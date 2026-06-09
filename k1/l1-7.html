@@ -105,8 +105,8 @@
   <div class="box warning">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Kde se u zkoušky ztrácí body</div>
     <ul>
-      <li><strong>Zapomenuté $\sum_k y_k = 1$:</strong> solver vypne všechna $y_k$ a platí cenu $0$ (nebo zapne víc intervalů najednou a meze se rozpadnou). Cena v kritériu sama žádný výběr nevynutí.</li>
-      <li><strong>Jen jedna mez na interval:</strong> každý vnitřní interval potřebuje OBĚ nerovnosti (dolní i horní). V dochovaném řešení z termínu 21.06.2021 hodnotitel strhl body s poznámkou, že případ třetího intervalu „není shora omezený“ — meze nebyly svázané úplně.</li>
+      <li><strong>Zapomenuté $\sum_k y_k = 1$:</strong> solver vypne všechna $y_k$ a platí cenu $0$ (nebo zapne víc intervalů najednou — v kompaktním zápisu se pak meze rozpadnou, v big-M tvaru se naopak zkombinují neslučitelné meze). Cena v kritériu sama žádný výběr nevynutí.</li>
+      <li><strong>Jen jedna mez na interval:</strong> každý vnitřní interval potřebuje OBĚ nerovnosti (dolní i horní). V dochovaném řešení z termínu 21.06.2021 hodnotitel strhl 2 body s poznámkou, že (pokud to dobře chápe) třetí cenový případ není shora omezený — meze nebyly svázané úplně.</li>
       <li><strong>Špatný směr relaxace:</strong> $\ge$ se uvolňuje členem $-M(1-y_k)$, $\le$ členem $+M(1-y_k)$. Prohozený směr omezení naopak zpřísní (srov. <a href="l1-4.html#takeaways">[L1.4]</a>).</li>
     </ul>
   </div>
@@ -135,7 +135,7 @@
     </div>
     <div class="task-body">
       <div class="assignment">
-        <span class="lbl">Assignment (original, EN)</span>
+        <span class="lbl">Assignment (compiled from slides 33–36, EN)</span>
         <p>“Labor demand, material demand and income per piece are:</p>
         <table>
           <tr><th>product</th><th>T-shirt</th><th>shirt</th><th>robe</th><th>capacity</th><th>unit cost [CZK]</th></tr>
@@ -145,6 +145,7 @@
         </table>
         <p>Goal is to maximize the profit (i.e. total income minus total expenses). Constraints: material capacity is 130 meters. Another constraint: Total amount of work per week can be at most 40 or 80 or 120 or 160 hours depending on the number of Full Time Employees (FTEs). Criterion adaptation: labor cost is proportional to the number of FTEs (one FTE costs 40). We only want some values of person-hours to be available:</p>
         $$3x_1 + 2x_2 + 6x_3 \le \text{ either } 40 \text{ or } 80 \text{ or } 120 \text{ or } 160$$
+        <p class="note" style="font-size:13px;opacity:.8">Pozn.: text je sestavený ze slidů 33–36; původní omezení ze slidu 33 „labor is on demand with maximum capacity of 160 person-hours“ slide 36 nahrazuje FTE variantou výše.</p>
       </div>
 
       <h4>a) Co je v zadání?</h4>
@@ -190,7 +191,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Tohle je ostrá zkoušková úloha za 7 bodů (padla 25.05.2026 i 21.06.2021). Kompletně ji složíš ve <a href="l1-9.html">[L1.9] Wedding plan [FOTO]</a> — <strong>tady trénujeme jen její jádro: pronájem podle intervalu + rozpočet</strong>. Tedy: binárky $x_i$ „host $i$ pozván“, počet hostů $N = \sum_i x_i$, cena pronájmu po částech konstantní ($p_1/p_2/p_3$ dle intervalu pro $N$), jídlo $m$ za hosta, vše dohromady max. $B$. Podmínku $D_{max}$ (rozdíl stran) zatím vynech — na tu je <a href="l1-8.html">[L1.8]</a>.</p>
+      <p>Tohle je ostrá zkoušková úloha za 7 bodů (25.05.2026; padla i 21.06.2021, tehdy za 6). Kompletně ji složíš ve <a href="l1-9.html">[L1.9] Wedding plan [FOTO]</a> — <strong>tady trénujeme jen její jádro: pronájem podle intervalu + rozpočet</strong>. Tedy: binárky $x_i$ „host $i$ pozván“, počet hostů $N = \sum_i x_i$, cena pronájmu po částech konstantní ($p_1/p_2/p_3$ dle intervalu pro $N$), jídlo $m$ za hosta, vše dohromady max. $B$. Podmínku $D_{max}$ (rozdíl stran) zatím vynech — na tu je <a href="l1-8.html">[L1.8]</a>.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -212,7 +213,7 @@
             <li>$M = n$ stačí: $N$ nikdy nepřekročí $n$ ani neklesne pod $0$, takže uvolněná mez (např. $N \ge 10 - n$) je vždy pravdivá. Meze $N \ge 0$ (interval 1) a $N \le n$ (interval 3) platí automaticky, psát je netřeba.</li>
             <li>Kompaktní alternativa vazeb: $10y_2 + 20y_3 \le N \le 9y_1 + 19y_2 + n\,y_3$ — díky $\sum_k y_k = 1$ ekvivalentní.</li>
             <li>Rozpočet: jídlo $m$ za <em>každého pozvaného</em> ($m \cdot N$) plus cena pronájmu vybraného intervalu ($\sum_k p_k y_k$). Pronájem se NEnásobí počtem hostů!</li>
-            <li><em>Poučení z reálné zkoušky (21.06.2021):</em> dochované studentské řešení použilo obrácený význam přepínačů ($Y_k = 1$ ⟺ interval $k$ <em>ne</em>vybrán, tedy $Y_1 + Y_2 + Y_3 = 2$ a v rozpočtu $(1-Y_k)\,p_k$) — to je legální ekvivalent, ale snadno se v něm chybuje: hodnotitel strhl body za neúplně svázané meze (případ třetího intervalu nebyl shora omezený). Drž se přímého významu $y_k = 1$ ⟺ vybráno a zkontroluj, že každý interval má obě meze.</li>
+            <li><em>Poučení z reálné zkoušky (21.06.2021):</em> dochované studentské řešení použilo obrácený význam přepínačů ($Y_k = 1$ ⟺ interval $k$ <em>ne</em>vybrán, tedy $Y_1 + Y_2 + Y_3 = 2$ a v rozpočtu $(1-Y_k)\,p_k$) — to je legální ekvivalent, ale snadno se v něm chybuje: hodnotitel strhl 2 body za neúplně svázané meze (s poznámkou, že třetí cenový případ zřejmě není shora omezený). Drž se přímého významu $y_k = 1$ ⟺ vybráno a zkontroluj, že každý interval má obě meze.</li>
             <li>Zbývající podmínka $|{\sum_i gr(g_i) x_i - \sum_i br(g_i) x_i}| \le D_{max}$ přijde v <a href="l1-8.html">[L1.8]</a>; celý model složíš v <a href="l1-9.html">[L1.9]</a>.</li>
           </ul>
         </div>
@@ -262,7 +263,7 @@ KOViz.fnPlot(document.getElementById('viz-broken'), {
     {x1: 20, y1: 8, x2: 30, y2: 8, label: 'y₃ = 1: cena 8', labelAt: 0.1, labelDx: 0, labelDy: -10},
   ],
   points: [
-    {x: 0, y: 0, open: true, label: 'y₁ = y₂ = y₃ = 0: cena 0 a meze pryč — díra v modelu', dx: 12, dy: -10},
+    {x: 0, y: 0, open: true, label: 'y₁ = y₂ = y₃ = 0: cena 0 a meze pryč — díra v modelu', dx: 14, dy: -24},
   ],
   caption: 'Správný model nabízí jen tři schody (plné úsečky): vybraný interval určuje cenu i meze pro N. Bez Σyₖ = 1 ale přibude kombinace y₁ = y₂ = y₃ = 0 (prázdný bod): v kompaktním zápisu vynutí N ≤ 0 a cena 0, v big-M tvaru se meze úplně vypnou a solver „pronajme zadarmo“ pro libovolné N. Obojí je špatně — rovnost Σyₖ = 1 je povinná.'
 });
