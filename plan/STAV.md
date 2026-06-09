@@ -21,3 +21,4 @@ Aktualizováno: 9. 6. 2026 večer
 - Stepper frames jsou ABSOLUTNÍ stavy (ne diffy) — viz viz-gallery.html ukázka 5.
 - Po vytvoření lekce: headless Chrome screenshot → Read PNG → kontrola glitchů.
 - Commit po každém kroku pipeline.
+- L1.2 obsahuje dopředné odkazy na l1-3.html, l1-4.html a l1-14.html (zatím neexistují — sériový workflow). Po dopsání L1.3/L1.4/L1.14 ověřit, že názvy souborů a titulky v odkazech (vč. pageru „Další“) sedí.

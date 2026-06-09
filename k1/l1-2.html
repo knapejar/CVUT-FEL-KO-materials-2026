@@ -151,9 +151,10 @@
       <div class="assignment">
         <span class="lbl">Assignment (original, EN)</span>
         <p>“There is a set of toys $T = \{t_1, t_2, \ldots, t_n\}$ scattered all around the room. By one of the walls, there is a row of boxes $B = \{b_1, b_2, \ldots, b_n\}$, where box $b_i$ is located left to $b_{i+1}$ for all $i \in \{1, 2, \ldots, n-1\}$. Distance of toy $t_i$ to box $b_j$ is $d_{ij} \in \mathbb{R}_0^+$ for all $t_i \in T$, $b_j \in B$.</p>
-        <p>(a) Design an ILP model to organize the toys to the boxes such that: (i) each box contains exactly one toy and each toy is stored in one box, (ii) the total distance between the toys and their assigned boxes is minimized, (iii) toy $t_1$ is assigned to the box immediately left to the box where $t_2$ is assigned, (iv) neither $t_5$ nor $t_6$ can be assigned to $b_1$ or $b_n$, (v) $t_4$ is in the box immediately next to $t_5$ or $t_6$.”</p>
+        <p>(a) Design an ILP model to organize the toys to the boxes such that: (i) each box contains exactly one toy and each toy is stored in one box, (ii) the total distance between the toys and their assigned boxes is minimized, (iii) toy $t_1$ is assigned to the box immediately left to the box where $t_2$ is assigned, (iv) neither $t_5$ nor $t_6$ can be assigned to $b_1$ or $b_n$, (v) $t_4$ is in the box immediately next to $t_5$ or $t_6$.</p>
+        <p>(b) Disregard constraints (iii) and (v). Then, formalize the problem as an assignment problem (i.e., minimum weight perfect matching in complete bipartite graph whose sets have the same cardinality).”</p>
       </div>
-      <p><em>V této lekci modeluj jen podmínky <strong>(i)</strong> a <strong>(ii)</strong> — přiřazovací kostru. Podmínky (iii)–(v) (sousednost, zákaz krajů, disjunkce) vyžadují techniky z <a href="l1-3.html">[L1.3]</a> a <a href="l1-4.html">[L1.4]</a>; celou úlohu dotáhneš jako FOTO checkpoint v <a href="l1-14.html">[L1.14]</a>.</em></p>
+      <p><em>V této lekci modeluj jen podmínky <strong>(i)</strong> a <strong>(ii)</strong> — přiřazovací kostru. Podmínky (iii)–(v) (sousednost, zákaz krajů, disjunkce) vyžadují techniky z <a href="l1-3.html">[L1.3]</a> a <a href="l1-4.html">[L1.4]</a>; celou úlohu (včetně části (b) — viz box Výhled) dotáhneš jako FOTO checkpoint v <a href="l1-14.html">[L1.14]</a>.</em></p>
 
       <h4>a) Co je v zadání?</h4>
       <p>$n$ hraček, $n$ krabic, známá vzdálenost $d_{ij}$ každé hračky od každé krabice. Hledáš úklid „1 hračka ↔ 1 krabice“ (bijekci) s minimálním součtem vzdáleností realizovaných dvojic.</p>
@@ -204,7 +205,7 @@
 <script>
 // 1 — přípustné přiřazení: bipartitní pohled, vybrané páry zeleně
 KOViz.graph(document.getElementById('viz-assign'), {
-  directed: true,
+  directed: false,
   w: 640, h: 300,
   nodes: [
     {id:'t1', x:200, y:55,  label:'t₁', cls:'good'},
@@ -225,12 +226,12 @@ KOViz.graph(document.getElementById('viz-assign'), {
     {from:'t3', to:'b2', cls:'dim', dashed:true},
     {from:'t3', to:'b3', cls:'good', label:'d₃₃=1'},
   ],
-  caption: 'PŘÍPUSTNÉ přiřazení: zelené hrany = páry s xᵢⱼ = 1 (šedé čárkované = možnosti s xᵢⱼ = 0). Z každé hračky vychází právě 1 zvolená hrana (Σⱼ xᵢⱼ = 1) a do každé krabice vchází právě 1 (Σᵢ xᵢⱼ = 1). Cena: z = 2 + 3 + 1 = 6.'
+  caption: 'PŘÍPUSTNÉ přiřazení: zelené hrany = páry s xᵢⱼ = 1 (šedé čárkované = možnosti s xᵢⱼ = 0). Každé hračky se dotýká právě 1 zvolená hrana (Σⱼ xᵢⱼ = 1) a každé krabice právě 1 (Σᵢ xᵢⱼ = 1) — přesně párování dle [L0.6]. Cena: z = 2 + 3 + 1 = 6.'
 });
 
 // 2 — porušení sloupcového omezení: dvě hračky v b₂, b₃ prázdná
 KOViz.graph(document.getElementById('viz-bad'), {
-  directed: true,
+  directed: false,
   w: 640, h: 300,
   nodes: [
     {id:'t1', x:200, y:55,  label:'t₁'},
