@@ -11,7 +11,7 @@ Aktualizováno: 10. 6. 2026
 
 ## Píše se
 - [ ] K0: L0.1–L0.8 (pipeline tvůrce→kritik→korektor) — L0.1–L0.4 po korektuře (79000cc), L0.5–L0.8 napsány tvůrcem (čeká kritik)
-- [ ] K1: L1.1–L1.15 — L1.1, L1.2 po korektuře; L1.3 po korektuře; L1.4 po korektuře; L1.5 po korektuře; L1.6 po korektuře; L1.7 po korektuře; L1.8 napsána tvůrcem (čeká kritik); viz.js: přidán `labelAt` u lpRegion constraints + posun popisku objective šipky; oprava lpRegion: dedupe průsečíků hraniční čáry procházející rohy okna (jinak se čára+popisek nevykreslí — ukázka 4b ve viz-gallery); přidán `KOViz.fnPlot` (graf funkce po úsecích — nespojité fce, ukázka 4c ve viz-gallery, použit v L1.6)
+- [ ] K1: L1.1–L1.15 — L1.1, L1.2 po korektuře; L1.3 po korektuře; L1.4 po korektuře; L1.5 po korektuře; L1.6 po korektuře; L1.7 po korektuře; L1.8 po korektuře; viz.js: přidán `labelAt` u lpRegion constraints + posun popisku objective šipky; oprava lpRegion: dedupe průsečíků hraniční čáry procházející rohy okna (jinak se čára+popisek nevykreslí — ukázka 4b ve viz-gallery); přidán `KOViz.fnPlot` (graf funkce po úsecích — nespojité fce, ukázka 4c ve viz-gallery, použit v L1.6)
 
 ## Fronta
 - K2 (18 lekcí) → K3 (16) → K4 (15) → K5 (16) → K6 (3) → K7 (2)
