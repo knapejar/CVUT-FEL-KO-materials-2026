@@ -31,6 +31,9 @@
   <h2>4 · LP region (celočíselná mřížka + optimum + gradient)</h2>
   <div class="viz" id="g4"></div>
 
+  <h2>4b · LP region (binární čtverec, čára přes rohy okna)</h2>
+  <div class="viz" id="g4b"></div>
+
   <h2>5 · Stepper (krokování algoritmu)</h2>
   <div class="viz" id="g5"></div>
 
@@ -114,6 +117,16 @@ KOViz.lpRegion(document.getElementById('g4'), {
   opt: [4, 3],
   objective: {a:2, b:3, label:'max 2x₁+3x₂'},
   caption: 'Ukázka 4: přípustná oblast, celočíselné body (zeleně přípustné), optimum červeně, gradient cíle. První popisek posunut přes labelAt: 0.8 (pozice podél čáry, default 0.5).'
+});
+
+// 4b — LP region: hraniční čára procházející ROHY okna (regrese: dedupe průsečíků)
+KOViz.lpRegion(document.getElementById('g4b'), {
+  xmax: 1, ymax: 1, integer: true,
+  constraints: [
+    {a:1, b:1, c:1, label:'x₁+x₂≤1', labelAt: 0.25},
+    {a:-1, b:-1, c:-1, label:'x₁+x₂≥1', labelAt: 0.75},
+  ],
+  caption: 'Ukázka 4b: XOR na binárním čtverci — obě hranice leží na čáře procházející rohy (0,1) a (1,0); čára i popisky se musí vykreslit (dedupe duplicitních průsečíků).'
 });
 
 // 5 — stepper (mini Dijkstra na 4 uzlech)

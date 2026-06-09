@@ -11,7 +11,7 @@ Aktualizováno: 9. 6. 2026 večer
 
 ## Píše se
 - [ ] K0: L0.1–L0.8 (pipeline tvůrce→kritik→korektor) — L0.1–L0.4 po korektuře (79000cc), L0.5–L0.8 napsány tvůrcem (čeká kritik)
-- [ ] K1: L1.1–L1.15 — L1.1 napsána tvůrcem (čeká kritik); viz.js: přidán `labelAt` u lpRegion constraints + posun popisku objective šipky
+- [ ] K1: L1.1–L1.15 — L1.1, L1.2 po korektuře; L1.3 napsána tvůrcem (čeká kritik); viz.js: přidán `labelAt` u lpRegion constraints + posun popisku objective šipky; oprava lpRegion: dedupe průsečíků hraniční čáry procházející rohy okna (jinak se čára+popisek nevykreslí — ukázka 4b ve viz-gallery)
 
 ## Fronta
 - K2 (18 lekcí) → K3 (16) → K4 (15) → K5 (16) → K6 (3) → K7 (2)
@@ -21,4 +21,4 @@ Aktualizováno: 9. 6. 2026 večer
 - Stepper frames jsou ABSOLUTNÍ stavy (ne diffy) — viz viz-gallery.html ukázka 5.
 - Po vytvoření lekce: headless Chrome screenshot → Read PNG → kontrola glitchů.
 - Commit po každém kroku pipeline.
-- L1.2 obsahuje dopředné odkazy na l1-3.html, l1-4.html a l1-14.html (zatím neexistují — sériový workflow). Po dopsání L1.3/L1.4/L1.14 ověřit, že názvy souborů a titulky v odkazech (vč. pageru „Další“) sedí.
+- L1.2 obsahuje dopředné odkazy na l1-3.html, l1-4.html a l1-14.html (sériový workflow). l1-3.html už existuje a titulek sedí ✓; po dopsání L1.4/L1.14 ověřit zbylé. L1.3 má dopředné odkazy na l1-4.html (pager + 2× v textu).

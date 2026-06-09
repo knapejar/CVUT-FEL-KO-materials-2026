@@ -229,8 +229,13 @@
         if (x0 >= -0.001 && x0 <= xmax + 0.001) pts.push([x0, 0]);
         if (xy >= -0.001 && xy <= xmax + 0.001) pts.push([xy, ymax]);
       }
-      if (pts.length >= 2) {
-        const [p, q] = [pts[0], pts[pts.length - 1]];
+      // dedupe (čára procházející rohem okna se najde dvakrát — jednou přes osu x, jednou přes y)
+      const uniq = [];
+      pts.forEach(pt => {
+        if (!uniq.some(u => Math.abs(u[0] - pt[0]) < 1e-9 && Math.abs(u[1] - pt[1]) < 1e-9)) uniq.push(pt);
+      });
+      if (uniq.length >= 2) {
+        const [p, q] = [uniq[0], uniq[uniq.length - 1]];
         const ln = svgEl("line", { x1: X(p[0]), y1: Y(p[1]), x2: X(q[0]), y2: Y(q[1]) });
         ln.style.stroke = "var(--accent)"; ln.style.strokeWidth = "1.8";
         svg.appendChild(ln);

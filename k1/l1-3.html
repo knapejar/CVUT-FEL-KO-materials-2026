@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.3 · Modelování logiky: implikace, XOR, AND — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.3</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.3</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Modelování logiky: implikace, XOR, AND</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Logické vztahy mezi binárními rozhodnutími — <strong>implikace</strong> ($x \Rightarrow y$), <strong>negace</strong> ($1-x$), <strong>XOR</strong> a <strong>AND v předpokladu</strong> — zapsané jako obyčejná lineární omezení.
+  </div>
+
+  <p>Prerekvizity: <a href="../k0/l0-8.html">[L0.8] Binární proměnná</a>; navazujeme na Real Estate model z <a href="l1-1.html#takeaways">[L1.1]</a>.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Kde se v ILP bere logika</h2>
+  <p>Vrať se k Real Estate Investment z <a href="l1-1.html">[L1.1]</a>: 6 budov, binární $x_i$ („koupit budovu $i$?“), rozpočet 14 mil. Slide 30 přidává novou větu zadání: <em>„if building 1 is selected, then building 2 is selected too“</em> — tedy logickou <strong>implikaci</strong> (implication) $x_1 \Rightarrow x_2$. Jenže ILP nezná „jestliže–pak“; umí jen lineární (ne)rovnosti. Celá tahle lekce je o jednom triku: <strong>logickou formuli nad binárkami přepiš na lineární omezení, které propustí přesně ty samé kombinace nul a jedniček</strong>.</p>
+
+  <p>Začni pravdivostní tabulkou implikace (slide 30):</p>
+  <table>
+    <thead><tr><th>$x_1$</th><th>$x_2$</th><th>$x_1 \Rightarrow x_2$</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>0</td><td>1</td></tr>
+      <tr><td>0</td><td>1</td><td>1</td></tr>
+      <tr><td>1</td><td>0</td><td><strong>0</strong></td></tr>
+      <tr><td>1</td><td>1</td><td>1</td></tr>
+    </tbody>
+  </table>
+
+  <details class="try">
+    <summary>Zkus sám: kolik kombinací $(x_1, x_2)$ implikace zakazuje a kterou? Co z toho plyne pro hledané omezení?</summary>
+    <div class="inner">
+      <p>Jedinou: $(x_1, x_2) = (1, 0)$ — „koupil jsem 1, ale ne 2“. Ostatní tři řádky jsou povolené. Hledám tedy lineární nerovnost, která ze čtyř rohů čtverce $\{0,1\}^2$ <em>vyřízne přesně bod $(1,0)$</em> a zbylé tři nechá.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: najdi tu nerovnost. (Nápověda: porovnej $x_1$ a $x_2$ ve třech povolených řádcích a v zakázaném.)</summary>
+    <div class="inner">
+      <p>V povolených řádcích je vždy $x_2 \ge x_1$ ($0\ge0$, $1\ge0$, $1\ge1$); v zakázaném $(1,0)$ je $0 \ge 1$ nepravda. Takže:</p>
+      $$x_1 \Rightarrow x_2 \quad\equiv\quad x_2 \ge x_1.$$
+      <p>Čtení nahlas: „$x_2$ je aspoň tak velké jako $x_1$“ — když se zapne $x_1$, musí se zapnout i $x_2$; když je $x_1 = 0$, na $x_2$ se nic nevynucuje.</p>
+    </div>
+  </details>
+
+  <p>Geometricky (slide 30): ze čtverce $0..1 \times 0..1$ zůstane trojúhelník — bod $(1,0)$ je odříznutý:</p>
+
+  <div class="viz" id="viz-impl"></div>
+
+  <p>Model ze slidu 32 (build 3) pak jen přidá řádek do „subject to“:</p>
+  $$\begin{aligned} \max z = \;& 16x_1 + 22x_2 + 12x_3 + 8x_4 + 11x_5 + 19x_6 \\ \text{s.t.} \;& 5x_1 + 7x_2 + 4x_3 + 3x_4 + 4x_5 + 6x_6 \le 14 \\ & x_2 \ge x_1 \\ & x_{i \in 1 \cdots 6} \in \{0, 1\} \end{aligned}$$
+
+  <h2>Negace: $\overline{x}$ je prostě $1 - x$</h2>
+  <p>Slide 30 (další build) přidává: <em>„If building 3 is selected, then building 4 is <strong>not</strong> selected“</em> — $x_3 \Rightarrow \overline{x_4}$. Nový prvek je <strong>negace</strong> (negation): „budova 4 NENÍ vybrána“. Žádnou novou proměnnou nepotřebuješ — když $x \in \{0,1\}$, pak výraz $(1 - x)$ je přesně jeho opak: $1-0 = 1$, $1-1 = 0$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: dosaď negaci do hotového vzorce implikace $x_1 \Rightarrow x_2 \equiv x_2 \ge x_1$ a uprav. Co vyjde pro $x_3 \Rightarrow \overline{x_4}$?</summary>
+    <div class="inner">
+      <p>Hlava implikace je $\overline{x_4} = 1 - x_4$, takže $1 - x_4 \ge x_3$, tedy:</p>
+      $$x_3 + x_4 \le 1.$$
+      <p>Kontrola proti pravdivostní tabulce: zakázaný je jediný řádek $(x_3, x_4) = (1,1)$ — a opravdu, $1 + 1 = 2 \not\le 1$, zatímco $(0,0), (0,1), (1,0)$ projdou. Čtení: „dohromady nejvýš jedna z obou budov“ — vzájemné vyloučení (NAND / at most one). Z <a href="../k0/l0-8.html#takeaways">[L0.8]</a> to znáš jako $\sum x_i \le 1$ pro dvojici.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-nand"></div>
+
+  <h2>XOR: právě jedna z obou</h2>
+  <p>Slide 31: <em>„either building 5 is chosen or building 6 is chosen, but not both“</em> — $x_5$ XOR $x_6$ (exclusive or, vylučovací nebo). Tabulka:</p>
+  <table>
+    <thead><tr><th>$x_5$</th><th>$x_6$</th><th>$x_5$ XOR $x_6$</th></tr></thead>
+    <tbody>
+      <tr><td>0</td><td>0</td><td><strong>0</strong></td></tr>
+      <tr><td>0</td><td>1</td><td>1</td></tr>
+      <tr><td>1</td><td>0</td><td>1</td></tr>
+      <tr><td>1</td><td>1</td><td><strong>0</strong></td></tr>
+    </tbody>
+  </table>
+
+  <details class="try">
+    <summary>Zkus sám: tentokrát jsou zakázané řádky dva — $(0,0)$ i $(1,1)$. Jaké omezení je vyřízne oba najednou?</summary>
+    <div class="inner">
+      <p>$(1,1)$ zakáže $x_5 + x_6 \le 1$ (to už umíš); $(0,0)$ zakáže $x_5 + x_6 \ge 1$ („aspoň jedna“ — opět počítání z <a href="../k0/l0-8.html#takeaways">[L0.8]</a>). Dohromady:</p>
+      $$x_5 + x_6 = 1.$$
+      <p>„Právě jedna z obou.“ Geometricky zbude z čtverce jen úsečka — diagonála z $(0,1)$ do $(1,0)$.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-xor"></div>
+
+  <p>Mimochodem — obyčejné <strong>OR</strong> („aspoň jedna z obou, klidně obě“) je jen volnější polovina téhož: $x_5 + x_6 \ge 1$.</p>
+
+  <h2>Univerzální recept: zakaž řádky pravdivostní tabulky</h2>
+  <p>Všechna tři odvození měla stejný rytmus: najdi v tabulce řádky s hodnotou 0 a každý vyřízni jedním omezením. To funguje vždy (postup ze studentské wiki <em>ilpbin</em>, tam přes tzv. maxtermy):</p>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Recept „zakázaný řádek“</div>
+    <p>Pro každý <strong>zakázaný řádek</strong> pravdivostní tabulky (kombinaci hodnot $v_1, \ldots, v_k$) přidej jedno omezení: sečti přes všechny zúčastněné proměnné <em>literál, který v tom řádku vyšel 0</em> — tedy $x_i$, pokud $v_i = 0$, a $(1 - x_i)$, pokud $v_i = 1$ — a chtěj</p>
+    $$\sum_{i:\, v_i = 0} x_i \;+\; \sum_{i:\, v_i = 1} (1 - x_i) \;\ge\; 1.$$
+    <p>Levá strana je 0 právě v zakázané kombinaci a $\ge 1$ ve všech ostatních — omezení tedy vyřízne přesně ten jeden řádek. Jedna formule = tolik omezení, kolik má zakázaných řádků.</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: ověř recept na implikaci $x_1 \Rightarrow x_2$ (zakázaný řádek $x_1 = 1, x_2 = 0$). Vyjde známé $x_2 \ge x_1$?</summary>
+    <div class="inner">
+      <p>$v_1 = 1$ dá literál $(1 - x_1)$, $v_2 = 0$ dá literál $x_2$:</p>
+      $$(1 - x_1) + x_2 \ge 1 \quad\Longleftrightarrow\quad x_2 \ge x_1. \;\checkmark$$
+      <p>A XOR: řádek $(0,0)$ dá $x_5 + x_6 \ge 1$, řádek $(1,1)$ dá $(1-x_5) + (1-x_6) \ge 1 \Leftrightarrow x_5 + x_6 \le 1$ — dohromady $x_5 + x_6 = 1$. ✓</p>
+    </div>
+  </details>
+
+  <h2>AND v předpokladu: $(x_1 \text{ AND } x_2) \Rightarrow x_3$</h2>
+  <p>Domácí úkol ze slidu 32 obsahuje i tříproměnnou formuli: <em>„if estates 1 and 2 have been chosen, then estate 3 must be chosen too“</em>. Tady už geometrická úvaha ve čtverci nestačí (krychle $\{0,1\}^3$ má 8 rohů) — ale recept funguje stejně.</p>
+
+  <details class="try">
+    <summary>Zkus sám: který jediný řádek tabulky $(x_1, x_2, x_3)$ formule zakazuje? Aplikuj recept a uprav výsledek.</summary>
+    <div class="inner">
+      <p>Implikace selže, jen když platí předpoklad a neplatí hlava: $(x_1, x_2, x_3) = (1, 1, 0)$. Recept: $v_1 = 1 \to (1-x_1)$, $v_2 = 1 \to (1-x_2)$, $v_3 = 0 \to x_3$:</p>
+      $$(1 - x_1) + (1 - x_2) + x_3 \ge 1 \quad\Longleftrightarrow\quad x_3 \ge x_1 + x_2 - 1.$$
+      <p>Kontrola čtením: když $x_1 = x_2 = 1$, pravá strana je $1$ → vynutí $x_3 = 1$. Když je aspoň jedna z nich 0, pravá strana je $\le 0$ → na $x_3$ se nic nevynucuje. Přesně implikace.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: implikace ⇒ není ekvivalence ⇔</div>
+    <p>Omezení $x_3 \ge x_1 + x_2 - 1$ modeluje JEN směr „když 1 a 2, tak i 3“. <strong>Nezakazuje</strong> koupit budovu 3 samotnou ($x_3 = 1$ při $x_1 = 0$) — a to je správně, zadání nic takového nechce. Kdyby zadání chtělo ekvivalenci „$x_3 = 1$ právě když $x_1 = x_2 = 1$“ (tj. $x_3 = x_1 \wedge x_2$), musíš zakázat i řádky, kde $x_3 = 1$ a předpoklad neplatí: přidej $x_3 \le x_1$ a $x_3 \le x_2$. Vždy si v tabulce ověř, KTERÉ řádky tvoje věta zadání opravdu zakazuje — modelovat víc, než zadání říká, je stejná chyba jako modelovat míň.</p>
+  </div>
+
+  <h2>Počítání vybraných: „aspoň 2 ze 3“ a podobné</h2>
+  <p>Část logických vět se obejde i bez tabulky — jsou to jen počty. Z <a href="../k0/l0-8.html#takeaways">[L0.8]</a> víš, že $\sum_i x_i$ = počet vybraných věcí. Takže:</p>
+  <ul>
+    <li>„aspoň dvě z budov $A, B, C$“: $x_A + x_B + x_C \ge 2$,</li>
+    <li>„právě 3 budovy celkem“: $\sum_i x_i = 3$,</li>
+    <li>„právě 2 budovy NEkoupené“: $\sum_i (1 - x_i) = 2$, po úpravě $\sum_i x_i = n - 2$,</li>
+    <li>„budova 1 povinně, budova 2 zakázaná“: $x_1 = 1$, $x_2 = 0$ (fixace proměnné je taky lineární omezení).</li>
+  </ul>
+
+  <div class="box warning">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Rozliš: logika nad PROMĚNNÝMI vs. nad OMEZENÍMI</div>
+    <p>Vše v této lekci spojuje <em>binární proměnné</em> — „vyber aspoň 2 ze 3 <strong>budov</strong>“. U zkoušky (např. Real estate test 8. 3. 2011) ale padá i „musí platit aspoň 2 ze 3 <strong>podmínek</strong>“ (celých nerovností!). To čistou logikou nezvládneš — nerovnost nejde „sečíst jako binárku“. Potřebuješ velkou konstantu $M$ a pomocné přepínače $y_i$ — přesně to je <a href="l1-4.html">[L1.4] big-M: disjunkce omezení</a>.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.3</div>
+    <ul>
+      <li><strong>Implikace</strong> $x \Rightarrow y$: $\;y \ge x$. <strong>Negace</strong> $\overline{x}$: dosaď $(1 - x)$; takže $x \Rightarrow \overline{y}$ je $x + y \le 1$ (nejvýš jedna).</li>
+      <li><strong>XOR</strong> (právě jedna z $A, B$): $x_A + x_B = 1$. Obyčejné OR (aspoň jedna): $x_A + x_B \ge 1$.</li>
+      <li><strong>AND v předpokladu</strong> — „$A$ a $B$ ⟹ $C$“: $x_C \ge x_A + x_B - 1$. Je to jen implikace, ne ekvivalence ($C$ smí být 1 i samo o sobě).</li>
+      <li><strong>Univerzální recept:</strong> každý zakázaný řádek pravdivostní tabulky → jedno omezení $\sum_{v_i=0} x_i + \sum_{v_i=1}(1 - x_i) \ge 1$.</li>
+      <li>Počty: „aspoň 2 ze 3“ = $x_A + x_B + x_C \ge 2$; „právě $k$“ = $\sum x_i = k$; povinná/zakázaná volba = fixace $x_i = 1$ / $x_i = 0$.</li>
+      <li>Logika mezi celými <em>omezeními</em> („platí aspoň jedna z nerovností“) se takhle udělat nedá → big-M, <a href="l1-4.html">[L1.4]</a>.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-realestate-logic">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Real Estate Investment — adding logical formulas</strong>
+      <span class="task-src">zdroj: prezentace/02_ILP.md, slide 30–31</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“We consider 6 buildings for investment. (… model from slide 29: maximize income, budget 14 mil CZK, $x_i \in \{0,1\}$ …) Another constraint:</p>
+        <ul>
+          <li>if building 1 is selected, then building 2 is selected too $\;(x_1 \Rightarrow x_2)$;</li>
+          <li>if building 3 is selected, then building 4 is not selected $\;(x_3 \Rightarrow \overline{x_4})$;</li>
+          <li>either building 5 is chosen or building 6 is chosen, but not both $\;(x_5 \text{ XOR } x_6)$.”</li>
+        </ul>
+        <p>Extend the ILP model from slide 29 with these three logical constraints.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Hotový základní model z <a href="l1-1.html">[L1.1]</a> (úloha T01) a tři logické věty navíc: implikace, implikace s negací a XOR. Úkol je přepsat každou na jedno lineární omezení.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — vzorce $y \ge x$, $x + y \le 1$, $x + y = 1$ (resp. recept „zakázaný řádek“).</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a> — základní model, do kterého omezení přidáváš.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a> — čtení součtů binárek.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Pro každou větu si napiš (klidně jen v hlavě) pravdivostní tabulku a označ zakázané řádky. Implikace zakazuje jediný řádek — který? Negaci nahraď $(1-x)$ a použij už hotový vzorec implikace. XOR zakazuje dva řádky — jaká dvě omezení z toho plynou a jak se slijí do jednoho?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Tři nová omezení (slidy 30–31):</p>
+          <ul>
+            <li>$x_1 \Rightarrow x_2$: zakázaný řádek $(1,0)$ → $x_2 \ge x_1$.</li>
+            <li>$x_3 \Rightarrow \overline{x_4}$: hlava $\overline{x_4} = 1 - x_4$, takže $1 - x_4 \ge x_3$ → $x_3 + x_4 \le 1$.</li>
+            <li>$x_5$ XOR $x_6$: zakázané řádky $(0,0)$ a $(1,1)$ → $x_5 + x_6 \ge 1$ a $x_5 + x_6 \le 1$, dohromady $x_5 + x_6 = 1$.</li>
+          </ul>
+          <p>Celý model se všemi třemi formulemi najednou:</p>
+          $$\begin{aligned} \max z = \;& 16x_1 + 22x_2 + 12x_3 + 8x_4 + 11x_5 + 19x_6 \\ \text{s.t.} \;& 5x_1 + 7x_2 + 4x_3 + 3x_4 + 4x_5 + 6x_6 \le 14 \\ & x_2 \ge x_1 \\ & x_3 + x_4 \le 1 \\ & x_5 + x_6 = 1 \\ & x_{i \in 1 \cdots 6} \in \{0, 1\} \end{aligned}$$
+          <p><strong>Kontrola:</strong> optimum základního modelu $x = (1,0,0,1,0,1)$ z [L1.1] teď není přípustné ($x_1 = 1$, ale $x_2 = 0$ porušuje $x_2 \ge x_1$) — logická omezení opravdu „kousla“. XOR je navíc splněn těsně: $x_5 + x_6 = 0 + 1 = 1$ ✓.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-homework">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Adding Logical Formula — Homework (slide 32)</strong>
+      <span class="task-src">zdroj: prezentace/02_ILP.md, slide 32</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Formulate:</p>
+        <ul>
+          <li>building 1 must be chosen but building 2 can not</li>
+          <li>at least 3 estates must be chosen</li>
+          <li>exactly 3 estates must be chosen</li>
+          <li>if estates 1 and 2 have been chosen, then estate 3 must be chosen too $(x_1 \text{ AND } x_2) \Rightarrow x_3$</li>
+          <li>exactly 2 estates can not be chosen”</li>
+        </ul>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Pět samostatných slovních podmínek nad šesti binárkami $x_1, \ldots, x_6$ Real Estate modelu; každou máš vyjádřit lineárním omezením (nebo dvojicí omezení).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — fixace proměnných, počty vybraných, recept „zakázaný řádek“ pro AND-implikaci.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a> — $\sum x_i$ = počet vybraných, negace $(1-x_i)$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Roztřiď podmínky: které jsou jen <em>počty</em> (sčítání binárek s $\ge$ / $=$), které jsou <em>fixace</em> jediné proměnné a která jediná potřebuje pravdivostní tabulku? U „exactly 2 … can not be chosen“ si dej pozor, CO se počítá — vybrané, nebo nevybrané budovy?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <ul>
+            <li><strong>building 1 must be chosen but building 2 can not:</strong> $x_1 = 1$ a $x_2 = 0$ (dvě fixace).</li>
+            <li><strong>at least 3 estates must be chosen:</strong> $\sum_{i=1}^{6} x_i \ge 3$.</li>
+            <li><strong>exactly 3 estates must be chosen:</strong> $\sum_{i=1}^{6} x_i = 3$.</li>
+            <li><strong>$(x_1 \text{ AND } x_2) \Rightarrow x_3$:</strong> jediný zakázaný řádek $(1,1,0)$ → $(1-x_1) + (1-x_2) + x_3 \ge 1$, tedy $$x_3 \ge x_1 + x_2 - 1.$$</li>
+            <li><strong>exactly 2 estates can not be chosen:</strong> počítám NEvybrané: $\sum_{i=1}^{6} (1 - x_i) = 2$, po úpravě $\sum_{i=1}^{6} x_i = 4$.</li>
+          </ul>
+          <p>Sanity check AND-implikace: $x_1 = x_2 = 1$ → $x_3 \ge 1$ → vynuceno; $x_1 = 1, x_2 = 0$ → $x_3 \ge 0$ → volné. ✓ (A pozor — je to jen ⇒, ne ⇔; viz červený box v lekci.)</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-realestate-test2011">
+    <div class="task-head">
+      <span class="task-id">T03</span>
+      <strong>Real estate — zkoušková varianta s XOR, AND-implikací a „2 ze 3“</strong>
+      <span class="task-src">zdroj: T08 / a4b35ko__test1.md (test 8. 3. 2011, přepis studenta)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (originální přepis, CZ — wiki záznam testu)</span>
+        <p>„Maximalizace zisku z najmu pro nakup nemovitosti - velmi podobny priklad jako ve slidech. Meli jsme to formulovat jako ILP. Nekolik omezeni navic jako XOR, pokud plati A a zaroven B tak taky C atd. Prekvapilo ze jsme meli vybrat 2 ze 3 podminek - nutno resit pomoci velkeho celeho cisla M a pomocne promenne y_1, y_2 a y_3 (y_1+y_2+y_3&le;1)“</p>
+        <p><em>Pozn.: jde o studentský přepis, ne doslovné znění zadání — proto je výjimečně česky. Procvič na něm: formuluj pro Real Estate model omezení (i) „budova $A$ XOR budova $B$“, (ii) „pokud $A$ a zároveň $B$, tak taky $C$“, (iii) „koupeny aspoň 2 ze 3 budov $A, B, C$“.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Tatáž Real Estate kostra, ale zkoušející navrší několik logických omezení naráz — přesně mix téhle lekce. Poslední překvapení testu („vyber 2 ze 3 <em>podmínek</em>“ přes velké $M$ a $y_1 + y_2 + y_3 \le 1$) je už disjunkce celých omezení.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — XOR, AND-implikace, počty vybraných.</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a> — základní model.</li>
+        <li>Na „2 ze 3 podmínek“: <a href="l1-4.html">[L1.4] big-M: disjunkce omezení</a> (další lekce).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Body (i) a (ii) jsou přímo vzorce z takeaways. U bodu (iii) se ptej: počítám budovy (binárky), nebo platnost nerovností? Když binárky — stačí součet s vhodnou pravou stranou. A rozmysli si dopředu, proč by „aspoň 2 ze 3 <em>nerovností</em>“ stejným součtem nešlo (čím se nerovnost liší od binární proměnné?).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Nad binárkami $x_A, x_B, x_C$ Real Estate modelu:</p>
+          <ul>
+            <li><strong>(i) $A$ XOR $B$:</strong> $x_A + x_B = 1$.</li>
+            <li><strong>(ii) $(A \text{ AND } B) \Rightarrow C$:</strong> $x_C \ge x_A + x_B - 1$.</li>
+            <li><strong>(iii) aspoň 2 ze 3 budov:</strong> $x_A + x_B + x_C \ge 2$.</li>
+          </ul>
+          <p><strong>Proč (iii) nefunguje pro podmínky-nerovnosti:</strong> nerovnost typu $5x_1 + 7x_2 \le 14$ není proměnná — nemá hodnotu 0/1, kterou bys sečetl. „Platí aspoň 2 ze 3 nerovností“ se řeší tak, že ke každé nerovnosti přidáš binární přepínač $y_i$, který ji přes člen $+ M y_i$ umí „vypnout“, a vypnutí povolíš nejvýš jedno: $y_1 + y_2 + y_3 \le 1$ — přesně konstrukce z přepisu testu. Detailně v <a href="l1-4.html">[L1.4]</a>.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.3">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-2.html"><span class="dir">← Předchozí</span> L1.2 · Přiřazovací (assignment) struktura</a>
+    <a class="next" href="l1-4.html"><span class="dir">Další →</span> L1.4 · big-M: disjunkce omezení</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — implikace x1 ⇒ x2: ze čtverce zbude trojúhelník (0,0),(0,1),(1,1); bod (1,0) vyříznut
+KOViz.lpRegion(document.getElementById('viz-impl'), {
+  xmax: 1, ymax: 1, integer: true,
+  xlabel: 'x₁', ylabel: 'x₂',
+  constraints: [
+    {a: 1, b: -1, c: 0, label: 'x₂ ≥ x₁', labelAt: 0.62},
+  ],
+  caption: 'IMPLIKACE x₁ ⇒ x₂ ≡ x₂ ≥ x₁ (tj. x₁ − x₂ ≤ 0): z rohů čtverce 0..1 × 0..1 zůstávají povolené (zelené) body (0,0), (0,1), (1,1); zakázaný řádek tabulky (1,0) je odříznutý.'
+});
+
+// 2 — x3 ⇒ ¬x4: trojúhelník (0,0),(1,0),(0,1); bod (1,1) vyříznut
+KOViz.lpRegion(document.getElementById('viz-nand'), {
+  xmax: 1, ymax: 1, integer: true,
+  xlabel: 'x₃', ylabel: 'x₄',
+  constraints: [
+    {a: 1, b: 1, c: 1, label: 'x₃ + x₄ ≤ 1', labelAt: 0.7},
+  ],
+  caption: 'IMPLIKACE S NEGACÍ x₃ ⇒ x̄₄ ≡ x₃ + x₄ ≤ 1: povolené body (0,0), (1,0), (0,1); zakázaná kombinace (1,1) — „obě najednou“ — je odříznutá.'
+});
+
+// 3 — XOR x5, x6: oblast degeneruje na úsečku (0,1)–(1,0); povolené jen 2 body
+KOViz.lpRegion(document.getElementById('viz-xor'), {
+  xmax: 1, ymax: 1, integer: true,
+  xlabel: 'x₅', ylabel: 'x₆',
+  constraints: [
+    {a: 1, b: 1, c: 1, label: 'x₅ + x₆ ≤ 1', labelAt: 0.22},
+    {a: -1, b: -1, c: -1, label: 'x₅ + x₆ ≥ 1', labelAt: 0.78},
+  ],
+  caption: 'XOR x₅ ⊕ x₆ ≡ x₅ + x₆ = 1 (zapsáno jako ≤ 1 a zároveň ≥ 1): přípustná oblast je jen úsečka (diagonála) z (0,1) do (1,0); povolené body (0,1) a (1,0), rohy (0,0) i (1,1) jsou vyloučené.'
+});
+</script>
+</body>
+</html>
