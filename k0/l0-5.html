@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L0.5 · Minimální kostra (MST) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k0">K0 · Základní jazyk grafů a ILP</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L0.5</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L0.5</span> Kapitola K0 — Základní jazyk grafů a ILP · <strong>[MUST]</strong>
+  </p>
+  <h1>Minimální kostra (MST)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    MST = kostra s nejmenším součtem vah hran.
+  </div>
+
+  <p>Prerekvizity: <a href="l0-4.html">[L0.4] Strom, kostra, les, DAG</a> (kostra = strom na všech vrcholech).</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Od kostry k nejlevnější kostře</h2>
+  <p>V <a href="l0-4.html#takeaways">[L0.4]</a> jsme viděli, že souvislý graf má kostru — a typicky jich má <em>hodně</em> (úplný graf na pouhých 4 vrcholech jich má $4^{2}=16$, obecně $n^{n-2}$). Jakmile mají hrany <strong>váhy</strong> (weights) $c(e)$, nejsou si kostry rovné: každá má cenu $c(T) = \sum_{e \in T} c(e)$. <strong>Minimum spanning tree — MST</strong> (minimální kostra) je kostra s nejmenší cenou. Definice ze slidů (03_SPT, slide 6): <em>„In an undirected graph with the weights associated to arcs, find a spanning tree of minimum weight or decide that the graph is not connected.“</em></p>
+
+  <div class="viz" id="viz-anytree"></div>
+
+  <details class="try">
+    <summary>Zkus sám: najdeš v grafu nahoře kostru levnější než 15? Jak bys ji hledal, abys nemusel zkoušet všechny?</summary>
+    <div class="inner">
+      <p>Jde to mnohem líp — nejlevnější kostra má cenu <strong>9</strong>. A hledat ji můžeš <em>hladově</em> (greedy): ber hrany od nejlevnější a přidávej je, pokud nevytvoří kružnici. Přesně to dělá Kruskalův algoritmus — krokuj si ho níže.</p>
+    </div>
+  </details>
+
+  <h2>Jak se MST počítá: hladově</h2>
+  <p>MST je vzácný případ, kdy hladový postup <em>zaručeně</em> najde optimum. Dva klasické algoritmy:</p>
+  <ul>
+    <li><strong>Kruskal:</strong> seřaď hrany podle váhy vzestupně; přidávej je do kostry, dokud nepřidáš $n-1$ hran; hranu, která by uzavřela kružnici, zahoď.</li>
+    <li><strong>Prim:</strong> rosti strom z jednoho vrcholu; vždy přidej nejlevnější hranu vedoucí ze stromu ven. (Slidy 03_SPT, slide 17 — domácí úkol: čím se liší Prim pro MST od Dijkstry pro strom nejkratších cest?)</li>
+  </ul>
+  <p>Pro zkoušku nepotřebuješ důkazy správnosti — potřebuješ MST umět <strong>rychle spočítat na papíře</strong> (Kruskalem) a vědět, že je to polynomiální, „levný“ objekt.</p>
+
+  <div class="viz" id="viz-kruskal"></div>
+
+  <details class="try">
+    <summary>Zkus sám: může mít graf víc různých minimálních koster? A může mít dvě MST s různou cenou?</summary>
+    <div class="inner">
+      <p>Různých minimálních koster může být víc — když se váhy opakují (remízy), může Kruskal při stejné váze vybrat různé hrany a obě volby dopadnou stejně dobře. Ale <strong>cena MST je vždy jednoznačná</strong>: všechny minimální kostry mají z definice tentýž (nejmenší) součet. „MST grafu“ jako číslo $c(\mathrm{MST})$ je tedy dobře definované.</p>
+    </div>
+  </details>
+
+  <h2>K čemu nám MST bude: dolní mez</h2>
+  <p>V tomhle kurzu MST skoro nikdy není finální odpověď — je to <strong>stavební kámen a dolní mez</strong> (lower bound). Klíčové pozorování (06_TSP, slide 25): když z libovolného okruhu procházejícího všemi vrcholy odebereš jednu hranu, zbyde <em>kostra</em>. Ta nemůže být levnější než MST. Takže žádný okruh přes všechny vrcholy nemůže být levnější než $c(\mathrm{MST})$ — to je srdce 2-aproximace TSP, kterou rozvineme v [L3.8b] (kapitola K3).</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč po odebrání jedné hrany z okruhu přes všech $n$ vrcholů zbyde právě kostra?</summary>
+    <div class="inner">
+      <p>Okruh přes všechny vrcholy má $n$ hran a je souvislý. Odebráním jedné hrany se souvislost nezruší (zbytek okruhu oba konce pořád spojuje) a zbyde $n-1$ hran — souvislý graf s $n-1$ hranami je podle ekvivalencí z <a href="l0-4.html#takeaways">[L0.4]</a> strom na všech vrcholech, tedy kostra.</p>
+    </div>
+  </details>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L0.5</div>
+    <ul>
+      <li><strong>MST (minimum spanning tree)</strong> = kostra minimalizující $\sum_{e \in T} c(e)$; existuje, právě když je graf souvislý.</li>
+      <li>Počítá se <strong>hladově</strong> a polynomiálně: Kruskal (hrany od nejlevnější, kružnice zahazuj) nebo Prim (rosti strom nejlevnější hranou ven).</li>
+      <li>Cena $c(\mathrm{MST})$ je jednoznačná, i když minimálních koster může být při remízách vah víc.</li>
+      <li>MST je <strong>dolní mez</strong>: okruh přes všechny vrcholy minus jedna hrana = kostra, tedy $c(\mathrm{MST}) \le \mathrm{OPT}$ — rozvineme u TSP v [L3.8b].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-mst-vs-spt">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>MST vs. shortest path tree</strong>
+      <span class="task-src">zdroj: prezentace/03_SPT_KO.md, slide 6 (rekonstrukce obrázku)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Minimum Spanning Tree — MST: In an undirected graph with the weights associated to arcs, find a spanning tree of minimum weight or decide that the graph is not connected. … The spanning tree in the middle (SPT from central node) has weight 8 and diameter 4 (the longest path between two nodes) while the spanning tree on the right side (MST) has weight 5 and diameter 5.” For the graph drawn below (four outer nodes in a ring, edges of weight 1; central node $s$ joined to each outer node by an edge of weight 2), find the MST and verify both claimed weights and diameters.</p>
+      </div>
+
+      <div class="viz" id="viz-task1"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Graf „čtverec se středem“: kružnice $v_1 v_2 v_3 v_4$ z hran váhy 1, střed $s$ napojený na každý rohový vrchol hranou váhy 2. Najdi minimální kostru, spočítej její váhu a průměr (délku nejdelší cesty mezi dvojicí vrcholů) a srovnej se stromem nejkratších cest ze středu (SPT = všechny čtyři hrany ze středu).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice MST, Kruskal.</li>
+        <li><a href="l0-4.html#takeaways">[L0.4] Strom, kostra, les, DAG</a> — kostra má $n-1$ hran.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Kostra na $n=5$ vrcholech má 4 hrany. Kruskal: kolik hran váhy 1 můžeš vzít, než vznikne kružnice? Kolik hran váhy 2 pak ještě potřebuješ? Pro průměr si výslednou kostru nakresli a najdi nejdelší cestu (váženou).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Kruskal:</strong> hrany váhy 1 jsou čtyři: $v_1v_2, v_2v_3, v_3v_4, v_4v_1$. Vezmu $v_1v_2$, $v_2v_3$, $v_3v_4$; čtvrtá hrana $v_4v_1$ by uzavřela kružnici — zahodím. Zbývá připojit $s$: libovolná hrana $s v_i$ váhy 2, např. $s v_1$. <strong>MST</strong> $= \{v_1v_2, v_2v_3, v_3v_4, s v_1\}$, váha $1+1+1+2 = \mathbf{5}$ ✓. Průměr: nejdelší cesta je $s \to v_1 \to v_2 \to v_3 \to v_4$ s váhou $2+1+1+1 = \mathbf{5}$ ✓ (remízami může MST vyjít i jinak, váha je vždy 5).</p>
+          <p><strong>SPT ze středu</strong> $= \{s v_1, s v_2, s v_3, s v_4\}$: váha $4 \cdot 2 = \mathbf{8}$ ✓, průměr = cesta $v_i \to s \to v_j$ s váhou $2+2=\mathbf{4}$ ✓. Pointa slidu: <em>strom nejkratších cest a minimální kostra jsou různé objekty</em> — SPT minimalizuje vzdálenosti od kořene (a je dražší), MST minimalizuje celkovou váhu (a má delší cesty).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-mst-lb">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>MST as a lower bound for a circuit through all nodes</strong>
+      <span class="task-src">zdroj: prezentace/06_TSP.md, slide 25 (bod 2 důkazu)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“2. while deleting one edge in the circuit, we create the tree. Therefore, inequality $\mathrm{OPT}(K_n, c) \ge c(E(T))$ holds”, where $T$ is a minimum weight spanning tree of $K_n$ and $\mathrm{OPT}(K_n,c)$ is the cost of the cheapest circuit visiting all $n$ nodes. Justify this inequality in detail (assume non-negative edge costs $c$).</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Dokaž, že cena nejlevnějšího okruhu přes všechny vrcholy je aspoň cena MST. (Je to jeden krok důkazu 2-aproximace TSP — tady ho trénujeme samostatně.)</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — MST je nejlevnější ze <em>všech</em> koster.</li>
+        <li><a href="l0-4.html#takeaways">[L0.4] Strom, kostra, les, DAG</a> — souvislý graf s $n-1$ hranami je strom.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Vezmi <em>optimální</em> okruh a odeber z něj jednu hranu. Co za objekt ti zbyl (kolik má hran, je souvislý)? Jak se jeho cena srovnává (i) s cenou okruhu a (ii) s cenou MST?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Nechť $H$ je optimální okruh přes všech $n$ vrcholů, $c(H) = \mathrm{OPT}(K_n, c)$. Odeberu z $H$ libovolnou hranu $e$ a dostanu podgraf $P = H - e$: je souvislý (zbytek okruhu spojuje oba konce $e$), obsahuje všech $n$ vrcholů a má $n-1$ hran — je to tedy <strong>kostra</strong> (cesta přes všechny vrcholy), viz ekvivalence (c) z [L0.4].</p>
+          <p>Dvě nerovnosti:
+          $$c(\mathrm{MST}) \;\le\; c(P) \;=\; c(H) - c(e) \;\le\; c(H) = \mathrm{OPT}(K_n,c).$$
+          První platí, protože MST je nejlevnější kostra a $P$ je nějaká kostra; druhá protože $c(e) \ge 0$. Dohromady $c(E(T)) = c(\mathrm{MST}) \le \mathrm{OPT}(K_n, c)$. $\blacksquare$</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L0.5">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l0-4.html"><span class="dir">← Předchozí</span> L0.4 · Strom, kostra, les, DAG</a>
+    <a class="next" href="l0-6.html"><span class="dir">Další →</span> L0.6 · Párování a perfektní párování</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// společný vážený graf pro úvod i Kruskala
+const NODES = [
+  {id:'a', x:100, y:90},
+  {id:'b', x:320, y:60},
+  {id:'c', x:545, y:100},
+  {id:'d', x:200, y:290},
+  {id:'e', x:450, y:285},
+];
+const EDGES = [
+  {from:'a', to:'b', label:'3'},
+  {from:'b', to:'c', label:'4'},
+  {from:'a', to:'d', label:'2'},
+  {from:'b', to:'d', label:'5'},
+  {from:'d', to:'e', label:'1'},
+  {from:'b', to:'e', label:'2'},
+  {from:'c', to:'e', label:'6'},
+];
+
+// 1 — nějaká (drahá) kostra
+KOViz.graph(document.getElementById('viz-anytree'), {
+  directed: false,
+  nodes: NODES,
+  edges: EDGES.map(e => {
+    const inTree = ['a->b','b->d','d->e','c->e'].includes(e.from + '->' + e.to);
+    return Object.assign({}, e, inTree ? {cls:'good'} : {cls:'dim', dashed:true});
+  }),
+  caption: 'Vážený graf a jedna z jeho koster (zeleně): hrany 3 + 5 + 1 + 6, cena 15. Je to kostra — ale je nejlevnější?'
+});
+
+// 2 — Kruskal krok za krokem (frames = absolutní stavy)
+KOViz.stepper(document.getElementById('viz-kruskal'), {
+  graph: { directed: false, nodes: NODES, edges: EDGES },
+  frames: [
+    { desc: 'KRUSKAL: seřaď hrany podle váhy vzestupně: d–e (1), a–d (2), b–e (2), a–b (3), b–c (4), b–d (5), c–e (6). Kostra zatím prázdná.' },
+    { desc: 'Vezmi nejlevnější hranu d–e (váha 1). Kružnici nevytvoří → do kostry.',
+      edges: {'d->e':'good'} },
+    { desc: 'Další je a–d (váha 2). Kružnici nevytvoří → do kostry.',
+      edges: {'d->e':'good','a->d':'good'} },
+    { desc: 'Další je b–e (váha 2). Kružnici nevytvoří → do kostry. Máme 3 hrany, potřebujeme n − 1 = 4.',
+      edges: {'d->e':'good','a->d':'good','b->e':'good'} },
+    { desc: 'Další je a–b (váha 3). POZOR: uzavřela by kružnici a–d–e–b–a → ZAHODIT.',
+      edges: {'d->e':'good','a->d':'good','b->e':'good','a->b':'bad'} },
+    { desc: 'Další je b–c (váha 4). Kružnici nevytvoří → do kostry. Hotovo: 4 = n − 1 hran, c(MST) = 1 + 2 + 2 + 4 = 9.',
+      edges: {'d->e':'good','a->d':'good','b->e':'good','a->b':'dim','b->c':'good'} },
+  ],
+});
+
+// 3 — úloha T01: čtverec se středem
+KOViz.graph(document.getElementById('viz-task1'), {
+  directed: false,
+  nodes: [
+    {id:'v1', x:200, y:80},
+    {id:'v2', x:460, y:80},
+    {id:'v3', x:460, y:300},
+    {id:'v4', x:200, y:300},
+    {id:'s',  x:330, y:190, cls:'hl'},
+  ],
+  edges: [
+    {from:'v1', to:'v2', label:'1'},
+    {from:'v2', to:'v3', label:'1'},
+    {from:'v3', to:'v4', label:'1'},
+    {from:'v4', to:'v1', label:'1'},
+    {from:'s', to:'v1', label:'2'},
+    {from:'s', to:'v2', label:'2'},
+    {from:'s', to:'v3', label:'2'},
+    {from:'s', to:'v4', label:'2'},
+  ],
+  caption: 'Úloha T01: čtverec se středem s — vnější hrany váhy 1, hrany ze středu váhy 2 (rekonstrukce obrázku ze slidu 6).'
+});
+</script>
+</body>
+</html>

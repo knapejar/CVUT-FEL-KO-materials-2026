@@ -10,7 +10,7 @@ Aktualizováno: 9. 6. 2026 večer
 - [x] CLAUDE.md s trvalými pokyny
 
 ## Píše se
-- [ ] K0: L0.1–L0.8 (pipeline tvůrce→kritik→korektor)
+- [ ] K0: L0.1–L0.8 (pipeline tvůrce→kritik→korektor) — L0.1–L0.4 po korektuře (79000cc), L0.5–L0.8 napsány tvůrcem (čeká kritik)
 - [ ] K1: L1.1–L1.15
 
 ## Fronta

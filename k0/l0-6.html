@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L0.6 · Párování a perfektní párování — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k0">K0 · Základní jazyk grafů a ILP</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L0.6</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L0.6</span> Kapitola K0 — Základní jazyk grafů a ILP · <strong>[MUST]</strong>
+  </p>
+  <h1>Párování a perfektní párování</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Párování (matching) = množina hran, z nichž žádné dvě nesdílí vrchol.
+  </div>
+
+  <p>Prerekvizity: <a href="l0-1.html">[L0.1] Co je graf</a>. V této lekci jde jen o <em>pojem</em> — algoritmy na výpočet přijdou až v kapitole K4 (toky).</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Definice</h2>
+  <p>Ze slidů (04_Flows, slide 38): <em>„<strong>Matching</strong> is the set of arcs $P \subseteq E(G)$ in undirected graph $G$, such that the endpoints are all different (no arcs from $P$ are incident with the same node).“</em> Česky: <strong>párování</strong> je podmnožina hran, ve které se žádné dvě hrany nedotýkají stejného vrcholu — každý vrchol je „spárovaný“ nejvýš jednou.</p>
+
+  <div class="viz" id="viz-def"></div>
+
+  <details class="try">
+    <summary>Zkus sám: kolik vrcholů pokrývá párování o $k$ hranách? Kolik hran může mít párování v grafu s $n$ vrcholy nejvýš?</summary>
+    <div class="inner">
+      <p>Každá hrana párování pokrývá 2 vrcholy a žádný vrchol se neopakuje — párování o $k$ hranách pokrývá přesně $2k$ vrcholů. Proto párování nemůže mít víc než $\lfloor n/2 \rfloor$ hran.</p>
+    </div>
+  </details>
+
+  <h2>Perfektní párování</h2>
+  <p>Slide 38 pokračuje: <em>„When all nodes of $G$ are incident with some arc in $P$, we call $P$ a <strong>perfect matching</strong>.“</em> <strong>Perfektní párování</strong> tedy pokrývá <em>každý</em> vrchol právě jednou hranou — nikdo nezbyl.</p>
+
+  <div class="viz" id="viz-perfect"></div>
+
+  <details class="try">
+    <summary>Zkus sám: může mít perfektní párování graf s lichým počtem vrcholů? A stačí sudý počet vrcholů k tomu, aby perfektní párování existovalo?</summary>
+    <div class="inner">
+      <p>Lichý počet vrcholů: <strong>ne</strong> — perfektní párování pokrývá $2k$ vrcholů, takže $n$ musí být sudé. Sudý počet ale <strong>nestačí</strong>: třeba hvězda se 4 vrcholy (střed + 3 listy) má sudý počet vrcholů, ale jakákoli hrana pokryje střed a jeden list — dva zbylé listy už spárovat nejde (nevede mezi nimi hrana). Existence perfektního párování závisí na struktuře grafu, ne jen na počtu vrcholů.</p>
+    </div>
+  </details>
+
+  <h2>Čtyři problémy nad párováním (zatím jen názvy)</h2>
+  <p>Slide 38 vyjmenovává čtyři úlohy — teď je ber jako slovníček, počítat je budeme později:</p>
+  <ul>
+    <li><strong>a) Maximum Cardinality Matching</strong> — párování s největším počtem hran (v obecném grafu).</li>
+    <li><strong>b) Maximum Cardinality Matching in Bipartite Graphs</strong> — totéž v bipartitním grafu (vrcholy ve dvou skupinách, hrany jen mezi skupinami); speciální případ a). Spočteme přes max-flow v [L4.9].</li>
+    <li><strong>c) Minimum Weight Matching</strong> — nejlevnější z párování maximální kardinality ve váženém grafu.</li>
+    <li><strong>d) Minimum Weight Perfect Matching</strong> v úplném bipartitním grafu se stejně velkými stranami — tzv. <strong>Assignment Problem</strong> (přiřazovací problém); speciální případ c) a zároveň speciální případ min-cost flow. Spočteme v [L4.12].</li>
+  </ul>
+  <p>Důležité (a u zkoušky uklidňující): <em>„These problems can be solved in polynomial time.“</em> Párování jsou — na rozdíl od ILP — efektivně řešitelná. Pro důkazy (např. Christofides v K3) navíc stačí <strong>existence</strong> a vlastnosti min-weight perfect matchingu; výpočet znát nemusíš.</p>
+
+  <div class="viz" id="viz-bip"></div>
+
+  <details class="try">
+    <summary>Zkus sám: v bipartitním grafu nahoře je zeleně párování o 2 hranách. Je největší možné (jde rozšířit na 3)?</summary>
+    <div class="inner">
+      <p>Zelené párování $\{x_2y_1, x_3y_2\}$ rozšířit přímo nejde — nepokryté zůstaly jen $x_1$ a $y_3$ a každá jejich hrana ($x_1y_1$, $x_3y_3$) se dotýká už pokrytého vrcholu. Ale <strong>největší to není</strong>: párování $\{x_1y_1, x_2y_2, x_3y_3\}$ má 3 hrany a je dokonce perfektní. Pozor tedy na rozdíl „nejde přidat hranu“ vs. „největší možné“ — k vylepšení je někdy potřeba hrany <em>přepárovat</em> (to dělá tzv. augmenting path, potkáš ji v K4).</p>
+    </div>
+  </details>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L0.6</div>
+    <ul>
+      <li><strong>Párování (matching)</strong> $M \subseteq E(G)$: žádné dvě hrany nesdílí vrchol; $k$ hran pokrývá přesně $2k$ vrcholů.</li>
+      <li><strong>Perfektní párování</strong>: každý vrchol pokrytý právě jednou hranou — vyžaduje sudé $n$, ale sudé $n$ samo nestačí.</li>
+      <li><strong>Min-weight perfect matching</strong> v úplném bipartitním grafu = <strong>assignment problem</strong>; tady jen pojem — výpočet přes toky až v [L4.9] (cardinality) / [L4.12] (min-weight perfect).</li>
+      <li>Úlohy o párování jsou řešitelné <strong>polynomiálně</strong>; pro důkazy (Christofides) stačí existence a vlastnosti matchingu.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-matching-def">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Matching — recognize and maximize</strong>
+      <span class="task-src">zdroj: prezentace/04_Flows_KO.md, slide 38 (procvičení definice)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Matching is the set of arcs $P \subseteq E(G)$ in undirected graph $G$, such that the endpoints are all different (no arcs from $P$ are incident with the same node). When all nodes of $G$ are incident with some arc in $P$, we call $P$ a perfect matching.” For the graph in the first figure of this lesson (nodes $u_1,\dots,u_6$), find a maximum cardinality matching and decide whether the graph has a perfect matching.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Na prvním obrázku lekce najdi co největší párování a rozhodni, jestli existuje perfektní (tj. párování pokrývající všech 6 vrcholů).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice párování a perfektního párování.</li>
+        <li><a href="l0-1.html#takeaways">[L0.1] Co je graf</a> — hrana, incidence s vrcholem.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>6 vrcholů → perfektní párování by mělo 3 hrany pokrývající každý vrchol právě jednou. Zkus vrcholy rozdělit do tří disjunktních dvojic spojených hranou. Pomáhá začít od vrcholů s nejmenším stupněm (mají nejmíň možností).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Hrany grafu: $u_1u_2$, $u_1u_4$, $u_2u_3$, $u_2u_5$, $u_3u_6$, $u_4u_5$, $u_5u_6$. Vrchol $u_1$ má jen sousedy $u_2, u_4$. Zkusím $u_1u_4$: zbývá spárovat $u_2, u_3, u_5, u_6$ — vezmu $u_2u_5$? Pak zbyde $u_3, u_6$ a hrana $u_3u_6$ existuje ✓. Tedy
+          $$M = \{u_1u_4,\; u_2u_5,\; u_3u_6\}$$
+          je párování o 3 hranách pokrývající všech 6 vrcholů — <strong>perfektní párování existuje</strong> a $M$ je zároveň maximum (víc než $6/2 = 3$ hran párování mít nemůže).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-busdrivers">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>School Bus Driver Assignment</strong>
+      <span class="task-src">zdroj: historicke_zadani_testu.md, bank #7 (termín 02.06.2011)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>A bus company has $m$ morning runs and $n$ afternoon runs that it needs to assign them to its $n$ drivers. The runs are of different duration. If the total duration of the morning and afternoon runs assigned to a driver is more than a specified $D$, the driver receives a premium payment for each hour of overtime. The company would like to assign the runs to the drivers to minimize the total number of overtime hours.</p>
+        <p>(a) Formulate this problem as an appropriate matching problem. Formally specify input parameters of the problem.</p>
+        <p>(b) Suppose that we arrange the morning runs in the non-decreasing order of their duration and the afternoon runs in the non-increasing order of their duration. If we assign each driver $i$ to the $i$th morning run and the $i$th afternoon run, do we obtain the optimal assignment? Outline the proof or find a counterexample.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Ranní a odpolední jízdy se mají rozdělit řidičům po dvojicích (každý řidič jedna ranní + jedna odpolední); přesčas řidiče je čas nad limit $D$. Cíl: minimalizovat celkové přesčasy. Část (a): pojmenuj to jako úlohu o párování. Část (b): rozhodni, zda „nejkratší ranní s nejdelší odpolední“ je optimum.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — min-weight perfect matching v úplném bipartitním grafu (assignment problem).</li>
+        <li><a href="l0-1.html#takeaways">[L0.1] Co je graf</a> — bipartitní graf $K_{n,n}$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(a) Co jsou dvě strany bipartitního grafu? Co znamená hrana $(i,j)$ a jakou má cenu (kolik přesčasu vznikne, když ranní $i$ a odpolední $j$ dostane tentýž řidič)? Které párování odpovídá přípustnému přiřazení — stačí libovolné, nebo perfektní? (b) Vezmi dvě dvojice „prohozené“ proti seřazenému pravidlu a porovnej přesčas obou variant (výměnný argument). Pomůže funkce $o(x) = \max\{0, x - D\}$ a její konvexita.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(a)</strong> Vstup: doby ranních jízd $m_i$, doby odpoledních jízd $a_j$, limit $D$ (a $m = n$, aby vyšlo přiřazení každému řidiči). Přesčas dvojice: $c_{ij} = o(m_i + a_j) = \max\{0,\, m_i + a_j - D\}$. Sestroj úplný bipartitní graf $K_{n,n} = (M \cup A, E)$, kde $M$ = ranní jízdy, $A$ = odpolední; hrana $(i,j)$ = „jeden řidič dostane ranní $i$ a odpolední $j$“ s váhou $c_{ij}$. Přípustné přiřazení = <strong>perfektní párování</strong> (každá jízda právě jednou), takže úloha je <strong>minimum-weight perfect matching v $K_{n,n}$</strong> — assignment problem. Ekvivalentně: $\min \sum_{i}\sum_{j} c_{ij} x_{ij}$ za podmínek $\sum_j x_{ij} = 1\ \forall i$, $\sum_i x_{ij} = 1\ \forall j$, $x_{ij} \in \{0,1\}$.</p>
+          <p><strong>(b) Ano, seřazené protichůdné párování je optimální.</strong> Výměnný důkaz: vezmi $m_i \le m_j$ a $a_p \le a_q$. „Souhlasné“ spárování $(m_i,a_p), (m_j,a_q)$ vs. „protichůdné“ $(m_i,a_q), (m_j,a_p)$. Označ $A = m_i + a_p$, $\Delta = m_j - m_i \ge 0$, $\Gamma = a_q - a_p \ge 0$; součty jsou $A,\ A{+}\Delta{+}\Gamma$ vs. $A{+}\Gamma,\ A{+}\Delta$ (stejný celkový čas, protichůdné je vyrovnanější). Stačí ukázat
+          $$o(A+\Gamma) + o(A+\Delta) \;\le\; o(A) + o(A+\Delta+\Gamma).$$
+          S $\alpha = A - D$ rozbor tří případů: (1) $\alpha \ge 0$ — obě strany rovny $2\alpha + \Delta + \Gamma$; (2) $\alpha + \Delta + \Gamma \le 0$ — všechny členy nulové; (3) $\alpha &lt; 0 &lt; \alpha + \Delta + \Gamma$ — pravá strana je $\alpha + \Delta + \Gamma$, levá nejvýš $2\alpha + \Delta + \Gamma \le \alpha + \Delta + \Gamma$ (protože $\alpha \le 0$), případně menší. Výměna tedy nikdy nezhorší cíl; opakovaným odstraňováním „inverzí“ dojdeš až k seřazenému protichůdnému párování — to je optimální. $\blacksquare$</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L0.6">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l0-5.html"><span class="dir">← Předchozí</span> L0.5 · Minimální kostra (MST)</a>
+    <a class="next" href="l0-7.html"><span class="dir">Další →</span> L0.7 · Co je ILP a LP relaxace</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — definice: párování (zeleně) vs. hrany, které by porušily definici (červeně)
+KOViz.graph(document.getElementById('viz-def'), {
+  directed: false,
+  nodes: [
+    {id:'u1', x:110, y:90,  label:'u₁'},
+    {id:'u2', x:320, y:60,  label:'u₂'},
+    {id:'u3', x:540, y:90,  label:'u₃'},
+    {id:'u4', x:140, y:290, label:'u₄'},
+    {id:'u5', x:330, y:300, label:'u₅'},
+    {id:'u6', x:540, y:280, label:'u₆'},
+  ],
+  edges: [
+    {from:'u1', to:'u2', cls:'good'},
+    {from:'u1', to:'u4', cls:'dim', dashed:true},
+    {from:'u2', to:'u3', cls:'bad'},
+    {from:'u2', to:'u5', cls:'dim', dashed:true},
+    {from:'u3', to:'u6', cls:'dim', dashed:true},
+    {from:'u4', to:'u5', cls:'good'},
+    {from:'u5', to:'u6', cls:'dim', dashed:true},
+  ],
+  caption: 'Zelené hrany {u₁u₂, u₄u₅} tvoří PÁROVÁNÍ — nesdílejí vrchol. Červenou hranu u₂u₃ přidat NELZE: dotýká se u₂, který už je spárovaný. (Vrcholy u₃, u₆ zůstaly nepokryté → tohle párování není perfektní.)'
+});
+
+// 2 — perfektní párování na 6 vrcholech (cyklus C6)
+KOViz.graph(document.getElementById('viz-perfect'), {
+  directed: false,
+  nodes: [
+    {id:'a', x:200, y:70},
+    {id:'b', x:440, y:70},
+    {id:'c', x:560, y:185},
+    {id:'d', x:440, y:300},
+    {id:'e', x:200, y:300},
+    {id:'f', x:80,  y:185},
+  ],
+  edges: [
+    {from:'a', to:'b', cls:'good'},
+    {from:'b', to:'c', cls:'dim', dashed:true},
+    {from:'c', to:'d', cls:'good'},
+    {from:'d', to:'e', cls:'dim', dashed:true},
+    {from:'e', to:'f', cls:'good'},
+    {from:'f', to:'a', cls:'dim', dashed:true},
+  ],
+  caption: 'PERFEKTNÍ párování na kružnici se 6 vrcholy: zelené hrany {ab, cd, ef} pokrývají každý vrchol právě jednou. (Druhá možnost: tři čárkované hrany.)'
+});
+
+// 3 — bipartitní graf: párování, které „nejde přidat“, ale není maximum
+KOViz.graph(document.getElementById('viz-bip'), {
+  directed: false,
+  nodes: [
+    {id:'x1', x:180, y:70,  label:'x₁', cls:'hl'},
+    {id:'x2', x:180, y:185, label:'x₂', cls:'hl'},
+    {id:'x3', x:180, y:300, label:'x₃', cls:'hl'},
+    {id:'y1', x:460, y:70,  label:'y₁'},
+    {id:'y2', x:460, y:185, label:'y₂'},
+    {id:'y3', x:460, y:300, label:'y₃'},
+  ],
+  edges: [
+    {from:'x1', to:'y1', cls:'dim', dashed:true},
+    {from:'x2', to:'y1', cls:'good'},
+    {from:'x2', to:'y2', cls:'dim', dashed:true},
+    {from:'x3', to:'y2', cls:'good'},
+    {from:'x3', to:'y3', cls:'dim', dashed:true},
+  ],
+  caption: 'BIPARTITNÍ graf (strany X a Y, hrany jen mezi stranami). Zelené párování {x₂y₁, x₃y₂} má 2 hrany — žádnou hranu k němu přidat nejde… ale největší možné to není (zkus najít párování o 3 hranách).'
+});
+</script>
+</body>
+</html>

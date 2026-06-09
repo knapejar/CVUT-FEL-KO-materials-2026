@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L0.7 · Co je ILP a LP relaxace — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k0">K0 · Základní jazyk grafů a ILP</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L0.7</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L0.7</span> Kapitola K0 — Základní jazyk grafů a ILP · <strong>[MUST]</strong>
+  </p>
+  <h1>Co je ILP a LP relaxace</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    ILP = lineární program, ve kterém proměnné musí být celočíselné; LP relaxace = tentýž program bez celočíselnosti.
+  </div>
+
+  <p>Prerekvizity: žádné — tohle je vstupní brána do celé kapitoly K1 (ILP modelování).</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Definice ILP</h2>
+  <p>Ze slidů (02_ILP, slide 3): <em>„The ILP problem is given by matrix $\mathbf{A} \in \mathbb{R}^{m \times n}$ and vectors $\mathbf{b} \in \mathbb{R}^m$ and $\mathbf{c} \in \mathbb{R}^n$. The goal is to find a vector $\mathbf{x} \in \mathbb{Z}^n$ such that $\mathbf{A}x \le b$ and $c^T x$ is the maximum.“</em> Zkráceně:</p>
+  $$\max \left\{ c^T x \;:\; \mathbf{A}x \le b,\; x \in \mathbb{Z}^n \right\}$$
+  <p><strong>Integer Linear Programming — ILP</strong> (celočíselné lineární programování): cílová funkce i omezení jsou <em>lineární</em>, ale proměnné musí být <em>celé</em>. Když smí být část proměnných reálná, mluví se o <strong>MIP</strong> (mixed integer programming) — slidy ale říkají: <em>„we will use the term ILP when at least one variable has integer domain“</em>, takže ILP říkáme i smíšeným modelům.</p>
+
+  <details class="try">
+    <summary>Zkus sám: čím se liší LP od ILP — a která z těch dvou úloh je „těžká“?</summary>
+    <div class="inner">
+      <p><strong>LP</strong> má $x \in \mathbb{R}^n$ — přípustná množina je konvexní mnohostěn a LP se řeší v <strong>polynomiálním čase</strong>. <strong>ILP</strong> je <strong>NP-těžké</strong>: celočíselnost rozbije konvexitu (přípustné body jsou „roztroušená“ mřížka) a žádný polynomiální algoritmus není znám. Paradox kurzu: přidáním <em>omezení</em> (celočíselnost) se úloha stane těžší — ale zároveň díky tomu ILP umí vyjádřit NP-těžké kombinatorické problémy.</p>
+    </div>
+  </details>
+
+  <h2>LP relaxace: zahodím celočíselnost</h2>
+  <p><strong>LP relaxace</strong> ILP problému = tentýž model, ve kterém podmínku $x \in \mathbb{Z}^n$ nahradím $x \in \mathbb{R}^n$. Relaxace se řeší rychle a její optimum je vždy <em>aspoň tak dobré</em> jako optimum ILP (přípustných bodů jen přibylo). Konkrétní příklad ze slidu 17:</p>
+  $$\begin{aligned} \max\ z = \;& 3x_1 + 4x_2 \\ \text{s.t.}\ & 5x_1 + 8x_2 \le 40 \\ & x_1 - 5x_2 \le 0 \\ & x_1, x_2 \in \mathbb{Z}^+_0 \end{aligned}$$
+
+  <div class="viz" id="viz-lp"></div>
+
+  <details class="try">
+    <summary>Zkus sám: LP optimum vyšlo $x_1 = 6.06$, $x_2 = 1.21$. Co s tím? Zaokrouhlit na $(6, 1)$?</summary>
+    <div class="inner">
+      <p>Zkontroluj omezení pro $(6,1)$: $5 \cdot 6 + 8 \cdot 1 = 38 \le 40$ ✓, ale $x_1 - 5x_2 = 6 - 5 = 1 \not\le 0$ ✗. Zaokrouhlený bod je <strong>infeasible</strong> — leží mimo přípustnou oblast! A to není jediný problém, viz druhý obrázek.</p>
+    </div>
+  </details>
+
+  <h2>Proč zaokrouhlování nestačí</h2>
+  <p>Slide 18 (<em>„Rounding is not always good choice“</em>) na stejném modelu ukazuje čtyři body:</p>
+  <ul>
+    <li><strong>a)</strong> LP řešení $z = 23.03$ pro $x_1 = 6.06,\ x_2 = 1.21$ — necelé,</li>
+    <li><strong>b)</strong> zaokrouhlení vede na <strong>infeasible</strong> $(6, 1)$,</li>
+    <li><strong>c)</strong> nejbližší přípustný celočíselný bod $(5, 1)$ není optimální: $z = 19$,</li>
+    <li><strong>d)</strong> skutečné optimum ILP je $z = 21$ pro $x_1 = 3,\ x_2 = 3$ — <em>úplně jinde</em>.</li>
+  </ul>
+
+  <div class="viz" id="viz-ilp"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor — nebezpečná polopravda</div>
+    <p>„ILP vyřeším tak, že vyřeším LP a zaokrouhlím.“ <strong>NE.</strong> Zaokrouhlené řešení může být (b) infeasible, a i nejbližší přípustný celočíselný bod (c) může být daleko od optima (d). LP relaxace je cenná jinak: dává <strong>mez</strong> (u maximalizace horní, u minimalizace dolní) — na tom stojí Branch &amp; Bound (kapitola K1/K5).</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: může být optimum LP relaxace <em>horší</em> (menší při maximalizaci) než optimum ILP?</summary>
+    <div class="inner">
+      <p>Ne. Každé přípustné řešení ILP je i přípustným řešením relaxace (jen jsme zahodili jednu podmínku), takže LP optimum je vždy $\ge$ ILP optimum (při maximalizaci). Tady: $23.03 \ge 21$. Proto LP relaxace funguje jako <strong>horní mez</strong> — když LP relaxace nějaké větve v Branch &amp; Bound dá míň, než už máme, celou větev lze zahodit.</p>
+    </div>
+  </details>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L0.7</div>
+    <ul>
+      <li><strong>ILP</strong>: $\max\{c^T x : \mathbf{A}x \le b,\ x \in \mathbb{Z}^n\}$ — lineární cíl i omezení, celočíselné proměnné. <strong>NP-těžké</strong>; přípustná množina není konvexní.</li>
+      <li><strong>LP</strong> ($x \in \mathbb{R}^n$) je řešitelné polynomiálně; <strong>LP relaxace</strong> ILP = zahození celočíselnosti.</li>
+      <li>Zaokrouhlení LP řešení může být <strong>infeasible</strong> a nejbližší přípustný celočíselný bod nemusí být optimum (slide 18: LP $23.03$ → ILP optimum $21$ v úplně jiném bodě).</li>
+      <li>LP relaxace dává <strong>mez</strong> na ILP optimum (horní u max, dolní u min) — základ Branch &amp; Bound.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-rounding">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>ILP solution space — can we just round?</strong>
+      <span class="task-src">zdroj: prezentace/02_ILP.md, slide 17–18</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>$$\max z = 3x_1 + 4x_2 \quad \text{s.t.} \quad 5x_1 + 8x_2 \le 40,\quad x_1 - 5x_2 \le 0,\quad x_1, x_2 \in \mathbb{Z}^+_0.$$</p>
+        <p>“What is optimal solution? Can we use LP to solve the ILP problem?” Compute the LP relaxation optimum, show that rounding it leads to an infeasible solution, evaluate the nearest feasible integer point, and find the integer optimum.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Malý ILP se dvěma proměnnými. Máš: (1) vyřešit LP relaxaci, (2) ověřit, že zaokrouhlení je nepřípustné, (3) vyhodnotit nejbližší přípustný celočíselný bod, (4) najít skutečné celočíselné optimum.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — LP relaxace, kontrola přípustnosti dosazením.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>LP optimum dvourozměrné úlohy leží ve vrcholu přípustné oblasti — tady v průsečíku obou přímek $5x_1 + 8x_2 = 40$ a $x_1 = 5x_2$ (proč zrovna tam? sleduj směr růstu $c = (3,4)$ na obrázku). Pro ILP optimum projdi celočíselné body uvnitř oblasti s velkým $z$ (mřížka na druhém obrázku).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(1) LP relaxace:</strong> průsečík: $x_1 = 5x_2$ dosadím do $5x_1 + 8x_2 = 40$: $25x_2 + 8x_2 = 33x_2 = 40$, tedy $x_2 = \tfrac{40}{33} \approx 1.21$, $x_1 = \tfrac{200}{33} \approx 6.06$, $z = 3 \cdot 6.06 + 4 \cdot 1.21 \approx \mathbf{23.03}$.</p>
+          <p><strong>(2) Zaokrouhlení</strong> $(6, 1)$: $5 \cdot 6 + 8 \cdot 1 = 38 \le 40$ ✓, ale $6 - 5 \cdot 1 = 1 > 0$ ✗ — <strong>infeasible</strong>.</p>
+          <p><strong>(3) Nejbližší přípustný celočíselný bod</strong> $(5, 1)$: $25 + 8 = 33 \le 40$ ✓, $5 - 5 = 0 \le 0$ ✓; $z = 15 + 4 = \mathbf{19}$.</p>
+          <p><strong>(4) Celočíselné optimum</strong> $(3, 3)$: $15 + 24 = 39 \le 40$ ✓, $3 - 15 = -12 \le 0$ ✓; $z = 9 + 12 = \mathbf{21} > 19$. Lepší celočíselný bod není (každý bod s $z \ge 22$ porušuje některé omezení — viz mřížka). LP tedy ILP nevyřeší: $23.03 \to$ zaokrouhlení mimo oblast, „opravený” bod dá 19, optimum je 21 jinde.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-ilp-vs-lp">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Comparison of ILP and LP</strong>
+      <span class="task-src">zdroj: prezentace/02_ILP.md, slide 4 (teorie)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“The LP problem solution space is convex, since $x \in \mathbb{R}^n$. … Since the ILP solution space is not a convex set, we cannot use convex optimization techniques.” Explain: (i) why the ILP solution space is not convex (give an example), and (ii) why “solve the LP and round” can fail. </p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Teoretická otázka (typický materiál na ústní): zdůvodni nekonvexitu množiny celočíselných řešení a selhání zaokrouhlování.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice ILP, příklad ze slidu 18.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Konvexní množina obsahuje s každými dvěma body i celou úsečku mezi nimi. Vezmi dva celočíselné přípustné body a podívej se na střed úsečky. Pro (ii) máš hotový protipříklad v T01.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Množina přípustných řešení ILP je množina <em>celočíselných bodů</em> (mřížky) uvnitř mnohostěnu. Vezmi třeba přípustné body $(0,0)$ a $(0,1)$: jejich střed $(0, 0.5)$ není celočíselný, tedy do množiny nepatří — množina neobsahuje úsečku mezi svými body, takže <strong>není konvexní</strong>. Proto nelze nasadit techniky konvexní optimalizace (které garantují, že lokální optimum je globální).</p>
+          <p><strong>(ii)</strong> Protipříklad ze slidu 18 (úloha T01): LP optimum $(6.06, 1.21)$, zaokrouhlení $(6,1)$ porušuje $x_1 - 5x_2 \le 0$ — <strong>infeasible</strong>; nejbližší přípustný celočíselný bod $(5,1)$ má $z = 19$, zatímco optimum je $z = 21$ v $(3,3)$, daleko od LP řešení. Zaokrouhlování tedy může dát nepřípustné i výrazně suboptimální řešení.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L0.7">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l0-6.html"><span class="dir">← Předchozí</span> L0.6 · Párování a perfektní párování</a>
+    <a class="next" href="l0-8.html"><span class="dir">Další →</span> L0.8 · Binární proměnná</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — LP relaxace: konvexní oblast + LP optimum (necelé)
+KOViz.lpRegion(document.getElementById('viz-lp'), {
+  xmax: 8, ymax: 5,
+  constraints: [
+    {a: 5, b: 8, c: 40, label: '5x₁+8x₂ ≤ 40'},
+    {a: 1, b: -5, c: 0, label: 'x₁−5x₂ ≤ 0'},
+  ],
+  opt: [200/33, 40/33],
+  objective: {a: 3, b: 4, label: 'směr růstu z = 3x₁+4x₂'},
+  caption: 'LP RELAXACE (slide 17): přípustná oblast je konvexní mnohoúhelník. Optimum z = 23.03 leží ve vrcholu (6.06, 1.21) — NENÍ celočíselné.'
+});
+
+// 2 — ILP: mřížka celočíselných bodů, optimum (3,3)
+KOViz.lpRegion(document.getElementById('viz-ilp'), {
+  xmax: 8, ymax: 5,
+  constraints: [
+    {a: 5, b: 8, c: 40, label: '5x₁+8x₂ ≤ 40'},
+    {a: 1, b: -5, c: 0, label: 'x₁−5x₂ ≤ 0'},
+  ],
+  integer: true,
+  opt: [3, 3],
+  objective: {a: 3, b: 4, label: 'směr růstu z'},
+  caption: 'ILP (slide 18): přípustná jsou jen celočíselná mřížková místa uvnitř oblasti (zvýrazněné body) — NEkonvexní množina. Optimum z = 21 je v bodě (3, 3); zaokrouhlené LP řešení (6, 1) leží MIMO oblast a bod (5, 1) dává jen z = 19.'
+});
+</script>
+</body>
+</html>

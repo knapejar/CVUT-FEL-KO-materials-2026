@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L0.8 · Binární proměnná — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k0">K0 · Základní jazyk grafů a ILP</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L0.8</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L0.8</span> Kapitola K0 — Základní jazyk grafů a ILP · <strong>[MUST]</strong>
+  </p>
+  <h1>Binární proměnná</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Proměnná $x \in \{0,1\}$ reprezentuje rozhodnutí ano/ne — a součty binárních proměnných počítají vybrané věci.
+  </div>
+
+  <p>Prerekvizity: <a href="l0-7.html">[L0.7] Co je ILP a LP relaxace</a>.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Rozhodnutí jako číslo</h2>
+  <p>Nejdůležitější modelovací trik celého kurzu: <strong>binary variable</strong> (binární proměnná) $x_i \in \{0,1\}$ kóduje rozhodnutí ano/ne. Slidy (02_ILP, slide 19) to říkají přímo: <em>„flexible — e.g. binary variable can be used to model the decision (logical expression)“</em>. Konvence čtení:</p>
+  $$x_i = 1 \iff \text{„věc } i \text{ je vybrána / aktivní“}, \qquad x_i = 0 \iff \text{„není“}.$$
+  <p>Ukázka přímo ze slidu 5 (2-Partition): <em>„$x_i = 1$ iff $i \in S$“</em> — binární proměnná kóduje, jestli bankovka $i$ patří do podmnožiny $S$. Každá podmnožina $S \subseteq \{1,\dots,n\}$ odpovídá právě jednomu vektoru nul a jedniček a naopak.</p>
+
+  <div class="viz" id="viz-select"></div>
+
+  <details class="try">
+    <summary>Zkus sám: co spočítá výraz $\sum_{i=1}^{n} x_i$? A co $\sum_{i=1}^{n} p_i x_i$, když $p_i$ je hodnota věci $i$?</summary>
+    <div class="inner">
+      <p>$\sum_i x_i$ = <strong>počet vybraných věcí</strong> (vybrané přispějí jedničkou, nevybrané nulou). $\sum_i p_i x_i$ = <strong>celková hodnota vybraných věcí</strong> — dosazením $x_i \in \{0,1\}$ se ze sumy „vyškrtnou“ právě nevybrané členy. Tohle je důvod, proč binární proměnné fungují: výběr podmnožiny se stane <em>lineárním výrazem</em>.</p>
+    </div>
+  </details>
+
+  <h2>Počítací omezení</h2>
+  <p>Jakmile $\sum_i x_i$ počítá vybrané, omezení na počet jsou lineární nerovnosti:</p>
+  <ul>
+    <li>$\sum_i x_i = 1$ — „vyber <strong>právě jednu</strong>“,</li>
+    <li>$\sum_i x_i \le k$ — „vyber <strong>nejvýše</strong> $k$“,</li>
+    <li>$\sum_i x_i \ge k$ — „vyber <strong>aspoň</strong> $k$“.</li>
+  </ul>
+  <p>A negace zadarmo: když $x_i$ znamená „vybráno“, pak $1 - x_i$ znamená „nevybráno“. Slide 5 přesně takhle zapisuje druhou polovinu rozdělení: hodnota nevybraných je $\sum_i (1 - x_i)\, p_i$.</p>
+
+  <div class="viz" id="viz-binsquare"></div>
+
+  <details class="try">
+    <summary>Zkus sám: kolik přípustných řešení má omezení $x_1 + x_2 \le 1$, $x_1, x_2 \in \{0,1\}$? A co to znamená slovně?</summary>
+    <div class="inner">
+      <p>Tři: $(0,0)$, $(1,0)$, $(0,1)$ — vyloučí se jen $(1,1)$. Slovně: „<strong>nevyber obě zároveň</strong>“ (nejvýš jednu ze dvou). Tahle drobnost je základ modelování logiky (konflikty, XOR, implikace) — systematicky v [L1.3] (kapitola K1).</p>
+    </div>
+  </details>
+
+  <h2>Binární vs. spojitá: vidíš ten rozdíl?</h2>
+  <p>Slide 6 ukazuje, co se stane, když binárnost povolíš: pro bankovky $p = [100, 50, 50, 50, 20, 20, 10, 10]$ frakční varianta ($x_i \in \langle 0,1\rangle$) připustí $x = [0, 0, 0.9, 1, 1, 1, 1, 1]$ — bankovku smíš „rozstřihnout“. S binárními proměnnými to nejde — a přesně tahle změna dělá z polynomiální úlohy NP-úplnou (srov. <a href="l0-7.html#takeaways">[L0.7]</a>: LP vs. ILP). Detailně si to osaháš v úloze T02.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L0.8</div>
+    <ul>
+      <li>$x_i \in \{0,1\}$: $x_i = 1 \iff$ „věc $i$ je vybrána / aktivní“, $x_i = 0 \iff$ „není“; negace = $1 - x_i$.</li>
+      <li>$\sum_i x_i$ = počet vybraných; $\sum_i p_i x_i$ = celková hodnota vybraných (výběr podmnožiny jako lineární výraz).</li>
+      <li>Počítací omezení: $\sum x_i = 1$ „právě jedna“, $\sum x_i \le k$ „nejvýše $k$“, $\sum x_i \ge k$ „aspoň $k$“.</li>
+      <li>Záměna $x_i \in \{0,1\}$ za $x_i \in \langle 0,1 \rangle$ je LP relaxace výběru — povolí „rozstřižené“ věci a může být přípustná, i když binární řešení neexistuje.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-2partition-read">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>2-Partition: reading the binary model</strong>
+      <span class="task-src">zdroj: prezentace/02_ILP.md, slide 5 (ILP1a)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“2-Partition Problem. <strong>Instance:</strong> Number of banknotes $n \in \mathbb{Z}^+$ and their values $p_1, \dots, p_n$, where $p_{i \in 1..n} \in \mathbb{Z}^+$. <strong>Decision:</strong> Is there a subset $S \subseteq \{1, \dots, n\}$ such that $\sum_{i \in S} p_i = \sum_{i \notin S} p_i$? … $x_i = 1$ iff $i \in S$.”</p>
+        $$\begin{aligned} \min \quad & 0 \\ \text{subject to:} \quad & \textstyle\sum_{i \in 1..n} x_i \ast p_i = 0.5 \ast \sum_{i \in 1..n} p_i \\ \text{variables:} \quad & x_{i \in 1..n} \in \{0,1\} \end{aligned}$$
+        <p>Explain the role of the binary variables: why does the single constraint encode $\sum_{i \in S} p_i = \sum_{i \notin S} p_i$, and why is the objective $\min 0$?</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Rozdělení bankovek na dvě stejně hodnotné hromádky zapsané jako ILP. Máš vysvětlit, co dělají binární proměnné, proč stačí jediné omezení a proč je cílová funkce nulová.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — čtení $x_i = 1 \iff i \in S$, suma $\sum p_i x_i$.</li>
+        <li><a href="l0-7.html#takeaways">[L0.7] Co je ILP a LP relaxace</a> — co je ILP a rozhodovací úloha.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Rozepiš $\sum_{i \in S} p_i$ pomocí $x_i$. Pak si všimni: když vybraná polovina má hodnotu přesně $0.5 \sum p_i$, kolik nutně zbývá na nevybranou? A k cíli: hledáme <em>nejlepší</em> řešení, nebo <em>nějaké</em>?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Role $x_i$:</strong> $x_i = 1 \iff i \in S$ — vektor $(x_1,\dots,x_n)$ jednoznačně kóduje podmnožinu $S$. Hodnota vybraných je pak lineární výraz $\sum_i p_i x_i = \sum_{i \in S} p_i$.</p>
+          <p><strong>Proč stačí jedno omezení:</strong> označ $P = \sum_i p_i$ (konstanta). Podmínka „obě hromádky stejné“ je $\sum_{i \in S} p_i = \sum_{i \notin S} p_i = P - \sum_{i \in S} p_i$, což je ekvivalentní $2\sum_{i \in S} p_i = P$, tedy $\sum_i p_i x_i = 0.5\, P$ — přesně omezení modelu. Druhá hromádka je určená automaticky ($1 - x_i$).</p>
+          <p><strong>Proč $\min 0$:</strong> je to <em>rozhodovací</em> úloha — nezajímá nás žádná kvalita řešení, jen jestli existuje přípustné $x$. Konstantní cíl znamená „najdi libovolné přípustné řešení“; solver odpoví buď řešením (= rozdělení existuje), nebo infeasible (= neexistuje). Slide dodává, že je to jeden z „nejlehčích“ NP-úplných problémů.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-fractional">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Fractional variant of the 2-Partition problem</strong>
+      <span class="task-src">zdroj: prezentace/02_ILP.md, slide 6 (ILP1b)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“We allow division of banknotes such that $x_{i \in 1..n} \in \langle 0, 1 \rangle$. … For example: $p = [100, 50, 50, 50, 20, 20, 10, 10]$ the fractional variant allows for $x = [0, 0, 0.9, 1, 1, 1, 1, 1]$ and thus divides the banknotes into equal halves $100 + 50 + 5 = 45 + 50 + 20 + 20 + 10 + 10$, but this instance does not have a non-fractional solution. For some non-fractional instances we can easily find that they cannot be partitioned (e.g. when the sum of all values divided by the greatest common divisor is not an even number).” Verify the fractional solution and prove that no binary solution exists for this instance.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejné bankovky, ale proměnné smí být zlomky (bankovku lze rozdělit). Máš ověřit, že uvedené frakční $x$ opravdu dělí hodnotu napůl, a dokázat, že <em>binární</em> (nerozstřižené) rozdělení pro tuto instanci neexistuje.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — čtení binárního výběru, $\sum p_i x_i$.</li>
+        <li><a href="l0-7.html#takeaways">[L0.7] Co je ILP a LP relaxace</a> — frakční varianta = LP relaxace.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Spočítej $\sum_i p_i$ a polovinu. Pro ověření dosaď $x$ do $\sum_i p_i x_i$. Pro neexistenci binárního řešení: jakým číslem jsou dělitelné všechny $p_i$ — a je polovina součtu taky jeho násobkem? (Slide napovídá přes největší společný dělitel.)</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Ověření:</strong> $\sum_i p_i = 100+50+50+50+20+20+10+10 = 310$, polovina $= 155$. Dosazení: $\sum_i p_i x_i = 0 + 0 + 0.9 \cdot 50 + 50 + 20 + 20 + 10 + 10 = 45 + 110 = 155$ ✓. Nevybraný zbytek: $100 + 50 + 0.1 \cdot 50 = 155$ ✓ — přesně rozdělení „$100 + 50 + 5 = 45 + 50 + 20 + 20 + 10 + 10$“ ze slidu.</p>
+          <p><strong>Neexistence binárního řešení:</strong> všechna $p_i$ jsou násobky $\gcd = 10$, takže hodnota <em>jakékoli</em> podmnožiny $\sum_{i \in S} p_i$ je násobek 10. Ale požadovaná polovina $155$ násobek 10 není — žádné binární $x$ omezení nesplní. (Slidové kritérium: $310 / \gcd = 310/10 = 31$ není sudé číslo → instance nejde rozdělit.) Frakční varianta (LP relaxace, konvexní množina) tedy řešení má, binární ILP ne — další ilustrace, že relaxace může být přípustná tam, kde celočíselný problém přípustný není.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L0.8">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l0-7.html"><span class="dir">← Předchozí</span> L0.7 · Co je ILP a LP relaxace</a>
+    <a class="next" href="../k1/l1-1.html"><span class="dir">Další →</span> L1.1 · Cílová funkce a základní omezení</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — výběr podmnožiny: bankovky jako uzly, x_i pod nimi
+KOViz.graph(document.getElementById('viz-select'), {
+  directed: false,
+  w: 640, h: 230,
+  nodes: [
+    {id:'p1', x:90,  y:100, label:'100', cls:'good', sub:'x₁ = 1'},
+    {id:'p2', x:205, y:100, label:'50',  sub:'x₂ = 0'},
+    {id:'p3', x:320, y:100, label:'50',  cls:'good', sub:'x₃ = 1'},
+    {id:'p4', x:435, y:100, label:'20',  sub:'x₄ = 0'},
+    {id:'p5', x:550, y:100, label:'10',  cls:'good', sub:'x₅ = 1'},
+  ],
+  edges: [],
+  caption: 'Výběr podmnožiny S = {1, 3, 5} z pěti bankovek zapsaný binárním vektorem x = (1, 0, 1, 0, 1). Počet vybraných: Σxᵢ = 3; hodnota vybraných: Σpᵢxᵢ = 100 + 50 + 10 = 160.'
+});
+
+// 2 — binární čtverec: {0,1}² a omezení x1 + x2 ≤ 1
+KOViz.lpRegion(document.getElementById('viz-binsquare'), {
+  xmax: 2, ymax: 2,
+  constraints: [
+    {a: 1, b: 0, c: 1},
+    {a: 0, b: 1, c: 1},
+    {a: 1, b: 1, c: 1, label: 'x₁+x₂ ≤ 1'},
+  ],
+  integer: true,
+  caption: 'Dvě binární proměnné = 4 mřížkové body čtverce {0,1}² (vodorovná čára x₂ ≤ 1, svislá x₁ ≤ 1). Omezení x₁ + x₂ ≤ 1 („nevyber obě“) nechá přípustné jen 3 body: (0,0), (1,0), (0,1) — bod (1,1) vypadl.'
+});
+</script>
+</body>
+</html>
