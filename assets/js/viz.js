@@ -3,6 +3,7 @@
    API:
      KOViz.graph(el, spec)     — orientovaný/neorientovaný graf s váhami
      KOViz.lpRegion(el, spec)  — 2D přípustná oblast LP/ILP s mřížkou celočíselných bodů
+     KOViz.fnPlot(el, spec)    — graf funkce po úsecích (nespojité / po částech lineární fce)
      KOViz.stepper(el, spec)   — krokovaná vizualizace (frames přepínají stavy grafu)
      KOViz.icon(name)          — vrátí <img> ikonu z assets/icons
    Všechny barvy jdou přes CSS třídy (viz style.css), takže fungují v obou tématech.
@@ -307,6 +308,94 @@
     return { svg };
   }
 
+  /* ---------- FUNCTION PLOT ----------
+     Graf funkce po úsecích — pro nespojité / po částech lineární funkce (fixed-charge apod.).
+     spec = {
+       xmax, ymax        : rozsah os v datových souřadnicích (default 10)
+       xstep, ystep      : krok mřížky a popisků os (default 1 — pro větší rozsahy zvol 5, 20…)
+       xlabel, ylabel    : popisky os (default "x", "f(x)")
+       segments: [{x1, y1, x2, y2, dashed?, label?, labelAt?, labelDx?, labelDy?}]
+                         — úsečka v datových souřadnicích; labelAt = 0..1 pozice popisku podél úsečky
+       points:   [{x, y, open?, label?, dx?, dy?}]
+                         — open=true: prázdné kolečko (limitní bod, který do funkce NEPATŘÍ)
+       caption
+     } */
+  function fnPlot(el, spec) {
+    const xmax = spec.xmax || 10, ymax = spec.ymax || 10;
+    const W = 460, H = 360, padL = 52, padB = 40, padT = 18, padR = 18;
+    const sx = (W - padL - padR) / xmax, sy = (H - padT - padB) / ymax;
+    const X = v => padL + v * sx, Y = v => H - padB - v * sy;
+    const xstep = spec.xstep || 1, ystep = spec.ystep || 1;
+
+    el.classList.add("viz");
+    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, class: "viz-canvas", role: "img" });
+
+    // mřížka
+    const grid = svgEl("g", { class: "grid" });
+    for (let i = 0; i <= xmax + 1e-9; i += xstep) grid.appendChild(svgEl("line", { x1: X(i), y1: Y(0), x2: X(i), y2: Y(ymax) }));
+    for (let j = 0; j <= ymax + 1e-9; j += ystep) grid.appendChild(svgEl("line", { x1: X(0), y1: Y(j), x2: X(xmax), y2: Y(j) }));
+    svg.appendChild(grid);
+
+    // úsečky funkce
+    (spec.segments || []).forEach(s => {
+      const ln = svgEl("line", { x1: X(s.x1), y1: Y(s.y1), x2: X(s.x2), y2: Y(s.y2) });
+      ln.style.stroke = "var(--accent)"; ln.style.strokeWidth = "2.6";
+      if (s.dashed) ln.setAttribute("stroke-dasharray", "6 5");
+      svg.appendChild(ln);
+      if (s.label) {
+        const fr = (typeof s.labelAt === "number") ? s.labelAt : 0.5;
+        const lx = s.x1 + fr * (s.x2 - s.x1), ly = s.y1 + fr * (s.y2 - s.y1);
+        const dx = (typeof s.labelDx === "number") ? s.labelDx : 8;
+        const dy = (typeof s.labelDy === "number") ? s.labelDy : -8;
+        const t = svgEl("text", { x: X(lx) + dx, y: Y(ly) + dy, "font-size": "12.5" });
+        t.textContent = s.label; t.style.fill = "var(--accent)"; t.style.fontWeight = "600";
+        svg.appendChild(t);
+      }
+    });
+
+    // body (plné = patří do funkce, prázdné = limitní bod, který do funkce nepatří)
+    (spec.points || []).forEach(p => {
+      const c = svgEl("circle", { cx: X(p.x), cy: Y(p.y), r: 5.5 });
+      if (p.open) {
+        c.style.fill = "var(--bg-card)"; c.style.stroke = "var(--accent)"; c.style.strokeWidth = "2.4";
+      } else {
+        c.style.fill = "var(--accent)";
+      }
+      svg.appendChild(c);
+      if (p.label) {
+        const t = svgEl("text", {
+          x: X(p.x) + (typeof p.dx === "number" ? p.dx : 10),
+          y: Y(p.y) + (typeof p.dy === "number" ? p.dy : 4),
+          "font-size": "12.5",
+        });
+        t.textContent = p.label; t.style.fill = "var(--accent)"; t.style.fontWeight = "600";
+        svg.appendChild(t);
+      }
+    });
+
+    // osy
+    const ax = svgEl("g", { class: "axis" });
+    ax.appendChild(svgEl("line", { x1: X(0), y1: Y(0), x2: X(xmax) + 8, y2: Y(0) }));
+    ax.appendChild(svgEl("line", { x1: X(0), y1: Y(0), x2: X(0), y2: Y(ymax) - 8 }));
+    for (let i = 0; i <= xmax + 1e-9; i += xstep) {
+      const t = svgEl("text", { x: X(i), y: Y(0) + 17, "text-anchor": "middle" }); t.textContent = i; ax.appendChild(t);
+    }
+    for (let j = ystep; j <= ymax + 1e-9; j += ystep) {
+      const t = svgEl("text", { x: X(0) - 9, y: Y(j) + 4, "text-anchor": "end" }); t.textContent = j; ax.appendChild(t);
+    }
+    const lx = svgEl("text", { x: X(xmax) + 4, y: Y(0) - 8 }); lx.textContent = spec.xlabel || "x"; ax.appendChild(lx);
+    const ly = svgEl("text", { x: X(0) + 12, y: Y(ymax) - 6 }); ly.textContent = spec.ylabel || "f(x)"; ax.appendChild(ly);
+    svg.appendChild(ax);
+
+    el.appendChild(svg);
+    if (spec.caption) {
+      const c = document.createElement("div");
+      c.className = "viz-caption"; c.innerHTML = spec.caption;
+      el.appendChild(c);
+    }
+    return { svg };
+  }
+
   /* ---------- STEPPER ----------
      Krokování stavů nad grafem (pro algoritmy: Dijkstra, FF, AC-3…).
      spec = {
@@ -366,5 +455,5 @@
     return b;
   }
 
-  window.KOViz = { graph, lpRegion, stepper, icon };
+  window.KOViz = { graph, lpRegion, fnPlot, stepper, icon };
 })();

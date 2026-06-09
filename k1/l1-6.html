@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.6 · Fixed-charge (fixní náklady) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.6</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.6</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Fixed-charge (fixní náklady)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Nespojitá nákladová funkce $f(x) = 0$ pro $x = 0$, jinak $f(x) = A + Bx$ — v ILP zapsaná lineárně jako $A \cdot y + B \cdot x$ s vazbou $x \le M \cdot y$.
+  </div>
+
+  <p>Prerekvizita: <a href="l1-5.html#takeaways">[L1.5] Navázání binární na spojitou (aktivace)</a> — vazba $x \le M \cdot y$ je přesně to, co tady použijeme. V L1.5 jsme s ní platili pronájem stroje; teď z toho uděláme obecný vzorec.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Funkce, která „skáče“</h2>
+  <p><strong>Fixed-charge</strong> (fixní náklad, též fixed cost) je situace, kdy zaplatíš vstupní částku $A$ jednou — ať vyrobíš jeden kus, nebo tisíc — a k tomu $B$ za každý kus. Nákladová funkce tedy je:</p>
+  $$f(x) = \begin{cases} A + Bx, & \text{pokud } x > 0, \\ 0, & \text{pokud } x = 0. \end{cases}$$
+  <p>Pozor na to, co se děje v nule: $f(0) = 0$, ale „těsně nad nulou“ už náklad začíná na $A$. Funkce má v nule <strong>skok</strong> — je <strong>nespojitá</strong> (discontinuous). Konkrétně třeba pro $A = 7$, $B = 5$:</p>
+
+  <div class="viz" id="viz-fcn"></div>
+
+  <details class="try">
+    <summary>Zkus sám: proč nemůžu do ILP napsat prostě kritérium $\min z = A + Bx$?</summary>
+    <div class="inner">
+      <p>Protože by konstanta $A$ byla v ceně <em>vždy</em> — i pro $x = 0$. Výraz $A + Bx$ je rovnice té šikmé přímky, ale skutečná funkce v bodě $x = 0$ z přímky „vyskočí“ dolů na $0$. Lineární výraz v proměnné $x$ žádný skok udělat neumí: potřebujeme do modelu dostat informaci „platí se $A$, právě když $x &gt; 0$“ — a to je rozhodnutí ano/ne.</p>
+    </div>
+  </details>
+
+  <h2>Linearizace přes aktivační přepínač</h2>
+
+  <details class="try">
+    <summary>Zkus sám: vzpomeň si na <a href="l1-5.html#takeaways">[L1.5]</a>. Jakou proměnnou a jakou vazbu přidáš, aby kritérium platilo $A$ jen při $x &gt; 0$?</summary>
+    <div class="inner">
+      <p>Binární přepínač $y \in \{0,1\}$ s významem „$y = 1$ ⟺ $x &gt; 0$“, do kritéria člen $A \cdot y$ a vazbu z L1.5:</p>
+      $$\min z = A \cdot y + B \cdot x, \qquad x \le M \cdot y,$$
+      <p>kde $M$ je horní mez proměnné $x$. Pro $y = 0$ vazba vynucuje $x = 0$ a cena je $0$; pro $y = 1$ se vazba vypne a cena je $A + Bx$. Přesně kopie nespojité funkce $f$.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: zbývá podezřelý bod $x = 0,\ y = 1$ (cena $A$ za nic) — vazba $x \le My$ ho nezakazuje. Potřebuju kvůli němu přidat $x \ge y$?</summary>
+    <div class="inner">
+      <p>Při <strong>minimalizaci</strong> s $A &gt; 0$ ne. Bod $x = 0, y = 1$ je sice přípustný, ale stojí $A$, zatímco $x = 0, y = 0$ stojí $0$ a všechna ostatní omezení splňuje stejně — solver tedy dražší variantu nikdy nevybere. Je to zrcadlový argument k L1.5 (tam kritérium maximalizovalo a $y$ jen ubíralo). Jakmile ale $y$ v modelu dělá ještě něco jiného, než že stojí peníze, ekvivalenci $y = 1 \Leftrightarrow x \ge 1$ musíš vynutit i druhou nerovností $x \ge y$ — viz warning box v <a href="l1-5.html">[L1.5]</a>.</p>
+    </div>
+  </details>
+
+  <p>Podívej se, jakou množinu dvojic (množství, cena) linearizovaný model $z = 7y + 5x$, $x \le M y$ vlastně nabízí:</p>
+
+  <div class="viz" id="viz-lin"></div>
+
+  <div class="box warning">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Klasický chyták u zkoušky</div>
+    <p>Fixní náklad (pronájem stroje, pořizovací cena, „expenses that are the same for 1 piece as well as for 1000 pieces“) se v zadání objeví jako nenápadná věta — a láká dvě chyby: (1) vynásobit ho množstvím ($f_i \cdot x_i$ je špatně — fixní náklad se neplatí za kus), (2) dát $A \cdot y$ do kritéria, ale <em>zapomenout vazbu</em> $x \le M y$ — pak solver vyrábí a fixní náklad nezaplatí. Kritérium samo žádnou logiku nevynutí; vazba je povinná.</p>
+  </div>
+
+  <h2>Recept (k zapamatování)</h2>
+  <p>Nespojitý náklad $f(x) = 0$ pro $x = 0$, jinak $A + Bx$, kde $x \in \langle 0, M \rangle$:</p>
+  $$\begin{aligned} \text{cena} &= A \cdot y + B \cdot x \\ x & \le M \cdot y \\ y & \in \{0,1\} \end{aligned}$$
+  <p>Při minimalizaci ceny (resp. maximalizaci zisku, ze kterého se cena odečítá) s $A &gt; 0$ není potřeba nic dalšího. Stejný vzorec funguje pro každý produkt zvlášť: $\sum_i f_i y_i$ v kritériu + $x_i \le M y_i$ pro každé $i$ — to je přesně model Cloth Production z <a href="l1-5.html#takeaways">[L1.5]</a>.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.6</div>
+    <ul>
+      <li><strong>Fixed-charge funkce:</strong> $f(x) = 0$ pro $x = 0$, jinak $f(x) = A + Bx$ — nespojitá (skok o $A$ v nule), takže ji nelze napsat jedním lineárním výrazem v $x$.</li>
+      <li><strong>Linearizace:</strong> binární aktivace $y$ z <a href="l1-5.html#takeaways">[L1.5]</a>: náklad $= A \cdot y + B \cdot x$ s vazbou $x \le M \cdot y$ ($M$ = horní mez $x$).</li>
+      <li>Při minimalizaci nákladu ($A &gt; 0$) bod $x = 0, y = 1$ optimum nikdy nevyhraje — nerovnost $x \ge y$ lze vynechat. Vazbu $x \le My$ vynechat NIKDY nejde.</li>
+      <li><strong>Fixní náklady (pronájem stroje, pořízení) = klasický chyták:</strong> neplatí se za kus ($f_i x_i$ je špatně) a bez vazby je solver „nezaplatí“.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-discontinuous">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Minimization of discontinuous functions</strong>
+      <span class="task-src">zdroj: zkouška KO 21.06.2021</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Consider the following mathematical model of two variables $x_1, x_2$.</p>
+        $$\text{Minimize } z = f(x_1)$$
+        <p>subject to the restrictions</p>
+        <ol>
+          <li>$|x_1 - x_2| = 0$ or $6$.</li>
+          <li>$0 \le x_1 \le 20,\ 0 \le x_2 \le 20$.</li>
+          <li>$x_{1,2} \in \mathbb{Z}_0^+$</li>
+        </ol>
+        <p>where</p>
+        $$f(x_1) = \begin{cases} 7 + 5x_1, & \text{if } x_1 > 0. \\ 0, & \text{if } x_1 = 0. \end{cases}$$
+        <p>Formulate this problem as an ILP problem.”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Dvě celočíselné proměnné v rozsahu $0..20$. Minimalizuje se nespojitá fixed-charge funkce $f(x_1)$ s $A = 7$, $B = 5$ (přesně funkce z výkladu). Navíc omezení, že $|x_1 - x_2|$ je buď $0$, nebo $6$ — tedy rozdíl $x_1 - x_2$ smí nabývat jen hodnot z množiny $\{-6, 0, 6\}$. Úkol: přepsat celé na čisté ILP (žádná absolutní hodnota, žádné „nebo“, žádný skok).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — linearizace $f(x_1)$ přes $7y + 5x_1$, $x_1 \le My$.</li>
+        <li><a href="l1-4.html#takeaways">[L1.4] big-M: disjunkce omezení</a> — „rozdíl je 0 NEBO ±6“ je disjunkce.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a>.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Rozděl si model na dvě nezávislé části. <em>Kritérium:</em> $f(x_1)$ je přesně fixed-charge funkce — aplikuj recept z této lekce; jaké $M$ dává mez $x_1 \le 20$? <em>Omezení 1:</em> pozor, $|x_1 - x_2| = 0$ or $6$ NEjsou jen dva případy! Vypiš si, jaké hodnoty smí mít rozdíl $d = x_1 - x_2$ bez absolutní hodnoty. Pak: umíš výběr jedné hodnoty z konečné množiny napsat lineárně přes binární přepínače (výčet hodnot, srov. slide 36 přednášky ILP)? Alternativně jde každý případ zapsat dvojicí big-M nerovností à la <a href="l1-4.html#takeaways">[L1.4]</a> s „právě jeden případ zapnutý“.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Kritérium (fixed-charge):</strong> zaveď $y \in \{0,1\}$, $y = 1$ ⟺ $x_1 &gt; 0$. Protože $x_1 \le 20$, stačí $M = 20$:</p>
+          $$\min z = 7y + 5x_1, \qquad x_1 \le 20\,y.$$
+          <p>Při minimalizaci a $7 &gt; 0$ není potřeba $x_1 \ge y$: kombinaci $x_1 = 0, y = 1$ (cena 7 za nic) optimum nikdy nezvolí.</p>
+          <p><strong>Omezení $|x_1 - x_2| = 0$ or $6$:</strong> rozdíl $d = x_1 - x_2$ smí být $-6$, $0$, nebo $+6$ (absolutní hodnota $6$ pokrývá OBA směry!). Nejčistší je výčet hodnot přes dva binární přepínače $s^+, s^- \in \{0,1\}$:</p>
+          $$x_1 - x_2 = 6s^+ - 6s^-, \qquad s^+ + s^- \le 1.$$
+          <p>Kombinace $(s^+, s^-) = (0,0)$ dává rozdíl $0$, $(1,0)$ dává $+6$, $(0,1)$ dává $-6$; kombinaci $(1,1)$ zakazuje $s^+ + s^- \le 1$ (dala by sice taky rozdíl 0, ale vyloučit ji je čistší). Celý model:</p>
+          $$\begin{aligned} \min z = \quad & 7y + 5x_1 \\ \text{s.t.} \quad & x_1 \le 20\,y \\ & x_1 - x_2 = 6s^+ - 6s^- \\ & s^+ + s^- \le 1 \\ & 0 \le x_1 \le 20, \;\; 0 \le x_2 \le 20 \\ & x_1, x_2 \in \mathbb{Z}_0^+, \;\; y, s^+, s^- \in \{0,1\} \end{aligned}$$
+          <p><em>Ekvivalentní cesta přes big-M:</em> tři případy $d = v_k$, $v \in \{-6, 0, 6\}$, každý jako dvojice nerovností $v_k - M(1 - s_k) \le x_1 - x_2 \le v_k + M(1 - s_k)$ a $\sum_k s_k = 1$ — funguje stejně, jen je delší.</p>
+          <p><em>Poučení z reálné zkoušky:</em> dochované studentské řešení z termínu 21.06.2021 pokrylo jen případy $d = 0$ a $d = +6$ jednou binární $Y_2$ — a hodnotitel červeně připsal, že „absolutní hodnota pro 6 vyžaduje“ i záporný směr. Na $d = -6$ se zapomíná nejčastěji.</p>
+          <p><em>Sanity check:</em> optimum modelu je $x_1 = 0$ (pak $y = 0$, $z = 0$) s libovolným $x_2 \in \{0, 6\}$ — skok funkce je správně „vypnutý“.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-production5">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Production Planning — 5 products</strong>
+      <span class="task-src">zdroj: teoreticky_test_final.md</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p><em>“We remind you that your formulation must be linear, i.e., no multiplication of variables, no implications, no logical expressions, etc. All non-linearities you might require, need to be linearized so that they can be written as linear expressions.”</em></p>
+        <p>“A company plans to produce five products. Formulate as an ILP problem. Given the following constraints, find optimal volume of each product while maximizing the profit:</p>
+        <ol>
+          <li>$p_i$ is the number of hours needed for one piece of product $i$</li>
+          <li>$P$ is the company labor capacity in hours</li>
+          <li>the volume of each product is at most 1000 pieces</li>
+          <li>the volume of product 1 is an even number</li>
+          <li>at least one of the following constraints holds:
+            <ul>
+              <li>the volume of product 2 plus product 3 is at least 100</li>
+              <li>the volume of product 4 plus product 5 is at most 200</li>
+            </ul>
+          </li>
+          <li>the income generated by one piece of product $i$ is given by $v_i$</li>
+          <li>fixed costs (i.e. expenses that are the same for 1 piece as well as for 1000 pieces) needed to hire the machines for product $i$ are given by $f_i$</li>
+          <li>labor cost for one piece of product $i$ is given by $c_i$</li>
+          <li>profit is given as the sum of the incomes minus the sum of the labor and fixed costs”</li>
+        </ol>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Výrobní plánování pěti produktů: $x_i$ = objem produktu $i$, kapacita práce $P$, mez 1000 kusů. Tři „triky“ v jednom: <strong>fixní náklady</strong> $f_i$ na pronájem strojů (tato lekce), <strong>sudost</strong> objemu produktu 1, a <strong>disjunkce</strong> „aspoň jedno ze dvou omezení platí“ (<a href="l1-4.html#takeaways">[L1.4]</a>). Zisk = příjmy − (mzdové + fixní náklady).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — fixní náklady $f_i y_i$ + vazba $x_i \le 1000\,y_i$.</li>
+        <li><a href="l1-4.html#takeaways">[L1.4] big-M: disjunkce omezení</a> — „at least one of the following constraints holds“.</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a> — kritérium a kapacita.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Projdi podmínky po jedné a každou přelož. Kritérium poskládej z bodů 6–9: co se násobí $x_i$ a co binárkou $y_i$? (Pozor na chyták z výkladu: $f_i$ se NEnásobí $x_i$.) Jakou hodnotu $M$ použiješ ve vazbě fixních nákladů, když bod 3 dává $x_i \le 1000$? Sudost: jak vynutíš „$x_1$ je sudé“ jedinou rovnicí s pomocnou celočíselnou proměnnou? Disjunkce: dvě omezení, aspoň jedno platí — kolik binárek a jaké big-M relaxace ($\ge$ vs. $\le$ se uvolňují opačným směrem!)? Jak velké musí být $M$, když $x_i \le 1000$?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Proměnné:</strong> $x_i \in \mathbb{Z}_0^+$ = objem produktu $i$ ($i = 1..5$); $y_i \in \{0,1\}$ = stroj na produkt $i$ je pronajatý; $u \in \mathbb{Z}_0^+$ pomocná pro sudost; $w_1, w_2 \in \{0,1\}$ přepínače disjunkce.</p>
+          <p><strong>Kritérium (bod 9):</strong> zisk = příjmy − mzdové − fixní náklady:</p>
+          $$\max z = \sum_{i=1}^{5} (v_i - c_i)\,x_i - \sum_{i=1}^{5} f_i\,y_i$$
+          <p><strong>Omezení:</strong></p>
+          $$\begin{aligned} & \sum_{i=1}^{5} p_i x_i \le P && \text{(body 1–2: kapacita práce)} \\ & x_i \le 1000 && \text{(bod 3)} \\ & x_i \le 1000\,y_i && \text{(bod 7: fixed-charge vazba, } M = 1000\text{)} \\ & x_1 = 2u && \text{(bod 4: sudost)} \\ & x_2 + x_3 \ge 100 - M w_1 && \text{(bod 5a, relaxace dolů)} \\ & x_4 + x_5 \le 200 + M w_2 && \text{(bod 5b, relaxace nahoru)} \\ & w_1 + w_2 \le 1 && \text{(aspoň jedno omezení platí)} \\ & x_i, u \in \mathbb{Z}_0^+, \;\; y_i, w_1, w_2 \in \{0,1\} \end{aligned}$$
+          <p><strong>Komentáře:</strong></p>
+          <ul>
+            <li><em>Fixní náklady:</em> recept této lekce s $M = 1000$ (mez z bodu 3). Vazba $x_i \le 1000 y_i$ vynucuje $x_i &gt; 0 \Rightarrow y_i = 1$; opačný směr hlídá kritérium ($-f_i y_i$ při maximalizaci tlačí $y_i$ na 0, takže zbytečný pronájem optimum nevybere) — proto $x_i \ge y_i$ není nutné.</li>
+            <li><em>Sudost:</em> $x_1 = 2u$ s celočíselnou $u \ge 0$ — jediný lineární zápis bez logiky.</li>
+            <li><em>Disjunkce:</em> $w_k = 1$ znamená „omezení $k$ smí být porušeno“; $w_1 + w_2 \le 1$ nechá porušit nejvýš jedno. Omezení typu $\ge$ se uvolňuje odečtením $Mw$, typu $\le$ přičtením $Mw$. Velikost: pro 5a stačí $M \ge 100$, pro 5b musí $M \ge 1000 + 1000 - 200 = 1800$ (největší možné $x_4 + x_5$ minus 200) — bezpečně třeba $M = 2000$.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.6">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-5.html"><span class="dir">← Předchozí</span> L1.5 · Navázání binární na spojitou (aktivace)</a>
+    <a class="next" href="l1-7.html"><span class="dir">Další →</span> L1.7 · Po částech konstantní funkce přes intervaly</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Nespojitá fixed-charge funkce f(x) s A = 7, B = 5 (čísla z úlohy T01, rozsah zmenšen na x ≤ 4 pro čitelnost).
+KOViz.fnPlot(document.getElementById('viz-fcn'), {
+  xmax: 4, ymax: 30, xstep: 1, ystep: 5,
+  xlabel: 'x', ylabel: 'f(x)',
+  segments: [{x1: 0, y1: 7, x2: 4, y2: 27, label: 'A + Bx = 7 + 5x', labelAt: 0.5, labelDx: 10, labelDy: 8}],
+  points: [
+    {x: 0, y: 0, label: 'f(0) = 0', dx: 12, dy: -6},
+    {x: 0, y: 7, open: true, label: 'A = 7 — skok: bod do funkce NEPATŘÍ', dx: 14, dy: 22},
+  ],
+  caption: 'Fixed-charge funkce pro A = 7, B = 5: v nule platíš 0 (plný bod), pro x > 0 začínáš na A = 7 a rosteš se sklonem B = 5. Prázdné kolečko (0, 7) ukazuje skok — tahle hodnota se v x = 0 NEplatí. Jedním lineárním výrazem v x tohle napsat nejde.'
+});
+
+// Co nabízí linearizace z = 7y + 5x, x ≤ My: bod (0,0) pro y = 0 a celá úsečka pro y = 1.
+KOViz.fnPlot(document.getElementById('viz-lin'), {
+  xmax: 4, ymax: 30, xstep: 1, ystep: 5,
+  xlabel: 'x', ylabel: 'z = 7y + 5x',
+  segments: [{x1: 0, y1: 7, x2: 4, y2: 27, label: 'y = 1: z = 7 + 5x', labelAt: 0.5, labelDx: 10, labelDy: 8}],
+  points: [
+    {x: 0, y: 0, label: 'y = 0 (vazba vynutí x = 0): z = 0', dx: 12, dy: -6},
+    {x: 0, y: 7, label: 'y = 1, x = 0: přípustné, ale dražší — min ho nevybere', dx: 14, dy: 22},
+  ],
+  caption: 'Dvojice (x, z) dosažitelné modelem z = 7y + 5x s vazbou x ≤ My. Pro y = 0 zbývá jediný bod (0, 0); pro y = 1 celá úsečka VČETNĚ plného bodu (0, 7) — „platím 7 za nic“. Minimalizace ale tenhle bod nikdy nezvolí (bod (0,0) je levnější), takže model kopíruje f přesně tam, kde na tom záleží.'
+});
+</script>
+</body>
+</html>

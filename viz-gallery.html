@@ -34,6 +34,9 @@
   <h2>4b · LP region (binární čtverec, čára přes rohy okna)</h2>
   <div class="viz" id="g4b"></div>
 
+  <h2>4c · Function plot (nespojitá fixed-charge funkce)</h2>
+  <div class="viz" id="g4c"></div>
+
   <h2>5 · Stepper (krokování algoritmu)</h2>
   <div class="viz" id="g5"></div>
 
@@ -127,6 +130,18 @@ KOViz.lpRegion(document.getElementById('g4b'), {
     {a:-1, b:-1, c:-1, label:'x₁+x₂≥1', labelAt: 0.75, labelDx: 10, labelDy: 12},
   ],
   caption: 'Ukázka 4b: XOR na binárním čtverci — obě hranice leží na čáře procházející rohy (0,1) a (1,0); čára i popisky se musí vykreslit (dedupe duplicitních průsečíků). Druhý popisek odsazen od čáry přes labelDx/labelDy (px offset, default +6/−6 — nutné, když je čára diagonální a defaultní offset by ji nechal text přeškrtnout).'
+});
+
+// 4c — function plot: nespojitá funkce f(x) = 0 pro x=0, 7+5x pro x>0
+KOViz.fnPlot(document.getElementById('g4c'), {
+  xmax: 4, ymax: 30, xstep: 1, ystep: 5,
+  xlabel: 'x', ylabel: 'f(x)',
+  segments: [{x1: 0, y1: 7, x2: 4, y2: 27, label: 'f(x) = 7 + 5x', labelAt: 0.55, labelDx: 10, labelDy: 6}],
+  points: [
+    {x: 0, y: 0, label: 'f(0) = 0', dx: 12, dy: -8},
+    {x: 0, y: 7, open: true, label: 'limitní bod — do funkce nepatří', dx: 14, dy: 22},
+  ],
+  caption: 'Ukázka 4c: KOViz.fnPlot — po částech lineární nespojitá funkce; prázdné kolečko = bod, který do funkce nepatří, plné = patří.'
 });
 
 // 5 — stepper (mini Dijkstra na 4 uzlech)
