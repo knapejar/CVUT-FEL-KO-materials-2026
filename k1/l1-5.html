@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.5 · Navázání binární na spojitou/celočíselnou (aktivace) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.5</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.5</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Navázání binární na spojitou/celočíselnou (aktivace)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Vazba „přepínač $y_i$ je zapnutý právě tehdy, když proměnnou $x_i$ opravdu používám“ ($y_i = 0 \Leftrightarrow x_i = 0$) — zapsaná jako $x_i \le M \cdot y_i$ (a případně $x_i \ge y_i$).
+  </div>
+
+  <p>Prerekvizita: <a href="l1-4.html#takeaways">[L1.4] big-M: disjunkce omezení</a> — vypínání omezení členem $M \cdot y$ tu uvidíš v nejčastější praktické podobě. Hodí se i <a href="../k0/l0-8.html">[L0.8] Binární proměnná</a>.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Výchozí model: Cloth Production</h2>
+  <p>Slide 33 přednášky ILP staví výrobní model: šijeme tři produkty (T-shirt, shirt, robe), $x_i \in \mathbb{Z}^+_0$ je vyrobené množství produktu $i$. Po odečtení nákladů na práci a materiál od příjmu vychází zisk na kus $6$, $4$ a $7$ (v tisících CZK) a kapacity dávají dvě omezení:</p>
+  $$\begin{aligned} \max z = \quad & 6x_1 + 4x_2 + 7x_3 \\ \text{s.t.} \quad & 3x_1 + 2x_2 + 6x_3 \le 160 \quad \text{(labor)} \\ & 4x_1 + 3x_2 + 4x_3 \le 130 \quad \text{(material)} \\ & x_{i \in 1 \cdots 3} \in \mathbb{Z}^+_0 \end{aligned}$$
+  <p>To je klasické ILP, jaké už umíš z <a href="l1-1.html#takeaways">[L1.1]</a>. Teď přijde nová podmínka (slide 34): <strong>the fixed cost has to be covered to rent the machine</strong> — na každý produkt potřebuješ pronajmout stroj a pronájem stojí fixní částku (200&nbsp;000, 150&nbsp;000 a 100&nbsp;000 CZK), <em>ať vyrobíš jeden kus, nebo sto</em>.</p>
+
+  <details class="try">
+    <summary>Zkus sám: jaké proměnné a jaký člen v kritériu potřebuješ, aby model pronájem „zaplatil“?</summary>
+    <div class="inner">
+      <p>Pronájem je rozhodnutí ano/ne — tedy <strong>binary variable</strong> (binární proměnná) $y_i \in \{0,1\}$: $y_i = 1$, když je stroj na produkt $i$ pronajatý. Kritérium se změní na (částky v tisících, slide 34):</p>
+      $$\max z = 6x_1 + 4x_2 + 7x_3 - 200y_1 - 150y_2 - 100y_3$$
+    </div>
+  </details>
+
+  <h2>V čem je háček: solver podvádí</h2>
+
+  <details class="try">
+    <summary>Zkus sám: nech model přesně takhle — kritérium s $-200y_1 - 150y_2 - 100y_3$, žádné další omezení. Co udělá solver s $y$? A co to znamená pro řešení?</summary>
+    <div class="inner">
+      <p>Solver maximalizuje, takže záporné členy chce co nejmenší — nastaví $y_1 = y_2 = y_3 = 0$ a fixní náklady prostě <em>nezaplatí</em>, přitom klidně vyrábí $x_i &gt; 0$. Proměnné $x_i$ a $y_i$ spolu zatím <strong>nijak nesouvisí</strong> — v modelu chybí omezení, které by je svázalo. Kritérium samo žádnou logiku nevynutí.</p>
+    </div>
+  </details>
+
+  <p>Potřebujeme tedy do soustavy přidat vazbu (slide 35): stroj $i$ je pronajatý, právě když se produkt $i$ vyrábí. Formálně <strong>join binary $y_i$ with integer $x_i$</strong> tak, aby</p>
+  <ul>
+    <li>$y_i = 0$ <em>iff</em> $x_i = 0$,</li>
+    <li>$y_i = 1$ <em>iff</em> $x_i \ge 1$.</li>
+  </ul>
+
+  <h2>Vazba $x_i \le M \cdot y_i$</h2>
+
+  <details class="try">
+    <summary>Zkus sám: víš, že $x_i$ nikdy nepřekročí 100 (rozsah $x_i \in \langle 0, 100 \rangle$). Vymysli JEDNU lineární nerovnost s $x_i$ a $y_i$, která zakáže „vyrábím, ale neplatím“ (tedy $x_i \ge 1$ a zároveň $y_i = 0$).</summary>
+    <div class="inner">
+      <p>$$x_i \le 100 \cdot y_i$$</p>
+      <p>Pro $y_i = 0$ se redukuje na $x_i \le 0$, tedy $x_i = 0$ — bez zaplaceného pronájmu se vyrábět nedá. Pro $y_i = 1$ dává $x_i \le 100$, což $x_i$ neomezuje nad rámec jeho rozsahu — omezení je <em>vypnuté</em>. Poznáváš vzor z <a href="l1-4.html#takeaways">[L1.4]</a>? Je to přesně big-M konstrukce s $M = 100$ = horní mez proměnné: člen $M \cdot y_i$ na pravé straně omezení „$x_i \le 0$“ ho podle hodnoty přepínače vypíná.</p>
+    </div>
+  </details>
+
+  <p>Podívej se, co vazba $x \le M y$ dělá geometricky (pro názornost $M = 10$). LP relaxace (šedá oblast, $y$ spojité) je trojúhelník — ale celočíselnost $y \in \{0,1\}$ z něj nechá jen dva vodorovné „řezy“:</p>
+
+  <div class="viz" id="viz-link"></div>
+
+  <details class="try">
+    <summary>Zkus sám: nerovnost $x_i \le 100 y_i$ pokrývá směr „vyrábím ⟹ platím“. Pokrývá i obrácený směr „$y_i = 1$ ⟹ opravdu vyrábím“? Najdi přípustný bod, který to porušuje.</summary>
+    <div class="inner">
+      <p>Nepokrývá: bod $x_i = 0$, $y_i = 1$ nerovnost $0 \le 100$ splňuje — model dovoluje platit pronájem stroje, který nic nevyrábí (na obrázku bod $(0, 1)$). Druhý směr vynucuje nerovnost</p>
+      <p>$$x_i \ge y_i,$$</p>
+      <p>která pro $y_i = 1$ dává $x_i \ge 1$ (a pro $y_i = 0$ neříká nic). Slide 35 ale dodává: <em>„we can omit this inequality due to the objective function ($x_i = 0, y_i = 1$ will not be chosen because we want $x_i$ to be maximal and $y_i$ minimal)“</em> — bod $(0,1)$ sice přípustný je, ale optimum to nikdy nebude, protože $y_i$ v kritériu jen ubírá (a stačí ho vypnout, nic jiného se nezmění).</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-link-both"></div>
+
+  <div class="box warning">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Kdy $x \ge y$ NEsmíš vynechat</div>
+    <p>Vynechání funguje jen tehdy, když kritérium samo „tlačí“ $y$ k nule (zapnutí jen stojí peníze). Jakmile $y$ v modelu něco <em>umožňuje nebo vydělává</em> — odemyká jiné omezení, vystupuje v dalším vztahu, nebo se na „$x &gt; 0$“ ptá zadání přímo — musí ekvivalence platit ze soustavy, ne z dobré vůle solveru. Pak piš obě nerovnosti: $x \le M y$ <strong>a</strong> $x \ge y$. U <em>spojitého</em> $x$ navíc „$x &gt; 0$“ ostrou nerovností zapsat nejde — vynucuje se $x \ge \varepsilon \cdot y$ s malou konstantou $\varepsilon &gt; 0$ (u celočíselného $x$ je přirozeně $\varepsilon = 1$).</p>
+  </div>
+
+  <h2>Shrnutí konstrukce</h2>
+  <p>Pro proměnnou $x \in \langle 0, M \rangle$ (spojitou i celočíselnou — $M$ je horní mez $x$) a aktivační přepínač $y \in \{0,1\}$:</p>
+  $$\begin{aligned} x & \le M \cdot y && \text{„používám } x \Rightarrow y = 1\text{“} \\ x & \ge y \;\; (\text{resp. } x \ge \varepsilon y) && \text{„} y = 1 \Rightarrow x \ge 1 \text{ (resp. } x \ge \varepsilon\text{)“} \end{aligned}$$
+  <p>Druhou nerovnost lze vynechat, když ji nahradí tlak kritéria. Celý model Cloth Production s pronájmy strojů pak je:</p>
+  $$\begin{aligned} \max z = \quad & 6x_1 + 4x_2 + 7x_3 - 200y_1 - 150y_2 - 100y_3 \\ \text{s.t.} \quad & 3x_1 + 2x_2 + 6x_3 \le 160 \\ & 4x_1 + 3x_2 + 4x_3 \le 130 \\ & x_i \le 100 \cdot y_i && i \in 1 \cdots 3 \\ & x_i \in \mathbb{Z}^+_0, \;\; y_i \in \{0,1\} && i \in 1 \cdots 3 \end{aligned}$$
+  <p>Tahle vazba je přesně to, co příští lekce <a href="l1-6.html">[L1.6] Fixed-charge (fixní náklady)</a> povýší na obecný vzorec pro nespojité nákladové funkce — a u ústní zkoušky je to oblíbené téma.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.5</div>
+    <ul>
+      <li><strong>Aktivace:</strong> „pokud používám $x$ ($x &gt; 0$), zapni přepínač $y$“ = $x \le M \cdot y$, kde $M$ je horní mez $x$. Pro $y = 0$ vynucuje $x = 0$, pro $y = 1$ nic neomezuje.</li>
+      <li><strong>Obrácený směr</strong> „$y = 1$ ⟹ vynuť $x &gt; 0$“: $x \ge y$ (celočíselné $x$), u spojitého $x \ge \varepsilon \cdot y$.</li>
+      <li>Nerovnost $x \ge y$ lze <strong>vynechat</strong>, jen když kritérium samo tlačí $y$ na 0 (zapnutí pouze stojí peníze) — slide 35: bod $x = 0, y = 1$ „will not be chosen“. Jinak ji piš.</li>
+      <li>Je to speciální případ big-M z <a href="l1-4.html#takeaways">[L1.4]</a>: $x \le 0 + M y$ = vypínatelné omezení „$x = 0$“.</li>
+      <li>Tahle vazba je základ <strong>fixed-charge</strong> (fixních nákladů) → <a href="l1-6.html">[L1.6]</a>. <em>(Téma ústní zkoušky.)</em></li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-cloth-production">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Cloth Production — relationship between binary and integer variable (slides 33–35)</strong>
+      <span class="task-src">zdroj: prezentace/02_ILP.md, slide 33–35</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Labor demand, material demand and income per piece are:</p>
+        <table>
+          <tr><th>product</th><th>T-shirt</th><th>shirt</th><th>robe</th><th>capacity</th><th>unit cost [CZK]</th></tr>
+          <tr><td>labor [person-hour]</td><td>3</td><td>2</td><td>6</td><td>160</td><td>1000</td></tr>
+          <tr><td>material [meter]</td><td>4</td><td>3</td><td>4</td><td>130</td><td>200</td></tr>
+          <tr><td>income [1000 CZK]</td><td>9.8</td><td>6.6</td><td>13.8</td><td></td><td></td></tr>
+        </table>
+        <p>Goal is to maximize the profit (i.e. total income minus total expenses). Constraints: labor is on demand with maximum capacity of 160 person-hours; material capacity is 130 meters.</p>
+        <p>Another constraint: the fixed cost has to be covered to rent the machine</p>
+        <table>
+          <tr><th>product</th><th>T-shirt</th><th>shirt</th><th>trousers</th></tr>
+          <tr><td>machine cost</td><td>200 000</td><td>150 000</td><td>100 000</td></tr>
+        </table>
+        <p>Machine $i$ is rented when product $i$ is produced. We join binary $y_i$ with integer $x_i$ such that: $y_i = 0$ iff $x_i = 0$; $y_i = 1$ iff $x_i \ge 1$. For range $x_i \in \langle 0, 100 \rangle$ write these relations as inequalities.”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Výrobní plánování tří produktů: $x_i$ = počet kusů, zisk na kus po odečtení práce a materiálu, dvě kapacitní omezení. Navíc fixní pronájem stroje za každý <em>vyráběný</em> produkt — sestavit celý ILP model včetně vazby $x_i \leftrightarrow y_i$. (Drobnost zdroje: tabulka strojů uvádí třetí produkt jako „trousers“, výrobní tabulka „robe“ — jde o tentýž třetí produkt, slidy se v názvu rozcházejí.)</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — vazba $x_i \le M y_i$ a kdy lze vynechat $x_i \ge y_i$.</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a> — sestavení kritéria a kapacit.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a> — význam $y_i$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Nejdřív čistý model bez strojů: zisk na kus = income − labor·1000 − material·200 (pozor na jednotky, vše převeď na tisíce CZK). Pak: v jakých jednotkách přidáš pronájmy do kritéria? Jaká nerovnost zařídí, že $y_i = 0$ vynucuje $x_i = 0$? Potřebuješ tady i $x_i \ge y_i$, nebo ji za tebe odvede kritérium — a proč přesně?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Zisk na kus</strong> (v 1000 CZK; práce 1 person-hour = 1000 CZK = 1, materiál 1 m = 200 CZK = 0.2): $$\begin{aligned} \text{T-shirt:} \;& 9.8 - 3 \cdot 1 - 4 \cdot 0.2 = 6, \\ \text{shirt:} \;& 6.6 - 2 \cdot 1 - 3 \cdot 0.2 = 4, \\ \text{robe:} \;& 13.8 - 6 \cdot 1 - 4 \cdot 0.2 = 7. \end{aligned}$$</p>
+          <p><strong>Proměnné:</strong> $x_i \in \mathbb{Z}^+_0$ = množství produktu $i$; $y_i \in \{0,1\}$, $y_i = 1$ když je stroj na produkt $i$ pronajatý. Pronájmy v tisících: 200, 150, 100. Celý model:</p>
+          $$\begin{aligned} \max z = \quad & 6x_1 + 4x_2 + 7x_3 - 200y_1 - 150y_2 - 100y_3 \\ \text{s.t.} \quad & 3x_1 + 2x_2 + 6x_3 \le 160 \\ & 4x_1 + 3x_2 + 4x_3 \le 130 \\ & x_i \le 100 \cdot y_i && i \in 1 \cdots 3 \\ & x_i \in \mathbb{Z}^+_0, \;\; y_i \in \{0,1\} && i \in 1 \cdots 3 \end{aligned}$$
+          <p><strong>Vazba:</strong> $x_i \le 100 y_i$ (s $M = 100$ z rozsahu $x_i \in \langle 0, 100 \rangle$) vynucuje „$x_i \ge 1 \Rightarrow y_i = 1$“. Druhá nerovnost $x_i \ge y_i$ by vynucovala „$y_i = 1 \Rightarrow x_i \ge 1$“, ale dle slidu 35 ji lze vynechat: kombinace $x_i = 0, y_i = 1$ jen zhoršuje kritérium (platíš pronájem za nic), takže ji optimum nikdy nezvolí — „we want $x_i$ to be maximal and $y_i$ minimal“.</p>
+          <p><em>Kontrola kapacit vs. $M$:</em> z materiálu $4x_1 \le 130$ plyne $x_1 \le 32$, takže $M = 100$ je bezpečně nad skutečným maximem — vypnutá vazba nikdy neořezává přípustná řešení (pravidlo volby $M$ z <a href="l1-4.html#takeaways">[L1.4]</a>).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.5">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-4.html"><span class="dir">← Předchozí</span> L1.4 · big-M: disjunkce omezení</a>
+    <a class="next" href="l1-6.html"><span class="dir">Další →</span> L1.6 · Fixed-charge (fixní náklady)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Vazba x ≤ M·y v rovině (x, y), M = 10: LP relaxace je trojúhelník,
+// celočíselné y nechá jen řezy y = 0 (bod x = 0) a y = 1 (celý interval 0..10).
+KOViz.lpRegion(document.getElementById('viz-link'), {
+  xmax: 10, ymax: 1,
+  xlabel: 'x', ylabel: 'y',
+  integer: true,
+  constraints: [
+    {a: 1, b: -10, c: 0, label: 'x ≤ 10·y', labelAt: 0.62, labelDx: 14, labelDy: 18},
+    {a: 0, b: 1, c: 1},
+  ],
+  caption: 'Vazba x ≤ M·y pro M = 10. Šedý trojúhelník = LP relaxace (y spojité). Celočíselnost y ∈ {0,1} nechá jen zvýrazněné mřížkové body: řádek y = 0 obsahuje JEDINÝ bod x = 0 („nepoužívám, neplatím“), řádek y = 1 celý rozsah x ∈ 0..10 („platím, smím vyrábět“).'
+});
+
+// Přidání x ≥ y: zmizí bod (0, 1) — „platím za nic“.
+KOViz.lpRegion(document.getElementById('viz-link-both'), {
+  xmax: 10, ymax: 1,
+  xlabel: 'x', ylabel: 'y',
+  integer: true,
+  constraints: [
+    {a: 1, b: -10, c: 0, label: 'x ≤ 10·y', labelAt: 0.62, labelDx: 14, labelDy: 18},
+    {a: -1, b: 1, c: 0, label: 'x ≥ y', labelAt: 0.85, labelDx: -40, labelDy: -6},
+    {a: 0, b: 1, c: 1},
+  ],
+  caption: 'Po přidání x ≥ y bod (0, 1) z přípustné množiny zmizel: y = 1 nyní VYNUCUJE x ≥ 1. Zbývají přesně body odpovídající ekvivalenci y = 0 ⟺ x = 0.'
+});
+</script>
+</body>
+</html>
