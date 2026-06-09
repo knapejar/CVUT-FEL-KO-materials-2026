@@ -60,7 +60,7 @@
     <li>$\sum_i x_i \le k$ — „vyber <strong>nejvýše</strong> $k$“,</li>
     <li>$\sum_i x_i \ge k$ — „vyber <strong>aspoň</strong> $k$“.</li>
   </ul>
-  <p>A negace zadarmo: když $x_i$ znamená „vybráno“, pak $1 - x_i$ znamená „nevybráno“. Slide 5 přesně takhle zapisuje druhou polovinu rozdělení: hodnota nevybraných je $\sum_i (1 - x_i)\, p_i$.</p>
+  <p>A negace zadarmo: když $x_i$ znamená „vybráno“, pak $1 - x_i$ znamená „nevybráno“. Slide 7 (ILP1c, optimalizační verze 2-Partition) přesně takhle zapisuje druhou polovinu rozdělení: hodnota nevybraných je $\sum_i (1 - x_i)\, p_i$.</p>
 
   <div class="viz" id="viz-binsquare"></div>
 
@@ -96,7 +96,7 @@
       <div class="assignment">
         <span class="lbl">Assignment (original, EN)</span>
         <p>“2-Partition Problem. <strong>Instance:</strong> Number of banknotes $n \in \mathbb{Z}^+$ and their values $p_1, \dots, p_n$, where $p_{i \in 1..n} \in \mathbb{Z}^+$. <strong>Decision:</strong> Is there a subset $S \subseteq \{1, \dots, n\}$ such that $\sum_{i \in S} p_i = \sum_{i \notin S} p_i$? … $x_i = 1$ iff $i \in S$.”</p>
-        $$\begin{aligned} \min \quad & 0 \\ \text{subject to:} \quad & \textstyle\sum_{i \in 1..n} x_i \ast p_i = 0.5 \ast \sum_{i \in 1..n} p_i \\ \text{variables:} \quad & x_{i \in 1..n} \in \{0,1\} \end{aligned}$$
+        $$\begin{aligned} \min \quad & 0 \\ \text{subject to:} \quad & \textstyle\sum_{i \in 1..n} x_i \ast p_i = 0.5 \ast \sum_{i \in 1..n} p_i \\ \text{parameters:} \quad & n \in \mathbb{Z}^+,\ p_{i \in 1..n} \in \mathbb{Z}^+ \\ \text{variables:} \quad & x_{i \in 1..n} \in \{0,1\} \end{aligned}$$
         <p>Explain the role of the binary variables: why does the single constraint encode $\sum_{i \in S} p_i = \sum_{i \notin S} p_i$, and why is the objective $\min 0$?</p>
       </div>
 

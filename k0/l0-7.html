@@ -77,7 +77,7 @@
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor — nebezpečná polopravda</div>
-    <p>„ILP vyřeším tak, že vyřeším LP a zaokrouhlím.“ <strong>NE.</strong> Zaokrouhlené řešení může být (b) infeasible, a i nejbližší přípustný celočíselný bod (c) může být daleko od optima (d). LP relaxace je cenná jinak: dává <strong>mez</strong> (u maximalizace horní, u minimalizace dolní) — na tom stojí Branch &amp; Bound (kapitola K1/K5).</p>
+    <p>„ILP vyřeším tak, že vyřeším LP a zaokrouhlím.“ <strong>NE.</strong> Zaokrouhlené řešení může být (b) infeasible, a i nejbližší přípustný celočíselný bod (c) může být daleko od optima (d). LP relaxace je cenná jinak: dává <strong>mez</strong> (u maximalizace horní, u minimalizace dolní) — na tom stojí Branch &amp; Bound (kapitola K5, [L5.5]).</p>
   </div>
 
   <details class="try">
@@ -192,7 +192,7 @@ KOViz.lpRegion(document.getElementById('viz-lp'), {
     {a: 1, b: -5, c: 0, label: 'x₁−5x₂ ≤ 0'},
   ],
   opt: [200/33, 40/33],
-  objective: {a: 3, b: 4, label: 'směr růstu z = 3x₁+4x₂'},
+  objective: {a: 3, b: 4, label: 'směr růstu z'},
   caption: 'LP RELAXACE (slide 17): přípustná oblast je konvexní mnohoúhelník. Optimum z = 23.03 leží ve vrcholu (6.06, 1.21) — NENÍ celočíselné.'
 });
 
