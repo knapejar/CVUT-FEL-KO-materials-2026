@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.11 · Poměrová a max-z-více podmínka — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.11</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.11</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Poměrová a max-z-více podmínka</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Dvě zkouškové podmínky, které <em>vypadají</em> nelineárně, ale lineární jsou: poměr $\frac{x_1}{x_4} = 4$ a „$x_1$ je aspoň $\max\{2x_2, x_3\}$“ — plus přesná hranice, kde přepis přestává být zadarmo ($x_4 \ne 0$ už chce binární přepínač).
+  </div>
+
+  <p>Prerekvizity: <a href="l1-4.html#takeaways">[L1.4] Disjunkce a big-M</a>, <a href="l1-10.html#takeaways">[L1.10] Linearizace absolutní hodnoty</a>. V <a href="l1-10.html">[L1.10]</a> jsi na zkouškové úloze <em>Maximization of absolute value</em> (zkouška 2023) vyřešil kritérium $\max |x_1| + |x_2|$ a disjunkci. Zbyly dvě podmínky, které jsme tam odbyli „selským rozumem“ — dnes je rozebereme systematicky:</p>
+  <ul>
+    <li>podmínka (2): <em>„$x_1$ is at least $\max\{2 \cdot x_2, x_3\}$“</em>,</li>
+    <li>podmínka (3): <em>„$\frac{x_1}{x_4}$ equals to 4“</em>.</li>
+  </ul>
+
+  <!-- ===== POMĚR ===== -->
+  <h2>Poměrová podmínka: $\frac{x_1}{x_4} = 4$</h2>
+  <p>Zlomek se dvěma proměnnými do ILP napsat nesmíš — $\frac{x_1}{x_4}$ <strong>není lineární výraz</strong> (lineární výraz je jen součet <em>konstanta × proměnná</em>).</p>
+
+  <details class="try">
+    <summary>Zkus sám: jak z rovnice $\frac{x_1}{x_4} = 4$ zlomek odstranit, aby zbyla lineární rovnost?</summary>
+    <div class="inner">
+      <p>Vynásob obě strany jmenovatelem $x_4$:</p>
+      $$x_1 = 4 \cdot x_4.$$
+      <p>To už lineární <strong>je</strong> — žádný součin dvou proměnných, jen proměnná krát konstanta. Poměr dvou proměnných rovný konstantě $c$ je obecně vždy přímka procházející počátkem: $\frac{a}{b} = c \iff a = c \cdot b$.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: kdy je úprava „vynásobím jmenovatelem“ vůbec legální? Proč v této úloze nehrozí problém?</summary>
+    <div class="inner">
+      <p>Zlomek $\frac{x_1}{x_4}$ má smysl jen pro $x_4 \ne 0$ — dělit nulou se nesmí. Násobením jmenovatelem se rovnice $x_1 = 4x_4$ stane splnitelnou i pro $x_4 = 0$ (s $x_1 = 0$), což původní podmínka <em>nedovolovala</em>. Musíš tedy zvlášť zaručit $x_4 \ne 0$.</p>
+      <p>V zadání 2023 to vyřešily meze: podmínka (5) říká $x_4 \ge 1$, takže $x_4 = 0$ je vyloučené samo od sebe a rovnost $x_1 = 4x_4$ je úplný přepis. (Bonus: $x_4 \ge 1$ navíc vynucuje $x_1 = 4x_4 \ge 4 &gt; 0$ — přesně to „vynucené znaménko“, díky kterému v [L1.10] zmizela absolutní hodnota $|x_1|$.)</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-ratio"></div>
+
+  <h2>A co kdyby $x_4 \ge 1$ v zadání nebylo? Podmínka $x_4 \ne 0$</h2>
+  <p>Ruční řešení zkoušky 2023 si k podmínce (3) poznamenalo: $x_4 \ne 0 \Rightarrow (x_4 &gt; 0) \lor (x_4 &lt; 0)$ — a zavedlo binárku $z \in \{0,1\}$. Proč binárku?</p>
+
+  <details class="try">
+    <summary>Zkus sám: umíš „$x_4 \ne 0$“ napsat jako jedno lineární omezení? Co ti brání?</summary>
+    <div class="inner">
+      <p>Neumíš. Přípustná množina $\{x_4 : x_4 \ne 0\}$ má uprostřed <strong>díru</strong> — a jedno lineární omezení vždy vyřízne souvislou polorovinu, díru udělat neumí. „Nerovná se“ je ve skutečnosti <strong>disjunkce</strong> dvou podmínek:</p>
+      $$x_4 \ne 0 \iff (x_4 &gt; 0) \;\lor\; (x_4 &lt; 0),$$
+      <p>a pro <strong>celočíselné</strong> $x_4$ (podmínka (4): $x_4 \in \mathbb{Z}$) se ostré nerovnosti převedou na neostré:</p>
+      $$x_4 \ge 1 \quad \lor \quad x_4 \le -1.$$
+      <p>Disjunkci „aspoň jedna z podmínek platí“ už umíš z <a href="l1-4.html#takeaways">[L1.4]</a>: binární přepínač + big-M.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-neq"></div>
+
+  <details class="try">
+    <summary>Zkus sám: zapiš obě větve s přepínačem $z \in \{0,1\}$ a big-M. Jak velké $M$ potřebuješ při mezích $-5000 \le x_4 \le 1000$?</summary>
+    <div class="inner">
+      $$x_4 \ge 1 - M(1 - z), \qquad x_4 \le -1 + M z, \qquad z \in \{0,1\}.$$
+      <p>Pro $z = 1$ platí naostro $x_4 \ge 1$ a druhé omezení je uvolněné ($x_4 \le -1 + M$); pro $z = 0$ naopak platí $x_4 \le -1$. Volba $M$: vypnuté omezení musí být splnitelné pro <em>všechny</em> hodnoty v mezích — z $1 - M \le -5000$ plyne $M \ge 5001$, z $-1 + M \ge 1000$ plyne $M \ge 1001$. Stačí tedy např. $M = 5001$.</p>
+      <p>Tohle je přesně ten případ, kde se bez přepínače neobejdeš — stejně jako u obecné $\max |x|$ s neurčitým znaménkem z <a href="l1-10.html#takeaways">[L1.10]</a>. Není náhoda, že je to tatáž binárka: obě konstrukce rozhodují, <em>na které straně nuly</em> proměnná leží.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: trik s $x \ne 0$ stojí na celočíselnosti</div>
+    <p>Přepis $x \ne 0 \iff (x \ge 1) \lor (x \le -1)$ platí jen pro $x \in \mathbb{Z}$. Pro <strong>spojitou</strong> proměnnou ostrou nerovnost $x &gt; 0$ v (I)LP zapsat nelze — přípustná množina musí být uzavřená. Než trik použiješ, ověř si v zadání, že proměnná je celočíselná (tady ano: podmínka (4)). A pokud zadání dává $x_4 \ge 1$ rovnou (jako zkouška 2023), žádný přepínač nezaváděj — byla by to zbytečná práce a zbytečný prostor pro chybu.</p>
+  </div>
+
+  <!-- ===== MAX-Z-VÍCE ===== -->
+  <h2>Max-z-více podmínka: „$x_1$ is at least $\max\{2x_2,\; x_3\}$“</h2>
+  <p>Druhá podezřelá podmínka obsahuje $\max$ — a $\max$ není lineární funkce. Přesto ji přepíšeš bez jediné pomocné proměnné.</p>
+
+  <details class="try">
+    <summary>Zkus sám: co přesně říká „$x_1$ je aspoň maximum z $2x_2$ a $x_3$“ o vztahu $x_1$ ke <em>každému</em> z těch dvou výrazů?</summary>
+    <div class="inner">
+      <p>Být aspoň tak velký jako maximum skupiny = být aspoň tak velký jako <strong>každý člen</strong> skupiny:</p>
+      $$x_1 \ge \max\{2x_2,\; x_3\} \iff x_1 \ge 2x_2 \;\;\text{A ZÁROVEŇ}\;\; x_1 \ge x_3.$$
+      <p>A konjunkce (AND) je v ILP zadarmo — prostě napíšeš obě nerovnosti pod sebe. Stejný princip jsi už použil v <a href="l1-8.html#takeaways">[L1.8]</a> u $h_{max}$: „$h_{max} \ge$ součet každé skupiny“ je tatáž konstrukce, jen s více členy. Obecně pro libovolný počet výrazů: $x \ge \max\{a_1, \ldots, a_k\} \iff x \ge a_j$ pro všechna $j$.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-max"></div>
+
+  <details class="try">
+    <summary>Zkus sám: a co opačný směr — $x \le \max\{a, b\}$? Je to taky „obě nerovnosti pod sebe“?</summary>
+    <div class="inner">
+      <p><strong>Není!</strong> Být nejvýš roven maximu znamená nepřesáhnout <em>aspoň jeden</em> z výrazů — stačí, když $x \le a$ <strong>NEBO</strong> $x \le b$ (ten větší z nich). To je <strong>disjunkce</strong>, takže binární přepínač + big-M <a href="l1-4.html#takeaways">[L1.4]</a>: $x \le a + M(1-s)$, $x \le b + Ms$. Kdybys omylem napsal obě nerovnosti naostro (AND), vyžadoval bys $x \le \min\{a,b\}$ — to je <em>přísnější</em> podmínka a ořezal by sis přípustná řešení.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „podmínku s max/min vždy rozepíšu na všechny nerovnosti“</div>
+    <p>Rozepsání na konjunkci (obě nerovnosti pod sebe, zadarmo) je správně jen na <strong>„snadné“ straně</strong>: $x \ge \max\{\cdot\}$ a symetricky $x \le \min\{\cdot\}$. Opačné směry ($x \le \max\{\cdot\}$, $x \ge \min\{\cdot\}$) říkají „stačí aspoň jeden výraz“ — to je disjunkce a potřebuje binární přepínač + big-M [L1.4]. Vždy si nahlas přelož, jestli podmínka chce „pro KAŽDÝ člen“ (AND, zadarmo), nebo „pro ASPOŇ JEDEN člen“ (OR, přepínač).</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.11</div>
+    <ul>
+      <li><strong>Poměr = přímka:</strong> $\frac{x_1}{x_4} = 4 \iff x_1 = 4 \cdot x_4$ (lineární rovnost). Násobení jmenovatelem je legální, jen když je zaručeno $x_4 \ne 0$ — ve zkoušce 2023 to zaručila mez $x_4 \ge 1$.</li>
+      <li><strong>$x \ge \max\{a, b\} \iff x \ge a$ AND $x \ge b$</strong> — „aspoň maximum“ = „aspoň každý člen“, konjunkce je v ILP zadarmo (žádná pomocná proměnná). Symetricky $x \le \min\{a,b\} \iff x \le a$ AND $x \le b$.</li>
+      <li><strong>Opačné směry jsou disjunkce:</strong> $x \le \max\{\cdot\}$ a $x \ge \min\{\cdot\}$ znamenají „stačí aspoň jeden člen“ → binární přepínač + big-M <a href="l1-4.html#takeaways">[L1.4]</a>.</li>
+      <li><strong>„$x_4 \ne 0$“ je díra = disjunkce:</strong> pro $x_4 \in \mathbb{Z}$ je $x_4 \ne 0 \iff (x_4 \ge 1) \lor (x_4 \le -1)$, tedy znaménkový přepínač $z$ přes big-M: $x_4 \ge 1 - M(1-z)$, $x_4 \le -1 + Mz$. Tady (a u obecné $\max|x|$ z <a href="l1-10.html#takeaways">[L1.10]</a>) přepínač opravdu potřebuješ; pro spojité proměnné $\ne$ zapsat nelze vůbec.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA ===== -->
+  <div class="task" id="t-absval-cond">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Maximization of absolute value — podmínky (2) a (3)</strong>
+      <span class="task-src">zdroj: zkouška 2023, strana 6 (T07)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Consider the following mathematical model of four variables $x_1, x_2, x_3$ and $x_4$.</p>
+        $$\text{Maximize } |x_1| + |x_2|$$
+        <p>subject to the restrictions</p>
+        <ol>
+          <li>at least one of these two constraints must hold:
+            <ul>
+              <li>$x_1 + x_2 + x_3 + x_4 \le 1000$</li>
+              <li>$3 \cdot x_1 + 5 \cdot x_2 + x_3 + 2 \cdot x_4 \le 500$</li>
+            </ul>
+          </li>
+          <li>$x_1$ is at least $\max\{2 \cdot x_2, x_3\}$.</li>
+          <li>$\frac{x_1}{x_4}$ equals to 4.</li>
+          <li>$x_{i \in \{1, 2, 3, 4\}} \in \mathbb{Z}$</li>
+          <li>$-5000 \le x_{i \in \{1, 2, 3\}}$, $x_4 \ge 1$, $x_{i \in \{1, 2, 3, 4\}} \le 1000$.</li>
+        </ol>
+        <p>Formulate by the <strong>Integer Linear Programming</strong>.”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejná zkoušková úloha jako v <a href="l1-10.html">[L1.10]</a> (tam jsme řešili kritérium s absolutními hodnotami a disjunkci (1)). Tentokrát se soustřeď na podmínky <strong>(2)</strong> — „$x_1$ je aspoň maximum dvou výrazů“ — a <strong>(3)</strong> — poměr $\frac{x_1}{x_4} = 4$. Navíc si rozmysli variantu: co kdyby místo $x_4 \ge 1$ zadání říkalo jen $x_4 \ne 0$?</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — poměr → rovnost, $\ge \max$ → konjunkce, $\ne 0$ → disjunkce.</li>
+        <li><a href="l1-4.html#takeaways">[L1.4] Disjunkce a big-M</a> — přepínač pro variantu $x_4 \ne 0$.</li>
+        <li><a href="l1-10.html#takeaways">[L1.10] Linearizace absolutní hodnoty</a> — zbytek modelu (kritérium, disjunkce (1)).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>K (2): přelož si $\max$ do češtiny — chce zadání „$x_1 \ge$ KAŽDÝ z výrazů“, nebo „$x_1 \ge$ ASPOŇ JEDEN“? Podle toho AND (zadarmo), nebo OR (přepínač). K (3): zbav se zlomku násobením — a hned zkontroluj, co zaručuje, že jmenovatel není nula. K variantě $x_4 \ne 0$: kde má přípustná množina díru a na kolik větví se rozpadne? Nezapomeň spočítat big-M poctivě z mezí (5).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Podmínka (2):</strong> „$x_1$ is at least $\max\{2x_2, x_3\}$“ = $x_1$ je aspoň tak velké jako <em>každý</em> z obou výrazů — konjunkce, dvě nerovnosti zadarmo:</p>
+          $$x_1 \ge 2 x_2, \qquad x_1 \ge x_3.$$
+          <p><strong>Podmínka (3):</strong> vynásobením jmenovatelem $\frac{x_1}{x_4} = 4 \iff x_1 = 4 x_4$ (lineární rovnost). Dělení nulou nehrozí: podmínka (5) vynucuje $x_4 \ge 1$, takže $x_4 = 0$ je vyloučené. Navíc z $x_1 = 4x_4 \ge 4 &gt; 0$ plyne vynucené znaménko $x_1$, takže $|x_1| = x_1$ v kritériu (viz <a href="l1-10.html#takeaways">[L1.10]</a>).</p>
+          <p><strong>Varianta — kdyby zadání dávalo jen $x_4 \ne 0$:</strong> pro $x_4 \in \mathbb{Z}$ je $x_4 \ne 0 \iff (x_4 \ge 1) \lor (x_4 \le -1)$. Disjunkce → binárka $z \in \{0,1\}$ + big-M:</p>
+          $$x_4 \ge 1 - M(1 - z), \qquad x_4 \le -1 + M z, \qquad z \in \{0,1\}.$$
+          <p>Velikost $M$ při mezích $-5000 \le x_4 \le 1000$: vypnutá větev musí povolit celé rozpětí — $1 - M \le -5000 \Rightarrow M \ge 5001$ a $-1 + M \ge 1000 \Rightarrow M \ge 1001$, tedy např. $M = 5001$. Pozor: v této variantě by už znaménko $x_1$ <em>nebylo</em> vynucené ($x_4$ smí být záporné), takže i $|x_1|$ v kritériu by potřebovalo znaménkový přepínač jako $|x_2|$ — viz řešení T02 v <a href="l1-10.html">[L1.10]</a>.</p>
+          <p><strong>Zbytek modelu</strong> (kritérium $\max |x_1| + |x_2|$, disjunkce (1) s $y \in \{0,1\}$ a $M = 11000$, meze (5)) je kompletně vyřešený v úloze T02 lekce <a href="l1-10.html">[L1.10]</a> — výsledný model si tam porovnej.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.11">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-10.html"><span class="dir">← Předchozí</span> L1.10 · Linearizace absolutní hodnoty (min vs. max)</a>
+    <a class="next" href="l1-12.html"><span class="dir">Další →</span> L1.12 · Implikace mezi skupinami — Loot [FOTO]</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Poměr x1/x4 = 4 je přímka x1 = 4·x4 procházející počátkem
+KOViz.fnPlot(document.getElementById('viz-ratio'), {
+  xmin: 0, xmax: 5, ymax: 20, xstep: 1, ystep: 4,
+  xlabel: 'x₄', ylabel: 'x₁',
+  segments: [
+    {x1: 0, y1: 0, x2: 5, y2: 20, label: 'x₁ = 4·x₄', labelAt: 0.72, labelDx: 14, labelDy: 8},
+  ],
+  points: [
+    {x: 0, y: 0, open: true, label: 'x₄ = 0: zlomek nedefinovaný (vyloučeno mezí x₄ ≥ 1)', dx: 12, dy: -8},
+    {x: 1, y: 4, label: '(1, 4)', dx: 12, dy: 6},
+    {x: 2, y: 8, label: '(2, 8)', dx: 12, dy: 6},
+    {x: 3, y: 12, label: '(3, 12)', dx: 12, dy: 6},
+  ],
+  caption: 'Poměrová podmínka x₁/x₄ = 4 po vynásobení jmenovatelem: přímka x₁ = 4·x₄ — lineární rovnost. Bod x₄ = 0 do původní podmínky nepatří (dělení nulou); zde ho vylučuje mez x₄ ≥ 1 ze zadání.'
+});
+
+// x4 ≠ 0 pro celočíselné x4 = dvě poloosy (díra v nule) → disjunkce
+KOViz.fnPlot(document.getElementById('viz-neq'), {
+  xmin: -4, xmax: 4, ymax: 2, xstep: 1, ystep: 1,
+  xlabel: 'x₄', ylabel: '',
+  segments: [
+    {x1: -4, y1: 1, x2: -1, y2: 1, label: 'x₄ ≤ −1 (z = 0)', labelAt: 0.45, labelDx: -52, labelDy: -14},
+    {x1: 1, y1: 1, x2: 4, y2: 1, label: 'x₄ ≥ 1 (z = 1)', labelAt: 0.55, labelDx: -42, labelDy: -14},
+  ],
+  points: [
+    {x: -1, y: 1},
+    {x: 1, y: 1},
+    {x: 0, y: 1, open: true, label: 'x₄ = 0 zakázáno', dx: -48, dy: 26},
+  ],
+  caption: 'Přípustné hodnoty celočíselného x₄ ≠ 0: dvě oddělené poloosy s dírou v nule. Jedno lineární omezení díru vyříznout neumí → disjunkce (x₄ ≥ 1) ∨ (x₄ ≤ −1) s binárním přepínačem z a big-M.'
+});
+
+// x1 ≥ max{2x2, x3} pro x3 = 3: průnik dvou polorovin (AND)
+KOViz.lpRegion(document.getElementById('viz-max'), {
+  xmax: 6, ymax: 8, integer: true,
+  xlabel: 'x₂', ylabel: 'x₁',
+  constraints: [
+    {a: 2, b: -1, c: 0, label: 'x₁ = 2·x₂', labelAt: 0.78, labelDx: 12, labelDy: 26},
+    {a: 0, b: -1, c: -3, label: 'x₁ = x₃ (zde x₃ = 3)', labelAt: 0.62, labelDx: 6, labelDy: 16},
+  ],
+  caption: 'Podmínka x₁ ≥ max{2x₂, x₃} (řez pro pevné x₃ = 3, výsek x₂ ≥ 0): přípustná oblast je PRŮNIK polorovin x₁ ≥ 2x₂ a x₁ ≥ 3 — „aspoň maximum“ = „aspoň každý člen“, tedy konjunkce dvou nerovností zadarmo.'
+});
+</script>
+</body>
+</html>
