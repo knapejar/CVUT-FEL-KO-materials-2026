@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.7 · Po částech konstantní funkce přes intervaly — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.7</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.7</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Po částech konstantní funkce přes intervaly</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Cena, která závisí na tom, do kterého <em>intervalu</em> spadá počet: binární $y_k$ pro každý interval, $\sum_k y_k = 1$ (vyber právě jeden), meze intervalu přes big-M a cena $= \sum_k p_k\,y_k$.
+  </div>
+
+  <p>Prerekvizity: <a href="l1-4.html#takeaways">[L1.4] big-M: disjunkce omezení</a> (podmíněná omezení „pokud $y_k = 1$, pak…“) a <a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a>. V <a href="l1-6.html#takeaways">[L1.6] Fixed-charge</a> funkce skočila jednou — v nule. Teď bude skákat víckrát: jako schody.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Cena, která skáče po schodech</h2>
+  <p>Zkoušková klasika <strong>Wedding plan</strong> (svatební plán) obsahuje tuhle větu: <em>„A price for renting a place differs, depending on the number of invited guests: for $[0,9]$ guests, the price is $p_1$ CZK, for $[10,19]$ guests, the price is $p_2$ CZK, and for $[20,n]$ guests the price is $p_3$ CZK.“</em></p>
+  <p>Označme $N$ počet pozvaných hostů. Cena za pronájem je <strong>piecewise constant function</strong> (po částech konstantní funkce) proměnné $N$:</p>
+  $$f(N) = \begin{cases} p_1, & N \in [0, 9], \\ p_2, & N \in [10, 19], \\ p_3, & N \in [20, n]. \end{cases}$$
+  <p>Důležitý detail: $N$ <em>není</em> konstanta zadání — je to součet rozhodovacích proměnných ($N = \sum_i x_i$, kde $x_i = 1$ ⟺ host $i$ je pozvaný). Model tedy sám rozhoduje, na kterém „schodu“ skončí. Konkrétně pro $p_1 = 2$, $p_2 = 5$, $p_3 = 8$ (v tisících CZK) a $n = 30$:</p>
+
+  <div class="viz" id="viz-steps"></div>
+
+  <details class="try">
+    <summary>Zkus sám: vyřeší to recept z <a href="l1-6.html#takeaways">[L1.6]</a> — jeden přepínač $y$ a člen $A \cdot y$?</summary>
+    <div class="inner">
+      <p>Ne. Fixed-charge funkce má <em>jeden</em> skok (v nule) a pak roste lineárně — jediný přepínač rozlišil dva režimy „nevyrábím / vyrábím“. Tady jsou <em>tři</em> konstantní úrovně a dva skoky: jedna binárka na to nestačí, režimy jsou tři. Ale jádro nápadu se přenáší: <strong>jeden binární přepínač na každý režim</strong> — tady na každý interval.</p>
+    </div>
+  </details>
+
+  <h2>Krok 1: vyber právě jeden interval</h2>
+
+  <details class="try">
+    <summary>Zkus sám: zaveď $y_1, y_2, y_3 \in \{0,1\}$ („interval $k$ je ten, ve kterém $N$ leží“). Jaké omezení vynutí, že je vybraný právě jeden interval?</summary>
+    <div class="inner">
+      <p>$$y_1 + y_2 + y_3 = 1.$$</p>
+      <p>Intervaly $[0,9]$, $[10,19]$, $[20,n]$ jsou <em>disjunktní</em> a dohromady <em>pokrývají</em> všechna možná $N \in \{0, \dots, n\}$ — každé $N$ leží v právě jednom z nich. Rovnost (ne $\le$, ne $\ge$!) tedy přesně odpovídá realitě a model kvůli ní nikdy není nepřípustný. Stejný trik jsi viděl v miniatuře u <a href="l1-6.html">[L1.6]</a>, úloha T01 (výčet hodnot rozdílu) — teď ho povyšujeme na obecný vzorec.</p>
+    </div>
+  </details>
+
+  <h2>Krok 2: svaž $N$ s vybraným intervalem</h2>
+  <p>Zatím $y_k$ s $N$ nijak nesouvisí — solver by si vybral nejlevnější interval bez ohledu na skutečný počet hostů. Potřebujeme podmíněné omezení: <em>pokud</em> $y_2 = 1$, <em>pak</em> $10 \le N \le 19$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: „pokud $y_2 = 1$, pak $N \ge 10$ a $N \le 19$“ — jak se podmíněné omezení píše lineárně? (Nápověda: <a href="l1-4.html#takeaways">[L1.4]</a>.)</summary>
+    <div class="inner">
+      <p>Big-M relaxace, která se <em>vypne</em> při $y_2 = 0$:</p>
+      $$N \ge 10 - M(1 - y_2), \qquad N \le 19 + M(1 - y_2).$$
+      <p>Pro $y_2 = 1$ zbude $10 \le N \le 19$; pro $y_2 = 0$ se obě nerovnosti uvolní na vždy-pravdivé ($N \ge 10 - M$ a $N \le 19 + M$). Pozor na směry z [L1.4]: dolní mez ($\ge$) se uvolňuje <em>odečtením</em> $M$, horní mez ($\le$) <em>přičtením</em> $M$. Protože $0 \le N \le n$, stačí $M = n$.</p>
+      <p>Stejně pro zbylé intervaly (triviální meze $N \ge 0$ a $N \le n$ lze vynechat):</p>
+      $$N \le 9 + M(1 - y_1), \qquad N \ge 20 - M(1 - y_3).$$
+    </div>
+  </details>
+
+  <p>Existuje i kompaktnější zápis. Protože platí $\sum_k y_k = 1$, je vždy aktivní právě jedna sada mezí — a meze tedy můžeme <strong>vyjmenovat</strong> v jediné nerovnosti (stejný princip jako výčet hodnot na slidu 36 přednášky ILP):</p>
+  $$N \;\le\; 9\,y_1 + 19\,y_2 + n\,y_3, \qquad N \;\ge\; 0\,y_1 + 10\,y_2 + 20\,y_3.$$
+
+  <details class="try">
+    <summary>Zkus sám: ověř, že kompaktní zápis dělá totéž. Co říká pro $y_2 = 1$? A proč by se rozbil bez $\sum_k y_k = 1$?</summary>
+    <div class="inner">
+      <p>Pro $y_2 = 1$ (a tedy $y_1 = y_3 = 0$) zbude přesně $10 \le N \le 19$. Pro $y_1 = 1$ zbude $0 \le N \le 9$, pro $y_3 = 1$ zbude $20 \le N \le n$. ✓</p>
+      <p>Bez $\sum_k y_k = 1$ by ale solver mohl nastavit třeba $y_1 = y_3 = 1$ (pak $N \le 9 + n$ — mez v háji) nebo všechna $y_k = 0$ (pak $N \le 0$, což u maximalizace hostů model nesmyslně zaškrtí, a hlavně cena vyjde $0$). Rovnost „právě jeden“ je nosný pilíř celé konstrukce — kompaktní zápis je <em>zkratka platná jen díky ní</em>.</p>
+    </div>
+  </details>
+
+  <h2>Krok 3: cena vybraného intervalu</h2>
+
+  <details class="try">
+    <summary>Zkus sám: jak teď zapíšeš cenu pronájmu jediným lineárním výrazem?</summary>
+    <div class="inner">
+      <p>$$\text{cena} = p_1\,y_1 + p_2\,y_2 + p_3\,y_3 = \sum_k p_k\,y_k.$$</p>
+      <p>Právě jedno $y_k$ je $1$, ostatní $0$ — součet tedy „vytáhne“ přesně cenu vybraného intervalu. Žádné násobení proměnných, čistě lineární výraz, který můžeš dát do kritéria nebo do rozpočtového omezení: ve Wedding plan např. $m \cdot N + \sum_k p_k y_k \le B$.</p>
+    </div>
+  </details>
+
+  <p>Souhrnně — <strong>recept na po částech konstantní funkci přes $K$ intervalů</strong> $[l_k, u_k]$ s cenami $p_k$:</p>
+  $$\begin{aligned} & y_k \in \{0,1\} \quad (k = 1..K), \qquad \sum_{k=1}^{K} y_k = 1 \\ & l_k - M(1 - y_k) \;\le\; N \;\le\; u_k + M(1 - y_k) \quad \forall k \qquad \text{(nebo kompaktně } \textstyle\sum_k l_k y_k \le N \le \sum_k u_k y_k\text{)} \\ & \text{cena} = \sum_{k=1}^{K} p_k\,y_k \end{aligned}$$
+
+  <div class="box warning">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Kde se u zkoušky ztrácí body</div>
+    <ul>
+      <li><strong>Zapomenuté $\sum_k y_k = 1$:</strong> solver vypne všechna $y_k$ a platí cenu $0$ (nebo zapne víc intervalů najednou a meze se rozpadnou). Cena v kritériu sama žádný výběr nevynutí.</li>
+      <li><strong>Jen jedna mez na interval:</strong> každý vnitřní interval potřebuje OBĚ nerovnosti (dolní i horní). V dochovaném řešení z termínu 21.06.2021 hodnotitel strhl body s poznámkou, že případ třetího intervalu „není shora omezený“ — meze nebyly svázané úplně.</li>
+      <li><strong>Špatný směr relaxace:</strong> $\ge$ se uvolňuje členem $-M(1-y_k)$, $\le$ členem $+M(1-y_k)$. Prohozený směr omezení naopak zpřísní (srov. <a href="l1-4.html#takeaways">[L1.4]</a>).</li>
+    </ul>
+  </div>
+
+  <p>Takhle vypadá množina dvojic (počet, cena), kterou správný model nabízí — a co se stane, když $\sum_k y_k = 1$ vypadne:</p>
+
+  <div class="viz" id="viz-broken"></div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.7</div>
+    <ul>
+      <li><strong>Po částech konstantní cena přes intervaly:</strong> pro každý interval binární $y_k$ a <strong>$\sum_k y_k = 1$</strong> (vybírám právě jeden interval; intervaly jsou disjunktní a pokrývají vše, takže rovnost je vždy splnitelná).</li>
+      <li><strong>Vazba počtu na interval</strong> přes big-M <a href="l1-4.html#takeaways">[L1.4]</a>: $l_k - M(1-y_k) \le N \le u_k + M(1-y_k)$, kde $M = n$ (rozsah $N$) stačí. Každý interval potřebuje obě meze.</li>
+      <li><strong>Kompaktní alternativa</strong> (platná jen díky $\sum_k y_k = 1$): $\sum_k l_k y_k \le N \le \sum_k u_k y_k$ — výčet mezí, srov. slide 36 přednášky ILP.</li>
+      <li><strong>Cena $= \sum_k p_k\,y_k$</strong> — lineární výraz, který jde do kritéria i do rozpočtu (např. $m N + \sum_k p_k y_k \le B$ ve Wedding plan).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-fte">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Cloth Production — Considering Several Values</strong>
+      <span class="task-src">zdroj: přednáška 02_ILP, slide 33–36</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Labor demand, material demand and income per piece are:</p>
+        <table>
+          <tr><th>product</th><th>T-shirt</th><th>shirt</th><th>robe</th><th>capacity</th><th>unit cost [CZK]</th></tr>
+          <tr><td>labor [person-hour]</td><td>3</td><td>2</td><td>6</td><td>160</td><td>1000</td></tr>
+          <tr><td>material [meter]</td><td>4</td><td>3</td><td>4</td><td>130</td><td>200</td></tr>
+          <tr><td>income [1000 CZK]</td><td>9.8</td><td>6.6</td><td>13.8</td><td></td><td></td></tr>
+        </table>
+        <p>Goal is to maximize the profit (i.e. total income minus total expenses). Constraints: material capacity is 130 meters. Another constraint: Total amount of work per week can be at most 40 or 80 or 120 or 160 hours depending on the number of Full Time Employees (FTEs). Criterion adaptation: labor cost is proportional to the number of FTEs (one FTE costs 40). We only want some values of person-hours to be available:</p>
+        $$3x_1 + 2x_2 + 6x_3 \le \text{ either } 40 \text{ or } 80 \text{ or } 120 \text{ or } 160$$
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Výroba tří produktů ($x_i$ = počet kusů produktu $i$) s materiálovou kapacitou. Pracovní kapacita ale není pevná: firma najímá 1–4 zaměstnance na plný úvazek (FTE) a kapacita hodin je $40 \cdot (\text{počet FTE})$ — tedy jedna ze čtyř hodnot $\{40, 80, 120, 160\}$. Mzdový náklad je úměrný počtu FTE (jeden FTE stojí 40, v tisících CZK). Místo intervalů tu vybíráme jednu z konečně mnoha <em>hodnot</em> meze — stejná konstrukce, jen se „interval“ smrskl na bod.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — výběr právě jedné varianty přes $\sum_k v_k = 1$ a výčet hodnot $\sum_k u_k v_k$.</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a> — kritérium a kapacity.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a>.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Kolik „režimů“ má pracovní kapacita? Zaveď pro každý binárku $v_k$. Jak vypadá pravá strana omezení na osobohodiny, když má být rovna vybrané hodnotě (výčet hodnot — krok 2 této lekce v kompaktním tvaru; dolní mez tu netřeba, proč?)? A jak se náklad na FTE dostane do kritéria (krok 3)? Zisk na kus si spočti jako příjem − materiálové náklady na kus (mzdy už platíš přes FTE, ne za osobohodinu: materiál 200 CZK/m, tedy $0.8$, $0.6$, $0.8$ tisíc CZK na kus).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Binární přepínače variant $v_1, \dots, v_4 \in \{0,1\}$ ($v_k = 1$ ⟺ firma má $k$ FTE). Formulace ze slidu 36:</p>
+          $$\begin{aligned} \max z = \quad & (9.8 - 0.8)x_1 + (6.6 - 0.6)x_2 + (13.8 - 0.8)x_3 - 40v_1 - 80v_2 - 120v_3 - 160v_4 \\ \text{s.t.} \quad & 3x_1 + 2x_2 + 6x_3 \le 40v_1 + 80v_2 + 120v_3 + 160v_4 \\ & \sum_{k=1}^{4} v_k = 1 \\ & 4x_1 + 3x_2 + 4x_3 \le 130 \\ & x_i \in \mathbb{Z}_0^+, \;\; v_k \in \{0,1\} \end{aligned}$$
+          <p><strong>Komentáře:</strong></p>
+          <ul>
+            <li>Pravá strana $40v_1 + \dots + 160v_4$ s $\sum v_k = 1$ je přesně „výčet hodnot“: vybraná varianta dosadí svou kapacitu. Dolní mez netřeba — osobohodiny jsou výraz $3x_1+2x_2+6x_3 \ge 0$ a omezujeme je jen shora.</li>
+            <li>Náklad na FTE v kritériu je $\sum_k (40k) v_k$ — po částech konstantní funkce počtu FTE, krok 3 této lekce.</li>
+            <li><em>Poznámka ze slidu:</em> protože je mzdový náklad úměrný počtu FTE, šlo by alternativně použít jedinou celočíselnou proměnnou $v \in \{1,2,3,4\}$ (počet FTE): $3x_1+2x_2+6x_3 \le 40v$, kritérium $\dots - 40v$. To ale funguje JEN když jsou hodnoty v aritmetické řadě a cena úměrná — obecné ceny $p_k$ vyžadují binární výčet.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-wedding-rent">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Wedding plan — pronájem místa podle počtu hostů</strong>
+      <span class="task-src">zdroj: zkouška KO 25.05.2026 / 21.06.2021</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“You are planning a wedding. There is a set of potential guests $G = \{g_1, g_2, \ldots, g_n\}$. You want to invite as many guests as possible; however, there are some constraints. A meal for a single guest costs $m$ CZK (Czech koruna). A price for renting a place differs, depending on the number of invited guests: for $[0, 9]$ guests, the price is $p_1$ CZK, for $[10, 19]$ guests, the price is $p_2$ CZK, and for $[20, n]$ guests the price is $p_3$ CZK. You have a $B$ CZK; this budget cannot be exceeded. Furthermore, for the sake of justice, the number of guests invited from the groom's side and the bride's side can differ by at most $D_{max}$. Assume functions $br : G \to \{0, 1\}$ and $gr : G \to \{0, 1\}$, where $br(g_i) = 1$ iff $g_i$ is from the bride's side, and $gr(g_i) = 1$ iff $g_i$ is from the groom's side. (Note that there might be some guest $g_i$ such that $br(g_i) = gr(g_i) = 1$.)</p>
+        <p>Design an ILP model deciding which guests will be invited while respecting all the constraints.”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Tohle je ostrá zkoušková úloha za 7 bodů (padla 25.05.2026 i 21.06.2021). Kompletně ji složíš ve <a href="l1-9.html">[L1.9] Wedding plan [FOTO]</a> — <strong>tady trénujeme jen její jádro: pronájem podle intervalu + rozpočet</strong>. Tedy: binárky $x_i$ „host $i$ pozván“, počet hostů $N = \sum_i x_i$, cena pronájmu po částech konstantní ($p_1/p_2/p_3$ dle intervalu pro $N$), jídlo $m$ za hosta, vše dohromady max. $B$. Podmínku $D_{max}$ (rozdíl stran) zatím vynech — na tu je <a href="l1-8.html">[L1.8]</a>.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — $y_1, y_2, y_3$, $\sum_k y_k = 1$, meze intervalů, cena $\sum_k p_k y_k$.</li>
+        <li><a href="l1-4.html#takeaways">[L1.4] big-M: disjunkce omezení</a> — podmíněné meze.</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a> — rozpočet $\le B$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Co je kritérium („as many guests as possible“)? Čemu se rovná $N$ a proč je to lineární výraz? Které tři binárky přidáš a jaké omezení je drží pohromadě? Napiš meze intervalů — big-M tvarem, nebo kompaktně výčtem; jaké $M$ stačí, když $N \le n$? Nakonec rozpočet: co všechno se platí a kde se v něm objeví cena pronájmu?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (část: pronájem + rozpočet)</summary>
+        <div class="inner">
+          <p><strong>Proměnné:</strong> $x_i \in \{0,1\}$ ($x_i = 1$ ⟺ host $g_i$ pozván), $y_1, y_2, y_3 \in \{0,1\}$ (vybraný cenový interval). Označme $N = \sum_{i=1}^{n} x_i$ (jen zkratka za lineární výraz, ne nová proměnná).</p>
+          $$\begin{aligned} \max \quad & \sum_{i=1}^{n} x_i \\ \text{s.t.} \quad & y_1 + y_2 + y_3 = 1 \\ & N \le 9 + n(1 - y_1) \\ & N \ge 10 - n(1 - y_2), \qquad N \le 19 + n(1 - y_2) \\ & N \ge 20 - n(1 - y_3) \\ & m \cdot N + p_1 y_1 + p_2 y_2 + p_3 y_3 \;\le\; B \\ & x_i \in \{0,1\} \;\; \forall i, \qquad y_k \in \{0,1\} \;\; \forall k \end{aligned}$$
+          <p><strong>Komentáře:</strong></p>
+          <ul>
+            <li>$M = n$ stačí: $N$ nikdy nepřekročí $n$ ani neklesne pod $0$, takže uvolněná mez (např. $N \ge 10 - n$) je vždy pravdivá. Meze $N \ge 0$ (interval 1) a $N \le n$ (interval 3) platí automaticky, psát je netřeba.</li>
+            <li>Kompaktní alternativa vazeb: $10y_2 + 20y_3 \le N \le 9y_1 + 19y_2 + n\,y_3$ — díky $\sum_k y_k = 1$ ekvivalentní.</li>
+            <li>Rozpočet: jídlo $m$ za <em>každého pozvaného</em> ($m \cdot N$) plus cena pronájmu vybraného intervalu ($\sum_k p_k y_k$). Pronájem se NEnásobí počtem hostů!</li>
+            <li><em>Poučení z reálné zkoušky (21.06.2021):</em> dochované studentské řešení použilo obrácený význam přepínačů ($Y_k = 1$ ⟺ interval $k$ <em>ne</em>vybrán, tedy $Y_1 + Y_2 + Y_3 = 2$ a v rozpočtu $(1-Y_k)\,p_k$) — to je legální ekvivalent, ale snadno se v něm chybuje: hodnotitel strhl body za neúplně svázané meze (případ třetího intervalu nebyl shora omezený). Drž se přímého významu $y_k = 1$ ⟺ vybráno a zkontroluj, že každý interval má obě meze.</li>
+            <li>Zbývající podmínka $|{\sum_i gr(g_i) x_i - \sum_i br(g_i) x_i}| \le D_{max}$ přijde v <a href="l1-8.html">[L1.8]</a>; celý model složíš v <a href="l1-9.html">[L1.9]</a>.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.7">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-6.html"><span class="dir">← Předchozí</span> L1.6 · Fixed-charge (fixní náklady)</a>
+    <a class="next" href="l1-8.html"><span class="dir">Další →</span> L1.8 · Rozdíl / omezení rozptylu (max−min)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Po částech konstantní cena pronájmu f(N): p1 = 2 na [0,9], p2 = 5 na [10,19], p3 = 8 na [20,30] (ceny v tisících CZK, n = 30).
+KOViz.fnPlot(document.getElementById('viz-steps'), {
+  xmax: 30, ymax: 10, xstep: 5, ystep: 2,
+  xlabel: 'N', ylabel: 'f(N)',
+  segments: [
+    {x1: 0,  y1: 2, x2: 9,  y2: 2, label: 'p₁ = 2  (N ∈ [0,9])',   labelAt: 0.15, labelDx: 0, labelDy: -10},
+    {x1: 10, y1: 5, x2: 19, y2: 5, label: 'p₂ = 5  (N ∈ [10,19])', labelAt: 0.1,  labelDx: 0, labelDy: -10},
+    {x1: 20, y1: 8, x2: 30, y2: 8, label: 'p₃ = 8  (N ∈ [20,n])',  labelAt: 0.1,  labelDx: 0, labelDy: -10},
+  ],
+  points: [
+    {x: 9,  y: 2}, {x: 10, y: 5},
+    {x: 19, y: 5}, {x: 20, y: 8},
+  ],
+  caption: 'Cena pronájmu jako po částech konstantní funkce počtu hostů N (p₁ = 2, p₂ = 5, p₃ = 8 tis. CZK, n = 30). Uvnitř intervalu se cena nemění, mezi N = 9 → 10 a N = 19 → 20 skočí. N je celé číslo, oba krajní body každého schodu do funkce patří (plné body). Jedním lineárním výrazem v N tohle napsat nejde — schody nejsou přímka.'
+});
+
+// Co se stane bez Σyₖ = 1: solver smí vypnout všechna yₖ a „platit“ 0.
+KOViz.fnPlot(document.getElementById('viz-broken'), {
+  xmax: 30, ymax: 10, xstep: 5, ystep: 2,
+  xlabel: 'N', ylabel: 'cena',
+  segments: [
+    {x1: 0,  y1: 2, x2: 9,  y2: 2, label: 'y₁ = 1: cena 2', labelAt: 0.1, labelDx: 0, labelDy: -10},
+    {x1: 10, y1: 5, x2: 19, y2: 5, label: 'y₂ = 1: cena 5', labelAt: 0.1, labelDx: 0, labelDy: -10},
+    {x1: 20, y1: 8, x2: 30, y2: 8, label: 'y₃ = 1: cena 8', labelAt: 0.1, labelDx: 0, labelDy: -10},
+  ],
+  points: [
+    {x: 0, y: 0, open: true, label: 'y₁ = y₂ = y₃ = 0: cena 0 a meze pryč — díra v modelu', dx: 12, dy: -10},
+  ],
+  caption: 'Správný model nabízí jen tři schody (plné úsečky): vybraný interval určuje cenu i meze pro N. Bez Σyₖ = 1 ale přibude kombinace y₁ = y₂ = y₃ = 0 (prázdný bod): v kompaktním zápisu vynutí N ≤ 0 a cena 0, v big-M tvaru se meze úplně vypnou a solver „pronajme zadarmo“ pro libovolné N. Obojí je špatně — rovnost Σyₖ = 1 je povinná.'
+});
+</script>
+</body>
+</html>
