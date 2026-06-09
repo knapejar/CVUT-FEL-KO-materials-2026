@@ -277,7 +277,7 @@
       const t = svgEl("text", { x: X(0) - 9, y: Y(j) + 4, "text-anchor": "end" }); t.textContent = j; ax.appendChild(t);
     }
     const lx = svgEl("text", { x: X(xmax) + 4, y: Y(0) - 8 }); lx.textContent = spec.xlabel || "x₁"; ax.appendChild(lx);
-    const ly = svgEl("text", { x: X(0) + 7, y: Y(ymax) + 2 }); ly.textContent = spec.ylabel || "x₂"; ax.appendChild(ly);
+    const ly = svgEl("text", { x: X(0) + 12, y: Y(ymax) - 6 }); ly.textContent = spec.ylabel || "x₂"; ax.appendChild(ly);
     svg.appendChild(ax);
 
     // gradient účelové funkce

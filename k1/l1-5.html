@@ -77,7 +77,7 @@
     </div>
   </details>
 
-  <p>Podívej se, co vazba $x \le M y$ dělá geometricky (pro názornost $M = 10$). LP relaxace (šedá oblast, $y$ spojité) je trojúhelník — ale celočíselnost $y \in \{0,1\}$ z něj nechá jen dva vodorovné „řezy“:</p>
+  <p>Podívej se, co vazba $x \le M y$ dělá geometricky (pro názornost $M = 10$). LP relaxace (modře vyplněná oblast, $y$ spojité) je trojúhelník — ale celočíselnost $y \in \{0,1\}$ z něj nechá jen dva vodorovné „řezy“:</p>
 
   <div class="viz" id="viz-link"></div>
 
@@ -139,7 +139,8 @@
           <tr><th>product</th><th>T-shirt</th><th>shirt</th><th>trousers</th></tr>
           <tr><td>machine cost</td><td>200 000</td><td>150 000</td><td>100 000</td></tr>
         </table>
-        <p>Machine $i$ is rented when product $i$ is produced. We join binary $y_i$ with integer $x_i$ such that: $y_i = 0$ iff $x_i = 0$; $y_i = 1$ iff $x_i \ge 1$. For range $x_i \in \langle 0, 100 \rangle$ write these relations as inequalities.”</p>
+        <p>Machine $i$ is rented when product $i$ is produced. We join binary $y_i$ with integer $x_i$ such that: $y_i = 0$ iff $x_i = 0$; $y_i = 1$ iff $x_i \ge 1$. For range $x_i \in \langle 0, 100 \rangle$ these relations can be written as inequalities.”</p>
+        <p><em>Task:</em> Write these relations as inequalities and formulate the complete model.</p>
       </div>
 
       <h4>a) Co je v zadání?</h4>
@@ -153,7 +154,7 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Nejdřív čistý model bez strojů: zisk na kus = income − labor·1000 − material·200 (pozor na jednotky, vše převeď na tisíce CZK). Pak: v jakých jednotkách přidáš pronájmy do kritéria? Jaká nerovnost zařídí, že $y_i = 0$ vynucuje $x_i = 0$? Potřebuješ tady i $x_i \ge y_i$, nebo ji za tebe odvede kritérium — a proč přesně?</p>
+      <p>Nejdřív čistý model bez strojů: zisk na kus [1000 CZK] = income − labor·1 − material·0.2 (income je v tabulce už v tisících CZK; 1000 CZK za person-hour = 1, 200 CZK za metr = 0.2). Pak: v jakých jednotkách přidáš pronájmy do kritéria? Jaká nerovnost zařídí, že $y_i = 0$ vynucuje $x_i = 0$? Potřebuješ tady i $x_i \ge y_i$, nebo ji za tebe odvede kritérium — a proč přesně?</p>
 
       <details class="solution">
         <summary>d) Úplné řešení</summary>
@@ -194,7 +195,7 @@ KOViz.lpRegion(document.getElementById('viz-link'), {
     {a: 1, b: -10, c: 0, label: 'x ≤ 10·y', labelAt: 0.62, labelDx: 14, labelDy: 18},
     {a: 0, b: 1, c: 1},
   ],
-  caption: 'Vazba x ≤ M·y pro M = 10. Šedý trojúhelník = LP relaxace (y spojité). Celočíselnost y ∈ {0,1} nechá jen zvýrazněné mřížkové body: řádek y = 0 obsahuje JEDINÝ bod x = 0 („nepoužívám, neplatím“), řádek y = 1 celý rozsah x ∈ 0..10 („platím, smím vyrábět“).'
+  caption: 'Vazba x ≤ M·y pro M = 10. Modře vyplněný trojúhelník = LP relaxace (y spojité). Celočíselnost y ∈ {0,1} nechá jen zvýrazněné mřížkové body: řádek y = 0 obsahuje JEDINÝ bod x = 0 („nepoužívám, neplatím“), řádek y = 1 celý rozsah x ∈ 0..10 („platím, smím vyrábět“).'
 });
 
 // Přidání x ≥ y: zmizí bod (0, 1) — „platím za nic“.
@@ -204,7 +205,7 @@ KOViz.lpRegion(document.getElementById('viz-link-both'), {
   integer: true,
   constraints: [
     {a: 1, b: -10, c: 0, label: 'x ≤ 10·y', labelAt: 0.62, labelDx: 14, labelDy: 18},
-    {a: -1, b: 1, c: 0, label: 'x ≥ y', labelAt: 0.85, labelDx: -40, labelDy: -6},
+    {a: -1, b: 1, c: 0, label: 'x ≥ y', labelAt: 0.6, labelDx: 10, labelDy: -6},
     {a: 0, b: 1, c: 1},
   ],
   caption: 'Po přidání x ≥ y bod (0, 1) z přípustné množiny zmizel: y = 1 nyní VYNUCUJE x ≥ 1. Zbývají přesně body odpovídající ekvivalenci y = 0 ⟺ x = 0.'
