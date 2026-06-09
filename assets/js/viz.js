@@ -312,6 +312,7 @@
      Graf funkce po úsecích — pro nespojité / po částech lineární funkce (fixed-charge apod.).
      spec = {
        xmax, ymax        : rozsah os v datových souřadnicích (default 10)
+       xmin              : levý okraj osy x (default 0; záporný → čárkovaná svislice v x=0)
        xstep, ystep      : krok mřížky a popisků os (default 1 — pro větší rozsahy zvol 5, 20…)
        xlabel, ylabel    : popisky os (default "x", "f(x)")
        segments: [{x1, y1, x2, y2, dashed?, label?, labelAt?, labelDx?, labelDy?}]
@@ -321,10 +322,11 @@
        caption
      } */
   function fnPlot(el, spec) {
+    const xmin = spec.xmin || 0;
     const xmax = spec.xmax || 10, ymax = spec.ymax || 10;
     const W = 460, H = 360, padL = 52, padB = 40, padT = 18, padR = 18;
-    const sx = (W - padL - padR) / xmax, sy = (H - padT - padB) / ymax;
-    const X = v => padL + v * sx, Y = v => H - padB - v * sy;
+    const sx = (W - padL - padR) / (xmax - xmin), sy = (H - padT - padB) / ymax;
+    const X = v => padL + (v - xmin) * sx, Y = v => H - padB - v * sy;
     const xstep = spec.xstep || 1, ystep = spec.ystep || 1;
 
     el.classList.add("viz");
@@ -332,8 +334,8 @@
 
     // mřížka
     const grid = svgEl("g", { class: "grid" });
-    for (let i = 0; i <= xmax + 1e-9; i += xstep) grid.appendChild(svgEl("line", { x1: X(i), y1: Y(0), x2: X(i), y2: Y(ymax) }));
-    for (let j = 0; j <= ymax + 1e-9; j += ystep) grid.appendChild(svgEl("line", { x1: X(0), y1: Y(j), x2: X(xmax), y2: Y(j) }));
+    for (let i = xmin; i <= xmax + 1e-9; i += xstep) grid.appendChild(svgEl("line", { x1: X(i), y1: Y(0), x2: X(i), y2: Y(ymax) }));
+    for (let j = 0; j <= ymax + 1e-9; j += ystep) grid.appendChild(svgEl("line", { x1: X(xmin), y1: Y(j), x2: X(xmax), y2: Y(j) }));
     svg.appendChild(grid);
 
     // úsečky funkce
@@ -375,16 +377,22 @@
 
     // osy
     const ax = svgEl("g", { class: "axis" });
-    ax.appendChild(svgEl("line", { x1: X(0), y1: Y(0), x2: X(xmax) + 8, y2: Y(0) }));
-    ax.appendChild(svgEl("line", { x1: X(0), y1: Y(0), x2: X(0), y2: Y(ymax) - 8 }));
-    for (let i = 0; i <= xmax + 1e-9; i += xstep) {
-      const t = svgEl("text", { x: X(i), y: Y(0) + 17, "text-anchor": "middle" }); t.textContent = i; ax.appendChild(t);
+    ax.appendChild(svgEl("line", { x1: X(xmin), y1: Y(0), x2: X(xmax) + 8, y2: Y(0) }));
+    ax.appendChild(svgEl("line", { x1: X(xmin), y1: Y(0), x2: X(xmin), y2: Y(ymax) - 8 }));
+    if (xmin < 0) {
+      // svislá čára v x=0, aby byl u záporného rozsahu vidět počátek
+      const z = svgEl("line", { x1: X(0), y1: Y(0), x2: X(0), y2: Y(ymax) - 8 });
+      z.setAttribute("stroke-dasharray", "3 4");
+      ax.appendChild(z);
+    }
+    for (let i = xmin; i <= xmax + 1e-9; i += xstep) {
+      const t = svgEl("text", { x: X(i), y: Y(0) + 17, "text-anchor": "middle" }); t.textContent = Math.round(i * 1e6) / 1e6; ax.appendChild(t);
     }
     for (let j = ystep; j <= ymax + 1e-9; j += ystep) {
-      const t = svgEl("text", { x: X(0) - 9, y: Y(j) + 4, "text-anchor": "end" }); t.textContent = j; ax.appendChild(t);
+      const t = svgEl("text", { x: X(xmin) - 9, y: Y(j) + 4, "text-anchor": "end" }); t.textContent = j; ax.appendChild(t);
     }
     const lx = svgEl("text", { x: X(xmax) + 4, y: Y(0) - 8 }); lx.textContent = spec.xlabel || "x"; ax.appendChild(lx);
-    const ly = svgEl("text", { x: X(0) + 12, y: Y(ymax) - 6 }); ly.textContent = spec.ylabel || "f(x)"; ax.appendChild(ly);
+    const ly = svgEl("text", { x: X(xmin) + 12, y: Y(ymax) - 6 }); ly.textContent = spec.ylabel || "f(x)"; ax.appendChild(ly);
     svg.appendChild(ax);
 
     el.appendChild(svg);

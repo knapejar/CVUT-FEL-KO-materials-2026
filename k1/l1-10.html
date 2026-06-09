@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.10 · Linearizace absolutní hodnoty (min vs. max) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.10</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.10</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Linearizace absolutní hodnoty (min vs. max)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Absolutní hodnota $|x|$ v <em>kritériu</em> přes pomocnou proměnnou $z \ge x$, $z \ge -x$ — a kdy tahle konstrukce opravdu stačí i pro maximalizaci (spoiler: skoro nikdy).
+  </div>
+
+  <p>Prerekvizity: <a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a>, <a href="l1-4.html#takeaways">[L1.4] Disjunkce a big-M</a>. V <a href="l1-8.html#takeaways">[L1.8]</a> jsi linearizoval $|a-b| \le D$ <em>v omezení</em>. Dnes se absolutní hodnota přestěhuje do <strong>objective function</strong> (cílové funkce) — a ukáže se, že záleží na tom, jestli minimalizuješ, nebo maximalizuješ.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Motivace: call centrum chce pokrýt poptávku „co nejtěsněji“</h2>
+  <p>Cvičení Lab 3 modeluje <strong>call center scheduling</strong> (rozvrhování směn call centra): $d_i$ je požadovaný počet lidí v hodině $i$, proměnná $x_j$ je počet osmihodinových směn začínajících v hodině $j$. Když jen minimalizuješ počet směn při pokrytí $\ge d_i$, vznikají v některých hodinách velké přebytky. Domácí úkol proto chce pokrýt poptávku <em>co nejpřesněji</em>:</p>
+  $$\min \sum_{i=0}^{23} \Big| \, d_i - \sum_{j=i-7}^{i} x_{j \bmod 24} \Big|.$$
+  <p>Odchylka nahoru i dolů je špatně, proto absolutní hodnota. Jenže $|\cdot|$ <strong>není lineární funkce</strong> — do ILP ji přímo napsat nesmíš (přesvědčil ses už v [L1.8]: její graf je „zlomené V“, ne přímka).</p>
+
+  <details class="try">
+    <summary>Zkus sám: umíš $|x|$ napsat jako maximum dvou lineárních funkcí?</summary>
+    <div class="inner">
+      <p>$$|x| = \max\{x,\; -x\}.$$</p>
+      <p>Pro $x \ge 0$ vyhrává větev $x$, pro $x \le 0$ větev $-x$ — dohromady přesně „zlomené V“. Tohle je klíčové pozorování: absolutní hodnota je <em>maximum lineárních funkcí</em>, a s maximem už z [L1.8] umíme zacházet pomocnou proměnnou.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: zaveď pomocnou proměnnou $z$, která má „hrát roli“ $|x|$ v minimalizačním kritériu. Jakými lineárními omezeními ji svážeš s $x$?</summary>
+    <div class="inner">
+      <p>Stejně jako $h_{max}$ v [L1.8] — jednostrannými mezemi shora přes obě větve:</p>
+      $$z \ge x, \qquad z \ge -x,$$
+      <p>a v kritériu minimalizuj $z$ místo $|x|$. Omezení zaručují jen $z \ge \max\{x, -x\} = |x|$ — tedy $z$ smí být i zbytečně velké. Ale <strong>minimalizace</strong> tlačí $z$ dolů, takže v optimu se $z$ „přilepí“ na nejnižší povolenou hodnotu: $z = |x|$. Přesně tahle dělba práce (omezení hlídají jeden směr, kritérium druhý) dělala v [L1.8] korektní i $h_{max}$.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-min"></div>
+
+  <p>Zdrojové cvičení formuluje obecný recept: pro součet absolutních hodnot zavedeš <strong>jednu proměnnou $z_i$ na každou absolutní hodnotu</strong>:</p>
+  $$\min \sum_i |q_i - v_i| \quad \longrightarrow \quad \min \sum_i z_i \quad \text{s.t.} \quad q_i - v_i \le z_i, \;\; v_i - q_i \le z_i, \;\; z_i \ge 0.$$
+  <p>A hned k tomu dodává varování (citace): <em>„Please notice that this transformation <strong>does not generally work</strong> if the absolute value was not originally in the objective function.“</em> Co se přesně rozbije?</p>
+
+  <h2>A co maximalizace?</h2>
+
+  <details class="try">
+    <summary>Zkus sám: nech omezení $z \ge x$, $z \ge -x$ a změň kritérium na $\max z$. Co udělá solver?</summary>
+    <div class="inner">
+      <p>Omezení dávají $z$ jen <em>dolní</em> mez — shora ho nedrží nic. Maximalizace tedy požene $z$ nahoru: buď do nekonečna (model je <strong>unbounded</strong>, neomezený), nebo na horní mez $z$, pokud nějakou deklaruješ. V obou případech $z \ne |x|$ — hodnota kritéria nemá s absolutní hodnotou nic společného. Trik $z \ge x$, $z \ge -x$ funguje <strong>jen ve směru, kterým kritérium tlačí</strong> — tj. jen pro minimalizaci.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-max"></div>
+
+  <details class="try">
+    <summary>Zkus sám: pomůže, když dám meze na $x$, třeba $-5000 \le x \le 1000$? Solver pak přece nemůže utéct „donekonečna“…</summary>
+    <div class="inner">
+      <p>Nepomůže. Meze na $x$ vůbec neomezují $z$ — to uteče stejně. A když omezíš i $z$ (třeba $z \le 5000$), solver prostě nastaví $z = 5000$ bez ohledu na skutečnou hodnotu $|x|$. Pouhé <strong>bounds</strong> (prosté meze na proměnné) vztah $z = |x|$ nevynutí nikdy — chybí omezení, které by $z$ <em>shora</em> přivázalo k větvím $x$ a $-x$. A „$z \le x$ NEBO $z \le -x$“ je disjunkce → binární přepínač + big-M [L1.4].</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „max $|x|$ vyřeším přes $z \ge x$, $z \ge -x$, vždyť mám bounds“</div>
+    <p>Pouhé meze na proměnných (např. $-5000 \le x \le 1000$) <strong>NESTAČÍ</strong>. U maximalizace se $z$ od $|x|$ „odlepí“ a uletí na svou horní mez — kritérium pak měří nesmysl. Zápis bez přepínače je u maximalizace přípustný <strong>jen tehdy, když je znaménko $x$ jednoznačně vynucené ostatními omezeními</strong> (pak ale žádné $z$ nepotřebuješ — viz níže). Nikdy nemodeluj $\max |x|$ bez znaménkového přepínače, dokud sis neověřil, že znaménko $x$ je vynucené.</p>
+  </div>
+
+  <h2>Kdy se obejdeš bez přepínače: vynucené znaménko</h2>
+  <p>Na zkoušce 2023 se maximalizovalo $|x_1| + |x_2|$ a v modelu zároveň platilo $x_1 = 4 x_4$ a $x_4 \ge 1$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: co tahle dvě omezení říkají o znaménku $x_1$? A co z toho plyne pro $|x_1|$?</summary>
+    <div class="inner">
+      <p>$x_4 \ge 1$ a $x_1 = 4x_4$ dávají $x_1 \ge 4 &gt; 0$ — $x_1$ je <strong>v každém přípustném řešení kladné</strong>. Pak ale $|x_1| = x_1$ <em>identicky</em> a do kritéria napíšeš rovnou $x_1$, žádná pomocná proměnná, žádný trik. Pozor na správné čtení: vzorové řešení tady „prošlo“ kvůli <strong>vynucenému znaménku</strong>, NE proto, že by trik $z \ge \pm x$ u maximalizace fungoval díky mezím $-5000 \le x_i \le 1000$.</p>
+      <p>Symetricky: kdyby omezení vynucovala $x \le 0$, je $|x| = -x$. Vynucené znaménko = absolutní hodnota zmizí sama.</p>
+    </div>
+  </details>
+
+  <p>A když znaménko vynucené není (v téže úloze třeba u $x_2$)? Pak obecná $\max |x|$ potřebuje <strong>binární přepínač znaménka</strong> s big-M [L1.4]: binárka $s$ řekne, která větev maxima platí, a $z$ se přiváže <em>shora</em>:</p>
+  $$z \le x + M(1-s), \qquad z \le -x + M s, \qquad s \in \{0,1\}.$$
+  <p>Maximalizace pak $z$ vytlačí přesně na $|x|$ (solver si zvolí $s$ podle znaménka $x$). Detailně si přepínač — spolu s poměrovou a max-z-více podmínkou z téže zkouškové úlohy — rozebereme v <a href="l1-11.html">[L1.11] Poměrová a max-z-více podmínka</a>; tady si ho vyzkoušíš v úloze T02.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.10</div>
+    <ul>
+      <li><strong>$|x| = \max\{x, -x\}$.</strong> Minimalizace $|x|$ v kritériu: zaveď $z$, přidej $z \ge x$, $z \ge -x$ a minimalizuj $z$ (u součtu jedna $z_i$ na každou absolutní hodnotu). Vždy validní — minimalizace $z$ stlačí na $|x|$.</li>
+      <li><strong>Maximalizace $|x|$ přes pouhé $z \ge x$, $z \ge -x$ OBECNĚ NEFUNGUJE</strong> — omezení drží $z$ jen zdola, max ho odlepí od $|x|$ a požene na horní mez (či do neomezenosti). <strong>Pouhé bounds na proměnných (např. $-5000 \le x \le 1000$) NESTAČÍ.</strong></li>
+      <li>Bez přepínače se $\max |x|$ obejde <strong>jen když je znaménko $x$ vynucené ostatními omezeními</strong> (např. $x_1 = 4x_4 \wedge x_4 \ge 1 \Rightarrow x_1 \ge 4 &gt; 0$, takže $|x_1| = x_1$). Zkouška 2023 prošla kvůli vynuceným znaménkům, ne kvůli bounds.</li>
+      <li>Obecná $\max |x|$ s neurčitým znaménkem = binární <strong>znaménkový přepínač</strong> $s$ + big-M <a href="l1-4.html#takeaways">[L1.4]</a>: $z \le x + M(1-s)$, $z \le -x + Ms$ — detaily v <a href="l1-11.html">[L1.11]</a>.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-callcenter">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Call center scheduling (min Σ|odchylka|)</strong>
+      <span class="task-src">zdroj: Lab 3 — cv03_ilp_callcenter (homework)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“A call center needs to create a cyclic daily schedule (i.e., numbers of the shifts at particular hours are same on every day) of the <em>shifts</em> for its employees. Let $\mathbf{d}$ be a vector of a <em>personnel demand</em> in each hour during the day, i.e., $d_i$ is defined $\forall i = 0, 1, 2, \ldots, 23$. The personnel demand $d_i$ determines the minimal number of shifts (i.e., employees who will be assigned to these shifts) between $i$ and $(i+1)$ hour, e.g., $d_{10}$ expresses the minimal number of shifts running between 10 a.m. and 11 a.m. […] The shift may start at arbitrary full hour and its length is set to 8 hours. The ILP model of this problem is based on a variable $\mathbf{x}$ such that $x_i$ represents a number of the shifts starting at hour $i$.</p>
+        <p>To avoid a large surplus of shifts in comparison to the personnel demand, we modify our objective to find a daily schedule of shifts such that the difference of the personnel demand and its coverage is minimized, i.e., we try to cover the personnel demand as precisely as possible”</p>
+        $$\min \sum_{i=0}^{23} \left| d_i - \sum_{j=i-7}^{i} x_{j \bmod 24} \right| \tag{1}$$
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Cyklický denní rozvrh směn: $x_j$ = počet osmihodinových směn začínajících v hodině $j$ (stejný každý den, hodiny počítáme modulo 24). Hodinu $i$ pokrývají směny, které začaly v hodinách $i-7, \ldots, i$ (mod 24). Cíl: minimalizovat součet absolutních odchylek mezi poptávkou $d_i$ a skutečným pokrytím — penalizuje se přebytek i nedostatek (tvrdé pokrytí $\ge d_i$ se v této verzi nevyžaduje).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — $|{\cdot}|$ v minimalizačním kritériu přes $z_i \ge \cdot$, $z_i \ge -(\cdot)$.</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a> — celočíselné nezáporné proměnné, lineární výrazy.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Nejdřív bez absolutní hodnoty: jak vypadá lineární výraz „pokrytí hodiny $i$“? (Které směny v hodině $i$ ještě běží?) Pak: kolik absolutních hodnot kritérium obsahuje — a kolik pomocných proměnných $z_i$ tedy zavedeš? Nakonec: kterým směrem každé $z_i$ svážou omezení a kterým směrem ho tlačí kritérium? Ověř si, že jde o minimalizaci — jinak by trik nebyl validní!</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Pokrytí hodiny $i$ označme $c_i = \sum_{j=i-7}^{i} x_{j \bmod 24}$ (lineární výraz v $x$). Na každou z 24 absolutních hodnot jedna pomocná proměnná $z_i$:</p>
+          $$\begin{aligned} \min \quad & \sum_{i=0}^{23} z_i \\ \text{subject to:} \quad & d_i - \sum_{j=i-7}^{i} x_{j \bmod 24} \;\le\; z_i \qquad i \in 0..23 \\ & \sum_{j=i-7}^{i} x_{j \bmod 24} - d_i \;\le\; z_i \qquad i \in 0..23 \\ \text{variables:} \quad & x_{j \in 0..23} \in \mathbb{Z}_{\ge 0}, \qquad z_{i \in 0..23} \ge 0 \end{aligned}$$
+          <p><strong>Komentáře:</strong></p>
+          <ul>
+            <li>Dvě nerovnosti na $z_i$ říkají $z_i \ge |d_i - c_i|$; minimalizace $\sum z_i$ pak v optimu každé $z_i$ stlačí přesně na $|d_i - c_i|$. Absolutní hodnota je <em>v minimalizačním kritériu</em> — trik je validní.</li>
+            <li>Sčítací index $j \bmod 24$ řeší cykličnost: hodinu 2 pokrývají i směny začínající v 19, 20, …, 23 předchozího dne.</li>
+            <li>$z_i \ge 0$ je zde redundantní (plyne z obou nerovností), ale zdrojový recept Eq. (2) ho uvádí — klidně ho piš taky.</li>
+            <li>Sanity check ze zdroje: pro ukázkový vektor $\mathbf{d}$ z Lab 3 vyjde optimum $28$ (zatímco původní model „minimalizuj počet směn při pokrytí $\ge d_i$“ dává 55 směn s velkými přebytky kolem 4.–5. hodiny ranní).</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-absval">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Maximization of absolute value</strong>
+      <span class="task-src">zdroj: zkouška 2023, strana 6 (T07)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Consider the following mathematical model of four variables $x_1, x_2, x_3$ and $x_4$.</p>
+        $$\text{Maximize } |x_1| + |x_2|$$
+        <p>subject to the restrictions</p>
+        <ol>
+          <li>at least one of these two constraints must hold:
+            <ul>
+              <li>$x_1 + x_2 + x_3 + x_4 \le 1000$</li>
+              <li>$3 \cdot x_1 + 5 \cdot x_2 + x_3 + 2 \cdot x_4 \le 500$</li>
+            </ul>
+          </li>
+          <li>$x_1$ is at least $\max\{2 \cdot x_2, x_3\}$.</li>
+          <li>$\frac{x_1}{x_4}$ equals to 4.</li>
+          <li>$x_{i \in \{1, 2, 3, 4\}} \in \mathbb{Z}$</li>
+          <li>$-5000 \le x_{i \in \{1, 2, 3\}}$, $x_4 \ge 1$, $x_{i \in \{1, 2, 3, 4\}} \le 1000$.</li>
+        </ol>
+        <p>Formulate by the <strong>Integer Linear Programming</strong>.”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p><strong>Maximalizace</strong> součtu dvou absolutních hodnot nad pěti druhy omezení: disjunkce „aspoň jedna ze dvou nerovností“ (1), podmínka s maximem (2), poměr dvou proměnných (3), celočíselnost (4) a prosté meze (5). Úkolem je čistá ILP formulace — nic se nepočítá.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — min vs. max $|x|$, vynucené znaménko, znaménkový přepínač.</li>
+        <li><a href="l1-4.html#takeaways">[L1.4] Disjunkce a big-M</a> — „aspoň jedna z podmínek“ a přepínač.</li>
+        <li>Podmínky (2) a (3) zvládneš selským rozumem už teď; systematicky je rozebere <a href="l1-11.html">[L1.11]</a> (následující lekce).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Hlavní past je v kritériu: je to <em>maximalizace</em>, takže $z \ge \pm x$ z první části lekce použít nesmíš. Projdi proměnné v kritériu jednu po druhé: vynucují omezení (2), (3), (5) znaménko $x_1$? (Zkombinuj $x_1 = 4x_4$ s mezí na $x_4$.) A znaménko $x_2$? Pokud vynucené není, potřebuješ znaménkový přepínač. K podmínce (1): klasické big-M „aspoň jedna platí“ [L1.4] — a spočítej si poctivě, jak velké $M$ musí být, aby <em>vypnutá</em> nerovnost šla splnit při nejhorších hodnotách mezí (5). K (2): „$x_1$ je aspoň maximum dvou výrazů“ — co to říká o vztahu $x_1$ ke <em>každému</em> z nich? K (3): zlomek přepiš na rovnost (smíš — proč nehrozí dělení nulou?).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Proměnné: $x_1, \ldots, x_4 \in \mathbb{Z}$; $y \in \{0,1\}$ (přepínač disjunkce), $s \in \{0,1\}$ (znaménkový přepínač pro $x_2$), $z_2 \in \mathbb{Z}$ (role $|x_2|$). Konstanta $M = 11000$ (zdůvodnění níže).</p>
+          $$\begin{aligned} \max \quad & x_1 + z_2 \\ \text{subject to:} \quad & x_1 + x_2 + x_3 + x_4 \le 1000 + M y \\ & 3x_1 + 5x_2 + x_3 + 2x_4 \le 500 + M (1 - y) \\ & x_1 \ge 2 x_2 \\ & x_1 \ge x_3 \\ & x_1 = 4 x_4 \\ & z_2 \le x_2 + M(1 - s) \\ & z_2 \le -x_2 + M s \\ & -5000 \le x_i \le 1000 \quad i \in \{1,2,3\} \\ & 1 \le x_4 \le 1000 \\ \text{variables:} \quad & x_{i \in 1..4} \in \mathbb{Z}, \;\; z_2 \in \mathbb{Z}, \;\; y, s \in \{0,1\} \end{aligned}$$
+          <p><strong>Komentáře po podmínkách:</strong></p>
+          <ul>
+            <li><strong>Kritérium, $|x_1|$:</strong> z $x_1 = 4x_4$ a $x_4 \ge 1$ plyne $x_1 \ge 4 &gt; 0$, takže $|x_1| = x_1$ — píšeme rovnou $x_1$, bez pomocné proměnné. To je přesně případ „vynucené znaménko“ z výkladu.</li>
+            <li><strong>Kritérium, $|x_2|$:</strong> znaménko $x_2$ vynucené NENÍ (meze dovolují $-5000$ až $1000$, omezení $x_1 \ge 2x_2$ ho neurčí). Maximalizujeme, takže $z_2$ musí být přivázané <em>shora</em>: pro $s = 1$ platí $z_2 \le x_2$ (větev $x_2 \ge 0$), pro $s = 0$ platí $z_2 \le -x_2$; druhá nerovnost je vždy uvolněná o $M$. Solver zvolí $s$ podle znaménka $x_2$ a maximalizace vytlačí $z_2 = |x_2|$. Pozor: zápis „$|x_2| \ge x_2$, $|x_2| \ge -x_2$“ z ručního řešení 2023 by při maximalizaci nechal $|x_2|$ utéct na horní mez (v přepisu řešení je ostatně přeškrtnutý) — viz nebezpečná polopravda této lekce.</li>
+            <li><strong>(1) disjunkce:</strong> big-M přepínač [L1.4]: $y = 1$ vypne první nerovnost, $y = 0$ druhou. <strong>Volba $M$:</strong> vypnutá nerovnost musí být splnitelná pro všechny hodnoty v mezích (5). Nejhorší levá strana první nerovnosti je $4 \cdot 1000 = 4000$ (potřeba $M \ge 3000$), druhé $3000 + 5000 + 1000 + 2000 = 11000$ (potřeba $M \ge 10500$). Bereme $M = 11000$. Ruční řešení 2023 psalo $M = 4 \cdot 1000$ — to pro druhou nerovnost <em>nestačí</em> a zbytečně by ořezalo přípustnou množinu.</li>
+            <li><strong>(2) maximum:</strong> $x_1 \ge \max\{2x_2, x_3\}$ ⟺ $x_1 \ge 2x_2$ A ZÁROVEŇ $x_1 \ge x_3$ — „aspoň maximum“ = „aspoň každý z výrazů“, konjunkce je v ILP zadarmo (srovnej [L1.8]; systematicky v [L1.11]).</li>
+            <li><strong>(3) poměr:</strong> $\frac{x_1}{x_4} = 4$ ⟺ $x_1 = 4 x_4$. Dělení nulou nehrozí, protože (5) vynucuje $x_4 \ge 1$ — obecné ošetření „$x_4 \ne 0$“ ukáže [L1.11].</li>
+            <li><strong>Sanity check:</strong> optimum je $x_1 = 1000$ ($x_4 = 250$), $x_2 = -5000$ ($s = 0$, $z_2 = 5000$), např. $x_3 = -5000$, $y = 1$ (platí druhá nerovnost: $3000 - 25000 - 5000 + 500 = -26500 \le 500$ ✓); hodnota kritéria $1000 + 5000 = 6000$.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.10">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-9.html"><span class="dir">← Předchozí</span> L1.9 · VYVRCHOLENÍ: Wedding plan [FOTO]</a>
+    <a class="next" href="l1-11.html"><span class="dir">Další →</span> L1.11 · Poměrová a max-z-více podmínka</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// MIN: z je tlačeno dolů na "zlomené V" |x| = max{x, −x}
+KOViz.fnPlot(document.getElementById('viz-min'), {
+  xmin: -4, xmax: 4, ymax: 5, xstep: 1, ystep: 1,
+  xlabel: 'x', ylabel: 'z',
+  segments: [
+    {x1: -4, y1: 4, x2: 0, y2: 0, label: 'z = −x', labelAt: 0.3, labelDx: -42, labelDy: -2},
+    {x1: 0, y1: 0, x2: 4, y2: 4, label: 'z = x', labelAt: 0.7, labelDx: 12, labelDy: 4},
+  ],
+  points: [
+    {x: 2.5, y: 4.4, open: true, label: 'přípustné, ale min z ho stlačí ↓', dx: -218, dy: 5},
+    {x: 2.5, y: 2.5, label: 'optimum: z = |x|', dx: -112, dy: 16},
+  ],
+  caption: 'Minimalizace: omezení z ≥ x a z ≥ −x dovolují z kdekoli NAD „zlomeným V“. Kritérium min z tlačí dolů, takže v optimu z sedí přesně na V — tj. z = max{x, −x} = |x|. Omezení hlídají jeden směr, kritérium druhý.'
+});
+
+// MAX: z se odlepí a uletí k horní mezi — bounds na x nepomůžou
+KOViz.fnPlot(document.getElementById('viz-max'), {
+  xmin: -4, xmax: 4, ymax: 5, xstep: 1, ystep: 1,
+  xlabel: 'x', ylabel: 'z',
+  segments: [
+    {x1: -4, y1: 4, x2: 0, y2: 0},
+    {x1: 0, y1: 0, x2: 4, y2: 4, label: 'z = |x|', labelAt: 0.75, labelDx: 12, labelDy: 6},
+    {x1: -3.8, y1: 4.6, x2: 3.8, y2: 4.6, dashed: true, label: 'max z žene z sem (horní mez / ∞)', labelAt: 0.16, labelDx: -8, labelDy: -8},
+  ],
+  points: [
+    {x: 0.5, y: 4.6, open: true, label: 'z = 4.6, ale |x| = 0.5', dx: 10, dy: 24},
+  ],
+  caption: 'Maximalizace s týmiž omezeními z ≥ x, z ≥ −x: shora z nedrží nic, takže max z uteče od V nahoru — na horní mez, nebo do neomezenosti. Hodnota kritéria pak s |x| nesouvisí. Meze na x (bounds) to nespraví: neomezují z.'
+});
+</script>
+</body>
+</html>

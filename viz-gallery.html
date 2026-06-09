@@ -37,6 +37,9 @@
   <h2>4c · Function plot (nespojitá fixed-charge funkce)</h2>
   <div class="viz" id="g4c"></div>
 
+  <h2>4d · Function plot se záporným rozsahem x (xmin)</h2>
+  <div class="viz" id="g4d"></div>
+
   <h2>5 · Stepper (krokování algoritmu)</h2>
   <div class="viz" id="g5"></div>
 
@@ -142,6 +145,18 @@ KOViz.fnPlot(document.getElementById('g4c'), {
     {x: 0, y: 7, open: true, label: 'limitní bod — do funkce nepatří', dx: 14, dy: 22},
   ],
   caption: 'Ukázka 4c: KOViz.fnPlot — po částech lineární nespojitá funkce; prázdné kolečko = bod, který do funkce nepatří, plné = patří.'
+});
+
+// 4d — function plot se záporným x: f(x) = |x|
+KOViz.fnPlot(document.getElementById('g4d'), {
+  xmin: -4, xmax: 4, ymax: 5, xstep: 1, ystep: 1,
+  xlabel: 'x', ylabel: 'z',
+  segments: [
+    {x1: -4, y1: 4, x2: 0, y2: 0, label: 'z = −x', labelAt: 0.35, labelDx: -56, labelDy: -4},
+    {x1: 0, y1: 0, x2: 4, y2: 4, label: 'z = x', labelAt: 0.65, labelDx: 12, labelDy: 2},
+  ],
+  points: [{x: 0, y: 0}],
+  caption: 'Ukázka 4d: KOViz.fnPlot s xmin &lt; 0 — graf z = |x|; čárkovaná svislice vyznačuje x = 0.'
 });
 
 // 5 — stepper (mini Dijkstra na 4 uzlech)
