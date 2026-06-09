@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L0.1 · Co je graf — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k0">K0 · Základní jazyk grafů a ILP</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L0.1</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L0.1</span> Kapitola K0 — Základní jazyk grafů a ILP · <strong>[MUST]</strong>
+  </p>
+  <h1>Co je graf</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Graf = vrcholy + hrany; hrana je buď orientovaná (má směr), nebo neorientovaná.
+  </div>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Proč grafy?</h2>
+  <p>Skoro každá úloha v tomhle kurzu — nejkratší cesty, toky, obchodní cestující, rozvrhování s precedencemi — se formalizuje pomocí <strong>grafu</strong> (graph). Neformálně: graf se skládá z <strong>vrcholů</strong> (nodes, také uzly) a <strong>hran</strong> (edges); každá hrana spojuje dva vrcholy.</p>
+
+  <div class="viz" id="viz-undirected"></div>
+
+  <p>Hrana mezi vrcholy $v$ a $w$ může být dvojího druhu:</p>
+  <ul>
+    <li><strong>Neorientovaná</strong> (undirected): symetrické spojení, zapisujeme jako <em>množinu</em> $e = \{v, w\}$.</li>
+    <li><strong>Orientovaná</strong> (directed): hrana z jednoho vrcholu <em>vychází</em> (leaves) a do druhého <em>vstupuje</em> (enters), zapisujeme jako <em>uspořádanou dvojici</em> $e = (v, w)$.</li>
+  </ul>
+
+  <details class="try">
+    <summary>Zkus sám: jaký je praktický rozdíl mezi zápisem $\{v,w\}$ a $(v,w)$?</summary>
+    <div class="inner">
+      <p>Množina $\{v,w\}$ nemá pořadí: $\{v,w\} = \{w,v\}$ — po neorientované hraně se dá „jít“ oběma směry. Uspořádaná dvojice $(v,w)$ pořadí má: $(v,w) \ne (w,v)$ — orientovaná hrana vede jen z $v$ do $w$. Proto se orientované hrany kreslí se šipkou.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-directed"></div>
+
+  <h2>Formální definice</h2>
+  <p>Graf s vrcholy $V$ a hranami $E$ obvykle značíme $G = (V, E)$. <strong>Orientovaný graf</strong> (directed graph, <strong>digraph</strong>) má hrany — uspořádané dvojice $(v,w) \in V \times V$, $v \ne w$. <strong>Neorientovaný graf</strong> má hrany — dvouprvkové podmnožiny $\{v,w\} \subseteq V$. Obě množiny $V$ i $E$ jsou konečné.</p>
+  <p>Pár pojmů, které budeme potkávat pořád:</p>
+  <ul>
+    <li>Vrcholy $v$, $w$ hrany $e$ jsou její <strong>krajní vrcholy</strong> (endpoints); říkáme, že jsou s hranou <strong>incidentní</strong> (incident).</li>
+    <li>Dvě hrany spojující tutéž dvojici vrcholů jsou <strong>paralelní hrany</strong> (parallel edges); graf s paralelními hranami je <strong>multigraf</strong>. Graf bez nich je <strong>prostý graf</strong> (simple graph) — s těmi pracujeme prakticky vždy.</li>
+    <li><strong>Podgraf</strong> (subgraph) $H$ grafu $G$ vznikne vynecháním některých vrcholů a/nebo hran (hrana v podgrafu musí mít oba krajní vrcholy).</li>
+    <li><strong>Úplný graf</strong> (complete graph) $K_n$: neorientovaný prostý graf na $n$ vrcholech, kde každá dvojice vrcholů je spojena hranou.</li>
+  </ul>
+
+  <details class="try">
+    <summary>Zkus sám: kolik hran má úplný graf $K_5$?</summary>
+    <div class="inner">
+      <p>Hrana = dvojice vrcholů, takže $\binom{5}{2} = 10$ hran. Obecně má $K_n$ přesně $\binom{n}{2} = \frac{n(n-1)}{2}$ hran. To je dobré číslo pro odhady: „hustý“ graf má až $O(n^2)$ hran.</p>
+    </div>
+  </details>
+
+  <h2>Čísla na hranách: váha a kapacita</h2>
+  <p>Samotná struktura grafu většinou nestačí — optimalizujeme přes čísla přiřazená hranám:</p>
+  <ul>
+    <li><strong>Váha / cena</strong> (weight / cost) $c(e)$ — např. délka silnice. Minimalizujeme součet cen (nejkratší cesta, minimální kostra…).</li>
+    <li><strong>Kapacita</strong> (capacity) $u(e)$ — např. propustnost potrubí. Omezuje, kolik „toku“ smí hranou protéct (kapitola K4).</li>
+  </ul>
+
+  <div class="viz" id="viz-weights"></div>
+
+  <h2>Neorientovaný graf jako digraf</h2>
+  <p>Většina algoritmů v kurzu je formulovaná pro digrafy. Vadí to u neorientovaných grafů?</p>
+
+  <details class="try">
+    <summary>Zkus sám: jak z neorientovaného grafu vyrobit „ekvivalentní“ digraf?</summary>
+    <div class="inner">
+      <p>Každou neorientovanou hranu $\{v,w\}$ nahradíme <strong>dvojicí protisměrných orientovaných hran</strong> $(v,w)$ a $(w,v)$ — obě se stejnou váhou/kapacitou. Po obou se dá jít „tam i zpět“, přesně jako po původní neorientované hraně. Proto stačí umět algoritmy pro digrafy.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-replace"></div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L0.1</div>
+    <ul>
+      <li>Graf $G = (V, E)$: vrcholy + hrany; hrana spojuje dva vrcholy. Orientovaná hrana $(v,w)$ má směr (z $v$ do $w$), neorientovaná $\{v,w\}$ ne.</li>
+      <li>Hrana může nést <strong>váhu/cenu</strong> $c(e)$ (minimalizujeme součet) a <strong>kapacitu</strong> $u(e)$ (omezuje tok).</li>
+      <li>Neorientovanou hranu lze nahradit dvěma protisměrnými orientovanými hranami — algoritmy pro digrafy tak pokryjí i neorientované grafy.</li>
+      <li>Prostý graf (simple) nemá paralelní hrany; úplný graf $K_n$ má $\binom{n}{2}$ hran.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA ===== -->
+  <div class="task" id="t-undirected-to-digraph">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>From an undirected graph to a digraph</strong>
+      <span class="task-src">zdroj: prezentace/01_Basic_KO.md, slide 56</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“From an undirected graph we can make a digraph by replacing every undirected edge by a pair of inverse directed edges.” Apply this construction to the undirected graph drawn below (triangle $a, b, c$ with edge weights $c(\{a,b\})=2$, $c(\{b,c\})=5$, $c(\{a,c\})=4$): write down the node set $V$ and the edge set $E$ of the resulting digraph, including the weight of each directed edge.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Máš neorientovaný trojúhelník se třemi váženými hranami. Úkol: přepsat ho na orientovaný graf (digraf) podle pravidla ze slidu — každá neorientovaná hrana → dvě protisměrné orientované — a vypsat $V$, $E$ i váhy.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Jen tuhle lekci: zápis $\{v,w\}$ vs. $(v,w)$ a pravidlo náhrady.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Kolik orientovaných hran vznikne ze 3 neorientovaných? Jakou váhu dostane každá z dvojice protisměrných hran? (Stejnou jako původní hrana — jízda „tam“ stojí stejně jako „zpět“.)</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Vrcholy se nemění: $V = \{a, b, c\}$. Každá ze 3 neorientovaných hran dá 2 orientované, celkem 6 hran:</p>
+          $$E = \{(a,b), (b,a), (b,c), (c,b), (a,c), (c,a)\}$$
+          <p>Váhy: $c((a,b)) = c((b,a)) = 2$, $\;c((b,c)) = c((c,b)) = 5$, $\;c((a,c)) = c((c,a)) = 4$. Obecně: neorientovaný graf s $m$ hranami → digraf s $2m$ hranami, váhy se kopírují na obě protisměrné hrany.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L0.1">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../index.html"><span class="dir">← Předchozí</span> Domů</a>
+    <a class="next" href="l0-2.html"><span class="dir">Další →</span> L0.2 · Stupeň vrcholu</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — neorientovaný graf
+KOViz.graph(document.getElementById('viz-undirected'), {
+  directed: false,
+  nodes: [
+    {id:'a', x:130, y:90},
+    {id:'b', x:330, y:60},
+    {id:'c', x:510, y:120},
+    {id:'d', x:230, y:270},
+    {id:'e', x:450, y:280},
+  ],
+  edges: [
+    {from:'a', to:'b'},
+    {from:'b', to:'c'},
+    {from:'a', to:'d'},
+    {from:'b', to:'d'},
+    {from:'c', to:'e'},
+    {from:'d', to:'e'},
+  ],
+  caption: 'Neorientovaný graf: 5 vrcholů V = {a,…,e}, 6 hran. Hrany nemají směr — žádné šipky.'
+});
+
+// 2 — orientovaný graf
+KOViz.graph(document.getElementById('viz-directed'), {
+  directed: true,
+  nodes: [
+    {id:'a', x:130, y:90},
+    {id:'b', x:330, y:60},
+    {id:'c', x:510, y:120},
+    {id:'d', x:230, y:270},
+    {id:'e', x:450, y:280},
+  ],
+  edges: [
+    {from:'a', to:'b'},
+    {from:'b', to:'c'},
+    {from:'d', to:'a'},
+    {from:'b', to:'d'},
+    {from:'c', to:'e'},
+    {from:'e', to:'d'},
+  ],
+  caption: 'Orientovaný graf (digraf) na stejných vrcholech: každá hrana má směr. Např. (d,a) vychází z d a vstupuje do a.'
+});
+
+// 3 — váhy a kapacity
+KOViz.graph(document.getElementById('viz-weights'), {
+  directed: true,
+  nodes: [
+    {id:'s', x:90,  y:180},
+    {id:'a', x:300, y:80},
+    {id:'b', x:300, y:280},
+    {id:'t', x:540, y:180},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'c=3'},
+    {from:'s', to:'b', label:'c=1'},
+    {from:'a', to:'t', label:'c=2'},
+    {from:'b', to:'t', label:'c=7'},
+    {from:'b', to:'a', label:'u=5', dashed:true},
+  ],
+  caption: 'Čísla na hranách: plné hrany nesou cenu c(e), čárkovaná hrana ukazuje kapacitu u(e). Stejný graf, různé „brýle“ podle úlohy.'
+});
+
+// 4 — náhrada neorientované hrany dvěma orientovanými
+KOViz.graph(document.getElementById('viz-replace'), {
+  directed: true,
+  nodes: [
+    {id:'v1', x:110, y:180, label:'v'},
+    {id:'w1', x:260, y:180, label:'w'},
+    {id:'v2', x:400, y:180, label:'v'},
+    {id:'w2', x:560, y:180, label:'w'},
+  ],
+  edges: [
+    {from:'v1', to:'w1', label:'c=4', undirected:true},
+    {from:'v2', to:'w2', label:'c=4', curve:-0.6},
+    {from:'w2', to:'v2', label:'c=4', curve:-0.6},
+  ],
+  caption: 'Vlevo neorientovaná hrana {v,w}; vpravo její náhrada dvojicí protisměrných orientovaných hran (v,w) a (w,v) se stejnou váhou.'
+});
+</script>
+</body>
+</html>

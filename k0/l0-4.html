@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L0.4 · Strom, kostra, les, DAG — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k0">K0 · Základní jazyk grafů a ILP</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L0.4</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L0.4</span> Kapitola K0 — Základní jazyk grafů a ILP · <strong>[MUST]</strong>
+  </p>
+  <h1>Strom, kostra, les, DAG</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Strom = souvislý graf bez kružnic; DAG = orientovaný graf bez orientovaného cyklu.
+  </div>
+
+  <p>Prerekvizity: <a href="l0-3.html">[L0.3] Cesta, sled, tah, cyklus</a> (cesta, kružnice), <a href="l0-2.html">[L0.2] Stupeň vrcholu</a>.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Souvislost</h2>
+  <p>Neorientovaný graf je <strong>souvislý</strong> (connected), pokud mezi každou dvojicí vrcholů existuje cesta. Maximální souvislé podgrafy jsou <strong>komponenty souvislosti</strong> (connected components) — každý vrchol leží přesně v jedné. Digraf je souvislý, pokud je souvislý jeho podkladový neorientovaný graf; je <strong>silně souvislý</strong> (strongly connected), pokud mezi každými $x, y$ vede orientovaná cesta tam i zpět.</p>
+
+  <h2>Les a strom</h2>
+  <ul>
+    <li><strong>Les</strong> (forest) = neorientovaný graf <em>bez kružnice</em>.</li>
+    <li><strong>Strom</strong> (tree) = les, který je navíc <em>souvislý</em>.</li>
+  </ul>
+
+  <div class="viz" id="viz-tree"></div>
+
+  <details class="try">
+    <summary>Zkus sám: strom má $n$ vrcholů. Kolik má hran? A co se stane, když jednu hranu přidáš / odebereš?</summary>
+    <div class="inner">
+      <p>Strom na $n$ vrcholech má přesně $\boldsymbol{n-1}$ hran. Když libovolnou hranu <em>odebereš</em>, graf se rozpadne (přestane být souvislý). Když libovolnou hranu <em>přidáš</em>, vznikne kružnice. Strom je tedy „přesně na hraně“: minimální souvislý a zároveň maximální acyklický graf.</p>
+    </div>
+  </details>
+
+  <p>Slidy (slide 61) dávají sedm ekvivalentních charakterizací stromu. Nejdůležitější pro nás:</p>
+  <ul>
+    <li>(b) $G$ má $n-1$ hran a žádnou kružnici,</li>
+    <li>(c) $G$ má $n-1$ hran a je souvislý,</li>
+    <li>(g) mezi každou dvojicí vrcholů vede <strong>právě jedna</strong> cesta.</li>
+  </ul>
+  <p>Užitečný fakt z důkazu: les s $n$ vrcholy, $m$ hranami a $p$ komponentami splňuje $n = m + p$.</p>
+
+  <h2>Kostra</h2>
+  <p><strong>Kostra</strong> (spanning tree) grafu $G$ = podgraf, který je stromem a obsahuje <em>všechny</em> vrcholy $G$. Každý souvislý graf nějakou kostru má (kružnice postupně trhám odebíráním hran). Pozor: kostra je <em>libovolná</em> — o nejlevnější kostře (MST) až v <a href="l0-5.html">[L0.5] Minimální kostra (MST)</a>.</p>
+
+  <div class="viz" id="viz-spanning"></div>
+
+  <details class="try">
+    <summary>Zkus sám: kolik hran musíš z grafu s $n$ vrcholy a $m$ hranami odebrat, aby zbyla kostra?</summary>
+    <div class="inner">
+      <p>Kostra má $n-1$ hran, takže odebíráš $m - (n-1)$ hran — a každá odebraná musí ležet na nějaké kružnici (jinak bys graf rozpojil).</p>
+    </div>
+  </details>
+
+  <h2>DAG a topologické uspořádání</h2>
+  <p>Orientovaná obdoba acykličnosti: <strong>DAG</strong> (directed acyclic graph, orientovaný acyklický graf) = digraf bez orientovaného cyklu. <strong>Topologické uspořádání</strong> (topological ordering) digrafu je takové seřazení vrcholů do řady, že každá hrana $(u,v)$ jde „zleva doprava“ ($u$ je v pořadí před $v$). Každý DAG má alespoň jedno topologické uspořádání.</p>
+
+  <div class="viz" id="viz-dag"></div>
+
+  <details class="try">
+    <summary>Zkus sám: může mít topologické uspořádání digraf, který obsahuje cyklus?</summary>
+    <div class="inner">
+      <p>Ne. Na cyklu $v_1 \to v_2 \to \cdots \to v_k \to v_1$ by muselo platit „$v_1$ před $v_2$ před … před $v_k$ před $v_1$“ — tedy $v_1$ před sebou samým, spor. Existence topologického uspořádání je tedy <em>ekvivalentní</em> tomu, že je digraf DAG. Topologické pořadí využijeme např. pro nejkratší cesty v DAGu jedním průchodem (K2) a u precedencí v rozvrhování (K5).</p>
+    </div>
+  </details>
+
+  <p>Drobnost navíc ze slidů: <strong>out-tree</strong> (arborescence, kořenový strom) = digraf s <strong>kořenem</strong> (root) $x$, ze kterého vede orientovaná cesta do všech vrcholů; do kořene nevstupuje žádná hrana, do každého jiného vrcholu právě jedna. Takhle vypadá např. strom nejkratších cest od zdroje.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L0.4</div>
+    <ul>
+      <li><strong>Les</strong> = neorientovaný graf bez kružnice; <strong>strom</strong> = souvislý les. Strom na $n$ vrcholech má přesně $n-1$ hran a mezi každou dvojicí vrcholů právě jednu cestu.</li>
+      <li><strong>Kostra</strong> (spanning tree) = strom obsahující všechny vrcholy grafu — libovolná, nemusí být nejlevnější (to až MST v <a href="l0-5.html">[L0.5]</a>).</li>
+      <li>Les: $n = m + p$ (vrcholy = hrany + komponenty).</li>
+      <li><strong>DAG</strong> = digraf bez orientovaného cyklu ⟺ má <strong>topologické uspořádání</strong> (vrcholy na přímce, hrany zleva doprava).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA ===== -->
+  <div class="task" id="t-tree-equiv">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Tree: equivalent statements — prove (c) ⇒ (a)</strong>
+      <span class="task-src">zdroj: prezentace/01_Basic_KO.md, slide 61–62</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Let $G$ be an undirected graph with $n$ nodes, then the following statements are equivalent: (a) $G$ is a tree. … (c) $G$ has $n-1$ edges and is connected.” Prove the implication (c) $\Rightarrow$ (a). You may use the fact that for a forest with $n$ nodes, $m$ edges and $p$ connected components $n = m + p$ holds.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Máš dokázat: souvislý graf s $n$ vrcholy a $n-1$ hranami je strom (tj. nemá kružnici). Smíš použít vzorec pro les $n = m + p$.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice strom/les, vzorec $n = m + p$.</li>
+        <li><a href="l0-3.html#takeaways">[L0.3] Cesta, sled, tah, cyklus</a> — co je kružnice.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Stačí vyloučit kružnice. Zkus „trhat“ kružnice: dokud nějaká existuje, odeber z ní hranu — zůstane graf souvislý? Kolik hran ti zbyde po $k$ odebráních a co na to vzorec $n = m + p$?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>(Důkaz ze slidu 62.) Nechť $G$ je souvislý s $n-1$ hranami. Dokud $G$ obsahuje kružnici, odeberu libovolnou její hranu — odebrání hrany kružnice <em>nezruší souvislost</em> (oba konce hrany zůstanou spojeny zbytkem kružnice). Předpokládejme, že jsem takto odebral $k$ hran (zničil $k$ kružnic). Výsledný graf $G'$ je souvislý a bez kružnice, tedy <strong>strom</strong>, a má $m = n - 1 - k$ hran.</p>
+          <p>Strom je les s jednou komponentou ($p = 1$), takže podle vzorce $n = m + p$:
+          $$n = (n - 1 - k) + 1 \;\;\Longrightarrow\;\; k = 0.$$
+          Žádnou hranu jsem tedy neodebral — $G$ už od začátku žádnou kružnici neměl. $G$ je souvislý a bez kružnice, tedy strom. $\blacksquare$</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-topo">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Topological ordering of a DAG</strong>
+      <span class="task-src">zdroj: prezentace/01_Basic_KO.md, slide 63 (procvičení definice)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“A topological ordering of a digraph is a linear ordering of its vertices such that for every directed edge from vertex $u$ to vertex $v$, $u$ comes before $v$ in the ordering.” Find a topological ordering of the DAG drawn above (edges $(p,q), (p,r), (q,s), (r,s), (r,t), (s,t)$). Is it unique?</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Pro nakreslený DAG najdi seřazení vrcholů, ve kterém všechny hrany jdou zleva doprava, a rozhodni, jestli je takové seřazení jediné.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice DAG a topologického uspořádání.</li>
+        <li><a href="l0-2.html#takeaways">[L0.2] Stupeň vrcholu</a> — in-degree (vrchol bez vstupních hran může jít první).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Který vrchol smí být v pořadí první? (Ten, do kterého nic nevstupuje, tj. $|\delta^-(v)| = 0$.) Vezmi ho, „odeber“ z grafu i s hranami a opakuj. Pro jednoznačnost: je v některém kroku na výběr víc vrcholů s nulovým in-degree?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>In-degree: $|\delta^-(p)| = 0$, takže $p$ první. Po odebrání $p$ mají nulový in-degree $q$ i $r$ — na výběr. Např. pořadí
+          $$p, \; q, \; r, \; s, \; t$$
+          funguje: všechny hrany $(p,q), (p,r), (q,s), (r,s), (r,t), (s,t)$ jdou zleva doprava. <strong>Není jednoznačné</strong>: stejně dobře funguje $p, r, q, s, t$ (prohození nezávislých vrcholů $q$ a $r$). Topologické uspořádání je jednoznačné jen tehdy, když DAG obsahuje hamiltonovskou cestu (vrcholy zřetězené hranami za sebou) — tady ne.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L0.4">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l0-3.html"><span class="dir">← Předchozí</span> L0.3 · Cesta, sled, tah, cyklus</a>
+    <a class="next" href="l0-5.html"><span class="dir">Další →</span> L0.5 · Minimální kostra (MST)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — les a strom
+KOViz.graph(document.getElementById('viz-tree'), {
+  directed: false,
+  nodes: [
+    {id:'a', x:90,  y:90},
+    {id:'b', x:200, y:60},
+    {id:'c', x:160, y:230},
+    {id:'d', x:300, y:160},
+    {id:'e', x:300, y:300},
+    {id:'f', x:470, y:90,  cls:'hl'},
+    {id:'g', x:560, y:200, cls:'hl'},
+    {id:'h', x:440, y:280, cls:'hl'},
+  ],
+  edges: [
+    {from:'a', to:'b'},
+    {from:'a', to:'c'},
+    {from:'c', to:'d'},
+    {from:'c', to:'e'},
+    {from:'f', to:'g', cls:'hl'},
+    {from:'g', to:'h', cls:'hl'},
+  ],
+  caption: 'LES se dvěma komponentami (n = 8 = m + p = 6 + 2). Každá komponenta sama o sobě je STROM — souvislá a bez kružnice (zvýrazněný strom: 3 vrcholy, 2 hrany).'
+});
+
+// 2 — kostra: plné hrany = kostra, čárkované dim = zbytek grafu
+KOViz.graph(document.getElementById('viz-spanning'), {
+  directed: false,
+  nodes: [
+    {id:'a', x:120, y:90},
+    {id:'b', x:330, y:60},
+    {id:'c', x:540, y:120},
+    {id:'d', x:230, y:270},
+    {id:'e', x:460, y:280},
+  ],
+  edges: [
+    {from:'a', to:'b', cls:'good'},
+    {from:'b', to:'c', cls:'good'},
+    {from:'a', to:'d', cls:'good'},
+    {from:'c', to:'e', cls:'good'},
+    {from:'b', to:'d', cls:'dim', dashed:true},
+    {from:'d', to:'e', cls:'dim', dashed:true},
+    {from:'b', to:'e', cls:'dim', dashed:true},
+  ],
+  caption: 'KOSTRA (zeleně): strom na všech n = 5 vrcholech, n − 1 = 4 hrany. Čárkované hrany do kostry nepatří — každá z nich by uzavřela kružnici.'
+});
+
+// 3 — DAG v topologickém pořadí zleva doprava
+KOViz.graph(document.getElementById('viz-dag'), {
+  directed: true,
+  nodes: [
+    {id:'p', x:80,  y:180, sub:'1.'},
+    {id:'q', x:230, y:80,  sub:'2.'},
+    {id:'r', x:230, y:280, sub:'3.'},
+    {id:'s', x:410, y:140, sub:'4.'},
+    {id:'t', x:560, y:230, sub:'5.'},
+  ],
+  edges: [
+    {from:'p', to:'q'},
+    {from:'p', to:'r'},
+    {from:'q', to:'s'},
+    {from:'r', to:'s'},
+    {from:'r', to:'t'},
+    {from:'s', to:'t'},
+  ],
+  caption: 'DAG nakreslený tak, že všechny hrany jdou zleva doprava — čísla pod vrcholy dávají jedno topologické uspořádání p, q, r, s, t.'
+});
+</script>
+</body>
+</html>

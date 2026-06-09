@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L0.2 · Stupeň vrcholu — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k0">K0 · Základní jazyk grafů a ILP</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L0.2</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L0.2</span> Kapitola K0 — Základní jazyk grafů a ILP · <strong>[MUST]</strong>
+  </p>
+  <h1>Stupeň vrcholu</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Out-degree $|\delta^+(v)|$ = počet hran z $v$ ven, in-degree $|\delta^-(v)|$ = počet hran do $v$.
+  </div>
+
+  <p>Prerekvizita: <a href="l0-1.html">[L0.1] Co je graf</a> — orientovaná vs. neorientovaná hrana.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Hrany kolem vrcholu</h2>
+  <p>Pro vrchol $v$ orientovaného grafu $G$ definujeme (značení dle kurzu, budeš ho potkávat u toků i řezů):</p>
+  <ul>
+    <li>$\delta^+(v)$ — množina hran <strong>vycházejících</strong> (leaving) z $v$,</li>
+    <li>$\delta^-(v)$ — množina hran <strong>vstupujících</strong> (entering) do $v$,</li>
+    <li>$\delta(v)$ — množina všech hran incidentních s $v$ (tj. $\delta^+(v) \cup \delta^-(v)$),</li>
+    <li>$\Gamma(v)$ — množina <strong>sousedů</strong> (neighbors) vrcholu $v$.</li>
+  </ul>
+  <p>Velikosti těchto množin jsou stupně: $|\delta^+(v)|$ je <strong>výstupní stupeň</strong> (out-degree), $|\delta^-(v)|$ je <strong>vstupní stupeň</strong> (in-degree) a $|\delta(v)|$ je <strong>stupeň vrcholu</strong> (degree). V neorientovaném grafu směr není, takže existuje jen $\delta(v)$ a stupeň $|\delta(v)|$.</p>
+
+  <div class="viz" id="viz-degrees"></div>
+
+  <details class="try">
+    <summary>Zkus sám: spočítej z obrázku $|\delta^+(b)|$, $|\delta^-(b)|$ a $\Gamma(b)$.</summary>
+    <div class="inner">
+      <p>Z $b$ vycházejí hrany do $c$ a do $d$, takže $|\delta^+(b)| = 2$. Do $b$ vstupuje jen hrana z $a$, takže $|\delta^-(b)| = 1$. Sousedé jsou všechny vrcholy spojené hranou bez ohledu na směr: $\Gamma(b) = \{a, c, d\}$.</p>
+    </div>
+  </details>
+
+  <h2>Součet stupňů (handshake lemma)</h2>
+  <p>Teď klíčové pozorování. Sečti stupně všech vrcholů v libovolném grafu.</p>
+
+  <details class="try">
+    <summary>Zkus sám: čemu se rovná $\sum_{v \in V(G)} |\delta(v)|$? (Nápověda: kolikrát se v součtu „započítá“ jedna hrana?)</summary>
+    <div class="inner">
+      <p>Každá hrana má přesně dva krajní vrcholy, takže se v součtu objeví <strong>přesně dvakrát</strong> — jednou za každý konec. Proto
+      $$\sum_{v \in V(G)} |\delta(v)| = 2\,|E(G)|.$$
+      Součet stupňů je tedy vždy <strong>sudé číslo</strong>.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: co z toho plyne pro počet vrcholů s lichým stupněm?</summary>
+    <div class="inner">
+      <p>Rozděl součet na vrcholy sudého a lichého stupně: $\underbrace{\sum_{\text{sudé}}}_{\text{sudé číslo}} + \sum_{\text{liché}} = 2|E|$ (sudé). Součet přes liché stupně tedy musí být sudý — a součet lichých čísel je sudý, jen když jich je <strong>sudý počet</strong>. Závěr: <em>počet vrcholů lichého stupně je sudý</em>. (Tohle využije Christofidesův algoritmus v K3: vrcholů lichého stupně v kostře je sudě, takže se dají spárovat.)</p>
+    </div>
+  </details>
+
+  <h2>K čemu nám to bude: balance vrcholu</h2>
+  <p>U digrafů budeme často porovnávat $|\delta^+(v)|$ a $|\delta^-(v)|$ — případně součty toků na těchto hranách:</p>
+  <ul>
+    <li><strong>Toky (K4):</strong> zachování toku ve vrcholu = „co přiteče po $\delta^-(v)$, to odteče po $\delta^+(v)$“.</li>
+    <li><strong>Eulerovský tah (K3, Christofides):</strong> existence souvisí se sudostí stupňů, v digrafu s rovností $|\delta^+(v)| = |\delta^-(v)|$.</li>
+  </ul>
+  <p>Téhle rovnosti/nerovnosti budeme říkat <strong>balance</strong> vrcholu. Zatím stačí umět stupně spočítat.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L0.2</div>
+    <ul>
+      <li>$\delta^+(v)$ = hrany z $v$ ven (out-degree $|\delta^+(v)|$); $\delta^-(v)$ = hrany do $v$ (in-degree $|\delta^-(v)|$); $\delta(v)$ = všechny incidentní hrany.</li>
+      <li>Handshake lemma: $\sum_{v \in V(G)} |\delta(v)| = 2|E(G)|$ — každá hrana se počítá dvakrát.</li>
+      <li>Důsledek: počet vrcholů lichého stupně je vždy sudý.</li>
+      <li>Porovnání $|\delta^+(v)|$ vs. $|\delta^-(v)|$ („balance“) je základ zachování toku (K4) a podmínek pro Eulerovský tah (K3).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA ===== -->
+  <div class="task" id="t-handshake">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Sum of degrees and odd-degree nodes</strong>
+      <span class="task-src">zdroj: prezentace/01_Basic_KO.md, slide 54</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Notice: $\sum_{v \in V(G)} |\delta(v)| = 2\,|E(G)|$. The number of nodes with an odd degree is even.” Prove both statements for an arbitrary undirected graph $G$.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Dvě tvrzení ze slidu 54: (1) součet stupňů všech vrcholů je dvojnásobek počtu hran, (2) vrcholů s lichým stupněm je sudý počet. Máš je dokázat pro libovolný neorientovaný graf.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li><a href="l0-1.html#takeaways">[L0.1] Co je graf</a> — hrana má dva krajní vrcholy.</li>
+        <li>Tato lekce — definice $\delta(v)$ a stupně.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Pro (1): nepočítej po vrcholech, počítej po hranách — kolika členům součtu přispěje jedna hrana? Pro (2): rozděl $V$ na vrcholy sudého a lichého stupně a využij paritu výsledku z (1).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(1)</strong> Dvojí počítání (double counting) dvojic (vrchol, incidentní hrana): každá hrana $e = \{v,w\}$ je incidentní s přesně dvěma vrcholy, takže přispívá hodnotou 1 do $|\delta(v)|$ a hodnotou 1 do $|\delta(w)|$ — celkem 2 do součtu. Sečteno přes všechny hrany:
+          $$\sum_{v \in V(G)} |\delta(v)| = \sum_{e \in E(G)} 2 = 2\,|E(G)|.$$</p>
+          <p><strong>(2)</strong> Označ $S$ vrcholy sudého stupně a $L$ vrcholy lichého stupně. Pak
+          $$\underbrace{\sum_{v \in S} |\delta(v)|}_{\text{sudé}} + \sum_{v \in L} |\delta(v)| = 2|E(G)| \;\;(\text{sudé}).$$
+          Součet $\sum_{v \in L} |\delta(v)|$ je tedy sudý. Je to ale součet $|L|$ lichých čísel — a ten je sudý právě tehdy, když je $|L|$ sudé. Tedy počet vrcholů lichého stupně je sudý. $\blacksquare$</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-degrees-compute">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>In-degrees and out-degrees in a digraph</strong>
+      <span class="task-src">zdroj: prezentace/01_Basic_KO.md, slide 54 (procvičení definic)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>For the digraph drawn above (nodes $a,b,c,d,e$), determine $|\delta^+(v)|$ and $|\delta^-(v)|$ for every node $v$, and verify that $\sum_v |\delta^+(v)| = \sum_v |\delta^-(v)| = |E(G)|$.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>U digrafu z obrázku výše vypiš out-degree a in-degree všech pěti vrcholů a ověř, že oba součty dají počet hran.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice $\delta^+(v)$, $\delta^-(v)$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Projdi hranu po hraně: každá orientovaná hrana přidá přesně 1 do out-degree svého počátku a přesně 1 do in-degree svého konce. Proč z toho rovnost součtů plyne okamžitě?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Hrany grafu: $(a,b), (b,c), (b,d), (d,a), (c,e), (e,d)$, tedy $|E| = 6$.</p>
+          <table>
+            <tr><th>$v$</th><th>$a$</th><th>$b$</th><th>$c$</th><th>$d$</th><th>$e$</th><th>Σ</th></tr>
+            <tr><td>$|\delta^+(v)|$</td><td>1</td><td>2</td><td>1</td><td>1</td><td>1</td><td>6</td></tr>
+            <tr><td>$|\delta^-(v)|$</td><td>1</td><td>1</td><td>1</td><td>2</td><td>1</td><td>6</td></tr>
+          </table>
+          <p>Oba součty = 6 = $|E(G)|$, protože každá hrana má právě jeden počátek (přispěje 1× do součtu out-degree) a právě jeden konec (1× do součtu in-degree).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L0.2">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l0-1.html"><span class="dir">← Předchozí</span> L0.1 · Co je graf</a>
+    <a class="next" href="l0-3.html"><span class="dir">Další →</span> L0.3 · Cesta, sled, tah, cyklus</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// digraf se stupni v sub-popiscích
+KOViz.graph(document.getElementById('viz-degrees'), {
+  directed: true,
+  nodes: [
+    {id:'a', x:120, y:100, sub:'δ⁺=1, δ⁻=1'},
+    {id:'b', x:330, y:70,  sub:'δ⁺=2, δ⁻=1'},
+    {id:'c', x:540, y:120, sub:'δ⁺=1, δ⁻=1'},
+    {id:'d', x:230, y:270, sub:'δ⁺=1, δ⁻=2'},
+    {id:'e', x:460, y:280, sub:'δ⁺=1, δ⁻=1'},
+  ],
+  edges: [
+    {from:'a', to:'b'},
+    {from:'b', to:'c'},
+    {from:'b', to:'d'},
+    {from:'d', to:'a'},
+    {from:'c', to:'e'},
+    {from:'e', to:'d'},
+  ],
+  caption: 'Digraf se 6 hranami; pod každým vrcholem out-degree |δ⁺(v)| a in-degree |δ⁻(v)|. Součet všech stupňů = 12 = 2|E|.'
+});
+</script>
+</body>
+</html>

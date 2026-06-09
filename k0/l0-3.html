@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L0.3 · Cesta, sled, tah, cyklus — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k0">K0 · Základní jazyk grafů a ILP</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L0.3</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L0.3</span> Kapitola K0 — Základní jazyk grafů a ILP · <strong>[MUST]</strong>
+  </p>
+  <h1>Cesta, sled, tah, cyklus</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Rozdíl mezi cestou (path) a sledem (walk): cesta nesmí opakovat vrcholy, sled smí cokoliv.
+  </div>
+
+  <p>Prerekvizita: <a href="l0-1.html">[L0.1] Co je graf</a> — vrcholy, hrany, orientace.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Procházka grafem</h2>
+  <p>Spousta úloh (nejkratší cesty, TSP, Eulerovský tah) je o „procházení“ grafu. Nejobecnější procházka je <strong>sled</strong> (v kurzu anglicky <strong>edge progression</strong>, v běžné literatuře <em>walk</em>): posloupnost
+  $$v_1, e_1, v_2, e_2, \ldots, v_k, e_k, v_{k+1},$$
+  kde každá $e_i$ je hrana mezi $v_i$ a $v_{i+1}$ (u digrafu hrana $(v_i, v_{i+1})$). Vrcholy i hrany se smí libovolně opakovat. Sled je <strong>uzavřený</strong> (closed), pokud $v_1 = v_{k+1}$.</p>
+
+  <div class="viz" id="viz-sled"></div>
+
+  <details class="try">
+    <summary>Zkus sám: co kdybychom zakázali opakování <em>hran</em>? A co opakování <em>vrcholů</em> — je to silnější, nebo slabší podmínka?</summary>
+    <div class="inner">
+      <p>Zákaz opakování hran dává <strong>tah</strong>; zákaz opakování vrcholů dává <strong>cestu</strong>. Zákaz opakování vrcholů je <em>silnější</em>: když se neopakuje žádný vrchol, nemůže se opakovat ani hrana (hrana je určena svými konci). Každá cesta je tedy tah a každý tah je sled — naopak to neplatí.</p>
+    </div>
+  </details>
+
+  <h2>Tah a cesta</h2>
+  <ul>
+    <li><strong>Tah</strong> (ve slidech kurzu anglicky <strong>walk</strong>, v jiné literatuře <em>trail</em>): sled, ve kterém se žádná hrana neobjeví víc než jednou ($e_i \ne e_j$ pro $i \ne j$). Vrcholy se opakovat smí. Klasický příklad: <em>Eulerovský tah</em> projde každou hranu právě jednou (potkáš ho u Christofidese v K3).</li>
+    <li><strong>Cesta</strong> (path): tah, ve kterém se žádný <em>vrchol</em> neobjeví víc než jednou ($v_i \ne v_j$). Tohle hledáme u nejkratších cest (K2).</li>
+  </ul>
+  <p>Hierarchie: <strong>cesta ⊂ tah ⊂ sled</strong>.</p>
+
+  <div class="viz" id="viz-tah"></div>
+  <div class="viz" id="viz-cesta"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor na anglickou terminologii</div>
+    <p>Slidy kurzu používají <strong>edge progression = sled</strong> a <strong>walk = tah</strong> (bez opakování hran). Většina učebnic ale používá <em>walk = sled</em> a <em>trail = tah</em>. V písemce čti definici v zadání; česky je to jednoznačné: sled / tah / cesta.</p>
+  </div>
+
+  <h2>Cyklus (kružnice)</h2>
+  <p>Uzavřená procházka bez opakování vrcholů (kromě začátku = konce) je <strong>cyklus</strong>. Slidy rozlišují podle orientace: <strong>circuit (kružnice)</strong> = uzavřený neorientovaný „okruh“ s navzájem různými vrcholy $v_1, \ldots, v_k$; <strong>cycle (cyklus)</strong> = totéž orientovaně (všechny hrany po směru). Neformálně: cyklus = „uzavřená cesta“.</p>
+
+  <div class="viz" id="viz-cyklus"></div>
+
+  <details class="try">
+    <summary>Zkus sám: proč u nejkratších cest hledáme cestu, a ne jen sled?</summary>
+    <div class="inner">
+      <p>Při <em>nezáporných</em> cenách hran se vyplácí vrcholy neopakovat — každé zopakování úsek jen prodraží (nebo nechá stejně drahý), takže nejkratší sled lze vždy zkrátit na cestu. Problém nastane se <em>zápornými</em> cenami: obsahuje-li graf záporný cyklus, sled ho může obíhat donekonečna a „délka“ padá k $-\infty$ — proto se tam musí vynutit cesta a úloha se stává těžkou. Detaily v kapitole K2 (nejkratší cesty).</p>
+    </div>
+  </details>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L0.3</div>
+    <ul>
+      <li><strong>Sled</strong> (edge progression; jinde walk): posloupnost $v_1, e_1, \ldots, e_k, v_{k+1}$ — vrcholy i hrany se smí opakovat.</li>
+      <li><strong>Tah</strong> (ve slidech walk; jinde trail): sled bez opakování hran.</li>
+      <li><strong>Cesta</strong> (path): sled bez opakování vrcholů. Hierarchie: cesta ⊂ tah ⊂ sled.</li>
+      <li><strong>Cyklus/kružnice</strong> (cycle/circuit): uzavřená cesta — $v_1 = v_{k+1}$, jinak se žádný vrchol neopakuje; cycle orientovaně, circuit neorientovaně.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA ===== -->
+  <div class="task" id="t-classify">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Edge progression, walk, or path?</strong>
+      <span class="task-src">zdroj: prezentace/01_Basic_KO.md, slide 59 (definice 1:1)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>Recall the definitions: “<em>Edge progression (sled)</em> is a sequence $v_1, e_1, v_2, e_2, \ldots, v_k, e_k, v_{k+1}$ such that $e_i = (v_i, v_{i+1}) \in E(G)$ or $e_i = \{v_i, v_{i+1}\} \in E(G)$ for all $i$. Directed (undirected) <em>walk (tah)</em> is directed (undirected) edge progression, where no edge appears more than once. Directed (undirected) <em>path (cesta)</em> is directed (undirected) walk, where no node appears more than once.”</p>
+        <p>For the digraph drawn above (edges $(a,b), (b,c), (c,a), (b,d), (d,c), (c,e)$), classify each of the following sequences as an edge progression, a walk, a path, or none of them (state the strongest applicable term):</p>
+        <ol>
+          <li>$a, b, d, c, e$</li>
+          <li>$a, b, c, a, b, d$</li>
+          <li>$b, c, a, b, d, c, e$</li>
+          <li>$a, b, d, e$</li>
+        </ol>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Dostaneš digraf a čtyři posloupnosti vrcholů. Pro každou rozhodni, zda je to sled / tah / cesta (uveď nejsilnější platný pojem), nebo vůbec nic (např. když některá hrana v grafu neexistuje).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice sled/tah/cesta a hierarchie cesta ⊂ tah ⊂ sled.</li>
+        <li><a href="l0-1.html#takeaways">[L0.1] Co je graf</a> — orientovaná hrana má směr.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Postupuj testem od nejslabšího: (1) Existují všechny použité hrany ve správném směru? Pokud ne, není to ani sled. (2) Opakuje se hrana? Pokud ne, je to tah. (3) Opakuje se vrchol? Pokud ne, je to cesta.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <ol>
+            <li>$a{\to}b{\to}d{\to}c{\to}e$: hrany $(a,b), (b,d), (d,c), (c,e)$ existují, žádný vrchol se neopakuje → <strong>cesta</strong> (tedy i tah a sled).</li>
+            <li>$a{\to}b{\to}c{\to}a{\to}b{\to}d$: hrany existují, ale hrana $(a,b)$ je použita dvakrát → jen <strong>sled</strong> (není tah).</li>
+            <li>$b{\to}c{\to}a{\to}b{\to}d{\to}c{\to}e$: všechny hrany $(b,c), (c,a), (a,b), (b,d), (d,c), (c,e)$ existují a každá je použita jednou → <strong>tah</strong>; vrcholy $b$ a $c$ se opakují, takže to <em>není</em> cesta.</li>
+            <li>$a{\to}b{\to}d{\to}e$: hrana $(d,e)$ v grafu <strong>neexistuje</strong> (existuje jen $(d,c)$) → <strong>nic</strong>, není to ani sled.</li>
+          </ol>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L0.3">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l0-2.html"><span class="dir">← Předchozí</span> L0.2 · Stupeň vrcholu</a>
+    <a class="next" href="l0-4.html"><span class="dir">Další →</span> L0.4 · Strom, kostra, les, DAG</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// společný graf pro všechny tři ukázky
+const NODES = [
+  {id:'a', x:120, y:90},
+  {id:'b', x:320, y:70},
+  {id:'c', x:330, y:260},
+  {id:'d', x:520, y:90},
+  {id:'e', x:540, y:280},
+];
+const EDGES = [
+  {from:'a', to:'b'},
+  {from:'b', to:'c'},
+  {from:'c', to:'a'},
+  {from:'b', to:'d'},
+  {from:'d', to:'c'},
+  {from:'c', to:'e'},
+];
+
+function withCls(nodeCls, edgeCls) {
+  return {
+    directed: true,
+    nodes: NODES.map(n => Object.assign({}, n, {cls: nodeCls[n.id] || ''})),
+    edges: EDGES.map(e => Object.assign({}, e, {cls: edgeCls[e.from + '->' + e.to] || 'dim'})),
+  };
+}
+
+// 1 — sled: a→b→c→a→b→d (hrana a→b dvakrát)
+KOViz.graph(document.getElementById('viz-sled'), Object.assign(
+  withCls({a:'hl', b:'hl', c:'hl', d:'hl'}, {'a->b':'hl', 'b->c':'hl', 'c->a':'hl', 'b->d':'hl'}),
+  {caption: 'SLED a→b→c→a→b→d: hrana (a,b) i vrcholy a, b se použijí dvakrát — sled to dovoluje. (Není to tah ani cesta.)'}
+));
+
+// 2 — tah: b→c→a→b→d→c→e (vrcholy b,c dvakrát, hrany různé)
+KOViz.graph(document.getElementById('viz-tah'), Object.assign(
+  withCls({b:'hl', c:'hl', a:'hl', d:'hl', e:'hl'}, {'b->c':'hl', 'c->a':'hl', 'a->b':'hl', 'b->d':'hl', 'd->c':'hl', 'c->e':'hl'}),
+  {caption: 'TAH b→c→a→b→d→c→e: každá hrana nejvýš jednou, ale vrcholy b a c se opakují. (Není to cesta.)'}
+));
+
+// 3 — cesta: a→b→d→c→e
+KOViz.graph(document.getElementById('viz-cesta'), Object.assign(
+  withCls({a:'good', b:'good', d:'good', c:'good', e:'good'}, {'a->b':'good', 'b->d':'good', 'd->c':'good', 'c->e':'good'}),
+  {caption: 'CESTA a→b→d→c→e: žádný vrchol (a tedy ani hrana) se neopakuje.'}
+));
+
+// 4 — cyklus: a→b→c→a
+KOViz.graph(document.getElementById('viz-cyklus'), Object.assign(
+  withCls({a:'hl', b:'hl', c:'hl'}, {'a->b':'hl', 'b->c':'hl', 'c->a':'hl'}),
+  {caption: 'CYKLUS a→b→c→a: uzavřená cesta — začátek = konec, jinak se žádný vrchol neopakuje.'}
+));
+</script>
+</body>
+</html>
