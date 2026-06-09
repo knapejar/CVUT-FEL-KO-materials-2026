@@ -11,6 +11,8 @@
   "use strict";
   const NS = "http://www.w3.org/2000/svg";
 
+  let gCounter = 0;
+
   function svgEl(tag, attrs) {
     const e = document.createElementNS(NS, tag);
     for (const k in attrs || {}) e.setAttribute(k, attrs[k]);
@@ -47,15 +49,20 @@
     const W = spec.w || 640, H = spec.h || 360, R = spec.nodeR || 19;
     el.classList.add("viz");
     const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, class: "viz-canvas", role: "img" });
+    // unikátní id markeru per-instance (více grafů na stránce nesmí sdílet defs)
+    const MID = "arr-" + Math.floor(performance.now() * 1000 + gCounter++) .toString(36);
     if (spec.directed !== false) {
       const defs = svgEl("defs", {});
-      const mk = (id, cls) => {
-        const m = svgEl("marker", { id, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" });
-        const p = svgEl("path", { d: "M0,0 L10,5 L0,10 z" });
-        p.style.fill = "currentColor";
-        m.appendChild(p); defs.appendChild(m);
-      };
-      mk("arr"); // šipka dědí currentColor z hrany přes CSS stroke→fill nelze; nastavíme fill v JS níže
+      const m = svgEl("marker", {
+        id: MID, viewBox: "0 0 10 10", refX: 8.5, refY: 5,
+        markerWidth: 9, markerHeight: 9,
+        markerUnits: "userSpaceOnUse", // pevná velikost — neškáluje se s tloušťkou hrany
+        orient: "auto-start-reverse",
+      });
+      const p = svgEl("path", { d: "M0,1 L9,5 L0,9 z" });
+      // context-stroke = barva hrany (Chrome 123+, Firefox, Safari); fallback šedá
+      p.setAttribute("fill", "context-stroke");
+      m.appendChild(p); defs.appendChild(m);
       svg.appendChild(defs);
     }
 
@@ -90,7 +97,7 @@
         path = svgEl("path", { d: `M${x1},${y1} Q${cx},${cy} ${x2},${y2}` });
         midX = (x1 + 2 * cx + x2) / 4; midY = (y1 + 2 * cy + y2) / 4;
       }
-      if (spec.directed !== false && !e.undirected) path.setAttribute("marker-end", "url(#arr)");
+      if (spec.directed !== false && !e.undirected) path.setAttribute("marker-end", "url(#" + MID + ")");
       if (e.dashed) path.setAttribute("stroke-dasharray", "6 5");
       g.appendChild(path);
       if (e.label !== undefined && e.label !== null && e.label !== "") {
