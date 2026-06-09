@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.4 · big-M: disjunkce omezení — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.4</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.4</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>big-M: disjunkce omezení</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    „Platí aspoň jedno z omezení“ (<strong>disjunctive constraints</strong>, disjunkce omezení) — celou nerovnost umíš „vypnout“ velkou konstantou $M$ a binárním přepínačem $y$.
+  </div>
+
+  <p>Prerekvizity: <a href="../k0/l0-8.html">[L0.8] Binární proměnná</a>, <a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a>. Navazujeme přesně tam, kde skončil žlutý box v <a href="l1-3.html#takeaways">[L1.3] Modelování logiky</a>.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Proč nestačí logika z L1.3</h2>
+  <p>V <a href="l1-3.html">[L1.3]</a> jsi dělal OR mezi <em>binárními proměnnými</em>: „koupit budovu 5 NEBO 6“ je $x_5 + x_6 \ge 1$. Slide 37 přednášky ILP ale chce OR mezi <em>celými nerovnostmi</em> — pro $x_{i \in 1 \dots 4} \in \langle 0, 5 \rangle$, $x_i \in \mathbb{R}$:</p>
+  $$\begin{aligned} \text{holds } & 2x_1 + 2x_2 \le 8 \\ \text{or } & 2x_3 - 2x_4 \le 2 \\ & \text{or both} \end{aligned}$$
+
+  <details class="try">
+    <summary>Zkus sám: proč nemůžu prostě „sečíst nerovnosti“ jako binárky a chtít součet $\ge 1$?</summary>
+    <div class="inner">
+      <p>Nerovnost není proměnná — nemá v modelu žádnou hodnotu 0/1, kterou by šlo sčítat. Buď v soustavě JE (a pak platit MUSÍ), nebo v ní není (a pak se nevynucuje nikdy). ILP solver bere všechna omezení v soustavě jako konjunkci (AND). Potřebujeme tedy trik, kterým omezení v soustavě <em>necháme</em>, ale umíme ho podle hodnoty nějaké binární proměnné učinit neúčinným.</p>
+    </div>
+  </details>
+
+  <h2>Jak „vypnout“ nerovnost: velké $M$</h2>
+
+  <details class="try">
+    <summary>Zkus sám: jak upravit nerovnost $2x_1 + 2x_2 \le 8$, aby zůstala v soustavě, ale platila automaticky pro ÚPLNĚ každé $x_1, x_2 \in \langle 0,5 \rangle$?</summary>
+    <div class="inner">
+      <p>Zvětšit pravou stranu tak, aby ji levá strana nemohla nikdy přerůst. Levá strana je nejvýš $2 \cdot 5 + 2 \cdot 5 = 20$, takže např. $2x_1 + 2x_2 \le 8 + 15 = 23$ platí vždy — omezení je formálně v soustavě, ale nikoho neomezuje. Je „vypnuté“.</p>
+    </div>
+  </details>
+
+  <p>Tomu přičtenému velkému kladnému číslu se říká <strong>big-M</strong> (velké $M$; slide 37 volí $M = 15$). A teď klíčový krok: přičtení uděláme <em>podmíněně</em> přes binární přepínač $y \in \{0,1\}$ — člen $M \cdot y$ je buď $0$ (omezení platí normálně), nebo $M$ (omezení vypnuto). Konstrukce ze slidu 37:</p>
+  $$\begin{aligned} 2x_1 + 2x_2 & \le 8 + M \cdot y \\ 2x_3 - 2x_4 & \le 2 + M \cdot (1 - y) \end{aligned}$$
+
+  <details class="try">
+    <summary>Zkus sám: projdi obě hodnoty $y$. Která nerovnost je kdy vynucená a může se stát, že jsou vypnuté obě?</summary>
+    <div class="inner">
+      <p>Pro $y = 0$: první nerovnost se redukuje na $2x_1 + 2x_2 \le 8$ (vynucená), druhá má vpravo $2 + M$ (vypnutá). Pro $y = 1$ přesně naopak: první vypnutá, druhá vynucená $2x_3 - 2x_4 \le 2$ (slide 38). Protože druhý přepínač je <em>negace</em> $(1-y)$ toho prvního (znáš z <a href="l1-3.html#takeaways">[L1.3]</a>), vždy je vypnutá nejvýš jedna — tedy <strong>aspoň jedna platí</strong>. A „or both“? Vypnutí neznamená zákaz: i vypnutá nerovnost smí být náhodou splněna. Proto konstrukce modeluje OR, ne XOR.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-or-y0"></div>
+  <div class="viz" id="viz-or-y1"></div>
+
+  <details class="try">
+    <summary>Zkus sám: jak malé $M$ by v příkladu ještě stačilo? A co se stane, když dám $M$ moc malé, třeba $M = 5$?</summary>
+    <div class="inner">
+      <p>Vypnutá nerovnost musí platit pro všechna přípustná $x$. První: levá strana $\le 20$, takže potřebuju $8 + M \ge 20$, tj. $M \ge 12$. Druhá: levá strana $2x_3 - 2x_4 \le 10$, takže $2 + M \ge 10$, tj. $M \ge 8$. Stačí tedy $M \ge 12$; slide bere s rezervou $M = 15$. S $M = 5$ by „vypnutá“ první nerovnost říkala $2x_1 + 2x_2 \le 13$ — pořád by ořezávala body jako $(5,4)$, a model by tak <em>zakazoval řešení, která zadání povoluje</em>. Tichá, těžko odhalitelná chyba.</p>
+    </div>
+  </details>
+
+  <div class="box warning">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Jak volit $M$ (a směr členu s $M$)</div>
+    <p>$M$ musí být tak velké, aby vypnuté omezení platilo pro <em>každou</em> přípustnou hodnotu proměnných — spočti ho z mezí proměnných (nejhorší možná levá strana). U omezení typu $\le$ se $M \cdot y$ <strong>přičítá k pravé straně</strong> (zvětšuje strop). U omezení typu $\ge$ je to zrcadlově: $M$ se přičítá k <em>menší</em> (levé) straně, např. $M \cdot (1-y) + 2x_1 + x_2 \ge 10$ — vypnutí strop nezvedá, ale podlahu „podlézá“. Vždy si ověř dosazením: po vypnutí musí nerovnost platit triviálně.</p>
+  </div>
+
+  <h2>Klasické použití: nepreemptivní rozvrhování</h2>
+  <p>Slidy 40–42 ukazují, kde se big-M potkáš nejčastěji: <strong>non-preemptive scheduling</strong> (nepreemptivní rozvrhování) $1 | r_j, \widetilde{d_j} | C_{max}$. Úlohy $T_1, \dots, T_n$ s dobami $p_i$, časy uvolnění $r_i$ a deadliny $\widetilde{d_i}$ běží na jednom procesoru; hledáme časy startu $s_i$. Na jednom procesoru běží v každém okamžiku nejvýš jedna úloha, takže pro každou dvojici $T_i, T_j$ musí platit:</p>
+  <ol>
+    <li>$T_i$ předchází $T_j$ — $s_j \ge s_i + p_i$,</li>
+    <li><strong>nebo</strong> $T_j$ předchází $T_i$ — $s_i \ge s_j + p_j$.</li>
+  </ol>
+  <p>Pro $p_i > 0$ nemohou platit obě najednou — je to disjunkce jako vyšitá. Slide 41 zavádí $x_{ij} \in \{0,1\}$, $x_{ij} = 1$ když $T_i$ předchází $T_j$, a pro každou dvojici píše:</p>
+  $$\begin{aligned} s_j + M \cdot (1 - x_{ij}) & \ge s_i + p_i \quad \text{„switched off“ when } x_{ij} = 0 \\ s_i + M \cdot x_{ij} & \ge s_j + p_j \quad \text{„switched off“ when } x_{ij} = 1 \end{aligned}$$
+
+  <details class="try">
+    <summary>Zkus sám: nerovnosti jsou typu $\ge$ — sedí to s pravidlem z warning boxu? Ověř dosazením $x_{ij} = 1$.</summary>
+    <div class="inner">
+      <p>Sedí: člen s $M$ je přičtený na levé (menší) straně. Pro $x_{ij} = 1$: první nerovnost je $s_j \ge s_i + p_i$ ($T_i$ opravdu předchází $T_j$ — vynuceno), druhá je $s_i + M \ge s_j + p_j$ — pro dost velké $M$ (např. větší než nejzazší deadline) platí pro libovolné starty, je vypnutá. Pro $x_{ij} = 0$ zrcadlově. Stejný vzor jako u OR výše, jen má přepínač navíc <em>význam</em>: $x_{ij}$ rovnou kóduje pořadí úloh.</p>
+    </div>
+  </details>
+
+  <h2>Co big-M dělá s přípustnou oblastí: nekonvexita</h2>
+  <p>Slide 42 si vezme konkrétní čísla: $p_i = 2$, $p_j = 3$, $r_i = r_j = 0$, $\widetilde{d_i} = 10$, $\widetilde{d_j} = 11$, $M = 11$. Deadliny dávají $s_i \le 8$, $s_j \le 8$. Podívej se na řezy prostorem řešení v rovinách $x_{ij} = 1$ a $x_{ij} = 0$:</p>
+
+  <div class="viz" id="viz-sched-x1"></div>
+  <div class="viz" id="viz-sched-x0"></div>
+
+  <details class="try">
+    <summary>Zkus sám: vezmi bod z prvního trojúhelníku a bod z druhého a podívej se na jejich průměr. Je přípustný? Co to říká o tvaru celé přípustné oblasti?</summary>
+    <div class="inner">
+      <p>Např. $(s_i, s_j) = (0, 2)$ (z řezu $x_{ij}=1$) a $(3, 0)$ (z řezu $x_{ij}=0$); průměr $(1.5, 1)$ neleží ani v jednom trojúhelníku — úlohy by se překrývaly. Sjednocení obou řezů tedy <strong>není konvexní</strong>: úsečka mezi dvěma přípustnými body vede přes nepřípustný pás. Slide 42: nekonvexní 2D prostor je projekce dvou řezů 3D polytopu v rovinách $x_{ij} = 0$ a $x_{ij} = 1$.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Nekonvexita je smysl, ne vada</div>
+    <p>Přípustná oblast čistého LP je vždy konvexní (průnik polorovin) — proto LP „nebo“ z principu neumí. big-M s binárním $y$ slepí dohromady dvě konvexní oblasti do nekonvexního sjednocení; nekonvexitu nese právě celočíselnost přepínače. To je důvod, proč disjunkce patří do ILP, a ne do LP.</p>
+  </div>
+
+  <h2>Zobecnění: aspoň $K$ z $N$ omezení</h2>
+  <p>Slide 43: máme $N$ omezení typu $f(x_1, \dots, x_n) \le b_i$ a chceme, aby platilo <strong>aspoň $K$ z nich</strong>. Dvojici už umíš — co takhle obecně?</p>
+
+  <details class="try">
+    <summary>Zkus sám: dej každému omezení vlastní přepínač $y_i$ („vypínám $i$-té“). Jaké omezení na $\sum y_i$ zajistí „aspoň $K$ platí“?</summary>
+    <div class="inner">
+      <p>$y_i = 1$ znamená, že $i$-té omezení smí být porušeno. Když má platit aspoň $K$ z $N$, smí být vypnuto nejvýš $N - K$ omezení. Slide píše rovnost:</p>
+      $$\begin{aligned} f(x_1, \dots, x_n) & \le b_i + M \cdot y_i \quad i \in 1 \dots N \\ \sum_{i=1}^{N} y_i & = N - K \end{aligned}$$
+      <p>Funguje i $\sum y_i \le N - K$ — vypnutí totiž porušení jen <em>povoluje</em>, nevynucuje, takže méně vypnutých nikdy nevadí. A poznámka ze slidu 43: pro $K = 1$, $N = 2$ stačí jediná skalární proměnná $y$ s negací $(1 - y)$ — přesně OR konstrukce ze začátku lekce.</p>
+    </div>
+  </details>
+
+  <p>Tohle je přesně to „překvapení“ ze zkouškového přepisu Real estate (test 8. 3. 2011, úloha T03 v <a href="l1-3.html#t-realestate-test2011">[L1.3]</a>): „vyber 2 ze 3 <em>podmínek</em>“ = $N = 3$, $K = 2$, tedy $y_1 + y_2 + y_3 \le 1$.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.4</div>
+    <ul>
+      <li><strong>Vypnutí omezení:</strong> člen $M \cdot y$, $y \in \{0,1\}$ — u „$\le$“ přičti $M y$ k pravé straně, u „$\ge$“ k levé. $y = 1$ ⇒ omezení platí triviálně (je vypnuté), $y = 0$ ⇒ platí normálně.</li>
+      <li><strong>OR dvou omezení</strong> (aspoň jedno platí): přepínače $y$ a $(1-y)$ — vypnuté je vždy nejvýš jedno: $\;2x_1 + 2x_2 \le 8 + M y$, $\;2x_3 - 2x_4 \le 2 + M(1-y)$.</li>
+      <li><strong>Aspoň $K$ z $N$ omezení:</strong> $f(x) \le b_i + M y_i$ pro $i \in 1..N$ a $\sum y_i = N - K$ (či $\le N - K$) — nejvýš $N-K$ vypnutých.</li>
+      <li>$M$ = dost velká konstanta: spočti z mezí proměnných tak, aby vypnuté omezení platilo VŽDY. Moc malé $M$ tiše zakazuje povolená řešení.</li>
+      <li>big-M dělá přípustný prostor <strong>nekonvexní</strong> (sjednocení oblastí) — proto „nebo“ neumí LP a potřebuješ binární přepínač, tj. ILP.</li>
+      <li>Kanonický příklad: nepreemptivní rozvrhování — pro dvojici úloh $s_j + M(1 - x_{ij}) \ge s_i + p_i$ a $s_i + M x_{ij} \ge s_j + p_j$.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-homework-or">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>OR relation between inequalities — Homework (slide 39)</strong>
+      <span class="task-src">zdroj: prezentace/02_ILP.md, slide 39</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“To model OR relation between inequalities, draw the 2D solution space $(x_1, x_2)$ of the system of inequalities with big M:</p>
+        $$\begin{aligned} 2x_1 + x_2 & \le 5 + M \cdot y \\ 2x_1 - x_2 & \le 2 + M \cdot (1 - y) \\ y & \in \{0, 1\} \end{aligned}$$
+        <p>Example where OR overlaps with XOR: In 2D draw the solution space $(x_1, x_2)$ of the system of inequalities. Note that the equations correspond to parallel lines. Is it possible to find $x_1, x_2$ such that both original inequalities $2x_1 + x_2 \le 5$ and $2x_1 + x_2 \ge 10$ are valid simultaneously?</p>
+        $$\begin{aligned} 2x_1 + x_2 & \le 5 + M \cdot y \\ M \cdot (1 - y) + 2x_1 + x_2 & \ge 10 \\ y & \in \{0, 1\} \end{aligned}$$
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Dvě malé soustavy s big-M a přepínačem $y$; u obou máš <em>nakreslit</em>, jak vypadá množina přípustných $(x_1, x_2)$ (přes obě hodnoty $y$). U druhé navíc odpovědět, zda mohou obě původní nerovnosti platit zároveň — tedy jestli je to OR, nebo fakticky XOR.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — čtení konstrukce $M y$ / $M(1-y)$, směr členu s $M$ u $\le$ vs. $\ge$.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a> — negace $(1-y)$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Pro $y = 0$ a $y = 1$ zvlášť si napiš, co ze soustavy zbyde (vypnutá omezení škrtni), a nakresli příslušnou polorovinu. Celková přípustná množina je <em>sjednocení</em> obou obrázků. U druhé soustavy: obě hraniční přímky mají stejný směrový vektor — co leží mezi $2x_1 + x_2 = 5$ a $2x_1 + x_2 = 10$?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Soustava 1:</strong> $y = 0$ vynucuje $2x_1 + x_2 \le 5$ (druhé omezení vypnuté), $y = 1$ vynucuje $2x_1 - x_2 \le 2$ (první vypnuté). Přípustný prostor = sjednocení dvou polorovin (zde kresleno v okně $0..5 \times 0..5$):</p>
+          <div class="viz" id="viz-hw1-y0"></div>
+          <div class="viz" id="viz-hw1-y1"></div>
+          <p>Sjednocení je nekonvexní: např. $(2, 0)$ je přípustné přes $y=0$, $(3, 5)$ přes $y=1$, ale jejich průměr $(2.5, 2.5)$ porušuje obě původní nerovnosti ($7.5 > 5$ i $2.5 > 2$). Body jako $(0, 0)$ splňují obě nerovnosti najednou — OR, ne XOR.</p>
+          <p><strong>Soustava 2:</strong> $y = 0$ vynucuje $2x_1 + x_2 \le 5$, $y = 1$ vynucuje $2x_1 + x_2 \ge 10$:</p>
+          <div class="viz" id="viz-hw2-y0"></div>
+          <div class="viz" id="viz-hw2-y1"></div>
+          <p><strong>Odpověď:</strong> Ne — $2x_1 + x_2 \le 5$ a $2x_1 + x_2 \ge 10$ zároveň by znamenalo $10 \le 2x_1 + x_2 \le 5$, spor. Hraniční přímky jsou rovnoběžky a pás mezi nimi je prázdná zóna. Konstrukce je formálně OR, ale protože „obě najednou“ je nemožné, splývá tady OR s XOR — vždy platí právě jedna.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-sched-disjunctive">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Non-preemptive Scheduling — disjunctive constraints (slides 40–42)</strong>
+      <span class="task-src">zdroj: prezentace/02_ILP.md, slide 40–42</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“$1 | r_j, \widetilde{d_j} | C_{max}$ … NP-hard problem. <strong>Instance:</strong> A set of non-preemptive tasks $\mathcal{T} = \{T_1, \dots, T_i, \dots, T_n\}$ with release date $r$ and deadline $\widetilde{d}$ should be executed on one processor. The processing times are given by vector $p$. <strong>Goal:</strong> Find a feasible schedule represented by start times $s$ that minimizes completion time $C_{max} = \max_{i \in \langle 1, n \rangle} s_i + p_i$ or decide that it does not exist.</p>
+        <p>Since at the given moment, at most, one task is running on a given resource, therefore, for all task pairs $T_i, T_j$ it must hold: 1. $T_i$ precedes $T_j$ ($s_j \ge s_i + p_i$) 2. or $T_j$ precedes $T_i$ ($s_i \ge s_j + p_j$). We need to formulate that at least one inequality holds.”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Rozvrhování na jednom stroji: každá úloha má start $s_i$ (spojitá proměnná), trvání $p_i$, nejdřívější start $r_i$ a deadline $\widetilde{d_i}$. Jádro úlohy: pro každou dvojici úloh zapsat „jedna předchází druhou“ — disjunkci dvou nerovností, které (pro $p > 0$) nemohou platit obě.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — big-M přepínač pro $\ge$ nerovnosti.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a> — význam $x_{ij}$ a negace $(1 - x_{ij})$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Co přesně má kódovat přepínač? Tady se nabízí dát mu rovnou význam: $x_{ij} = 1$ ⟺ „$T_i$ předchází $T_j$“. Kterou z obou nerovností má $x_{ij} = 1$ vynucovat a kterou vypínat? A nezapomeň na omezení, která disjunkci nepotřebují: release date a deadline každé úlohy.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Pro každou dvojici zaveď $x_{ij} \in \{0,1\}$, $x_{ij} = 1$ když $T_i$ předchází $T_j$ (slide 41):</p>
+          $$\begin{aligned} s_j + M \cdot (1 - x_{ij}) & \ge s_i + p_i \quad \text{„switched off“ when } x_{ij} = 0 \\ s_i + M \cdot x_{ij} & \ge s_j + p_j \quad \text{„switched off“ when } x_{ij} = 1 \end{aligned}$$
+          <p>Celá soustava omezení (slide 42; dvojice stačí brát jednou, $j &lt; i$):</p>
+          $$\begin{aligned} s_i & \ge r_i & i \in 1..n \quad & \text{release date} \\ \widetilde{d_i} & \ge s_i + p_i & i \in 1..n \quad & \text{deadline} \\ s_j + M \cdot (1 - x_{ij}) & \ge s_i + p_i & i \in 1..n,\ j &lt; i \quad & T_i \text{ precedes } T_j \\ s_i + M \cdot x_{ij} & \ge s_j + p_j & i \in 1..n,\ j &lt; i \quad & T_j \text{ precedes } T_i \end{aligned}$$
+          <p>Volba $M$: dost velké vzhledem k horizontu rozvrhu — na slidu 42 ($\widetilde{d_j} = 11$) je $M = 11$; obecně stačí $M \ge \max_i \widetilde{d_i}$, protože pak $s_i + M$ přeroste jakékoli $s_j + p_j \le \widetilde{d_j}$. Kritérium $C_{max} = \max_i (s_i + p_i)$ se pak minimalizuje pomocnou proměnnou $C_{max} \ge s_i + p_i \;\forall i$ — modelování maxima rozebere <a href="l1-8.html">[L1.8]</a>.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-k-of-n">
+    <div class="task-head">
+      <span class="task-id">T03</span>
+      <strong>At least K of N constraints must hold (slide 43)</strong>
+      <span class="task-src">zdroj: prezentace/02_ILP.md, slide 43</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“We have $N$ constraints and we need at least $K$ of them to hold. Constraints are of type:</p>
+        $$f(x_1, x_2, \dots, x_n) \le b_1, \quad f(x_1, x_2, \dots, x_n) \le b_2, \quad \dots, \quad f(x_1, x_2, \dots, x_n) \le b_N.$$
+        <p>How can this be modeled in ILP?”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Zobecnění OR z této lekce: místo „aspoň 1 ze 2“ chceme „aspoň $K$ z $N$“ nerovností. Hledá se obecná konstrukce s pomocnými binárkami.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — vypínání omezení přes $M y_i$.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a> — $\sum y_i$ = počet zapnutých jedniček.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Každé omezení dostane vlastní přepínač $y_i$ ($y_i = 1$ = „$i$-té omezení smí být porušeno“). Kolik omezení smí být nejvýš vypnuto, když jich aspoň $K$ má platit? A proč u dvojice (OR) stačila jen jedna proměnná $y$?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Zaveď $N$ proměnných $y_{i \in 1 \dots N} \in \{0,1\}$ (slide 43):</p>
+          $$\begin{aligned} f(x_1, x_2, \dots, x_n) & \le b_i + M \cdot y_i \quad i \in 1 \dots N \\ \sum_{i=1}^{N} y_i & = N - K \end{aligned}$$
+          <p>Vypnutých je přesně $N - K$ omezení, takže zbylých $K$ platí. Funguje i $\sum y_i \le N - K$ — $y_i = 1$ porušení jen povoluje, nevynucuje. Poznámka ze slidu 43: pro $K = 1$ a $N = 2$ lze použít jedinou skalární proměnnou $y$ a její negaci $(1 - y)$ — viz OR konstrukce výše. A zkoušková aplikace „aspoň 2 ze 3 podmínek“ (Real estate 2011, <a href="l1-3.html#t-realestate-test2011">[L1.3] T03</a>): $y_1 + y_2 + y_3 \le 1$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.4">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-3.html"><span class="dir">← Předchozí</span> L1.3 · Modelování logiky: implikace, XOR, AND</a>
+    <a class="next" href="l1-5.html"><span class="dir">Další →</span> L1.5 · Navázání binární na spojitou (aktivace)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1a — OR příklad ze slidu 37–38, řez y = 0: první omezení aktivní v rovině (x1, x2)
+KOViz.lpRegion(document.getElementById('viz-or-y0'), {
+  xmax: 5, ymax: 5,
+  xlabel: 'x₁', ylabel: 'x₂',
+  constraints: [
+    {a: 2, b: 2, c: 8, label: '2x₁ + 2x₂ ≤ 8', labelAt: 0.45},
+  ],
+  caption: 'y = 0: první nerovnost je VYNUCENÁ — v rovině (x₁, x₂) zbývá trojúhelník pod přímkou 2x₁ + 2x₂ = 8. Druhá nerovnost má vpravo 2 + M, takže rovina (x₃, x₄) je celá volná (slide 38).'
+});
+
+// 1b — řez y = 1: druhé omezení aktivní v rovině (x3, x4)
+KOViz.lpRegion(document.getElementById('viz-or-y1'), {
+  xmax: 5, ymax: 5,
+  xlabel: 'x₃', ylabel: 'x₄',
+  constraints: [
+    {a: 2, b: -2, c: 2, label: '2x₃ − 2x₄ ≤ 2', labelAt: 0.55, labelDx: 10, labelDy: 14},
+  ],
+  caption: 'y = 1: vynucená je druhá nerovnost — v rovině (x₃, x₄) zbývá oblast nad/vlevo od přímky 2x₃ − 2x₄ = 2; rovina (x₁, x₂) je tentokrát celá volná. Přípustný prostor celé soustavy = sjednocení obou případů.'
+});
+
+// 2a — rozvrhování, řez x_ij = 1: T_i předchází T_j (s_j ≥ s_i + 2), deadliny s_i ≤ 8, s_j ≤ 8
+KOViz.lpRegion(document.getElementById('viz-sched-x1'), {
+  xmax: 8, ymax: 8,
+  xlabel: 'sᵢ', ylabel: 'sⱼ',
+  constraints: [
+    {a: 1, b: -1, c: -2, label: 'sⱼ ≥ sᵢ + pᵢ', labelAt: 0.45, labelDx: -86, labelDy: -10},
+  ],
+  caption: 'Řez xᵢⱼ = 1: Tᵢ předchází Tⱼ, vynuceno sⱼ ≥ sᵢ + pᵢ = sᵢ + 2 (deadliny dávají sᵢ ≤ 8, sⱼ ≤ 8 — okraje okna). Trojúhelník nad přímkou.'
+});
+
+// 2b — řez x_ij = 0: T_j předchází T_i (s_i ≥ s_j + 3)
+KOViz.lpRegion(document.getElementById('viz-sched-x0'), {
+  xmax: 8, ymax: 8,
+  xlabel: 'sᵢ', ylabel: 'sⱼ',
+  constraints: [
+    {a: -1, b: 1, c: -3, label: 'sᵢ ≥ sⱼ + pⱼ', labelAt: 0.45, labelDx: 12, labelDy: 16},
+  ],
+  caption: 'Řez xᵢⱼ = 0: Tⱼ předchází Tᵢ, vynuceno sᵢ ≥ sⱼ + pⱼ = sⱼ + 3. Trojúhelník pod přímkou. Sjednocení obou řezů (skutečný prostor řešení) je NEKONVEXNÍ — mezi trojúhelníky zeje nepřípustný pás, kde by se úlohy překrývaly (slide 42).'
+});
+
+// T01 řešení — soustava 1: y = 0 a y = 1
+KOViz.lpRegion(document.getElementById('viz-hw1-y0'), {
+  xmax: 5, ymax: 5,
+  xlabel: 'x₁', ylabel: 'x₂',
+  constraints: [
+    {a: 2, b: 1, c: 5, label: '2x₁ + x₂ ≤ 5', labelAt: 0.3, labelDx: 8, labelDy: 2},
+  ],
+  caption: 'Soustava 1, y = 0: vynuceno 2x₁ + x₂ ≤ 5 (trojúhelník s vrcholy (0,0), (2.5,0), (0,5)); druhé omezení vypnuté.'
+});
+KOViz.lpRegion(document.getElementById('viz-hw1-y1'), {
+  xmax: 5, ymax: 5,
+  xlabel: 'x₁', ylabel: 'x₂',
+  constraints: [
+    {a: 2, b: -1, c: 2, label: '2x₁ − x₂ ≤ 2', labelAt: 0.55, labelDx: 10, labelDy: 12},
+  ],
+  caption: 'Soustava 1, y = 1: vynuceno 2x₁ − x₂ ≤ 2 (oblast vlevo/nad přímkou přes (1,0) a (3.5,5)); první omezení vypnuté. Přípustná množina celé soustavy = sjednocení obou obrázků (nekonvexní).'
+});
+
+// T01 řešení — soustava 2 (rovnoběžky): y = 0 a y = 1
+KOViz.lpRegion(document.getElementById('viz-hw2-y0'), {
+  xmax: 5, ymax: 5,
+  xlabel: 'x₁', ylabel: 'x₂',
+  constraints: [
+    {a: 2, b: 1, c: 5, label: '2x₁ + x₂ ≤ 5', labelAt: 0.3, labelDx: 8, labelDy: 2},
+  ],
+  caption: 'Soustava 2, y = 0: vynuceno 2x₁ + x₂ ≤ 5 — dolní trojúhelník.'
+});
+KOViz.lpRegion(document.getElementById('viz-hw2-y1'), {
+  xmax: 5, ymax: 5,
+  xlabel: 'x₁', ylabel: 'x₂',
+  constraints: [
+    {a: -2, b: -1, c: -10, label: '2x₁ + x₂ ≥ 10', labelAt: 0.45, labelDx: -100, labelDy: -8},
+  ],
+  caption: 'Soustava 2, y = 1: vynuceno 2x₁ + x₂ ≥ 10 — horní oblast. Hraniční přímky jsou ROVNOBĚŽKY; pás mezi nimi (5 < 2x₁ + x₂ < 10) je nepřípustný pro obě hodnoty y, takže obě původní nerovnosti najednou platit nemohou — OR tu splývá s XOR.'
+});
+</script>
+</body>
+</html>
