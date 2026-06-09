@@ -85,7 +85,7 @@
   </div>
 
   <h2>Klasické použití: nepreemptivní rozvrhování</h2>
-  <p>Slidy 40–42 ukazují, kde se big-M potkáš nejčastěji: <strong>non-preemptive scheduling</strong> (nepreemptivní rozvrhování) $1 | r_j, \widetilde{d_j} | C_{max}$. Úlohy $T_1, \dots, T_n$ s dobami $p_i$, časy uvolnění $r_i$ a deadliny $\widetilde{d_i}$ běží na jednom procesoru; hledáme časy startu $s_i$. Na jednom procesoru běží v každém okamžiku nejvýš jedna úloha, takže pro každou dvojici $T_i, T_j$ musí platit:</p>
+  <p>Slidy 40–42 ukazují, kde se big-M potkáš nejčastěji: <strong>non-preemptive scheduling</strong> (nepreemptivní rozvrhování) $1 | r_j, \widetilde{d_j} | C_{max}$ (Grahamova notace rozvrhování — rozklíčujeme ji až v K5, tady ber zápis jen jako jméno problému). Úlohy $T_1, \dots, T_n$ s dobami $p_i$, časy uvolnění $r_i$ a deadliny $\widetilde{d_i}$ běží na jednom procesoru; hledáme časy startu $s_i$. Na jednom procesoru běží v každém okamžiku nejvýš jedna úloha, takže pro každou dvojici $T_i, T_j$ musí platit:</p>
   <ol>
     <li>$T_i$ předchází $T_j$ — $s_j \ge s_i + p_i$,</li>
     <li><strong>nebo</strong> $T_j$ předchází $T_i$ — $s_i \ge s_j + p_j$.</li>
@@ -199,7 +199,7 @@
       <div class="assignment">
         <span class="lbl">Assignment (original, EN)</span>
         <p>“$1 | r_j, \widetilde{d_j} | C_{max}$ … NP-hard problem. <strong>Instance:</strong> A set of non-preemptive tasks $\mathcal{T} = \{T_1, \dots, T_i, \dots, T_n\}$ with release date $r$ and deadline $\widetilde{d}$ should be executed on one processor. The processing times are given by vector $p$. <strong>Goal:</strong> Find a feasible schedule represented by start times $s$ that minimizes completion time $C_{max} = \max_{i \in \langle 1, n \rangle} s_i + p_i$ or decide that it does not exist.</p>
-        <p>Since at the given moment, at most, one task is running on a given resource, therefore, for all task pairs $T_i, T_j$ it must hold: 1. $T_i$ precedes $T_j$ ($s_j \ge s_i + p_i$) 2. or $T_j$ precedes $T_i$ ($s_i \ge s_j + p_j$). We need to formulate that at least one inequality holds.”</p>
+        <p>Since at the given moment, at most, one task is running on a given resource, therefore, for all task pairs $T_i, T_j$ it must hold: 1. $T_i$ precedes $T_j$ ($s_j \ge s_i + p_i$) 2. or $T_j$ precedes $T_i$ ($s_i \ge s_j + p_j$). […] We need to formulate that at least one inequality holds.”</p>
       </div>
 
       <h4>a) Co je v zadání?</h4>
@@ -270,7 +270,7 @@
 
   <div class="pager">
     <a href="l1-3.html"><span class="dir">← Předchozí</span> L1.3 · Modelování logiky: implikace, XOR, AND</a>
-    <a class="next" href="l1-5.html"><span class="dir">Další →</span> L1.5 · Navázání binární na spojitou (aktivace)</a>
+    <a class="next" href="l1-5.html"><span class="dir">Další →</span> L1.5 · Navázání binární na spojitou/celočíselnou (aktivace)</a>
   </div>
 
 </div>
