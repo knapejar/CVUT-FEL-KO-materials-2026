@@ -101,7 +101,7 @@
     <div class="task-body">
       <div class="assignment">
         <span class="lbl">Assignment (original, EN)</span>
-        <p>Recall the definitions: “<em>Edge progression (sled)</em> is a sequence $v_1, e_1, v_2, e_2, \ldots, v_k, e_k, v_{k+1}$ such that $e_i = (v_i, v_{i+1}) \in E(G)$ or $e_i = \{v_i, v_{i+1}\} \in E(G)$ for all $i$. Directed (undirected) <em>walk (tah)</em> is directed (undirected) edge progression, where no edge appears more than once. Directed (undirected) <em>path (cesta)</em> is directed (undirected) walk, where no node appears more than once.”</p>
+        <p>Recall the definitions: “<em>Edge progression (sled)</em> is a sequence $v_1, e_1, v_2, e_2, \ldots, v_k, e_k, v_{k+1}$ such that $e_i = (v_i, v_{i+1}) \in E(G)$ or $e_i = \{v_i, v_{i+1}\} \in E(G)$ for all $i$. Directed (undirected) <em>walk (tah)</em> is directed (undirected) edge progression, where no edge appears more than once, i.e. $e_i \ne e_j$ for all $1 \le i &lt; j \le k$. Directed (undirected) <em>path (cesta)</em> is directed (undirected) walk, where no node appears more than once, i.e. $v_i \ne v_j$ for all $1 \le i &lt; j \le k+1$.”</p>
         <p>For the digraph drawn above (edges $(a,b), (b,c), (c,a), (b,d), (d,c), (c,e)$), classify each of the following sequences as an edge progression, a walk, a path, or none of them (state the strongest applicable term):</p>
         <ol>
           <li>$a, b, d, c, e$</li>
@@ -178,11 +178,22 @@ function withCls(nodeCls, edgeCls) {
   };
 }
 
-// 1 — sled: a→b→c→a→b→d (hrana a→b dvakrát)
-KOViz.graph(document.getElementById('viz-sled'), Object.assign(
-  withCls({a:'hl', b:'hl', c:'hl', d:'hl'}, {'a->b':'hl', 'b->c':'hl', 'c->a':'hl', 'b->d':'hl'}),
-  {caption: 'SLED a→b→c→a→b→d: hrana (a,b) i vrcholy a, b se použijí dvakrát — sled to dovoluje. (Není to tah ani cesta.)'}
-));
+// 1 — sled: a→b→c→a→b→d (hrana a→b dvakrát) — krokování, ať je opakování vidět
+KOViz.stepper(document.getElementById('viz-sled'), {
+  graph: {
+    directed: true,
+    nodes: NODES,
+    edges: EDGES.map(e => Object.assign({}, e, {cls: 'dim'})),
+  },
+  frames: [
+    {desc:'SLED a→b→c→a→b→d. Start ve vrcholu <b>a</b>.', nodes:{a:'hl'}},
+    {desc:'Krok 1: hrana (a,b) — poprvé.', nodes:{a:'good', b:'hl'}, edges:{'a->b':'good'}},
+    {desc:'Krok 2: hrana (b,c).', nodes:{a:'good', b:'good', c:'hl'}, edges:{'a->b':'good', 'b->c':'good'}},
+    {desc:'Krok 3: hrana (c,a) — vrchol <b>a</b> navštíven <b>podruhé</b>. Sled to dovoluje.', nodes:{a:'hl', b:'good', c:'good'}, edges:{'a->b':'good', 'b->c':'good', 'c->a':'good'}},
+    {desc:'Krok 4: hrana (a,b) <b>podruhé</b>! Proto je to jen sled — tah by opakování hrany zakázal.', nodes:{a:'good', b:'hl', c:'good'}, edges:{'a->b':'bad', 'b->c':'good', 'c->a':'good'}},
+    {desc:'Krok 5: hrana (b,d) — konec v <b>d</b>. Výsledek: sled (hrana (a,b) dvakrát ⇒ není tah, vrcholy a, b dvakrát ⇒ není cesta).', nodes:{a:'good', b:'good', c:'good', d:'hl'}, edges:{'a->b':'bad', 'b->c':'good', 'c->a':'good', 'b->d':'good'}},
+  ],
+});
 
 // 2 — tah: b→c→a→b→d→c→e (vrcholy b,c dvakrát, hrany různé)
 KOViz.graph(document.getElementById('viz-tah'), Object.assign(
