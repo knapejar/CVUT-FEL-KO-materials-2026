@@ -172,7 +172,8 @@
      spec = {
        xmax, ymax       : rozsah os (celá čísla, default 8)
        constraints: [{a, b, c, label?, labelAt?}]  — polorovina a·x + b·y <= c;
-                          labelAt = 0..1 pozice popisku podél čáry (default 0.5, proti kolizím popisků)
+                          labelAt = 0..1 pozice popisku podél čáry (default 0.5, proti kolizím popisků);
+                          labelDx, labelDy = px offset popisku od čáry (default +6, −6 — uprav, když je čára diagonální a text by přeškrtla)
        integer          : true → vykresli mřížku celočíselných bodů, zvýrazni přípustné
        opt              : [x, y] — bod optima (zvýrazní červeně)
        objective        : {a, b} — směr účelové fce (nakreslí šipku gradientu)
@@ -216,7 +217,7 @@
     }
 
     // hranice omezení (čáry) + popisky
-    (spec.constraints || []).forEach(({ a, b, c, label, labelAt }, idx) => {
+    (spec.constraints || []).forEach(({ a, b, c, label, labelAt, labelDx, labelDy }, idx) => {
       // úsečka a·x + b·y = c oříznutá do okna
       const pts = [];
       if (Math.abs(b) > 1e-12) {
@@ -242,7 +243,9 @@
         if (label) {
           const fr = (typeof labelAt === "number") ? labelAt : 0.5;
           const lx = p[0] + fr * (q[0] - p[0]), ly = p[1] + fr * (q[1] - p[1]);
-          const t = svgEl("text", { x: X(lx) + 6, y: Y(ly) - 6, "font-size": "12" });
+          const dx = (typeof labelDx === "number") ? labelDx : 6;
+          const dy = (typeof labelDy === "number") ? labelDy : -6;
+          const t = svgEl("text", { x: X(lx) + dx, y: Y(ly) + dy, "font-size": "12" });
           t.textContent = label; t.style.fill = "var(--accent)";
           svg.appendChild(t);
         }

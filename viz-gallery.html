@@ -124,9 +124,9 @@ KOViz.lpRegion(document.getElementById('g4b'), {
   xmax: 1, ymax: 1, integer: true,
   constraints: [
     {a:1, b:1, c:1, label:'x₁+x₂≤1', labelAt: 0.25},
-    {a:-1, b:-1, c:-1, label:'x₁+x₂≥1', labelAt: 0.75},
+    {a:-1, b:-1, c:-1, label:'x₁+x₂≥1', labelAt: 0.75, labelDx: 10, labelDy: 12},
   ],
-  caption: 'Ukázka 4b: XOR na binárním čtverci — obě hranice leží na čáře procházející rohy (0,1) a (1,0); čára i popisky se musí vykreslit (dedupe duplicitních průsečíků).'
+  caption: 'Ukázka 4b: XOR na binárním čtverci — obě hranice leží na čáře procházející rohy (0,1) a (1,0); čára i popisky se musí vykreslit (dedupe duplicitních průsečíků). Druhý popisek odsazen od čáry přes labelDx/labelDy (px offset, default +6/−6 — nutné, když je čára diagonální a defaultní offset by ji nechal text přeškrtnout).'
 });
 
 // 5 — stepper (mini Dijkstra na 4 uzlech)

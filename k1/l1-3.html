@@ -73,7 +73,7 @@
 
   <div class="viz" id="viz-impl"></div>
 
-  <p>Model ze slidu 32 (build 3) pak jen přidá řádek do „subject to“:</p>
+  <p>Model ze slidu 30 (build 3) pak jen přidá řádek do „subject to“:</p>
   $$\begin{aligned} \max z = \;& 16x_1 + 22x_2 + 12x_3 + 8x_4 + 11x_5 + 19x_6 \\ \text{s.t.} \;& 5x_1 + 7x_2 + 4x_3 + 3x_4 + 4x_5 + 6x_6 \le 14 \\ & x_2 \ge x_1 \\ & x_{i \in 1 \cdots 6} \in \{0, 1\} \end{aligned}$$
 
   <h2>Negace: $\overline{x}$ je prostě $1 - x$</h2>
@@ -221,7 +221,7 @@
           </ul>
           <p>Celý model se všemi třemi formulemi najednou:</p>
           $$\begin{aligned} \max z = \;& 16x_1 + 22x_2 + 12x_3 + 8x_4 + 11x_5 + 19x_6 \\ \text{s.t.} \;& 5x_1 + 7x_2 + 4x_3 + 3x_4 + 4x_5 + 6x_6 \le 14 \\ & x_2 \ge x_1 \\ & x_3 + x_4 \le 1 \\ & x_5 + x_6 = 1 \\ & x_{i \in 1 \cdots 6} \in \{0, 1\} \end{aligned}$$
-          <p><strong>Kontrola:</strong> optimum základního modelu $x = (1,0,0,1,0,1)$ z [L1.1] teď není přípustné ($x_1 = 1$, ale $x_2 = 0$ porušuje $x_2 \ge x_1$) — logická omezení opravdu „kousla“. XOR je navíc splněn těsně: $x_5 + x_6 = 0 + 1 = 1$ ✓.</p>
+          <p><strong>Kontrola:</strong> optimum základního modelu $x = (1,0,0,1,0,1)$ z [L1.1] teď není přípustné ($x_1 = 1$, ale $x_2 = 0$ porušuje $x_2 \ge x_1$) — logická omezení opravdu „kousla“. Nové optimum je nižší: např. $x = (0,1,0,0,0,1)$ s cenou $7 + 6 = 13 \le 14$ a ziskem $z = 22 + 19 = 41 < 43$ — za logiku se platí ziskem.</p>
         </div>
       </details>
     </div>
@@ -336,7 +336,7 @@ KOViz.lpRegion(document.getElementById('viz-impl'), {
   xmax: 1, ymax: 1, integer: true,
   xlabel: 'x₁', ylabel: 'x₂',
   constraints: [
-    {a: 1, b: -1, c: 0, label: 'x₂ ≥ x₁', labelAt: 0.62},
+    {a: 1, b: -1, c: 0, label: 'x₂ ≥ x₁', labelAt: 0.62, labelDx: -80, labelDy: -14},
   ],
   caption: 'IMPLIKACE x₁ ⇒ x₂ ≡ x₂ ≥ x₁ (tj. x₁ − x₂ ≤ 0): z rohů čtverce 0..1 × 0..1 zůstávají povolené (zelené) body (0,0), (0,1), (1,1); zakázaný řádek tabulky (1,0) je odříznutý.'
 });
