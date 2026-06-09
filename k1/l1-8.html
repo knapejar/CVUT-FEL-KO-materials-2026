@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.8 · Rozdíl / omezení rozptylu (max−min) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.8</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.8</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Rozdíl / omezení rozptylu (max−min)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Lineární zápis $|a - b| \le D$ (dvě nerovnosti) a omezení rozptylu $\max - \min$ <em>jedné pevné množiny hodnot</em> přes pomocné proměnné $h_{max}$, $h_{min}$.
+  </div>
+
+  <p>Prerekvizity: <a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a>. Navazujeme přímo na <a href="l1-7.html#takeaways">[L1.7]</a> — ve <strong>Wedding plan</strong> nám z modelu zbývá poslední nevyřízená věta.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>„Strany se smí lišit nejvýš o $D_{max}$“</h2>
+  <p>Zkouškové zadání Wedding plan říká: <em>„…for the sake of justice, the number of guests invited from the groom's side and the bride's side can differ by at most $D_{max}$.“</em> Označme počty pozvaných z obou stran (lineární výrazy v binárkách $x_i$ „host $i$ pozván“):</p>
+  $$a = \sum_{i=1}^{n} gr(g_i)\,x_i \qquad b = \sum_{i=1}^{n} br(g_i)\,x_i.$$
+  <p>Podmínka „liší se nejvýš o $D_{max}$“ je $|a - b| \le D_{max}$. Jenže <strong>absolute value</strong> (absolutní hodnota) není lineární funkce — do ILP ji takhle napsat nesmíme.</p>
+
+  <details class="try">
+    <summary>Zkus sám: co přesně říká $|a - b| \le D$ o čísle $a - b$? Umíš to říct bez absolutní hodnoty?</summary>
+    <div class="inner">
+      <p>$|t| \le D$ znamená přesně $-D \le t \le D$. Dosaď $t = a - b$ a roztrhni na dvě lineární nerovnosti:</p>
+      $$a - b \le D \qquad \text{a zároveň} \qquad b - a \le D.$$
+      <p>První hlídá případ „$a$ je větší“, druhá případ „$b$ je větší“. Obě musí platit <em>současně</em> — a „současně“ (průnik, AND) je v ILP zadarmo: prostě napíšeš obě omezení pod sebe. Žádná binárka, žádné big-M.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: a šlo by stejně levně i „strany se musí lišit <em>aspoň</em> o $D$“, tedy $|a - b| \ge D$?</summary>
+    <div class="inner">
+      <p>Ne! $|t| \ge D$ znamená „$t \ge D$ <strong>NEBO</strong> $t \le -D$“ — to je <em>disjunkce</em>, přípustná množina má díru uprostřed (je nekonvexní). „Nebo“ se v ILP platí binárním přepínačem a big-M <a href="l1-4.html#takeaways">[L1.4]</a>:</p>
+      $$a - b \ge D - M y, \qquad b - a \ge D - M(1 - y), \qquad y \in \{0,1\}.$$
+      <p>Zapamatuj si ten kontrast: $|{\cdot}| \le D$ je AND (zadarmo), $|{\cdot}| \ge D$ je OR (big-M). Směr nerovnosti rozhoduje o ceně.</p>
+    </div>
+  </details>
+
+  <p>Tím je Wedding plan kompletně pokrytý — celý model složíš v <a href="l1-9.html">[L1.9]</a>. Ale dvojice hodnot je jen začátek: co když se nesmí „rozjet“ <em>víc než dvě</em> hodnoty najednou?</p>
+
+  <h2>Z dvojice na celou množinu: max − min</h2>
+  <p>Zápočtový test 2021 chtěl rozdělit bankovky do <strong>čtyř</strong> skupin $S_1, \dots, S_4$ se součty $h_1, \dots, h_4$ tak, aby rozdíl mezi <em>nejvyšším</em> a <em>nejnižším</em> součtem nepřekročil limit $P$:</p>
+  $$\max_j h_j \;-\; \min_j h_j \;\le\; P.$$
+  <p>Funkce $\max$ a $\min$ ale lineární nejsou — stejný problém jako u absolutní hodnoty.</p>
+
+  <details class="try">
+    <summary>Zkus sám: umíš to vyřešit jen tím, co už znáš z první sekce?</summary>
+    <div class="inner">
+      <p>Ano — „max − min ≤ P“ platí právě tehdy, když se <em>žádné dvě</em> hodnoty neliší o víc než $P$. Stačí tedy napsat $|h_j - h_k| \le P$ pro všechny dvojice, tj. dvě nerovnosti na dvojici:</p>
+      $$h_j - h_k \le P \quad \forall j \ne k.$$
+      <p>Pro 4 skupiny je to $\binom{4}{2} \cdot 2 = 12$ nerovností. Funguje to, ale počet omezení roste kvadraticky s počtem skupin — a hlavně existuje elegantnější konstrukce, kterou používá vzorové řešení a kterou musíš umět: pomocné proměnné.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: zaveď novou proměnnou $h_{max}$, která má „držet maximum“. Jakými lineárními omezeními ji přivážeš k hodnotám $h_1, \dots, h_4$?</summary>
+    <div class="inner">
+      <p>Maximum je nejmenší číslo, které je $\ge$ všem hodnotám. Lineárně umíme zařídit tu druhou půlku:</p>
+      $$h_{max} \ge h_j \qquad \forall j \in 1..4.$$
+      <p>Symetricky pro minimum: $h_{min} \le h_j$ pro všechna $j$. A samotné omezení rozptylu je pak jediná nerovnost:</p>
+      $$h_{max} - h_{min} \le P.$$
+      <p>Celkem $2 \cdot 4 + 1 = 9$ omezení a dvě pomocné proměnné — a počet roste jen <em>lineárně</em> s počtem skupin.</p>
+    </div>
+  </details>
+
+  <p>Na konkrétním (nevyhovujícím) rozdělení: součty skupin $h = (9, 12, 10, 14)$, celkový součet $45$, limit $P = 0.1 \cdot 45 = 4.5$:</p>
+
+  <div class="viz" id="viz-maxmin"></div>
+
+  <h2>Pozor: $h_{max}$ NENÍ rovno maximu</h2>
+  <p>V konstrukci je schovaná jemnost, na kterou se u ústní zkoušky dobře ptá.</p>
+
+  <details class="try">
+    <summary>Zkus sám: omezení říká jen $h_{max} \ge h_j$. Co brání solveru nastavit $h_{max}$ třeba na milion? A vadí to?</summary>
+    <div class="inner">
+      <p>Nebrání mu nic — $h_{max}$ je jen <em>horní mez</em> hodnot, ne jejich maximum (a $h_{min}$ jen dolní mez). Ale nevadí to, protože nerovnost $h_{max} - h_{min} \le P$ tlačí <em>proti</em> ulétnutí:</p>
+      <ul>
+        <li>Pokud řešení splní $h_{max} - h_{min} \le P$, pak skutečný rozptyl je ještě menší: $\max_j h_j - \min_j h_j \le h_{max} - h_{min} \le P$. ✓</li>
+        <li>Naopak pokud rozdělení má rozptyl $\le P$, solver smí položit $h_{max} = \max_j h_j$ a $h_{min} = \min_j h_j$ a omezení projde. ✓</li>
+      </ul>
+      <p>Přípustná rozdělení jsou tedy <em>přesně</em> ta správná — konstrukce je korektní, i když se $h_{max}$ maximu jen „umí rovnat“, nemusí.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: a fungovala by stejná konstrukce pro opačný požadavek „rozptyl musí být ASPOŇ $P$“, tedy $h_{max} - h_{min} \ge P$?</summary>
+    <div class="inner">
+      <p>Ne! Právě proto, že $h_{max}$ smí ulétnout nahoru (a $h_{min}$ dolů), splní solver $h_{max} - h_{min} \ge P$ <em>vždy</em> — třeba $h_{max} = 10^6$, $h_{min} = 0$ — aniž by skutečné hodnoty cokoli plnily. Omezení by bylo bezzubé.</p>
+      <p>Stejná logika říká, kdy konstrukci smíš dát do kritéria: <strong>$\min\,(h_{max} - h_{min})$ funguje</strong> (minimalizace stlačí meze až na skutečné max/min), <strong>$\max\,(h_{max} - h_{min})$ ne</strong>. Pomocná proměnná funguje jen ve směru, ve kterém ji omezení/kritérium „přitlačí“ k hodnotám. Srovnej s big-M [L1.4]: tam má $M$ tutéž roli jednostranné meze.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „max/min už umím“</div>
+    <p>Konstrukce z této lekce zachycuje max/min přes <strong>JEDNU pevnou množinu hodnot</strong> — čtyři součty $h_1, \dots, h_4$, které v každém přípustném řešení existují vedle sebe. Něco úplně jiného je požadavek typu „nerovnost musí platit <strong>pro každou možnou volbu</strong>“ (worst-case přes všechny kombinace, např. „ať si student vybere kterékoli jedno jídlo denně…“). Tam žádná konečná množina hodnot „vedle sebe“ neleží a $h_{max} \ge h_j$ napsat nejde — je to jiná konstrukce, viz <a href="l1-13.html">[L1.13]</a>. Nezaměňuj!</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.8</div>
+    <ul>
+      <li><strong>$|a - b| \le D$</strong> ⟺ dvě lineární nerovnosti $a - b \le D$ a $b - a \le D$ (AND, zadarmo). Pozor: $|a - b| \ge D$ je disjunkce (OR) → big-M <a href="l1-4.html#takeaways">[L1.4]</a>.</li>
+      <li><strong>max přes pomocnou proměnnou:</strong> $h_{max} \ge h_j$ pro všechna $j$ z dané množiny; <strong>min:</strong> $h_{min} \le h_j$; rozptyl pak $h_{max} - h_{min} \le P$ jedinou nerovností.</li>
+      <li>$h_{max}$/$h_{min}$ jsou jen <strong>jednostranné meze</strong>, ne maximum/minimum samo — proto fungují pro „rozptyl $\le P$“ a pro $\min(h_{max} - h_{min})$ v kritériu, ale NE pro „rozptyl $\ge P$“ či $\max(h_{max} - h_{min})$.</li>
+      <li><strong>Rozsah platnosti:</strong> jedna konkrétní množina hodnot (např. součty skupin). Min/max <em>přes všechny kombinace voleb</em> je jiná konstrukce — viz <a href="l1-13.html">[L1.13]</a>.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-4partition">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>4-Partition Problem (banknotes)</strong>
+      <span class="task-src">zdroj: zápočtový test 2021 v2, strana 3</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Formulate using ILP:</p>
+        <ul>
+          <li><strong>Instance:</strong> Number of banknotes $n \in \mathbb{Z}^+$ and their values $p_1, \ldots, p_n$, where $p_{i \in 1..n} \in \mathbb{Z}^+$.</li>
+          <li><strong>Decision:</strong> Is there any division in 4 pairwise disjoint sets $S_1, S_2, S_3, S_4$ such that the difference between the highest value of the set and the lowest value of the set is equal or less than 10% of the sum of all banknotes value? Value of the set $S_j \subseteq \{1, \ldots, 4\}$ is given as $h_j = \sum_{i \in S_j} p_i$.”</li>
+        </ul>
+        <p class="note" style="font-size:13px;opacity:.8">Pozn.: zápis „$S_j \subseteq \{1, \ldots, 4\}$“ je takto v originále; míněno je zjevně $S_j \subseteq \{1, \ldots, n\}$ pro $j \in 1..4$ (skupiny jsou množiny bankovek).</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Rozhodovací (decision) úloha: existuje rozdělení $n$ bankovek do 4 navzájem disjunktních skupin tak, aby rozdíl mezi nejvyšším a nejnižším součtem skupiny byl nejvýš 10 % celkového součtu? „Disjoint division“ = každá bankovka padne právě do jedné skupiny. Nehledáme optimum, jen přípustnost — kritérium může být klidně $\min 0$.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — $h_{max} \ge h_j$, $h_{min} \le h_j$, $h_{max} - h_{min} \le P$.</li>
+        <li><a href="l1-2.html#takeaways">[L1.2] Přiřazovací struktura</a> — $x_{ij}$ a „každé $i$ právě jednou“: $\sum_j x_{ij} = 1$.</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a> — jak se zapisuje decision úloha.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Jaká binárka popíše „bankovka $i$ patří do skupiny $j$“? Které omezení vynutí „pairwise disjoint“ a zároveň „každá bankovka někde je“? Jak z binárek lineárně poskládáš součet skupiny $h_j$? Limit „10 % of the sum of all banknotes value“ — je to konstanta, nebo proměnná? (Hodnoty $p_i$ jsou parametry zadání!) A nakonec: dvě pomocné proměnné a tři druhy omezení z této lekce.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Dle vzorového řešení: $x_{ij} = 1$ ⟺ bankovka $i \in S_j$.</p>
+          $$\begin{aligned} \min \quad & 0 \\ \text{subject to:} \quad & \\ & \sum_{i \in 1..n} x_{ij} \cdot p_i = h_j \quad j \in 1..4 \\ & \sum_{j \in 1..4} x_{ij} = 1 \quad i \in 1..n \\ & h_{min} \le h_j \quad j \in 1..4 \\ & h_{max} \ge h_j \quad j \in 1..4 \\ & h_{max} - h_{min} \le 0.1 \sum_{i \in 1..n} p_i \\ \text{parameters:} \quad & p_{i \in 1..n} \in \mathbb{Z}^+ \\ \text{variables:} \quad & x_{i \in 1..n,\, j \in 1..4} \in \{0,1\}, \;\; h_{max}, h_{min}, h_{j \in 1..4} \in \mathbb{Z}^+ \end{aligned}$$
+          <p><strong>Komentáře:</strong></p>
+          <ul>
+            <li><strong>$\min 0$:</strong> decision úloha — zajímá nás jen, zda existuje přípustné řešení. Solver vrátí feasible/infeasible, to je odpověď ano/ne.</li>
+            <li><strong>$\sum_j x_{ij} = 1$</strong> řeší obojí najednou: bankovka je aspoň v jedné skupině (pokrytí) a nejvýš v jedné (disjunktnost) — polovina přiřazovací struktury <a href="l1-2.html#takeaways">[L1.2]</a> (druhou polovinu $\sum_i x_{ij} = 1$ tu nechceme: skupina smí mít víc bankovek).</li>
+            <li><strong>Pravá strana $0.1 \sum_i p_i$ je konstanta</strong> — hodnoty $p_i$ jsou parametry, ne proměnné. Omezení je tedy lineární; žádné násobení proměnných nehrozí.</li>
+            <li>Proměnné $h_j$ jsou formálně zbytečné (jen zkratka za $\sum_i x_{ij} p_i$) — ale model s nimi je čitelnější a vzorové řešení je zavádí. Klidně je u zkoušky zaveď taky.</li>
+            <li>Vzorové řešení deklaruje $h_{max}, h_{min}, h_j \in \mathbb{Z}^+$ (kladná celá čísla). Drobnost k zamyšlení: připouští-li instance prázdnou skupinu ($h_j = 0$), bylo by korektnější $\mathbb{Z}_0^+$ — u zkoušky se drž vzoru, ale věz, co píšeš.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.8">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-7.html"><span class="dir">← Předchozí</span> L1.7 · Po částech konstantní funkce přes intervaly</a>
+    <a class="next" href="l1-9.html"><span class="dir">Další →</span> L1.9 · VYVRCHOLENÍ: Wedding plan [FOTO]</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Součty čtyř skupin h = (9, 12, 10, 14); h_max / h_min jako vodorovné meze.
+KOViz.fnPlot(document.getElementById('viz-maxmin'), {
+  xmax: 5, ymax: 16, xstep: 1, ystep: 2,
+  xlabel: 'j', ylabel: 'h_j',
+  segments: [
+    {x1: 0.4, y1: 14, x2: 4.8, y2: 14, dashed: true, label: 'h_max ≥ všechna h_j (nejníž 14)', labelAt: 0.1, labelDx: 0, labelDy: -10},
+    {x1: 0.4, y1: 9,  x2: 4.8, y2: 9,  dashed: true, label: 'h_min ≤ všechna h_j (nejvýš 9)',  labelAt: 0.32, labelDx: 0, labelDy: 16},
+  ],
+  points: [
+    {x: 1, y: 9,  label: 'h₁ = 9',  dx: -16, dy: -12},
+    {x: 2, y: 12, label: 'h₂ = 12', dx: -16, dy: -12},
+    {x: 3, y: 10, label: 'h₃ = 10', dx: -16, dy: -12},
+    {x: 4, y: 14, label: 'h₄ = 14', dx: 12,  dy: 22},
+  ],
+  caption: 'Součty čtyř skupin h_j (osa x = index skupiny j): h = (9, 12, 10, 14), celkový součet 45, limit P = 0.1 · 45 = 4.5. Omezení h_max ≥ h_j tlačí čárkovanou mez nejníž na 14, h_min ≤ h_j nejvýš na 9 — sevřít je na h_max − h_min ≤ 4.5 nelze (mezera je 5). Toto rozdělení je tedy nepřípustné a solver musí bankovky rozházet jinak (nebo ohlásit infeasible).'
+});
+</script>
+</body>
+</html>

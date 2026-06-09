@@ -1,6 +1,6 @@
 # STAV projektu KO učebnice
 
-Aktualizováno: 9. 6. 2026 večer
+Aktualizováno: 10. 6. 2026
 
 ## Hotovo
 - [x] OSNOVA.md (93 lekcí, 3× kriticky iterováno workflow)
@@ -11,7 +11,7 @@ Aktualizováno: 9. 6. 2026 večer
 
 ## Píše se
 - [ ] K0: L0.1–L0.8 (pipeline tvůrce→kritik→korektor) — L0.1–L0.4 po korektuře (79000cc), L0.5–L0.8 napsány tvůrcem (čeká kritik)
-- [ ] K1: L1.1–L1.15 — L1.1, L1.2 po korektuře; L1.3 po korektuře; L1.4 po korektuře; L1.5 po korektuře; L1.6 po korektuře; L1.7 napsána tvůrcem (čeká kritik); viz.js: přidán `labelAt` u lpRegion constraints + posun popisku objective šipky; oprava lpRegion: dedupe průsečíků hraniční čáry procházející rohy okna (jinak se čára+popisek nevykreslí — ukázka 4b ve viz-gallery); přidán `KOViz.fnPlot` (graf funkce po úsecích — nespojité fce, ukázka 4c ve viz-gallery, použit v L1.6)
+- [ ] K1: L1.1–L1.15 — L1.1, L1.2 po korektuře; L1.3 po korektuře; L1.4 po korektuře; L1.5 po korektuře; L1.6 po korektuře; L1.7 po korektuře; L1.8 napsána tvůrcem (čeká kritik); viz.js: přidán `labelAt` u lpRegion constraints + posun popisku objective šipky; oprava lpRegion: dedupe průsečíků hraniční čáry procházející rohy okna (jinak se čára+popisek nevykreslí — ukázka 4b ve viz-gallery); přidán `KOViz.fnPlot` (graf funkce po úsecích — nespojité fce, ukázka 4c ve viz-gallery, použit v L1.6)
 
 ## Fronta
 - K2 (18 lekcí) → K3 (16) → K4 (15) → K5 (16) → K6 (3) → K7 (2)
@@ -21,4 +21,4 @@ Aktualizováno: 9. 6. 2026 večer
 - Stepper frames jsou ABSOLUTNÍ stavy (ne diffy) — viz viz-gallery.html ukázka 5.
 - Po vytvoření lekce: headless Chrome screenshot → Read PNG → kontrola glitchů.
 - Commit po každém kroku pipeline.
-- L1.2 obsahuje dopředné odkazy na l1-3.html, l1-4.html a l1-14.html (sériový workflow). l1-3.html už existuje a titulek sedí ✓; po dopsání L1.14 ověřit zbylé. l1-4.html už existuje (titulek sedí ✓). L1.4 má dopředné odkazy na l1-5.html (pager — existuje ✓) a l1-8.html (řešení T02 — modelování maxima). L1.5 má dopředné odkazy na l1-6.html (pager + výklad/takeaways — fixed-charge; existuje ✓). L1.6 má dopředný odkaz na l1-7.html (pager — existuje ✓, titulek sedí ✓). L1.7 má dopředné odkazy na l1-8.html (pager + T02 — max−min/|rozdíl|) a l1-9.html (T02 — Wedding plan [FOTO]); po dopsání ověřit titulky.
+- L1.2 obsahuje dopředné odkazy na l1-3.html, l1-4.html a l1-14.html (sériový workflow). l1-3.html už existuje a titulek sedí ✓; po dopsání L1.14 ověřit zbylé. l1-4.html už existuje (titulek sedí ✓). L1.4 má dopředné odkazy na l1-5.html (pager — existuje ✓) a l1-8.html (řešení T02 — modelování maxima). L1.5 má dopředné odkazy na l1-6.html (pager + výklad/takeaways — fixed-charge; existuje ✓). L1.6 má dopředný odkaz na l1-7.html (pager — existuje ✓, titulek sedí ✓). L1.7 má dopředné odkazy na l1-8.html (existuje ✓, titulek sedí ✓) a l1-9.html (T02 — Wedding plan [FOTO]). L1.8 má dopředné odkazy na l1-9.html (pager + výklad — Wedding plan) a l1-13.html (danger box + takeaways — worst-case přes kombinace); po dopsání ověřit titulky.
