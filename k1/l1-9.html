@@ -79,7 +79,7 @@
       $$N \le 9 + n(1 - y_1)$$
       $$N \ge 10 - n(1 - y_2), \qquad N \le 19 + n(1 - y_2)$$
       $$N \ge 20 - n(1 - y_3)$$
-      <p>Zkontroluj, že <em>každý vnitřní interval má obě meze</em> — přesně za tohle se na termínu 21.06.2021 strhávaly 2 body.</p>
+      <p>Zkontroluj, že <em>žádnému intervalu nechybí netriviální mez</em> — za neomezený třetí cenový případ se na termínu 21.06.2021 strhávaly 2 body (ve studentově formulaci nebyla jeho horní mez triviální).</p>
     </div>
   </details>
 
@@ -199,7 +199,7 @@
           <p><strong>Parameters:</strong> $n \in \mathbb{N}^+$; $m, p_1, p_2, p_3, B \in \mathbb{R}^+$; $D_{max} \in \mathbb{Z}_0^+$; $br(g_i), gr(g_i) \in \{0,1\}$ pro $i \in 1..n$.</p>
           <p><strong>Komentáře:</strong></p>
           <ul>
-            <li><strong>$M = n$ stačí:</strong> $0 \le N \le n$ vždy, takže uvolněná mez (např. $N \ge 10 - n$) nikdy nic neomezuje. Triviální meze $N \ge 0$ (interval 1) a $N \le n$ (interval 3) platí automaticky. Kompaktní ekvivalent vazeb (díky $\sum_k y_k = 1$): $10y_2 + 20y_3 \le N \le 9y_1 + 19y_2 + n\,y_3$.</li>
+            <li><strong>$M = n$ stačí:</strong> $0 \le N \le n$ vždy, takže uvolněná mez (např. $N \ge 10 - n$) nikdy nic neomezuje (zadání implikuje $n \ge 20$ — jinak by interval $[20, n]$ byl prázdný; pak je $20 - n \le 0$ a uvolněná mez opravdu nic neomezuje). Triviální meze $N \ge 0$ (interval 1) a $N \le n$ (interval 3) platí automaticky. Kompaktní ekvivalent vazeb (díky $\sum_k y_k = 1$): $10y_2 + 20y_3 \le N \le 9y_1 + 19y_2 + n\,y_3$.</li>
             <li><strong>Rozpočet:</strong> jídlo $m$ za každého pozvaného ($mN$) + pronájem vybraného intervalu ($\sum_k p_k y_k$). Pronájem se nenásobí počtem hostů.</li>
             <li><strong>Spravedlnost:</strong> $|{\sum_i gr(g_i)x_i - \sum_i br(g_i)x_i}| \le D_{max}$ roztržená na dvě nerovnosti <a href="l1-8.html#takeaways">[L1.8]</a>. Host s $br = gr = 1$ se v rozdílu vyruší — žádná zvláštní obsluha.</li>
             <li><strong>Srovnání s dochovaným studentským řešením (21.06.2021):</strong> student použil obrácené přepínače $Y_k = 1$ ⟺ interval <em>ne</em>vybrán ($Y_1+Y_2+Y_3 = 2$, v rozpočtu $(1-Y_k)p_k$) — legální ekvivalent, ale ztratil 2 body za neúplně svázané meze intervalů a body za první (sečtenou místo odečtenou) verzi podmínky $D_{max}$. Přímý význam $y_k = 1$ ⟺ vybráno je bezpečnější.</li>
