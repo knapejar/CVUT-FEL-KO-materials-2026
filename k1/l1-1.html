@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.1 · Cílová funkce a základní omezení — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.1</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.1</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Cílová funkce a základní omezení</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Jak ze slovního zadání napsat kompletní ILP model: proměnné s oborem, cílovou funkci $\max/\min \sum_i c_i x_i$ a lineární omezení (typicky rozpočtové $\sum_i w_i x_i \le B$).
+  </div>
+
+  <p>Prerekvizity: <a href="../k0/l0-7.html">[L0.7] Co je ILP a LP relaxace</a>, <a href="../k0/l0-8.html">[L0.8] Binární proměnná</a>.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Tři povinné části modelu</h2>
+  <p>V <a href="../k0/l0-7.html#takeaways">[L0.7]</a> ses naučil, co ILP <em>je</em>: $\max\{c^T x : \mathbf{A}x \le b,\ x \in \mathbb{Z}^n\}$. Od téhle lekce začíná řemeslo Slotu 1 (7 bodů, 100 % termínů): ILP modely <strong>psát</strong>. Každý odevzdaný model musí mít tři části — když některá chybí, model není úplný a přicházíš o body:</p>
+  <ol>
+    <li><strong>Proměnné</strong> (variables) — co rozhoduji, <em>včetně oboru</em>: $x_i \in \{0,1\}$? $\in \mathbb{Z}^+_0$? $\in \mathbb{R}^+_0$?</li>
+    <li><strong>Cílová funkce</strong> (objective function) — co maximalizuji/minimalizuji: lineární výraz $\sum_i c_i x_i$.</li>
+    <li><strong>Omezení</strong> (constraints) — co musí platit: lineární nerovnosti nebo rovnosti.</li>
+  </ol>
+  <p>Slidy navíc oddělují <strong>parametry</strong> (parameters) — vstupní konstanty zadání ($n$, ceny $p_i$, rozpočet $B$, …). Parametry solver <em>dostane</em>, proměnné solver <em>hledá</em>. Záměna parametru a proměnné je nejčastější začátečnická chyba.</p>
+
+  <details class="try">
+    <summary>Zkus sám: kamarád odevzdá model „$\max z = 16x_1 + 22x_2$ s.t. $5x_1 + 7x_2 \le 14$“. Co v něm chybí a co se může stát?</summary>
+    <div class="inner">
+      <p>Chybí <strong>obor proměnných</strong>. Bez něj solver smí dosadit $x_1 = 2.8,\ x_2 = 0$ (reálné, klidně i víc než 1) — koupíš „2,8 budovy“. Teprve $x_i \in \{0,1\}$ říká „každou budovu nejvýš jednou, vcelku“. Obor je plnohodnotná součást modelu, ne formalita — mění množinu přípustných řešení (srov. binární vs. frakční 2-Partition v <a href="../k0/l0-8.html#takeaways">[L0.8]</a>).</p>
+    </div>
+  </details>
+
+  <h2>Ze slov do matematiky: Real Estate Investment</h2>
+  <p>Vzorové zadání ze slidů (02_ILP, slide 28): <em>„We consider 6 buildings for investment. … <strong>Goal:</strong> maximize income. <strong>Constraints:</strong> investment budget is 14 mil CZK; each building can be bought only once.“</em></p>
+  <table>
+    <thead><tr><th>building</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr></thead>
+    <tbody>
+      <tr><td>price [mil. CZK]</td><td>5</td><td>7</td><td>4</td><td>3</td><td>4</td><td>6</td></tr>
+      <tr><td>income [thousand CZK]</td><td>16</td><td>22</td><td>12</td><td>8</td><td>11</td><td>19</td></tr>
+    </tbody>
+  </table>
+  <p>Postupuj vždy stejně. Krok 1 — proměnné: rozhodnutí je „koupit / nekoupit budovu $i$“, tedy binární $x_i \in \{0,1\}$ s konvencí „$x_i = 1$ iff budovu $i$ koupím“ (přesně čtení z <a href="../k0/l0-8.html#takeaways">[L0.8]</a>).</p>
+
+  <details class="try">
+    <summary>Zkus sám: krok 2 — napiš cílovou funkci. Co se v zadání maximalizuje a jak to vyjádříš přes $x_i$?</summary>
+    <div class="inner">
+      <p>Maximalizuje se <strong>příjem vybraných budov</strong>. Hodnota vybraných je suma „cena × vybráno“: $$\max z = 16x_1 + 22x_2 + 12x_3 + 8x_4 + 11x_5 + 19x_6.$$ Nevybrané budovy přispějí nulou — suma $\sum_i c_i x_i$ sama „vyškrtne“ nekoupené. Obecný vzor: <strong>cílová funkce = $\max$ (nebo $\min$) $\sum_i c_i x_i$</strong>, kde $c_i$ je „cena za jednotku rozhodnutí $i$“.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: krok 3 — napiš omezení „investment budget is 14 mil CZK“.</summary>
+    <div class="inner">
+      <p>Utracené peníze = suma cen koupených budov, a ta nesmí přesáhnout 14: $$5x_1 + 7x_2 + 4x_3 + 3x_4 + 4x_5 + 6x_6 \le 14.$$ Tomuhle tvaru se říká <strong>budget/capacity constraint</strong> (rozpočtové či kapacitní omezení): $$\sum_i w_i x_i \le B,$$ kde $w_i$ je „spotřeba zdroje“ věcí $i$ a $B$ kapacita zdroje (peníze, čas, místo, hmotnost…). Druhé omezení zadání („each building can be bought only once“) je už schované v oboru $x_i \in \{0,1\}$.</p>
+    </div>
+  </details>
+
+  <p>Kompletní model (slide 29) — všimni si, že obsahuje všechny tři části:</p>
+  $$\begin{aligned} \max z = \;& 16x_1 + 22x_2 + 12x_3 + 8x_4 + 11x_5 + 19x_6 \\ \text{s.t.} \;& 5x_1 + 7x_2 + 4x_3 + 3x_4 + 4x_5 + 6x_6 \le 14 \\ & x_{i \in 1 \cdots 6} \in \{0, 1\} \end{aligned}$$
+
+  <div class="viz" id="viz-buildings"></div>
+
+  <h2>Max vs. min: stejný stroj, jiný směr</h2>
+  <p>Minimalizace není nic nového: $\min \sum_i c_i x_i$ je totéž co $\max \sum_i (-c_i) x_i$ — jen otočíš směr, kterým po přípustné oblasti „tlačíš“. Stejná oblast, jiná cílová funkce, jiné optimum:</p>
+
+  <div class="viz" id="viz-max"></div>
+  <div class="viz" id="viz-min"></div>
+
+  <details class="try">
+    <summary>Zkus sám: a co rozhodovací úlohy bez kvality řešení („existuje rozdělení?“) — jakou mají cílovou funkci?</summary>
+    <div class="inner">
+      <p>Klidně <strong>konstantní</strong>: $\min 0$. Viděl jsi to u 2-Partition v <a href="../k0/l0-8.html#takeaways">[L0.8]</a> — solver pak jen hledá <em>libovolné přípustné</em> řešení a odpoví „řešení / infeasible“. Cílová funkce je povinná část zápisu, ale nemusí nic „vážit“. Naopak: ze stejné rozhodovací úlohy uděláš optimalizační, když do cíle dáš smysluplnou veličinu — uvidíš v úloze T02(c).</p>
+    </div>
+  </details>
+
+  <h2>Checklist na písemku</h2>
+  <p>U každé modelovací úlohy Slotu 1 piš v tomhle pořadí (a nic nevynech):</p>
+  <ul>
+    <li><strong>parameters:</strong> co je dáno (a obory konstant),</li>
+    <li><strong>variables:</strong> co hledám + obor každé proměnné ($\{0,1\}$ / $\mathbb{Z}$ / $\mathbb{R}$),</li>
+    <li><strong>objective:</strong> $\max$ či $\min$ lineární výraz,</li>
+    <li><strong>subject to:</strong> všechna omezení jako lineární (ne)rovnosti — pro každou větu zadání zkontroluj, že je někde zachycená (v omezení, v cíli, nebo v oboru proměnných).</li>
+  </ul>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.1</div>
+    <ul>
+      <li>Kompletní ILP model = <strong>proměnné s oborem</strong> + <strong>cílová funkce</strong> + <strong>omezení</strong> (+ parametry zadání). Chybějící obor proměnných = jiný (špatný) model.</li>
+      <li>Cílová funkce: $\max \sum_i c_i x_i$ nebo $\min \sum_i c_i x_i$; min je max s otočeným znaménkem. U rozhodovací úlohy smí být konstantní ($\min 0$).</li>
+      <li><strong>Rozpočtové (kapacitní) omezení:</strong> $\sum_i w_i x_i \le B$ — spotřeba zdroje vybraných věcí nepřesáhne kapacitu $B$.</li>
+      <li>Každou větu slovního zadání zachyť v modelu: v omezení, v cíli, nebo v oboru proměnných („only once“ = $x_i \in \{0,1\}$).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-realestate">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Real Estate Investment — basic ILP formulation</strong>
+      <span class="task-src">zdroj: prezentace/02_ILP.md, slide 28–29</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“We consider 6 buildings for investment. The price and rental income for each of them are listed in the table.</p>
+        <table>
+          <thead><tr><th>building</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th><th>6</th></tr></thead>
+          <tbody>
+            <tr><td>price [mil. CZK]</td><td>5</td><td>7</td><td>4</td><td>3</td><td>4</td><td>6</td></tr>
+            <tr><td>income [thousand CZK]</td><td>16</td><td>22</td><td>12</td><td>8</td><td>11</td><td>19</td></tr>
+          </tbody>
+        </table>
+        <p><strong>Goal:</strong> maximize income. <strong>Constraints:</strong> investment budget is 14 mil CZK; each building can be bought only once.” Formulate the problem using ILP and find the optimal investment.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Výběr podmnožiny budov: každá má pořizovací cenu a roční příjem z nájmu. Chceš maximální celkový příjem, ale součet cen koupených budov se musí vejít do rozpočtu 14 mil. Kč.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — tři části modelu, cílová funkce, rozpočtové omezení.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a> — $x_i = 1 \iff$ koupeno, $\sum p_i x_i$ = hodnota vybraných.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Polož si tři otázky z checklistu: Co rozhoduji (a jaký obor to vynucuje)? Co maximalizuji (která řádka tabulky jde do cíle)? Co mě omezuje (která řádka jde do omezení a s jakou pravou stranou)? Pro optimum pak zkoušej kombinace, které vyčerpají rozpočet co nejtěsněji — s 6 binárními proměnnými to jde ručně.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Proměnné:</strong> $x_i = 1$ if we buy building $i$, tedy $x_{i \in 1\cdots 6} \in \{0,1\}$. <strong>Model</strong> (slide 29):</p>
+          $$\begin{aligned} \max z = \;& 16x_1 + 22x_2 + 12x_3 + 8x_4 + 11x_5 + 19x_6 \\ \text{s.t.} \;& 5x_1 + 7x_2 + 4x_3 + 3x_4 + 4x_5 + 6x_6 \le 14 \\ & x_{i \in 1 \cdots 6} \in \{0, 1\} \end{aligned}$$
+          <p>Cíl = příjmová řádka tabulky, omezení = cenová řádka s pravou stranou 14 (rozpočtové omezení $\sum w_i x_i \le B$); „only once“ je v oboru $\{0,1\}$.</p>
+          <p><strong>Optimum:</strong> $x = (1, 0, 0, 1, 0, 1)$ — budovy $\{1, 4, 6\}$: cena $5 + 3 + 6 = 14 \le 14$ ✓, příjem $z = 16 + 8 + 19 = \mathbf{43}$. Pro porovnání nejlepší dvojice $\{2,6\}$ dává jen $41$, trojice $\{2,3,4\}$ dává $42$ a $\{3,5,6\}$ taky $42$ — víc než 43 se do rozpočtu nevejde.</p>
+          <p><em>Poznámka:</em> na slidech 30–32 se k téhle úloze přidávají logické podmínky (implikace, XOR) — to je téma <a href="l1-3.html">[L1.3] Modelování logiky</a>.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-2partition">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Example ILP1a–1c: 2-Partition Problem</strong>
+      <span class="task-src">zdroj: task bank v42 #3; prezentace/02_ILP.md, slide 5–7</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“(a) <strong>Example ILP1a: 2-Partition Problem.</strong> Instance: number of banknotes $n \in \mathbb{Z}_+$ and values $p_1, \ldots, p_n$, where $p_i \in \mathbb{Z}_+$. Decision: is there a subset $S \subseteq \{1, \ldots, n\}$ such that $$\sum_{i \in S} p_i = \sum_{i \notin S} p_i?$$ Formulate this decision problem as an ILP using binary variables.</p>
+        <p>(b) <strong>Example ILP1b: Fractional Variant of the 2-Partition Problem.</strong> Allow division of banknotes, i.e. $x_i \in \langle 0, 1 \rangle$, and formulate the LP relaxation.</p>
+        <p>(c) <strong>Example ILP1c: 2-Partition Problem – Optimization Version.</strong> Formulate an optimization model minimizing the larger of the two subset sums and explain the relation to $P2 \,\|\, C_{\max}$ scheduling.”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Třikrát stejná úloha (rozdělit bankovky na dvě stejně hodnotné hromádky), třikrát jiný model: (a) rozhodovací ILP s binárními proměnnými, (b) frakční LP varianta, (c) optimalizační verze, která minimalizuje hodnotu těžší hromádky.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — checklist parameters/variables/objective/constraints; konstantní cíl rozhodovací úlohy.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a> — $x_i = 1 \iff i \in S$; negace $1 - x_i$; v T01/T02 tam máš obě verze <em>přečtené</em>, tady je píšeš sám.</li>
+        <li><a href="../k0/l0-7.html#takeaways">[L0.7] Co je ILP a LP relaxace</a> — frakční varianta = LP relaxace.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(a) Vyjádři hodnotu hromádky $S$ přes $x_i$ a uvědom si, že „obě stejné“ znamená „vybraná polovina = polovina celkového součtu“. Jaký cíl má čistě rozhodovací úloha? (b) Co přesně se změní v sekci variables — a co musíš přidat do omezení, aby $x_i$ nepřerostlo 1? (c) Hodnota druhé hromádky je $\sum_i (1-x_i)p_i$; zaveď novou proměnnou $C_{max}$ jako „strop“ obou hromádek a tlač ho dolů. Jaký obor má $C_{max}$?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(a) Rozhodovací ILP (slide 5):</strong> $x_i = 1$ iff $i \in S$. Podmínka $\sum_{i \in S} p_i = \sum_{i \notin S} p_i$ je ekvivalentní $\sum_i x_i p_i = 0.5 \sum_i p_i$ (obě hromádky stejné ⟺ vybraná má přesně polovinu celkového součtu):</p>
+          $$\begin{aligned} \min \quad & 0 \\ \text{subject to:} \quad & \textstyle\sum_{i \in 1..n} x_i \ast p_i = 0.5 \ast \sum_{i \in 1..n} p_i \\ \text{parameters:} \quad & n \in \mathbb{Z}^+,\ p_{i \in 1..n} \in \mathbb{Z}^+ \\ \text{variables:} \quad & x_{i \in 1..n} \in \{0,1\} \end{aligned}$$
+          <p>Cíl $\min 0$ je konstantní — hledáme jen přípustné řešení (rozhodovací úloha).</p>
+          <p><strong>(b) Frakční LP (slide 6):</strong> jediná koncepční změna je obor: $x_i \in \mathbb{R}^+_0$ plus omezení $x_i \le 1$ (bez něj by „bankovka“ mohla být vybrána víc než jednou):</p>
+          $$\begin{aligned} \min \quad & 0 \\ \text{subject to:} \quad & \textstyle\sum_{i \in 1..n} x_i \ast p_i = 0.5 \ast \sum_{i \in 1..n} p_i \\ & x_i \le 1 \quad i \in 1..n \\ \text{parameters:} \quad & n \in \mathbb{Z}^+,\ p_{i \in 1..n} \in \mathbb{Z}^+ \\ \text{variables:} \quad & x_{i \in 1..n} \in \mathbb{R}^+_0 \end{aligned}$$
+          <p>Přípustná množina je konvexní → je to LP a řeší se polynomiálně.</p>
+          <p><strong>(c) Optimalizační verze (slide 7):</strong> nová reálná proměnná $C_{max}$ = strop obou hromádek; minimalizací stropu se minimalizuje těžší hromádka:</p>
+          $$\begin{aligned} \min \quad & C_{max} \\ \text{subject to:} \quad & \textstyle\sum_{i \in 1..n} x_i \ast p_i \le C_{max} \\ & \textstyle\sum_{i \in 1..n} (1 - x_i) \ast p_i \le C_{max} \\ \text{parameters:} \quad & n \in \mathbb{Z}^+,\ p_{i \in 1..n} \in \mathbb{Z}^+ \\ \text{variables:} \quad & x_{i \in 1..n} \in \{0, 1\},\ C_{max} \in \mathbb{R}^+ \end{aligned}$$
+          <p>Rozhodovací úlohu pak vyřešíš porovnáním optima s prahem (threshold) $0.5\sum_i p_i$: optimum $= $ práh ⟺ rozdělení existuje; jinak optimum vrací hodnotu nejblíž prahu. (Obecnou konstrukci „minimalizuj maximum z množiny hodnot“ rozebere <a href="l1-8.html">[L1.8]</a>.)</p>
+          <p><strong>Vztah k $P2\,\|\,C_{max}$:</strong> slide 7 doslova: rozhodnutí $x_i$ = „na který ze dvou identických paralelních procesorů dám nepreemptivní úlohu $T_i$ s dobou $p_i$“; hromádka = zátěž procesoru a $C_{max}$ = čas dokončení poslední úlohy, který minimalizujeme. Frakční varianta odpovídá preemptivnímu rozvrhování.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.1">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k0/l0-8.html"><span class="dir">← Předchozí</span> L0.8 · Binární proměnná</a>
+    <a class="next" href="l1-2.html"><span class="dir">Další →</span> L1.2 · Přiřazovací (assignment) struktura</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Real Estate: výběr budov jako binární vektor, cíl + rozpočet
+KOViz.graph(document.getElementById('viz-buildings'), {
+  directed: false,
+  w: 640, h: 170,
+  nodes: [
+    {id:'b1', x:75,  y:75, label:'5|16', cls:'good', sub:'x₁ = 1'},
+    {id:'b2', x:170, y:75, label:'7|22', sub:'x₂ = 0'},
+    {id:'b3', x:265, y:75, label:'4|12', sub:'x₃ = 0'},
+    {id:'b4', x:360, y:75, label:'3|8',  cls:'good', sub:'x₄ = 1'},
+    {id:'b5', x:455, y:75, label:'4|11', sub:'x₅ = 0'},
+    {id:'b6', x:550, y:75, label:'6|19', cls:'good', sub:'x₆ = 1'},
+  ],
+  edges: [],
+  caption: 'Budovy jako „cena|příjem“; optimální nákup x = (1,0,0,1,0,1). Rozpočtové omezení: Σwᵢxᵢ = 5+3+6 = 14 ≤ 14 ✓. Cílová funkce: z = Σcᵢxᵢ = 16+8+19 = 43.'
+});
+
+// 2 — stejná oblast, maximalizace: optimum ve vrcholu (3, 2)
+KOViz.lpRegion(document.getElementById('viz-max'), {
+  xmax: 6, ymax: 4,
+  constraints: [
+    {a: 2, b: 1, c: 8, label: '2x₁+x₂ ≤ 8', labelAt: 0.12},
+    {a: 1, b: 3, c: 9, label: 'x₁+3x₂ ≤ 9', labelAt: 0.75},
+  ],
+  opt: [3, 2],
+  objective: {a: 1, b: 1, label: 'směr růstu z'},
+  caption: 'MAXIMALIZACE z = x₁ + x₂: tlačím po oblasti ve směru růstu z, optimum z = 5 ve vrcholu (3, 2).'
+});
+
+// 3 — stejná oblast, minimalizace: optimum v (0, 0)
+KOViz.lpRegion(document.getElementById('viz-min'), {
+  xmax: 6, ymax: 4,
+  constraints: [
+    {a: 2, b: 1, c: 8, label: '2x₁+x₂ ≤ 8', labelAt: 0.12},
+    {a: 1, b: 3, c: 9, label: 'x₁+3x₂ ≤ 9', labelAt: 0.75},
+  ],
+  opt: [0, 0],
+  objective: {a: -1, b: -1, label: 'směr poklesu z'},
+  caption: 'MINIMALIZACE z = x₁ + x₂ na TÉŽE oblasti: min Σcᵢxᵢ = max Σ(−cᵢ)xᵢ — jen otočený směr; optimum z = 0 v bodě (0, 0).'
+});
+</script>
+</body>
+</html>

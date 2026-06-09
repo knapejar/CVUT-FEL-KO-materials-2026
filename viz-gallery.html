@@ -108,12 +108,12 @@ KOViz.graph(document.getElementById('g3'), {
 KOViz.lpRegion(document.getElementById('g4'), {
   xmax: 7, ymax: 6, integer: true,
   constraints: [
-    {a:1, b:2, c:10, label:'x₁+2x₂≤10'},
+    {a:1, b:2, c:10, label:'x₁+2x₂≤10', labelAt: 0.8},
     {a:3, b:1, c:15, label:'3x₁+x₂≤15'},
   ],
   opt: [4, 3],
   objective: {a:2, b:3, label:'max 2x₁+3x₂'},
-  caption: 'Ukázka 4: přípustná oblast, celočíselné body (zeleně přípustné), optimum červeně, gradient cíle.'
+  caption: 'Ukázka 4: přípustná oblast, celočíselné body (zeleně přípustné), optimum červeně, gradient cíle. První popisek posunut přes labelAt: 0.8 (pozice podél čáry, default 0.5).'
 });
 
 // 5 — stepper (mini Dijkstra na 4 uzlech)

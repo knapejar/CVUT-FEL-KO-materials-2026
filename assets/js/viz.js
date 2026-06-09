@@ -171,7 +171,8 @@
   /* ---------- LP REGION ----------
      spec = {
        xmax, ymax       : rozsah os (celá čísla, default 8)
-       constraints: [{a, b, c, label?}]  — polorovina a·x + b·y <= c
+       constraints: [{a, b, c, label?, labelAt?}]  — polorovina a·x + b·y <= c;
+                          labelAt = 0..1 pozice popisku podél čáry (default 0.5, proti kolizím popisků)
        integer          : true → vykresli mřížku celočíselných bodů, zvýrazni přípustné
        opt              : [x, y] — bod optima (zvýrazní červeně)
        objective        : {a, b} — směr účelové fce (nakreslí šipku gradientu)
@@ -215,7 +216,7 @@
     }
 
     // hranice omezení (čáry) + popisky
-    (spec.constraints || []).forEach(({ a, b, c, label }, idx) => {
+    (spec.constraints || []).forEach(({ a, b, c, label, labelAt }, idx) => {
       // úsečka a·x + b·y = c oříznutá do okna
       const pts = [];
       if (Math.abs(b) > 1e-12) {
@@ -234,7 +235,9 @@
         ln.style.stroke = "var(--accent)"; ln.style.strokeWidth = "1.8";
         svg.appendChild(ln);
         if (label) {
-          const t = svgEl("text", { x: X((p[0] + q[0]) / 2) + 6, y: Y((p[1] + q[1]) / 2) - 6, "font-size": "12" });
+          const fr = (typeof labelAt === "number") ? labelAt : 0.5;
+          const lx = p[0] + fr * (q[0] - p[0]), ly = p[1] + fr * (q[1] - p[1]);
+          const t = svgEl("text", { x: X(lx) + 6, y: Y(ly) - 6, "font-size": "12" });
           t.textContent = label; t.style.fill = "var(--accent)";
           svg.appendChild(t);
         }
@@ -281,7 +284,8 @@
       const m = svgEl("marker", { id: "arrObj", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto" });
       const mp = svgEl("path", { d: "M0,0 L10,5 L0,10 z" }); mp.style.fill = "var(--bad)";
       m.appendChild(mp); defs.appendChild(m); svg.appendChild(defs);
-      const t = svgEl("text", { x: cx + (a / n) * 50, y: cy - (b / n) * 50, "font-size": "12.5", "text-anchor": "middle" });
+      // popisek za špičkou šipky; u šipky směřující dolů jej posuň pod špičku, ať jej hrot neprotíná
+      const t = svgEl("text", { x: cx + (a / n) * 58, y: cy - (b / n) * 58 + (b < 0 ? 14 : -6), "font-size": "12.5", "text-anchor": "middle" });
       t.textContent = spec.objective.label || "směr růstu c"; t.style.fill = "var(--bad)"; t.style.fontWeight = "600";
       g.appendChild(ln); g.appendChild(t); svg.appendChild(g);
     }

@@ -11,7 +11,7 @@ Aktualizováno: 9. 6. 2026 večer
 
 ## Píše se
 - [ ] K0: L0.1–L0.8 (pipeline tvůrce→kritik→korektor) — L0.1–L0.4 po korektuře (79000cc), L0.5–L0.8 napsány tvůrcem (čeká kritik)
-- [ ] K1: L1.1–L1.15
+- [ ] K1: L1.1–L1.15 — L1.1 napsána tvůrcem (čeká kritik); viz.js: přidán `labelAt` u lpRegion constraints + posun popisku objective šipky
 
 ## Fronta
 - K2 (18 lekcí) → K3 (16) → K4 (15) → K5 (16) → K6 (3) → K7 (2)
