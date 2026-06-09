@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.2 · Přiřazovací (assignment) struktura — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.2</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.2</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Přiřazovací (assignment) struktura</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Proměnná se dvěma indexy $x_{ij}$ („objekt $i$ přiřazen na pozici $j$“) a <strong>dvojí součtové omezení</strong>: $\sum_j x_{ij} = 1$ pro každé $i$ a $\sum_i x_{ij} = 1$ pro každé $j$.
+  </div>
+
+  <p>Prerekvizity: <a href="l1-1.html">[L1.1] Cílová funkce a základní omezení</a>.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Když rozhodnutí není „ano/ne“, ale „kam“</h2>
+  <p>Zkoušková úloha <strong>Toys Assignment</strong> (hračky do krabic, termín 09.07.2021) začíná takhle: po pokoji je rozházeno $n$ hraček $T = \{t_1, \ldots, t_n\}$, u zdi stojí řada $n$ krabic $B = \{b_1, \ldots, b_n\}$ a vzdálenost hračky $t_i$ od krabice $b_j$ je $d_{ij} \in \mathbb{R}^+_0$. Úkol: uklidit <em>každou hračku do právě jedné krabice</em> a <em>do každé krabice právě jednu hračku</em> tak, aby celková ujitá vzdálenost byla minimální.</p>
+  <p>V <a href="l1-1.html#takeaways">[L1.1]</a> byl první krok modelu vždy stejný: „co rozhoduji?“ — a rozhodnutí „koupit budovu $i$?“ dalo binární $x_i$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč tady proměnná $x_i \in \{0,1\}$ („hračka $i$ uklizena?“) nestačí? Jaké rozhodnutí ve skutečnosti dělám?</summary>
+    <div class="inner">
+      <p>Rozhodnutí není „uklidit / neuklidit“ (uklízí se všechno), ale <strong>KAM</strong>: která hračka skončí ve které krabici. Odpověď má <em>dva</em> rozměry — hračku $i$ a krabici $j$. Trik: rozbij rozhodnutí „kam s $t_i$“ na $n$ otázek ano/ne, jednu pro každý pár (hračka, krabice):</p>
+      $$x_{ij} = \begin{cases} 1, & \text{hračka } t_i \text{ je v krabici } b_j, \\ 0, & \text{jinak.} \end{cases}$$
+      <p>Celkem $n \times n$ binárních proměnných — pořád každá jen ano/ne dle <a href="../k0/l0-8.html#takeaways">[L0.8]</a>, jen jich je matice místo vektoru.</p>
+    </div>
+  </details>
+
+  <p>Tohle je obecný vzor: kdykoli zadání říká „přiřaď objekty pozicím / do skupin / na stroje / na sloty“, sáhni po <strong>assignment variables</strong> (přiřazovacích proměnných) $x_{ij} \in \{0,1\}$ s konvencí „$x_{ij} = 1 \iff$ objekt $i$ je na pozici $j$“.</p>
+
+  <h2>Dvojí součtové omezení</h2>
+  <p>Samotné proměnné $x_{ij}$ ještě nic nehlídají — solver by klidně nechal všechny nulové (nic neuklidil) nebo nacpal tři hračky do jedné krabice. Pravidla hry musíš napsat jako omezení.</p>
+
+  <details class="try">
+    <summary>Zkus sám: zapiš omezení „each toy is stored in one box“ (každá hračka v právě jedné krabici). Přes které indexy se sčítá?</summary>
+    <div class="inner">
+      <p>Zafixuj hračku $i$ a projdi všechny krabice: $x_{i1} + x_{i2} + \cdots + x_{in}$ = počet krabic, ve kterých $t_i$ leží (součet binárních = počet vybraných, <a href="../k0/l0-8.html#takeaways">[L0.8]</a>). Chceme právě jednu:</p>
+      $$\sum_{j=1}^{n} x_{ij} = 1 \qquad \forall i = 1, \ldots, n.$$
+      <p>Sčítá se přes $j$ (krabice), omezení je <em>jedno pro každé</em> $i$ — celkem $n$ rovností, ne jedna!</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: a teď druhou půlku — „each box contains exactly one toy“ (každá krabice právě jednu hračku).</summary>
+    <div class="inner">
+      <p>Zrcadlově: zafixuj krabici $j$ a sečti přes hračky:</p>
+      $$\sum_{i=1}^{n} x_{ij} = 1 \qquad \forall j = 1, \ldots, n.$$
+      <p>Dohromady tedy <strong>dvojí součtové omezení</strong> — $n$ „řádkových“ rovností a $n$ „sloupcových“ rovností. Pozor na nejčastější chybu: napsat jen jednu sadu. Samotné $\sum_j x_{ij} = 1$ dovolí dvě hračky v téže krabici (každý <em>řádek</em> je v pořádku, ale <em>sloupec</em> má součet 2).</p>
+    </div>
+  </details>
+
+  <p>Vyplatí se to vidět maticově. Proměnné $x_{ij}$ tvoří tabulku $n \times n$; přípustné přiřazení = v každém <strong>řádku</strong> i v každém <strong>sloupci</strong> právě jedna jednička (permutační matice):</p>
+
+  <table>
+    <thead><tr><th>$x_{ij}$</th><th>$b_1$</th><th>$b_2$</th><th>$b_3$</th><th>$\sum_j$</th></tr></thead>
+    <tbody>
+      <tr><td>$t_1$</td><td><strong>1</strong></td><td>0</td><td>0</td><td>= 1 ✓</td></tr>
+      <tr><td>$t_2$</td><td>0</td><td><strong>1</strong></td><td>0</td><td>= 1 ✓</td></tr>
+      <tr><td>$t_3$</td><td>0</td><td>0</td><td><strong>1</strong></td><td>= 1 ✓</td></tr>
+      <tr><td>$\sum_i$</td><td>= 1 ✓</td><td>= 1 ✓</td><td>= 1 ✓</td><td></td></tr>
+    </tbody>
+  </table>
+
+  <p>A graficky — přiřazení je výběr hran mezi dvěma stranami (hračky vlevo, krabice vpravo):</p>
+
+  <div class="viz" id="viz-assign"></div>
+  <div class="viz" id="viz-bad"></div>
+
+  <h2>Cílová funkce: cena vybraných párů</h2>
+
+  <details class="try">
+    <summary>Zkus sám: jak zapíšeš „the total distance between the toys and their assigned boxes is minimized“? (Stejný trik jako cíl v [L1.1].)</summary>
+    <div class="inner">
+      <p>Cena se platí jen za <em>vybrané</em> páry — a přesně to udělá součin „cena × vybráno“ sečtený přes všechny páry:</p>
+      $$\min \; \sum_{i=1}^{n} \sum_{j=1}^{n} d_{ij}\, x_{ij}.$$
+      <p>Pár s $x_{ij} = 0$ přispěje nulou, takže dvojitá suma automaticky sečte jen vzdálenosti realizovaných přiřazení. Je to tatáž logika jako $\sum_i c_i x_i$ z <a href="l1-1.html#takeaways">[L1.1]</a>, jen s maticí koeficientů $d_{ij}$ místo vektoru $c_i$.</p>
+    </div>
+  </details>
+
+  <p>Celá kostra přiřazovacího modelu (assignment problem) pohromadě:</p>
+  $$\begin{aligned} \min \quad & \sum_{i=1}^{n} \sum_{j=1}^{n} d_{ij}\, x_{ij} \\ \text{subject to:} \quad & \sum_{j=1}^{n} x_{ij} = 1 \quad \forall i = 1, \ldots, n \\ & \sum_{i=1}^{n} x_{ij} = 1 \quad \forall j = 1, \ldots, n \\ \text{variables:} \quad & x_{ij} \in \{0,1\} \quad \forall i, j \end{aligned}$$
+
+  <h2>Kostra většiny rozdělovacích úloh: $=$, $\le$, kapacity</h2>
+  <p>Přesně tahle kostra (s úpravami pravých stran) sedí na většinu „rozdělovacích“ zadání. Stačí se u každé strany zeptat: <em>musí být obsazená právě jednou, nejvýš jednou, nebo má kapacitu?</em></p>
+
+  <details class="try">
+    <summary>Zkus sám: krabic je víc než hraček ($m &gt; n$). Které omezení se změní a jak? A co by se stalo, kdybys nechal obě s „$= 1$“?</summary>
+    <div class="inner">
+      <p>Každá hračka pořád musí někam: $\sum_{j} x_{ij} = 1$ pro každé $i$. Ale krabice už nemůžou být všechny obsazené — některé zůstanou prázdné: $$\sum_{i} x_{ij} \le 1 \qquad \forall j = 1, \ldots, m.$$ Kdybys nechal obě sady s $=1$, sečti řádkové rovnosti: jedniček je přesně $n$; sečti sloupcové: jedniček je přesně $m$. Pro $m \neq n$ spor → model je <strong>infeasible</strong>, i když reálná úloha řešení má. Špatné znaménko tu nezhorší optimum, ale zabije celý model.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: co modeluje omezení $\sum_i x_{ij} \le k_j$? Vymysli slovní čtení.</summary>
+    <div class="inner">
+      <p>„Do skupiny/krabice/na stroj $j$ se vejde <strong>nejvýš $k_j$ objektů</strong>“ — kapacita pozice. Sloupcový součet = počet objektů přiřazených na $j$ (<a href="../k0/l0-8.html#takeaways">[L0.8]</a>: $\sum$ binárních = počet vybraných), takže pravou stranou řídíš obsazenost: $=1$ právě jeden, $\le 1$ nejvýš jeden, $\le k_j$ kapacita, $\ge 1$ aspoň jeden (žádná skupina prázdná).</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Výhled: assignment = perfektní párování</div>
+    <p>Přiřazovací problém s oběma sadami „$=1$“ je přesně <strong>minimum weight perfect matching</strong> (perfektní párování s min. vahou, <a href="../k0/l0-6.html#takeaways">[L0.6]</a>) v úplném bipartitním grafu — vybrané hrany $\{(t_i, b_j) : x_{ij} = 1\}$ se nikde nesdílí ve vrcholu a pokrývají všechno. Tenhle most využije <a href="l1-14.html">[L1.14]</a> (Toys, část b) a naplno kapitola K4 (řeší se polynomiálně, např. maďarským algoritmem).</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.2</div>
+    <ul>
+      <li><strong>Přiřazovací proměnná:</strong> $x_{ij} \in \{0,1\}$, $x_{ij} = 1 \iff$ objekt $i$ je přiřazen na pozici / do skupiny $j$. Rozhodnutí „kam“ = matice rozhodnutí „ano/ne“.</li>
+      <li><strong>Dvojí součtové omezení:</strong> $\sum_j x_{ij} = 1\ \forall i$ (každý objekt právě jednou) <em>a zároveň</em> $\sum_i x_{ij} = 1\ \forall j$ (každá pozice právě jednou). Jen jedna sada nestačí.</li>
+      <li>Cena přiřazení: $\min \sum_i \sum_j d_{ij} x_{ij}$ — nevybrané páry přispějí nulou.</li>
+      <li>Pravá strana sloupcového součtu řídí obsazenost: $=1$ / $\le 1$ (pozic víc než objektů) / $\le k_j$ (kapacita) / $\ge 1$ (nikdo prázdný). Tohle je kostra většiny rozdělovacích úloh.</li>
+      <li>Assignment s „$=1$“ na obou stranách = min-weight perfect matching v bipartitním grafu (<a href="../k0/l0-6.html#takeaways">[L0.6]</a>; most do K4).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-toys-skeleton">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Toys Assignment — přiřazovací kostra (podmínky (i) + (ii))</strong>
+      <span class="task-src">zdroj: task bank v42 #6; termín 09.07.2021</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“There is a set of toys $T = \{t_1, t_2, \ldots, t_n\}$ scattered all around the room. By one of the walls, there is a row of boxes $B = \{b_1, b_2, \ldots, b_n\}$, where box $b_i$ is located left to $b_{i+1}$ for all $i \in \{1, 2, \ldots, n-1\}$. Distance of toy $t_i$ to box $b_j$ is $d_{ij} \in \mathbb{R}_0^+$ for all $t_i \in T$, $b_j \in B$.</p>
+        <p>(a) Design an ILP model to organize the toys to the boxes such that: (i) each box contains exactly one toy and each toy is stored in one box, (ii) the total distance between the toys and their assigned boxes is minimized, (iii) toy $t_1$ is assigned to the box immediately left to the box where $t_2$ is assigned, (iv) neither $t_5$ nor $t_6$ can be assigned to $b_1$ or $b_n$, (v) $t_4$ is in the box immediately next to $t_5$ or $t_6$.”</p>
+      </div>
+      <p><em>V této lekci modeluj jen podmínky <strong>(i)</strong> a <strong>(ii)</strong> — přiřazovací kostru. Podmínky (iii)–(v) (sousednost, zákaz krajů, disjunkce) vyžadují techniky z <a href="l1-3.html">[L1.3]</a> a <a href="l1-4.html">[L1.4]</a>; celou úlohu dotáhneš jako FOTO checkpoint v <a href="l1-14.html">[L1.14]</a>.</em></p>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>$n$ hraček, $n$ krabic, známá vzdálenost $d_{ij}$ každé hračky od každé krabice. Hledáš úklid „1 hračka ↔ 1 krabice“ (bijekci) s minimálním součtem vzdáleností realizovaných dvojic.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — proměnné $x_{ij}$, dvojí součtové omezení, cena $\sum\sum d_{ij} x_{ij}$.</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a> — checklist parameters / variables / objective / constraints.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a> — čtení „součet binárních = počet vybraných“.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Projdi checklist z [L1.1]: Co rozhoduji? (Pro každý pár hračka–krabice ano/ne.) Co minimalizuji? (Vzdálenosti — ale jen těch párů, které se opravdu realizují; jak to suma zařídí sama?) Co musí platit? Podmínka (i) jsou <em>dvě</em> věty — „each box contains exactly one toy“ <em>a</em> „each toy is stored in one box“ — každá dá jednu sadu součtových omezení. Zkontroluj si směr sčítání: které omezení sčítá přes $i$ a které přes $j$?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Proměnné:</strong></p>
+          $$x_{ij} = \begin{cases} 1, & \text{toy } t_i \text{ is assigned to box } b_j, \\ 0, & \text{otherwise,} \end{cases} \qquad x_{ij} \in \{0,1\} \quad \forall i,j \in 1 \ldots n.$$
+          <p><strong>Parametry:</strong> $n \in \mathbb{Z}^+$, $d_{ij} \in \mathbb{R}^+_0$.</p>
+          <p><strong>Cíl — podmínka (ii):</strong></p>
+          $$\min \; z = \sum_{i=1}^{n} \sum_{j=1}^{n} d_{ij}\, x_{ij}.$$
+          <p><strong>Omezení — podmínka (i)</strong> (přesně dle vzorového řešení banky):</p>
+          $$\sum_{j=1}^{n} x_{ij} = 1 \quad \forall i = 1, \ldots, n \qquad \text{(každá hračka v právě jedné krabici)},$$
+          $$\sum_{i=1}^{n} x_{ij} = 1 \quad \forall j = 1, \ldots, n \qquad \text{(každá krabice právě jednu hračku)}.$$
+          <p><strong>Kontrola proti zadání:</strong> „each toy is stored in one box“ = řádkové součty, „each box contains exactly one toy“ = sloupcové součty, „total distance … minimized“ = dvojitá suma v cíli; obor $\{0,1\}$ zakazuje půlení hraček. Všechny věty (i)+(ii) jsou zachycené.</p>
+          <p><em>Výhled:</em> ve vzorovém řešení následují podmínky (iii)–(v), např. $x_{1j} = x_{2,j+1}$ pro sousednost $t_1$ vlevo od $t_2$ a $x_{5,1} = x_{5,n} = x_{6,1} = x_{6,n} = 0$ pro zákaz krajů — k těm se vrátíme v <a href="l1-14.html">[L1.14]</a> po logice <a href="l1-3.html">[L1.3]</a> a big-M <a href="l1-4.html">[L1.4]</a>.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.2">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-1.html"><span class="dir">← Předchozí</span> L1.1 · Cílová funkce a základní omezení</a>
+    <a class="next" href="l1-3.html"><span class="dir">Další →</span> L1.3 · Modelování logiky: implikace, XOR, AND</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — přípustné přiřazení: bipartitní pohled, vybrané páry zeleně
+KOViz.graph(document.getElementById('viz-assign'), {
+  directed: true,
+  w: 640, h: 300,
+  nodes: [
+    {id:'t1', x:200, y:55,  label:'t₁', cls:'good'},
+    {id:'t2', x:200, y:150, label:'t₂', cls:'good'},
+    {id:'t3', x:200, y:245, label:'t₃', cls:'good'},
+    {id:'b1', x:440, y:55,  label:'b₁'},
+    {id:'b2', x:440, y:150, label:'b₂'},
+    {id:'b3', x:440, y:245, label:'b₃'},
+  ],
+  edges: [
+    {from:'t1', to:'b1', cls:'good', label:'d₁₁=2'},
+    {from:'t1', to:'b2', cls:'dim', dashed:true},
+    {from:'t1', to:'b3', cls:'dim', dashed:true},
+    {from:'t2', to:'b1', cls:'dim', dashed:true},
+    {from:'t2', to:'b2', cls:'good', label:'d₂₂=3'},
+    {from:'t2', to:'b3', cls:'dim', dashed:true},
+    {from:'t3', to:'b1', cls:'dim', dashed:true},
+    {from:'t3', to:'b2', cls:'dim', dashed:true},
+    {from:'t3', to:'b3', cls:'good', label:'d₃₃=1'},
+  ],
+  caption: 'PŘÍPUSTNÉ přiřazení: zelené hrany = páry s xᵢⱼ = 1 (šedé čárkované = možnosti s xᵢⱼ = 0). Z každé hračky vychází právě 1 zvolená hrana (Σⱼ xᵢⱼ = 1) a do každé krabice vchází právě 1 (Σᵢ xᵢⱼ = 1). Cena: z = 2 + 3 + 1 = 6.'
+});
+
+// 2 — porušení sloupcového omezení: dvě hračky v b₂, b₃ prázdná
+KOViz.graph(document.getElementById('viz-bad'), {
+  directed: true,
+  w: 640, h: 300,
+  nodes: [
+    {id:'t1', x:200, y:55,  label:'t₁'},
+    {id:'t2', x:200, y:150, label:'t₂'},
+    {id:'t3', x:200, y:245, label:'t₃'},
+    {id:'b1', x:440, y:55,  label:'b₁'},
+    {id:'b2', x:440, y:150, label:'b₂', cls:'bad', sub:'Σᵢ xᵢ₂ = 2 ✗'},
+    {id:'b3', x:440, y:245, label:'b₃', cls:'bad', sub:'Σᵢ xᵢ₃ = 0 ✗'},
+  ],
+  edges: [
+    {from:'t3', to:'b1', cls:'good'},
+    {from:'t1', to:'b2', cls:'bad', label:'x₁₂=1'},
+    {from:'t2', to:'b2', cls:'bad', label:'x₂₂=1'},
+  ],
+  caption: 'NEPŘÍPUSTNÉ: řádková omezení Σⱼ xᵢⱼ = 1 platí pro všechny tři hračky (zelená x₃₁ = 1 je sama o sobě v pořádku), a přesto jsou v b₂ dvě hračky a b₃ je prázdná. Bez sloupcové sady Σᵢ xᵢⱼ = 1 model tohle nezakáže — proto je omezení DVOJÍ.'
+});
+</script>
+</body>
+</html>
