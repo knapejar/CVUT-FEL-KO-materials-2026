@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.9 · VYVRCHOLENÍ: Wedding plan [FOTO] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.9</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.9</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>VYVRCHOLENÍ: Wedding plan [FOTO]</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Složení všech dosavadních ILP technik do <em>jedné kompletní zkouškové odpovědi</em>: rozpočet <a href="l1-1.html#takeaways">[L1.1]</a> + krokový pronájem dle intervalu <a href="l1-7.html#takeaways">[L1.7]</a> + omezení rozdílu stran <a href="l1-8.html#takeaways">[L1.8]</a> — a zápis ve formátu, za který hodnotitel dává plný počet bodů.
+  </div>
+
+  <p>Prerekvizity: <a href="l1-1.html#takeaways">[L1.1]</a>, <a href="l1-7.html#takeaways">[L1.7]</a>, <a href="l1-8.html#takeaways">[L1.8]</a>. <strong>Wedding plan</strong> je ostrá zkoušková úloha: padla 21.06.2021 (za 6 bodů), v roce 2023 a 25.05.2026 (za 7 bodů) — v predikovaném slotu 1, který padá ve 100 % termínů. Všechny díly už znáš; dnes je poprvé poskládáš dohromady sám, od prázdného papíru po kompletní model.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Krok 0: rozeber zadání na věty</h2>
+  <p>Zkouškové zadání (celé přesně v úloze T01 níže) je jeden hutný odstavec. První dovednost: rozsekat ho na věty a ke každé říct, <em>kterou techniku</em> vyžaduje. Teprve pak se píší proměnné a omezení.</p>
+
+  <details class="try">
+    <summary>Zkus sám: projdi si zadání v T01 a ke každé větě přiřaď lekci, která ji řeší. Kolik „stavebních dílů“ napočítáš?</summary>
+    <div class="inner">
+      <ul>
+        <li><em>„You want to invite as many guests as possible“</em> → <strong>kritérium</strong>: maximalizace počtu pozvaných — <a href="l1-1.html#takeaways">[L1.1]</a> + binárky „host pozván“ <a href="../k0/l0-8.html#takeaways">[L0.8]</a>.</li>
+        <li><em>„A meal for a single guest costs $m$ CZK“</em> + <em>„You have a $B$ CZK; this budget cannot be exceeded“</em> → <strong>rozpočtové omezení</strong> $\dots \le B$ — <a href="l1-1.html#takeaways">[L1.1]</a>.</li>
+        <li><em>„A price for renting a place differs, depending on the number of invited guests: …$p_1$ / $p_2$ / $p_3$“</em> → <strong>po částech konstantní cena</strong> přes intervaly $[0,9]$, $[10,19]$, $[20,n]$ — přepínače $y_k$, $\sum_k y_k = 1$, big-M meze — <a href="l1-7.html#takeaways">[L1.7]</a>.</li>
+        <li><em>„…the number of guests invited from the groom's side and the bride's side can differ by at most $D_{max}$“</em> → <strong>$|a-b| \le D_{max}$</strong> jako dvě lineární nerovnosti — <a href="l1-8.html#takeaways">[L1.8]</a>.</li>
+      </ul>
+      <p>Čtyři díly — a žádný z nich není nový. Celé „vyvrcholení“ je o disciplíně skládání.</p>
+    </div>
+  </details>
+
+  <h2>Krok 1: proměnné</h2>
+
+  <details class="try">
+    <summary>Zkus sám: jaké rozhodovací proměnné model potřebuje? (Méně, než si možná myslíš.)</summary>
+    <div class="inner">
+      <p>Jen dvě sady:</p>
+      <ul>
+        <li>$x_i \in \{0,1\}$ pro $i \in 1..n$ — $x_i = 1$ ⟺ host $g_i$ je pozvaný (jádro rozhodnutí „which guests will be invited“),</li>
+        <li>$y_1, y_2, y_3 \in \{0,1\}$ — $y_k = 1$ ⟺ počet hostů padne do $k$-tého cenového intervalu <a href="l1-7.html#takeaways">[L1.7]</a>.</li>
+      </ul>
+      <p>Počet hostů $N = \sum_{i=1}^{n} x_i$ je jen <em>zkratka za lineární výraz</em>, ne nová proměnná. Funkce $br$, $gr$, čísla $m, p_1, p_2, p_3, B, D_{max}, n$ jsou <strong>parametry</strong> zadání — solver o nich nerozhoduje. Toto rozlišení v odpovědi explicitně uveď (sekce „parameters“ vs. „variables“); hodnotitel za ni dává body.</p>
+    </div>
+  </details>
+
+  <h2>Krok 2: omezení — díl po dílu</h2>
+
+  <details class="try">
+    <summary>Zkus sám: napiš blok „pronájem podle intervalu“ — výběr intervalu, vazby na $N$, jaké $M$ stačí?</summary>
+    <div class="inner">
+      <p>Recept z <a href="l1-7.html#takeaways">[L1.7]</a> beze změny ($M = n$ stačí, protože $0 \le N \le n$; triviální meze $N \ge 0$ a $N \le n$ netřeba psát):</p>
+      $$y_1 + y_2 + y_3 = 1$$
+      $$N \le 9 + n(1 - y_1)$$
+      $$N \ge 10 - n(1 - y_2), \qquad N \le 19 + n(1 - y_2)$$
+      $$N \ge 20 - n(1 - y_3)$$
+      <p>Zkontroluj, že <em>každý vnitřní interval má obě meze</em> — přesně za tohle se na termínu 21.06.2021 strhávaly 2 body.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: napiš rozpočtové omezení. Co všechno se platí — a čím se NEnásobí pronájem?</summary>
+    <div class="inner">
+      <p>Platí se jídlo $m$ za <em>každého pozvaného</em> hosta a cena pronájmu <em>vybraného</em> intervalu:</p>
+      $$m \sum_{i=1}^{n} x_i \;+\; p_1 y_1 + p_2 y_2 + p_3 y_3 \;\le\; B.$$
+      <p>Pronájem je za <em>místo</em>, ne za hlavu — nenásobí se počtem hostů. A díky $\sum_k y_k = 1$ se z $\sum_k p_k y_k$ „vytáhne“ přesně jedna cena.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: napiš podmínku spravedlnosti („differ by at most $D_{max}$“). Kolik nerovností potřebuješ?</summary>
+    <div class="inner">
+      <p>Počty pozvaných z obou stran jsou lineární výrazy $\sum_i gr(g_i)\,x_i$ a $\sum_i br(g_i)\,x_i$. Podmínka $|a - b| \le D_{max}$ = dvě nerovnosti <a href="l1-8.html#takeaways">[L1.8]</a>:</p>
+      $$\sum_{i=1}^{n} gr(g_i)\,x_i - \sum_{i=1}^{n} br(g_i)\,x_i \;\le\; D_{max}$$
+      $$\sum_{i=1}^{n} br(g_i)\,x_i - \sum_{i=1}^{n} gr(g_i)\,x_i \;\le\; D_{max}$$
+      <p>Jedna nerovnost nestačí — hlídala by jen jeden směr převahy. V dochovaném ohodnoceném řešení hodnotitel přeškrtl první pokus, kde student omylem obě sumy <em>sečetl</em> (plus místo minus); správně je rozdíl, oběma směry.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: zadání upozorňuje, že může existovat host s $br(g_i) = gr(g_i) = 1$ (patří k oběma stranám). Nerozbije takový host podmínku $D_{max}$?</summary>
+    <div class="inner">
+      <p>Nerozbije — a právě proto je konstrukce přes rozdíl sum elegantní. Pozvaný host s $br(g_i) = gr(g_i) = 1$ přičte $x_i = 1$ do <em>obou</em> sum, takže v rozdílu $\sum gr\,x - \sum br\,x$ se vyruší. „Společný“ host nenaklání váhy na žádnou stranu, což přesně odpovídá smyslu spravedlnosti v zadání. (V kritériu se samozřejmě počítá jen jednou — je to jeden host $x_i$.) Tahle poznámka v závorce je v zadání schválně: testuje, jestli si model nezačneš zbytečně komplikovat, např. rozdělováním hosta na půlky.</p>
+    </div>
+  </details>
+
+  <h2>Jak model „šlape“: rozpočet vs. počet hostů</h2>
+  <p>Intuice celého modelu na konkrétních číslech ($m = 1$, $p_1 = 2$, $p_2 = 5$, $p_3 = 8$ — vše v tisících CZK, $n = 30$): celkové výdaje jsou $m \cdot N + p_k$ a kritérium tlačí $N$ doprava, dokud výdaje nenarazí na rozpočet $B$.</p>
+
+  <div class="viz" id="viz-budget"></div>
+
+  <details class="try">
+    <summary>Zkus sám: v obrázku je $B = 20$. Proč optimum není na konci druhého schodu ($N = 19$)? A co by se stalo pro $B = 13$?</summary>
+    <div class="inner">
+      <p>Na druhém schodu stojí $N$ hostů $N + 5$; rozpočet $20$ dovolí nejvýš $N = 15$ (výdaje $20 \le 20$), pro $N = 16$ už $21 > 20$. Optimum tedy uvázne <em>uvnitř</em> intervalu — meze intervalu a rozpočet se o $N$ přetahují a model to vybalancuje sám.</p>
+      <p>Pro $B = 13$: druhý schod začíná výdaji $10 + 5 = 15 > 13$, takže interval 2 je celý nedostupný a optimum je $N = 9$ za $9 + 2 = 11$ — konec prvního schodu. Všimni si „díry“: hostů 10–13 se nedočkáš, i kdyby na jídlo zbývalo, protože skokem na druhý schod zdraží pronájem. Přesně tohle chování po částech konstantní ceny model přes $y_k$ věrně kopíruje.</p>
+    </div>
+  </details>
+
+  <h2>Krok 3: zápis zkouškové odpovědi</h2>
+  <p>Hodnotitel boduje <em>po částech</em> — v dochovaném ohodnoceném řešení z 21.06.2021 jsou vidět dílčí body zvlášť za kritérium, za rozpočet, za podmínku $D_{max}$ i za sekci parametrů. Kompletní odpověď má čtyři bloky: <strong>objective</strong> (kritérium), <strong>constraints</strong> (omezení, ideálně s krátkým slovním komentářem, co která skupina dělá), <strong>parameters</strong> (co je dané) a <strong>variables</strong> (o čem se rozhoduje, s definicí významu). Chybějící blok = zbytečně ztracené půlbody.</p>
+
+  <div class="box warning">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Kontrola před odevzdáním (reálné ztráty bodů)</div>
+    <ul>
+      <li><strong>Každý interval má OBĚ meze?</strong> Na termínu 21.06.2021 strhnuty 2 body — třetí cenový případ nebyl shora omezený (tady je horní mez $N \le n$ triviální, ale u intervalu 2 obě meze triviální nejsou!).</li>
+      <li><strong>$\sum_k y_k = 1$ nechybí?</strong> Bez něj solver „pronajme zadarmo“ — viz <a href="l1-7.html#takeaways">[L1.7]</a>.</li>
+      <li><strong>$D_{max}$ oběma směry?</strong> Dvě nerovnosti, rozdíl (ne součet!) sum.</li>
+      <li><strong>Pronájem se nenásobí počtem hostů</strong> — do rozpočtu jde $m N + \sum_k p_k y_k$, ne $(m + p_k) N$.</li>
+      <li><strong>Význam proměnných je napsaný?</strong> „$x_i = 1$ iff guest $g_i$ is invited“, „$y_k = 1$ iff $N$ falls into interval $k$“. Bez definice významu hodnotitel hádá — a hádá proti tobě.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.9</div>
+    <ul>
+      <li><strong>Wedding plan = skládačka tří technik:</strong> rozpočet $\le B$ <a href="l1-1.html#takeaways">[L1.1]</a>, krokový pronájem dle intervalu přes $y_k$, $\sum_k y_k = 1$ a big-M meze <a href="l1-7.html#takeaways">[L1.7]</a>, omezení rozdílu stran $|a-b| \le D_{max}$ dvěma nerovnostmi <a href="l1-8.html#takeaways">[L1.8]</a>.</li>
+      <li><strong>Postup u každé modelovací úlohy:</strong> ① rozsekat zadání na věty a přiřadit techniky, ② proměnné (a oddělit je od parametrů), ③ omezení po blocích s komentáři, ④ kritérium — zapsat ve formátu objective / constraints / parameters / variables.</li>
+      <li>Host s $br(g_i) = gr(g_i) = 1$ se v rozdílu sum <strong>vyruší</strong> — konstrukce rozdílu ho zvládá bez jakékoli úpravy.</li>
+      <li>Reálné ztráty bodů: chybějící druhá mez intervalu (−2 b. na termínu 2021), jednosměrná podmínka $D_{max}$, pronájem násobený počtem hostů.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA ===== -->
+  <div class="task" id="t-wedding">
+    <div class="task-head foto">
+      <span class="task-id">T01</span>
+      <strong>Wedding plan</strong>
+      <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
+      <span class="task-src">zdroj: zkouška KO 25.05.2026 (7 b.); dříve 21.06.2021 (6 b.) a 2023</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“You are planning a wedding. There is a set of potential guests $G = \{g_1, g_2, \ldots, g_n\}$. You want to invite as many guests as possible; however, there are some constraints. A meal for a single guest costs $m$ CZK (Czech koruna). A price for renting a place differs, depending on the number of invited guests: for $[0, 9]$ guests, the price is $p_1$ CZK, for $[10, 19]$ guests, the price is $p_2$ CZK, and for $[20, n]$ guests the price is $p_3$ CZK. You have a $B$ CZK; this budget cannot be exceeded. Furthermore, for the sake of justice, the number of guests invited from the groom's side and the bride's side can differ by at most $D_{max}$. Assume functions $br : G \to \{0, 1\}$ and $gr : G \to \{0, 1\}$, where $br(g_i) = 1$ iff $g_i$ is from the bride's side, and $gr(g_i) = 1$ iff $g_i$ is from the groom's side. (Note that there might be some guest $g_i$ such that $br(g_i) = gr(g_i) = 1$.)</p>
+        <p>Design an ILP model deciding which guests will be invited while respecting all the constraints.”</p>
+      </div>
+
+      <div class="box foto">
+        <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+        <p>Tuhle úlohu vyřeš celou <strong>NA PAPÍR</strong> — od prázdného listu, bez koukání do lekce ani do řešení, ideálně na čas (na zkoušce na ni budeš mít zhruba 15–20 minut). Pak mi pošli fotku — zkontroluju ti ji a vytknu chyby přesně jako hodnotitel.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Pozvat co nejvíc hostů z množiny $G$ ($n$ kandidátů). Výdaje: jídlo $m$ CZK za každého pozvaného + pronájem místa, jehož cena je po částech konstantní podle počtu pozvaných ($p_1$ pro 0–9, $p_2$ pro 10–19, $p_3$ pro 20–$n$). Celkem nejvýš $B$ CZK. Navíc se počty pozvaných ze strany ženicha (groom) a nevěsty (bride) smí lišit nejvýš o $D_{max}$; příslušnost ke stranám dávají parametry $gr(g_i), br(g_i) \in \{0,1\}$, přičemž host může patřit k oběma stranám zároveň. Výstup: ILP model rozhodující, kdo bude pozván.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a> — $x_i$ „host pozván“.</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a> — kritérium a rozpočet.</li>
+        <li><a href="l1-7.html#takeaways">[L1.7] Po částech konstantní funkce přes intervaly</a> — pronájem přes $y_k$.</li>
+        <li><a href="l1-8.html#takeaways">[L1.8] Rozdíl / omezení rozptylu</a> — $|a-b| \le D_{max}$ dvěma nerovnostmi.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Postupuj přesně podle kroků z výkladu: ① rozsekej zadání na věty a u každé si poznač techniku; ② proměnné — co je rozhodnutí ($x_i$, $y_k$) a co parametr ($m, p_k, B, D_{max}, br, gr, n$)? ③ omezení po blocích: výběr intervalu + vazby na $N = \sum_i x_i$ (jaké $M$ stačí?), rozpočet (co všechno se platí?), spravedlnost (kolik nerovností?); ④ kritérium. Nakonec projdi checklist z boxu „Kontrola před odevzdáním“.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Variables:</strong> $x_i \in \{0,1\}$, $x_i = 1$ ⟺ host $g_i$ je pozvaný; $y_1, y_2, y_3 \in \{0,1\}$, $y_k = 1$ ⟺ počet pozvaných padne do $k$-tého cenového intervalu. Zkratka $N = \sum_{i=1}^{n} x_i$ (lineární výraz, ne proměnná).</p>
+          $$\begin{aligned}
+          \max \quad & \sum_{i=1}^{n} x_i && \text{(as many guests as possible)} \\
+          \text{s.t.} \quad & y_1 + y_2 + y_3 = 1 && \text{(právě jeden cenový interval)} \\
+          & N \le 9 + n(1 - y_1) && \text{(interval 1: } N \in [0,9]) \\
+          & N \ge 10 - n(1 - y_2), \quad N \le 19 + n(1 - y_2) && \text{(interval 2: } N \in [10,19]) \\
+          & N \ge 20 - n(1 - y_3) && \text{(interval 3: } N \in [20,n]) \\
+          & m N + p_1 y_1 + p_2 y_2 + p_3 y_3 \le B && \text{(budget not exceeded)} \\
+          & \textstyle\sum_{i=1}^{n} gr(g_i)\,x_i - \sum_{i=1}^{n} br(g_i)\,x_i \le D_{max} && \text{(strany se neliší} \\
+          & \textstyle\sum_{i=1}^{n} br(g_i)\,x_i - \sum_{i=1}^{n} gr(g_i)\,x_i \le D_{max} && \text{ o víc než } D_{max}\text{)} \\
+          & x_i \in \{0,1\} \;\; \forall i \in 1..n, \qquad y_k \in \{0,1\} \;\; \forall k \in \{1,2,3\}
+          \end{aligned}$$
+          <p><strong>Parameters:</strong> $n \in \mathbb{N}^+$; $m, p_1, p_2, p_3, B \in \mathbb{R}^+$; $D_{max} \in \mathbb{Z}_0^+$; $br(g_i), gr(g_i) \in \{0,1\}$ pro $i \in 1..n$.</p>
+          <p><strong>Komentáře:</strong></p>
+          <ul>
+            <li><strong>$M = n$ stačí:</strong> $0 \le N \le n$ vždy, takže uvolněná mez (např. $N \ge 10 - n$) nikdy nic neomezuje. Triviální meze $N \ge 0$ (interval 1) a $N \le n$ (interval 3) platí automaticky. Kompaktní ekvivalent vazeb (díky $\sum_k y_k = 1$): $10y_2 + 20y_3 \le N \le 9y_1 + 19y_2 + n\,y_3$.</li>
+            <li><strong>Rozpočet:</strong> jídlo $m$ za každého pozvaného ($mN$) + pronájem vybraného intervalu ($\sum_k p_k y_k$). Pronájem se nenásobí počtem hostů.</li>
+            <li><strong>Spravedlnost:</strong> $|{\sum_i gr(g_i)x_i - \sum_i br(g_i)x_i}| \le D_{max}$ roztržená na dvě nerovnosti <a href="l1-8.html#takeaways">[L1.8]</a>. Host s $br = gr = 1$ se v rozdílu vyruší — žádná zvláštní obsluha.</li>
+            <li><strong>Srovnání s dochovaným studentským řešením (21.06.2021):</strong> student použil obrácené přepínače $Y_k = 1$ ⟺ interval <em>ne</em>vybrán ($Y_1+Y_2+Y_3 = 2$, v rozpočtu $(1-Y_k)p_k$) — legální ekvivalent, ale ztratil 2 body za neúplně svázané meze intervalů a body za první (sečtenou místo odečtenou) verzi podmínky $D_{max}$. Přímý význam $y_k = 1$ ⟺ vybráno je bezpečnější.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.9">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-8.html"><span class="dir">← Předchozí</span> L1.8 · Rozdíl / omezení rozptylu (max−min)</a>
+    <a class="next" href="l1-10.html"><span class="dir">Další →</span> L1.10 · Linearizace absolutní hodnoty (min vs. max)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Celkové výdaje m·N + p_k (m = 1, p = 2/5/8 tis. CZK, n = 30) vs. rozpočet B = 20.
+KOViz.fnPlot(document.getElementById('viz-budget'), {
+  xmax: 30, ymax: 40, xstep: 5, ystep: 5,
+  xlabel: 'N', ylabel: 'výdaje',
+  segments: [
+    {x1: 0,  y1: 2,  x2: 9,  y2: 11, label: 'N + p₁  (N ∈ [0,9])',   labelAt: 0.55, labelDx: -62, labelDy: -30},
+    {x1: 10, y1: 15, x2: 19, y2: 24, label: 'N + p₂  (N ∈ [10,19])', labelAt: 0.6,  labelDx: -80, labelDy: -30},
+    {x1: 20, y1: 28, x2: 30, y2: 38, label: 'N + p₃  (N ∈ [20,n])',  labelAt: 0.5,  labelDx: -76, labelDy: -30},
+    {x1: 0,  y1: 20, x2: 30, y2: 20, dashed: true, label: 'rozpočet B = 20', labelAt: 0.1, labelDx: 28, labelDy: -10},
+  ],
+  points: [
+    {x: 15, y: 20, label: 'optimum: N = 15 (výdaje 20 = B)', dx: 14, dy: 16},
+  ],
+  caption: 'Celkové výdaje m·N + pₖ jako funkce počtu hostů N (m = 1, p₁ = 2, p₂ = 5, p₃ = 8 tis. CZK, n = 30). Kritérium tlačí N doprava, rozpočet B = 20 (čárkovaně) výdaje shora utne: na druhém schodu projde nejvýš N = 15. Třetí schod začíná výdaji 28 > B, je celý nedostupný. Model přes y₁, y₂, y₃ tuhle skákavou funkci kopíruje přesně.'
+});
+</script>
+</body>
+</html>
