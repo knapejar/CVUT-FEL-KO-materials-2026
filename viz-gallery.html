@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galerie vizualizací — kontrolní stránka</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html">Domů</a>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+<div class="wrap">
+  <h1>Galerie komponent KOViz</h1>
+  <p>Interní kontrolní stránka — po každé změně <code>viz.js</code> sem přidej ukázku a zkontroluj screenshotem.</p>
+
+  <h2>1 · Orientovaný graf s váhami</h2>
+  <div class="viz" id="g1"></div>
+
+  <h2>2 · Graf se zvýrazněním (cesta, dim hrany, sub-texty l(v))</h2>
+  <div class="viz" id="g2"></div>
+
+  <h2>3 · Zakřivené hrany (multigraf / protisměrné)</h2>
+  <div class="viz" id="g3"></div>
+
+  <h2>4 · LP region (celočíselná mřížka + optimum + gradient)</h2>
+  <div class="viz" id="g4"></div>
+
+  <h2>5 · Stepper (krokování algoritmu)</h2>
+  <div class="viz" id="g5"></div>
+
+  <h2>6 · Matematika + boxy</h2>
+  <p>Inline $\sum_{i=1}^n c_i x_i \le B$ a display:</p>
+  $$\min \; C_{max} \quad \text{s.t.} \quad s_i + p_i \le s_j \;\; \forall (i,j) \in E$$
+  <div class="box takeaways"><div class="box-title"><img src="assets/icons/key-round.svg" class="ico" alt="">Key takeaways</div><ul><li>Bod jedna s $x_{ij} \in \{0,1\}$.</li></ul></div>
+  <div class="box danger"><div class="box-title"><img src="assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda</div><p>max $|x|$ bez přepínače…</p></div>
+  <details class="try"><summary>Zkus sám: kolik hran má strom na $n$ vrcholech?</summary><div class="inner">$n-1$.</div></details>
+  <details class="solution"><summary>d) Úplné řešení</summary><div class="inner">Řešení s diakritikou: žluťoučký kůň úpěl ďábelské ódy.</div></details>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="assets/js/viz.js"></script>
+<script src="assets/js/app.js"></script>
+<script>
+// 1 — základní graf
+KOViz.graph(document.getElementById('g1'), {
+  directed: true,
+  nodes: [
+    {id:'s', x:70,  y:180, label:'s'},
+    {id:'a', x:240, y:80},
+    {id:'b', x:240, y:280},
+    {id:'c', x:430, y:80},
+    {id:'d', x:430, y:280},
+    {id:'t', x:580, y:180},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'3'},
+    {from:'s', to:'b', label:'1'},
+    {from:'a', to:'c', label:'2'},
+    {from:'b', to:'d', label:'4'},
+    {from:'a', to:'d', label:'1'},
+    {from:'c', to:'t', label:'2'},
+    {from:'d', to:'t', label:'5'},
+  ],
+  caption: 'Ukázka 1: orientovaný graf, popisky vah na hranách.'
+});
+
+// 2 — zvýraznění
+KOViz.graph(document.getElementById('g2'), {
+  directed: true,
+  nodes: [
+    {id:'s', x:70,  y:180, cls:'good', sub:'l=0'},
+    {id:'a', x:240, y:80,  cls:'hl',   sub:'l=3'},
+    {id:'b', x:240, y:280, sub:'l=1'},
+    {id:'t', x:520, y:180, cls:'bad',  sub:'l=∞'},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'3', cls:'good'},
+    {from:'s', to:'b', label:'1', cls:'dim'},
+    {from:'a', to:'t', label:'2', cls:'hl'},
+    {from:'b', to:'t', label:'7', dashed:true},
+  ],
+  caption: 'Ukázka 2: třídy good/hl/bad/dim, čárkovaná hrana, sub-texty pod uzly.'
+});
+
+// 3 — křivky
+KOViz.graph(document.getElementById('g3'), {
+  directed: true,
+  nodes: [
+    {id:'u', x:160, y:180},
+    {id:'v', x:480, y:180},
+  ],
+  edges: [
+    {from:'u', to:'v', label:'f=2', curve:-0.6},
+    {from:'v', to:'u', label:'f=1', curve:-0.6},
+    {from:'u', to:'v', label:'u=5', curve:0.6, dashed:true},
+  ],
+  caption: 'Ukázka 3: zakřivené a protisměrné hrany.'
+});
+
+// 4 — LP region
+KOViz.lpRegion(document.getElementById('g4'), {
+  xmax: 7, ymax: 6, integer: true,
+  constraints: [
+    {a:1, b:2, c:10, label:'x₁+2x₂≤10'},
+    {a:3, b:1, c:15, label:'3x₁+x₂≤15'},
+  ],
+  opt: [4, 3],
+  objective: {a:2, b:3, label:'max 2x₁+3x₂'},
+  caption: 'Ukázka 4: přípustná oblast, celočíselné body (zeleně přípustné), optimum červeně, gradient cíle.'
+});
+
+// 5 — stepper (mini Dijkstra na 4 uzlech)
+KOViz.stepper(document.getElementById('g5'), {
+  graph: {
+    directed: true,
+    nodes: [
+      {id:'s', x:80,  y:180},
+      {id:'a', x:300, y:70},
+      {id:'b', x:300, y:290},
+      {id:'t', x:540, y:180},
+    ],
+    edges: [
+      {from:'s', to:'a', label:'4'},
+      {from:'s', to:'b', label:'1'},
+      {from:'b', to:'a', label:'2'},
+      {from:'a', to:'t', label:'1'},
+      {from:'b', to:'t', label:'6'},
+    ],
+  },
+  frames: [
+    {desc:'Inicializace: $l(s)=0$, ostatní ∞.', nodes:{s:'hl'}, subs:{s:'l=0', a:'l=∞', b:'l=∞', t:'l=∞'}},
+    {desc:'Uzavřu <b>s</b>, relaxuji hrany z s.', nodes:{s:'good'}, edges:{'s->a':'hl','s->b':'hl'}, subs:{s:'l=0', a:'l=4', b:'l=1', t:'l=∞'}},
+    {desc:'Nejmenší l má <b>b</b> (1) → uzavřu, relaxace zlepší a: 1+2=3 &lt; 4.', nodes:{s:'good', b:'good'}, edges:{'b->a':'good','b->t':'hl'}, subs:{s:'l=0', a:'l=3', b:'l=1', t:'l=7'}},
+    {desc:'Uzavřu <b>a</b> (3), relaxace zlepší t: 3+1=4 &lt; 7.', nodes:{s:'good', b:'good', a:'good'}, edges:{'a->t':'good'}, subs:{s:'l=0', a:'l=3', b:'l=1', t:'l=4'}},
+    {desc:'Uzavřu <b>t</b> — hotovo. Nejkratší cesta s→b→a→t, délka 4.', nodes:{s:'good', b:'good', a:'good', t:'good'}, edges:{'s->b':'good','b->a':'good','a->t':'good'}, subs:{s:'l=0', a:'l=3', b:'l=1', t:'l=4'}},
+  ],
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L_ID_ · _NÁZEV_ — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k_KAPITOLA_">K_KAPITOLA_ · _TÉMA KAPITOLY_</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L_ID_</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L_ID_</span> Kapitola K_X_ — _TÉMA_ · <strong>[MUST]</strong>
+  </p>
+  <h1>_NÁZEV LEKCE_</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    _JEDNA VĚTA: co nového se v této lekci naučíš._
+  </div>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>_Sekce výkladu_</h2>
+  <p>Výklad česky. Anglické termíny: <strong>shortest path</strong> (nejkratší cesta). Matematika: $C_{max}$, $$\min \sum_i c_i x_i.$$</p>
+
+  <details class="try">
+    <summary>Zkus sám: _návodná otázka, na kterou si má student přijít_</summary>
+    <div class="inner">
+      <p>_Odpověď + vysvětlení proč._</p>
+    </div>
+  </details>
+
+  <!-- vizualizace -->
+  <div class="viz" id="viz1"></div>
+  <script type="text/koviz">
+    /* skripty vizualizací patří na konec body — tento blok jen ukazuje vzor volání:
+       KOViz.graph(document.getElementById('viz1'), {
+         directed: true,
+         nodes: [{id:'s', x:80, y:180}, {id:'t', x:560, y:180}],
+         edges: [{from:'s', to:'t', label:'5'}],
+         caption: 'Popisek obrázku.'
+       });
+    */
+  </script>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L_ID_</div>
+    <ul>
+      <li>_Poznatek 1 (formulovaný tak, aby šel citovat z jiné lekce)._</li>
+      <li>_Poznatek 2._</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA (4-dílný formát) ===== -->
+  <div class="task" id="t-_SLUG_">
+    <div class="task-head"><!-- u FOTO: class="task-head foto" -->
+      <span class="task-id">_TXX_</span>
+      <strong>_Název úlohy_</strong>
+      <!-- u FOTO: <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span> -->
+      <span class="task-src">zdroj: _termín/soubor_</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>_Zadání ANGLICKY, co nejblíže 1:1 originálu._</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>_Lidská parafráze česky._</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a></li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>_Myšlenkový postup, návodné otázky (bez prozrazení řešení)._</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>_Kompletní řešení s matematikou._</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- u FOTO checkpoint lekcí přidat: -->
+  <!--
+  <div class="box foto">
+    <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+    <p>Tuhle úlohu vyřeš celou NA PAPÍR (bez koukání do řešení) a pošli mi fotku — zkontroluju ti ji a vytknu chyby.</p>
+  </div>
+  -->
+
+  <label class="done-toggle" data-lesson-id="L_ID_">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l_PREV_.html"><span class="dir">← Předchozí</span> L_PREV_ · _NÁZEV_</a>
+    <a class="next" href="l_NEXT_.html"><span class="dir">Další →</span> L_NEXT_ · _NÁZEV_</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+  // sem patří volání KOViz.* pro vizualizace této lekce
+</script>
+</body>
+</html>

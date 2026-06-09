@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KO učebnice — příprava na zkoušku 15. 6. 2026</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" style="display:flex;align-items:center;gap:6px;font-weight:700;color:var(--ink)">
+      <img src="assets/icons/graph.svg" class="ico" alt="">KO učebnice
+    </a>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <h1>Kombinatorická optimalizace — příprava na zkoušku</h1>
+  <p class="lesson-meta">Cíl: písemka + ústní <strong>15. 6. 2026</strong> · 6 úloh / 40 bodů · řazeno podle bodové návratnosti</p>
+
+  <div class="box info">
+    <div class="box-title"><img src="assets/icons/book-open.svg" class="ico" alt="">Jak s učebnicí pracovat</div>
+    <ul style="margin:4px 0">
+      <li>Jdi <strong>shora dolů</strong> — kapitoly jsou seřazené podle očekávaných bodů ve zkoušce.</li>
+      <li>Každá lekce učí <strong>jednu novou věc</strong>. Otázky „🤔 Zkus sám" si vždy nejdřív zodpověz, pak rozklikni.</li>
+      <li>Úlohy s <span class="tag-foto">FOTO</span> vyřeš celé na papír a pošli fotku ke kontrole.</li>
+      <li>Zadání úloh jsou <strong>anglicky</strong> (jako v písemce), výklad česky (jako u ústní).</li>
+      <li>Plná osnova všech 93 lekcí: <a href="OSNOVA.md">OSNOVA.md</a>.</li>
+    </ul>
+  </div>
+
+  <!-- ========== K0 ========== -->
+  <div class="chapter-card" id="k0">
+    <h3>K0 — Základní jazyk grafů a ILP</h3>
+    <div class="meta">prerekvizitní minikapitola · 8 lekcí · bez FOTO — projeď rychle, vracej se podle odkazů</div>
+    <ul class="lesson-list">
+      <li data-done-mark="L0.1"><span class="lid">L0.1</span><a href="k0/l0-1.html">Co je graf</a></li>
+      <li data-done-mark="L0.2"><span class="lid">L0.2</span><a href="k0/l0-2.html">Stupeň vrcholu</a></li>
+      <li data-done-mark="L0.3"><span class="lid">L0.3</span><a href="k0/l0-3.html">Cesta, sled, tah, cyklus</a></li>
+      <li data-done-mark="L0.4"><span class="lid">L0.4</span><a href="k0/l0-4.html">Strom, kostra, les, DAG</a></li>
+      <li data-done-mark="L0.5"><span class="lid">L0.5</span><a href="k0/l0-5.html">Minimální kostra (MST)</a></li>
+      <li data-done-mark="L0.6"><span class="lid">L0.6</span><a href="k0/l0-6.html">Párování a perfektní párování</a></li>
+      <li data-done-mark="L0.7"><span class="lid">L0.7</span><a href="k0/l0-7.html">Co je ILP a LP relaxace</a></li>
+      <li data-done-mark="L0.8"><span class="lid">L0.8</span><a href="k0/l0-8.html">Binární proměnná</a></li>
+    </ul>
+  </div>
+
+  <!-- ========== K1 ========== -->
+  <div class="chapter-card" id="k1">
+    <h3>K1 — ILP modelování (Slot 1)</h3>
+    <div class="meta">100 % výskyt × 7 bodů · 15 lekcí · FOTO: L1.9 Wedding, L1.12 Loot, L1.14 Toys</div>
+    <ul class="lesson-list">
+      <li data-done-mark="L1.1"><span class="lid">L1.1</span><a href="k1/l1-1.html">Cílová funkce a základní omezení</a></li>
+      <li data-done-mark="L1.2"><span class="lid">L1.2</span><a href="k1/l1-2.html">Přiřazovací (assignment) struktura</a></li>
+      <li data-done-mark="L1.3"><span class="lid">L1.3</span><a href="k1/l1-3.html">Modelování logiky: implikace, XOR, AND</a></li>
+      <li data-done-mark="L1.4"><span class="lid">L1.4</span><a href="k1/l1-4.html">big-M: disjunkce omezení</a></li>
+      <li data-done-mark="L1.5"><span class="lid">L1.5</span><a href="k1/l1-5.html">Navázání binární na spojitou (aktivace)</a></li>
+      <li data-done-mark="L1.6"><span class="lid">L1.6</span><a href="k1/l1-6.html">Fixed-charge (fixní náklady)</a></li>
+      <li data-done-mark="L1.7"><span class="lid">L1.7</span><a href="k1/l1-7.html">Po částech konstantní funkce</a></li>
+      <li data-done-mark="L1.8"><span class="lid">L1.8</span><a href="k1/l1-8.html">Rozdíl / omezení rozptylu (max−min)</a></li>
+      <li data-done-mark="L1.9"><span class="lid">L1.9</span><a href="k1/l1-9.html">VYVRCHOLENÍ: Wedding plan</a><span class="tag-foto">FOTO</span></li>
+      <li data-done-mark="L1.10"><span class="lid">L1.10</span><a href="k1/l1-10.html">Linearizace absolutní hodnoty</a></li>
+      <li data-done-mark="L1.11"><span class="lid">L1.11</span><a href="k1/l1-11.html">Poměrová a max-z-více podmínka</a></li>
+      <li data-done-mark="L1.12"><span class="lid">L1.12</span><a href="k1/l1-12.html">Implikace mezi skupinami (Loot)</a><span class="tag-foto">FOTO</span></li>
+      <li data-done-mark="L1.13"><span class="lid">L1.13</span><a href="k1/l1-13.html">„Worst-case" omezení přes kombinace</a></li>
+      <li data-done-mark="L1.14"><span class="lid">L1.14</span><a href="k1/l1-14.html">Sousednost a prostorová omezení (Toys)</a><span class="tag-foto">FOTO</span></li>
+      <li data-done-mark="L1.15"><span class="lid">L1.15</span><a href="k1/l1-15.html">Časově/pozičně indexované proměnné</a></li>
+    </ul>
+  </div>
+
+  <!-- ========== K2–K7 placeholder ========== -->
+  <div class="chapter-card" id="k2">
+    <h3>K2 — Nejkratší cesty (Slot 2)</h3>
+    <div class="meta">90 % × 7 bodů · 18 lekcí · <em>připravuje se</em></div>
+  </div>
+  <div class="chapter-card" id="k3">
+    <h3>K3 — Důkaz / teorie (Slot 3)</h3>
+    <div class="meta">95 % × 7 bodů · 16 lekcí · <em>připravuje se</em></div>
+  </div>
+  <div class="chapter-card" id="k4">
+    <h3>K4 — Toky a řezy (Slot 4)</h3>
+    <div class="meta">~100 % × 7 bodů · 15 lekcí · <em>připravuje se</em></div>
+  </div>
+  <div class="chapter-card" id="k5">
+    <h3>K5 — Rozvrhování (Slot 5)</h3>
+    <div class="meta">100 % × 6 bodů · 16 lekcí · <em>připravuje se</em></div>
+  </div>
+  <div class="chapter-card" id="k6">
+    <h3>K6 — CSP / AC-3 (Slot 6)</h3>
+    <div class="meta">55 % × 6 bodů · 3 lekce · <em>připravuje se</em></div>
+  </div>
+  <div class="chapter-card" id="k7">
+    <h3>K7 — Knapsack (doplňková)</h3>
+    <div class="meta">2 lekce · <em>připravuje se</em></div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="assets/js/viz.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+*.png.tmp
+shots/
+node_modules/
+Thumbs.db
