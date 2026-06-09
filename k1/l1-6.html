@@ -58,7 +58,7 @@
   <details class="try">
     <summary>Zkus sám: vzpomeň si na <a href="l1-5.html#takeaways">[L1.5]</a>. Jakou proměnnou a jakou vazbu přidáš, aby kritérium platilo $A$ jen při $x &gt; 0$?</summary>
     <div class="inner">
-      <p>Binární přepínač $y \in \{0,1\}$ s významem „$y = 1$ ⟺ $x &gt; 0$“, do kritéria člen $A \cdot y$ a vazbu z L1.5:</p>
+      <p>Binární přepínač $y \in \{0,1\}$ se <em>zamýšleným</em> významem „$x &gt; 0$ ⇒ $y = 1$“, do kritéria člen $A \cdot y$ a vazbu z L1.5:</p>
       $$\min z = A \cdot y + B \cdot x, \qquad x \le M \cdot y,$$
       <p>kde $M$ je horní mez proměnné $x$. Pro $y = 0$ vazba vynucuje $x = 0$ a cena je $0$; pro $y = 1$ se vazba vypne a cena je $A + Bx$. Přesně kopie nespojité funkce $f$.</p>
     </div>
@@ -130,7 +130,7 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Rozděl si model na dvě nezávislé části. <em>Kritérium:</em> $f(x_1)$ je přesně fixed-charge funkce — aplikuj recept z této lekce; jaké $M$ dává mez $x_1 \le 20$? <em>Omezení 1:</em> pozor, $|x_1 - x_2| = 0$ or $6$ NEjsou jen dva případy! Vypiš si, jaké hodnoty smí mít rozdíl $d = x_1 - x_2$ bez absolutní hodnoty. Pak: umíš výběr jedné hodnoty z konečné množiny napsat lineárně přes binární přepínače (výčet hodnot, srov. slide 36 přednášky ILP)? Alternativně jde každý případ zapsat dvojicí big-M nerovností à la <a href="l1-4.html#takeaways">[L1.4]</a> s „právě jeden případ zapnutý“.</p>
+      <p>Rozděl si model na dvě nezávislé části. <em>Kritérium:</em> $f(x_1)$ je přesně fixed-charge funkce — aplikuj recept z této lekce; jaké $M$ dává mez $x_1 \le 20$? <em>Omezení 1:</em> pozor, $|x_1 - x_2| = 0$ or $6$ NEjsou jen dva případy! Vypiš si, jaké hodnoty smí mít rozdíl $d = x_1 - x_2$ bez absolutní hodnoty. Pak: umíš výběr jedné hodnoty z konečné množiny napsat lineárně přes binární přepínače (výčet hodnot, srov. slide 36 přednášky ILP)? Je to nový mini-trik nad rámec této lekce — naplno se rozvine v <a href="l1-7.html">[L1.7] Po částech konstantní funkce</a> ($\sum_k y_k = 1$), tady ho stačí přijmout z řešení. Alternativně jde každý případ zapsat dvojicí big-M nerovností à la <a href="l1-4.html#takeaways">[L1.4]</a> s „právě jeden případ zapnutý“.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení</summary>
@@ -143,7 +143,7 @@
           <p>Kombinace $(s^+, s^-) = (0,0)$ dává rozdíl $0$, $(1,0)$ dává $+6$, $(0,1)$ dává $-6$; kombinaci $(1,1)$ zakazuje $s^+ + s^- \le 1$ (dala by sice taky rozdíl 0, ale vyloučit ji je čistší). Celý model:</p>
           $$\begin{aligned} \min z = \quad & 7y + 5x_1 \\ \text{s.t.} \quad & x_1 \le 20\,y \\ & x_1 - x_2 = 6s^+ - 6s^- \\ & s^+ + s^- \le 1 \\ & 0 \le x_1 \le 20, \;\; 0 \le x_2 \le 20 \\ & x_1, x_2 \in \mathbb{Z}_0^+, \;\; y, s^+, s^- \in \{0,1\} \end{aligned}$$
           <p><em>Ekvivalentní cesta přes big-M:</em> tři případy $d = v_k$, $v \in \{-6, 0, 6\}$, každý jako dvojice nerovností $v_k - M(1 - s_k) \le x_1 - x_2 \le v_k + M(1 - s_k)$ a $\sum_k s_k = 1$ — funguje stejně, jen je delší.</p>
-          <p><em>Poučení z reálné zkoušky:</em> dochované studentské řešení z termínu 21.06.2021 pokrylo jen případy $d = 0$ a $d = +6$ jednou binární $Y_2$ — a hodnotitel červeně připsal, že „absolutní hodnota pro 6 vyžaduje“ i záporný směr. Na $d = -6$ se zapomíná nejčastěji.</p>
+          <p><em>Poučení z reálné zkoušky:</em> dochované studentské řešení z termínu 21.06.2021 pokrylo jen případy $d = 0$ a $d = +6$ jedinou binární proměnnou $y$ — a hodnotitel červeně připsal, že „absolutní hodnota pro 6 vyžaduje“ i záporný směr. Na $d = -6$ se zapomíná nejčastěji.</p>
           <p><em>Sanity check:</em> optimum modelu je $x_1 = 0$ (pak $y = 0$, $z = 0$) s libovolným $x_2 \in \{0, 6\}$ — skok funkce je správně „vypnutý“.</p>
         </div>
       </details>
