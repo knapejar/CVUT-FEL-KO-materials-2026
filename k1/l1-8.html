@@ -202,14 +202,14 @@ KOViz.fnPlot(document.getElementById('viz-maxmin'), {
   xmax: 5, ymax: 16, xstep: 1, ystep: 2,
   xlabel: 'j', ylabel: 'h_j',
   segments: [
-    {x1: 0.4, y1: 14, x2: 4.8, y2: 14, dashed: true, label: 'h_max ≥ všechna h_j (nejníž 14)', labelAt: 0.1, labelDx: 0, labelDy: -10},
-    {x1: 0.4, y1: 9,  x2: 4.8, y2: 9,  dashed: true, label: 'h_min ≤ všechna h_j (nejvýš 9)',  labelAt: 0.32, labelDx: 0, labelDy: 16},
+    {x1: 0.4, y1: 14, x2: 4.8, y2: 14, dashed: true, label: 'h_max ≥ všechna h_j (mez nesmí pod 14)', labelAt: 0.1, labelDx: 0, labelDy: -10},
+    {x1: 0.4, y1: 9,  x2: 4.8, y2: 9,  dashed: true, label: 'h_min ≤ všechna h_j (mez nesmí nad 9)',  labelAt: 0.32, labelDx: 0, labelDy: 16},
   ],
   points: [
-    {x: 1, y: 9,  label: 'h₁ = 9',  dx: -16, dy: -12},
-    {x: 2, y: 12, label: 'h₂ = 12', dx: -16, dy: -12},
-    {x: 3, y: 10, label: 'h₃ = 10', dx: -16, dy: -12},
-    {x: 4, y: 14, label: 'h₄ = 14', dx: 12,  dy: 22},
+    {x: 1, y: 9,  label: 'h_1 = 9',  dx: -16, dy: -12},
+    {x: 2, y: 12, label: 'h_2 = 12', dx: -16, dy: -12},
+    {x: 3, y: 10, label: 'h_3 = 10', dx: -16, dy: -12},
+    {x: 4, y: 14, label: 'h_4 = 14', dx: 12,  dy: 22},
   ],
   caption: 'Součty čtyř skupin h_j (osa x = index skupiny j): h = (9, 12, 10, 14), celkový součet 45, limit P = 0.1 · 45 = 4.5. Omezení h_max ≥ h_j tlačí čárkovanou mez nejníž na 14, h_min ≤ h_j nejvýš na 9 — sevřít je na h_max − h_min ≤ 4.5 nelze (mezera je 5). Toto rozdělení je tedy nepřípustné a solver musí bankovky rozházet jinak (nebo ohlásit infeasible).'
 });
