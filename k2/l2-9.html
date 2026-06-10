@@ -68,7 +68,7 @@
   <details class="try">
     <summary>Zkus sám: cesta $0 \to 15$ teď odpovídá investiční strategii. Jaká je její hodnota — a jaký SP problém vlastně řešíme? (Vzpomeň si na <a href="l2-7.html#takeaways">[L2.7]</a>.)</summary>
     <div class="inner">
-      <p>Výsledná částka = vklad $\times$ <strong>součin</strong> násobků $1 + a_e$ přes hrany cesty a chceme ji <strong>maximalizovat</strong>. To je přesně situace pro $-\log$ z <a href="l2-7.html#takeaways">[L2.7]</a>: polož $c(e) := -\log(1 + a_e)$ a minimalizuj součet. Jenže $1 + a_e \ge 1$, takže $-\log(1 + a_e) \le 0$ — <strong>všechny váhy jsou záporné</strong> (čekací hrany mají $-\log 1 = 0$). Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> je tedy mimo hru.</p>
+      <p>Výsledná částka = vklad $\times$ <strong>součin</strong> násobků $1 + a_e$ přes hrany cesty a chceme ji <strong>maximalizovat</strong>. To je přesně situace pro $-\log$ z <a href="l2-7.html#takeaways">[L2.7]</a>: polož $c(e) := -\log(1 + a_e)$ a minimalizuj součet. Jenže $1 + a_e \ge 1$, takže $-\log(1 + a_e) \le 0$ — <strong>všechny váhy jsou nekladné ($\le 0$)</strong> (investiční hrany záporné, čekací hrany mají $-\log 1 = 0$). Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> je tedy mimo hru.</p>
     </div>
   </details>
 
@@ -112,7 +112,7 @@
   <div class="viz" id="viz-bus"></div>
 
   <details class="try">
-    <summary>Zkus sám: najdi v obrázku nejlevnější pokrytí (ceny směn jsou ilustrační — v zkouškové reportáži se nedochovaly).</summary>
+    <summary>Zkus sám: najdi v obrázku nejlevnější pokrytí (ceny směn jsou ilustrační — ve zkouškové reportáži se nedochovaly).</summary>
     <div class="inner">
       <p>Optimum je <strong>115</strong>: směny 9–13 (45), 12–16 (40) a 15–17 (30), tedy cesta $9 \to 13 \to 12 \to 16 \to 15 \to 17$ se dvěma hranami zpět. Srovnej: 9–13 + 12–17 dá $45 + 75 = 120$; 9–13 + 12–14 + 14–16 + 15–17 dá $45 + 25 + 25 + 30 = 125$.</p>
     </div>
@@ -193,7 +193,7 @@
         <summary>d) Úplné řešení</summary>
         <div class="inner">
           <p><strong>Graf.</strong> Vrcholy $V = \{0, 1, \ldots, 15\}$ = roky (stav „peníze jsou volné v roce $t$“); $s = 0$, $t = 15$. Hrany: pro každou příležitost $(k, p, a)$ hrana $k \to k + p$ s násobkem $1 + a$; pro každý rok $t \le 14$ <strong>čekací hrana</strong> $t \to t + 1$ s násobkem $1$ (peníze leží na účtu — „single investment alternative“ zakazuje dělit peníze, ne nechat je ležet). Každá strategie investování ↔ právě jedna cesta $0 \to 15$ a výsledná částka = vklad $\times$ součin násobků podél cesty.</p>
-          <p><strong>Převod na nejkratší cestu.</strong> Maximalizujeme součin $\prod_e (1 + a_e)$ → podle <a href="l2-7.html#takeaways">[L2.7]</a> polož $c(e) := -\log(1 + a_e)$ a minimalizuj $\sum_e c(e)$; logaritmus je rostoucí, takže vítězná cesta se nemění. Váhy vyjdou <strong>záporné</strong> ($1 + a_e \ge 1$), čekací hrany mají váhu $0$. To je v pořádku: všechny hrany vedou z dřívějšího roku do pozdějšího, graf je <strong>DAG</strong> <a href="../k0/l0-4.html#takeaways">[L0.4]</a> (roky na přímce = topologické uspořádání), takže neobsahuje žádný cyklus — tím spíš žádný záporný <a href="l2-1.html#takeaways">[L2.1]</a> a nejkratší cesta je dobře definovaná. (Ekvivalentně: nejdelší cesta v DAG s vahami $\log(1 + a_e)$.) Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> se kvůli záporným vahám použít nesmí; v DAG stačí vyhodnotit Bellmanovu rovnici <a href="l2-2.html#takeaways">[L2.2]</a> po vrcholech zleva doprava — algoritmus s $O(|V| + |E|)$ podrobně v lekci <a href="l2-13.html">[L2.13]</a>. Tím je formulace (= požadovaná odpověď) hotová.</p>
+          <p><strong>Převod na nejkratší cestu.</strong> Maximalizujeme součin $\prod_e (1 + a_e)$ → podle <a href="l2-7.html#takeaways">[L2.7]</a> polož $c(e) := -\log(1 + a_e)$ a minimalizuj $\sum_e c(e)$; logaritmus je rostoucí, takže vítězná cesta se nemění. Váhy vyjdou <strong>nekladné</strong> ($1 + a_e \ge 1$): investiční hrany záporné, čekací hrany mají váhu $0$. To je v pořádku: všechny hrany vedou z dřívějšího roku do pozdějšího, graf je <strong>DAG</strong> <a href="../k0/l0-4.html#takeaways">[L0.4]</a> (roky na přímce = topologické uspořádání), takže neobsahuje žádný cyklus — tím spíš žádný záporný <a href="l2-1.html#takeaways">[L2.1]</a> a nejkratší cesta je dobře definovaná. (Ekvivalentně: nejdelší cesta v DAG s vahami $\log(1 + a_e)$.) Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> se kvůli záporným vahám použít nesmí; v DAG stačí vyhodnotit Bellmanovu rovnici <a href="l2-2.html#takeaways">[L2.2]</a> po vrcholech zleva doprava — algoritmus s $O(|V| + |E|)$ podrobně v lekci <a href="l2-13.html">[L2.13]</a>. Tím je formulace (= požadovaná odpověď) hotová.</p>
           <p><strong>Bonus: konkrétní optimum.</strong> Označ $v(t)$ nejlepší dosažitelný násobek v roce $t$ a vyhodnocuj multiplikativní obdobu Bellmanovy rovnice zleva doprava, $v(w) = \max_{(u,w)} v(u) \cdot m(u,w)$ (stejný princip jako multiplikativní pravidlo v <a href="l2-7.html#takeaways">[L2.7]</a>, T01b). Hodnota se mění jen v koncových letech příležitostí (mezi nimi ji kopírují čekací hrany):</p>
           <table>
             <tr><th>roky $t$</th><td>0–3</td><td>4–5</td><td>6–8</td><td>9–10</td><td>11–12</td><td>13–14</td><td>15</td></tr>
@@ -317,7 +317,7 @@ KOViz.graph(document.getElementById('viz-dj-opt'), {
   w: 960, h: 360, nodeR: 16,
   nodes: djNodes(),
   edges: djEdges(true),
-  caption: 'SPOILER k řešení T01 (proto je obrázek až za ním): optimální strategie — rok počkat, b (1–6), dva roky počkat, h (8–13), j (13–15); celkem ×1.047 · 1.058 · 1.032 ≈ 1.1432.',
+  caption: 'SPOILER k řešení T01 (proto je obrázek až za ním): optimální strategie — rok počkat, b (1–6), dva roky počkat, h (8–13), j (13–15); celkem ×1,047 · 1,058 · 1,032 ≈ 1,1432.',
 });
 
 // ---- Řidič autobusu: hodiny 9..17, směny + hrany zpět ----
