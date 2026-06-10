@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Level (Muntz &amp; Coffman) — immersive video · KO Hitovky</title>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #11141d;
+    --text: #e8eaf0;
+    --muted: #8b93a7;
+    --accent: #ffb000;
+    --border: #232a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; overflow: hidden;
+  }
+  #topbar {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; font-size: 13px; color: var(--muted);
+  }
+  #topbar a { color: var(--muted); text-decoration: none; }
+  #topbar a:hover { color: var(--accent); }
+  #topbar .title { color: var(--text); font-weight: 700; }
+  #topbar .badge {
+    font-size: 11px; color: var(--bg); background: var(--accent);
+    border-radius: 10px; padding: 2px 9px; font-weight: 700;
+  }
+  #stagewrap {
+    flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
+    min-height: 0; padding: 0 16px;
+  }
+  #stage {
+    position: relative;
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #0b0e16; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+  }
+  #stage canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  /* ── karaoke pruh přes video, zarovnaný odspodu ── */
+  #subtitle {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 26px 4% 16px;
+    background: linear-gradient(to top, rgba(5,7,12,0.88) 0%, rgba(5,7,12,0.55) 65%, transparent 100%);
+    text-align: center; pointer-events: none;
+    font-size: clamp(15px, 2.6vw, 30px); font-weight: 700; line-height: 1.4;
+    color: #fff;
+  }
+  #subtitle .m {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    color: #7dd3fc;
+  }
+  #subtitle .hl {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    padding: 0 4px; border-radius: 5px;
+  }
+  #subtitle .c1 { background: rgba(125,211,252,0.15); color: #7dd3fc; }
+  #subtitle .c2 { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+  #subtitle .c3 { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+  #subtitle .c4 { background: rgba(52,211,153,0.15);  color: #4ade80; }
+  #subtitle .c5 { background: rgba(244,114,182,0.16); color: #f9a8d4; }
+  #subtitle .c6 { background: rgba(251,146,60,0.17);  color: #fdba74; }
+  #subtitle .c7 { background: rgba(147,197,253,0.16); color: #93c5fd; }
+  .kw { position: relative; display: inline-block; white-space: nowrap; }
+  .kw .wb { opacity: 0.42; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+  .kw .wf {
+    position: absolute; left: 0; top: 0; width: 0%;
+    overflow: hidden; white-space: nowrap;
+    text-shadow: 0 0 16px rgba(255,176,0,0.85), 0 2px 10px rgba(0,0,0,0.95);
+  }
+  .kw .wf, .kw .wf * { color: #ffd34d !important; }
+  #bigplay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(5,7,12,0.55); cursor: pointer; z-index: 5;
+    flex-direction: column; gap: 18px;
+  }
+  #bigplay.hidden { display: none; }
+  #bigplay .pbtn {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--accent); color: #1a1200;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; box-shadow: 0 0 60px rgba(255,176,0,0.45);
+    transition: transform .15s;
+  }
+  #bigplay:hover .pbtn { transform: scale(1.08); }
+  #bigplay .hint { color: var(--text); font-size: 15px; font-weight: 600; text-shadow: 0 2px 8px #000; }
+  #bigplay .hint small { display: block; color: var(--muted); font-weight: 400; margin-top: 6px; }
+  #controls {
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 4px 16px;
+  }
+  #controls button {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    width: 42px; height: 42px; border-radius: 50%; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: border-color .15s, color .15s;
+  }
+  #controls button:hover { border-color: var(--accent); color: var(--accent); }
+  #seek {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 6px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--p, 0%), #2a3040 var(--p, 0%));
+    border-radius: 3px; outline: none; cursor: pointer;
+  }
+  #seek::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px rgba(255,176,0,0.6); cursor: pointer;
+  }
+  #seek::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; border: none;
+    background: var(--accent); cursor: pointer;
+  }
+  .time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 44px; text-align: center; }
+  @media (max-height: 560px) { #topbar { display: none; } }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="pisnicky.html">← Zpěvník</a>
+  <span class="title">Level (Muntz &amp; Coffman)</span>
+  <span class="badge">IMMERSIVE VIDEO</span>
+  <span style="margin-left:auto">mezerník = play/pauza · ←/→ = ±5 s · R = od začátku</span>
+</div>
+
+<div id="stagewrap">
+  <div id="stage">
+    <div id="subtitle"></div>
+    <div id="bigplay">
+      <div class="pbtn">▶</div>
+      <div class="hint">Muntz &amp; Coffman — levely, sdílení procesorů &amp; McNaughton<small>2 min 57 s · zpívaná videolekce</small></div>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btnPlay" title="Play / pauza">▶</button>
+  <button id="btnRestart" title="Od začátku">⟲</button>
+  <span class="time" id="tCur">0:00</span>
+  <input type="range" id="seek" min="0" max="177.3" step="0.01" value="0">
+  <span class="time" id="tDur">2:57</span>
+</div>
+
+<audio id="player" src="audio/procesory-hanulo.mp3" preload="auto"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
+<script>
+(async function () {
+'use strict';
+
+// ════════════════════════════════════════════════════════════════════
+// 0) COLORS + helpers
+// ════════════════════════════════════════════════════════════════════
+const C = {
+  bg: 0x0b0e16, gold: 0xffb000, goldHi: 0xffd34d, green: 0x4ade80,
+  pink: 0xf472b6, cyan: 0x7dd3fc, violet: 0xa78bfa, white: 0xffffff,
+  dim: 0x37415a, muted: 0x8b93a7, red: 0xef4444, card: 0x141927,
+};
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - clamp01(t), 3);
+const ph = (t, a, b) => clamp01((t - a) / (b - a));
+
+// ════════════════════════════════════════════════════════════════════
+// 1) INSTANCE + REAL M&C RUN (ručně ověřený trace)
+//    R=2; A(2)→C, B(3)→C, C(3)→F, D(4)→F, E(3) volná
+//    levely: B=8, A=7, D=6, C=5, E=3, F=2
+// ════════════════════════════════════════════════════════════════════
+const TASKS = {
+  A: { p: 2, lvl: 7, x: 200, y: 380, col: 0x7dd3fc },
+  B: { p: 3, lvl: 8, x: 200, y: 190, col: 0xfbbf24 },
+  C: { p: 3, lvl: 5, x: 500, y: 285, col: 0x4ade80 },
+  D: { p: 4, lvl: 6, x: 470, y: 500, col: 0xf472b6 },
+  E: { p: 3, lvl: 3, x: 880, y: 500, col: 0xc4b5fd },
+  F: { p: 2, lvl: 2, x: 800, y: 330, col: 0xfdba74 },
+};
+const PREC = [['A', 'C'], ['B', 'C'], ['C', 'F'], ['D', 'F']];
+// segmenty procesor-sharing běhu (kdo běží jakou rychlostí β)
+const SEGS = [
+  { t0: 0,   t1: 1,   run: { B: 1, A: 1 },                lbl: 'top-2 levely: B, A' },
+  { t0: 1,   t1: 3,   run: { B: 1, A: 0.5, D: 0.5 },      lbl: 'A klesla na D → sdílí β=½' },
+  { t0: 3,   t1: 5,   run: { C: 1, D: 1 },                lbl: 'A,B hotovo → C,D' },
+  { t0: 5,   t1: 6.5, run: { C: 2/3, D: 2/3, E: 2/3 },    lbl: '3 úlohy / 2 stroje → β=⅔' },
+  { t0: 6.5, t1: 8.5, run: { E: 1, F: 1 },                lbl: 'C,D hotovo → E,F' },
+];
+const CMAX = 8.5;
+// δ události pro V2
+const EVENTS = [
+  { t: 1,   kind: 2, lbl: 'δ: level(A) klesl na level(D)' },
+  { t: 3,   kind: 1, lbl: 'δ: A i B doběhly' },
+  { t: 5,   kind: 2, lbl: 'δ: levely C,D klesly na E' },
+  { t: 6.5, kind: 1, lbl: 'δ: C i D doběhly' },
+];
+// polyline levelů v čase (pro level-decay graf)
+const LVLLINES = {
+  B: [[0, 8], [3, 5]],
+  A: [[0, 7], [1, 6], [3, 5]],
+  D: [[0, 6], [1, 6], [3, 5], [5, 3], [6.5, 2]],
+  C: [[0, 5], [3, 5], [5, 3], [6.5, 2]],
+  E: [[0, 3], [5, 3], [6.5, 2], [8.5, 0]],
+  F: [[0, 2], [6.5, 2], [8.5, 0]],
+};
+
+// ════════════════════════════════════════════════════════════════════
+// 2) PIXI SETUP
+// ════════════════════════════════════════════════════════════════════
+const app = new PIXI.Application({ width: 1280, height: 720, antialias: true, background: C.bg });
+document.getElementById('stage').appendChild(app.view);
+const starLayer = new PIXI.Container();
+const sceneLayer = new PIXI.Container();
+const fxLayer = new PIXI.Container();
+app.stage.addChild(starLayer, sceneLayer, fxLayer);
+
+const dotG = new PIXI.Graphics();
+dotG.beginFill(0xffffff, 1).drawCircle(0, 0, 32).endFill();
+const dotTex = app.renderer.generateTexture(dotG);
+const stars = [];
+for (let i = 0; i < 70; i++) {
+  const s = new PIXI.Sprite(dotTex);
+  s.anchor.set(0.5);
+  s.x = Math.random() * 1280; s.y = Math.random() * 720;
+  s.scale.set(0.015 + Math.random() * 0.035);
+  s.alpha = 0.12 + Math.random() * 0.25;
+  s.tint = Math.random() < 0.25 ? C.gold : 0x9fb4ff;
+  s._vy = 2 + Math.random() * 6; s._tw = Math.random() * 6.28;
+  starLayer.addChild(s); stars.push(s);
+}
+const parts = [];
+function burst(x, y, tint, count = 18, speed = 220, size = 0.1) {
+  for (let i = 0; i < count; i++) {
+    const p = new PIXI.Sprite(dotTex);
+    p.anchor.set(0.5); p.x = x; p.y = y; p.tint = tint;
+    p.blendMode = PIXI.BLEND_MODES.ADD;
+    const a = Math.random() * 6.283, v = speed * (0.3 + Math.random() * 0.8);
+    p._vx = Math.cos(a) * v; p._vy = Math.sin(a) * v;
+    p._life = 0.6 + Math.random() * 0.7; p._t = 0;
+    p.scale.set(size * (0.5 + Math.random()));
+    fxLayer.addChild(p); parts.push(p);
+  }
+}
+app.ticker.add(() => {
+  const dt = app.ticker.deltaMS / 1000;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p._t += dt; p.x += p._vx * dt; p.y += p._vy * dt;
+    p._vy += 220 * dt; p.alpha = clamp01(1 - p._t / p._life);
+    if (p._t > p._life) { fxLayer.removeChild(p); p.destroy(); parts.splice(i, 1); }
+  }
+  for (const s of stars) {
+    s.y += s._vy * dt; s._tw += dt * 2;
+    s.alpha = 0.1 + 0.18 * (0.5 + 0.5 * Math.sin(s._tw));
+    if (s.y > 730) { s.y = -10; s.x = Math.random() * 1280; }
+  }
+});
+function txt(str, size, color, weight = '800', family = "'Segoe UI', system-ui, sans-serif") {
+  const t = new PIXI.Text(str, {
+    fontFamily: family, fontSize: size, fill: color, fontWeight: weight,
+    align: 'center', dropShadow: true, dropShadowColor: 0x000000,
+    dropShadowBlur: 8, dropShadowAlpha: 0.6, dropShadowDistance: 2,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  return t;
+}
+const MATH = "'Cambria Math', Cambria, Georgia, serif";
+function arrow(g, A, B, width, color, alpha, shrink = 34) {
+  const dx = B.x - A.x, dy = B.y - A.y, len = Math.hypot(dx, dy);
+  const ux = dx / len, uy = dy / len;
+  const sx = A.x + ux * shrink, sy = A.y + uy * shrink;
+  const ex = B.x - ux * shrink, ey = B.y - uy * shrink;
+  g.lineStyle(width, color, alpha);
+  g.moveTo(sx, sy); g.lineTo(ex, ey);
+  const hs = 10 + width;
+  g.lineStyle(0);
+  g.beginFill(color, alpha);
+  g.moveTo(ex, ey);
+  g.lineTo(ex - ux * hs - uy * hs * 0.55, ey - uy * hs + ux * hs * 0.55);
+  g.lineTo(ex - ux * hs + uy * hs * 0.55, ey - uy * hs - ux * hs * 0.55);
+  g.closePath().endFill();
+}
+
+// ── DAG renderer (level badges per reveal time map) ──
+function buildDAG(c, scale = 1, ox = 0, oy = 0) {
+  const wrap = new PIXI.Container(); wrap.scale.set(scale); wrap.x = ox; wrap.y = oy; c.addChild(wrap);
+  const g = new PIXI.Graphics(); wrap.addChild(g);
+  const nameT = {}, pT = {}, lvlT = {};
+  for (const [id, T] of Object.entries(TASKS)) {
+    nameT[id] = txt(id, 26, 0x0b0e16, '900'); nameT[id].x = T.x; nameT[id].y = T.y; wrap.addChild(nameT[id]);
+    pT[id] = txt('p=' + T.p, 17, C.muted, '700', MATH); pT[id].x = T.x; pT[id].y = T.y + 50; wrap.addChild(pT[id]);
+    lvlT[id] = txt('level ' + T.lvl, 20, C.goldHi, '900', MATH); lvlT[id].x = T.x; lvlT[id].y = T.y - 52; lvlT[id].alpha = 0; wrap.addChild(lvlT[id]);
+  }
+  function render(t, opts = {}) {
+    g.clear();
+    for (const [a, b] of PREC) {
+      const hl = opts.pathHL && opts.pathHL.includes(a + b);
+      arrow(g, TASKS[a], TASKS[b], hl ? 6 : 3.5, hl ? C.goldHi : C.dim, 0.95);
+    }
+    for (const [id, T] of Object.entries(TASKS)) {
+      const rv = opts.reveal ? clamp01(opts.reveal[id] === undefined ? 1 : ph(t, opts.reveal[id], opts.reveal[id] + 0.5)) : 1;
+      g.lineStyle(0);
+      g.beginFill(0x0b0e16, 1).drawCircle(T.x, T.y, 33).endFill();
+      g.beginFill(T.col, 1).drawCircle(T.x, T.y, 30).endFill();
+      lvlT[id].alpha = rv;
+      lvlT[id].scale.set(lerp(1.7, 1, easeOut(rv)));
+    }
+  }
+  return { wrap, render, lvlT };
+}
+
+// ── Gantt renderer (processor-sharing bands up to simT) ──
+const GX0 = 250, GX1 = 1060, GY0 = 470, ROWH = 62;
+const gx = u => GX0 + (GX1 - GX0) * u / CMAX;
+function buildGantt(c) {
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const lbls = new PIXI.Container(); c.addChild(lbls);
+  const p1 = txt('P1', 20, C.muted, '800'); p1.x = GX0 - 36; p1.y = GY0 + ROWH / 2; lbls.addChild(p1);
+  const p2 = txt('P2', 20, C.muted, '800'); p2.x = GX0 - 36; p2.y = GY0 + ROWH * 1.5 + 8; lbls.addChild(p2);
+  const made = new Set();
+  function render(simT, t, opts = {}) {
+    g.clear();
+    // axis + ticks
+    g.lineStyle(2, C.dim, 1);
+    g.moveTo(GX0, GY0 + 2 * ROWH + 16); g.lineTo(GX1, GY0 + 2 * ROWH + 16);
+    for (let u = 0; u <= 8; u++) {
+      g.moveTo(gx(u), GY0 + 2 * ROWH + 12); g.lineTo(gx(u), GY0 + 2 * ROWH + 20);
+    }
+    // bands per segment (vertical split podle β — sdílení je vidět jako tenčí pruhy)
+    for (const seg of SEGS) {
+      const sT = Math.min(simT, seg.t1);
+      if (sT <= seg.t0) break;
+      let yOff = 0;
+      for (const [id, beta] of Object.entries(seg.run)) {
+        const h = 2 * ROWH * (beta / 2); // celkem 2 procesory výšky
+        const x0 = gx(seg.t0), x1 = gx(sT);
+        g.lineStyle(1, 0x0b0e16, 1);
+        g.beginFill(TASKS[id].col, 0.92);
+        g.drawRect(x0, GY0 + yOff, x1 - x0, h - 2);
+        g.endFill();
+        // task letter once segment wide enough
+        const key = seg.t0 + id;
+        if (x1 - x0 > 30 && !made.has(key)) {
+          made.add(key);
+          const tt = txt(id + (beta < 1 ? ' β=' + (beta === 0.5 ? '½' : '⅔') : ''), 16, 0x0b0e16, '900');
+          tt.x = (x0 + gx(seg.t1)) / 2; tt.y = GY0 + yOff + h / 2;
+          lbls.addChild(tt);
+        }
+        yOff += h;
+      }
+    }
+    // event markers
+    if (opts.marks) for (const ev of EVENTS) {
+      if (ev.t > simT + 0.01) continue;
+      const on = opts.flashKind === ev.kind;
+      const a = on ? 0.55 + 0.45 * Math.sin(t * 8) : 0.5;
+      g.lineStyle(on ? 4 : 2, ev.kind === 1 ? C.green : C.violet, a);
+      g.moveTo(gx(ev.t), GY0 - 8); g.lineTo(gx(ev.t), GY0 + 2 * ROWH + 8);
+    }
+    // cursor
+    if (simT < CMAX - 0.01) {
+      g.lineStyle(3, C.goldHi, 1);
+      g.moveTo(gx(simT), GY0 - 12); g.lineTo(gx(simT), GY0 + 2 * ROWH + 12);
+      g.beginFill(C.goldHi, 1).drawCircle(gx(simT), GY0 - 16, 6).endFill();
+    }
+  }
+  return { render };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 3) SCENES
+// ════════════════════════════════════════════════════════════════════
+const scenes = [];
+function scene(t0, t1, build) {
+  const s = { t0, t1, st: null };
+  s.init = () => { s.st = build(); sceneLayer.addChild(s.st.c); };
+  s.update = (lt) => s.st && s.st.update(lt);
+  s.destroy = () => { if (s.st) { sceneLayer.removeChild(s.st.c); s.st.c.destroy({ children: true }); s.st = null; } };
+  scenes.push(s);
+  return s;
+}
+function caption(c, str, color = C.gold, y = 46, size = 27) {
+  const t = txt(str, size, color, '800');
+  t.x = 640; t.y = y; c.addChild(t);
+  return t;
+}
+function makeC() { const c = new PIXI.Container(); const g = new PIXI.Graphics(); c.addChild(g); return { c, g }; }
+
+// ── INTRO [0 – 26] ──
+scene(0, 26.0, () => {
+  const { c, g } = makeC();
+  const t1 = txt('MUNTZ & COFFMAN', 76, C.gold, '900'); t1.x = 640; t1.y = 170; t1.alpha = 0;
+  const t2 = txt('LEVEL SCHEDULING', 38, 0xdfe6f5, '800'); t2.x = 640; t2.y = 252; t2.alpha = 0;
+  const t3 = txt('P | pmtn, prec | C·max', 30, C.cyan, '800', MATH); t3.x = 640; t3.y = 316; t3.alpha = 0;
+  c.addChild(t1, t2, t3);
+  const dag = buildDAG(c, 0.62, 230, 130);
+  dag.wrap.alpha = 0;
+  let fired = new Set();
+  return { c, update(lt) {
+    t1.alpha = easeOut(ph(lt, 0.5, 1.6));
+    t1.scale.set(lerp(1.4, 1, easeOut(ph(lt, 0.5, 1.8))) * (1 + 0.04 * Math.max(0, Math.sin(lt * 9))));
+    t2.alpha = easeOut(ph(lt, 2.2, 3.2));
+    t3.alpha = easeOut(ph(lt, 3.8, 4.8));
+    if (lt > 0.6 && !fired.has('t')) { fired.add('t'); burst(640, 170, C.gold, 30, 300, 0.13); }
+    // beat pulses (DnB!)
+    const beat = Math.floor(lt * 2.9);
+    if (lt > 6 && lt < 24 && !fired.has('b' + beat) && beat % 4 === 0) {
+      fired.add('b' + beat);
+      burst(160 + (beat * 137) % 960, 620, [C.cyan, C.pink, C.violet][beat % 3], 8, 160, 0.07);
+    }
+    const shift = easeOut(ph(lt, 9, 11));
+    t1.y = lerp(170, 70, shift); t1.scale.set(lerp(1, 0.5, shift));
+    t2.alpha *= (1 - shift); t3.y = lerp(316, 118, shift);
+    dag.wrap.alpha = easeOut(ph(lt, 10, 13));
+    dag.render(lt, { reveal: { A: 1e9, B: 1e9, C: 1e9, D: 1e9, E: 1e9, F: 1e9 } });
+    g.clear();
+  } };
+});
+
+// ── VERSE 1: LEVELY ODZADU [26 – 37.44] ──
+scene(26.0, 37.44, () => {
+  const { c } = makeC();
+  const cap = caption(c, 'LEVEL = nejdelší cesta do cíle (počítej ODZADU)', C.goldHi);
+  const sub = txt('koncová úloha: level = p · jinak: p + max level následníků', 20, C.muted, '600'); sub.x = 640; sub.y = 86; c.addChild(sub);
+  const dag = buildDAG(c, 0.78, 130, 90);
+  // reveal: koncové F,E nejdřív, pak C,D, pak A,B (odzadu!)
+  const reveal = { F: 26.8, E: 27.6, C: 29.5, D: 30.4, A: 32.3, B: 33.1 };
+  let fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 26.0;
+    const pathOn = lt >= 34.7;
+    dag.render(lt, { reveal, pathHL: pathOn ? ['BC', 'CF'] : null });
+    for (const [id, rt] of Object.entries(reveal)) {
+      if (lt > rt + 0.1 && !fired.has(id)) {
+        fired.add(id);
+        const T = TASKS[id];
+        burst(0.78 * T.x + 130, 0.78 * (T.y - 52) + 90, C.goldHi, 12, 160, 0.08);
+      }
+    }
+    if (pathOn) { cap.text = 'B → C → F: 3+3+2 = 8 — nejdelší cesta, level(B)=8'; cap.style.fill = C.gold; }
+  } };
+});
+
+// ── CHORUS factory: hesla + živý Gantt / level-graf ──
+// an = { top, beta, delta, mcn } word anchors
+function chorusScene(t0, t1, an, mode) {
+  scene(t0, t1, () => {
+    const { c, g } = makeC();
+    const w1 = txt('NEJVYŠŠÍ LEVEL bere procesory!', 40, C.gold, '900'); w1.x = 640; w1.y = 70; w1.alpha = 0;
+    const w2 = txt('β = h / |S|', 52, 0xfbbf24, '900', MATH); w2.x = 250, w2.y = 150; w2.alpha = 0;
+    const w3 = txt('δ: SKONČÍ · KLESNE · DOHÁNÍ', 32, C.violet, '900'); w3.x = 750; w3.y = 150; w3.alpha = 0;
+    const w4 = txt('…a McNAUGHTON to srovná!', 34, C.green, '900'); w4.x = 640; w4.y = 215; w4.alpha = 0;
+    c.addChild(w1, w2, w3, w4);
+    let gantt = null, dagMini = null;
+    if (mode === 'gantt') gantt = buildGantt(c);
+    if (mode === 'levels') {
+      // level-decay graf — ikonický M&C obrázek
+      const lg = new PIXI.Graphics(); c.addChild(lg);
+      const LX0 = 280, LX1 = 1030, LY0 = 620, LYS = 38; // level 0..8
+      const lx = u => LX0 + (LX1 - LX0) * u / CMAX;
+      const ly = l => LY0 - l * LYS;
+      const axisT = txt('level(úlohy) v čase — kde se čáry potkají, tam se sdílí', 19, C.muted, '600');
+      axisT.x = 640; axisT.y = 648; c.addChild(axisT);
+      gantt = { render(simT, t) {
+        lg.clear();
+        lg.lineStyle(2, C.dim, 0.8);
+        lg.moveTo(LX0, LY0); lg.lineTo(LX1, LY0);
+        lg.moveTo(LX0, LY0); lg.lineTo(LX0, ly(8.4));
+        for (const [id, pts] of Object.entries(LVLLINES)) {
+          lg.lineStyle(4, TASKS[id].col, 0.95);
+          let started = false;
+          for (let i = 0; i < pts.length; i++) {
+            const [u, l] = pts[i];
+            if (u > simT) {
+              // partial segment
+              if (i > 0) {
+                const [u0, l0] = pts[i - 1];
+                const f = ph(simT, u0, u);
+                lg.lineTo(lx(lerp(u0, u, f)), ly(lerp(l0, l, f)));
+              }
+              break;
+            }
+            if (!started) { lg.moveTo(lx(u), ly(l)); started = true; }
+            else lg.lineTo(lx(u), ly(l));
+          }
+        }
+      } };
+    }
+    const fired = new Set();
+    return { c, update(lt0) {
+      const lt = lt0 + t0;
+      w1.alpha = lt > an.top ? 1 : 0;
+      w2.alpha = lt > an.beta ? 1 : 0;
+      w3.alpha = lt > an.delta ? 1 : 0;
+      w4.alpha = lt > an.mcn ? 1 : 0;
+      w1.scale.set(1 + 0.04 * Math.sin(lt * 6) * w1.alpha);
+      w2.scale.set(lerp(1.5, 1, easeOut(ph(lt, an.beta, an.beta + 0.4))));
+      [['t', an.top, w1, C.gold], ['b', an.beta, w2, 0xfbbf24], ['d', an.delta, w3, C.violet], ['m', an.mcn, w4, C.green]].forEach(([k, at, el, col]) => {
+        if (lt > at && !fired.has(k)) { fired.add(k); burst(el.x, el.y, col, 22, 260, 0.11); }
+      });
+      g.clear();
+      if (gantt) {
+        // simulace jede přes refrén: simT 0→8.5
+        const simT = ph(lt, t0 + 0.8, t1 - 3.5) * CMAX;
+        gantt.render(simT, lt, { marks: true });
+      }
+    } };
+  });
+}
+chorusScene(37.44, 57.06, { top: 37.5, beta: 44.08, delta: 47.36, mcn: 50.1 }, 'gantt');
+
+// ── VERSE 2: TŘI PŘÍPADY δ [57.06 – 79.78] ──
+scene(57.06, 79.78, () => {
+  const { c, g } = makeC();
+  const cap = caption(c, 'tři události δ — kdy se přepočítává', C.violet);
+  const gantt = buildGantt(c);
+  const k1 = txt('① úloha DOBĚHLA (t=3, t=6.5)', 30, C.green, '900'); k1.x = 640; k1.y = 110; k1.alpha = 0;
+  const k2 = txt('② přiřazená KLESLA na čekající (t=1: A→D · t=5: C,D→E)', 28, C.violet, '900'); k2.x = 640; k2.y = 165; k2.alpha = 0;
+  const k3 = txt('③ rychlejší DOHNAL pomalou (u uniformních strojů Q)', 26, C.pink, '900'); k3.x = 640; k3.y = 220; k3.alpha = 0;
+  const upd = txt('mezi událostmi: p i levely klesají o δ·β — pak posuň čas', 22, C.muted, '700', MATH); upd.x = 640; upd.y = 270; upd.alpha = 0;
+  c.addChild(k1, k2, k3, upd);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 57.06;
+    g.clear();
+    const flashKind = lt < 62.5 ? 1 : (lt < 69.36 ? 2 : 0);
+    gantt.render(CMAX, lt, { marks: true, flashKind });
+    k1.alpha = lt > 57.5 ? 1 : 0;
+    k2.alpha = lt > 62.6 ? 1 : 0;
+    k3.alpha = lt > 69.5 ? 1 : 0;
+    upd.alpha = lt > 73.3 ? 1 : 0;
+    [['1', 57.5, k1, C.green], ['2', 62.6, k2, C.violet], ['3', 69.5, k3, C.pink], ['u', 73.3, upd, C.muted]].forEach(([k, at, el, col]) => {
+      if (lt > at && !fired.has(k)) { fired.add(k); burst(el.x, el.y, col, 18, 220, 0.1); }
+    });
+  } };
+});
+
+chorusScene(79.78, 102.58, { top: 79.85, beta: 87.94, delta: 91.24, mcn: 95.0 }, 'levels');
+
+// ── BRIDGE: McNAUGHTON — KOBEREC [102.58 – 125.26] ──
+scene(102.58, 125.26, () => {
+  const { c, g } = makeC();
+  const cap = caption(c, 'McNaughton: P | pmtn | C·max — namotávání', C.green);
+  const f1 = txt('C·max = max( max pⱼ ,  Σpⱼ / R )', 42, C.green, '900', MATH); f1.x = 640; f1.y = 130; f1.alpha = 0;
+  const f2 = txt('p = (3, 4, 5), R = 2:  C· = max(5, 12/2) = 6', 28, C.cyan, '800', MATH); f2.x = 640; f2.y = 190; f2.alpha = 0;
+  const noteT = txt('úloha 2 se zlomila PRÁVĚ JEDNOU — víc nikdy netřeba · O(n)', 24, C.goldHi, '800'); noteT.x = 640; noteT.y = 640; noteT.alpha = 0;
+  c.addChild(f1, f2, noteT);
+  // koberec: pás úloh [3][4][5] se namotá na 2 řádky šířky 6
+  const MX0 = 320, MW = 640, MY = 300, MH = 70, unit = MW / 6;
+  const pieces = [
+    { id: '1', len: 3, col: 0x7dd3fc }, { id: '2', len: 4, col: 0xf472b6 }, { id: '3', len: 5, col: 0x4ade80 },
+  ];
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 102.58;
+    g.clear();
+    f1.alpha = easeOut(ph(lt, 103.4, 104.4));
+    f1.scale.set(1 + 0.03 * Math.sin(lt * 5) * f1.alpha);
+    f2.alpha = easeOut(ph(lt, 108.4, 109.4));
+    if (lt > 103.5 && !fired.has('f1')) { fired.add('f1'); burst(640, 130, C.green, 24, 260, 0.12); }
+    // rows
+    const rowsOn = easeOut(ph(lt, 110, 111));
+    if (rowsOn > 0) {
+      for (let r = 0; r < 2; r++) {
+        g.lineStyle(2, C.dim, rowsOn);
+        g.beginFill(C.card, 0.6 * rowsOn);
+        g.drawRect(MX0, MY + r * (MH + 18), MW, MH);
+        g.endFill();
+      }
+      // wrap progress: total strip 12 units rolls on [113.5, 120.5]
+      const wp = ph(lt, 113.5, 120.5) * 12;
+      let off = 0;
+      for (const pc of pieces) {
+        const drawn = clamp01((wp - off) / pc.len) * pc.len;
+        let d0 = off, d1 = off + drawn;
+        // split into rows at 6
+        for (const [r0, r1, row] of [[Math.min(d0, 6), Math.min(d1, 6), 0], [Math.max(d0, 6), Math.max(d1, 6), 1]]) {
+          if (r1 <= r0) continue;
+          const x0 = MX0 + (r0 - row * 6) * unit, x1 = MX0 + (r1 - row * 6) * unit;
+          g.lineStyle(2, 0x0b0e16, 1);
+          g.beginFill(pc.col, 0.95);
+          g.drawRect(x0, MY + row * (MH + 18), x1 - x0, MH);
+          g.endFill();
+        }
+        off += pc.len;
+      }
+      // break marker for piece 2 (crosses 6)
+      if (wp >= 7 && lt < 125) {
+        g.lineStyle(4, C.red, 0.5 + 0.5 * Math.sin(lt * 6));
+        g.moveTo(MX0 + MW, MY - 8); g.lineTo(MX0 + MW, MY + MH + 8);
+        if (!fired.has('br')) { fired.add('br'); burst(MX0 + MW, MY + MH / 2, C.red, 18, 220, 0.1); }
+      }
+    }
+    noteT.alpha = easeOut(ph(lt, 118.6, 119.6));
+    if (lt > 121.4) { cap.text = 'každá úloha zlomená nejvýš 1× → McNaughton je O(n)'; cap.style.fill = C.goldHi; }
+  } };
+});
+
+// ── VERSE 3: KDY PŘESNÝ vs. APROXIMACE [125.26 – 136.56] ──
+scene(125.26, 136.56, () => {
+  const { c, g } = makeC();
+  const cap = caption(c, 'kdy je Muntz & Coffman PŘESNÝ?', C.white);
+  const l1 = txt('✓ 2 stroje + pmtn + prec', 34, C.green, '900'); l1.x = 350; l1.y = 200; l1.alpha = 0;
+  const l2 = txt('✓ pmtn + STROM precedencí', 34, C.green, '900'); l2.x = 350; l2.y = 270; l2.alpha = 0;
+  const r1 = txt('jinak APROXIMACE', 30, 0xdfe6f5, '800'); r1.x = 930; r1.y = 200; r1.alpha = 0;
+  const r2 = txt('2 − 2/R', 64, 0xfdba74, '900', MATH); r2.x = 930; r2.y = 280; r2.alpha = 0;
+  const r3 = txt('O(n²)', 40, 0x93c5fd, '900', MATH); r3.x = 930; r3.y = 360; r3.alpha = 0;
+  c.addChild(l1, l2, r1, r2, r3);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 125.26;
+    g.clear();
+    g.lineStyle(2, C.dim, 0.7);
+    g.moveTo(640, 150); g.lineTo(640, 420);
+    l1.alpha = easeOut(ph(lt, 125.6, 126.4));
+    l2.alpha = easeOut(ph(lt, 128.8, 129.6));
+    r1.alpha = easeOut(ph(lt, 131.3, 132.0));
+    r2.alpha = easeOut(ph(lt, 132.4, 133.2));
+    r3.alpha = easeOut(ph(lt, 134.2, 135.0));
+    r2.scale.set(1 + 0.04 * Math.sin(lt * 6) * r2.alpha);
+    [['1', 125.7, l1, C.green], ['2', 128.9, l2, C.green], ['r', 132.5, r2, 0xfdba74], ['o', 134.3, r3, 0x93c5fd]].forEach(([k, at, el, col]) => {
+      if (lt > at && !fired.has(k)) { fired.add(k); burst(el.x, el.y, col, 18, 230, 0.1); }
+    });
+  } };
+});
+
+chorusScene(136.56, 158.64, { top: 136.6, beta: 146.36, delta: 148.86, mcn: 152.4 }, 'gantt');
+
+// ── OUTRO [158.64 – 178] ──
+scene(158.64, 178, () => {
+  const { c, g } = makeC();
+  const steps = ['LEVELY (odzadu)', 'NEJVYŠŠÍ BERE', 'β = h/|S|', 'δ UDÁLOSTI', 'McNAUGHTON'];
+  const cols = [C.goldHi, C.gold, 0xfbbf24, C.violet, C.green];
+  const wt = steps.map((s, i) => {
+    const t = txt(s, 32, cols[i], '900'); t.x = 640; t.y = 160 + i * 70; t.alpha = 0; c.addChild(t); return t;
+  });
+  const fin = txt('Hotovo. Spočítej běh na papír — L5.10', 22, C.muted, '600'); fin.x = 640; fin.y = 560; fin.alpha = 0; c.addChild(fin);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 158.64;
+    g.clear();
+    wt.forEach((t, i) => {
+      t.alpha = easeOut(ph(lt, 159.5 + i * 1.2, 160.3 + i * 1.2));
+      if (lt > 159.6 + i * 1.2 && !fired.has(i)) { fired.add(i); burst(640, 160 + i * 70, cols[i], 14, 180, 0.09); }
+    });
+    fin.alpha = easeOut(ph(lt, 167, 168.5));
+    // hey! pulses
+    if (lt > 158.7 && !fired.has('h1')) { fired.add('h1'); burst(640, 360, C.gold, 36, 340, 0.14); }
+    if (lt > 171.4 && !fired.has('h2')) { fired.add('h2'); burst(640, 360, C.cyan, 36, 340, 0.14); }
+  } };
+});
+
+// ════════════════════════════════════════════════════════════════════
+// 4) SUBTITLES — řádky 1:1 jako sekce „Zpívej“ ve zpěvníku
+// ════════════════════════════════════════════════════════════════════
+const SUNG = [[0,0.34],[0.34,2],[2,2],[2,17.75],[17.75,31.58],[31.58,31.88],[31.88,31.98],[31.98,32.01],[32.01,32.65],[32.65,32.8],[32.8,32.95],[32.95,33.28],[33.28,33.47],[33.47,33.96],[33.96,34.13],[34.13,34.64],[34.64,35.36],[35.36,35.78],[35.78,35.93],[35.93,36.54],[36.54,36.7],[36.7,36.94],[36.94,37.02],[37.02,37.44],[37.44,38.21],[38.21,38.56],[38.56,38.84],[38.84,39.52],[39.52,39.88],[39.88,40.24],[40.24,41.32],[41.32,42.24],[42.24,42.59],[42.59,42.73],[42.73,43.08],[43.08,43.36],[43.36,43.64],[43.64,44.08],[44.08,44.73],[44.73,45.06],[45.06,45.5],[45.5,46.65],[46.65,47.11],[47.11,47.36],[47.36,47.62],[47.62,47.93],[47.93,48.43],[48.43,48.74],[48.74,49.15],[49.15,49.46],[49.46,49.98],[49.98,50.17],[50.17,52.08],[52.08,52.28],[52.28,52.96],[52.96,53.78],[53.78,53.98],[53.98,57.06],[57.06,59.74],[59.74,60.04],[60.04,60.56],[60.56,61.18],[61.18,61.96],[61.96,61.96],[61.96,62.5],[62.5,64.37],[64.37,65.1],[65.1,65.9],[65.9,66.22],[66.22,66.47],[66.47,66.82],[66.82,67.92],[67.92,68.8],[68.8,68.89],[68.89,69.36],[69.36,70.24],[70.24,70.72],[70.72,71.28],[71.28,71.33],[71.33,71.74],[71.74,72.08],[72.08,72.57],[72.57,73.18],[73.18,75.29],[75.29,75.66],[75.66,75.73],[75.73,76.16],[76.16,76.23],[76.23,76.62],[76.62,77.14],[77.14,77.54],[77.54,78.22],[78.22,79.08],[79.08,79.78],[79.78,81.15],[81.15,81.77],[81.77,82.27],[82.27,83.42],[83.42,83.78],[83.78,84.14],[84.14,85.22],[85.22,86.14],[86.14,86.46],[86.46,86.59],[86.59,86.91],[86.91,87.17],[87.17,87.43],[87.43,87.94],[87.94,88.63],[88.63,88.98],[88.98,89.4],[89.4,90.53],[90.53,90.99],[90.99,91.24],[91.24,91.42],[91.42,91.63],[91.63,91.94],[91.94,91.94],[91.94,91.94],[91.94,91.94],[91.94,92.36],[92.36,92.97],[92.97,93.07],[93.07,93.42],[93.42,94.02],[94.02,94.84],[94.84,94.95],[94.95,96.06],[96.06,96.27],[96.27,97.04],[97.04,98.88],[98.88,100.5],[100.5,102.58],[102.58,103.26],[103.26,103.4],[103.4,104.98],[104.98,105.88],[105.88,107.14],[107.14,107.5],[107.5,108.24],[108.24,109.62],[109.62,110.44],[110.44,111.12],[111.12,111.97],[111.97,112.16],[112.16,113.32],[113.32,113.54],[113.54,114.06],[114.06,114.97],[114.97,115.78],[115.78,116.43],[116.43,117.08],[117.08,117.6],[117.6,118.56],[118.56,119.08],[119.08,119.23],[119.23,119.74],[119.74,120.65],[120.65,121.44],[121.44,121.44],[121.44,123.34],[123.34,124.52],[124.52,125.26],[125.26,126.04],[126.04,126.7],[126.7,127.28],[127.28,127.94],[127.94,128.68],[128.68,129.38],[129.38,129.45],[129.45,129.68],[129.68,129.91],[129.91,130.54],[130.54,130.68],[130.68,130.82],[130.82,131.26],[131.26,131.63],[131.63,132.4],[132.4,132.56],[132.56,132.88],[132.88,133.14],[133.14,133.92],[133.92,134.06],[134.06,134.46],[134.46,134.98],[134.98,135.3],[135.3,135.4],[135.4,135.7],[135.7,135.9],[135.9,136.04],[136.04,136.17],[136.17,136.56],[136.56,136.56],[136.56,138.26],[138.26,139.03],[139.03,139.65],[139.65,141.35],[141.35,141.66],[141.66,141.97],[141.97,142.89],[142.89,143.72],[143.72,144.19],[144.19,144.38],[144.38,145.04],[145.04,145.7],[145.7,146.36],[146.36,146.74],[146.74,146.93],[146.93,147.06],[147.06,148.58],[148.58,148.86],[148.86,149.19],[149.19,149.58],[149.58,150.23],[150.23,150.62],[150.62,151.14],[151.14,151.53],[151.53,152.18],[152.18,152.31],[152.31,153.6],[153.6,153.89],[153.89,154.9],[154.9,156.04],[156.04,157.12],[157.12,158.64],[158.64,160.88],[160.88,160.88],[160.88,162.88],[162.88,163.66],[163.66,165.52],[165.52,166.42],[166.42,168.24],[168.24,169.14],[169.14,170.63],[170.63,171.4],[171.4,171.82],[171.82,171.85],[171.85,174.99],[174.99,176.52]];
+const H = (cls, s) => `<span class="hl ${cls}">${s}</span>`;
+const CH1L = `Nejvyšší level bere procesory — to je zákon náš!`;
+const CH2L = `Když je úloh víc než strojů: ${H('c2', 'β = h / |S|')}!`;
+const CH3L = `${H('c3', 'δ')}: někdo SKONČÍ, někdo KLESNE, někdo DOHÁNÍ —`;
+const CH4L = `a McNaughton to nakonec všechno srovná, yes!`;
+const LINES = [
+  // Verse 1 (začátek odhadem — whisper tu měl kaši; karaoke jede rovnoměrně)
+  [26.0, 29.2, `Level koncové úlohy? Prostě její ${H('c1', 'p')}.`],
+  [29.2, 31.98, `Jinak ${H('c1', 'p')} plus maximum levelů následníků, jé!`],
+  [31.98, 34.64, `Počítej to odzadu, od konce ke startu —`],
+  [34.64, 37.44, `nejdelší cesta do cíle, tu měj v kartu.`],
+  // Chorus 1
+  [37.44, 42.24, CH1L],
+  [42.24, 47.36, CH2L],
+  [47.36, 49.98, CH3L],
+  [49.98, 57.06, CH4L],
+  // Verse 2
+  [57.06, 62.5, `Případ jedna: úloha doběhla — hotovo, šmik.`],
+  [62.5, 69.36, `Případ dva: přiřazená klesla pod ready čekající — přepočti vmžik.`],
+  [69.36, 73.18, `Případ tři: rychlejší s větší ${H('c2', 'β')} dohnal pomalou —`],
+  [73.18, 79.78, `sniž ${H('c1', 'p')} i levely o ${H('c3', 'δ·β')}, posuň čas, jedem dál!`],
+  // Chorus 2
+  [79.78, 86.0, CH1L],
+  [86.0, 91.24, CH2L],
+  [91.24, 94.95, CH3L],
+  [94.95, 102.58, CH4L],
+  // Bridge
+  [102.58, 108.24, `${H('c4', 'C*<sub>max</sub>')}: vezmi MAXIMUM ze dvou —`],
+  [108.24, 113.8, `nejdelší úloha, nebo ${H('c4', 'Σp / R')}!`],
+  [113.8, 118.56, `Namotávej úlohy přes okraj jako koberec,`],
+  [118.56, 125.26, `každá se zlomí nejvýš jednou — McNaughton, ${H('c5', 'O(n)')}, věř!`],
+  // Verse 3
+  [125.26, 128.68, `Dva stroje, preempce, precedence — výsledek přesný!`],
+  [128.68, 131.26, `Preempce a les — taky přesný, to je hezký.`],
+  [131.26, 134.06, `Jinak aproximace: ${H('c6', '2 − 2/R')} —`],
+  [134.06, 136.56, `Muntz a Coffman, ${H('c7', 'O(n²)')}, tref se a ber!`],
+  // Chorus 3
+  [136.56, 144.0, CH1L],
+  [144.0, 148.86, CH2L],
+  [148.86, 152.31, CH3L],
+  [152.31, 158.64, CH4L],
+  // Outro
+  [158.64, 161.5, `Hey!`],
+  [171.4, 173.0, `Hey!`],
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 5) PLAYER / KARAOKE / CONTROLS
+// ════════════════════════════════════════════════════════════════════
+const player = document.getElementById('player');
+const subEl = document.getElementById('subtitle');
+const bigplay = document.getElementById('bigplay');
+const btnPlay = document.getElementById('btnPlay');
+const btnRestart = document.getElementById('btnRestart');
+const seek = document.getElementById('seek');
+const tCur = document.getElementById('tCur');
+const tDur = document.getElementById('tDur');
+
+let curScene = null, lastLocal = -1, curLine = -1;
+let lineWords = [];
+function tokenize(html) {
+  const out = []; let cur = ''; let inTag = false;
+  for (const ch of html) {
+    if (ch === '<') inTag = true;
+    else if (ch === '>') inTag = false;
+    if (ch === ' ' && !inTag) { if (cur) out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+function buildKaraokeLine(li) {
+  const [a, b, html] = LINES[li];
+  const tokens = tokenize(html);
+  const ww = SUNG.filter(w => w[0] >= a - 0.06 && w[0] < b && w[1] > w[0]);
+  const pick = (i) => {
+    if (!ww.length) {
+      const step = (b - a) / tokens.length;
+      return [a + step * i, a + step * (i + 1)];
+    }
+    const wi = tokens.length === 1 ? 0 : Math.round(i * (ww.length - 1) / (tokens.length - 1));
+    return ww[wi];
+  };
+  subEl.innerHTML = tokens.map(tok =>
+    `<span class="kw"><span class="wb">${tok}</span><span class="wf">${tok}</span></span>`).join(' ');
+  const els = [...subEl.querySelectorAll('.kw')];
+  lineWords = tokens.map((tok, i) => {
+    const [t0, t1] = pick(i);
+    return { t0, t1: Math.max(t1, t0 + 0.12), wf: els[i] ? els[i].querySelector('.wf') : null };
+  });
+}
+function tick() {
+  const t = player.currentTime;
+  const s = scenes.find(sc => t >= sc.t0 && t < sc.t1) || scenes[scenes.length - 1];
+  if (s !== curScene) { curScene && curScene.destroy(); curScene = s; s.init(); lastLocal = -1; }
+  const localT = t - s.t0;
+  if (localT < lastLocal - 0.05) { s.destroy(); s.init(); }
+  s.update(localT);
+  lastLocal = localT;
+  const li = LINES.findIndex(([a, b]) => t >= a && t < b);
+  if (li !== curLine) {
+    curLine = li;
+    if (li >= 0) buildKaraokeLine(li);
+    else { subEl.innerHTML = ''; lineWords = []; }
+    subEl.style.opacity = li >= 0 ? 1 : 0;
+  }
+  for (let i = 0; i < lineWords.length; i++) {
+    const w = lineWords[i];
+    if (!w.wf) continue;
+    const nextStart = i + 1 < lineWords.length ? lineWords[i + 1].t0 : w.t1;
+    let p;
+    if (t >= Math.max(w.t1, nextStart)) p = 1;
+    else p = clamp01((t - w.t0) / (w.t1 - w.t0));
+    w.wf.style.width = (p * 100).toFixed(1) + '%';
+  }
+  if (!seekDragging) {
+    seek.value = t;
+    seek.style.setProperty('--p', (t / (player.duration || 177.3) * 100) + '%');
+  }
+  tCur.textContent = fmtTime(t);
+  requestAnimationFrame(tick);
+}
+function fmtTime(t) { t = Math.max(0, t || 0); return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`; }
+
+let seekDragging = false;
+seek.addEventListener('input', () => {
+  seekDragging = true;
+  player.currentTime = +seek.value;
+  seek.style.setProperty('--p', (+seek.value / (player.duration || 177.3) * 100) + '%');
+});
+seek.addEventListener('change', () => { seekDragging = false; });
+function togglePlay() { if (player.paused) player.play(); else player.pause(); }
+player.addEventListener('play', () => { btnPlay.textContent = '⏸'; bigplay.classList.add('hidden'); });
+player.addEventListener('pause', () => { btnPlay.textContent = '▶'; if (player.currentTime < 0.05 || player.ended) bigplay.classList.remove('hidden'); });
+player.addEventListener('ended', () => { bigplay.classList.remove('hidden'); bigplay.querySelector('.hint').innerHTML = 'Ještě jednou?<small>R = od začátku</small>'; });
+player.addEventListener('loadedmetadata', () => {
+  seek.max = player.duration;
+  tDur.textContent = fmtTime(player.duration);
+});
+btnPlay.addEventListener('click', togglePlay);
+btnRestart.addEventListener('click', () => { player.currentTime = 0; player.play(); });
+bigplay.addEventListener('click', () => { player.play(); });
+document.getElementById('stage').addEventListener('click', (e) => {
+  if (e.target.closest('#bigplay')) return;
+  togglePlay();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  else if (e.code === 'ArrowRight') player.currentTime = Math.min(player.duration || 177, player.currentTime + 5);
+  else if (e.code === 'ArrowLeft') player.currentTime = Math.max(0, player.currentTime - 5);
+  else if (e.key === 'r' || e.key === 'R' || e.code === 'Home') { player.currentTime = 0; player.play(); }
+});
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
