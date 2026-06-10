@@ -36,7 +36,7 @@
     Kde v síti zbývá <strong>volná kapacita — vpřed i vzad</strong>: dopředu lze tok přidat, dokud $f(e) &lt; u(e)$, dozadu lze tok ubrat, dokud $f(e) &gt; l(e)$. Zabalené do jednoho objektu je to <strong>reziduální graf</strong> $G_f$ a cesta $s \to t$ v něm je <strong>augmentující cesta</strong>.
   </div>
 
-  <p>V <a href="l4-1.html#takeaways">[L4.1] Síť, tok, Kirchhoffův zákon</a> jsme na zkouškové síti z 25. 5. 2026 ověřili, že zadané $f$ je přípustný tok s hodnotou $|f| = 9$, a bez počítání odvodili mez $|f| \le 16$. Mezi 9 a 16 je propast — dnes si postavíme nástroj, kterým se tok <em>vylepšuje</em>. Ford-Fulkersonův algoritmus, který ho v <a href="l4-3.html">[L4.3]</a> bude opakovat v cyklu, pak už bude jen jednověté „opakuj, dokud to jde“.</p>
+  <p>V <a href="l4-1.html#takeaways">[L4.1] Síť, tok, Kirchhoffův zákon</a> jsme na zkouškové síti z 25.&nbsp;5.&nbsp;2026 ověřili, že zadané $f$ je přípustný tok s hodnotou $|f| = 9$, a bez počítání odvodili mez $|f| \le 16$. Mezi 9 a 16 je propast — dnes si postavíme nástroj, kterým se tok <em>vylepšuje</em>. Ford-Fulkersonův algoritmus, který ho v <a href="l4-3.html">[L4.3]</a> bude opakovat v cyklu, pak už bude jen jednověté „opakuj, dokud to jde“.</p>
 
   <!-- ===== SEKCE 1: DOPŘEDNÝ NÁPAD ===== -->
   <h2>První nápad: protlačit víc po cestě s rezervou</h2>
@@ -158,7 +158,7 @@
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „zpětná hrana má kapacitu $f(e)$“</div>
-    <p>Zpětná reziduální kapacita je $f(e) - l(e)$, <strong>ne</strong> $f(e)$ — vrátit smíš jen to, co je nad dolní mezí. Při $l \equiv 0$ obojí splývá, ale zkoušková síť z 25. 5. 2026 má tři hrany s $l &gt; 0$ a na jedné z nich to bolí: hrana $T_7 \to T_8$ nese $(l, f, u) = (1, 1, 4)$, tok $f = 1$ je kladný, a přesto zpětná hrana $T_8 \to T_7$ v $G_f$ <strong>neexistuje</strong>, protože $u_f = f - l = 0$. Podobně zpětná hrana $T_3 \to T_1$ má kapacitu $5 - 2 = 3$, ne $5$.</p>
+    <p>Zpětná reziduální kapacita je $f(e) - l(e)$, <strong>ne</strong> $f(e)$ — vrátit smíš jen to, co je nad dolní mezí. Při $l \equiv 0$ obojí splývá, ale zkoušková síť z 25.&nbsp;5.&nbsp;2026 má tři hrany s $l &gt; 0$ a na jedné z nich to bolí: hrana $T_7 \to T_8$ nese $(l, f, u) = (1, 1, 4)$, tok $f = 1$ je kladný, a přesto zpětná hrana $T_8 \to T_7$ v $G_f$ <strong>neexistuje</strong>, protože $u_f = f - l = 0$. Podobně zpětná hrana $T_3 \to T_1$ má kapacitu $5 - 2 = 3$, ne $5$.</p>
   </div>
 
   <!-- ===== SEKCE 5: REZIDUÁLNÍ GRAF ZKOUŠKOVÉ SÍTĚ ===== -->
@@ -171,7 +171,7 @@
   <details class="try">
     <summary>Zkus sám: kudy všudy vedou augmentující cesty? Čím musí každá začínat a jaká je $\gamma$ té zvýrazněné?</summary>
     <div class="inner">
-      <p>Z $T_1$ vede v $G_f$ <strong>jediná</strong> hrana, $T_1 \to T_4$ s $u_f = 7$ (hrany do $T_2$ a $T_3$ jsou nasycené, takže dopředné reziduální hrany nemají) — každá augmentující cesta začíná $T_1 \to T_4$. Zvýrazněná cesta $T_1 \to T_4 \to T_5 \to T_8$ má $\gamma = \min\{7, 8, 4\} = 4$. Další možnosti: $T_1 \to T_4 \to T_7 \to T_8$ s $\gamma = \min\{7, 1, 3\} = 1$, nebo přes zpětnou hranu $T_5 \to T_3$: $T_1 \to T_4 \to T_5 \to T_3 \to T_6 \to T_8$ s $\gamma = \min\{7, 8, 3, 6, 3\} = 3$. Kterou pořadí vybrat a jak iterovat až k maximu — to je <a href="l4-3.html">[L4.3]</a>.</p>
+      <p>Z $T_1$ vede v $G_f$ <strong>jediná</strong> hrana, $T_1 \to T_4$ s $u_f = 7$ (hrany do $T_2$ a $T_3$ jsou nasycené, takže dopředné reziduální hrany nemají) — každá augmentující cesta začíná $T_1 \to T_4$. Zvýrazněná cesta $T_1 \to T_4 \to T_5 \to T_8$ má $\gamma = \min\{7, 8, 4\} = 4$. Další možnosti: $T_1 \to T_4 \to T_7 \to T_8$ s $\gamma = \min\{7, 1, 3\} = 1$, nebo přes zpětnou hranu $T_5 \to T_3$: $T_1 \to T_4 \to T_5 \to T_3 \to T_6 \to T_8$ s $\gamma = \min\{7, 8, 3, 6, 3\} = 3$. Které pořadí vybrat a jak iterovat až k maximu — to je <a href="l4-3.html">[L4.3]</a>.</p>
     </div>
   </details>
 
@@ -503,7 +503,7 @@ KOViz.stepper(document.getElementById('viz-label'), {
      edges:{'T1->T4':'hl','T4->T5':'hl','T5->T8':'hl'},
      subs:{T1:'TRUE', T4:'TRUE', T5:'TRUE', T7:'TRUE', T3:'TRUE', T8:'TRUE ✓'}},
     {desc:'γ = min{7 − 0, 8 − 0, 8 − 4} = 4 → po augmentaci f₁₄ = 4, f₄₅ = 4, f₅₈ = 8 a |f| = 9 + 4 = 13. Tohle je 1. iterace Ford-Fulkersona — celý běh až k maximu 16 v L4.3.',
-     nodes:{T1:'hl', T4:'good', T5:'good', T8:'hl'},
+     nodes:{T1:'hl', T4:'good', T5:'good', T7:'good', T3:'good', T8:'hl'},
      edges:{'T1->T4':'hl','T4->T5':'hl','T5->T8':'hl'},
      labels:{'T1->T4':'0,4,7','T4->T5':'0,4,8','T5->T8':'0,8,8'},
      subs:{T1:'|f| = 13'}},
