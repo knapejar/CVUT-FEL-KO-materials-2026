@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L5.2 · Precedence a temporální omezení; graf TC — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k5">K5 · Rozvrhování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L5.2</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L5.2</span> Kapitola K5 — Rozvrhování (Slot 5) · <strong>[MUST]</strong>
+  </p>
+  <h1>Precedence a temporální omezení; graf TC</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Temporální omezení $s_i + l_{ij} \le s_j$ — jediná nerovnost mezi <em>starty</em> dvou úloh — a jeho orientovaný graf. Kladná hrana = „nejdřív po…“, záporná hrana = „nejpozději do…“, <strong>kladný cyklus = rozvrh neexistuje</strong>.
+  </div>
+
+  <p>V <a href="../k5/l5-1.html">[L5.1] Grahamově notaci</a> jsme v poli $\beta$ potkali zkratky $\mathrm{prec}$ (precedence) a $temp$ (temporal constraints) — třeba ve zkouškovém problému $PS1 \,|\, temp \,|\, C_{max}$. Tahle lekce vysvětluje, co přesně se za $temp$ skrývá: jak jednou nerovností popsat „B začne přesně 1 po A“, „D nejdřív 3 po dokončení C“ i „celý projekt musí skončit do 12“ — a jak z těchto nerovností sestavit <strong>graf temporálních omezení</strong> (graf TC), ze kterého feasibilitu přečteš z cyklů. Příští lekce [L5.3] pak nad tímhle grafem postaví time-indexed ILP.</p>
+
+  <!-- ===== SEKCE 1: OD PRECEDENCE K TEMPORÁLNÍMU OMEZENÍ ===== -->
+  <h2>Od precedence k temporálnímu omezení</h2>
+
+  <p><strong>Precedence constraint</strong> (precedenční omezení) $T_i \prec T_j$ znamená: úloha $T_j$ nesmí začít, dokud $T_i$ neskončí. S proměnnými z <a href="../k5/l5-1.html#takeaways">[L5.1]</a> — start $s_i$, doba zpracování $p_i$ (a tedy konec $C_i = s_i + p_i$ u nepreemptivní úlohy) — to umíš zapsat sám:</p>
+
+  <details class="try">
+    <summary>Zkus sám: zapiš $T_i \prec T_j$ jako jednu nerovnost mezi starty $s_i$ a $s_j$.</summary>
+    <div class="inner">
+      <p>$T_j$ smí začít až po konci $T_i$: $\;C_i \le s_j$, tedy $s_i + p_i \le s_j$. Všimni si tvaru: <em>start plus nějaká konstanta $\le$ druhý start</em>. Když konstantu pustíme z $p_i$ na <strong>libovolné číslo</strong> $l_{ij}$ (klidně nulu nebo záporné!), dostaneme přesně temporální omezení — precedence je jen jeho speciální případ $l_{ij} = p_i$.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Definice — Temporal Constraints (slide 59 + 60, EN 1:1)</div>
+    <ul>
+      <li>“Set of non-preemptive tasks $\mathcal{T} = \{T_1, T_2, \ldots, T_n\}$ is represented by the nodes of the directed graph $G$ <strong>(may include negative cycles)</strong>.”</li>
+      <li>“Processing time $p_i$ is assigned to each task.”</li>
+      <li>“The edges represent temporal constraints. Each edge from $T_i$ to $T_j$ has the length $l_{ij}$.”</li>
+      <li>“Each temporal constraint is characterized by one inequality $\;s_i + l_{ij} \le s_j$.”</li>
+      <li>Jiná jména (slide 60): <strong>generalized precedence constraint</strong> (zobecněná precedence), <strong>positive-negative time lag</strong>.</li>
+    </ul>
+  </div>
+
+  <p>Klíčový posun oproti obyčejné precedenci: nerovnost svazuje <strong>starty</strong>, ne konec s počátkem, a délka hrany $l_{ij}$ je <strong>libovolné číslo</strong> — kladné, nulové i záporné. Takhle vypadá příklad ze slidu 59 (5 úloh, jedna hrana záporná) i s přípustným rozvrhem:</p>
+
+  <div class="viz" id="viz-tc59"></div>
+  <div class="viz" id="viz-tc59g"></div>
+
+  <details class="try">
+    <summary>Zkus sám: ověř v rozvrhu nahoře hrany $T_4 \to T_5$ ($l_{45}=4$) a $T_5 \to T_1$ ($l_{51}=-10$). Která je „těsná“?</summary>
+    <div class="inner">
+      <p>$T_4 \to T_5$: $s_4 + 4 = 6 + 4 = 10 \le s_5 = 10$ ✓ — těsná (proto $T_5$ nemůže začít dřív). $T_5 \to T_1$: $s_5 - 10 = 0 \le s_1 = 0$ ✓ — také těsná! Záporná hrana čteno po lidsku: $T_1$ smí začít <em>nejvýš 10 po startu $T_5$</em>, ekvivalentně $T_5$ musí začít <em>nejpozději 10 po startu $T_1$</em> — drží konec rozvrhu „u země“. Kdyby $s_5 = 11$, omezení by spadlo: $11 - 10 = 1 \not\le 0$.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: KATALOG l_ij ===== -->
+  <h2>Katalog: co všechno $l_{ij}$ umí (slidy 60–63)</h2>
+
+  <p>Slidy třídí temporální omezení podle vztahu $l_{ij}$ k $p_i$. Nejdřív otázka na záporný případ — ten je na písemce nejdůležitější:</p>
+
+  <details class="try">
+    <summary>Zkus sám: co po lidsku říká hrana $T_i \to T_j$ se <em>záporným</em> $l_{ij}$, třeba $l_{ij} = -2$?</summary>
+    <div class="inner">
+      <p>$s_i - 2 \le s_j$, tedy $s_i \le s_j + 2$: úloha $T_i$ musí začít <strong>nejpozději 2 po startu $T_j$</strong> (klidně i dřív). Slide 63 (EN 1:1): “Task $T_i$ has to start earlier or <strong>at most $|l_{ij}|$ later</strong> than $T_j$. It loses the sense of normal precedence relation, since $T_i$ does not have to precede $T_j$. It represents the <strong>relative deadline</strong> of $T_i$ related to the start-time of $T_j$.” Záporná hrana = relativní deadline, žádné pořadí nevynucuje.</p>
+    </div>
+  </details>
+
+  <table>
+    <tr><th>případ</th><th>vztah</th><th>Meaning (slidy 60–63, EN 1:1)</th><th>příklad ze slidů</th></tr>
+    <tr><td><strong>a)</strong></td><td>$l_{ij} = p_i$</td><td>“normal” precedence relation — “the second task can start when the previous task is finished”</td><td>běžná technologická návaznost</td></tr>
+    <tr><td><strong>b)</strong></td><td>$l_{ij} &gt; p_i$</td><td>“the second task can start some time after the completion of previous task”</td><td>paint → <em>dry</em> → pack; pipelined ALU</td></tr>
+    <tr><td><strong>c)</strong></td><td>$0 &lt; l_{ij} &lt; p_i$</td><td>“Partial results of the previous task may be used to start the execution of the following task.”</td><td><em>cut-through</em> switch (zpráva se posílá dál, než celá dorazí)</td></tr>
+    <tr><td><strong>d)</strong></td><td>$l_{ij} = 0$</td><td>“Task $T_i$ has to start earlier or at the same time as $T_j$”</td><td>synchronizované starty</td></tr>
+    <tr><td><strong>e)</strong></td><td>$l_{ij} &lt; 0$</td><td>“relative deadline of $T_i$ related to the start-time of $T_j$”</td><td>katalyzátor, deadliny</td></tr>
+  </table>
+
+  <p>Proklikej si všech pět případů na časové ose ($T_j$ kreslíme vždy v nejdřívějším povoleném startu — nerovnost dovoluje i pozdější):</p>
+
+  <div class="viz" id="viz-cases"></div>
+
+  <!-- ===== SEKCE 3: RELATIVNÍ ČASOVÉ OKNO ===== -->
+  <h2>Relativní časové okno: dvojice hran tam a zpět</h2>
+
+  <p>Zajímavé věci začnou, když mezi dvěma úlohami vedou hrany <strong>oběma směry</strong>. Slide 64 dává příklad nasazení katalyzátoru v chemickém procesu: $l_{12} = 2$ a $l_{21} = -3$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: napiš obě nerovnosti pro $l_{12} = 2$, $l_{21} = -3$ a vyjádři, co plyne pro rozdíl $s_2 - s_1$.</summary>
+    <div class="inner">
+      <p>$s_1 + 2 \le s_2$ a $s_2 - 3 \le s_1$, dohromady $\;2 \le s_2 - s_1 \le 3$. Úloha $T_2$ musí začít <strong>mezi 2 a 3 po startu $T_1$</strong> — slide 64 tomu říká <strong>relative time window</strong> (relativní časové okno). A doslova (EN 1:1): “If finite $l_{ij} \ge 0$ and $l_{ji} &lt; 0$ do exist, tasks $T_i$ and $T_j$ are constrained by the relative time window. The length of the negative cycle determines the <strong>‘clearance’</strong> of the time window.” Tady cyklus $T_1 \to T_2 \to T_1$ má délku $2 + (-3) = -1$ → vůle okna je $1$.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-window"></div>
+  <div class="viz" id="viz-windowg"></div>
+
+  <!-- ===== SEKCE 4: KLADNÝ CYKLUS ===== -->
+  <h2>Kdy rozvrh existuje? Rozhodne kladný cyklus</h2>
+
+  <p>U okna výše vyšel cyklus záporný a vše fungovalo. Co kdyby vyšel kladný — třeba $l_{12} = 4$ a $l_{21} = -3$?</p>
+
+  <details class="try">
+    <summary>Zkus sám (klíčová otázka): sečti nerovnosti $s_i + l_{ij} \le s_j$ podél libovolného cyklu v grafu $G$. Co dostaneš?</summary>
+    <div class="inner">
+      <p>Každý start se na levé i pravé straně objeví právě jednou, takže se všechny vykrátí a zbude $\;\sum_{\text{cyklus}} l_{ij} \le 0$: <strong>délka každého cyklu musí být $\le 0$</strong>, jinak dostaneš spor typu $s_1 + 1 \le s_1$. Pro dvojici $4$ / $-3$: $s_2 \ge s_1 + 4$ a zároveň $s_2 \le s_1 + 3$ — prázdné okno, rozvrh neexistuje. <strong>Kladný cyklus = certifikát nerozvrhnutelnosti.</strong> Nulový cyklus je v pořádku — vynucuje rovnost (přesně tak modelujeme „starts <em>exactly</em>…“).</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-poscycle"></div>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Schedulability (slide 64, EN 1:1)</div>
+    <p>“<strong>Absence of a positive cycle</strong> in graph $G$</p>
+    <ul>
+      <li>is a <strong>necessary condition</strong> for schedulability of $PS1 \,|\, temp \,|\, C_{max}$,</li>
+      <li>is a <strong>necessary and sufficient condition</strong> for schedulability of the instance with <strong>unlimited capacity of resources</strong>. The schedule, which is restricted only by the temp. constraints, can be found in pol. time — by LP, or by the longest paths.”</li>
+    </ul>
+    <p>K nejdelším cestám slide dodává: pro $G$ sestrojíme $G'$, “a complete digraph of longest paths”, kde váha $l'_{ij}$ = délka nejdelší orientované cesty z $T_i$ do $T_j$ v $G$ (neexistuje-li cesta, $l'_{ij} = -\infty$); pak “a start time of $T_j$ is lower bounded by the longest path from arbitrary node, i.e. $s_j \ge \max_{\forall i} l'_{ij}$.”</p>
+  </div>
+
+  <p>Intuice: každá orientovaná cesta do $T_j$ je řetěz nerovností, který se sečte na $s_i + (\text{délka cesty}) \le s_j$ — start tlačí nahoru ta <em>nejdelší</em> z nich. <strong>Nejdřívější starty = nejdelší cesty z počátečního uzlu</strong>; a nejdelší cesty s detekcí kladného cyklu spočítáš Bellman-Fordem z <a href="../k2/l2-12.html">[L2.12] Bellman-Ford + detekce záporného cyklu</a> — stačí otočit znaménka vah ($l \to -l$): nejdelší cesta se stane nejkratší a kladný cyklus záporným cyklem, který B-F umí ohlásit.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „špatný je záporný cyklus“</div>
+    <p>U <em>nejkratších cest</em> v K2 škodil <strong>záporný</strong> cyklus. Tady jsme ale ve světě <em>nejdelších cest</em> (omezení tlačí starty nahoru) — škodí <strong>KLADNÝ cyklus</strong>; záporné cykly jsou naopak užitečné (relativní okna — slide 59 výslovně píše „may include negative cycles“) a nulový cyklus vynucuje rovnost startů. Na otázku „Is this instance schedulable? Why?“ odpovídej přes (ne)existenci kladného cyklu.</p>
+  </div>
+
+  <p>Druhá půlka pravdy: bez kapacitního omezení je absence kladného cyklu i <em>postačující</em>, ale jakmile zdroj unese jen jednu úlohu najednou ($PS1$), je to jen podmínka <em>nutná</em> — úlohy se navíc nesmí překrývat a problém je NP-hard (slide 54). Proto se $PS1 \,|\, temp \,|\, C_{max}$ řeší time-indexed ILP — příští lekce [L5.3].</p>
+
+  <!-- ===== SEKCE 5: DUMMY UZLY A KÓDOVÁNÍ ZADÁNÍ ===== -->
+  <h2>Graf TC ze slovního zadání: dummy Start a End</h2>
+
+  <p>Zkouškové zadání nedává hrany — dává <em>věty</em> („B must start exactly 1 time unit after start of A“, „the maximum duration of the project is 12“). Recept na převod:</p>
+  <ol>
+    <li><strong>Uzly</strong> = aktivity; přidej <strong>dummy</strong> (fiktivní) uzly <strong>Start</strong> a <strong>End</strong> s $p = 0$ (začátek a konec projektu) — přesně to radí zkouškový hint: “Add ‘dummy’ activities with zero duration for beginning and end of the project.”</li>
+    <li>Každou větu přepiš na nerovnost tvaru $s_i + l_{ij} \le s_j$ → <strong>jedna hrana</strong>. Věta s „exactly“ = rovnost = <strong>dvě hrany</strong> ($+l$ tam, $-l$ zpět — nulový cyklus).</li>
+    <li>Pozor na slova „completion / after the completion“: měří se od <em>konce</em> úlohy, takže k zpoždění přičti $p_i$ (start + $p_i$ + odstup).</li>
+    <li>Start „drž” hranami $Start \to T_j$ s $l = 0$ (nic nezačne před projektem) — release time $r_j$ by dal hranu s $l = r_j$; konec projektu hranami $T_j \to End$ s $l = p_j$ (vše musí doběhnout).</li>
+  </ol>
+
+  <details class="try">
+    <summary>Zkus sám: jak jednou hranou zakódovat „maximální délka projektu je 12“?</summary>
+    <div class="inner">
+      <p>Chceme $s_{End} \le s_{Start} + 12$. Převedeno na povinný tvar $s_i + l \le s_j$: $\;s_{End} + (-12) \le s_{Start}$ — tedy <strong>zpětná hrana $End \to Start$ s délkou $-12$</strong>. Horní mez (deadline) vždy vyrobí <em>zápornou hranu v protisměru</em>. A hned vidíš mechaniku feasibility: cesta $Start \rightsquigarrow End$ delší než 12 spolu s touto hranou uzavře kladný cyklus.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nejčastější chyba: směr záporné hrany</div>
+    <p>„$T_j$ nejpozději $k$ po $T_i$“ je $s_j \le s_i + k$, tedy hrana $T_j \to T_i$ s $l = -k$ — <strong>z $T_j$ do $T_i$</strong>, ne naopak! Mnemotechnika: nerovnost si vždy nejdřív napiš, pak ji <em>mechanicky</em> srovnej do tvaru $s_{\text{odkud}} + l \le s_{\text{kam}}$ — levý index = odkud hrana vede, pravý = kam. Kdo kreslí hrany „po směru času“ i pro deadliny, vyrobí nesmyslný graf.</p>
+  </div>
+
+  <p>Stejným receptem funguje i redukce $1 \,|\, r_j, \tilde{d}_j \,|\, C_{max} \to PS1 \,|\, temp \,|\, C_{max}$ (dummy $T_0$, hrany $r_i$ tam a $-(\tilde{d}_i - p_i)$ zpět) — jen zmínka, detail v [L5.13]. Obyčejný precedenční graf (jen hrany $l_{ij} = p_i$, případně bez vah u Muntze&amp;Coffmana [L5.10]) je speciální případ grafu TC.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.2</div>
+    <ul>
+      <li><strong>Temporální omezení</strong> (generalized precedence / positive-negative time lag) = jedna nerovnost $s_i + l_{ij} \le s_j$ = jedna hrana $T_i \to T_j$ délky $l_{ij}$ v digrafu $G$. Běžná precedence $T_i \prec T_j$ je speciální případ $l_{ij} = p_i$.</li>
+      <li><strong>Katalog $l_{ij}$:</strong> $= p_i$ precedence; $&gt; p_i$ odstup po dokončení (dry); $0 &lt; l &lt; p_i$ částečné výsledky (cut-through); $= 0$ start nejpozději zároveň; $&lt; 0$ <strong>relativní deadline</strong>. Dvojice $l_{ij} \ge 0$, $l_{ji} &lt; 0$ = <strong>relativní časové okno</strong>; vůle okna = |délka záporného cyklu|.</li>
+      <li><strong>Stavba grafu TC:</strong> uzly = úlohy + dummy Start/End s $p=0$; každá věta zadání = jedna nerovnost = jedna hrana („exactly“ = dvě hrany); „po dokončení“ = přičti $p_i$; horní mez (deadline, max. délka projektu $D$) = <strong>záporná hrana v protisměru</strong> (např. $End \to Start$ s $-D$).</li>
+      <li><strong>Rozvrhnutelnost:</strong> součet nerovností podél cyklu dá $\sum l \le 0$ ⟹ <strong>kladný cyklus = instance NENÍ rozvrhnutelná</strong> (nutná podmínka; bez kapacitního omezení i postačující). Nejdřívější starty $s_j$ = nejdelší cesty ze Startu; výpočet/detekce Bellman-Fordem na $-l$ [L2.12].</li>
+      <li>S kapacitou zdroje ($PS1 \,|\, temp \,|\, C_{max}$) je absence kladného cyklu jen nutná — problém je NP-hard a řeší se time-indexed ILP [L5.3].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-psc">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Project Scheduling with Temporal Constraints</strong>
+      <span class="task-src">zdroj: zkouška 2023 (zkouska_2023.md str. 5), EN 1:1</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>A construction company has obtained a contract on a project consisting of 4 non-preemptive activities A, B, C and D. The following temporal constraints apply:</p>
+        <p>a) Activity durations are $p_A = 1$, $p_B = 2$, $p_C = 3$ and $p_D = 2$.<br>
+        b) B must start exactly 1 time unit after start of A.<br>
+        c) C can start at least 2 time units after start of A.<br>
+        d) After the completion of C, there are at least 3 more time units before D can start.<br>
+        e) D can be started not later than 7 units after start of C.<br>
+        f) We suppose that the project can be terminated 3 time units after the completion time of D.<br>
+        g) The maximum duration of the project is 12 time units.</p>
+        <p>a) Draw a directed graph with temporal constraints for this problem.<br>
+        b) Is this instance schedulable? Why?</p>
+        <p><strong>Hint:</strong> Add “dummy” activities with zero duration for beginning and end of the project.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stavební projekt se 4 nepreemptivními aktivitami a sedmi větami-omezeními: jedna rovnost („exactly“), dolní odstupy (z toho jeden „after the completion“ — pozor na $p_C$), jedna horní mez mezi aktivitami a jedna horní mez na délku celého projektu. Úkol (a) chce graf TC, úkol (b) verdikt o rozvrhnutelnosti se zdůvodněním.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — recept na stavbu grafu (dummy Start/End, „exactly“ = 2 hrany, „completion“ = +$p_i$, horní mez = záporná hrana) a kritérium kladného cyklu (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace</a> — parametry $p_j$, proměnné $s_j$.</li>
+        <li><a href="../k0/l0-4.html">[L0.4] Strom, kostra, les, DAG</a> — orientovaný cyklus.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Každou větu b)–g) přepiš <em>nejdřív na nerovnost</em> mezi starty (u f) a g) použij dummy uzly), teprve pak ji srovnej do tvaru $s_i + l \le s_j$ a zakresli hranu. U d) nezapomeň, že „after the completion of C“ znamená $s_C + p_C + 3$. U g) si rozmysli, mezi kterými uzly a kterým směrem hrana povede. Pro (b) pak hledej kladný cyklus — kde se může vzít? Jedině přes jedinou „velkou“ zápornou hranu.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(a) Stavba grafu.</strong> Překlad vět na nerovnosti a hrany (Start a End jsou dummy aktivity s $p = 0$; $s_{Start} = 0$):</p>
+          <table>
+            <tr><th>věta</th><th>nerovnost</th><th>hrana (délka)</th></tr>
+            <tr><td>b) „exactly 1 after start of A“</td><td>$s_A + 1 \le s_B$ <em>a</em> $s_B - 1 \le s_A$</td><td>$A \to B$ ($+1$), $B \to A$ ($-1$)</td></tr>
+            <tr><td>c) „at least 2 after start of A“</td><td>$s_A + 2 \le s_C$</td><td>$A \to C$ ($+2$)</td></tr>
+            <tr><td>d) „completion of C + at least 3“</td><td>$s_C + \underbrace{3}_{p_C} + 3 \le s_D$</td><td>$C \to D$ ($+6$)</td></tr>
+            <tr><td>e) „not later than 7 after start of C“</td><td>$s_D - 7 \le s_C$</td><td>$D \to C$ ($-7$)</td></tr>
+            <tr><td>f) „terminated 3 after completion of D“</td><td>$s_D + \underbrace{2}_{p_D} + 3 \le s_{End}$</td><td>$D \to End$ ($+5$)</td></tr>
+            <tr><td>g) „maximum duration 12“</td><td>$s_{End} - 12 \le s_{Start}$</td><td>$End \to Start$ ($-12$)</td></tr>
+            <tr><td>dummy</td><td>$s_{Start} + 0 \le s_X$ pro $X \in \{A,B,C,D\}$</td><td>$Start \to X$ ($0$)</td></tr>
+          </table>
+          <p>Proklikej si stavbu (krok 8 = odpověď na (b)):</p>
+          <div class="viz" id="viz-t01build"></div>
+          <p><em>Pozn.: pro úplnost lze přidat i hrany $A \to End$ ($+1$), $B \to End$ ($+2$), $C \to End$ ($+3$) — „každá aktivita skončí před koncem projektu“. Verdikt nezmění (nejdelší je stejně větev přes D), v obrázku je kvůli čitelnosti vynecháváme; ruční zkouškové řešení je také nemá. Hodnoty hran v dochovaném ručním řešení jsou zčásti nečitelné/přeškrtané — tabulka výše je vlastní pečlivé odvození z definice $s_i + l_{ij} \le s_j$.</em></p>
+          <p><strong>(b) Is this instance schedulable? — NE.</strong> V grafu je <strong>kladný cyklus</strong></p>
+          <p style="text-align:center">$Start \xrightarrow{0} A \xrightarrow{+2} C \xrightarrow{+6} D \xrightarrow{+5} End \xrightarrow{-12} Start$, &nbsp; délka $\;0 + 2 + 6 + 5 - 12 = \mathbf{+1} &gt; 0,$</p>
+          <p>a součet nerovností podél něj dá spor $s_{Start} + 1 \le s_{Start}$. Ekvivalentně přes nejdelší cesty: nejdřívější starty jsou $s_A = 0$, $s_B = 1$, $s_C = 2$, $s_D = s_C + 6 = 8$ a $s_{End} = s_D + 5 = 13$ — projekt nejde stihnout dřív než za <strong>13 &gt; 12</strong> časových jednotek, omezení g) nelze splnit. (Okno mezi C a D je přitom v pořádku: cyklus $C \to D \to C$ má délku $6 - 7 = -1 \le 0$.) Ruční zkouškové řešení dochází ke stejnému verdiktu (✗).</p>
+          <div class="viz" id="viz-t01gantt"></div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-tcdrill">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Oprava projektu: cykly, nejdřívější starty, Gantt</strong>
+      <span class="task-src">zdroj: vlastní drill — úprava zkouškové instance 2023 (přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; vlastní — instance z T01 se změněným g)</span>
+        <p>Consider the instance from T01 with constraint g) relaxed to: <em>“The maximum duration of the project is <strong>14</strong> time units.”</em> Assume unlimited capacity of resources (activities may run in parallel).</p>
+        <p>(i) List all directed cycles in the temporal-constraint graph and compute their lengths. Is the instance schedulable now?<br>
+        (ii) Compute the earliest start time of every activity (longest paths from Start) and the earliest project completion.<br>
+        (iii) Draw the Gantt chart of the earliest-start schedule.<br>
+        (iv) What is the relative time window for the start of D (relative to the start of C), and what is its “clearance”?</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejný graf TC jako v T01, jen zpětná hrana $End \to Start$ má nově délku $-14$. Drilluje se kompletní rutina: cykly → verdikt, nejdelší cesty → nejdřívější starty, rozvrh → Gantt, dvojice hran tam/zpět → okno. Předpoklad neomezené kapacity je tu klíčový — právě pro něj je „žádný kladný cyklus“ i postačující podmínka.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — kritérium kladného cyklu, nejdřívější starty = nejdelší cesty, relativní okno (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k2/l2-12.html">[L2.12] Bellman-Ford</a> — kdyby cyklů bylo moc na ruční výčet.</li>
+        <li><a href="../k5/l5-1.html#takeaways">[L5.1]</a> — Gantt chart.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Cykly hledej přes záporné hrany — jiné se uzavřít nemohou (proč?). Nejdřívější starty počítej topologicky „zleva“: $s_X = \max$ přes vstupní hrany ($s_i + l_{iX}$); záporné hrany pak už jen <em>zkontroluj</em>. V Ganttu se aktivity smí překrývat (neomezená kapacita!) — každé dej vlastní řádek.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Každý cyklus musí použít aspoň jednu zápornou hranu ($B \to A$, $D \to C$, nebo $End \to Start$ — kladné hrany vedou „zleva doprava“ a samy se neuzavřou). Cykly jsou tři:</p>
+          <ul>
+            <li>$A \to B \to A$: $\;1 + (-1) = 0$ — nulový, vynucuje rovnost $s_B = s_A + 1$ („exactly“),</li>
+            <li>$C \to D \to C$: $\;6 + (-7) = -1$ — záporný (relativní okno),</li>
+            <li>$Start \to A \to C \to D \to End \to Start$: $\;0 + 2 + 6 + 5 - 14 = \mathbf{-1}$ — záporný (v T01 byl $+1$).</li>
+          </ul>
+          <p>Žádný kladný cyklus + neomezená kapacita ⟹ <strong>instance JE rozvrhnutelná</strong>.</p>
+          <p><strong>(ii)</strong> Nejdelší cesty ze Startu ($s_{Start} = 0$): $s_A = 0$; $s_B = s_A + 1 = 1$; $s_C = s_A + 2 = 2$; $s_D = s_C + 6 = 8$; $s_{End} = s_D + 5 = 13$. Kontrola záporných hran: $s_B - 1 = 0 \le s_A$ ✓ (těsně, rovnost platí), $s_D - 7 = 1 \le s_C = 2$ ✓, $s_{End} - 14 = -1 \le 0$ ✓. <strong>Nejdřívější konec projektu = 13 ≤ 14.</strong></p>
+          <p><strong>(iii)</strong> Gantt (každá aktivita na svém řádku, B a C se překrývají — to neomezená kapacita dovoluje):</p>
+          <div class="viz" id="viz-t02gantt"></div>
+          <p><strong>(iv)</strong> Hrany $C \to D$ ($+6$) a $D \to C$ ($-7$) dávají $\;s_C + 6 \le s_D \le s_C + 7$: D smí začít <strong>mezi 6 a 7 po startu C</strong> (zde $[8, 9]$). Vůle (clearance) okna = |délka záporného cyklu| $= |{-1}| = 1$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L5.2">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k5/l5-0.html"><span class="dir">← Předchozí</span> L5.0 · Rozvrhování přes toky (P|pmtn,rj,dj|) [FOTO]</a>
+    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.3 · Time-indexed ILP pro PS1|temp|Cmax [FOTO])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Graf temporálních omezení ze slidu 59 (5 úloh, jedna záporná hrana)
+KOViz.graph(document.getElementById('viz-tc59'), {
+  directed: true,
+  nodes: [
+    {id:'T1', label:'T₁', x:90,  y:180, sub:'p₁ = 1'},
+    {id:'T2', label:'T₂', x:280, y:60,  sub:'p₂ = 3'},
+    {id:'T3', label:'T₃', x:280, y:295, sub:'p₃ = 2'},
+    {id:'T4', label:'T₄', x:440, y:295, sub:'p₄ = 4'},
+    {id:'T5', label:'T₅', x:550, y:150, sub:'p₅ = 5'},
+  ],
+  edges: [
+    {from:'T1', to:'T2', label:'+2'},
+    {from:'T1', to:'T3', label:'+1'},
+    {from:'T3', to:'T4', label:'+3'},
+    {from:'T2', to:'T5', label:'+4'},
+    {from:'T3', to:'T5', label:'+4', curve:-0.15},
+    {from:'T4', to:'T5', label:'+4'},
+    {from:'T5', to:'T1', label:'−10', curve:-0.25, cls:'p'},
+  ],
+  caption: 'Graf TC dle slidu 59: hrana T<sub>i</sub> → T<sub>j</sub> s délkou l<sub>ij</sub> = nerovnost s<sub>i</sub> + l<sub>ij</sub> ≤ s<sub>j</sub>. Fialová hrana T₅ → T₁ je záporná (−10) a uzavírá cykly — všechny mají délku ≤ 0 (např. T₁→T₃→T₄→T₅→T₁: 1+3+4−10 = −2). Rekonstrukce dle textového popisu obrázku (přepis je u jedné hrany nejednoznačný; hodnoty zvoleny tak, aby seděl rozvrh ze slidu — přiznáno).',
+});
+
+// 2 — Přípustný rozvrh téže instance na jediném zdroji (dle slidu 59)
+KOViz.gantt(document.getElementById('viz-tc59g'), {
+  tmax: 16, tstep: 2,
+  rows: [{id:'R', label:'zdroj'}],
+  blocks: [
+    {row:'R', from:0,  to:1,  label:'T₁'},
+    {row:'R', from:1,  to:3,  label:'T₃', cls:'good'},
+    {row:'R', from:3,  to:6,  label:'T₂'},
+    {row:'R', from:6,  to:10, label:'T₄', cls:'good'},
+    {row:'R', from:10, to:15, label:'T₅', cls:'p'},
+  ],
+  marks: [
+    {t:10, label:'s₅ = 10', cls:'soft'},
+    {t:15, label:'Cmax = 15'},
+  ],
+  caption: 'Přípustný rozvrh: s = (0, 3, 1, 6, 10). Hrana T₅ → T₁ (−10) drží: s₅ − 10 = 0 ≤ s₁ = 0 — těsně. Starty s₂…s₅ jsou přesně dolní meze z nejdelších cest, úlohy se na jediném zdroji nepřekrývají.',
+});
+
+// 3 — Katalog případů l_ij (slidy 60–63; konkrétní čísla ilustrační — p_i = 3, p_j = 2)
+KOViz.gantt(document.getElementById('viz-cases'), {
+  tmax: 8, tstep: 1,
+  rows: [{id:'Ti', label:'Tᵢ'}, {id:'Tj', label:'Tⱼ'}],
+  blocks: [],
+  frames: [
+    {desc:'a) l<sub>ij</sub> = p<sub>i</sub> = 3: „normal“ precedence — T<sub>j</sub> smí začít, jakmile T<sub>i</sub> skončí (s<sub>i</sub> + 3 ≤ s<sub>j</sub>).',
+     blocks: [
+       {row:'Ti', from:0, to:3, label:'Tᵢ'},
+       {row:'Tj', from:3, to:5, label:'Tⱼ', cls:'good'},
+     ],
+     marks: [{t:3, label:'sᵢ + lᵢⱼ = 3'}]},
+    {desc:'b) l<sub>ij</sub> = 5 &gt; p<sub>i</sub>: odstup i po dokončení T<sub>i</sub> — paint → <em>dry</em> → pack.',
+     blocks: [
+       {row:'Ti', from:0, to:3, label:'Tᵢ'},
+       {row:'Tj', from:5, to:7, label:'Tⱼ', cls:'good'},
+     ],
+     marks: [{t:5, label:'sᵢ + lᵢⱼ = 5'}]},
+    {desc:'c) 0 &lt; l<sub>ij</sub> = 1 &lt; p<sub>i</sub>: T<sub>j</sub> startuje nad částečnými výsledky T<sub>i</sub> (cut-through) — úlohy se PŘEKRÝVAJÍ.',
+     blocks: [
+       {row:'Ti', from:0, to:3, label:'Tᵢ'},
+       {row:'Tj', from:1, to:3, label:'Tⱼ', cls:'good'},
+     ],
+     marks: [{t:1, label:'sᵢ + lᵢⱼ = 1'}]},
+    {desc:'d) l<sub>ij</sub> = 0: T<sub>i</sub> musí začít nejpozději zároveň s T<sub>j</sub> (s<sub>i</sub> ≤ s<sub>j</sub>).',
+     blocks: [
+       {row:'Ti', from:0, to:3, label:'Tᵢ'},
+       {row:'Tj', from:0, to:2, label:'Tⱼ', cls:'good'},
+     ],
+     marks: [{t:0, label:'sᵢ + 0 = 0'}]},
+    {desc:'e) l<sub>ij</sub> = −2 &lt; 0: relativní deadline — T<sub>i</sub> smí začít NEJVÝŠ 2 po startu T<sub>j</sub> (s<sub>i</sub> ≤ s<sub>j</sub> + 2); pořadí už nevynucuje nic.',
+     blocks: [
+       {row:'Ti', from:2, to:5, label:'Tᵢ', cls:'p'},
+       {row:'Tj', from:0, to:2, label:'Tⱼ', cls:'good'},
+     ],
+     marks: [{t:2, label:'sⱼ + |lᵢⱼ| = 2'}]},
+  ],
+  caption: 'Pět tváří jedné nerovnosti s<sub>i</sub> + l<sub>ij</sub> ≤ s<sub>j</sub> (případy a–e ze slidů 60–63; čísla ilustrační, p<sub>i</sub> = 3, p<sub>j</sub> = 2 — vlastní volba). T<sub>j</sub> (resp. v případě e) T<sub>i</sub>) kreslíme v nejdřívějším povoleném startu.',
+});
+
+// 4 — Relativní časové okno (slide 64): l12 = 2, l21 = −3
+KOViz.graph(document.getElementById('viz-window'), {
+  directed: true, h: 200,
+  nodes: [
+    {id:'T1', label:'T₁', x:220, y:100},
+    {id:'T2', label:'T₂', x:420, y:100},
+  ],
+  edges: [
+    {from:'T1', to:'T2', label:'+2', curve:0.4},
+    {from:'T2', to:'T1', label:'−3', curve:0.4, cls:'p'},
+  ],
+  caption: 'Relativní časové okno (slide 64, hodnoty 1:1): s₁ + 2 ≤ s₂ a s₂ − 3 ≤ s₁ ⟹ s₂ − s₁ ∈ [2, 3]. Cyklus T₁→T₂→T₁ má délku 2 + (−3) = −1; vůle („clearance“) okna = 1.',
+});
+KOViz.gantt(document.getElementById('viz-windowg'), {
+  tmax: 5, tstep: 1,
+  rows: [{id:'T1', label:'T₁'}, {id:'T2', label:'T₂'}],
+  blocks: [],
+  frames: [
+    {desc:'Nejdřívější poloha: s₂ = s₁ + 2 (hrana +2 těsná). Okno pro start T₂ je vyznačeno značkami.',
+     blocks: [
+       {row:'T1', from:0, to:1, label:'T₁'},
+       {row:'T2', from:2, to:3, label:'T₂', cls:'good'},
+     ],
+     marks: [{t:2, label:'≥ 2', cls:'soft'}, {t:3, label:'≤ 3', cls:'soft'}]},
+    {desc:'Nejpozdější poloha: s₂ = s₁ + 3 (hrana −3 těsná). Cokoli později poruší s₂ − 3 ≤ s₁.',
+     blocks: [
+       {row:'T1', from:0, to:1, label:'T₁'},
+       {row:'T2', from:3, to:4, label:'T₂', cls:'p'},
+     ],
+     marks: [{t:2, label:'≥ 2', cls:'soft'}, {t:3, label:'≤ 3', cls:'soft'}]},
+  ],
+  caption: 'Dvě krajní polohy startu T₂ uvnitř okna [s₁+2, s₁+3] (p₁ = p₂ = 1 ilustrační — vlastní volba; slide uvádí příklad katalyzátoru bez konkrétních dob).',
+});
+
+// 5 — Kladný cyklus = nerozvrhnutelné (vlastní mini-protipříklad ke slidu 64)
+KOViz.graph(document.getElementById('viz-poscycle'), {
+  directed: true, h: 200,
+  nodes: [
+    {id:'T1', label:'T₁', x:220, y:100, cls:'bad'},
+    {id:'T2', label:'T₂', x:420, y:100, cls:'bad'},
+  ],
+  edges: [
+    {from:'T1', to:'T2', label:'+4', curve:0.4, cls:'bad'},
+    {from:'T2', to:'T1', label:'−3', curve:0.4, cls:'bad'},
+  ],
+  caption: 'Kladný cyklus (vlastní protipříklad): s₂ ≥ s₁ + 4 a zároveň s₂ ≤ s₁ + 3 — prázdné okno. Délka cyklu 4 + (−3) = +1 &gt; 0; součet nerovností podél cyklu dá spor s₁ + 1 ≤ s₁. Instance není rozvrhnutelná.',
+});
+
+// 6 — T01: stavba grafu TC zkouškové instance 2023 + nález kladného cyklu (stepper)
+KOViz.stepper(document.getElementById('viz-t01build'), {
+  graph: {
+    directed: true,
+    nodes: [
+      {id:'Start', label:'Start', x:60,  y:175, sub:'p = 0'},
+      {id:'A',     label:'A',     x:195, y:75,  sub:'p = 1'},
+      {id:'B',     label:'B',     x:195, y:275, sub:'p = 2'},
+      {id:'C',     label:'C',     x:400, y:75,  sub:'p = 3'},
+      {id:'D',     label:'D',     x:400, y:275, sub:'p = 2'},
+      {id:'End',   label:'End',   x:580, y:175, sub:'p = 0'},
+    ],
+    edges: [
+      {from:'Start', to:'A', label:'0'},
+      {from:'Start', to:'B', label:'0'},
+      {from:'Start', to:'C', label:'0', curve:-0.15},
+      {from:'Start', to:'D', label:'0', curve:0.15},
+      {from:'A', to:'B', label:'+1', curve:0.35},
+      {from:'B', to:'A', label:'−1', curve:0.35},
+      {from:'A', to:'C', label:'+2'},
+      {from:'C', to:'D', label:'+6', curve:0.35},
+      {from:'D', to:'C', label:'−7', curve:0.35},
+      {from:'D', to:'End', label:'+5'},
+      {from:'End', to:'Start', label:'−12', curve:-0.9},
+    ],
+  },
+  frames: [
+    {desc:'Uzly: aktivity A–D (pod uzlem p<sub>i</sub>) + dummy aktivity Start a End s p = 0 — přesně dle hintu zadání: „Add “dummy” activities with zero duration for beginning and end of the project.“',
+     edges:{'Start->A':'dim','Start->B':'dim','Start->C':'dim','Start->D':'dim','A->B':'dim','B->A':'dim','A->C':'dim','C->D':'dim','D->C':'dim','D->End':'dim','End->Start':'dim'},
+     labels:{'Start->A':'','Start->B':'','Start->C':'','Start->D':'','A->B':'','B->A':'','A->C':'','C->D':'','D->C':'','D->End':'','End->Start':''}},
+    {desc:'Nic nezačne před začátkem projektu: s<sub>Start</sub> + 0 ≤ s<sub>X</sub> → hrany Start → A, B, C, D s délkou 0.',
+     edges:{'Start->A':'hl','Start->B':'hl','Start->C':'hl','Start->D':'hl','A->B':'dim','B->A':'dim','A->C':'dim','C->D':'dim','D->C':'dim','D->End':'dim','End->Start':'dim'},
+     labels:{'A->B':'','B->A':'','A->C':'','C->D':'','D->C':'','D->End':'','End->Start':''}},
+    {desc:'b) „B must start <em>exactly</em> 1 after start of A“ = rovnost = DVĚ hrany: A → B (+1) a B → A (−1). Spolu tvoří nulový cyklus — to je v pořádku, vynucuje s<sub>B</sub> = s<sub>A</sub> + 1.',
+     edges:{'A->B':'hl','B->A':'hl','A->C':'dim','C->D':'dim','D->C':'dim','D->End':'dim','End->Start':'dim'},
+     labels:{'A->C':'','C->D':'','D->C':'','D->End':'','End->Start':''}},
+    {desc:'c) s<sub>A</sub> + 2 ≤ s<sub>C</sub> → hrana A → C (+2). d) „after the COMPLETION of C … 3 more units“: s<sub>C</sub> + p<sub>C</sub> + 3 = s<sub>C</sub> + 6 ≤ s<sub>D</sub> → hrana C → D (+6).',
+     edges:{'A->C':'hl','C->D':'hl','D->C':'dim','D->End':'dim','End->Start':'dim'},
+     labels:{'D->C':'','D->End':'','End->Start':''}},
+    {desc:'e) „D not later than 7 after start of C“ je HORNÍ mez: s<sub>D</sub> ≤ s<sub>C</sub> + 7, srovnáno do tvaru s<sub>D</sub> − 7 ≤ s<sub>C</sub> → ZÁPORNÁ hrana v protisměru D → C (−7).',
+     edges:{'D->C':'hl','D->End':'dim','End->Start':'dim'},
+     labels:{'D->End':'','End->Start':''}},
+    {desc:'f) konec projektu nejdřív 3 po DOKONČENÍ D: s<sub>D</sub> + p<sub>D</sub> + 3 = s<sub>D</sub> + 5 ≤ s<sub>End</sub> → hrana D → End (+5).',
+     edges:{'D->End':'hl','End->Start':'dim'},
+     labels:{'End->Start':''}},
+    {desc:'g) „maximum duration 12“: s<sub>End</sub> ≤ s<sub>Start</sub> + 12, tedy s<sub>End</sub> − 12 ≤ s<sub>Start</sub> → zpětná hrana End → Start (−12). Graf TC je hotový — odpověď na (a).',
+     edges:{'End->Start':'hl'}},
+    {desc:'(b) Hledej kladný cyklus: Start → A → C → D → End → Start má délku 0 + 2 + 6 + 5 − 12 = <strong>+1 &gt; 0</strong> → instance NENÍ rozvrhnutelná. (Nejdelší cesta Start→End měří 13 &gt; 12.)',
+     nodes:{'Start':'bad','A':'bad','C':'bad','D':'bad','End':'bad'},
+     edges:{'Start->A':'bad','A->C':'bad','C->D':'bad','D->End':'bad','End->Start':'bad'}},
+  ],
+  caption: 'Stavba grafu TC pro zkouškovou instanci 2023 (hodnoty hran = vlastní odvození dle definice; ruční řešení z fotek je zčásti nečitelné). Krok 8 = certifikát nerozvrhnutelnosti.',
+});
+
+// 7 — T01: nejdřívější starty narazí na limit 12 (vlastní dopočet — přiznáno)
+KOViz.gantt(document.getElementById('viz-t01gantt'), {
+  tmax: 14, tstep: 1,
+  rows: [{id:'A'}, {id:'B'}, {id:'C'}, {id:'D'}],
+  blocks: [
+    {row:'A', from:0, to:1,  label:'A'},
+    {row:'B', from:1, to:3,  label:'B'},
+    {row:'C', from:2, to:5,  label:'C', cls:'good'},
+    {row:'D', from:8, to:10, label:'D', cls:'good'},
+  ],
+  marks: [
+    {t:12, label:'limit g) = 12', cls:'bad'},
+    {t:13, label:'nejdřívější konec = 13'},
+  ],
+  caption: 'Nejdřívější starty (nejdelší cesty ze Startu): s = (0, 1, 2, 8), konec projektu s<sub>End</sub> = s<sub>D</sub> + 5 = 13. Ani nejtěsnější rozvrh se do 12 nevejde — vizuální podoba kladného cyklu (+1 = 13 − 12). Vlastní dopočet, přiznáno.',
+});
+
+// 8 — T02: přípustný earliest-start rozvrh po uvolnění limitu na 14 (vlastní drill)
+KOViz.gantt(document.getElementById('viz-t02gantt'), {
+  tmax: 14, tstep: 1,
+  rows: [{id:'A'}, {id:'B'}, {id:'C'}, {id:'D'}],
+  blocks: [
+    {row:'A', from:0, to:1,  label:'A'},
+    {row:'B', from:1, to:3,  label:'B'},
+    {row:'C', from:2, to:5,  label:'C', cls:'good'},
+    {row:'D', from:8, to:10, label:'D', cls:'good'},
+  ],
+  marks: [
+    {t:8,  label:'≥ 8', cls:'soft'},
+    {t:9,  label:'≤ 9', cls:'soft'},
+    {t:13, label:'End = 13', cls:'good'},
+    {t:14, label:'limit 14'},
+  ],
+  caption: 'Earliest-start rozvrh: s = (0, 1, 2, 8), konec 13 ≤ 14 ✓. B a C se překrývají (neomezená kapacita). Šedé značky = relativní okno startu D vůči C: s<sub>D</sub> ∈ [s<sub>C</sub>+6, s<sub>C</sub>+7] = [8, 9].',
+});
+</script>
+</body>
+</html>
