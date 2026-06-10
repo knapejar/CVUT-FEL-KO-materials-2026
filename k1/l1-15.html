@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.15 · Časově/pozičně indexované proměnné — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.15</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.15</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Časově/pozičně indexované proměnné</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Binárka indexovaná <strong>časem nebo pozicí</strong>: $x_{i,t} = 1 \iff$ akce $i$ nastane v čase $t$. Z ní lineárně přečteš „kdy“ ($s_i = \sum_t t \cdot x_{i,t}$), vynutíš „právě jednou“ ($\sum_t x_{i,t} = 1$) a uhlídáš kolize („v čase $t$ běží nanejvýš jedna úloha“).
+  </div>
+
+  <p>Prerekvizity: <a href="l1-2.html#takeaways">[L1.2] Přiřazovací struktura</a>; hodí se i předkrm z <a href="l1-14.html#takeaways">[L1.14]</a> (číslo boxu hračky jako $\sum_j j \cdot x_{ij}$). Tahle lekce uzavírá K1 — je to <em>přehledová</em> technika, která se naplno rozjede až v rozvrhování (kapitola <a href="../index.html#k5">K5</a>), ale na písemce z ILP modelování se objevuje už teď (úloha <strong>Penguins on ice</strong> z termínu 02.06.2021).</p>
+
+  <!-- ===== OD KDO-KAM KE KDO-KDY ===== -->
+  <h2>Od „kdo–kam“ ke „kdo–kdy“</h2>
+  <p>V <a href="l1-2.html#takeaways">[L1.2]</a> rozhodovala binárka $x_{ij}$ o tom, <em>kam</em> objekt $i$ patří. Co když ale úloha neřeší „kam“, nýbrž <strong>„kdy“</strong> — kdy odstartuje úloha na stroji, ve kterém kroku se tučňák pohne? Čas je spojitý… ILP ale chce konečně mnoho proměnných.</p>
+
+  <details class="try">
+    <summary>Zkus sám: jak z času udělat „pozice“, na které jde přiřazovat? A jak pak zapsat „akce $i$ nastane <em>právě jednou</em>“?</summary>
+    <div class="inner">
+      <p>Čas <strong>diskretizuješ</strong>: povolené okamžiky jsou $t \in \{0, 1, \ldots, UB\}$ pro nějaký horizont $UB$. Každý okamžik je „přihrádka“ a rozhoduješ binárkou</p>
+      $$x_{i,t} \in \{0,1\}, \qquad x_{i,t} = 1 \iff \text{akce } i \text{ nastane v čase } t.$$
+      <p>„Akce $i$ nastane právě jednou“ je pak řádkový součet, úplně stejný trik jako $\sum_j x_{ij} = 1$ v <a href="l1-2.html#takeaways">[L1.2]</a>:</p>
+      $$\sum_{t} x_{i,t} = 1 \qquad \forall i.$$
+      <p>Druhý index binárky prostě přestal být „box“ a stal se „okamžik“. Nic víc v té nové věci není — všechna síla je v tom, co z těch binárek jde lineárně vyrobit.</p>
+    </div>
+  </details>
+
+  <!-- ===== CTENI CASU ===== -->
+  <h2>Čtení času z binárek</h2>
+  <p>Mám binárky $x_{i,0}, x_{i,1}, \ldots, x_{i,UB}$ a chci s časem startu <em>počítat</em> — třeba říct „úloha $j$ startuje aspoň o $L$ později než úloha $i$“.</p>
+
+  <details class="try">
+    <summary>Zkus sám: napiš start $s_i$ úlohy $i$ jako lineární výraz z binárek. (V <a href="l1-14.html#takeaways">[L1.14]</a> jsme stejně četli „číslo boxu hračky“.)</summary>
+    <div class="inner">
+      <p>Právě jeden sčítanec je nenulový, takže součet „čas × binárka“ vrátí přesně ten čas, kde sedí jednička:</p>
+      $$s_i = \sum_{t} t \cdot x_{i,t}.$$
+      <p>A „$j$ startuje aspoň o $L$ později než $i$“ je pak obyčejná lineární nerovnost</p>
+      $$\sum_{t} t \cdot x_{i,t} + L \;\le\; \sum_{t} t \cdot x_{j,t},$$
+      <p>tedy $s_i + L \le s_j$. Přesně takhle se v K5 píší temporální omezení time-indexed modelu $PS1|temp|C_{max}$.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: co kdybys zapomněl omezení $\sum_t x_{i,t} = 1$? Najdi řešení, kde výraz $\sum_t t \cdot x_{i,t}$ lže.</summary>
+    <div class="inner">
+      <p>Bez „právě jednou“ smí být <strong>všechny binárky nulové</strong> — pak $s_i = 0$ a solver si „start v čase 0“ vyrobil zadarmo, i když akce vůbec nenastala. Nebo dvě jedničky, třeba $x_{i,1} = x_{i,4} = 1$ — pak $s_i = 5$, čas, kdy se nestalo vůbec nic. Čtení funguje <em>jen ve dvojici</em> s $\sum_t x_{i,t} = 1$.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „$\sum_t t \cdot x_{i,t}$ je start úlohy“</div>
+    <p>Sám o sobě NENÍ. Je to start úlohy <strong>jen spolu s omezením $\sum_t x_{i,t} = 1$</strong>. Samé nuly dají $s_i = 0$ (akce „nastala“ v čase 0, ač nenastala), dvě jedničky dají součet obou časů. Kdykoli na písemce čteš číslo z indexovaných binárek, zkontroluj, že máš v modelu i „právě jednou“.</p>
+  </div>
+
+  <div class="viz" id="viz-matrix"></div>
+
+  <!-- ===== KOLIZE ===== -->
+  <h2>Kolize: v čase $\tau$ běží nanejvýš jedna úloha</h2>
+  <p>Druhý standardní typ omezení: sdílený <strong>zdroj</strong> (resource) — stroj, kra, políčko. Dvě akce ho nesmí používat současně.</p>
+
+  <details class="try">
+    <summary>Zkus sám: akce trvají 1 časový krok (např. „tah“ tučňáka). Zakaž, aby dvě nastaly ve stejném čase.</summary>
+    <div class="inner">
+      <p>Sloupcový součet tabulky binárek — v každém okamžiku nanejvýš jedna jednička:</p>
+      $$\sum_{i} x_{i,t} \;\le\; 1 \qquad \forall t.$$
+      <p>Zase stejná kostra jako sloupcové součty v <a href="l1-2.html#takeaways">[L1.2]</a> (jen s $\le$, protože okamžik smí zůstat prázdný).</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: teď ať úloha $2$ trvá $p_2 = 2$ kroky. Najdi rozvrh, který $\sum_i x_{i,\tau} \le 1$ splní, a přesto se úlohy „potkají na stroji“.</summary>
+    <div class="inner">
+      <p>$T_2$ odstartuje v čase 1 (běží přes okamžiky 1 a 2) a $T_1$ odstartuje v čase 2. Žádné dva <em>starty</em> se nepotkaly — sloupcové součty platí — ale v okamžiku $\tau = 2$ běží obě úlohy. Sloupcový součet hlídá jen starty. Správně musíš sečíst všechny úlohy, které v $\tau$ <strong>běží</strong>: úloha $i$ běží v $\tau$, právě když odstartovala v některém $t$ s $t \le \tau &lt; t + p_i$. Resource omezení time-indexed modelu (slide 66, K5) proto zní:</p>
+      $$\sum_{i=1}^{n} \;\sum_{k = \max(0,\, \tau - p_i + 1)}^{\tau} x_{i,k} \;\le\; 1 \qquad \forall \tau \in \{0, \ldots, UB - 1\}.$$
+      <p>Vnitřní součet posbírá celé „okno“ startů, při kterých by úloha $i$ v čase $\tau$ ještě běžela.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „kolize = stejný start“</div>
+    <p>$\sum_i x_{i,\tau} \le 1$ zakazuje jen <strong>společné starty</strong>. Úloha s $p_i &gt; 1$ ale blokuje zdroj po celé okno $[s_i,\, s_i + p_i)$ — kolizi proto hlídej součtem přes okna startů $k \in \{\tau - p_i + 1, \ldots, \tau\}$ (ořezaná zdola nulou), ne jediným sloupcem. U akcí délky 1 obě verze splývají.</p>
+  </div>
+
+  <p>Cena za celou techniku: model má $n \cdot UB + 1$ proměnných — diskretizaci času platíš počtem binárek (proto se volí co nejtěsnější horizont $UB$). Krokuj si všechny tři myšlenky na tabulce binárek výše: řádkový součet, čtení startu, okno zdroje.</p>
+
+  <!-- ===== POZICE ===== -->
+  <h2>Pozice místo času: tentýž trik bez hodin</h2>
+  <p>Index $t$ vůbec nemusí být čas. Stejně dobře funguje <strong>pozice</strong>: pořadí v řadě (<a href="l1-14.html#takeaways">[L1.14]</a> — box $b_j$), políčko šachovnice, buňka mřížky. Říká se tomu <strong>position-indexed / position-based</strong> model — v K5 se tak modeluje $1|r_j, \tilde{d}_j|C_{max}$ („úloha $i$ je $q$-tá v pořadí“).</p>
+
+  <details class="try">
+    <summary>Zkus sám: na šachovnici $8 \times 8$ rozmísti co nejvíc koní tak, aby se nenapadali. Co je tady „index“, co je binárka a jak vypadá zákaz napadení?</summary>
+    <div class="inner">
+      <p>Index = políčko $s$ (dvojice řádek–sloupec), binárka $x_s = 1 \iff$ na $s$ stojí kůň. Kritérium: $\max \sum_s x_s$. Napadení je <em>párová</em> kolize — pro každou dvojici políček $s, s'$ vzdálených o koňský skok:</p>
+      $$x_s + x_{s'} \;\le\; 1.$$
+      <p>Žádný čas, žádná okna — „zdroj“ je tu dvojice políček. A zakázaná políčka (třeba ohrožená věží) vynuluješ: $x_s = 0$, stejně jako zákaz krajních boxů v <a href="l1-14.html#takeaways">[L1.14]</a>.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-knight"></div>
+
+  <!-- ===== CAS X POZICE ===== -->
+  <h2>Čas × pozice dohromady: tučňáci</h2>
+  <p>Vrchol techniky: akce má <em>kdo</em>, <em>kde</em> i <em>kdy</em>. Na zkoušce 02.06.2021: tučňáci skáčou po krách, kra se po opuštění potopí, v čase $T_{max}$ má každý stát na svém cíli.</p>
+
+  <details class="try">
+    <summary>Zkus sám: kolik indexů potřebuje binárka pro tučňáky? A co bude říkat „právě jednou“?</summary>
+    <div class="inner">
+      <p>Tři: $x_{i,c,t} = 1 \iff$ tučňák $i$ stojí na buňce $c$ v čase $t$. „Právě jednou“ tu neznamená „v čase“, ale „<strong>na právě jednom místě</strong>“ — v každém okamžiku stojí tučňák právě na jedné kře:</p>
+      $$\sum_{c} x_{i,c,t} = 1 \qquad \forall i, \forall t,$$
+      <p>a sdílení kry je sloupcová kolize: $\sum_i x_{i,c,t} \le 1$ pro každou kru $c$ a čas $t$. Pohyb, potápění a celý model rozebereme v úloze T01 níže.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-penguins"></div>
+
+  <p>Stejná trojindexová myšlenka se vrátí u časově expandované sítě [L2.11] („vrchol $(v,k)$ = jsem ve $v$ v čase $k$“), v rozvrhování (K5) a u TSP — proto je dobré ji mít v ruce už teď, jako poslední nástroj kapitoly K1.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.15</div>
+    <ul>
+      <li><strong>Časově/pozičně indexovaná binárka:</strong> $x_{i,t} = 1 \iff$ akce $i$ nastane v čase/pozici $t$. Je to přiřazovací struktura <a href="l1-2.html#takeaways">[L1.2]</a>, kde druhý index je diskretizovaný čas (horizont $t \in \{0, \ldots, UB\}$) nebo pozice.</li>
+      <li><strong>„Začíná právě jednou“:</strong> $\sum_t x_{i,t} = 1$; <strong>čtení času:</strong> $s_i = \sum_t t \cdot x_{i,t}$ — funguje <em>jen</em> spolu s „právě jednou“. Pak jsou vztahy startů lineární: $s_i + L \le s_j$.</li>
+      <li><strong>Kolize/zdroj:</strong> v čase $\tau$ běží nanejvýš jedna úloha — sčítej <em>okna</em> startů $\sum_i \sum_{k=\max(0,\tau-p_i+1)}^{\tau} x_{i,k} \le 1$, ne jen společné starty (sloupec $\sum_i x_{i,\tau} \le 1$ stačí jen pro akce délky 1).</li>
+      <li><strong>Pozice = čas bez hodin:</strong> tentýž aparát pro pořadí v řadě, políčka šachovnice ($x_s + x_{s'} \le 1$ pro útočné dvojice, zakázané pole $x_s = 0$) i mřížku; kombinace čas × pozice dá $x_{i,c,t}$ (Penguins on ice).</li>
+      <li>Naplno se technika použije v rozvrhování — <strong>time-indexed model $PS1|temp|C_{max}$</strong> v K5 ($n \cdot UB + 1$ proměnných) — a u TSP; tady stačí umět tabulku binárek postavit a přečíst.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ULOHA T01: PENGUINS ===== -->
+  <div class="task" id="t-penguins">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Penguins on ice</strong>
+      <span class="task-src">zdroj: zkouška KO, termín 02.06.2021 (bank T03)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“You are given a 2D grid of size $w \times h$. Each cell represents an ice cube floating on the water. There are $n$ penguins standing at starting positions $(x_1^{(s)}, y_1^{(s)}), (x_2^{(s)}, y_2^{(s)}), \ldots, (x_n^{(s)}, y_n^{(s)})$ at time $t = 0$. The time is discretized; during each time interval, each penguin can either remain on its position or it can move (by one tile) to its 4-neighborhood tiles. When the penguin moves, the ice cube on which it was standing sinks down, i.e., it cannot be used anymore. At most one penguin at time can stand on one ice cube.</p>
+        <p>Design an ILP model deciding whether the penguins can move in such a way that at time $T_{max}$, penguin $i$ stands at ending position $\left(x_i^{(e)}, y_i^{(e)}\right) \quad \forall i \in \{1, \ldots, n\}$.”</p>
+        <p><em>Figure: Illustration of an instance with $5 \times 5$ grid and three penguins starting at positions $(1,1)$, $(4,2)$ and $(3,3)$, respectively. The instance is feasible for $T_{max} \geq 8$.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Mřížka $w \times h$ ledových ker, $n$ tučňáků se známými starty a cíli, čas běží v krocích $0, 1, \ldots, T_{max}$. V každém kroku tučňák buď stojí, nebo se posune na 4-souseda; opuštěná kra se potopí (už nikdy nejde použít); na kře stojí nanejvýš jeden tučňák. Otázka je <strong>rozhodovací</strong> (feasibility): existuje pohyb, po kterém v čase $T_{max}$ stojí každý tučňák na svém cíli? Postav ILP, jehož přípustnost to rozhodne.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — trojindexová binárka $x_{i,c,t}$, „právě jedno místo v každém čase“, sloupcové kolize.</li>
+        <li><a href="l1-2.html#takeaways">[L1.2] Přiřazovací struktura</a> — součty $=1$ a $\le 1$.</li>
+        <li><a href="l1-3.html#takeaways">[L1.3] Modelování logiky</a> — linearizace AND pro detekci „nového vstupu na kru“ ($e = x_t \wedge \neg x_{t-1}$).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Elementární fakt o světě je „tučňák $i$ stojí na buňce $c$ v čase $t$“ — to přímo volá po $x_{i,c,t} \in \{0,1\}$. Pak ber pravidla po jednom: start a cíl jsou fixace binárek; „každý tučňák právě někde“ a „kra nanejvýš pro jednoho“ jsou součty. Pohyb je <em>implikace mezi sousedními časy</em>: kde smí být $i$ v čase $t$, když v $t-1$ stál na $c$? Nejtěžší je potápění — zkus si nejdřív říct, co přesně kra zakazuje: ne „stát dlouho“, ale „<strong>vstoupit podruhé</strong>“. Jak poznáš lineárně, že tučňák na kru právě <em>vstoupil</em> (v $t-1$ tam nebyl, v $t$ je)? To je AND dvou binárek — a od něj je k „každá kra nanejvýš jeden vstup celkem“ už jen jeden součet. Kritérium žádné není: feasibility úloha smí mít $\min 0$. (Dobový rukopisný pokus z písemky modeloval místo toho <em>souřadnice</em> $x_i^{(k)}, y_i^{(k)}$ jako čísla a topil se v absolutních hodnotách a big-M — indexované binárky jsou řádově čistší cesta.)</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Množiny a značení.</strong> $P = \{1, \ldots, n\}$ tučňáci, $C = \{(x,y) : 1 \le x \le w,\ 1 \le y \le h\}$ buňky, $\mathcal{T} = \{0, 1, \ldots, T_{max}\}$ časy. $N(c)$ jsou 4-sousedé buňky $c$ uvnitř mřížky; $s_i = (x_i^{(s)}, y_i^{(s)})$ start a $g_i = (x_i^{(e)}, y_i^{(e)})$ cíl tučňáka $i$.</p>
+          <p><strong>Proměnné.</strong></p>
+          $$x_{i,c,t} \in \{0,1\}: \quad x_{i,c,t} = 1 \iff \text{tučňák } i \text{ stojí na buňce } c \text{ v čase } t,$$
+          $$e_{i,c,t} \in \{0,1\}: \quad e_{i,c,t} = 1 \iff \text{tučňák } i \text{ na buňku } c \text{ v čase } t \text{ vstoupil}.$$
+          <p><strong>Kritérium.</strong> Feasibility úloha: $\min 0$.</p>
+          <p><strong>Start a cíl</strong> — fixace binárek:</p>
+          $$x_{i,s_i,0} = 1 \quad \forall i \in P, \qquad x_{i,g_i,T_{max}} = 1 \quad \forall i \in P.$$
+          <p><strong>Počáteční pozice se počítá jako vstup:</strong></p>
+          $$e_{i,c,0} = x_{i,c,0} \qquad \forall i \in P, \forall c \in C.$$
+          <p><strong>Každý tučňák právě na jednom místě</strong> (tahle lekce — „právě jednou“ přes pozice):</p>
+          $$\sum_{c \in C} x_{i,c,t} = 1 \qquad \forall i \in P, \forall t \in \mathcal{T}.$$
+          <p><strong>Na kře nanejvýš jeden tučňák</strong> (sloupcová kolize):</p>
+          $$\sum_{i \in P} x_{i,c,t} \le 1 \qquad \forall c \in C, \forall t \in \mathcal{T}.$$
+          <p><strong>Legální pohyb včetně čekání</strong> — implikace mezi sousedními časy, pro $t = 1, \ldots, T_{max}$:</p>
+          $$x_{i,c,t-1} \;\le\; x_{i,c,t} + \sum_{d \in N(c)} x_{i,d,t} \qquad \forall i \in P, \forall c \in C.$$
+          <p>Stál-li $i$ v čase $t-1$ na $c$, pak v čase $t$ je buď pořád na $c$ (čekání), nebo na některém 4-sousedovi. Pro $x_{i,c,t-1} = 0$ nerovnost nic nechce.</p>
+          <p><strong>Detekce vstupu</strong> — $e_{i,c,t} = x_{i,c,t} \wedge \neg x_{i,c,t-1}$, linearizace AND z <a href="l1-3.html#takeaways">[L1.3]</a>, pro $t = 1, \ldots, T_{max}$:</p>
+          $$e_{i,c,t} \ge x_{i,c,t} - x_{i,c,t-1}, \qquad e_{i,c,t} \le x_{i,c,t}, \qquad e_{i,c,t} \le 1 - x_{i,c,t-1} \qquad \forall i \in P, \forall c \in C.$$
+          <p>Trojice nerovností vynutí $e_{i,c,t} = 1 \iff (x_{i,c,t-1}, x_{i,c,t}) = (0,1)$: čekání na kře vstup nevytváří, návrat po odchodu by vytvořil druhý vstup.</p>
+          <p><strong>Potápění ker</strong> — každá kra smí být vstoupena celkem nanejvýš jednou:</p>
+          $$\sum_{i \in P} \sum_{t \in \mathcal{T}} e_{i,c,t} \;\le\; 1 \qquad \forall c \in C.$$
+          <p>Tím je pokryto všechno, co potopení znamená: čekání je dovoleno (není to nový vstup), návrat na opuštěnou kru zakázán (druhý vstup), vstup jiného tučňáka na použitou kru zakázán (taky druhý vstup).</p>
+          <p><strong>Velikost modelu:</strong> $O(n \cdot w h \cdot T_{max})$ binárek — typická cena časové indexace; horizont $T_{max}$ je naštěstí dán zadáním.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ULOHA T02: KNIGHTS ===== -->
+  <div class="task" id="t-knights">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Knights Placement</strong> <span class="chip">[NICE] doplňková</span>
+      <span class="task-src">zdroj: praktický test 2021 (a4b-knights-csp)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“You task is to place as many Knights as possible on $8 \times 8$ chessboard such that no two Knights attack each other. Furthermore, there might be some Rooks already placed on some fixed positions on the chessboard – in that case, you have to place the Knights such that they are not attacked by the Rooks.</p>
+        <p>We remind you that Knight moves in an ‘L-shape’ as illustrated in Figure 1. In case of the presence of a Rook on the chessboard, it threatens the whole row and column of the chessboard, as shown in Figure 2. We remind that you do not come up with the positions for the Rooks, these are given to you as an input. They just restrict some of the squares for your Knights.”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Šachovnice $8 \times 8$, na vstupu množina věží na pevných pozicích. Umísti co nejvíc <strong>koní</strong> tak, aby (1) se žádní dva koně nenapadali (kůň útočí L-skokem $(\pm 1, \pm 2)$ a $(\pm 2, \pm 1)$) a (2) žádný kůň nestál na poli ohroženém věží — věž ohrožuje celý svůj řádek a sloupec (a její pole je obsazené). V originále je to praktická (programovací) úloha; tady ji řešíme jako ILP model, který by program volal.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — pozičně indexovaná binárka $x_s$ na políčko, párová kolize $x_s + x_{s'} \le 1$.</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Cílová funkce a základní omezení</a> — maximalizace součtu binárek.</li>
+        <li><a href="l1-3.html#takeaways">[L1.3] Modelování logiky</a> — fixace zakázaných polí na 0, NAND dvojice.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Index je tady <em>pozice</em> — políčko šachovnice. Jedna binárka na políčko, kritérium je počet jedniček. Pak dvě pravidla: která políčka jsou zakázaná úplně (věže — spočti si je <em>předem</em> z dat, žádné proměnné pro věže!) a které <em>dvojice</em> políček se vylučují (koňský skok). Vylučující se dvojice binárek = součet $\le 1$ — žádné big-M, žádný čas. Rozmysli: stačí každou útočnou dvojici napsat jednou, nebo ji musíš psát v obou směrech?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Množiny (z dat, ne proměnné).</strong> $S = \{1,\ldots,8\} \times \{1,\ldots,8\}$ políčka; $R \subseteq S$ pozice věží (vstup); $A \subseteq S$ = pole ohrožená nebo obsazená věžemi = všechna pole sdílející řádek nebo sloupec s některou věží (každá věž ohrožuje i své vlastní pole, takže $R \subseteq A$). Pro políčko $s = (r, c)$ je</p>
+          $$N(s) = \{(r \pm 1, c \pm 2), (r \pm 2, c \pm 1)\} \cap S$$
+          <p>množina polí napadených koněm stojícím na $s$ (vztah je symetrický: $s' \in N(s) \iff s \in N(s')$).</p>
+          <p><strong>Proměnné.</strong> $x_s \in \{0,1\}$ pro $s \in S$; $x_s = 1 \iff$ na $s$ stojí kůň.</p>
+          <p><strong>Kritérium.</strong></p>
+          $$\max \; \sum_{s \in S} x_s.$$
+          <p><strong>Pole zakázaná věžemi</strong> — fixace na nulu:</p>
+          $$x_s = 0 \qquad \forall s \in A.$$
+          <p><strong>Žádní dva koně se nenapadají</strong> — pro každou neuspořádanou útočnou dvojici stačí jedna nerovnost (vztah je symetrický; napsat ji v obou směrech není chyba, jen duplicita):</p>
+          $$x_s + x_{s'} \;\le\; 1 \qquad \forall s \in S,\ \forall s' \in N(s),\ s' \text{ „za“ } s \text{ v libovolném pevném uspořádání}.$$
+          <p>Výstup programu: $N = \sum_s x_s$ a seznam polí s $x_s = 1$. Sanity check: na prázdné šachovnici je optimum 32 (všechna pole jedné barvy — kůň útočí vždy na opačnou barvu, takže koně na bílých polích se nikdy nenapadají; vzorový výstup testu přesně tohle vrací).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.15">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-14.html"><span class="dir">← Předchozí</span> L1.14 · Sousednost a prostorová omezení — Toys [FOTO]</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// ===== Tabulka binárek x_{i,t}: stepper (řádkový součet, čtení startu, okno zdroje) =====
+// Příklad ze slidu 67: T1, T2, T3, p = (1, 2, 1), UB = 5; rozvrh s = (0, 1, 3).
+(function () {
+  const rows = [70, 165, 260];
+  const cols = [150, 250, 350, 450, 550];
+  const ones = { '1,0': 1, '2,1': 1, '3,3': 1 };   // x_{1,0} = x_{2,1} = x_{3,3} = 1
+  const nodes = [
+    { id: 'T1', x: 55, y: rows[0], label: 'T₁' },
+    { id: 'T2', x: 55, y: rows[1], label: 'T₂' },
+    { id: 'T3', x: 55, y: rows[2], label: 'T₃' },
+  ];
+  for (let i = 1; i <= 3; i++) for (let t = 0; t <= 4; t++) {
+    const one = ones[i + ',' + t];
+    nodes.push({
+      id: 'x' + i + t, x: cols[t], y: rows[i - 1],
+      label: one ? '1' : '0',
+      cls: one ? 'good' : '',
+      sub: (i === 3) ? ('t = ' + t) : undefined,   // časová osa pod spodním řádkem
+    });
+  }
+  KOViz.stepper(document.getElementById('viz-matrix'), {
+    graph: { h: 330, directed: false, nodes: nodes, edges: [] },
+    frames: [
+      { desc: 'Tabulka binárek x<sub>i,t</sub>: řádky = úlohy T₁, T₂, T₃ s dobami p = (1, 2, 1), sloupce = časy t = 0…4 (horizont UB = 5). Zelené jedničky kódují rozvrh se starty s₁ = 0, s₂ = 1, s₃ = 3.' },
+      { desc: '„T₂ startuje právě jednou“ = řádkový součet: x₂,₀ + x₂,₁ + x₂,₂ + x₂,₃ + x₂,₄ = 1. Stejné omezení píšeš pro každý řádek.',
+        nodes: { T2: 'hl', x20: 'hl', x21: 'good', x22: 'hl', x23: 'hl', x24: 'hl' } },
+      { desc: 'Čtení startu: s₂ = Σ t·x₂,ₜ = 0·0 + 1·1 + 2·0 + 3·0 + 4·0 = 1. Funguje jen díky kroku 2 — bez „právě jednou“ by výraz lhal.',
+        nodes: { T2: 'hl', x21: 'good' } },
+      { desc: 'Zdrojové omezení v čase τ = 2: sečti všechna okna startů, při kterých by úloha v τ = 2 běžela — x₁,₂ + (x₂,₁ + x₂,₂) + x₃,₂ ≤ 1 (T₂ má p₂ = 2, takže ji v τ = 2 drží i start v t = 1). Tady běží jen T₂ (interval [1, 3)).',
+        nodes: { x12: 'hl', x21: 'good', x22: 'hl', x32: 'hl' } },
+    ],
+  });
+})();
+
+// ===== Kůň na c3 a jeho útočné dvojice (Figure 1 praktického testu 2021) =====
+(function () {
+  const colNames = ['a', 'b', 'c', 'd', 'e'];
+  const attacked = { a2: 1, a4: 1, b1: 1, b5: 1, d1: 1, d5: 1, e2: 1, e4: 1 };
+  const nodes = [], edges = [];
+  for (let c = 0; c < 5; c++) for (let r = 1; r <= 5; r++) {
+    const id = colNames[c] + r;
+    nodes.push({
+      id: id, x: 180 + c * 70, y: 340 - (r - 1) * 75,   // řádek 1 dole jako na šachovnici
+      label: id === 'c3' ? '♞' : id,
+      cls: id === 'c3' ? 'hl' : (attacked[id] ? 'bad' : ''),
+    });
+  }
+  for (const a in attacked) edges.push({ from: 'c3', to: a, cls: 'bad', dashed: true, undirected: true });
+  KOViz.graph(document.getElementById('viz-knight'), {
+    h: 380, directed: false, nodes: nodes, edges: edges,
+    caption: 'Kůň na c3 (výřez 5 × 5 jako na Figure 1 testu) napadá osm červených polí. Každá čárkovaná dvojice dá jednu nerovnost: x<sub>c3</sub> + x<sub>a2</sub> ≤ 1, x<sub>c3</sub> + x<sub>a4</sub> ≤ 1, … — párová kolize pozičně indexovaných binárek, žádné big-M.'
+  });
+})();
+
+// ===== Tučňáci: x_{i,c,t} na mřížce 3×3, potápění ker (stepper, absolutní stavy) =====
+(function () {
+  const nodes = [];
+  for (let gx = 1; gx <= 3; gx++) for (let gy = 1; gy <= 3; gy++) {
+    nodes.push({ id: 'g' + gx + gy, x: 80 + gx * 120, y: 360 - gy * 100, label: gx + ',' + gy });
+  }
+  const SUB0 = { g11: '', g21: '', g31: '', g12: '', g22: '', g32: '', g13: '', g23: '', g33: '' };
+  function subs(map) { return Object.assign({}, SUB0, map); }
+  KOViz.stepper(document.getElementById('viz-penguins'), {
+    graph: { h: 320, directed: false, nodes: nodes, edges: [] },
+    frames: [
+      { desc: 'Mini-instance na mřížce 3 × 3 (originál na zkoušce: 5 × 5, tři tučňáci). t = 0: tučňák A stojí na (1,1), tučňák B na (3,3) — binárky x<sub>A,(1,1),0</sub> = 1, x<sub>B,(3,3),0</sub> = 1. Počáteční pozice se počítají jako vstupy: e<sub>A,(1,1),0</sub> = e<sub>B,(3,3),0</sub> = 1. Cíle: A → (3,1), B → (1,3).',
+        nodes: { g11: 'hl', g33: 'good' }, subs: subs({ g11: 'A', g33: 'B' }) },
+      { desc: 't = 1: oba se posunuli na 4-souseda (pohybové omezení x<sub>i,c,0</sub> ≤ x<sub>i,c,1</sub> + Σ x<sub>i,d,1</sub>). Opuštěné kry (1,1) a (3,3) se potopily — vstoupit na ně podruhé už nejde. Nové vstupy: e<sub>A,(2,1),1</sub> = e<sub>B,(2,3),1</sub> = 1.',
+        nodes: { g21: 'hl', g23: 'good', g11: 'bad', g33: 'bad' }, subs: subs({ g21: 'A', g23: 'B' }) },
+      { desc: 't = 2 = T<sub>max</sub>: A stojí na cíli (3,1), B na cíli (1,3) — cílové fixace x<sub>A,(3,1),2</sub> = x<sub>B,(1,3),2</sub> = 1 platí. Každá kra byla vstoupena nanejvýš jednou: Σ<sub>i</sub> Σ<sub>t</sub> e<sub>i,c,t</sub> ≤ 1 pro každou buňku c.',
+        nodes: { g31: 'hl', g13: 'good', g11: 'bad', g21: 'bad', g33: 'bad', g23: 'bad' }, subs: subs({ g31: 'A', g13: 'B' }) },
+    ],
+  });
+})();
+</script>
+</body>
+</html>
