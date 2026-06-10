@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L4.1 · Síť, tok, Kirchhoffův zákon — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k4">K4 · Toky a řezy</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L4.1</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L4.1</span> Kapitola K4 — Toky a řezy (Slot 4) · <strong>[MUST]</strong>
+  </p>
+  <h1>Síť, tok, Kirchhoffův zákon</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Síť</strong> $(G, l, u, s, t)$ a <strong>přípustný tok</strong>: funkce $f$ na hranách, která v každém vnitřním vrcholu splňuje Kirchhoffův zákon (vstup = výstup) a na každé hraně se vejde mezi dolní mez $l(e)$ a kapacitu $u(e)$.
+  </div>
+
+  <p>Začíná kapitola K4. Slot 4 padl v <strong>obou</strong> doložených termínech 2026 — Ford-Fulkerson (25. 5.), Residents &amp; council (1. 6.) — za 7 bodů. Všechno v této kapitole (augmentující cesty, řezy, párování, min-cost flow) stojí na slovníku z téhle lekce, takže si ho postavíme pečlivě. Stačí ti k tomu orientované grafy <a href="../k0/l0-1.html#takeaways">[L0.1] Co je graf</a> a značení $\delta^+(v)$, $\delta^-(v)$ z <a href="../k0/l0-2.html#takeaways">[L0.2] Stupeň vrcholu</a>.</p>
+
+  <!-- ===== SEKCE 1: MOTIVACE ===== -->
+  <h2>K čemu toky jsou</h2>
+  <p>Vzorová aplikace ze slidů (slide 4): <strong>transportation problem</strong> — chceme přepravit maximum zboží z místa $s$ do místa $t$ po síti tras (pipeline, railway, motorway…). Předpokládáme, že proudění na trasách je <em>steady and lossless</em> — ustálené a bezeztrátové: nic se cestou neztrácí, nic se nikde nehromadí. Přesně tahle dvě slova se za chvíli stanou Kirchhoffovým zákonem.</p>
+
+  <!-- ===== SEKCE 2: SÍŤ ===== -->
+  <h2>Co je síť (slide 3)</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 3 — What is Network?, 1:1</div>
+    <p><em>By network we mean a 5-tuple $(G, l, u, s, t)$, where $G$ denotes the directed graph, $u : E(G) \to \mathbb{R}^+_0$ and $l : E(G) \to \mathbb{R}^+_0$ denote the maximum and minimum capacity of the arcs and finally $s$ represents the <strong>source node</strong> (there is an oriented path from the source node to every other node) while $t$ represents the <strong>sink node</strong> (there is an oriented path from every other node to the sink node).</em></p>
+  </div>
+
+  <p>Česky: <strong>network</strong> (síť) je orientovaný graf $G$, kde každá hrana $e$ nese dvě čísla — <strong>maximum capacity</strong> $u(e)$ (kapacita: víc než $u(e)$ hranou protéct nesmí) a <strong>minimum capacity</strong> $l(e)$ (dolní mez: míň než $l(e)$ taky ne) — a dva vyznačené vrcholy: <strong>source</strong> $s$ (zdroj) a <strong>sink</strong> $t$ (stok). Ostatním vrcholům říkáme <em>vnitřní</em>.</p>
+
+  <details class="try">
+    <summary>Zkus sám: definice navíc chce, aby z $s$ vedla orientovaná cesta do každého vrcholu a z každého vrcholu do $t$. Proč si takový předpoklad můžeme dovolit — co bys udělal s vrcholem, do kterého se z $s$ vůbec nedá dostat?</summary>
+    <div class="inner">
+      <p>Takový vrchol se žádné dopravy z $s$ do $t$ nemůže účastnit: nepřiteče do něj (resp. z něj neodteče) nic, co by mělo se zdrojem a stokem něco společného. Můžeš ho i s jeho hranami ze sítě vyhodit a úloha se nezmění. Předpoklad tedy nic neomezuje — jen říká „síť už je takhle uklizená“.</p>
+    </div>
+  </details>
+
+  <p>Malá síť na hraní (popisek hrany = $l(e),\ u(e)$):</p>
+
+  <div class="viz" id="viz-net"></div>
+
+  <!-- ===== SEKCE 3: TOK A KIRCHHOFF ===== -->
+  <h2>Tok a Kirchhoffův zákon</h2>
+
+  <details class="try">
+    <summary>Zkus sám: do vnitřní křižovatky potrubí přitéká 5 litrů za sekundu, ale odtéká jen 3. Co se ve křižovatce děje? A jaká rovnost musí platit, když je proudění „steady and lossless“?</summary>
+    <div class="inner">
+      <p>Každou sekundu se ve křižovatce „ztratí“ 2 litry — buď se tam voda hromadí (a křižovatka brzy bouchne), nebo někudy uniká. Ustálené bezeztrátové proudění obojí zakazuje, takže ve <em>vnitřní</em> křižovatce musí platit <strong>přítok = odtok</strong>. Jediné dva vrcholy, kde rovnost neplatí, jsou $s$ (tok vyrábí) a $t$ (tok polyká).</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 3 — Network Flow, 1:1</div>
+    <p><em>$f : E(G) \to \mathbb{R}^+_0$ is the flow if Kirchhoff law $\sum_{e \in \delta^-(v)} f(e) = \sum_{e \in \delta^+(v)} f(e)$ is valid for every node except $s$ and $t$.</em></p>
+  </div>
+
+  <p><strong>Flow</strong> (tok) je tedy libovolné nezáporné ohodnocení hran, které v každém vrcholu kromě $s$ a $t$ splňuje <strong>Kirchhoff law</strong> (Kirchhoffův zákon, zákon zachování toku): součet toku na hranách <em>vstupujících</em> do $v$ (množina $\delta^-(v)$ <a href="../k0/l0-2.html#takeaways">[L0.2]</a>) se rovná součtu na hranách <em>vystupujících</em> ($\delta^+(v)$). Jméno je vypůjčené z fyziky — je to přesně Kirchhoffův zákon o proudu v elektrickém uzlu.</p>
+
+  <p>Stejná síť, teď i s tokem (popisek hrany = $l(e),\ f(e),\ u(e)$ — tohle pořadí používá i zkouška):</p>
+
+  <div class="viz" id="viz-flow"></div>
+
+  <details class="try">
+    <summary>Zkus sám: ověř Kirchhoffův zákon ve vrcholech $a$ a $b$ na obrázku.</summary>
+    <div class="inner">
+      <p>Vrchol $a$: dovnitř $f(s,a) = 3$; ven $f(a,b) + f(a,t) = 1 + 2 = 3$. ✓<br>
+      Vrchol $b$: dovnitř $f(s,b) + f(a,b) = 1 + 1 = 2$; ven $f(b,t) = 2$. ✓<br>
+      U $s$ a $t$ rovnost neplatí a platit nemá: z $s$ čistě odtékají 4 jednotky, do $t$ 4 přitékají.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 4: PŘÍPUSTNOST ===== -->
+  <h2>Přípustný tok</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 3 — Feasible Flow, 1:1</div>
+    <p><em>Feasible flow must satisfy $f(e) \in \langle l(e), u(e) \rangle$.<br>
+    There might be no feasible flow when $l(e) > 0$.</em></p>
+  </div>
+
+  <p><strong>Feasible flow</strong> (přípustný tok) = tok, který se na každé hraně vejde do mezí: $l(e) \le f(e) \le u(e)$. Meze umí vyjádřit překvapivě hodně:</p>
+
+  <details class="try">
+    <summary>Zkus sám: co o hraně říkají omezení ze slidu 4 — $u_i = 10$, $l_j = 3$ a $l_k = u_k = 20$?</summary>
+    <div class="inner">
+      <p>1:1 ze slidu 4: <em>$u_i = 10$ — arc $i$ is capable of transporting 10 units maximum; $l_j = 3$ — arc $j$ must transport at least 3 units; $l_k = u_k = 20$ — arc $k$ transports exactly 20 units.</em> Tedy: horní mez = „nejvýš“, dolní mez = „aspoň“ a $l = u$ <strong>přibije</strong> tok hrany na přesnou hodnotu — žádná volnost.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „nulový tok je vždy přípustný“</div>
+    <p>Při $l \equiv 0$ ano — $f \equiv 0$ meze triviálně splní a každý algoritmus z něj může vystartovat. Jakmile ale má některá hrana $l(e) &gt; 0$, nulový tok přípustný <strong>není</strong> a přípustný tok dokonce <strong>nemusí existovat vůbec</strong> (vyzkoušíš si v úloze T02 dole). Proto zkouškové zadání Ford-Fulkersona rovnou <em>dává</em> přípustný tok $f$ v popisku $(l_e, f_e, u_e)$ — a proto existuje samostatná konstrukce počátečního přípustného toku, kterou potkáš v [L4.7]; rozhodovací verzi s bilancemi pak v [L4.6].</p>
+  </div>
+
+  <!-- ===== SEKCE 5: HODNOTA TOKU ===== -->
+  <h2>Hodnota toku a problém maximálního toku (slide 4)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: tok je rozprostřený po celé síti. Jak ho „změřit“ jedním číslem? Proč nedává smysl prostě sečíst všechna $f(e)$?</summary>
+    <div class="inner">
+      <p>Jedna jednotka zboží putující po cestě o čtyřech hranách by se v součtu $\sum_e f(e)$ započítala čtyřikrát — to neměří, <em>kolik</em> sítí proteklo, ale jak dlouhé trasy zboží jede. Správné měřidlo: postav se ke zdroji a počítej, kolik z něj <strong>čistě odteče</strong> (odtok minus případný přítok zpět do $s$). Díky Kirchhoffovu zákonu se nic cestou neztratí, takže totéž číslo naměříš i u stoku $t$.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 4 — Maximum flow, 1:1</div>
+    <p><em>Given a network $(G, l, u, s, t)$. The goal is to find the <strong>feasible flow</strong> $f$ from the source to the sink that maximizes $\sum_{e \in \delta^+(s)} f(e) - \sum_{e \in \delta^-(s)} f(e)$ (i.e. to send the maximum volume of the flow from $s$ to $t$).</em></p>
+    <p><em>$\delta^+(s)$ is a set of arcs leaving node $s$<br>
+    $\delta^-(s)$ is a set of arcs entering node $s$ (often we do not consider these arcs).</em></p>
+  </div>
+
+  <p>Číslu $\sum_{e \in \delta^+(s)} f(e) - \sum_{e \in \delta^-(s)} f(e)$ budeme říkat <strong>hodnota toku</strong> a značit $|f|$. V naší malé síti žádná hrana do $s$ nevstupuje, takže $|f| = f(s,a) + f(s,b) = 3 + 1 = 4$. <strong>Maximum flow problem</strong> (problém maximálního toku) = najdi přípustný tok s největší hodnotou.</p>
+
+  <h2>Tok jako LP — a měření na libovolné hranici (slide 8)</h2>
+
+  <p>Definici umíme přepsat rovnou jako lineární program (LP znáš z <a href="../k0/l0-7.html#takeaways">[L0.7] Co je ILP a LP relaxace</a> a celé K1) — proměnná $f(e) \in \mathbb{R}^+_0$ pro každou hranu, Kirchhoff jako rovnosti, meze jako nerovnosti:</p>
+
+  <p>$$
+  \begin{aligned}
+  \max \quad & \sum_{e \in \delta^+(s)} f(e) - \sum_{e \in \delta^-(s)} f(e) \\
+  \text{s.t.} \quad & \sum_{e \in \delta^-(v)} f(e) = \sum_{e \in \delta^+(v)} f(e) \qquad & v \in V(G) \setminus \{s, t\} \\
+  & l(e) \le f(e) \le u(e) & e \in E(G)
+  \end{aligned}
+  $$</p>
+
+  <p>Žádné celočíselné proměnné — je to čisté LP. (Kdy a proč vyjde tok celočíselně „zadarmo“, se dozvíš později v kapitole; logická omezení, která už ILP vyžadují, přijdou v [L4.14].) Slide 8 k formulaci přidává nenápadnou poznámku, která je ve skutečnosti předzvěst nejdůležitější věty kapitoly:</p>
+
+  <div class="box">
+    <div class="box-title">Slide 8 — poznámka + Homework, 1:1</div>
+    <p><em>Note that the following equation is valid for any set $A$ containing source $s$ but not containing sink $t$:</em></p>
+    <p>$$\sum_{e \in \delta^+(s)} f(e) - \sum_{e \in \delta^-(s)} f(e) = \sum_{e \in \delta^+(A)} f(e) - \sum_{e \in \delta^-(A)} f(e).$$</p>
+    <p><em><strong>Homework:</strong> Prove it while using Kirchhoff's law.</em></p>
+  </div>
+
+  <p>Slovy: hodnotu toku $|f|$ nenaměříš jen u zdroje — stejné číslo dostaneš na hranici <strong>libovolné</strong> množiny vrcholů $A$ s $s \in A$, $t \notin A$ (ven přes hranici minus dovnitř přes hranici). Takovým hranicím se bude říkat <strong>řez</strong> (cut) a v [L4.4] z téhle rovnosti vyroste věta max-flow = min-cut.</p>
+
+  <details class="try">
+    <summary>Zkus sám: ověř rovnost na naší malé síti pro $A = \{s, a\}$.</summary>
+    <div class="inner">
+      <p>Hrany ven z $A$: $(a,b)$ s $f = 1$, $(a,t)$ s $f = 2$ a $(s,b)$ s $f = 1$ → součet $4$. Hrany dovnitř do $A$: žádné. Takže $\sum_{\delta^+(A)} f - \sum_{\delta^-(A)} f = 4 - 0 = 4 = |f|$. ✓</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám (Homework ze slidu 8): dokaž rovnost Kirchhoffovým zákonem. Nápověda: sečti Kirchhoffovy rovnosti přes všechny vrcholy $v \in A$ a sleduj, co se stane s hranami, které mají oba konce uvnitř $A$.</summary>
+    <div class="inner">
+      <p><em>(Rozepsání je naše — slide dává důkaz jen jako homework.)</em> Sečti přes všechny $v \in A$ výraz $\sum_{e \in \delta^+(v)} f(e) - \sum_{e \in \delta^-(v)} f(e)$:</p>
+      <ul>
+        <li>Pro vnitřní vrcholy $v \in A \setminus \{s\}$ je tento výraz $0$ (Kirchhoff; $t \notin A$, takže jediný vrchol v $A$ bez Kirchhoffa je $s$). Celkový součet je proto roven příspěvku zdroje $\sum_{\delta^+(s)} f - \sum_{\delta^-(s)} f = |f|$.</li>
+        <li>Teď totéž spočítej po hranách. Hrana s <strong>oběma konci v $A$</strong> se v součtu objeví dvakrát: jednou jako vystupující ($+f(e)$ u svého počátku), jednou jako vstupující ($-f(e)$ u svého konce) — <strong>vyruší se</strong>. Hrana vedoucí <strong>ven z $A$</strong> přispěje jen $+f(e)$, hrana <strong>dovnitř</strong> jen $-f(e)$, hrany mimo $A$ nepřispějí vůbec.</li>
+      </ul>
+      <p>Součet je tedy zároveň $\sum_{e \in \delta^+(A)} f(e) - \sum_{e \in \delta^-(A)} f(e)$, a rovnost platí. $\blacksquare$</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 6: ZKOUŠKOVÁ SÍŤ ===== -->
+  <h2>Zkoušková síť z 25. 5. 2026 — naučit se ji číst</h2>
+
+  <p>Zkouškové zadání Ford-Fulkersona (25. 5. 2026) dává síť, kde každá hrana nese trojici $(l_e, f_e, u_e)$ — <em>minimum capacity, feasible flow, maximum capacity</em>. Samotný běh algoritmu přijde až v [L4.3] a řez v [L4.4]; dnes síť „jen“ přečteme brýlemi téhle lekce: je zadané $f$ opravdu přípustný tok a jakou má hodnotu?</p>
+
+  <div class="viz" id="viz-exam"></div>
+
+  <p style="font-size:14px;color:var(--ink-soft)"><em>Poznámka k přepisu: tištěné popisky obou diagonálních hran jsou ve zdrojových přepisech rozporné (sama banka úloh u $T_3 \to T_7$ uvádí korekci). Používáme jediné čtení konzistentní s oficiálním řešením banky: $T_3 \to T_7 = (0,1,1)$ a $T_4 \to T_5 = (0,0,8)$ — jen s ním je zadané $f$ vůbec tok.</em></p>
+
+  <details class="try">
+    <summary>Zkus sám: ověř Kirchhoffův zákon ve vrcholu $T_3$ (tři hrany ven, jedna dovnitř).</summary>
+    <div class="inner">
+      <p>Dovnitř: $f(T_1, T_3) = 5$. Ven: $f(T_3, T_6) + f(T_3, T_5) + f(T_3, T_7) = 0 + 4 + 1 = 5$. ✓ Sedí — a všimni si, že bez korekce diagonály ($f_{37} = 1$) by to nesedělo.</p>
+    </div>
+  </details>
+
+  <p>Celá kontrola přípustnosti, vrchol po vrcholu, a výpočet hodnoty:</p>
+
+  <div class="viz" id="viz-check"></div>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Tři rychlé kontroly, než začneš cokoli počítat</div>
+    <p>U každé tokové úlohy na zkoušce se vyplatí 30 sekund: ① <strong>Kirchhoff</strong> v každém vnitřním vrcholu (odhalí překlep v zadání i ve vlastním výpočtu), ② <strong>meze</strong> $l \le f \le u$ na každé hraně — pozor hlavně na hrany s $l &gt; 0$, ③ <strong>hodnota</strong> $|f|$ = čistý odtok z $s$ (a pro kontrolu totéž u $t$). Mimochodem: kapacity sedí vždy <em>na hranách</em> — kdyby zadání omezovalo průtok <em>vrcholem</em>, rozdělíš vrchol na dva stejným trikem, jako byl split vrcholu v <a href="../k2/l2-6.html#takeaways">[L2.6]</a>.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.1</div>
+    <ul>
+      <li><strong>Síť</strong> = pětice $(G, l, u, s, t)$: orientovaný graf, dolní meze $l(e)$ a kapacity $u(e)$ na hranách, zdroj $s$, stok $t$.</li>
+      <li><strong>Tok</strong> $f: E(G) \to \mathbb{R}^+_0$ splňuje <strong>Kirchhoffův zákon</strong> v každém vrcholu kromě $s, t$: $\sum_{e \in \delta^-(v)} f(e) = \sum_{e \in \delta^+(v)} f(e)$ (vstup = výstup, nic se neztrácí ani nehromadí).</li>
+      <li><strong>Přípustný tok</strong>: navíc $l(e) \le f(e) \le u(e)$ na každé hraně. Při $l &gt; 0$ není $f \equiv 0$ přípustný a přípustný tok nemusí existovat vůbec.</li>
+      <li><strong>Hodnota toku</strong> $|f| = \sum_{e \in \delta^+(s)} f(e) - \sum_{e \in \delta^-(s)} f(e)$; díky Kirchhoffovi naměříš totéž číslo na hranici libovolné množiny $A \ni s$, $t \notin A$ — předzvěst řezu [L4.4].</li>
+      <li><strong>Max flow problem</strong>: najdi přípustný tok maximalizující $|f|$; jako LP má jen Kirchhoffovy rovnosti + meze na hranách.</li>
+      <li>Zkouškový formát popisku hrany: $(l_e, f_e, u_e)$ — minimum capacity, feasible flow, maximum capacity.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-examnet">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Čtení zkouškové sítě (l, f, u)</strong>
+      <span class="task-src">zdroj: zkouška KO 25.05.2026 = task bank #21 (síť 1:1; otázky i–iii pro tuto lekci vlastní)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“a) Using Ford-Fulkerson alg. solve the maximum flow problem for the graph in the upper left corner (arc label is $l_e, f_e, u_e$, i.e., minimum capacity, feasible flow, maximum capacity). The source is $T_1$, the sink is $T_8$. Show the augmenting path in each iteration.</p>
+        <p>b) Determine the minimum capacity cut.”</p>
+        <p>Edge list — $(l_e, f_e, u_e)$: $T_1{\to}T_2$: $0,4,4$; $T_1{\to}T_3$: $2,5,5$; $T_1{\to}T_4$: $0,0,7$; $T_2{\to}T_6$: $0,4,7$; $T_3{\to}T_6$: $0,0,6$; $T_3{\to}T_5$: $1,4,4$; $T_3{\to}T_7$: $0,1,1$; $T_4{\to}T_5$: $0,0,8$; $T_4{\to}T_7$: $0,0,1$; $T_6{\to}T_8$: $0,4,7$; $T_5{\to}T_8$: $0,4,8$; $T_7{\to}T_8$: $1,1,4$. <em>(Síť je nakreslená výše ve výkladu.)</em></p>
+      </div>
+
+      <p><em>Originální otázky a), b) vyřešíme až v [L4.3] a [L4.4] — dnes na síti procvičíme přesně to, co umí tahle lekce. Otázky (i)–(iii) jsou naše vlastní:</em></p>
+      <ol>
+        <li>Verify that the prescribed $f$ is a <strong>feasible flow</strong>.</li>
+        <li>Compute the flow value $|f|$.</li>
+        <li>Without running any algorithm, give an upper bound on the maximum flow value.</li>
+      </ol>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Síť $(G, l, u, s{=}T_1, t{=}T_8)$ s 8 vrcholy a 12 hranami; každá hrana nese trojici $(l_e, f_e, u_e)$. Prostřední číslo je <em>nabídnutý</em> přípustný tok — zkouška ti ho dává jako startovní bod pro Ford-Fulkersona. My ověříme, že to přípustný tok opravdu je, změříme ho a odhadneme, kam až může maximální tok vyrůst.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice toku, přípustnosti a hodnoty $|f|$ (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k0/l0-2.html#takeaways">[L0.2] Stupeň vrcholu</a> — značení $\delta^+(v)$, $\delta^-(v)$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(i) Přípustnost má dvě nezávislé části — kterou kontroluješ po <em>vrcholech</em> a kterou po <em>hranách</em>? Kolik vrcholů musíš projít (a které dva přeskočit)? (ii) Kde se hodnota toku odečítá a co kdyby do $T_1$ nějaká hrana vstupovala? (iii) Veškerý tok musí opustit $s$ — co ho shora omezuje, i kdyby zbytek sítě byl nekonečně štědrý? Existuje stejný argument u $t$? Které z obou omezení je těsnější?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i) Kirchhoff ve vnitřních vrcholech $T_2, \ldots, T_7$</strong> (vstup = výstup):</p>
+          <ul>
+            <li>$T_2$: $4 = 4$ ✓ &nbsp; ($f_{12} = f_{26}$)</li>
+            <li>$T_3$: $5 = 0 + 4 + 1$ ✓ &nbsp; ($f_{13} = f_{36} + f_{35} + f_{37}$)</li>
+            <li>$T_4$: $0 = 0 + 0$ ✓ &nbsp; ($f_{14} = f_{45} + f_{47}$)</li>
+            <li>$T_5$: $4 + 0 = 4$ ✓ &nbsp; ($f_{35} + f_{45} = f_{58}$)</li>
+            <li>$T_6$: $4 + 0 = 4$ ✓ &nbsp; ($f_{26} + f_{36} = f_{68}$)</li>
+            <li>$T_7$: $1 + 0 = 1$ ✓ &nbsp; ($f_{37} + f_{47} = f_{78}$)</li>
+          </ul>
+          <p><strong>Meze $l \le f \le u$:</strong> hrany s $l &gt; 0$ jsou tři: $T_1{\to}T_3$ ($2 \le 5 \le 5$ ✓), $T_3{\to}T_5$ ($1 \le 4 \le 4$ ✓), $T_7{\to}T_8$ ($1 \le 1 \le 4$ ✓). Zbylé hrany mají $l = 0$ a všude $f \le u$ (zkontroluj po řádcích tabulky). Takže $f$ je <strong>přípustný tok</strong>. ✓</p>
+          <p><strong>(ii) Hodnota:</strong> do $T_1$ žádná hrana nevstupuje, takže
+          $$|f| = f_{12} + f_{13} + f_{14} = 4 + 5 + 0 = 9.$$
+          Kontrola u stoku: $f_{68} + f_{58} + f_{78} = 4 + 4 + 1 = 9$ ✓ (Kirchhoff funguje).</p>
+          <p><strong>(iii) Horní mez:</strong> všechen tok musí odtéct hranami $\delta^+(T_1)$, takže
+          $$|f| \le u_{12} + u_{13} + u_{14} = 4 + 5 + 7 = 16.$$
+          Stejný argument u stoku: $|f| \le u_{68} + u_{58} + u_{78} = 7 + 8 + 4 = 19$. Těsnější je mez u zdroje, $16$. (To jsou jen dvě nejjednodušší „hranice“ ze slidu 8 — $A = \{T_1\}$ a $A = V \setminus \{T_8\}$; obecné řezy v [L4.4]. A spoiler: Ford-Fulkerson v [L4.3] dožene tok z 9 právě na 16, takže mez u zdroje je zde dokonce dosažená.)</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-nofeasible">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>When no feasible flow exists</strong>
+      <span class="task-src">zdroj: VLASTNÍ drill (ilustruje větu slidu 3 „there might be no feasible flow when l(e) &gt; 0“)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (vlastní, EN)</span>
+        <p>Consider the network in the figure below; arc labels are $(l_e, u_e)$. (i) Prove that no feasible flow exists. (ii) Change the upper bound of a single arc as little as possible so that a feasible flow exists, and give one such flow.</p>
+      </div>
+
+      <div class="viz" id="viz-nofeas"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Síť se zdrojem $s$, stokem $t$ a dvěma vnitřními vrcholy; hrana $a \to t$ má dolní mez $l = 3$ (musí jí protéct aspoň 3), ale přívod do $a$ má kapacitu jen 2. Máme dokázat, že žádný přípustný tok neexistuje, a pak síť minimální úpravou jedné kapacity spravit.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — Kirchhoffův zákon + meze $l \le f \le u$ (<a href="#takeaways">takeaways</a>).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Důkaz neexistence = najít vrchol, kde se Kirchhoff a meze poperou. Co říká Kirchhoff o $f(s,a)$ a $f(a,t)$? Jaké nerovnosti na ně kladou meze? Dají se všechny tři podmínky splnit najednou? (Větev přes $b$ do konfliktu vůbec nemluví — proč?)</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Vrchol $a$ má jedinou hranu dovnitř a jedinou ven, takže Kirchhoff dává $f(s,a) = f(a,t)$. Meze ale chtějí
+          $$f(a,t) \ge l(a,t) = 3 \quad\text{a}\quad f(s,a) \le u(s,a) = 2,$$
+          dohromady $3 \le f(a,t) = f(s,a) \le 2$ — spor. Žádný přípustný tok neexistuje. $\blacksquare$ (Větev $s \to b \to t$ je nevinná: její toky se v konfliktu nevyskytují, sama si vystačí třeba s $f = 0$, protože má $l = 0$.)</p>
+          <p><strong>(ii)</strong> Konflikt zmizí, právě když $u(s,a) \ge 3$ — nejmenší úprava je zvýšit $u(s,a)$ z $2$ na $3$. Pak je přípustný např. tok
+          $$f(s,a) = f(a,t) = 3, \qquad f(s,b) = f(b,t) = 0,$$
+          (Kirchhoff: $a$: $3 = 3$ ✓, $b$: $0 = 0$ ✓; meze všude ✓) s hodnotou $|f| = 3$. Systematickou konstrukci počátečního přípustného toku — bez hádání — dostaneš v [L4.7].</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L4.1">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k3/l3-14.html"><span class="dir">← Předchozí</span> L3.14 · k-OPT local search [NICE]</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.2 · Reziduální graf a augmentující cesta)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Malá síť: jen meze (l, u)
+KOViz.graph(document.getElementById('viz-net'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s', x:80,  y:180, sub:'zdroj'},
+    {id:'a', x:300, y:70},
+    {id:'b', x:300, y:290},
+    {id:'t', x:540, y:180, sub:'stok'},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'0, 3'},
+    {from:'s', to:'b', label:'0, 2'},
+    {from:'a', to:'b', label:'1, 2', cls:'hl'},
+    {from:'a', to:'t', label:'0, 2'},
+    {from:'b', to:'t', label:'0, 3'},
+  ],
+  caption: 'Síť (G, l, u, s, t); popisek hrany = l(e), u(e). Modrá hrana a→b má dolní mez l = 1: musí jí protéct aspoň jednotka.',
+});
+
+// 2 — Tatáž síť s tokem (l, f, u)
+KOViz.graph(document.getElementById('viz-flow'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s', x:80,  y:180},
+    {id:'a', x:300, y:70},
+    {id:'b', x:300, y:290},
+    {id:'t', x:540, y:180},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'0, 3, 3'},
+    {from:'s', to:'b', label:'0, 1, 2'},
+    {from:'a', to:'b', label:'1, 1, 2', cls:'hl'},
+    {from:'a', to:'t', label:'0, 2, 2'},
+    {from:'b', to:'t', label:'0, 2, 3'},
+  ],
+  caption: 'Přípustný tok; popisek = l(e), f(e), u(e) — stejné pořadí jako na zkoušce. Ve vnitřních vrcholech a, b platí Kirchhoff; |f| = 3 + 1 = 4.',
+});
+
+// 3 — Zkoušková síť 25. 5. 2026 (bank #21), čtení konzistentní s řešením banky
+KOViz.graph(document.getElementById('viz-exam'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'T1', x:60,  y:180, label:'T₁', sub:'zdroj'},
+    {id:'T2', x:220, y:55,  label:'T₂'},
+    {id:'T3', x:220, y:180, label:'T₃'},
+    {id:'T4', x:220, y:305, label:'T₄'},
+    {id:'T6', x:420, y:55,  label:'T₆'},
+    {id:'T5', x:420, y:180, label:'T₅'},
+    {id:'T7', x:420, y:305, label:'T₇'},
+    {id:'T8', x:580, y:180, label:'T₈', sub:'stok'},
+  ],
+  edges: [
+    {from:'T1', to:'T2', label:'0,4,4'},
+    {from:'T1', to:'T3', label:'2,5,5'},
+    {from:'T1', to:'T4', label:'0,0,7'},
+    {from:'T2', to:'T6', label:'0,4,7'},
+    {from:'T3', to:'T6', label:'0,0,6'},
+    {from:'T3', to:'T5', label:'1,4,4'},
+    {from:'T3', to:'T7', label:'0,1,1', curve:0.35},
+    {from:'T4', to:'T5', label:'0,0,8', curve:-0.35},
+    {from:'T4', to:'T7', label:'0,0,1'},
+    {from:'T6', to:'T8', label:'0,4,7'},
+    {from:'T5', to:'T8', label:'0,4,8'},
+    {from:'T7', to:'T8', label:'1,1,4'},
+  ],
+  caption: 'Zkoušková síť (KO 25. 5. 2026): popisek hrany = (lₑ, fₑ, uₑ). Zdroj T₁, stok T₈; dvě diagonální hrany T₃→T₇ a T₄→T₅ se kříží.',
+});
+
+// 4 — Stepper: kontrola přípustnosti vrchol po vrcholu + hodnota
+KOViz.stepper(document.getElementById('viz-check'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'T1', x:60,  y:180, label:'T₁'},
+      {id:'T2', x:220, y:55,  label:'T₂'},
+      {id:'T3', x:220, y:180, label:'T₃'},
+      {id:'T4', x:220, y:305, label:'T₄'},
+      {id:'T6', x:420, y:55,  label:'T₆'},
+      {id:'T5', x:420, y:180, label:'T₅'},
+      {id:'T7', x:420, y:305, label:'T₇'},
+      {id:'T8', x:580, y:180, label:'T₈'},
+    ],
+    edges: [
+      {from:'T1', to:'T2', label:'0,4,4'},
+      {from:'T1', to:'T3', label:'2,5,5'},
+      {from:'T1', to:'T4', label:'0,0,7'},
+      {from:'T2', to:'T6', label:'0,4,7'},
+      {from:'T3', to:'T6', label:'0,0,6'},
+      {from:'T3', to:'T5', label:'1,4,4'},
+      {from:'T3', to:'T7', label:'0,1,1', curve:0.35},
+      {from:'T4', to:'T5', label:'0,0,8', curve:-0.35},
+      {from:'T4', to:'T7', label:'0,0,1'},
+      {from:'T6', to:'T8', label:'0,4,7'},
+      {from:'T5', to:'T8', label:'0,4,8'},
+      {from:'T7', to:'T8', label:'1,1,4'},
+    ],
+  },
+  frames: [
+    {desc:'Přípustnost = ① Kirchhoff v každém vnitřním vrcholu T₂–T₇ (vstup = výstup), ② l ≤ f ≤ u na každé hraně. Popisek hrany = l,f,u; projdeme vrcholy po jednom.',
+     nodes:{}, edges:{}, subs:{}},
+    {desc:'① T₂: dovnitř f₁₂ = 4, ven f₂₆ = 4. Sedí.',
+     nodes:{T2:'hl'},
+     edges:{'T1->T2':'hl','T2->T6':'hl'},
+     subs:{T2:'4 = 4 ✓'}},
+    {desc:'① T₃: dovnitř f₁₃ = 5, ven f₃₆ + f₃₅ + f₃₇ = 0 + 4 + 1 = 5. Sedí (díky diagonále f₃₇ = 1).',
+     nodes:{T2:'good', T3:'hl'},
+     edges:{'T1->T3':'hl','T3->T6':'hl','T3->T5':'hl','T3->T7':'hl'},
+     subs:{T2:'4 = 4 ✓', T3:'5 = 0+4+1 ✓'}},
+    {desc:'① T₄: dovnitř f₁₄ = 0, ven f₄₅ + f₄₇ = 0 + 0 = 0. Sedí — spodní větví zatím nic neteče.',
+     nodes:{T2:'good', T3:'good', T4:'hl'},
+     edges:{'T1->T4':'hl','T4->T5':'hl','T4->T7':'hl'},
+     subs:{T2:'4 = 4 ✓', T3:'5 = 0+4+1 ✓', T4:'0 = 0+0 ✓'}},
+    {desc:'① T₅: dovnitř f₃₅ + f₄₅ = 4 + 0 = 4, ven f₅₈ = 4. Sedí.',
+     nodes:{T2:'good', T3:'good', T4:'good', T5:'hl'},
+     edges:{'T3->T5':'hl','T4->T5':'hl','T5->T8':'hl'},
+     subs:{T2:'4 = 4 ✓', T3:'5 = 0+4+1 ✓', T4:'0 = 0+0 ✓', T5:'4+0 = 4 ✓'}},
+    {desc:'① T₆: dovnitř f₂₆ + f₃₆ = 4 + 0 = 4, ven f₆₈ = 4. Sedí.',
+     nodes:{T2:'good', T3:'good', T4:'good', T5:'good', T6:'hl'},
+     edges:{'T2->T6':'hl','T3->T6':'hl','T6->T8':'hl'},
+     subs:{T2:'4 = 4 ✓', T3:'5 = 0+4+1 ✓', T4:'0 = 0+0 ✓', T5:'4+0 = 4 ✓', T6:'4+0 = 4 ✓'}},
+    {desc:'① T₇: dovnitř f₃₇ + f₄₇ = 1 + 0 = 1, ven f₇₈ = 1. Sedí — Kirchhoff platí ve všech vnitřních vrcholech.',
+     nodes:{T2:'good', T3:'good', T4:'good', T5:'good', T6:'good', T7:'hl'},
+     edges:{'T3->T7':'hl','T4->T7':'hl','T7->T8':'hl'},
+     subs:{T2:'4 = 4 ✓', T3:'5 = 0+4+1 ✓', T4:'0 = 0+0 ✓', T5:'4+0 = 4 ✓', T6:'4+0 = 4 ✓', T7:'1+0 = 1 ✓'}},
+    {desc:'② Meze: hrany s l > 0 jsou tři (zvýrazněné): T₁→T₃ (2 ≤ 5 ≤ 5 ✓), T₃→T₅ (1 ≤ 4 ≤ 4 ✓), T₇→T₈ (1 ≤ 1 ≤ 4 ✓). Zbytek má l = 0 a všude f ≤ u. f je přípustný tok.',
+     nodes:{T2:'good', T3:'good', T4:'good', T5:'good', T6:'good', T7:'good'},
+     edges:{'T1->T3':'hl','T3->T5':'hl','T7->T8':'hl'},
+     subs:{}},
+    {desc:'Hodnota: do T₁ nic nevstupuje, takže |f| = f₁₂ + f₁₃ + f₁₄ = 4 + 5 + 0 = 9. Kontrola u stoku: 4 + 4 + 1 = 9 ✓. Tohle je startovní tok pro Ford-Fulkersona v L4.3.',
+     nodes:{T1:'hl', T2:'good', T3:'good', T4:'good', T5:'good', T6:'good', T7:'good', T8:'hl'},
+     edges:{'T1->T2':'hl','T1->T3':'hl','T1->T4':'hl','T6->T8':'good','T5->T8':'good','T7->T8':'good'},
+     subs:{T1:'|f| = 9', T8:'9 ✓'}},
+  ],
+  caption: 'Kontrola, že zadané f je přípustný tok (Kirchhoff vrchol po vrcholu + meze), a výpočet hodnoty |f| = 9.',
+});
+
+// 5 — T02: síť bez přípustného toku
+KOViz.graph(document.getElementById('viz-nofeas'), {
+  directed: true,
+  w: 640, h: 300,
+  nodes: [
+    {id:'s', x:90,  y:150},
+    {id:'a', x:320, y:60},
+    {id:'b', x:320, y:240},
+    {id:'t', x:550, y:150},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'0, 2', cls:'hl'},
+    {from:'a', to:'t', label:'3, 5', cls:'hl'},
+    {from:'s', to:'b', label:'0, 4'},
+    {from:'b', to:'t', label:'0, 1'},
+  ],
+  caption: 'Úloha T02; popisek hrany = l(e), u(e). Zvýrazněná dvojice hran je v konfliktu: do a přiteče nejvýš 2, ale ven musí aspoň 3.',
+});
+</script>
+</body>
+</html>
