@@ -78,7 +78,7 @@
 
   <h2>Rozhodovací problém: odpověď je jen ANO/NE</h2>
 
-  <p>HC se ptá <em>„existuje?“</em> — odpověď je jediný bit, žádná cílová funkce. S rozhodovacími úlohami ses už potkal(a) u 2-Partition: rozhodovací ILP s cílem $\min 0$ <a href="../k0/l0-8.html#takeaways">[L0.8]</a>, <a href="../k1/l1-1.html#takeaways">[L1.1]</a>. Slide 13 uvádí HC pod titulkem <em>„Related Decision Problem“</em> — je to rozhodovací příbuzný <strong>optimalizačního</strong> TSP („najdi <em>nejlevnější</em> Hamiltonovskou kružnici v úplném grafu $K_n$“), který formálně zavedeme v [L3.4]. Tahle dvojice (rozhodovací HC ↔ optimalizační TSP) je přesně to, co budou důkazy [L3.5]/[L3.6] spřahovat.</p>
+  <p>HC se ptá <em>„existuje?“</em> — odpověď je jediný bit, žádná cílová funkce. S rozhodovacími úlohami ses už potkal(a) u 2-Partition: rozhodovací ILP s cílem $\min 0$ <a href="../k0/l0-8.html#takeaways">[L0.8]</a>, <a href="../k1/l1-1.html#takeaways">[L1.1]</a>. Slide 13 uvádí HC pod titulkem <em>„Related Decision Problem“</em> — je to rozhodovací příbuzný <strong>optimalizačního</strong> TSP („najdi <em>nejlevnější</em> Hamiltonovskou kružnici v úplném grafu $K_n$“), který formálně zavedeme v <a href="l3-4.html">[L3.4]</a>. Tahle dvojice (rozhodovací HC ↔ optimalizační TSP) je přesně to, co budou důkazy [L3.5]/[L3.6] spřahovat.</p>
 
   <!-- ===== SEKCE 2: CO DĚLÁ PROBLÉM TĚŽKÝM ===== -->
   <h2>Co vlastně dělá TSP (a HC) těžkým?</h2>
@@ -151,7 +151,7 @@
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy o NP</div>
     <ul>
       <li><strong>„NP znamená ne-polynomiální.“</strong> NE — NP je „nedeterministicky polynomiální“ ≈ <em>ANO-odpověď ověřitelná polynomiálně certifikátem</em>. Celé P leží uvnitř NP.</li>
-      <li><strong>„NP-úplný = prakticky neřešitelný.“</strong> NE — slidy 3–12 ukazují <em>optimálně vyřešené</em> TSP instance až s 24 978 městy (Švédsko 2004). NP-úplnost říká jen: polynomiální algoritmus pro <em>všechny</em> instance není znám (a nejspíš neexistuje). Chytré exponenciální metody (B&B <a href="../k0/l0-7.html#takeaways">[L0.7]</a>, ILP modely [L3.4]) konkrétní instance zvládají.</li>
+      <li><strong>„NP-úplný = prakticky neřešitelný.“</strong> NE — slidy 3–12 ukazují <em>optimálně vyřešené</em> TSP instance až s 24 978 městy (Švédsko 2004). NP-úplnost říká jen: polynomiální algoritmus pro <em>všechny</em> instance není znám (a nejspíš neexistuje). Chytré exponenciální metody (B&B <a href="../k0/l0-7.html#takeaways">[L0.7]</a>, ILP modely <a href="l3-4.html">[L3.4]</a>) konkrétní instance zvládají.</li>
       <li><strong>Směr redukce:</strong> těžkost $X$ dokazuješ převodem <em>ZNÁMÉHO těžkého problému NA $X$</em> (HC → TSP): „kdybys uměl $X$, uměl bys HC“. Převod opačným směrem (TSP → HC) o těžkosti TSP neříká nic.</li>
       <li><strong>„Certifikát funguje pro obě odpovědi.“</strong> NE — definice NP mluví jen o ANO-instancích; krátký doklad NEexistence HC obecně neznáme.</li>
     </ul>
@@ -257,7 +257,7 @@
 
   <div class="pager">
     <a href="../k3/l3-2.html"><span class="dir">← Předchozí</span> L3.2 · Důkaz korektnosti Dijkstry [FOTO]</a>
-    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.4 · TSP jako ILP s eliminací podtras (MTZ))</a>
+    <a class="next" href="../k3/l3-4.html"><span class="dir">Další →</span> L3.4 · TSP jako ILP s eliminací podtras (MTZ)</a>
   </div>
 
 </div>

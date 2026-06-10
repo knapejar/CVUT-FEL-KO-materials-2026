@@ -41,7 +41,7 @@
   <!-- ===== SEKCE 1: KDYŽ JE OPTIMUM MIMO DOSAH ===== -->
   <h2>Když je optimum mimo dosah</h2>
 
-  <p>Zatím jsme měli štěstí: nejkratší cesty řeší Dijkstra <a href="../k2/l2-4.html#takeaways">[L2.4]</a> přesně a v polynomiálním čase. Jenže už v K2 jsme zahlédli druhý břeh — nejdelší cesta je NP-těžká <a href="../k2/l2-17.html#takeaways">[L2.17]</a> a stejně na tom je obchodní cestující (<strong>TSP</strong>, traveling salesman problem: najdi nejlevnější okruh přes všechna města; pořádně ho zavedeme v [L3.4] a [L3.5]). U takových problémů přesný polynomiální algoritmus nejspíš neexistuje (pokud $P \ne NP$).</p>
+  <p>Zatím jsme měli štěstí: nejkratší cesty řeší Dijkstra <a href="../k2/l2-4.html#takeaways">[L2.4]</a> přesně a v polynomiálním čase. Jenže už v K2 jsme zahlédli druhý břeh — nejdelší cesta je NP-těžká <a href="../k2/l2-17.html#takeaways">[L2.17]</a> a stejně na tom je obchodní cestující (<strong>TSP</strong>, traveling salesman problem: najdi nejlevnější okruh přes všechna města; pořádně ho zavedeme v <a href="l3-4.html">[L3.4]</a> a [L3.5]). U takových problémů přesný polynomiální algoritmus nejspíš neexistuje (pokud $P \ne NP$).</p>
 
   <details class="try">
     <summary>Zkus sám: máš NP-těžký minimalizační problém a instanci s 10 000 městy, kterou je potřeba vyřešit do večera. <em>Něco</em> musíš obětovat. Co a jaké máš možnosti?</summary>
@@ -229,7 +229,7 @@ Hamiltonian circuit H is defined by the sequence {v_[1], ..., v_[n], v_[1]};</pr
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Nearest neighbor staví okruh hladově: z aktuálního města vždy do nejbližšího nenavštíveného, nakonec zpět do startu. (Detaily TSP tu nepotřebuješ — $K_n$ je úplný graf na $n$ městech, okruh přes všechna města zavedeme v <a href="l3-3.html">[L3.3]</a>/[L3.4]; tahle úloha je čistě o kvantifikátorech definice z této lekce.) Slide tvrdí, že tento algoritmus <em>není</em> aproximační. Úkol: přeložit výrok do formálního jazyka definice a říct, jak by se dokazoval.</p>
+      <p>Nearest neighbor staví okruh hladově: z aktuálního města vždy do nejbližšího nenavštíveného, nakonec zpět do startu. (Detaily TSP tu nepotřebuješ — $K_n$ je úplný graf na $n$ městech, okruh přes všechna města zavedeme v <a href="l3-3.html">[L3.3]</a>/<a href="l3-4.html">[L3.4]</a>; tahle úloha je čistě o kvantifikátorech definice z této lekce.) Slide tvrdí, že tento algoritmus <em>není</em> aproximační. Úkol: přeložit výrok do formálního jazyka definice a říct, jak by se dokazoval.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
