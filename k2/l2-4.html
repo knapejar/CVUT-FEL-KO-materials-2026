@@ -108,12 +108,12 @@ end</code></pre>
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: Dijkstra funguje JEN pro nezáporné váhy</div>
     <ul>
       <li>Celý trik „nejmenší značka = hotovo“ stojí na tom, že obejití přes jiný vrchol může délku jen <strong>přidat</strong>. Záporná hrana tenhle argument zboří — a to i bez záporného cyklu <a href="l2-1.html#takeaways">[L2.1]</a> a přesto, že samotné relaxaci záporné váhy nevadí <a href="l2-3.html#takeaways">[L2.3]</a>. Pokazí se <em>strategie pořadí</em>, ne relaxace.</li>
-      <li>Se zápornými hranami (bez záporných cyklů) je potřeba label-correcting algoritmus — Bellman-Ford [L2.12].</li>
+      <li>Se zápornými hranami (bez záporných cyklů) je potřeba label-correcting algoritmus — Bellman-Ford <a href="l2-12.html">[L2.12]</a>.</li>
     </ul>
   </div>
 
   <h2>Label-setting vs. label-correcting, složitost</h2>
-  <p>Dijkstra je tzv. <strong>label-setting algoritmus</strong> (slide 20): v každé iteraci se jedna značka $l(v)$ stane trvalou (optimální). Naproti tomu <strong>label-correcting algoritmy</strong> (např. Bellman-Ford [L2.12] nebo Floyd [L2.14]) považují všechny značky za dočasné až do úplně posledního kroku, kdy se trvalými stanou všechny najednou — přesně jak sliboval výhled v <a href="l2-3.html#takeaways">[L2.3]</a>.</p>
+  <p>Dijkstra je tzv. <strong>label-setting algoritmus</strong> (slide 20): v každé iteraci se jedna značka $l(v)$ stane trvalou (optimální). Naproti tomu <strong>label-correcting algoritmy</strong> (např. Bellman-Ford <a href="l2-12.html">[L2.12]</a> nebo Floyd [L2.14]) považují všechny značky za dočasné až do úplně posledního kroku, kdy se trvalými stanou všechny najednou — přesně jak sliboval výhled v <a href="l2-3.html#takeaways">[L2.3]</a>.</p>
   <p><strong>Časová složitost</strong> Dijkstry je $\mathcal{O}(n^2)$, resp. $\mathcal{O}(m + n \log n)$ s prioritní frontou (datová struktura, která umí rychle vydávat minimum; $n = |V(G)|$, $m = |E(G)|$). Pro speciální grafy existují i lineární algoritmy — mj. pro DAGy, kde pořadí relaxací dostaneme zadarmo z topologického uspořádání [L2.13].</p>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
@@ -122,7 +122,7 @@ end</code></pre>
     <ul>
       <li><strong>Dijkstrův běh:</strong> udržuj vektory $l$ a $p$ <a href="l2-3.html#takeaways">[L2.3]</a>; opakovaně vyber neuzavřený vrchol s nejmenším $l$, přidej ho do $R$ (uzavři) a relaxuj jeho odchozí hrany do neuzavřených vrcholů.</li>
       <li>Vrcholy se uzavírají v pořadí <strong>neklesajících</strong> značek; značka je trvalá od okamžiku uzavření (<em>label-setting</em>), na hranici $R$ je jen pracovní odhad. Nedosažitelné vrcholy skončí s $l = \infty$, $p$ nedefinované; při hledání jediného cíle $t$ lze skončit zařazením $t$ do $R$.</li>
-      <li>Funguje <strong>JEN pro nezáporné váhy</strong> — záporná hrana (i bez záporného cyklu) rozbije argument „přes dražší vrchol to kratší být nemůže“. Pak je nutný Bellman-Ford [L2.12].</li>
+      <li>Funguje <strong>JEN pro nezáporné váhy</strong> — záporná hrana (i bez záporného cyklu) rozbije argument „přes dražší vrchol to kratší být nemůže“. Pak je nutný Bellman-Ford <a href="l2-12.html">[L2.12]</a>.</li>
       <li>Složitost $\mathcal{O}(n^2)$, resp. $\mathcal{O}(m + n \log n)$ s prioritní frontou. Důkaz korektnosti (indukce přes $R$) patří do kapitoly K3.</li>
     </ul>
   </div>

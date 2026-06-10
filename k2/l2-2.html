@@ -84,7 +84,7 @@
       <p>Dva důvody:</p>
       <ul>
         <li>Verze s počtem hran je <strong>silnější a obecnější</strong>: každá cesta má nejvýše $|V|-1$ hran, takže volbou $k \ge |V|-1$ dostaneš „obyčejnou“ verzi o nejkratších cestách zadarmo.</li>
-        <li>Přesně v tomhle tvaru (po vrstvách „nejvýše $k$ hran“) větu později použijí algoritmy, které vzdálenosti budují postupným přidáváním hran — uvidíš to u Bellman-Forda [L2.12]; jeho důkaz korektnosti na této větě stojí a probereme ho až v kapitole K3 (lekce o korektnosti Bellman-Forda).</li>
+        <li>Přesně v tomhle tvaru (po vrstvách „nejvýše $k$ hran“) větu později použijí algoritmy, které vzdálenosti budují postupným přidáváním hran — uvidíš to u Bellman-Forda <a href="l2-12.html">[L2.12]</a>; jeho důkaz korektnosti na této větě stojí a probereme ho až v kapitole K3 (lekce o korektnosti Bellman-Forda).</li>
       </ul>
     </div>
   </details>
@@ -146,7 +146,7 @@
       <p>Je to <strong>soustava rovnic</strong>: jedna rovnice pro každý vrchol $w$, neznámé jsou všechny vzdálenosti $l(s,\cdot)$. A přesně tak na ni budeme nahlížet: algoritmy téhle kapitoly jsou <em>různé strategie, jak soustavu vyřešit</em> —</p>
       <ul>
         <li><strong>Dijkstra</strong> [L2.4]: vyhodnocuje rovnice „od nejbližších vrcholů“ (potřebuje nezáporné váhy),</li>
-        <li><strong>Bellman-Ford</strong> [L2.12]: vyhodnocuje je opakovaně po vrstvách „nejvýše $k$ hran“ (zvládne záporné váhy),</li>
+        <li><strong>Bellman-Ford</strong> <a href="l2-12.html">[L2.12]</a>: vyhodnocuje je opakovaně po vrstvách „nejvýše $k$ hran“ (zvládne záporné váhy),</li>
         <li><strong>SP v DAG</strong> [L2.13]: vyhodnocí je v topologickém pořadí jedním průchodem,</li>
         <li><strong>Floyd-Warshall</strong> [L2.14]: řeší rovnice pro všechny dvojice najednou.</li>
       </ul>
@@ -169,7 +169,7 @@
       <li><strong>Optimal substructure:</strong> nejkratší cesta se skládá z nejkratších segmentů — obsahuje-li nejkratší $s$–$w$ cesta vrchol $v$, je $l(s,w) = l(s,v) + l(v,w)$.</li>
       <li><strong>Bellmanův princip optimality</strong> (přesná verze): je-li $P^k$ nejkratší $s$–$w$ cesta s nejvýše $k$ hranami a $e=(v,w)$ její poslední hrana, pak $P^{k-1}[s,v]$ je nejkratší $s$–$v$ cesta s nejvýše $k-1$ hranami. Důkaz sporem; předpoklad „bez záporných cyklů“ je potřeba jen v případě, kdy kratší objížďka prochází přes $w$.</li>
       <li><strong>Bellmanova rovnice:</strong> $l(s,w) = \min_{v \ne w}\{\,l(s,v) + c(v,w)\,\}$ — platí v grafu bez záporného cyklu; „$\le$“ je trojúhelníková nerovnost, „$=$“ dosahuje předchůdce na nejkratší cestě.</li>
-      <li>Tato vlastnost je důvod, proč fungují Dijkstra [L2.4], Bellman-Ford [L2.12], SP v DAG [L2.13] i Floyd [L2.14] — všechny jsou strategie řešení Bellmanovy rovnice; jejich společný lokální krok je relaxace hrany [L2.3].</li>
+      <li>Tato vlastnost je důvod, proč fungují Dijkstra [L2.4], Bellman-Ford <a href="l2-12.html">[L2.12]</a>, SP v DAG [L2.13] i Floyd [L2.14] — všechny jsou strategie řešení Bellmanovy rovnice; jejich společný lokální krok je relaxace hrany [L2.3].</li>
     </ul>
   </div>
 

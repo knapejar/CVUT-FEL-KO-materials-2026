@@ -131,7 +131,7 @@
     <tr><th>Výsledný graf</th><th>Algoritmus</th></tr>
     <tr><td>váhy $\ge 0$ (na cyklech nezáleží)</td><td><strong>Dijkstra</strong> <a href="l2-4.html#takeaways">[L2.4]</a> — $O(n^2)$, resp. $O(|E| \log |V|)$ s haldou</td></tr>
     <tr><td><strong>DAG</strong> <a href="../k0/l0-4.html#takeaways">[L0.4]</a> (váhy libovolné, i záporné; zvládne i nejdelší cestu)</td><td>jeden průchod v topologickém pořadí — lekce [L2.13], $O(|V| + |E|)$</td></tr>
-    <tr><td>záporné váhy a cykly zároveň</td><td>Bellman-Ford — lekce [L2.12]; pozor, záporný <em>cyklus</em> dělá SP nedefinovaným <a href="l2-1.html#takeaways">[L2.1]</a></td></tr>
+    <tr><td>záporné váhy a cykly zároveň</td><td>Bellman-Ford — lekce <a href="l2-12.html">[L2.12]</a>; pozor, záporný <em>cyklus</em> dělá SP nedefinovaným <a href="l2-1.html#takeaways">[L2.1]</a></td></tr>
   </table>
 
   <div class="box danger">
@@ -151,7 +151,7 @@
       <li><strong>Úlohy s časovou osou:</strong> vrcholy = časové body, hrany = příležitosti/směny s cenou; hrany vedou vpřed v čase → graf je DAG <a href="../k0/l0-4.html#takeaways">[L0.4]</a>.</li>
       <li><strong>Maximalizace zhodnocení = nejdelší cesta v DAG</strong>; přes $-\log$ <a href="l2-7.html#takeaways">[L2.7]</a> nejkratší cesta se zápornými vahami — v DAG to nevadí, žádný cyklus = žádný záporný cyklus <a href="l2-1.html#takeaways">[L2.1]</a>.</li>
       <li>Stav může být i „pokryto do $t$“ — hrany zpět s cenou 0 povolí překryv směn; váhy $\ge 0$ → Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> funguje i mimo DAG.</li>
-      <li><strong>Po modelování zkontroluj znaménka vah a cykly</strong> → volba algoritmu: Dijkstra / topologický průchod [L2.13] / Bellman-Ford [L2.12].</li>
+      <li><strong>Po modelování zkontroluj znaménka vah a cykly</strong> → volba algoritmu: Dijkstra / topologický průchod [L2.13] / Bellman-Ford <a href="l2-12.html">[L2.12]</a>.</li>
     </ul>
   </div>
 
