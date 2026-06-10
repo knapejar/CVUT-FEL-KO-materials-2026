@@ -93,7 +93,7 @@
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „due date a deadline je totéž“</div>
-    <p>Není! <strong>Due date $d_j$</strong> = úloha by <em>měla</em> skončit do $d_j$ — překročení je povolené a trestá ho až kritérium ($L_{max}$, $\sum w_j T_j$…). <strong>Deadline $\tilde{d}_j$</strong> = úloha <em>musí</em> skončit do $\tilde{d}_j$ — překročení znamená nepřípustný rozvrh. Vlnka nad písmenem rozhoduje, jestli jde o měkké přání, nebo tvrdé omezení. Na písemce se obě značky potkávají vedle sebe (např. $1 \,|\, \mathrm{pmtn}, r_j, d_j = \tilde{d}_j \,|\, L_{\max}$ — due dates rovnou v roli deadlinů).</p>
+    <p>Není! <strong>Due date $d_j$</strong> = úloha by <em>měla</em> skončit do $d_j$ — překročení je povolené a trestá ho až kritérium ($L_{max}$, $\sum w_j T_j$…). <strong>Deadline $\tilde{d}_j$</strong> = úloha <em>musí</em> skončit do $\tilde{d}_j$ — překročení znamená nepřípustný rozvrh. Vlnka nad písmenem rozhoduje, jestli jde o měkké přání, nebo tvrdé omezení. Na písemce se obě značky potkávají vedle sebe (např. $1 \,|\, \mathrm{pmtn}, r_j, d_j = \tilde{d}_j \,|\, L_{\max}$ — due dates rovnou v roli deadlines).</p>
   </div>
 
   <!-- ===== SEKCE 3: TŘI POLE ===== -->
@@ -128,7 +128,7 @@
     <tr><td>$PS$</td><td><strong>Project Scheduling</strong> — most general (several resource types with capacities, general precedence constraints)</td><td>projektové rozvrhování</td></tr>
   </table>
 
-  <p>$\alpha_2$: prázdné $\emptyset$ = <em>“arbitrary <strong>number</strong> of resources”</em> (počet je součástí instance), číslo = konkrétní počet (např. $2$), u Project Schedulingu $m, R$ = $m$ typů s kapacitami $R$.</p>
+  <p>$\alpha_2$: prázdné $\emptyset$ = <em>“arbitrary <strong>number</strong> of resources”</em> (počet je součástí instance), číslo = konkrétní počet (např. $2$), u Project Scheduling ($PS$) $m, R$ = $m$ typů s kapacitami $R$.</p>
 
   <details class="try">
     <summary>Zkus sám: jaký je rozdíl mezi $P$, $P2$ — a co znamená $PS1$, které potkáš na písemce v $PS1 \,|\, temp \,|\, C_{max}$?</summary>
@@ -159,7 +159,7 @@
   <details class="try">
     <summary>Zkus sám (klíčová otázka): co znamená, když je pole $\beta$ úplně <em>prázdné</em> — třeba v $P \,||\, C_{max}$?</summary>
     <div class="inner">
-      <p>Prázdné $\beta$ <strong>není</strong> „žádná informace“ — každá vynechaná položka má svou výchozí hodnotu: preempce <em>zakázána</em> ($\beta_1 = \emptyset$), úlohy <em>nezávislé</em> (žádné precedence), všechny $r_j = 0$ (úlohy jsou v systému od začátku), doby zpracování <em>libovolné</em>, žádné deadliny ani due daty. Dvě svislítka $\|$ v $P \,||\, C_{max}$ tedy nejsou žádný speciální operátor „paralelně“ — jen prázdné prostřední pole.</p>
+      <p>Prázdné $\beta$ <strong>není</strong> „žádná informace“ — každá vynechaná položka má svou výchozí hodnotu: preempce <em>zakázána</em> ($\beta_1 = \emptyset$), úlohy <em>nezávislé</em> (žádné precedence), všechny $r_j = 0$ (úlohy jsou v systému od začátku), doby zpracování <em>libovolné</em>, žádné deadlines ani due dates. Dvě svislítka $\|$ v $P \,||\, C_{max}$ tedy nejsou žádný speciální operátor „paralelně“ — jen prázdné prostřední pole.</p>
     </div>
   </details>
 
@@ -188,7 +188,7 @@
   <details class="try">
     <summary>Zkus sám: na zkoušce (2023) padl problém $P \,|\, \mathrm{pmtn}, r_j, \tilde{d}_j \,|$ — třetí pole úplně chybí. Co to znamená?</summary>
     <div class="inner">
-      <p>Prázdné $\gamma$ = <strong>rozhodovací problém</strong> (decision problem): nic se neminimalizuje, ptáme se jen „<em>existuje</em> přípustný rozvrh?“ — tady: lze úlohy s release times a deadliny preemptivně stihnout na $R$ identických procesorech? Přesně tenhle feasibility problém budeme hned v příští lekci <a href="../k5/l5-0.html">[L5.0] Rozvrhování přes toky</a> řešit převodem na maximální tok.</p>
+      <p>Prázdné $\gamma$ = <strong>rozhodovací problém</strong> (decision problem): nic se neminimalizuje, ptáme se jen „<em>existuje</em> přípustný rozvrh?“ — tady: lze úlohy s release times a deadlines preemptivně stihnout na $R$ identických procesorech? Přesně tenhle feasibility problém budeme hned v příští lekci <a href="../k5/l5-0.html">[L5.0] Rozvrhování přes toky</a> řešit převodem na maximální tok.</p>
     </div>
   </details>
 
@@ -200,8 +200,8 @@
   </div>
 
   <div class="box danger">
-    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: $L_{max}$ v $\gamma$ implikuje due daty, i když v $\beta$ nejsou</div>
-    <p>Poznámka ke slidu 27 (EN 1:1): <em>“minimization of $L_{\max}$ implies existence of due-date $d_j$ (even if it is not in $\beta$ notation)”</em>. Takže třeba $1 \,||\, L_{\max}$ <strong>má</strong> due daty na vstupu — schované v kritériu. Neexistující $d_j$ by dělalo $L_j = C_j - d_j$ nedefinované. Obecně: parametr může do hry vstoupit i přes $\gamma$, nejen přes $\beta$.</p>
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: $L_{max}$ v $\gamma$ implikuje due dates, i když v $\beta$ nejsou</div>
+    <p>Poznámka ke slidu 27 (EN 1:1): <em>“minimization of $L_{\max}$ implies existence of due-date $d_j$ (even if it is not in $\beta$ notation)”</em>. Takže třeba $1 \,||\, L_{\max}$ <strong>má</strong> due dates na vstupu — schované v kritériu. Neexistující $d_j$ by dělalo $L_j = C_j - d_j$ nedefinované. Obecně: parametr může do hry vstoupit i přes $\gamma$, nejen přes $\beta$.</p>
   </div>
 
   <h2>Čtecí rutina na písemku</h2>
@@ -220,7 +220,7 @@
     <ul>
       <li><strong>$\alpha\,|\,\beta\,|\,\gamma$ = resources | tasks | criterion.</strong> Čteš zleva: co mám / jaká pravidla / co minimalizuji.</li>
       <li><strong>$\alpha$:</strong> $1$, $P$ (identické), $Q$ (uniformní), $R$ (unrelated), $O$/$F$/$J$ (dedikované shopy), $PS$ (project scheduling); číslo za písmenem = počet prostředků ($P2$, $PS1$ = 1 zdroj kapacity 1).</li>
-      <li><strong>$\beta$:</strong> $\mathrm{pmtn}$, $\mathrm{prec}$/in-tree/chain/$temp$ (≡ tmpn), $r_j$, $p_j = k$, $\tilde{d}_j$/$d_j$, no-wait, set-up. <strong>Prázdné $\beta$ = defaulty</strong>: bez preempce, nezávislé úlohy, $r_j = 0$, libovolná $p_j$.</li>
+      <li><strong>$\beta$:</strong> $\mathrm{pmtn}$, $\mathrm{prec}$/in-tree/chain/$temp$ (totéž co tmpn ze slidu 11), $r_j$, $p_j = k$, $\tilde{d}_j$/$d_j$, no-wait, set-up. <strong>Prázdné $\beta$ = defaulty</strong>: bez preempce, nezávislé úlohy, $r_j = 0$, libovolná $p_j$.</li>
       <li><strong>$\gamma$:</strong> $C_{max}$, $\sum C_j$, $\sum w_j C_j$, $L_{max}$; <strong>prázdné $\gamma$ = rozhodovací problém</strong> (feasibilita). $L_{max}$ implikuje existenci $d_j$, i když v $\beta$ nejsou.</li>
       <li><strong>Parametry vs. proměnné:</strong> vstup $r_j$, $p_j$, $d_j$ (should), $\tilde{d}_j$ (has to); výstup rozvrhu $s_j$, $C_j$, $F_j = C_j - r_j$, $L_j = C_j - d_j$ (může být záporná), $T_j = \max\{L_j, 0\}$.</li>
       <li><strong>Gantt chart</strong> = standardní zápis rozvrhu: řádek = prostředek, blok = úloha; u preemptivního rozvrhu se táž úloha smí objevit ve více blocích.</li>
@@ -232,7 +232,7 @@
     <div class="task-head">
       <span class="task-id">T01</span>
       <strong>Meaning of the notation — zkouškové notace</strong>
-      <span class="task-src">zdroj: task bank #35 (zkouška 02.06.2021) a #40 (zkouška 02.06.2021 / 1.6.2026); notace P|pmtn,rj,d̃j| ze zkoušky 2023</span>
+      <span class="task-src">zdroj: task bank #35 (zkouška 02.06.2021) a #40 (zkouška 02.06.2021); notace P|pmtn,rj,d̃j| ze zkoušky 2023</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -242,7 +242,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Tři reálné zkouškové notace (první dvě jsou přesně problémy z písemek 2.6.2021 — Muntz&amp;Coffman byl znovu doložen 1.6.2026; třetí je feasibility problém ze zkoušky 2023, který řeší příští lekce). U rozvrhovacích úloh banka řešení vždy začíná odstavcem „Meaning of the notation“ — tohle je trénink přesně toho odstavce.</p>
+      <p>Tři reálné zkouškové notace (první dvě jsou přesně problémy z písemek 2.6.2021 — druhý odpovídá úloze Muntz&amp;Coffman z banky #40; třetí je feasibility problém ze zkoušky 2023, který řeší příští lekce). U rozvrhovacích úloh banka řešení vždy začíná odstavcem „Meaning of the notation“ — tohle je trénink přesně toho odstavce.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -289,7 +289,7 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Z popisu vytahej postupně: typ + počet prostředků → $\alpha$; každou zmíněnou vlastnost (preempce? release times? deadliny — tvrdé, nebo měkké?) → $\beta$; cíl → $\gamma$. Vlastnosti, o kterých popis říká, že jsou „výchozí“ (no preemption, arrive at time 0…), do $\beta$ <em>nepiš</em> — právě tím vznikne prázdné pole.</p>
+      <p>Z popisu vytahej postupně: typ + počet prostředků → $\alpha$; každou zmíněnou vlastnost (preempce? release times? deadlines — tvrdé, nebo měkké?) → $\beta$; cíl → $\gamma$. Vlastnosti, o kterých popis říká, že jsou „výchozí“ (no preemption, arrive at time 0…), do $\beta$ <em>nepiš</em> — právě tím vznikne prázdné pole.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení</summary>
@@ -297,7 +297,7 @@
           <p><strong>(i)</strong> $P \,||\, C_{max}$ — vše v popisu kromě „parallel identical“ a „minimize schedule length“ jsou defaulty, takže $\beta$ zůstane prázdné (slide 12).</p>
           <p><strong>(ii)</strong> $P2 \,|\, \mathrm{pmtn} \,|\, C_{max}$ — dva procesory → $P2$; „completion time of the last task“ = $C_{max}$ (slide 9).</p>
           <p><strong>(iii)</strong> $1 \,|\, r_j, \tilde{d}_j \,|\, C_{max}$ — „deadlines“ jsou tvrdé → vlnka $\tilde{d}_j$; jeden stroj → $1$. (V K5 ho řeší Bratleyho B&amp;B / position-based ILP — <a href="../k5/l5-9.html">[L5.9]</a>.)</p>
-          <p><strong>(iv)</strong> $1 \,|\, \mathrm{pmtn}, r_j, d_j = \tilde{d}_j \,|\, L_{\max}$ — „deadlines/due dates“ v jedné roli zapisuje appendix i slide 27 jako $d_j = \tilde{d}_j$; kritérium max. lateness. (Hornův algoritmus / EDF — <a href="../k5/l5-7.html">[L5.7] EDD a Hornův algoritmus</a>.) Uznatelná je i volnější odpověď $1 \,|\, \mathrm{pmtn}, r_j \,|\, L_{\max}$, pokud due daty bereš jen přes kritérium — vzpomeň: $L_{max}$ existenci $d_j$ implikuje.</p>
+          <p><strong>(iv)</strong> $1 \,|\, \mathrm{pmtn}, r_j, d_j = \tilde{d}_j \,|\, L_{\max}$ — „deadlines/due dates“ v jedné roli zapisuje appendix i slide 27 jako $d_j = \tilde{d}_j$; kritérium max. lateness. (Hornův algoritmus / EDF — <a href="../k5/l5-7.html">[L5.7] EDD a Hornův algoritmus</a>.) Uznatelná je i volnější odpověď $1 \,|\, \mathrm{pmtn}, r_j \,|\, L_{\max}$, pokud due dates bereš jen přes kritérium — vzpomeň: $L_{max}$ existenci $d_j$ implikuje.</p>
         </div>
       </details>
     </div>
