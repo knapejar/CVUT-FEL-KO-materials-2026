@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L3.10 · VYVRCHOLENÍ: Christofides 3/2 [FOTO] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k3">K3 · Důkaz / teorie</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L3.10</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L3.10</span> Kapitola K3 — Důkaz / teorie (Slot 3) · <strong>[MUST]</strong> · <strong>žebříček důkazů #1 pro 15. 6.</strong> · FOTO checkpoint
+  </p>
+  <h1>VYVRCHOLENÍ: Christofides 3/2 [FOTO]</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Christofidesův algoritmus</strong>: místo zdvojení celé kostry opraví liché stupně <em>minimálním perfektním párováním</em> $M$ — a nové lemma $c(E(M)) \le \mathrm{OPT}/2$ srazí faktor z 2 na $\tfrac{3}{2}$.
+  </div>
+
+  <p>Vyvrcholení kapitoly a <strong>nejpravděpodobnější důkaz písemky 15. 6.</strong> — doslova padl 21. 6. 2021 a koluje ve zkouškových souhrnech 2023 i s řešením. Studentský souhrn cituje zadavatele: <em>„Nestaci napsat factor. Je potreba napsat, proc ma takovy factor.“</em> Dobrá zpráva: z double-tree <a href="l3-9.html#takeaways">[L3.9]</a> už máš tři ze čtyř článků důkazu hotové. Dnes se mění jediná věc — jak <em>levně</em> vyrobit sudé stupně — a přibývá jediné nové lemma.</p>
+
+  <!-- ===== SEKCE 1: KDE BYDLÍ DVOJKA ===== -->
+  <h2>Kde bydlí dvojka — a koho zdvojení vlastně léčí</h2>
+
+  <p>Připomeň si řetízek double-tree <a href="l3-9.html#takeaways">[L3.9]</a>: $2\,\mathrm{OPT} \ge 2\,c(E(T)) = c(E(L)) \ge c(E(H))$. Dvojka bydlí v prostředním článku — platíme <strong>celou kostru podruhé</strong>, jen abychom dostali sudé stupně pro Eulerovský tah <a href="l3-8c.html#takeaways">[L3.8c]</a>.</p>
+
+  <details class="try">
+    <summary>Zkus sám: zdvojení „léčí“ liché stupně — ale které vrcholy kostry $T$ tu léčbu doopravdy potřebují? A co víš o jejich počtu?</summary>
+    <div class="inner">
+      <p>Jen vrcholy, které mají v $T$ <strong>lichý stupeň</strong> — vrcholům se sudým stupněm zdvojení „pomáhá“ zbytečně (sudý stupeň ×2 je pořád sudý, ale byl sudý už předtím). Označme množinu lichých vrcholů $W$. A z <a href="../k0/l0-2.html#takeaways">[L0.2]</a> víš (princip sudosti: $\sum_v \deg(v) = 2|E|$), že vrcholů lichého stupně je v <em>každém</em> grafu <strong>sudý počet</strong> — $|W|$ je sudé. To není detail, to je klíč k celé dnešní konstrukci.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám (návrh konstrukce): máš sudě mnoho „nemocných“ vrcholů $W$ v úplném grafu $K_n$. Jaká <em>nejmenší</em> množina přidaných hran zvedne stupeň každého vrcholu z $W$ přesně o 1 — a nikomu jinému nesáhne na stupeň?</summary>
+    <div class="inner">
+      <p>Hrany, které se každého vrcholu z $W$ dotýkají <strong>právě jednou</strong> a vrcholů mimo $W$ vůbec — to je přesně <strong>perfektní párování</strong> (perfect matching) na množině $W$ <a href="../k0/l0-6.html#takeaways">[L0.6]</a>. Existuje, protože $|W|$ je sudé a $K_n$ je úplný (každá dvojice má hranu). Po přidání párování má každý vrchol z $W$ stupeň lichý+1 = sudý a ostatní beze změny → celý multigraf má sudé stupně → Eulerovský tah existuje <a href="l3-8c.html#takeaways">[L3.8c]</a>. A protože chceme co nejlevnější opravu, vezmeme <strong>min-weight perfect matching</strong> $M$. Zbytek linky (Euler → shortcutting) zůstává z <a href="l3-9.html#takeaways">[L3.9]</a> beze změny.</p>
+    </div>
+  </details>
+
+  <p>Přesně to je Christofidesův algoritmus [1976]. Slide 26 (EN 1:1):</p>
+
+  <div class="box">
+    <div class="box-title">Slide 26 — Christofides' Algorithm [1976] (1:1)</div>
+<pre><code>Input:  An instance (K_n, c) of metric TSP.
+Output: Hamiltonian circuit H.
+
+  1  Find a minimum weight spanning tree T in K_n;
+  2  Let W be the set of vertices having an odd degree in T;
+  3  Find a minimum weight matching M of nodes from W in K_n;
+  4  Merge of T and M forms a multigraph (V(K_n), E(T) ∪ M)
+     in which we find the Eulerian walk L;
+  5  Transform the Eulerian walk L into the Hamiltonian circuit H
+     in the complete graph K_n;</code></pre>
+    <p><strong>Observation</strong> (1:1): <em>„Each edge connects 2 nodes $\Rightarrow$ the sum of the degree of all nodes is $2|E|$ $\Rightarrow$ there are an even number of nodes with an odd degree in every graph (and an arbitrary number of nodes with an even degree). Due to this and completeness of $K_n$, it is possible to find the perfect matching. The merging of $T$ and $M$ ensures even degree of all vertices in the multigraph and thus existence of Eulerian walk.“</em></p>
+  </div>
+
+  <div class="box">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Min-weight perfect matching tady bereme jako POJEM — nepanikař</div>
+    <p>Pro dnešní důkaz potřebuješ od párování jen dvě věci: že na $W$ <strong>existuje</strong> ($|W|$ sudé + úplnost $K_n$, viz Observation) a že $M$ je ze všech perfektních párování na $W$ <strong>nejlevnější</strong>. Jak se min-weight perfect matching <em>počítá</em> (přes toky), přijde až v [L4.12] — pro tento důkaz to <strong>nepotřebuješ</strong> a u zkoušky se to u této úlohy nechce. Definice párování: <a href="../k0/l0-6.html#takeaways">[L0.6]</a>.</p>
+  </div>
+
+  <!-- ===== SEKCE 2: BĚH NA INSTANCI ===== -->
+  <h2>Celý běh na známé instanci</h2>
+
+  <p>Stejná metrická $K_5$ jako u double-tree <a href="l3-8a.html#t-shortcut">[L3.8a]</a> (tabulka cen tam; $\mathrm{OPT} = 11$ enumerací v <a href="l3-8b.html#takeaways">[L3.8b]</a>) — ať vidíš oba algoritmy vedle sebe:</p>
+
+  <div class="viz" id="viz-run"></div>
+
+  <p>Drobnost k poctivosti: tady vyšlo $T \cap M = \emptyset$, takže $T \cup M$ je obyčejný graf. Obecně může $M$ obsahovat i hranu, která už v $T$ je — pak je $T \cup M$ multigraf s dvojitou hranou, Eulerovu tahu to nevadí <a href="l3-8c.html#takeaways">[L3.8c]</a>. A že na této malé instanci skončily oba algoritmy u <em>stejného</em> okruhu $H$ za 12, není podvod: liší se <strong>záruka</strong> ($16{,}5$ vs. $22$), ne nutně výstup na jedné konkrétní instanci — faktor je worst-case vlastnost <a href="l3-1.html#takeaways">[L3.1]</a>.</p>
+
+  <!-- ===== SEKCE 3: NOVÉ LEMMA ===== -->
+  <h2>Nové lemma: $c(E(M)) \le \mathrm{OPT}/2$</h2>
+
+  <p>Z double-tree důkazu <a href="l3-9.html#takeaways">[L3.9]</a> přežívají beze změny <strong>článek 1</strong> (shortcutting nezdraží, $c(E(L)) \ge c(E(H))$ <a href="l3-8a.html#takeaways">[L3.8a]</a>) a <strong>článek 2</strong> (dolní mez $\mathrm{OPT} \ge c(E(T))$ <a href="l3-8b.html#takeaways">[L3.8b]</a>). Místo „zdvojení = ×2“ máme nový <strong>článek 4</strong>, čisté počítání: $L$ projde každou hranu multigrafu $T \cup M$ právě jednou, takže $c(E(T)) + c(E(M)) = c(E(L))$. Zbývá jediná opravdu nová věc — ocenit párování. Tu si teď odvodíš sám, po krocích.</p>
+
+  <details class="try">
+    <summary>Zkus sám (krok A): optimální okruh $H^*$ stojí $\mathrm{OPT}$ a navštěvuje všechny vrcholy — tedy i všechny vrcholy $W$. Jak z něj vyrobit <em>levný okruh jen po vrcholech $W$</em>? (Nástroj na to už máš.)</summary>
+    <div class="inner">
+      <p><strong>Shortcuttingem</strong> <a href="l3-8a.html#takeaways">[L3.8a]</a>: projdi $H^*$ a vrcholy mimo $W$ přeskakuj — souvislé úseky přes ne-$W$ vrcholy nahraď přímou hranou mezi krajními $W$-vrcholy. Dostaneš okruh $C_W$, který navštíví vrcholy $W$ v pořadí, v jakém leží na $H^*$, a díky (zobecněné) trojúhelníkové nerovnosti <strong>nezdraží</strong>: $c(C_W) \le c(E(H^*)) = \mathrm{OPT}$. Pozor, zapamatuj si: tohle je <strong>druhé místo důkazu, kde se používá metrika</strong> (první je článek 1). U double-tree měla metrika jen jednu adresu — u Christofidese má dvě.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám (krok B): okruh $C_W$ má $|W|$ hran a $|W|$ je sudé. Jak z jeho hran vyrobit <em>dvě</em> perfektní párování množiny $W$?</summary>
+    <div class="inner">
+      <p>Obarvi hrany okruhu <strong>střídavě</strong> — ber „každou druhou“: liché hrany do $M_1$, sudé do $M_2$. Na okruhu se sudým počtem vrcholů se barvy potkají bez konfliktu a každý vrchol je v každé barvě pokryt právě jednou (má na okruhu 2 hrany, jednu od každé barvy) → $M_1$ i $M_2$ jsou perfektní párování na $W$ a dohromady vyčerpají všechny hrany: $c(E(M_1)) + c(E(M_2)) = c(C_W)$. Přesně to říká slide jednou větou: <em>„the perfect matching $M$ considers every second edge in the alternating path“</em>. (Kdyby byl počet vrcholů lichý, střídání se „kousne“ — proto je sudost $|W|$ <a href="../k0/l0-2.html#takeaways">[L0.2]</a> nepostradatelná.)</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám (krok C): dvě párování v součtu stojí $c(C_W) \le \mathrm{OPT}$. Dotáhni odhad pro <em>naše</em> párování $M$ z kroku 3 algoritmu.</summary>
+    <div class="inner">
+      <p>Dvě čísla se součtem $\le \mathrm{OPT}$ nemohou být obě větší než $\mathrm{OPT}/2$, takže $\min\{c(E(M_1)), c(E(M_2))\} \le \tfrac{\mathrm{OPT}}{2}$ — slide: <em>„being the minimum weight matching it chooses the smaller half“</em>. A $M$ je <strong>nejlevnější</strong> perfektní párování na $W$ vůbec, tedy levnější i než levnější z téhle dvojice:</p>
+      $$c(E(M)) \;\le\; \min\{c(E(M_1)),\, c(E(M_2))\} \;\le\; \frac{c(C_W)}{2} \;\le\; \frac{\mathrm{OPT}(K_n, c)}{2}.$$
+      <p>Lemma platí pro <em>každou</em> instanci metrického TSP — $H^*$ je důkazový objekt: vždy existuje, algoritmus ho znát nemusí. (Toto rozepsání po krocích A–C je vlastní rozpracování; slide 27 celé lemma konstatuje jedinou větou v bodu 3.)</p>
+    </div>
+  </details>
+
+  <p>Totéž na naší instanci, krok po kroku ($H^* = A,D,C,B,E,A$ za 11 — enumerace v <a href="l3-8b.html#takeaways">[L3.8b]</a>):</p>
+
+  <div class="viz" id="viz-lemma"></div>
+
+  <!-- ===== SEKCE 4: SLOŽENÍ ŘETÍZKU ===== -->
+  <h2>Důkaz faktoru 3/2: čtyři články, jeden řetízek</h2>
+
+  <details class="try">
+    <summary>Zkus sám (finále): máš čtyři fakta — <strong>(1)</strong> $c(E(L)) \ge c(E(H))$, <strong>(2)</strong> $\mathrm{OPT} \ge c(E(T))$, <strong>(3)</strong> $\tfrac{\mathrm{OPT}}{2} \ge c(E(M))$, <strong>(4)</strong> $c(E(M)) + c(E(T)) = c(E(L))$. Sestav řetízek od $\tfrac{3}{2}\,\mathrm{OPT}$ k $c(E(H))$.</summary>
+    <div class="inner">
+      <p>Sečti (2) a (3): $\mathrm{OPT} + \tfrac{\mathrm{OPT}}{2} = \tfrac{3}{2}\,\mathrm{OPT} \ge c(E(T)) + c(E(M))$ — nerovnosti se stejným směrem se sčítat smí. Pak (4) přepiš součet na $c(E(L))$ a (1) sestup z tahu na okruh:</p>
+      $$\frac{3}{2}\, \mathrm{OPT}(K_n, c) \;\stackrel{2.,3.}{\ge}\; c(E(T)) + c(E(M)) \;\stackrel{4.}{=}\; c(E(L)) \;\stackrel{1.}{\ge}\; c(E(H)).$$
+      <p>Čteno od konce: $c(E(H)) \le \tfrac{3}{2}\,\mathrm{OPT}$ — Christofides je $\tfrac{3}{2}$-aproximace. Srovnej s double-tree: tam řetízek začínal $2\,\mathrm{OPT} \ge 2\,c(E(T))$, tady druhou kostru za $\le \mathrm{OPT}$ nahradilo párování za $\le \tfrac{\mathrm{OPT}}{2}$.</p>
+    </div>
+  </details>
+
+  <p>Slide 27 (EN 1:1) říká totéž:</p>
+
+  <div class="box">
+    <div class="box-title">Slide 27 — Christofides' Algorithm is a $\frac{3}{2}$ Approximation (1:1)</div>
+    <p><em>Time complexity is $\mathcal{O}(n^3)$. It is a $\frac{3}{2}$ approximation algorithm for the <strong>metric TSP</strong>:</em></p>
+    <ul>
+      <li><em><strong>1.</strong> due to the triangle inequality the skipped nodes do not prolong the route, i.e $c(E(L)) \ge c(E(H))$</em></li>
+      <li><em><strong>2.</strong> while deleting one edge in the circuit, we create the tree. Therefore, inequality $\mathrm{OPT}(K_n, c) \ge c(E(T))$ holds</em></li>
+      <li><em><strong>3.</strong> since the perfect matching $M$ considers every second edge in the alternating path and being the minimum weight matching it chooses the smaller half, $\frac{\mathrm{OPT}(K_n, c)}{2} \ge c(E(M))$ holds</em></li>
+      <li><em><strong>4.</strong> due to the construction of $L$ it holds $c(E(M)) + c(E(T)) = c(E(L))$</em></li>
+      <li><em>finally we obtain:</em></li>
+    </ul>
+    $$\frac{3}{2} \mathrm{OPT}(K_n, c) \stackrel{2.,3.}{\ge} c(E(T)) + c(E(M)) \stackrel{4.}{=} c(E(L)) \stackrel{1.}{\ge} c(E(H))$$
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám (inventura předpokladů — u double-tree ses ji učil, teď ji aktualizuj): kde všude důkaz potřebuje trojúhelníkovou nerovnost, kde nezápornost a kde úplnost $K_n$?</summary>
+    <div class="inner">
+      <p><strong>Trojúhelníková nerovnost: nově DVĚ adresy</strong> — článek 1 (shortcut $L \to H$) a článek 3 (shortcut $H^* \to C_W$ uvnitř lemmatu). <strong>Nezápornost:</strong> článek 2 (odebraná hrana, $c(e) \ge 0$ <a href="l3-8b.html#takeaways">[L3.8b]</a>). <strong>Úplnost $K_n$:</strong> třikrát — zkratky v článku 1, zkratky v článku 3 a <em>existence</em> perfektního párování na $W$ (Observation). Článek 4 je čisté počítání. Bez metriky padají články 1 i 3 najednou — a z <a href="l3-6.html#takeaways">[L3.6]</a> víš, že obecný TSP žádnou r-aproximaci nemá, takže to ani jinou fintou opravit nejde.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 5: SLOŽITOST + SROVNÁNÍ ===== -->
+  <h2>Složitost a srovnání</h2>
+
+  <p>Slide 27 uvádí složitost $\mathcal{O}(n^3)$ — dražší než double-tree ($\mathcal{O}(n^2)$), nejdražším krokem je výpočet min-weight perfect matchingu (vlastní komentář, slide jen konstatuje číslo). Odměnou je lepší záruka:</p>
+
+  <table>
+    <thead><tr><th></th><th>sudé stupně zařídí</th><th>cena opravy</th><th>faktor</th><th>složitost</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Double-tree</strong> <a href="l3-9.html#takeaways">[L3.9]</a></td><td>druhá kopie celé kostry</td><td>$c(E(T)) \le \mathrm{OPT}$</td><td>$2$</td><td>$\mathcal{O}(n^2)$</td></tr>
+      <tr><td><strong>Christofides</strong></td><td>párování lichých vrcholů $W$</td><td>$c(E(M)) \le \tfrac{\mathrm{OPT}}{2}$</td><td>$\tfrac{3}{2}$</td><td>$\mathcal{O}(n^3)$</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
+    <ul>
+      <li><strong>„Stačí napsat, že faktor je 3/2.“</strong> NE — přímá citace ze zkouškového souhrnu: <em>„Nestaci napsat factor. Je potreba napsat, proc ma takovy factor.“</em> Chtějí 4 očíslované články + složení řetízku, a u článku 3 odvození, ne jen tvrzení.</li>
+      <li><strong>„Párování se hledá na všech vrcholech $K_n$.“</strong> NE — jen na $W$ (vrcholy <em>lichého stupně v $T$</em>). Na celém $V$ by pro liché $n$ perfektní párování ani neexistovalo <a href="../k0/l0-6.html#takeaways">[L0.6]</a>.</li>
+      <li><strong>„Metrika se používá jen při shortcuttingu na konci.“</strong> NE — u Christofidese má <strong>dvě adresy</strong>: článek 1 ($L \to H$) a článek 3 (shortcut optimálního okruhu $H^*$ na $W$). Kdo v důkazu lemma 3 trojúhelníkovou nerovnost nezmíní, má v důkazu díru.</li>
+      <li><strong>„$c(E(M)) \le \mathrm{OPT}/2$, protože párování je půlka optimálního okruhu.“</strong> Zkratka, která nedává smysl doslova — $H^*$ vede i přes vrcholy mimo $W$. Správně: shortcut $H^*$ na $W$ → okruh $C_W$ ceny $\le \mathrm{OPT}$ → jeho hrany ob jednu = dvě perfektní párování → levnější stojí $\le \mathrm{OPT}/2$ → minimální $M$ nanejvýš tolik.</li>
+      <li><strong>„Neumím spočítat matching, takže neumím Christofidese.“</strong> NE — důkaz potřebuje jen <em>existenci</em> ($|W|$ sudé <a href="../k0/l0-2.html#takeaways">[L0.2]</a> + úplnost) a <em>minimalitu</em> $M$. Výpočet přes toky je až [L4.12] a v této úloze se nechce.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.10</div>
+    <ul>
+      <li><strong>Christofides</strong> (slide 26): 1. MST $T$ → 2. $W$ = vrcholy lichého stupně v $T$ ($|W|$ sudé <a href="../k0/l0-2.html#takeaways">[L0.2]</a>) → 3. min-weight perfect matching $M$ na $W$ <a href="../k0/l0-6.html#takeaways">[L0.6]</a> → 4. Eulerovský tah $L$ v multigrafu $T \cup M$ <a href="l3-8c.html#takeaways">[L3.8c]</a> → 5. shortcutting na okruh $H$ <a href="l3-8a.html#takeaways">[L3.8a]</a>. Složitost $\mathcal{O}(n^3)$.</li>
+      <li><strong>Faktor 3/2</strong> (slide 27): $\tfrac{3}{2}\,\mathrm{OPT} \stackrel{2.,3.}{\ge} c(E(T)) + c(E(M)) \stackrel{4.}{=} c(E(L)) \stackrel{1.}{\ge} c(E(H))$ — články 1 a 2 jsou beze změny z <a href="l3-9.html#takeaways">[L3.9]</a>, článek 4 je počítání hran multigrafu.</li>
+      <li><strong>Nové lemma (článek 3)</strong>: $c(E(M)) \le \tfrac{\mathrm{OPT}}{2}$ — shortcut $H^*$ na $W$ (cena $\le \mathrm{OPT}$, metrika!), okruh na sudě mnoha vrcholech se rozpadne na <strong>dvě perfektní párování</strong>, levnější stojí $\le \mathrm{OPT}/2$ a minimální $M$ nanejvýš tolik.</li>
+      <li>Metrika má v důkazu <strong>dvě adresy</strong> (články 1 a 3), nezápornost jednu (článek 2), úplnost tři (zkratky 2× + existence párování).</li>
+      <li>Matching tu je <strong>pojem, ne výpočet</strong> — existence + minimalita stačí; algoritmus na min-weight perfect matching až [L4.12].</li>
+      <li>U zkoušky (žebříček #1): odvodit <em>proč</em> — 4 články se zdůvodněním + složení. Nestačí napsat faktor.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 [FOTO] ===== -->
+  <div class="task" id="t-christofides">
+    <div class="task-head foto">
+      <span class="task-id">T01</span>
+      <strong>Approximation Factor of Christofides' Algorithm</strong>
+      <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
+      <span class="task-src">zdroj: zkouška KO 21. 6. 2021 EN 1:1 (oba dochované přepisy shodné; algoritmus = banka #33 / slide 26); řešení dle slidu 27 = dochované vzorové řešení z fotek, rozepsání lemmatu 3 vlastní (přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN 1:1)</span>
+        <p>Derive Approximation Factor of Christofides' Algorithm:</p>
+        <p><strong>Input:</strong> An instance $(K_n, c)$ of <strong>metric TSP</strong>.</p>
+        <p><strong>Output:</strong> Hamiltonian circuit $H$.</p>
+        <ol>
+          <li>Find a minimum weight spanning tree $T$ in $K_n$;</li>
+          <li>Let $W$ be the set of vertices having an <strong>odd degree</strong> in $T$;</li>
+          <li>Find a <strong>minimum weight matching</strong> $M$ of nodes from $W$ in $K_n$;</li>
+          <li>Merge of $T$ and $M$ forms a multigraph $(V(K_n), E(T) \cup M)$ in which we find the Eulerian circuit $L$;</li>
+          <li>Transform the Eulerian circuit $L$ into the Hamiltonian circuit $H$ in the complete graph $K_n$;</li>
+        </ol>
+        <p><em>Pozn.: zkouškové znění říká „Eulerian circuit“, slidy „Eulerian walk“ — obojí značí týž uzavřený tah přes všechny hrany <a href="l3-8c.html#takeaways">[L3.8c]</a>.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Důkazová úloha č. 1 žebříčku: algoritmus je v zadání <em>darovaný</em> — tvoje práce je <strong>odvodit faktor</strong> $\tfrac{3}{2}$, tj. vyslovit 4 dílčí tvrzení, každé zdůvodnit (hlavně lemma $c(E(M)) \le \mathrm{OPT}/2$) a složit řetízek. Připomeň si citát zadavatele: nestačí napsat faktor, je potřeba napsat, <em>proč</em> má takový faktor.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — lemma o párování + složení řetízku.</li>
+        <li><a href="l3-9.html#takeaways">[L3.9] Double-tree</a> — články 1 a 2 a celková dramaturgie důkazu.</li>
+        <li><a href="l3-8a.html#takeaways">[L3.8a] Shortcutting</a> — používá se dvakrát (články 1 a 3).</li>
+        <li><a href="l3-8b.html#takeaways">[L3.8b] MST jako dolní mez</a> — článek 2.</li>
+        <li><a href="l3-8c.html#takeaways">[L3.8c] Euler ⟺ sudé stupně</a> — proč $L$ v $T \cup M$ existuje.</li>
+        <li><a href="../k0/l0-2.html#takeaways">[L0.2]</a> sudý počet lichých vrcholů; <a href="../k0/l0-6.html#takeaways">[L0.6]</a> perfektní párování.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Než začneš nerovnosti, věnuj dvě věty <em>přípustnosti</em>: proč $L$ existuje ($|W|$ sudé → párování existuje → $T \cup M$ má sudé stupně a je souvislý) a proč zkratky existují (úplnost). Pak piš čtyři očíslované články; 1, 2 a 4 jsou na jednu větu, lemma 3 rozepiš celé (shortcut $H^*$ na $W$ → dvě párování → levnější polovina → minimalita $M$). Nakonec slož řetízek a zkontroluj směry nerovností: začíná u $\tfrac{3}{2}\mathrm{OPT}$, končí u $c(E(H))$.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle slidu 27 / vzorového řešení; lemma 3 rozepsáno)</summary>
+        <div class="inner">
+          <p><strong>Přípustnost výstupu.</strong> Vrcholů lichého stupně v $T$ je sudý počet ($\sum_v \deg_T(v) = 2|E(T)|$), takže $|W|$ je sudé a díky úplnosti $K_n$ na $W$ existuje perfektní párování — i minimální $M$. V multigrafu $T \cup M$ má každý vrchol z $W$ stupeň o 1 vyšší (sudý) a ostatní beze změny (sudé); graf je souvislý (obsahuje kostru) ⇒ Eulerovský tah $L$ existuje a navštíví všechny vrcholy. Zkratky v kroku 5 existují (úplnost) ⇒ $H$ je Hamiltonovský okruh.</p>
+          <p><strong>Článek 1</strong> ($c(E(L)) \ge c(E(H))$): shortcutting nahrazuje úseky tahu přímými hranami; podle (zobecněné) trojúhelníkové nerovnosti se cena nezvýší (<a href="l3-8a.html#t-shortcut">[L3.8a] T02</a>).</p>
+          <p><strong>Článek 2</strong> ($\mathrm{OPT}(K_n,c) \ge c(E(T))$): odebráním jedné hrany z optimálního okruhu vznikne kostra; minimalita MST a nezápornost cen dají $c(E(T)) \le \mathrm{OPT} - c(e) \le \mathrm{OPT}$ (<a href="l3-8b.html#t-mstlb">[L3.8b] T01</a>).</p>
+          <p><strong>Článek 3</strong> ($\tfrac{\mathrm{OPT}}{2} \ge c(E(M))$): vezmi optimální okruh $H^*$ a shortcutni ho na vrcholy $W$ (vrcholy mimo $W$ přeskoč) — vznikne okruh $C_W$ po $W$ s $c(C_W) \le \mathrm{OPT}$ (trojúhelníková nerovnost, podruhé v důkazu). Okruh $C_W$ má sudý počet vrcholů, takže jeho hrany „ob jednu“ tvoří dvě perfektní párování $M_1, M_2$ na $W$ s $c(E(M_1)) + c(E(M_2)) = c(C_W)$. Levnější z nich stojí $\le \tfrac{c(C_W)}{2} \le \tfrac{\mathrm{OPT}}{2}$ a $M$ je minimální perfektní párování na $W$, tedy $c(E(M)) \le \min\{c(E(M_1)), c(E(M_2))\} \le \tfrac{\mathrm{OPT}}{2}$. (Slide formuluje jednou větou: matching „considers every second edge in the alternating path“ a jako minimální „chooses the smaller half“.)</p>
+          <p><strong>Článek 4</strong> ($c(E(M)) + c(E(T)) = c(E(L))$): $L$ projde každou hranu multigrafu $T \cup M$ právě jednou a multigraf obsahuje přesně hrany $T$ a hrany $M$.</p>
+          <p><strong>Složení.</strong></p>
+          $$\frac{3}{2}\, \mathrm{OPT}(K_n, c) \;\stackrel{2.,3.}{\ge}\; c(E(T)) + c(E(M)) \;\stackrel{4.}{=}\; c(E(L)) \;\stackrel{1.}{\ge}\; c(E(H)),$$
+          <p>tedy $c(E(H)) \le \tfrac{3}{2}\,\mathrm{OPT}(K_n,c)$ pro každou instanci metrického TSP — Christofidesův algoritmus je (polynomiální, $\mathcal{O}(n^3)$) $\tfrac{3}{2}$-aproximační algoritmus. $\blacksquare$</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="box foto">
+    <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+    <p>Tohle je <strong>důkaz č. 1 pro 15. 6.</strong> Napiš ho celý NA PAPÍR zpaměti (bez lekce, bez řešení): algoritmus v 5 krocích, dvě věty o přípustnosti ($|W|$ sudé → párování existuje → sudé stupně → Euler), čtyři očíslované články se zdůvodněním a složený řetízek. Pošli mi fotku — zkontroluju hlavně lemma 3 (shortcut $H^*$ na $W$ → dvě párování → levnější polovina → minimalita $M$), obě místa s trojúhelníkovou nerovností a směry nerovností v řetízku.</p>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-halflemma">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>The key lemma — where exactly does $c(E(M)) \le \mathrm{OPT}/2$ come from?</strong>
+      <span class="task-src">zdroj: úloha VLASTNÍ (přiznáno) — drill na nejčastější doplňující otázky k bodu 3; instance = metrická K₅ z [L3.8a]</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (own, EN)</span>
+        <p>Consider Christofides' algorithm on a metric TSP instance $(K_n, c)$ and let $W$ be the set of odd-degree vertices of the minimum spanning tree $T$. <em>(a) Why does a perfect matching of $W$ exist in $K_n$? (b) Prove in detail that the minimum weight perfect matching $M$ of $W$ satisfies $c(E(M)) \le \mathrm{OPT}(K_n,c)/2$. (c) List all places where the proof of the $\tfrac32$ factor uses the triangle inequality; what breaks on a non-metric instance? (d) Illustrate (b) on the 5-city instance from the lesson ($\mathrm{OPT} = 11$, $W = \{B, C, D, E\}$): write down the circuit on $W$ obtained from the optimal circuit, both matchings and their costs.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Pitva jediného opravdu nového kroku důkazu. Když u ústní odvyprávíš Christofidese, doplňující otázka skoro jistě míří sem: „proč přesně platí bod 3?“ a „kde všude je metrika?“. Část (d) tě nutí lemma jednou <em>spočítat</em> — nejlepší pojistka proti odříkávání naučené věty.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — kroky A–C lemmatu + stepper.</li>
+        <li><a href="../k0/l0-2.html#takeaways">[L0.2]</a> — sudý počet vrcholů lichého stupně.</li>
+        <li><a href="../k0/l0-6.html#takeaways">[L0.6]</a> — perfektní párování.</li>
+        <li><a href="l3-8a.html#takeaways">[L3.8a]</a> — shortcutting a zobecněná trojúhelníková nerovnost.</li>
+        <li><a href="l3-6.html#takeaways">[L3.6]</a> — proč bez metriky nejde zachránit vůbec nic.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>U (a) spoj dva fakty: počet lichých vrcholů + úplnost. U (b) drž pořadí kroků A (shortcut $H^*$ na $W$), B (rozpad sudého okruhu na dvě párování), C (levnější polovina + minimalita $M$) — a u každého kroku si řekni, který předpoklad používá. U (d) si nejdřív najdi pořadí vrcholů $W$ <em>podél optimálního okruhu</em>; párování pak vznikají střídáním hran, ne výběrem „nejlevnějších dvojic“.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní)</summary>
+        <div class="inner">
+          <p><strong>(a)</strong> Součet stupňů $\sum_v \deg_T(v) = 2|E(T)|$ je sudý, takže vrcholů lichého stupně je sudý počet — $|W|$ je sudé <a href="../k0/l0-2.html#takeaways">[L0.2]</a>. V úplném grafu lze sudě mnoho vrcholů vždy spárovat (libovolně je rozdvojkuj — každá dvojice má hranu); mezi všemi perfektními párováními existuje minimální $M$.</p>
+          <p><strong>(b)</strong> Nechť $H^*$ je optimální okruh, $c(E(H^*)) = \mathrm{OPT}$. <em>Krok A:</em> projdi $H^*$ a vrcholy mimo $W$ přeskakuj; každý vynechaný úsek nahradí přímá hrana mezi $W$-vrcholy a podle zobecněné trojúhelníkové nerovnosti se nezdraží ⇒ okruh $C_W$ po vrcholech $W$ (v pořadí podél $H^*$) s $c(C_W) \le \mathrm{OPT}$. <em>Krok B:</em> $C_W$ má $|W|$ hran, $|W|$ sudé ⇒ hrany ob jednu tvoří dvě perfektní párování $M_1, M_2$ množiny $W$ a $c(E(M_1)) + c(E(M_2)) = c(C_W)$. <em>Krok C:</em> $\min\{c(E(M_1)), c(E(M_2))\} \le \tfrac{c(C_W)}{2} \le \tfrac{\mathrm{OPT}}{2}$ a z minimality $M$ plyne $c(E(M)) \le \min\{c(E(M_1)), c(E(M_2))\} \le \tfrac{\mathrm{OPT}}{2}$. $\blacksquare$</p>
+          <p><strong>(c)</strong> Dvě místa: <strong>článek 1</strong> (shortcut Eulerova tahu $L$ na výstup $H$) a <strong>článek 3, krok A</strong> (shortcut $H^*$ na $C_W$). Na nemetrické instanci mohou obě zkratky zdražit: o $c(E(H))$ pak neumíme říct nic a lemma $c(E(M)) \le \mathrm{OPT}/2$ také padá. Opravit to nelze — obecný TSP nemá žádnou r-aproximaci, pokud P ≠ NP <a href="l3-6.html#takeaways">[L3.6]</a>. (Algoritmus by přesto doběhl a vrátil <em>nějaký</em> Hamiltonovský okruh — přípustnost metriku nepotřebuje, jen záruka ceny.)</p>
+          <p><strong>(d)</strong> $H^* = A,D,C,B,E,A$ s cenou $3+2+1+3+2 = 11$. Jediný ne-$W$ vrchol je $A$; přeskočením úseku $E \to A \to D$ (zkratka $\{E,D\}$: $5 \le 2 + 3 = 5$, zde rovnost) vznikne okruh na $W$ v pořadí podél $H^*$: $C_W = D,C,B,E,D$ s cenou $2+1+3+5 = 11 \le 11 = \mathrm{OPT}$. Střídání hran: $M_1 = \{\{D,C\}, \{B,E\}\}$ za $2+3 = 5$, $M_2 = \{\{C,B\}, \{E,D\}\}$ za $1+5 = 6$; součet $11 = c(C_W)$. Levnější polovina: $5 \le 5{,}5 = \mathrm{OPT}/2$. Minimální párování z běhu algoritmu bylo $M = \{\{B,E\}, \{C,D\}\}$ za 5 — zde náhodou $M = M_1$, obecně může být $M$ ještě levnější než obě $M_i$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L3.10">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k3/l3-9.html"><span class="dir">← Předchozí</span> L3.9 · Double-tree algoritmus (2-aproximace metrického TSP)</a>
+    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.11 · Knapsack: fractional greedy + 2-aproximace)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// Stepper 1: celý běh Christofidese na metrické K₅ z L3.8a (OPT=11, MST=7 — ověřeno v L3.8b).
+// Zde T ∩ M = ∅, takže T ∪ M je prostý graf (obecně multigraf). Vlastní kopie uzlů (nesdílet mezi KOViz voláními).
+KOViz.stepper(document.getElementById('viz-run'), {
+  graph: {
+    directed: false,
+    nodes: [
+      {id:'A', x:150, y:210},
+      {id:'B', x:300, y:150},
+      {id:'C', x:470, y:80},
+      {id:'D', x:480, y:300},
+      {id:'E', x:110, y:70},
+    ],
+    edges: [
+      {from:'A', to:'B', label:'2', cls:'dim'},
+      {from:'A', to:'E', label:'2', cls:'dim'},
+      {from:'B', to:'C', label:'1', cls:'dim'},
+      {from:'B', to:'D', label:'2', cls:'dim'},
+      {from:'B', to:'E', label:'3', curve:0.25, cls:'dim'},
+      {from:'C', to:'D', label:'2', cls:'dim'},
+      {from:'D', to:'E', label:'5', curve:-0.4, cls:'dim'},
+    ],
+    caption: 'Metrická K₅ z [L3.8a] (tabulka cen tam; nakresleno jen 7 hran, které běh použije). Klikej: MST → liché stupně W → matching M → Euler v T∪M → shortcutting → bilance.',
+  },
+  frames: [
+    {desc:'Vstup: instance (K₅, c) metrického TSP — stejná jako u double-tree v [L3.9], ať můžeš srovnávat. Neznámé OPT = 11 (enumerace v [L3.8b]; algoritmus ho znát nebude).'},
+    {desc:'Krok 1 — MST: T = {B–C (1), A–B (2), A–E (2), B–D (2)}, c(E(T)) = 7. Stejný start jako double-tree; dolní mez [L3.8b]: 7 ≤ OPT. Detailní běh Kruskala: [L3.8b] T02.',
+     nodes:{A:'hl', B:'hl', C:'hl', D:'hl', E:'hl'},
+     edges:{'A->B':'hl', 'A->E':'hl', 'B->C':'hl', 'B->D':'hl', 'B->E':'dim', 'C->D':'dim', 'D->E':'dim'}},
+    {desc:'Krok 2 — stupně v T: A 2, B 3, C 1, D 1, E 1. Liché (červeně): W = {B, C, D, E}, |W| = 4 — sudý počet, jak slibuje [L0.2]. Jen tyhle vrcholy potřebují opravu; A ne.',
+     nodes:{A:'good', B:'bad', C:'bad', D:'bad', E:'bad'},
+     edges:{'A->B':'hl', 'A->E':'hl', 'B->C':'hl', 'B->D':'hl', 'B->E':'dim', 'C->D':'dim', 'D->E':'dim'},
+     subs:{A:'deg 2', B:'deg 3', C:'deg 1', D:'deg 1', E:'deg 1'}},
+    {desc:'Krok 3 — min-weight perfect matching na W: kandidáti {B–C, D–E} = 1+5 = 6, {B–D, C–E} = 2+4 = 6, {B–E, C–D} = 3+2 = 5 → M = {B–E, C–D}, c(E(M)) = 5 (zeleně). Hrana C–E (4) není nakreslena — ceny v tabulce [L3.8a].',
+     nodes:{A:'hl', B:'hl', C:'hl', D:'hl', E:'hl'},
+     edges:{'A->B':'hl', 'A->E':'hl', 'B->C':'hl', 'B->D':'hl', 'B->E':'good', 'C->D':'good', 'D->E':'dim'}},
+    {desc:'Krok 4a — multigraf T ∪ M: stupně A 2, B 4, C 2, D 2, E 2 — všechny sudé a graf souvislý ⇒ Eulerovský tah existuje [L3.8c]. Cena 7 + 5 = 12 (srovnej: zdvojená kostra u double-tree stála 14).',
+     nodes:{A:'hl', B:'hl', C:'hl', D:'hl', E:'hl'},
+     edges:{'A->B':'hl', 'A->E':'hl', 'B->C':'hl', 'B->D':'hl', 'B->E':'hl', 'C->D':'hl', 'D->E':'dim'},
+     subs:{A:'deg 2', B:'deg 4', C:'deg 2', D:'deg 2', E:'deg 2'}},
+    {desc:'Krok 4b — Eulerovský tah: L = A,B,C,D,B,E,A — všech 6 hran T∪M právě jednou, c(E(L)) = 2+1+2+2+3+2 = 12 = c(E(T)) + c(E(M)) (článek 4). Čísla u vrcholů = pořadí návštěv.',
+     nodes:{A:'good', B:'good', C:'good', D:'good', E:'good'},
+     edges:{'A->B':'good', 'A->E':'good', 'B->C':'good', 'B->D':'good', 'B->E':'good', 'C->D':'good', 'D->E':'dim'},
+     subs:{A:'1·7', B:'2·5', C:'3', D:'4', E:'6'}},
+    {desc:'Krok 5 — shortcutting [L3.8a]: jediný opakovaný vrchol je B (A,B,C,D,B̶,E,A) → úsek D→B→E nahradí přímá hrana D–E: 5 ≤ 2+3 = 5 (nezdraží — zde dokonce rovnost). H = A,B,C,D,E,A, c(E(H)) = 2+1+2+5+2 = 12.',
+     nodes:{A:'good', B:'good', C:'good', D:'good', E:'good'},
+     edges:{'A->B':'good', 'A->E':'good', 'B->C':'good', 'C->D':'good', 'D->E':'hl', 'B->D':'dim', 'B->E':'dim'},
+     subs:{A:'1.', B:'2.', C:'3.', D:'4.', E:'5.'}},
+    {desc:'Bilance = řetízek na číslech: 3/2·OPT = 16,5 ≥ c(E(T)) + c(E(M)) = 12 = c(E(L)) ≥ c(E(H)) = 12. Double-tree: 2·OPT = 22 ≥ 14 ≥ 12. Stejný okruh, ale lepší ZÁRUKA — faktor je worst-case vlastnost [L3.1].',
+     nodes:{A:'good', B:'good', C:'good', D:'good', E:'good'},
+     edges:{'A->B':'good', 'A->E':'good', 'B->C':'good', 'C->D':'good', 'D->E':'good', 'B->D':'dim', 'B->E':'dim'},
+     subs:{A:'1.', B:'2.', C:'3.', D:'4.', E:'5.'}},
+  ],
+});
+
+// Stepper 2: důkaz lemmatu c(E(M)) ≤ OPT/2 na téže instanci. H* = A,D,C,B,E,A (OPT = 11, enumerace v [L3.8b]).
+KOViz.stepper(document.getElementById('viz-lemma'), {
+  graph: {
+    directed: false,
+    nodes: [
+      {id:'A', x:150, y:210},
+      {id:'B', x:300, y:150},
+      {id:'C', x:470, y:80},
+      {id:'D', x:480, y:300},
+      {id:'E', x:110, y:70},
+    ],
+    edges: [
+      {from:'A', to:'D', label:'3', cls:'dim'},
+      {from:'D', to:'C', label:'2', cls:'dim'},
+      {from:'C', to:'B', label:'1', cls:'dim'},
+      {from:'B', to:'E', label:'3', curve:0.25, cls:'dim'},
+      {from:'E', to:'A', label:'2', cls:'dim'},
+      {from:'D', to:'E', label:'5', curve:-0.4, cls:'dim'},
+    ],
+    caption: 'Důkaz lemmatu na instanci: optimální okruh H* → shortcut na W → rozpad na dvě párování → levnější polovina.',
+  },
+  frames: [
+    {desc:'Důkazový objekt: optimální okruh H* = A,D,C,B,E,A, c(E(H*)) = 3+2+1+3+2 = 11 = OPT. Algoritmus ho NEZNÁ — v důkazu stačí, že existuje. Vrcholy W = {B,C,D,E} z kroku 2 jsou zvýrazněné.',
+     nodes:{A:'', B:'hl', C:'hl', D:'hl', E:'hl'},
+     edges:{'A->D':'hl', 'D->C':'hl', 'C->B':'hl', 'B->E':'hl', 'E->A':'hl', 'D->E':'dim'},
+     subs:{B:'∈ W', C:'∈ W', D:'∈ W', E:'∈ W'}},
+    {desc:'Krok A — shortcut H* na W: jediný ne-W vrchol A přeskoč; úsek E→A→D nahradí hrana E–D: 5 ≤ 2+3 = 5 (trojúhelníková nerovnost [L3.8a] — DRUHÉ místo důkazu s metrikou). C_W = D,C,B,E,D, c(C_W) = 2+1+3+5 = 11 ≤ OPT.',
+     nodes:{A:'', B:'hl', C:'hl', D:'hl', E:'hl'},
+     edges:{'D->C':'hl', 'C->B':'hl', 'B->E':'hl', 'D->E':'hl', 'A->D':'dim', 'E->A':'dim'},
+     subs:{B:'∈ W', C:'∈ W', D:'∈ W', E:'∈ W'}},
+    {desc:'Krok B — okruh na sudě mnoha vrcholech rozdej ob jednu hranu: M₁ = {D–C, B–E} zeleně (2+3 = 5), M₂ = {C–B, E–D} červeně (1+5 = 6). Obě jsou perfektní párování W a c(E(M₁)) + c(E(M₂)) = 11 = c(C_W) ≤ OPT.',
+     nodes:{A:'', B:'hl', C:'hl', D:'hl', E:'hl'},
+     edges:{'D->C':'good', 'B->E':'good', 'C->B':'bad', 'D->E':'bad', 'A->D':'dim', 'E->A':'dim'},
+     subs:{B:'∈ W', C:'∈ W', D:'∈ W', E:'∈ W'}},
+    {desc:'Krok C — levnější polovina: min(5, 6) = 5 ≤ 5,5 = OPT/2. A M z algoritmu je NEJLEVNĚJŠÍ perfektní párování na W, takže c(E(M)) ≤ 5 ≤ OPT/2. (Zde vyšlo M = M₁ = {B–E, C–D}.) Lemma dokázáno — obecný argument v try kroku C výše.',
+     nodes:{A:'', B:'good', C:'good', D:'good', E:'good'},
+     edges:{'D->C':'good', 'B->E':'good', 'C->B':'dim', 'D->E':'dim', 'A->D':'dim', 'E->A':'dim'},
+     subs:{B:'∈ W', C:'∈ W', D:'∈ W', E:'∈ W'}},
+  ],
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

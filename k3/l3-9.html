@@ -134,7 +134,7 @@ Output: Hamiltonian circuit H.
   <details class="try">
     <summary>Zkus sám: kde přesně v řetízku „bydlí“ ta dvojka — a co bys musel zlevnit, kdybys chtěl faktor menší?</summary>
     <div class="inner">
-      <p>Dvojka bydlí v článku 3: platíme <strong>celou kostru dvakrát</strong> ($c(E(L)) = 2\,c(E(T))$), protože zdvojení je nejhrubší způsob, jak vyrobit sudé stupně. Kdo chce menší faktor, musí sudé stupně zařídit <em>levněji</em> než druhou kopií kostry. Přesně to udělá Christofides [L3.10]: liché vrcholy (je jich sudý počet <a href="../k0/l0-2.html#takeaways">[L0.2]</a>) spáruje minimálním perfektním párováním $M$ s cenou $c(M) \le \mathrm{OPT}/2$ — místo $2\,c(E(T)) \le 2\,\mathrm{OPT}$ pak řetízek začíná $c(E(T)) + c(M) \le \tfrac{3}{2}\,\mathrm{OPT}$. Zbytek linky (Euler → shortcutting) zůstane stejný.</p>
+      <p>Dvojka bydlí v článku 3: platíme <strong>celou kostru dvakrát</strong> ($c(E(L)) = 2\,c(E(T))$), protože zdvojení je nejhrubší způsob, jak vyrobit sudé stupně. Kdo chce menší faktor, musí sudé stupně zařídit <em>levněji</em> než druhou kopií kostry. Přesně to udělá Christofides <a href="l3-10.html">[L3.10]</a>: liché vrcholy (je jich sudý počet <a href="../k0/l0-2.html#takeaways">[L0.2]</a>) spáruje minimálním perfektním párováním $M$ s cenou $c(M) \le \mathrm{OPT}/2$ — místo $2\,c(E(T)) \le 2\,\mathrm{OPT}$ pak řetízek začíná $c(E(T)) + c(M) \le \tfrac{3}{2}\,\mathrm{OPT}$. Zbytek linky (Euler → shortcutting) zůstane stejný.</p>
     </div>
   </details>
 
@@ -156,7 +156,7 @@ Output: Hamiltonian circuit H.
       <li><strong>Faktor 2</strong> (slide 25): $2\,\mathrm{OPT}(K_n,c) \stackrel{2.}{\ge} 2\,c(E(T)) \stackrel{3.}{=} c(E(L)) \stackrel{1.}{\ge} c(E(H))$ — článek 2 = dolní mez <a href="l3-8b.html#takeaways">[L3.8b]</a>, článek 3 = zdvojení <a href="l3-8c.html#takeaways">[L3.8c]</a>, článek 1 = shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>.</li>
       <li>Trojúhelníková nerovnost je potřeba <strong>jen v článku 1</strong>; nezápornost v článku 2; úplnost $K_n$ pro existenci zkratek. Bez metriky záruka padá — a žádná jiná není možná <a href="l3-6.html#takeaways">[L3.6]</a>.</li>
       <li>$\mathrm{OPT}$ vstupuje do důkazu jediným místem (článek 2) — algoritmus optimum nepočítá, poměřuje se s ním přes MST.</li>
-      <li>Dvojka = cena za druhou kopii kostry; Christofides [L3.10] ji nahradí párováním lichých vrcholů s $c(M) \le \mathrm{OPT}/2$ → faktor $\tfrac{3}{2}$.</li>
+      <li>Dvojka = cena za druhou kopii kostry; Christofides <a href="l3-10.html">[L3.10]</a> ji nahradí párováním lichých vrcholů s $c(M) \le \mathrm{OPT}/2$ → faktor $\tfrac{3}{2}$.</li>
     </ul>
   </div>
 
@@ -256,7 +256,7 @@ Output: Hamiltonian circuit H.
 
   <div class="pager">
     <a href="../k3/l3-8c.html"><span class="dir">← Předchozí</span> L3.8c · Eulerovský tah a zdvojení hran (sudý stupeň)</a>
-    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.10 · VYVRCHOLENÍ: Christofides 3/2 [FOTO])</a>
+    <a class="next" href="../k3/l3-10.html"><span class="dir">Další →</span> L3.10 · VYVRCHOLENÍ: Christofides 3/2 [FOTO]</a>
   </div>
 
 </div>

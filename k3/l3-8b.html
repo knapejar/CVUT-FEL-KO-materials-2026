@@ -41,7 +41,7 @@
   <!-- ===== SEKCE 1: PROČ DOLNÍ MEZ ===== -->
   <h2>Problém: jak dokázat faktor vůči číslu, které nikdo nezná?</h2>
 
-  <p>Cíl příštích lekcí je dokázat záruky typu $c(H) \le 2 \cdot \mathrm{OPT}$ (double-tree <a href="l3-9.html">[L3.9]</a>) a $c(H) \le \tfrac{3}{2} \cdot \mathrm{OPT}$ (Christofides [L3.10]). Háček: $\mathrm{OPT}$ je řešení silně NP-těžké úlohy <a href="l3-8a.html#takeaways">[L3.8a]</a> — nikdo ho nezná a důkaz se na jeho hodnotu nesmí odvolávat.</p>
+  <p>Cíl příštích lekcí je dokázat záruky typu $c(H) \le 2 \cdot \mathrm{OPT}$ (double-tree <a href="l3-9.html">[L3.9]</a>) a $c(H) \le \tfrac{3}{2} \cdot \mathrm{OPT}$ (Christofides <a href="l3-10.html">[L3.10]</a>). Háček: $\mathrm{OPT}$ je řešení silně NP-těžké úlohy <a href="l3-8a.html#takeaways">[L3.8a]</a> — nikdo ho nezná a důkaz se na jeho hodnotu nesmí odvolávat.</p>
 
   <details class="try">
     <summary>Zkus sám: recept na tenhle problém už máš z <a href="l3-1.html#takeaways">[L3.1] Co je aproximační algoritmus a faktor r</a>. Jak se dokazuje $J^A \le r \cdot J^*$ u minimalizace, když $J^*$ neznáme?</summary>
@@ -123,7 +123,7 @@
 
   $$2\, \mathrm{OPT}(K_n, c) \stackrel{2.}{\ge} 2\, c(E(T)) \stackrel{3.}{=} c(E(L)) \stackrel{1.}{\ge} c(E(H))$$
 
-  <p>Bod 1 (shortcutting) máš z <a href="l3-8a.html#takeaways">[L3.8a]</a>, bod 2 je dnešní dolní mez, bod 3 (Eulerovský tah $L$ nad zdvojenou kostrou stojí $2\,c(E(T))$) přijde v <a href="l3-8c.html#takeaways">[L3.8c]</a> — a v <a href="l3-9.html">[L3.9]</a> už jen řetízek slepíme. Christofides [L3.10] použije bod 2 ve stejném znění (slide 27) a místo zdvojení přidá ke kostře levné párování. V obou případech: <em>algoritmus si postaví levný sled z MST, důkaz ho přes dnešní mez sváže s $\mathrm{OPT}$</em>.</p>
+  <p>Bod 1 (shortcutting) máš z <a href="l3-8a.html#takeaways">[L3.8a]</a>, bod 2 je dnešní dolní mez, bod 3 (Eulerovský tah $L$ nad zdvojenou kostrou stojí $2\,c(E(T))$) přijde v <a href="l3-8c.html#takeaways">[L3.8c]</a> — a v <a href="l3-9.html">[L3.9]</a> už jen řetízek slepíme. Christofides <a href="l3-10.html">[L3.10]</a> použije bod 2 ve stejném znění (slide 27) a místo zdvojení přidá ke kostře levné párování. V obou případech: <em>algoritmus si postaví levný sled z MST, důkaz ho přes dnešní mez sváže s $\mathrm{OPT}$</em>.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
@@ -131,7 +131,7 @@
       <li><strong>„MST je (skoro) řešení TSP.“</strong> NE — kostra není okruh, není to přípustné řešení TSP. $c(\mathrm{MST})$ je jen <em>číslo-měřítko</em>; okruh z kostry teprve musíš vyrobit (zdvojení <a href="l3-8c.html#takeaways">[L3.8c]</a> + shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>) a při tom se cena až zdvojnásobí.</li>
       <li><strong>Směr nerovnosti:</strong> $\mathrm{OPT} \ge c(\mathrm{MST})$, nikdy naopak. Mnemotechnika: okruh = kostra + jedna hrana navíc, takže okruh je „víc než“ kostra; a optimální okruh je pořád aspoň MST, protože MST je úplně nejlevnější způsob, jak vrcholy spojit.</li>
       <li><strong>„Tahle mez potřebuje trojúhelníkovou nerovnost.“</strong> NE — stačí nezáporné ceny; platí i pro nemetrický TSP. Metrika je potřeba v <em>jiných</em> krocích (shortcutting). Naopak <strong>nezápornost vypustit nejde</strong> ($c(e) \ge 0$ drží druhou nerovnost řetízku).</li>
-      <li><strong>„Dolní mez = hotová aproximace.“</strong> NE — mez sama žádný okruh nevyrábí. Faktor vznikne až spárováním s konstrukcí: okruh s cenou $\le 2\,c(\mathrm{MST})$ <a href="l3-9.html">[L3.9]</a>, resp. $\le \tfrac{3}{2}$-násobkem [L3.10].</li>
+      <li><strong>„Dolní mez = hotová aproximace.“</strong> NE — mez sama žádný okruh nevyrábí. Faktor vznikne až spárováním s konstrukcí: okruh s cenou $\le 2\,c(\mathrm{MST})$ <a href="l3-9.html">[L3.9]</a>, resp. $\le \tfrac{3}{2}$-násobkem <a href="l3-10.html">[L3.10]</a>.</li>
     </ul>
   </div>
 
@@ -141,7 +141,7 @@
     <ul>
       <li><strong>$\mathrm{OPT}(K_n,c) \ge c(E(T))$</strong> (slide 25 bod 2 = slide 27 bod 2): odeber z optimálního okruhu jednu hranu → vznikne kostra (Hamiltonovská cesta) <a href="../k0/l0-4.html#takeaways">[L0.4]</a>; řetízek $c(\mathrm{MST}) \le c(E(H^*)) - c(e) \le \mathrm{OPT}$ <a href="../k0/l0-5.html#takeaways">[L0.5]</a>.</li>
       <li>Důkaz potřebuje jen <strong>nezáporné ceny</strong> — trojúhelníkovou nerovnost NE; mez platí pro každý TSP. Metrika je potřeba až u shortcuttingu <a href="l3-8a.html#takeaways">[L3.8a]</a>.</li>
-      <li>Role dle receptu z <a href="l3-1.html#takeaways">[L3.1]</a>: $B = c(\mathrm{MST})$ je <strong>polynomiálně vypočitatelná dolní mez</strong> na neznámé $\mathrm{OPT}$ — centrální mez pro double-tree <a href="l3-9.html">[L3.9]</a> i Christofidese [L3.10].</li>
+      <li>Role dle receptu z <a href="l3-1.html#takeaways">[L3.1]</a>: $B = c(\mathrm{MST})$ je <strong>polynomiálně vypočitatelná dolní mez</strong> na neznámé $\mathrm{OPT}$ — centrální mez pro double-tree <a href="l3-9.html">[L3.9]</a> i Christofidese <a href="l3-10.html">[L3.10]</a>.</li>
       <li><strong>Sendvič:</strong> libovolný přípustný okruh dává horní mez, MST dolní — $c(\mathrm{MST}) \le \mathrm{OPT} \le c(\text{okruh})$ bez znalosti optima.</li>
       <li>MST <em>není</em> přípustné řešení TSP — je to měřítko; okruh z něj teprve vyrobí <a href="l3-8c.html#takeaways">[L3.8c]</a> + shortcutting.</li>
     </ul>

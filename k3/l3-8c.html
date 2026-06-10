@@ -120,7 +120,7 @@
 
   $$2\, \mathrm{OPT}(K_n, c) \;\stackrel{2.}{\ge}\; 2\, c(E(T)) \;\stackrel{3.}{=}\; c(E(L)) \;\stackrel{1.}{\ge}\; c(E(H)),$$
 
-  <p>kde bod 1 je shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>, bod 2 dolní mez <a href="l3-8b.html#takeaways">[L3.8b]</a> a bod 3 dnešní zdvojení. Christofides [L3.10] pak zahraje stejnou partii chytřeji: nezdvojí <em>všechno</em>, ale opraví jen vrcholy, kde sudost chybí — vrcholů lichého stupně je v každém grafu sudý počet <a href="../k0/l0-2.html#takeaways">[L0.2]</a>, takže se dají <em>spárovat</em> levným perfektním párováním (slide 26: <em>„The merging of $T$ and $M$ ensures even degree of all vertices in the multigraph and thus existence of Eulerian walk.“</em>). A Eulerovský tah potkáš i mimo TSP — u směrovaného čínského pošťáka [L4.13] se hrany doplňují podle bilance $|\delta^+| = |\delta^-|$.</p>
+  <p>kde bod 1 je shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>, bod 2 dolní mez <a href="l3-8b.html#takeaways">[L3.8b]</a> a bod 3 dnešní zdvojení. Christofides <a href="l3-10.html">[L3.10]</a> pak zahraje stejnou partii chytřeji: nezdvojí <em>všechno</em>, ale opraví jen vrcholy, kde sudost chybí — vrcholů lichého stupně je v každém grafu sudý počet <a href="../k0/l0-2.html#takeaways">[L0.2]</a>, takže se dají <em>spárovat</em> levným perfektním párováním (slide 26: <em>„The merging of $T$ and $M$ ensures even degree of all vertices in the multigraph and thus existence of Eulerian walk.“</em>). A Eulerovský tah potkáš i mimo TSP — u směrovaného čínského pošťáka [L4.13] se hrany doplňují podle bilance $|\delta^+| = |\delta^-|$.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
@@ -128,7 +128,7 @@
       <li><strong>„Eulerovský tah ≈ Hamiltonovský okruh.“</strong> NE — Euler projde každou <em>HRANU</em> právě jednou (vrcholy se smí opakovat), Hamilton každý <em>VRCHOL</em> právě jednou <a href="l3-3.html#takeaways">[L3.3]</a>. A složitost je opačný svět: Euler se pozná v polynomiálním čase (zkontroluj sudosti), Hamilton je NP-úplný. Eulerovský tah <em>není</em> přípustné řešení TSP — okruh z něj teprve vyrobí shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>.</li>
       <li><strong>„Sudé stupně stačí vždy.“</strong> Bez <em>souvislosti</em> ne — dvě disjunktní kružnice mají všechny stupně sudé, ale jeden tah je neprojde. Slide 24 souvislost nezmiňuje, protože zdvojená kostra je souvislá automaticky (vlastní upřesnění, přiznáno). Přesně: ekvivalence platí pro souvislé multigrafy (resp. ty, kde všechny hrany leží v jedné komponentě).</li>
       <li><strong>Uzavřený vs. otevřený tah:</strong> dnešní věta je o <em>uzavřeném</em> tahu (start = cíl) — ten chce TSP. Otevřený Eulerovský tah existuje ⟺ právě 2 vrcholy mají lichý stupeň (slavné königsberské mosty; vlastní doplněk, slidy ho nepotřebují).</li>
-      <li><strong>„Zdvojení je zadarmo.“</strong> NE — platíš celou kostru podruhé: $c(E(L)) = 2\,c(E(T))$. Právě tahle dvojka je celý faktor 2 double-tree algoritmu; Christofides [L3.10] ji srazí na $\tfrac{3}{2}$ tím, že místo druhé kostry přidá jen párování s cenou $\le \mathrm{OPT}/2$.</li>
+      <li><strong>„Zdvojení je zadarmo.“</strong> NE — platíš celou kostru podruhé: $c(E(L)) = 2\,c(E(T))$. Právě tahle dvojka je celý faktor 2 double-tree algoritmu; Christofides <a href="l3-10.html">[L3.10]</a> ji srazí na $\tfrac{3}{2}$ tím, že místo druhé kostry přidá jen párování s cenou $\le \mathrm{OPT}/2$.</li>
     </ul>
   </div>
 
@@ -140,7 +140,7 @@
       <li><strong>Zdvojení všech hran</strong> kostry zdvojnásobí každý stupeň → všechny sudé → Eulerovský multigraf; cena tahu $c(E(L)) = 2\,c(E(T))$ (slide 25, bod 3).</li>
       <li>Eulerovský tah pak shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a> převede na Hamiltonovský okruh bez zdražení — s dolní mezí <a href="l3-8b.html#takeaways">[L3.8b]</a> jsou tím pohromadě všechny tři kameny řetízku $2\,\mathrm{OPT} \ge 2\,c(E(T)) = c(E(L)) \ge c(E(H))$ pro <a href="l3-9.html">[L3.9]</a>.</li>
       <li>Euler ≠ Hamilton: hrany × vrcholy, polynomiální × NP-úplné <a href="l3-3.html#takeaways">[L3.3]</a>.</li>
-      <li>Christofides [L3.10] nezdvojuje vše — liché vrcholy (vždy sudý počet <a href="../k0/l0-2.html#takeaways">[L0.2]</a>) opraví perfektním párováním.</li>
+      <li>Christofides <a href="l3-10.html">[L3.10]</a> nezdvojuje vše — liché vrcholy (vždy sudý počet <a href="../k0/l0-2.html#takeaways">[L0.2]</a>) opraví perfektním párováním.</li>
     </ul>
   </div>
 
