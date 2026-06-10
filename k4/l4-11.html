@@ -212,7 +212,7 @@ end function</pre>
           <p><strong>(ii) Main loop</strong> (cv09 Algorithm 1 = slide 31): dokud Bellman-Ford v $G_f$ najde záporný cyklus $C$ s kapacitou $\delta = \min_{e \in C} u_f(e) &gt; 0$, augmentuj: pro každou hranu $e = (i,j) \in C$, je-li $e$ dopředná v $G$, pak $f(i,j) \leftarrow f(i,j) + \delta$, jinak $f(j,i) \leftarrow f(j,i) - \delta$; reziduální kapacity uprav $u_f(i,j) \leftarrow u_f(i,j) - \delta$ a $u_f(j,i) \leftarrow u_f(j,i) + \delta$. Když záporný cyklus neexistuje, vrať $f$ — je to minimum cost flow.</p>
           <p><strong>(iii) Detecting a negative cycle</strong> (cv09 §1.3 = slide 31 dole, 1:1): <em>1. Take the current $G_f$, remove all edges with zero residual capacity. 2. Introduce a dummy vertex $s$ and connect it with every other vertex in $G_f$ by edge with cost $c_f(e) = 0$. 3. Compute the shortest path tree (with respect to costs $c_f$) from the dummy vertex $s$ to all other vertices. 4. Recover a negative cycle or state that it does not exist.</em> — Bellman-Ford relaxuje i po $|V| - 1$ iteracích ⟺ záporný cyklus, který se zrekonstruuje z vektoru předchůdců (<a href="../k2/l2-12.html#takeaways">[L2.12]</a>, důkaz <a href="../k3/l3-7.html#takeaways">[L3.7]</a>).</p>
           <p><strong>(iv) Initial feasible balanced flow</strong> (cv09 §1.4, 1:1): <em>1. Introduce dummy vertices $s, t$ to the original graph $G$. 2. Connect $s$ with vertices $v \in V$, if $b(v) &gt; 0$, set $l(s, v) = 0$ and $u(s, v) = b(v)$. 3. Connect vertices $v \in V$ with $t$, if $b(v) &lt; 0$, set $l(v, t) = 0$ and $u(v, t) = -b(v)$. 4. Find maximum flow $f$ in this graph by Ford-Fulkerson algorithm. 5. If $f$ saturates all outgoing edges from $s$, then disconnect $s$ and $t$ from $G$. Now, the flow $f$ is a feasible balanced flow for the original minimum-cost flow problem.</em> — To je přesně redukce z <a href="l4-6.html#takeaways">[L4.6]</a>; nenulové dolní meze řeší <a href="l4-7.html#takeaways">[L4.7]</a>.</p>
-          <p>Bonus k ústní: složitost $\mathcal{O}(|V| \cdot |E|^2 \cdot C \cdot U)$ (slide 34, pseudopolynomiální) a kontext cvičení: cv09 tímhle algoritmem řeší <em>data association</em> při sledování hráčů ve videu — přiřazovací problém jako MCF, viz [L4.12].</p>
+          <p>Bonus k ústní: složitost $\mathcal{O}(|V| \cdot |E|^2 \cdot C \cdot U)$ (slide 34, pseudopolynomiální) a kontext cvičení: cv09 tímhle algoritmem řeší <em>data association</em> při sledování hráčů ve videu — přiřazovací problém jako MCF, viz <a href="l4-12.html">[L4.12]</a>.</p>
         </div>
       </details>
     </div>
@@ -266,7 +266,7 @@ end function</pre>
 
   <div class="pager">
     <a href="../k4/l4-10.html"><span class="dir">← Předchozí</span> L4.10 · Minimum Cost Flow + reziduální graf s cenami</a>
-    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.12 · Assignment problem přes MCF + min-weight perfect matching)</a>
+    <a class="next" href="l4-12.html"><span class="dir">Další →</span> L4.12 · Assignment problem přes MCF + min-weight perfect matching</a>
   </div>
 
 </div>

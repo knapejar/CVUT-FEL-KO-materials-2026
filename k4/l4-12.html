@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L4.12 · Assignment problem přes MCF + min-weight perfect matching — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k4">K4 · Toky a řezy</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L4.12</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L4.12</span> Kapitola K4 — Toky a řezy (Slot 4) · <strong>[MUST]</strong>
+  </p>
+  <h1>Assignment problem přes MCF + min-weight perfect matching</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Assignment problem</strong> (přiřazovací problém) = <strong>min-weight perfect matching</strong> v úplném bipartitním grafu <a href="../k0/l0-6.html#takeaways">[L0.6]</a> se spočítá jako <strong>minimum cost flow</strong> <a href="l4-10.html#takeaways">[L4.10]</a>: vrstvená síť $s \to X \to Y \to t$, všechny kapacity 1, ceny $d_{ij}$ na prostředních hranách — a vyřeší ho cycle canceling <a href="l4-11.html#takeaways">[L4.11]</a>.
+  </div>
+
+  <p>Tahle lekce splácí dluh, který se táhne od <a href="../k0/l0-6.html#takeaways">[L0.6]</a> („min-weight perfect matching — výpočet až v K4“), přes Toys assignment v <a href="../k1/l1-14.html#takeaways">[L1.14]</a> až po Christofidese <a href="../k3/l3-10.html#takeaways">[L3.10]</a>. Ingredience už máš všechny: v <a href="l4-9.html#takeaways">[L4.9]</a> jsi bipartitní párování <em>počítal</em> přes max flow (ale bez cen — šlo jen o <em>kolik</em> hran), v <a href="l4-10.html#takeaways">[L4.10]</a> jsi tokům přidal ceny a v <a href="l4-11.html#takeaways">[L4.11]</a> ses naučil MCF řešit. Dnes to celé sesadíme dohromady — a uvidíš, že „nejlevnější přiřazení“ je jen MCF v síti, kterou už umíš nakreslit.</p>
+
+  <!-- ===== SEKCE 1: PROBLÉM ===== -->
+  <h2>Problém d) ze slidu 38: assignment = min-weight perfect matching</h2>
+
+  <p>Slide 38 vyjmenoval čtyři párovací problémy (citovali jsme je v <a href="l4-9.html#takeaways">[L4.9]</a>, kde jsme vyřešili problém b). Dnes je na řadě poslední z nich:</p>
+
+  <div class="box">
+    <div class="box-title">Slide 38 — Matching: Introduction, problém d), 1:1</div>
+    <p><em><strong>d) Minimum Weight Perfect Matching</strong> in a complete bipartite graph whose parts have the same number of nodes. This problem is also called an <strong>Assignment Problem</strong> and it is a special case of problem c) and also a special case of the <strong>minimum cost flow problem</strong>. These problems can be solved in polynomial time.</em></p>
+  </div>
+
+  <p>Vstupem je úplný bipartitní graf $K_{n,n}$ s partitami $X$, $Y$, $|X| = |Y| = n$, a cena $d_{ij} \ge 0$ pro každou hranu $(i, j) \in X \times Y$. Hledáme perfektní párování <a href="../k0/l0-6.html#takeaways">[L0.6]</a> s nejmenším součtem cen — tedy bijekci $X \leftrightarrow Y$, kde každé spárování $i \leftrightarrow j$ stojí $d_{ij}$. Slide rovnou prozrazuje strategii: je to <em>speciální případ minimum cost flow</em>.</p>
+
+  <details class="try">
+    <summary>Zkus sám: konstrukci vlastně už znáš. Z <a href="l4-9.html#takeaways">[L4.9]</a> umíš síť $s \to X \to Y \to t$ s kapacitami 1, která počítá <em>kardinalitu</em> párování (žádné ceny). Z <a href="l4-10.html#takeaways">[L4.10]</a> víš, že MCF přidává hranám ceny $c$ a uzlům bilance $b$. Jak ty dvě věci složit, aby z optimálního toku vypadlo <em>nejlevnější perfektní</em> párování?</summary>
+    <div class="inner">
+      <p>Vezmi síť z [L4.9] beze změny kapacit (všude $l = 0$, $u = 1$) a dvě věci dolaď: ① <strong>ceny</strong> — prostřední hrana $i \to j$ dostane cenu $c(i,j) = d_{ij}$, krajní hrany $s \to i$ a $j \to t$ cenu $0$ (samotné „zapojení“ úkolu nic nestojí); ② <strong>perfektnost vynutíš bilancemi</strong> — $b(s) = n$, $b(t) = -n$, ostatní uzly $0$. Každý přípustný tok pak musí protlačit $n$ jednotek, tj. nasytit všechny krajní hrany — každé $i$ se s někým spáruje. MCF mezi takovými toky vybere ten s nejmenším $\sum d_{ij}$. Kdybys bilance nedal a chtěl jen „co nejlevnější tok“, vyhraje nulový tok za 0 — prázdné párování!</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: KONSTRUKCE ===== -->
+  <h2>Konstrukce ze slidu 41</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 41 — d) Assignment Problem: Solution by Minimum Cost Flow, 1:1</div>
+    <p><em>We have $n$ employees and $n$ tasks and we know the cost of execution for each possible employee-task pair.</em></p>
+    <p><em><strong>Goal:</strong> Assign one task per employee while minimizing the total cost.</em></p>
+    <p><em>Can be solved by transformation to <strong>Minimum Cost Flow problem</strong>. <strong>Example:</strong> costs of execution of tasks 1, 2, 3 by employees A, B, C:</em></p>
+    <p>$$\begin{array}{c|ccc}
+     & A & B & C \\ \hline
+    1 & 6 & 2 & 4 \\
+    2 & 3 & 1 & 3 \\
+    3 & 5 & 3 & 4
+    \end{array}$$</p>
+    <p><em>Add source $s$, sink $t$ and related edges with weight and orientation.</em></p>
+  </div>
+
+  <p>Síť pro příklad ze slidu (úkoly $1, 2, 3$ = partita $X$, zaměstnanci $A, B, C$ = partita $Y$):</p>
+
+  <div class="viz" id="viz-net"></div>
+
+  <p>Formálně: $G' = (\{s, t\} \cup X \cup Y,\ E')$ s hranami $s \to i$ pro $i \in X$, $i \to j$ pro $(i,j) \in X \times Y$ a $j \to t$ pro $j \in Y$; všude $l = 0$, $u = 1$; ceny $c(s,i) = c(j,t) = 0$ a $c(i,j) = d_{ij}$; bilance $b(s) = n$, $b(t) = -n$, jinde $0$. Pětice $(G', l, u, c, b)$ je přesně vstup MCF z <a href="l4-10.html#takeaways">[L4.10]</a>.</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč je optimální tok téhle sítě vždycky rovnou <em>párování</em> — tedy proč z něj přečteš $x_{ij} = f(i,j) \in \{0, 1\}$ a žádná „půlka úkolu“ ti nevyleze?</summary>
+    <div class="inner">
+      <p>Dva kroky. ① <strong>Celočíselnost:</strong> meze i bilance jsou celočíselné, takže existuje celočíselný optimální tok (Integral Flow Theorem, slide 17 — citovali jsme ho v <a href="l4-5.html#takeaways">[L4.5]</a>; cycle canceling ho navíc sám od sebe najde, protože startuje z celočíselného toku a augmentuje o celé $\gamma$). S kapacitou $u = 1$ pak $f(i,j) \in \{0, 1\}$. ② <strong>Stupně:</strong> do uzlu $i \in X$ přiteče po hraně $s \to i$ právě 1 (krajní hrany jsou nasycené, protože $b(s) = n$ a hran ze zdroje je přesně $n$), takže z Kirchhoffa <a href="l4-1.html#takeaways">[L4.1]</a> odteče právě 1 — uzel $i$ si vybere <em>právě jednoho</em> partnera $j$. Symetricky každé $j$ pošle do $t$ právě 1. Hrany s $f = 1$ uprostřed tedy tvoří perfektní párování a cena toku $= \sum_{(i,j):\, f(i,j)=1} d_{ij}$ je přesně jeho váha.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 41 (poslední řádek) + pozor na zkoušku</div>
+    <p><em>„Alternatively we can solve the assignment problem by Hungarian Alg.“</em> — Maďarský (Hungarian) algoritmus (slidy 42–48) je ale <strong>ze zkoušky 2026 výslovně vyloučen</strong>. U zkoušky assignment řeš <em>výhradně</em> přes MCF + cycle canceling; Hungarian tu proto nevykládáme vůbec.</p>
+  </div>
+
+  <!-- ===== SEKCE 3: BĚH ===== -->
+  <h2>Běh: cycle canceling na příkladu ze slidu 41</h2>
+
+  <p>Krok 1 cycle cancelingu <a href="l4-11.html#takeaways">[L4.11]</a> chce přípustný tok. Tady ho máš zadarmo: <em>libovolné</em> přiřazení (permutace) je přípustný tok — žádnou redukci z <a href="l4-6.html#takeaways">[L4.6]</a> nepotřebuješ. Vezmeme „diagonálu“ $1 \to A$, $2 \to B$, $3 \to C$ za $6 + 1 + 4 = 11$ a necháme algoritmus, ať ji zlevní.</p>
+
+  <details class="try">
+    <summary>Zkus sám: reziduální graf $G_f$ téhle sítě má i uzly $s$, $t$ a jejich hrany. Rozmysli, proč při hledání záporného cyklu můžeme $s$ a $t$ úplně ignorovat a kreslit jen bipartitní prostředek.</summary>
+    <div class="inner">
+      <p>Každý přípustný tok nasytí všechny krajní hrany ($b(s) = n$ = počet hran ze zdroje). Dopředné reziduální hrany $s \to i$ a $j \to t$ mají tedy $u_f = u - f = 0$ a v $E_f$ <em>nejsou</em>; existují jen zpětné $i \to s$ a $t \to j$. Jenže pak do $s$ hrany jen <em>vstupují</em> a žádná z něj nevychází — $s$ nemůže ležet na žádném cyklu (a $t$ zrcadlově: jen výstupní hrany). Všechny cykly $G_f$ tedy žijí mezi $X$ a $Y$: střídají dopřednou nepárovací hranu $i \to j$ (cena $+d_{ij}$) a zpětnou párovací $j' \to i'$ (cena $-d_{i'j'}$). To je přesně <strong>M-alternating cyklus</strong> ze slidu 39 — augmentace po záporném cyklu je <em>výměna párovacích hran</em>, která sníží váhu párování.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-run"></div>
+
+  <details class="try">
+    <summary>Zkus sám: ověř výsledek hrubou silou — permutace tří prvků je jen šest. Vyjde opravdu 9 jako minimum?</summary>
+    <div class="inner">
+      <p>$1A2B3C: 6+1+4=11$; $1B2A3C: 2+3+4=\mathbf{9}$; $1B2C3A: 2+3+5=10$; $1C2A3B: 4+3+3=10$; $1C2B3A: 4+1+5=10$; $1A2C3B: 6+3+3=12$. Minimum je jediné: $\{1{-}B,\ 2{-}A,\ 3{-}C\}$ za $\mathbf{9}$ — přesně to, co vrátil cycle canceling. (Pro $n = 3$ si to enumerací ověříš, pro $n = 50$ už ne — proto polynomiální MCF.)</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
+    <p><strong>1) Hungarian algoritmus u zkoušky nepoužívej</strong> — je vyloučen; assignment = MCF + cycle canceling.
+    <strong>2) Bez bilancí $b(s) = n$, $b(t) = -n$ to nefunguje:</strong> „nejlevnější tok“ bez požadavku na množství je nulový tok za 0. Perfektnost párování vynucují právě bilance (ekvivalentně lze dát $l = 1$ na krajní hrany).
+    <strong>3) Ceny $d_{ij}$ patří jen na prostřední hrany;</strong> krajní mají $c = 0$. Kdo napíše ceny i na krajní hrany, posune cenu každého řešení o konstantu — optimum přežije, ale hodnota „minimální ceny“ bude špatně.
+    <strong>4) Min-weight perfect matching (d) ≠ min-weight matching (c):</strong> problém c) hledá nejlevnější mezi párováními <em>maximální kardinality</em> v libovolném grafu; d) chce <em>perfektní</em> párování v $K_{n,n}$ se stejně velkými partitami. U zkoušky cituj přesně problém d).
+    <strong>5) „Seřaď a spáruj“ není univerzální recept:</strong> pravidlo „$i$-tý nejkratší s $i$-tým nejdelším“ je optimální jen pro speciální struktury cen (School Bus, úloha T03 — funguje díky tvaru $\max\{0, x - D\}$). Pro obecnou matici $d_{ij}$ žádné třídicí pravidlo neexistuje — musíš spustit MCF.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.12</div>
+    <ul>
+      <li><strong>Assignment problem</strong> = min-weight perfect matching v $K_{n,n}$ se stejně velkými partitami <a href="../k0/l0-6.html#takeaways">[L0.6]</a> = speciální případ MCF (slide 38 d); řešitelný polynomiálně.</li>
+      <li><strong>Konstrukce (slide 41):</strong> síť $s \to X \to Y \to t$; všude $l = 0$, $u = 1$; ceny $c = d_{ij}$ jen uprostřed, krajní $c = 0$; bilance $b(s) = n$, $b(t) = -n$. Celočíselnost <a href="l4-5.html#takeaways">[L4.5]</a> + Kirchhoff <a href="../k4/l4-1.html#takeaways">[L4.1]</a> ⟹ tok = perfektní párování, $x_{ij} = f(i,j)$.</li>
+      <li><strong>Řeš cycle cancelingem <a href="l4-11.html#takeaways">[L4.11]</a>:</strong> start = libovolná permutace; $s$ a $t$ na žádném cyklu neleží, záporné cykly jsou M-alternating cykly v bipartitní části a augmentace = výměna párovacích hran.</li>
+      <li><strong>Hungarian algoritmus je ze zkoušky vyloučen</strong> — assignment se řeší výhradně přes MCF.</li>
+      <li><strong>Třídicí pravidlo „$i$-tý nejkratší ranní + $i$-tý nejdelší odpolední“</strong> je optimální pro overtime ceny $\max\{0, m_i + a_j - D\}$ (exchange argument, T03) — pro obecné $d_{ij}$ nic takového neplatí.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-assignmcf">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Assignment Problem — Solution by Minimum Cost Flow</strong>
+      <span class="task-src">zdroj: banka #9 (study task ze slidu 41, EN 1:1)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN 1:1)</span>
+        <p><em>We have $n$ employees and $n$ tasks and we know the cost of execution for each possible employee-task pair. <strong>Goal:</strong> Assign one task per employee while minimizing the total cost. The assignment problem can be solved by transformation to the minimum cost flow problem. The source slide uses the example of execution costs of tasks $1, 2, 3$ by employees $A, B, C$:</em></p>
+        <p>$$\begin{array}{c|ccc}
+         & A & B & C \\ \hline
+        1 & 6 & 2 & 4 \\
+        2 & 3 & 1 & 3 \\
+        3 & 5 & 3 & 4
+        \end{array}$$</p>
+        <p><em><strong>Study task:</strong> Formulate the minimum-cost assignment problem as a minimum-cost flow problem. Define the source, sink, balances, capacities, costs, and how the chosen employee-task pairs are read from the flow.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Učebnicová podoba dnešní lekce: vzít přiřazovací problém (matice cen $3 \times 3$) a předvést kompletní převod na MCF — síť, meze, ceny, bilance — plus říct, jak se z optimálního toku přečte výsledné přiřazení.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — konstrukce + běh (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-10.html#takeaways">[L4.10] Minimum Cost Flow + reziduální graf s cenami</a> — co je pětice $(G, l, u, c, b)$.</li>
+        <li><a href="l4-11.html#takeaways">[L4.11] Cycle canceling</a> — když chce zkoušející i výpočet.</li>
+        <li><a href="l4-5.html#takeaways">[L4.5]</a> — Integral Flow Theorem (proč tok = párování).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Odpověz strukturovaně po složkách pětice $(G', l, u, c, b)$ — zkoušející chce vidět, že žádnou nezapomeneš. Pak jedna věta o celočíselnosti (bez ní není jasné, proč tok dává $x_{ij} \in \{0,1\}$) a jedna o čtení výsledku. Pokud se chce i vyřešit příklad: start = libovolná permutace, cycle canceling.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (konstrukce dle slidu 41; běh = stepper výše)</summary>
+        <div class="inner">
+          <p><strong>Konstrukce.</strong> $G' = (\{s, t\} \cup X \cup Y,\ E')$, kde $X$ = úkoly, $Y$ = zaměstnanci, $|X| = |Y| = n$:</p>
+          <ul>
+            <li><strong>Hrany:</strong> $s \to i$ pro všechna $i \in X$; $i \to j$ pro všechny dvojice $(i, j) \in X \times Y$; $j \to t$ pro všechna $j \in Y$.</li>
+            <li><strong>Kapacity:</strong> $l(e) = 0$, $u(e) = 1$ pro všechny hrany.</li>
+            <li><strong>Ceny:</strong> $c(s, i) = 0$, $c(i, j) = d_{ij}$, $c(j, t) = 0$.</li>
+            <li><strong>Bilance:</strong> $b(s) = n$, $b(t) = -n$, $b(v) = 0$ jinak.</li>
+          </ul>
+          <p><strong>Proč to funguje:</strong> bilance vynutí tok velikosti $n$, takže všechny krajní hrany jsou nasycené; z Kirchhoffa si pak každý úkol vybere právě jednoho zaměstnance a naopak. Meze a bilance jsou celočíselné ⟹ existuje celočíselné optimum (Integral Flow Theorem, <a href="l4-5.html#takeaways">[L4.5]</a>), tedy $f(i,j) \in \{0,1\}$. <strong>Čtení výsledku:</strong> $x_{ij} = f(i, j)$ — úkol $i$ dělá zaměstnanec $j$ právě když prostřední hranou $i \to j$ teče 1; cena toku $=$ cena přiřazení.</p>
+          <p><strong>Výpočet na příkladu</strong> (cycle canceling, viz stepper v lekci): start $1{\to}A, 2{\to}B, 3{\to}C$ za 11; záporný cyklus $1 \to B \to 2 \to A \to 1$ s cenou $2 - 1 + 3 - 6 = -2$, $\gamma = 1$ → přiřazení $\{1{-}B, 2{-}A, 3{-}C\}$ za $\mathbf{9}$; v novém $G_f$ už žádný záporný cyklus není (všechny alternating cykly mají cenu $+1$ až $+3$) ⟹ optimum.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-toys">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Toys Assignment — část b): min-weight perfect matching</strong>
+      <span class="task-src">zdroj: zkouška KO_09_07_2021 (EN 1:1; doloženo i pro termín 1. 6. 2026)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN 1:1)</span>
+        <p><em>There is a set of toys $T = \{t_1, t_2, \ldots, t_n\}$ scattered all around the room. By one of the walls, there is a row of boxes $B = \{b_1, b_2, \ldots, b_n\}$, where box $b_i$ is located left to $b_{i+1}$ for all $i \in \{1, 2, \ldots, n-1\}$. Distance of toy $t_i$ to box $b_j$ is $d_{i,j} \in \mathbb{R}_0^+ \ \forall t_i \in T, b_j \in B$.</em></p>
+        <p><em>(a) Your goal is to design an ILP model to organize the toys to the boxes such that: (i) each box contains exactly one toy and each toy is stored in one box, (ii) the total distance between the toys and their assigned boxes is minimized, (iii) toy $t_1$ is assigned to the box immediately left to the box where $t_2$ is assigned, (iv) neither $t_5$ nor $t_6$ can be assigned to $b_1$ or $b_n$, (v) $t_4$ is in the box immediately next to $t_5$ or $t_6$.</em></p>
+        <p><em>(b) Disregard constraints (iii) and (v). Then, formalize the problem as an assignment problem (i.e., minimum weight perfect matching in complete bipartite graph whose sets have the same cardinality).</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Část (a) — plný ILP model s podmínkami (iii) a (v) — jsi vyřešil už v <a href="../k1/l1-14.html#takeaways">[L1.14]</a>. Dnešní část (b) zahodí „polohové“ podmínky a ptá se přesně na dnešní pojem: zformalizuj zbytek (podmínky (i), (ii), (iv)) jako assignment problem, tj. min-weight perfect matching v úplném bipartitním grafu se stejně velkými partitami.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice problému d) + MCF síť (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k0/l0-6.html#takeaways">[L0.6] Párování a perfektní párování</a> — pojmy.</li>
+        <li><a href="../k1/l1-14.html#takeaways">[L1.14]</a> — část (a) a trik se zakázanými hranami.</li>
+        <li><a href="l4-11.html#takeaways">[L4.11]</a> — kdyby se chtělo i „a jak to spočítáš?“.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Podmínky (i)+(ii) jsou doslova definice assignment problemu — stačí pojmenovat partity, váhy a co je přípustné řešení. Jediná práce je podmínka (iv): zákaz čtyř konkrétních dvojic. Graf má ale zůstat <em>úplný</em> (tak zní zadání) — jak zakázat hranu, aniž ji smažeš? Vzpomeň na big-M z <a href="../k1/l1-14.html#takeaways">[L1.14]</a>.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (formulace dle vzorového rukopisného řešení zkoušky; úprava zákazů přes M a MCF dovětek — přiznáno)</summary>
+        <div class="inner">
+          <p><strong>Formulace.</strong> Bipartitní graf $K_{n,n} = (T \cup B, E)$: partita $T$ = hračky, partita $B$ = boxy, $|T| = |B| = n$; hrana $(t_i, b_j)$ s váhou $w_{ij} = d_{i,j}$ znamená „hračka $i$ leží v boxu $j$“. Přípustné uspořádání dle (i) = každá hračka v právě jednom boxu a obráceně = <strong>perfektní párování</strong>; (ii) = minimalizace $\sum_{(i,j) \in P} d_{i,j}$ → hledáme <strong>minimum weight perfect matching</strong>.</p>
+          <p><strong>Podmínka (iv):</strong> dvojice $(t_5, b_1), (t_5, b_n), (t_6, b_1), (t_6, b_n)$ jsou zakázané. Buď tyto čtyři hrany z grafu odstraníme (vzorové řešení: „kompletní provázání s výjimkou hran $d_{5,1}, d_{5,n}, d_{6,1}, d_{6,n}$, $n \ge 6$“ — graf je pak „skoro kompletní“), nebo — chceme-li doslova <em>úplný</em> bipartitní graf, jak žádá zadání — jim necháme existenci a dáme prohibitivní váhu $w_{5,1} = w_{5,n} = w_{6,1} = w_{6,n} = M$ (dost velké, např. $M &gt; \sum_{i,j} d_{i,j}$), takže do optima nikdy nevstoupí (stejný trik jako v <a href="../k1/l1-14.html#takeaways">[L1.14]</a>).</p>
+          <p><strong>Jako MCF síť</strong> (vzorové řešení ji kreslí; viz obrázek): $s \to$ hračky $\to$ boxy $\to t$; krajní hrany s kapacitou 1 a cenou 0, prostřední $t_i \to b_j$ s kapacitou 1 a cenou $d_{i,j}$; $b(s) = n$, $b(t) = -n$. Vzorové řešení uzavírá (1:1, CZ): <em>„z tohoto grafu můžeme najít reziduální graf a v něm odstranit záporné cykly, abychom dostali min flow“</em> — tedy přesně cycle canceling <a href="l4-11.html#takeaways">[L4.11]</a>.</p>
+          <div class="viz" id="viz-toys"></div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T03 ===== -->
+  <div class="task" id="t-busdrivers">
+    <div class="task-head">
+      <span class="task-id">T03</span>
+      <strong>School Bus Driver Assignment — matching + třídicí párování</strong>
+      <span class="task-src">zdroj: Master_Zkouska_KO, termín 02.06.2011 (= banka #7), EN 1:1</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN 1:1)</span>
+        <p><em>A bus company has $n$ morning runs and $n$ afternoon runs that it needs to assign them to its $n$ drivers. The runs are of different duration. If the total duration of the morning and afternoon runs assigned to a driver is more than a specified $D$, the driver receives a premium payment for each hour of overtime. The company would like to assign the runs to the drivers to minimize the total number of overtime hours.</em></p>
+        <p><em>(a) Formulate this problem as an appropriate matching problem. Formally specify input parameters of the problem.</em></p>
+        <p><em>(b) Suppose that we arrange the morning runs in the non-decreasing order of their duration and the afternoon runs in the non-increasing order of their duration. If we assign each driver $i$ to the $i$th morning run and the $i$th afternoon run, do we obtain the optimal assignment? Outline the proof or find a counterexample.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Každý řidič dostane jeden ranní a jeden odpolední běh; přesčas řidiče = o kolik součet délek přesáhne $D$. (a) chce <em>převod</em> na párovací problém včetně formálních vstupů; (b) testuje, jestli umíš o párovací heuristice <em>rozhodnout</em>: „nejkratší ranní + nejdelší odpolední“ — je to optimum, nebo najdeš protipříklad?</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — assignment problem = min-weight perfect matching (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k0/l0-6.html#takeaways">[L0.6]</a> — perfektní párování.</li>
+        <li>Exchange argument (výměnný argument) — stejná technika jako u Dantzigova greedy v <a href="../k3/l3-11.html#takeaways">[L3.11]</a>.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(a): klíčové rozhodnutí je, <em>co jsou partity</em>. Ne řidiči × běhy! Řidiči jsou zaměnitelní — páruješ ranní běhy s odpoledními a dvojice = jeden řidič. Cena dvojice musí zachytit přesčas: jaká funkce z $m_i$, $a_j$ a $D$ to je? (b): nejdřív si zkus pár malých případů — zjistíš, že prohození dvou dvojic celkový součet délek nemění, jen ho jinak <em>rozloží</em>. Otázka tedy zní: škodí přesčasům vyváženost, nebo pomáhá? Porovnej $o(A) + o(A + \Delta + \Gamma)$ s $o(A + \Gamma) + o(A + \Delta)$.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle banky #7)</summary>
+        <div class="inner">
+          <p><strong>(a) Formulace.</strong> Vstupy: $n \in \mathbb{Z}^+$, limit $D \in \mathbb{R}^+$, délky $m_i$ (ranní běh $i$) a $a_j$ (odpolední běh $j$), $i, j \in 1..n$. Přesčasová funkce $o(x) = \max\{0,\ x - D\}$. Spáruje-li jeden řidič ranní $i$ s odpoledním $j$, stojí to $c_{ij} = o(m_i + a_j) = \max\{0,\ m_i + a_j - D\}$ přesčasových hodin. Postav úplný bipartitní graf $K_{n,n} = (M \cup A, E)$, kde $M$ = ranní a $A$ = odpolední běhy; hrana $(i, j)$ = jeden řidič jede $i$ ráno a $j$ odpoledne. Přípustné přiřazení = perfektní párování ⟹ <strong>minimum-weight perfect matching v $K_{n,n}$</strong> — dnešní assignment problem, řešitelný přes MCF. Ekvivalentně ILP: $\min \sum_i \sum_j c_{ij} x_{ij}$ za podmínek $\sum_j x_{ij} = 1\ \forall i$, $\sum_i x_{ij} = 1\ \forall j$, $x_{ij} \in \{0,1\}$.</p>
+          <p><strong>(b) Ano — seřazené protiběžné párování je optimální.</strong> Seřaď $m_1 \le \cdots \le m_n$ a $a_1 \ge \cdots \ge a_n$ a páruj $m_i$ s $a_i$. Důkaz výměnným argumentem: vezmi libovolné přiřazení, v němž existuje „inverze“ — běhy $m_i \le m_j$ spárované <em>souhlasně</em>, tj. kratší s kratším: dvojice $(m_i, a_p)$, $(m_j, a_q)$ s $a_p \le a_q$. Označ $A = m_i + a_p$, $\Delta = m_j - m_i \ge 0$, $\Gamma = a_q - a_p \ge 0$. Souhlasné dvojice mají součty $A$ a $A + \Delta + \Gamma$; po prohození (kratší ranní s delším odpoledním) vyjdou $A + \Gamma$ a $A + \Delta$ — <em>stejný celkový součet, jen vyváženější rozdělení</em>. Stačí ukázat, že vyvážení přesčasy nezvýší:</p>
+          <p>$$o(A + \Gamma) + o(A + \Delta)\ \le\ o(A) + o(A + \Delta + \Gamma). \tag{1}$$</p>
+          <p>Substituce $\alpha = A - D$ převede (1) na $\max\{0, \alpha + \Gamma\} + \max\{0, \alpha + \Delta\} \le \max\{0, \alpha\} + \max\{0, \alpha + \Delta + \Gamma\}$ a rozbor tří případů:</p>
+          <ul>
+            <li>$\alpha \ge 0$: všechny čtyři členy kladné, obě strany $= 2\alpha + \Delta + \Gamma$. ✓</li>
+            <li>$\alpha + \Delta + \Gamma \le 0$: všechny čtyři členy nulové. ✓</li>
+            <li>$\alpha &lt; 0 &lt; \alpha + \Delta + \Gamma$: pravá strana $= \alpha + \Delta + \Gamma$; jsou-li oba levé členy kladné, levá strana $= 2\alpha + \Delta + \Gamma \le \alpha + \Delta + \Gamma$ (protože $\alpha \le 0$); je-li kladný jen jeden, je levá strana ještě menší. ✓</li>
+          </ul>
+          <p>Výměna tedy nikdy nezhorší účelovou funkci; opakovaným prohazováním odstraníš všechny inverze a doiteruješ přesně k seřazenému protiběžnému párování ⟹ je optimální. <strong>Pozor na zobecnění:</strong> důkaz stojí na konvexním tvaru $o(x) = \max\{0, x - D\}$ — pro obecnou matici cen $d_{ij}$ žádné třídicí pravidlo nefunguje a musíš spustit MCF (viz polopravda 5 v lekci).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L4.12">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k4/l4-11.html"><span class="dir">← Předchozí</span> L4.11 · Cycle canceling (řešení MCF)</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.13 · Directed Chinese Postman jako MCF [NICE])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Konstrukce slide 41: assignment síť pro matici 3×3 (úkoly 1,2,3 → zaměstnanci A,B,C)
+KOViz.graph(document.getElementById('viz-net'), {
+  directed: true,
+  w: 640, h: 380,
+  nodes: [
+    {id:'s', x:60,  y:190, label:'s', sub:'b = +3'},
+    {id:'1', x:220, y:70,  label:'1'},
+    {id:'2', x:220, y:190, label:'2'},
+    {id:'3', x:220, y:310, label:'3'},
+    {id:'A', x:430, y:70,  label:'A'},
+    {id:'B', x:430, y:190, label:'B'},
+    {id:'C', x:430, y:310, label:'C'},
+    {id:'t', x:590, y:190, label:'t', sub:'b = −3'},
+  ],
+  edges: [
+    {from:'s', to:'1', label:'0'},
+    {from:'s', to:'2', label:'0'},
+    {from:'s', to:'3', label:'0'},
+    {from:'1', to:'A', label:'6'},
+    {from:'1', to:'B', label:'2', curve:0.25},
+    {from:'1', to:'C', label:'4', curve:0.45},
+    {from:'2', to:'A', label:'3', curve:0.25},
+    {from:'2', to:'B', label:'1'},
+    {from:'2', to:'C', label:'3', curve:0.25},
+    {from:'3', to:'A', label:'5', curve:0.45},
+    {from:'3', to:'B', label:'3', curve:0.25},
+    {from:'3', to:'C', label:'4'},
+    {from:'A', to:'t', label:'0'},
+    {from:'B', to:'t', label:'0'},
+    {from:'C', to:'t', label:'0'},
+  ],
+  caption: 'Síť ze slidu 41: všechny hrany mají l = 0, u = 1; popisek hrany = cena c (prostřední hrany c = d_ij dle matice, krajní c = 0). Bilance b(s) = +3, b(t) = −3 vynucují tok velikosti 3 = perfektní párování.',
+});
+
+// 2 — HLAVNÍ BĚH: cycle canceling na assignment síti (jen bipartitní část G_f; s,t na cyklu ležet nemohou)
+// Frames = ABSOLUTNÍ stavy; popisek hrany = u_f | c_f; protisměrné (zpětné) hrany čárkovaně.
+KOViz.stepper(document.getElementById('viz-run'), {
+  graph: {
+    directed: true,
+    w: 640, h: 380,
+    nodes: [
+      {id:'1', x:170, y:70,  label:'1'},
+      {id:'2', x:170, y:190, label:'2'},
+      {id:'3', x:170, y:310, label:'3'},
+      {id:'A', x:470, y:70,  label:'A'},
+      {id:'B', x:470, y:190, label:'B'},
+      {id:'C', x:470, y:310, label:'C'},
+    ],
+    edges: [
+      {from:'1', to:'A', label:'u_f = 0', curve:0.18},
+      {from:'A', to:'1', label:'1 | −6',  curve:0.18, dashed:true},
+      {from:'1', to:'B', label:'1 | 2',   curve:0.18},
+      {from:'B', to:'1', label:'u_f = 0', curve:0.18, dashed:true},
+      {from:'1', to:'C', label:'1 | 4',   curve:0.45},
+      {from:'2', to:'A', label:'1 | 3',   curve:0.18},
+      {from:'A', to:'2', label:'u_f = 0', curve:0.18, dashed:true},
+      {from:'2', to:'B', label:'u_f = 0', curve:0.18},
+      {from:'B', to:'2', label:'1 | −1',  curve:0.18, dashed:true},
+      {from:'2', to:'C', label:'1 | 3',   curve:0.3},
+      {from:'3', to:'A', label:'1 | 5',   curve:0.45},
+      {from:'3', to:'B', label:'1 | 3',   curve:0.3},
+      {from:'3', to:'C', label:'u_f = 0', curve:0.18},
+      {from:'C', to:'3', label:'1 | −4',  curve:0.18, dashed:true},
+    ],
+  },
+  frames: [
+    {desc:'Krok 1: přípustný tok = libovolné přiřazení, vezmeme diagonálu f⁽¹⁾: 1→A, 2→B, 3→C za 6 + 1 + 4 = 11. Nakreslena bipartitní část G_f⁽¹⁾ (s a t na žádném cyklu ležet nemohou, viz try výše): párovací hrany jsou nasycené (u_f = 0, zešedlé), místo nich jsou v E_f zpětné hrany se zápornou cenou (čárkovaně).',
+     nodes:{}, edges:{'1->A':'dim', 'B->1':'dim', 'A->2':'dim', '2->B':'dim', '3->C':'dim'}},
+    {desc:'Krok 2: Bellman-Ford (z pomocného uzlu, [L4.11]) najde záporný cyklus, např. C₁ = 1 → B → 2 → A → 1: c_f(C₁) = 2 + (−1) + 3 + (−6) = −2 < 0; γ = min(1, 1, 1, 1) = 1. (Záporný je i 1→C→3→A→1: 4 − 4 + 5 − 6 = −1 a oba šesticykly za −1 — vzít lze kterýkoli.)',
+     nodes:{}, edges:{'1->A':'dim', 'B->1':'dim', 'A->2':'dim', '2->B':'dim', '3->C':'dim', '1->B':'bad', 'B->2':'bad', '2->A':'bad', 'A->1':'bad'}},
+    {desc:'Krok 3: augmentace o γ = 1 podél C₁ = výměna párovacích hran po M-alternating cyklu: f(1→B): 0→1, f(2→B): 1→0, f(2→A): 0→1, f(1→A): 1→0. Nový tok f⁽²⁾: 1→B, 2→A, 3→C za 11 − 2·1 = 9. V G_f⁽²⁾ se zpětné hrany přestěhovaly na nové párovací dvojice.',
+     nodes:{}, edges:{'1->B':'dim', 'A->1':'dim', '2->A':'dim', 'B->2':'dim', '3->C':'dim'},
+     labels:{'1->A':'1 | 6', 'A->1':'u_f = 0', '1->B':'u_f = 0', 'B->1':'1 | −2', '2->A':'u_f = 0', 'A->2':'1 | −3', '2->B':'1 | 1', 'B->2':'u_f = 0'}},
+    {desc:'Krok 2 podruhé: žádný záporný cyklus! Alternating cykly v G_f⁽²⁾: 1→A→2→B→1: 6 − 3 + 1 − 2 = +2; 1→C→3→B→1: 4 − 4 + 3 − 2 = +1; 2→C→3→A→2: 3 − 4 + 5 − 3 = +1; 1→A→2→C→3→B→1: 6 − 3 + 3 − 4 + 3 − 2 = +3; 1→C→3→A→2→B→1: 4 − 4 + 5 − 3 + 1 − 2 = +1. STOP — párování {1–B, 2–A, 3–C} (zeleně) za 9 je optimální.',
+     nodes:{}, edges:{'1->B':'dim', 'A->1':'dim', '2->A':'dim', 'B->2':'dim', '3->C':'dim', 'B->1':'good', 'A->2':'good', 'C->3':'good'},
+     labels:{'1->A':'1 | 6', 'A->1':'u_f = 0', '1->B':'u_f = 0', 'B->1':'1 | −2', '2->A':'u_f = 0', 'A->2':'1 | −3', '2->B':'1 | 1', 'B->2':'u_f = 0'}},
+  ],
+  caption: 'Cycle canceling na assignment síti slidu 41 (jen bipartitní část G_f; popisek hrany = u_f | c_f, zpětné hrany čárkovaně, hrany s „u_f = 0“ zešedlé a v E_f NEJSOU). Jedna iterace: 11 → 9, pak certifikát optimality. Nalezený záporný cyklus červeně, výsledné párování zeleně.',
+});
+
+// 3 — T02 Toys: MCF síť dle vzorového rukopisného řešení (reprezentativní hrany — přiznáno v caption)
+KOViz.graph(document.getElementById('viz-toys'), {
+  directed: true,
+  w: 640, h: 380,
+  nodes: [
+    {id:'s',  x:60,  y:190, label:'s',  sub:'b = +n'},
+    {id:'t1', x:230, y:60,  label:'t₁'},
+    {id:'t2', x:230, y:145, label:'t₂', sub:'⋮'},
+    {id:'t5', x:230, y:240, label:'t₅'},
+    {id:'t6', x:230, y:320, label:'t₆'},
+    {id:'b1', x:430, y:60,  label:'b₁'},
+    {id:'b2', x:430, y:145, label:'b₂', sub:'⋮'},
+    {id:'bn', x:430, y:300, label:'bₙ'},
+    {id:'t',  x:590, y:190, label:'t',  sub:'b = −n'},
+  ],
+  edges: [
+    {from:'s', to:'t1', label:'0'},
+    {from:'s', to:'t2', label:'0'},
+    {from:'s', to:'t5', label:'0'},
+    {from:'s', to:'t6', label:'0'},
+    {from:'t1', to:'b1', label:'d₁,₁'},
+    {from:'t1', to:'b2', label:'d₁,₂', curve:0.15},
+    {from:'t1', to:'bn', label:'d₁,ₙ', curve:0.35},
+    {from:'t5', to:'b1', label:'M', cls:'bad', dashed:true, curve:0.2},
+    {from:'t5', to:'bn', label:'M', cls:'bad', dashed:true, curve:-0.15},
+    {from:'t6', to:'b1', label:'M', cls:'bad', dashed:true, curve:0.4},
+    {from:'t6', to:'bn', label:'M', cls:'bad', dashed:true, curve:-0.3},
+    {from:'b1', to:'t', label:'0'},
+    {from:'b2', to:'t', label:'0'},
+    {from:'bn', to:'t', label:'0'},
+  ],
+  caption: 'T02 b): síť s → hračky → boxy → t (vzor vzorového rukopisného řešení). Všechny hrany l = 0, u = 1; popisek = cena (krajní 0, prostřední d_ij). Kvůli čitelnosti jsou z úplného bipartitního propojení vykresleny jen hrany z t₁ (reprezentativně — přiznáno) a čtyři ZAKÁZANÉ hrany podmínky (iv) červeně čárkovaně: t₅, t₆ ↛ b₁, bₙ — buď je ze sítě vynech, nebo jim dej prohibitivní cenu M.',
+});
+</script>
+</body>
+</html>

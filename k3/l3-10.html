@@ -76,7 +76,7 @@ Output: Hamiltonian circuit H.
 
   <div class="box">
     <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Min-weight perfect matching tady bereme jako POJEM — nepanikař</div>
-    <p>Pro dnešní důkaz potřebuješ od párování jen dvě věci: že na $W$ <strong>existuje</strong> ($|W|$ sudé + úplnost $K_n$, viz Observation) a že $M$ je ze všech perfektních párování na $W$ <strong>nejlevnější</strong>. Jak se min-weight perfect matching <em>počítá</em> (přes toky), přijde až v [L4.12] — pro tento důkaz to <strong>nepotřebuješ</strong> a u zkoušky se to u této úlohy nechce. Definice párování: <a href="../k0/l0-6.html#takeaways">[L0.6]</a>.</p>
+    <p>Pro dnešní důkaz potřebuješ od párování jen dvě věci: že na $W$ <strong>existuje</strong> ($|W|$ sudé + úplnost $K_n$, viz Observation) a že $M$ je ze všech perfektních párování na $W$ <strong>nejlevnější</strong>. Jak se min-weight perfect matching <em>počítá</em> (přes toky), přijde až v <a href="../k4/l4-12.html">[L4.12]</a> — pro tento důkaz to <strong>nepotřebuješ</strong> a u zkoušky se to u této úlohy nechce. Definice párování: <a href="../k0/l0-6.html#takeaways">[L0.6]</a>.</p>
   </div>
 
   <!-- ===== SEKCE 2: BĚH NA INSTANCI ===== -->
@@ -174,7 +174,7 @@ Output: Hamiltonian circuit H.
       <li><strong>„Párování se hledá na všech vrcholech $K_n$.“</strong> NE — jen na $W$ (vrcholy <em>lichého stupně v $T$</em>). Na celém $V$ by pro liché $n$ perfektní párování ani neexistovalo <a href="../k0/l0-6.html#takeaways">[L0.6]</a>.</li>
       <li><strong>„Metrika se používá jen při shortcuttingu na konci.“</strong> NE — u Christofidese má <strong>dvě adresy</strong>: článek 1 ($L \to H$) a článek 3 (shortcut optimálního okruhu $H^*$ na $W$). Kdo v důkazu lemma 3 trojúhelníkovou nerovnost nezmíní, má v důkazu díru.</li>
       <li><strong>„$c(E(M)) \le \mathrm{OPT}/2$, protože párování je půlka optimálního okruhu.“</strong> Zkratka, která nedává smysl doslova — $H^*$ vede i přes vrcholy mimo $W$. Správně: shortcut $H^*$ na $W$ → okruh $C_W$ ceny $\le \mathrm{OPT}$ → jeho hrany ob jednu = dvě perfektní párování → levnější stojí $\le \mathrm{OPT}/2$ → minimální $M$ nanejvýš tolik.</li>
-      <li><strong>„Neumím spočítat matching, takže neumím Christofidese.“</strong> NE — důkaz potřebuje jen <em>existenci</em> ($|W|$ sudé <a href="../k0/l0-2.html#takeaways">[L0.2]</a> + úplnost) a <em>minimalitu</em> $M$. Výpočet přes toky je až [L4.12] a v této úloze se nechce.</li>
+      <li><strong>„Neumím spočítat matching, takže neumím Christofidese.“</strong> NE — důkaz potřebuje jen <em>existenci</em> ($|W|$ sudé <a href="../k0/l0-2.html#takeaways">[L0.2]</a> + úplnost) a <em>minimalitu</em> $M$. Výpočet přes toky je až <a href="../k4/l4-12.html">[L4.12]</a> a v této úloze se nechce.</li>
     </ul>
   </div>
 
@@ -186,7 +186,7 @@ Output: Hamiltonian circuit H.
       <li><strong>Faktor 3/2</strong> (slide 27): $\tfrac{3}{2}\,\mathrm{OPT} \stackrel{2.,3.}{\ge} c(E(T)) + c(E(M)) \stackrel{4.}{=} c(E(L)) \stackrel{1.}{\ge} c(E(H))$ — články 1 a 2 jsou beze změny z <a href="l3-9.html#takeaways">[L3.9]</a>, článek 4 je počítání hran multigrafu.</li>
       <li><strong>Nové lemma (článek 3)</strong>: $c(E(M)) \le \tfrac{\mathrm{OPT}}{2}$ — shortcut $H^*$ na $W$ (cena $\le \mathrm{OPT}$, metrika!), okruh na sudě mnoha vrcholech se rozpadne na <strong>dvě perfektní párování</strong>, levnější stojí $\le \mathrm{OPT}/2$ a minimální $M$ nanejvýš tolik.</li>
       <li>Metrika má v důkazu <strong>dvě adresy</strong> (články 1 a 3), nezápornost jednu (článek 2), úplnost tři (zkratky 2× + existence párování).</li>
-      <li>Matching tu je <strong>pojem, ne výpočet</strong> — existence + minimalita stačí; algoritmus na min-weight perfect matching až [L4.12].</li>
+      <li>Matching tu je <strong>pojem, ne výpočet</strong> — existence + minimalita stačí; algoritmus na min-weight perfect matching až <a href="../k4/l4-12.html">[L4.12]</a>.</li>
       <li>U zkoušky (žebříček #1): odvodit <em>proč</em> — 4 články se zdůvodněním + složení. Nestačí napsat faktor.</li>
     </ul>
   </div>

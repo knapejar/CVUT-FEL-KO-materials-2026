@@ -54,7 +54,7 @@
     <p><em>These problems can be solved in polynomial time.</em></p>
   </div>
 
-  <p>Dnes řešíme <strong>b)</strong> — kardinalitu v bipartitním grafu, přes max flow. Problémy c) a d) (váhy, assignment) počkají na minimum cost flow: nejdřív si ho postavíme v <a href="l4-10.html">[L4.10]</a>, pak jím v [L4.12] vyřešíme assignment. <em>Maďarský (Hungarian) algoritmus je ze zkoušky vyloučen — assignment se u zkoušky řeší výhradně přes MCF.</em></p>
+  <p>Dnes řešíme <strong>b)</strong> — kardinalitu v bipartitním grafu, přes max flow. Problémy c) a d) (váhy, assignment) počkají na minimum cost flow: nejdřív si ho postavíme v <a href="l4-10.html">[L4.10]</a>, pak jím v <a href="l4-12.html">[L4.12]</a> vyřešíme assignment. <em>Maďarský (Hungarian) algoritmus je ze zkoušky vyloučen — assignment se u zkoušky řeší výhradně přes MCF.</em></p>
 
   <p>Celou lekci odpracujeme na jednom bipartitním grafu (vlastní instance — přiznáno): $X = \{x_1, x_2, x_3, x_4\}$, $Y = \{y_1, y_2, y_3\}$, hrany podle obrázku.</p>
 
@@ -149,7 +149,7 @@
     <strong>2) Frakční tok není párování.</strong> Odpověď „pustím max flow“ je úplná až s větou o celočíselnosti (Integral Flow Theorem — kapacity jsou celé, tedy existuje celočíselný max tok a F-F ho najde). U zkoušky nevynechávej.
     <strong>3) M-augmentující cesta musí mít OBA konce nepokryté.</strong> Střídavá cesta končící v pokrytém vrcholu párování nezvětší — přehozením velikost zachováš, nebo dokonce porušíš párovost.
     <strong>4) Hrany se orientují, kapacita 1 všude, $l = 0$.</strong> Neorientovaný graf nech za sebou: v síti vede vše $s \to X \to Y \to t$. A žádné dolní meze — nepleť s [L4.8], tady start $f \equiv 0$ funguje.
-    <strong>5) Maďarský algoritmus u zkoušky nepoužívej</strong> — je vyloučen; vážené verze (assignment) se řeší přes minimum cost flow (<a href="l4-10.html">[L4.10]</a> → [L4.12]).</p>
+    <strong>5) Maďarský algoritmus u zkoušky nepoužívej</strong> — je vyloučen; vážené verze (assignment) se řeší přes minimum cost flow (<a href="l4-10.html">[L4.10]</a> → <a href="l4-12.html">[L4.12]</a>).</p>
   </div>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
@@ -160,7 +160,7 @@
       <li><strong>Velikost max toku = velikost maximálního párování.</strong> Kapacity 1 na hranách u $s$/$t$ + Kirchhoff = každý vrchol nejvýš v jedné hraně; párování čteš z vnitřních hran s $f = 1$.</li>
       <li><strong>Celočíselnost říct nahlas:</strong> kapacity jsou celé → existuje celočíselný (0/1) max tok (Integral Flow Theorem <a href="l4-5.html#takeaways">[L4.5]</a>); frakční tok párování není.</li>
       <li><strong>M-augmenting path (slide 39):</strong> střídavá cesta s oběma konci nepokrytými; $M$ je maximum $\iff$ žádná neexistuje. V síti je to augmentující cesta v $G_f$ <a href="l4-2.html#takeaways">[L4.2]</a> — zpětná hrana = vyhození hrany z $M$ (přepojení).</li>
-      <li><strong>Když max tok $&lt; |X|$:</strong> perfektní párování neexistuje; certifikátem je min řez z posledního značkování <a href="l4-4.html#takeaways">[L4.4]</a>. Vážené párování (assignment) → MCF (<a href="l4-10.html">[L4.10]</a>, [L4.12]); Hungarian je ze zkoušky vyloučen.</li>
+      <li><strong>Když max tok $&lt; |X|$:</strong> perfektní párování neexistuje; certifikátem je min řez z posledního značkování <a href="l4-4.html#takeaways">[L4.4]</a>. Vážené párování (assignment) → MCF (<a href="l4-10.html">[L4.10]</a>, <a href="l4-12.html">[L4.12]</a>); Hungarian je ze zkoušky vyloučen.</li>
     </ul>
   </div>
 

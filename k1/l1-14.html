@@ -159,7 +159,7 @@
 
   <div class="viz" id="viz-match"></div>
 
-  <p>Tohle je klasický <strong>assignment problem</strong> (přiřazovací problém) a je řešitelný <strong>polynomiálně</strong>. Jak přesně — min-cost flow formulace a výpočet — je látka kapitoly K4 (lekce [L4.12]); dnes stačí umět <em>převod</em>: ILP (i)+(ii) ⟷ minimum weight perfect matching v $K_{n,n}$, zákazy pozic ⟷ odebrané hrany.</p>
+  <p>Tohle je klasický <strong>assignment problem</strong> (přiřazovací problém) a je řešitelný <strong>polynomiálně</strong>. Jak přesně — min-cost flow formulace a výpočet — je látka kapitoly K4 (lekce <a href="../k4/l4-12.html">[L4.12]</a>); dnes stačí umět <em>převod</em>: ILP (i)+(ii) ⟷ minimum weight perfect matching v $K_{n,n}$, zákazy pozic ⟷ odebrané hrany.</p>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
   <div class="box takeaways" id="takeaways">
@@ -168,7 +168,7 @@
       <li><strong>Poloha v řadě = index boxu.</strong> „$t_1$ hned vlevo od $t_2$“ = rovnost binárek s posunutým indexem: $x_{1,j} = x_{2,j+1}$ $\forall j \in 1 \dots n-1$ — plus <strong>okrajová pojistka</strong> $x_{1,n} = 0$ (a $x_{2,1} = 0$). Každý posun indexu zkontroluj na krajích řady, jinak řešení „přeteče“.</li>
       <li><strong>Zákaz pozice = vynulovaná binárka</strong> <a href="l1-3.html#takeaways">[L1.3]</a>: $x_{5,1} = x_{5,n} = x_{6,1} = x_{6,n} = 0$. Grafově: odebrané hrany.</li>
       <li><strong>„Hned vedle $t_5$ nebo $t_6$“ = implikace do součtu sousedů:</strong> $x_{4,j} \le x_{5,j-1} + x_{5,j+1} + x_{6,j-1} + x_{6,j+1}$ $\forall j$ (neplatné indexy = 0). Big-M netřeba — pravá strana je součet binárek. Obecná alternativa: disjunkce čtyř systémů přes selektorové binárky $y_1, y_2$ a big-M <a href="l1-4.html#takeaways">[L1.4]</a> (tady stačí $M=1$), ale je delší a náchylnější k chybám.</li>
-      <li><strong>Assignment ILP = minimum weight perfect matching</strong> v $K_{n,n}$ <a href="../k0/l0-6.html#takeaways">[L0.6]</a>: hračky ∪ boxy, váhy $d_{ij}$, zakázaná přiřazení = odebrané hrany (nebo váha $M$ při úplném grafu). Výpočet přes toky až v K4 [L4.12].</li>
+      <li><strong>Assignment ILP = minimum weight perfect matching</strong> v $K_{n,n}$ <a href="../k0/l0-6.html#takeaways">[L0.6]</a>: hračky ∪ boxy, váhy $d_{ij}$, zakázaná přiřazení = odebrané hrany (nebo váha $M$ při úplném grafu). Výpočet přes toky až v K4 <a href="../k4/l4-12.html">[L4.12]</a>.</li>
     </ul>
   </div>
 
@@ -234,7 +234,7 @@
           <p>Funguje (okraje kryje (iv)), ale součtová verze je kratší a na písemce bezpečnější.</p>
           <p><strong>(b) Assignment problem / minimum weight perfect matching.</strong> Bipartitní graf $G = (T \cup B, E)$; pro každé povolené přiřazení hrana $(t_i, b_j)$ s váhou $w(t_i, b_j) = d_{ij}$. Podmínka (iv) <em>zůstává</em> (škrtnuty jsou jen (iii) a (v)) a promítne se do množiny hran:</p>
           $$(t_5, b_1),\; (t_5, b_n),\; (t_6, b_1),\; (t_6, b_n) \;\notin\; E \qquad (n \ge 6),$$
-          <p>nebo — má-li odpověď stát na úplném $K_{n,n}$ — tyto čtyři hrany dostanou prohibitivní váhu $w = M$ (dost velkou, aby do optima nevstoupily). Perfektní párování vybírá právě jednu hranu u každé hračky i každého boxu, je tedy přesně bijekce hračky↔boxy; minimalizace váhy párování minimalizuje celkovou vzdálenost při respektování (iv). Úloha je řešitelná polynomiálně — výpočet přes min-cost flow v K4 [L4.12].</p>
+          <p>nebo — má-li odpověď stát na úplném $K_{n,n}$ — tyto čtyři hrany dostanou prohibitivní váhu $w = M$ (dost velkou, aby do optima nevstoupily). Perfektní párování vybírá právě jednu hranu u každé hračky i každého boxu, je tedy přesně bijekce hračky↔boxy; minimalizace váhy párování minimalizuje celkovou vzdálenost při respektování (iv). Úloha je řešitelná polynomiálně — výpočet přes min-cost flow v K4 <a href="../k4/l4-12.html">[L4.12]</a>.</p>
         </div>
       </details>
     </div>
