@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KO Hitovky — zpěvník s matematickou notací</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #181c26;
+    --card2: #1e2330;
+    --text: #e8eaf0;
+    --muted: #8b93a7;
+    --accent: #ffb000;
+    --math: #7dd3fc;
+    --chorus: #fbbf24;
+    --border: #2a3040;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.55;
+  }
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(15,17,23,0.92); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+  }
+  header h1 { font-size: 18px; font-weight: 700; }
+  header h1 .sub { color: var(--muted); font-weight: 400; font-size: 13px; margin-left: 8px; }
+  #nowplaying { font-size: 12px; color: var(--accent); min-height: 16px; }
+  nav {
+    max-width: 1100px; margin: 18px auto 0; padding: 0 20px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  nav a {
+    font-size: 12px; text-decoration: none; color: var(--text);
+    background: var(--card); border: 1px solid var(--border);
+    padding: 5px 10px; border-radius: 14px; transition: border-color .15s;
+  }
+  nav a:hover { border-color: var(--accent); }
+  nav a.noaudio { color: var(--muted); }
+  main { max-width: 1100px; margin: 0 auto; padding: 10px 20px 80px; }
+  .intro { color: var(--muted); font-size: 13px; margin: 16px 2px 4px; }
+  .intro .m { font-size: 13px; }
+  section.song {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; margin-top: 22px; overflow: hidden;
+  }
+  .song-head {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+    padding: 16px 20px; background: var(--card2);
+    border-bottom: 1px solid var(--border);
+  }
+  .song-num {
+    font-size: 22px; font-weight: 800; color: var(--accent);
+    min-width: 34px; text-align: center;
+  }
+  .song-title { font-size: 17px; font-weight: 700; }
+  .song-topic { width: 100%; font-size: 12px; color: var(--muted); }
+  .genre {
+    font-size: 11px; color: var(--bg); background: var(--accent);
+    border-radius: 10px; padding: 2px 9px; font-weight: 600; white-space: nowrap;
+  }
+  .noaudio-badge {
+    font-size: 11px; color: var(--muted); border: 1px dashed var(--muted);
+    border-radius: 10px; padding: 2px 9px; white-space: nowrap;
+  }
+  audio { width: 100%; max-width: 420px; height: 34px; margin-left: auto; }
+  .lyrics {
+    display: flex; flex-wrap: wrap; gap: 14px; padding: 18px 20px 22px;
+    align-items: flex-start;
+  }
+  .stanza {
+    flex: 1 1 320px; max-width: 520px;
+    background: rgba(255,255,255,0.02);
+    border-left: 3px solid var(--border);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    break-inside: avoid;
+  }
+  .stanza.chorus { border-left-color: var(--chorus); background: rgba(251,191,36,0.06); }
+  .stanza.bridge { border-left-color: #a78bfa; }
+  .stanza .tag {
+    display: block; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 5px; font-weight: 700;
+  }
+  .stanza.chorus .tag { color: var(--chorus); }
+  .stanza p { font-size: 14.5px; margin: 0; }
+  .m {
+    font-family: 'Cambria Math', Cambria, Georgia, serif;
+    font-style: italic; color: var(--math); font-size: 15px;
+    white-space: nowrap;
+  }
+  .m sub, .m sup { font-size: 11px; }
+  .stanza.chorus .m { color: #93e3ff; }
+  footer {
+    text-align: center; color: var(--muted); font-size: 12px;
+    padding: 30px 20px 50px;
+  }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎸 KO Hitovky <span class="sub">memorovací zpěvník — zkouška 15. 6. 2026 — texty s pořádnou matematickou notací</span></h1>
+  <div id="nowplaying"></div>
+</header>
+
+<nav>
+  <a href="#s1">1 Christofides</a>
+  <a href="#s2" class="noaudio">2 Dijkstra</a>
+  <a href="#s3">3 Ford–Fulkerson</a>
+  <a href="#s4">4 Řez</a>
+  <a href="#s5">5 Pět omezení</a>
+  <a href="#s6">6 Level</a>
+  <a href="#s7">7 AC-3</a>
+  <a href="#s8">8 TSP</a>
+  <a href="#s9">9 Bellman–Ford</a>
+  <a href="#s10" class="noaudio">10 Graham</a>
+  <a href="#s11" class="noaudio">11 Tři zlomky</a>
+  <a href="#s12" class="noaudio">12 Knapsack</a>
+  <a href="#s13" class="noaudio">13 AC-3 latino</a>
+</nav>
+
+<main>
+<p class="intro">Zpívané fonetické zápisy („ó en na třetí“, „el vé je menší nebo rovno el ká“) jsou tady přepsané na skutečnou notaci
+(<span class="m">O(n³)</span>, <span class="m">ℓ(v) ≤ ℓ(k)</span>) — zpívej slova, čti symboly. Písně bez přehrávače zatím nemají nahrávku.</p>
+
+<!-- ════════════════ 1. CHRISTOFIDES ════════════════ -->
+<section class="song" id="s1">
+  <div class="song-head">
+    <div class="song-num">1</div>
+    <div class="song-title">Jedna a půl (Christofides)</div>
+    <span class="genre">pop-punk</span>
+    <audio controls preload="none" data-name="1 — Jedna a půl (Christofides)" src="audio/christofidova-jedna-pul.mp3"></audio>
+    <div class="song-topic">Metrický TSP — 5 kroků algoritmu + 4 nerovnosti důkazu faktoru <span class="m">3/2</span></div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Intro (spoken)</span><p>
+      Metrický TSP. Christofides. <span class="m">3/2</span>.
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 1</span><p>
+      Najdi nejlevnější kostru, budem jí říkat <span class="m">T</span>,<br>
+      vrcholy lichého stupně hoď do množiny <span class="m">W</span>.<br>
+      Vždycky je jich sudý počet — to je jistá věc,<br>
+      nejlevnější párování <span class="m">M</span> na nich najdi přec!
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus</span><p>
+      Kostra! Liché! Párování!<br>
+      Euler! Zkratka! Hotovo!<br>
+      <span class="m">3/2 · OPT</span>,<br>
+      <span class="m">O(n³)</span> — Christofidovo!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 2</span><p>
+      Kostra <span class="m">T</span> plus matching <span class="m">M</span> — všechny stupně sudé jsou,<br>
+      Eulerův tah <span class="m">L</span> tam projde každou hranou jedinou.<br>
+      Zkratkou přeskoč vrcholy, cos viděl už dřív —<br>
+      trojúhelník zaručí, že okruh <span class="m">H</span> je kratší, div!
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge — 4 nerovnosti</span><p>
+      Čtyři nerovnosti, řetěz, co tě spasí:<br>
+      <span class="m">OPT ≥ c(T)</span> — okruh bez hrany je kostra taky,<br>
+      <span class="m">OPT/2 ≥ c(M)</span> — okruh dá dvě párování,<br>
+      <span class="m">c(T) + c(M) = c(L)</span> — a <span class="m">c(L) ≥ c(H)</span>, bez ptaní!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 3</span><p>
+      Double-tree je chudší bratr: hrany kostry zdvojí,<br>
+      faktor <span class="m">2</span>, <span class="m">O(n²)</span> — s tím se nespokojíš.<br>
+      Christofides místo zdvojení vezme matching <span class="m">M</span> —<br>
+      proto <span class="m">3/2 · OPT</span>, a důkaz máme všem!
+    </p></div>
+    <div class="stanza"><span class="tag">Outro</span><p>
+      Kostra, liché, párování, Euler, zkratka…
+    </p></div>
+  </div>
+</section>
+
+<!-- ════════════════ 2. DIJKSTRA ════════════════ -->
+<section class="song" id="s2">
+  <div class="song-head">
+    <div class="song-num">2</div>
+    <div class="song-title">Jednou zavřený, navždy zavřený (Dijkstra)</div>
+    <span class="genre">folková balada</span>
+    <span class="noaudio-badge">zatím bez nahrávky</span>
+    <div class="song-topic">Korektnost Dijkstry — indukční invariant, dva typy předchůdců, kde se použije nezápornost</div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Verse 1</span><p>
+      V <span class="m">s</span> začni s <span class="m">0</span>, všude jinde <span class="m">∞</span>,<br>
+      množina <span class="m">R</span> je prázdná — kdo v ní skončí, skončil věčně.<br>
+      Vyber vrchol s nejmenším <span class="m">ℓ</span> a zavři ho do <span class="m">R</span>,<br>
+      relaxuj hrany, co vedou ven — a znova, dokola.
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus</span><p>
+      Jednou zavřený, navždy zavřený — <span class="m">ℓ</span> už se nezmění,<br>
+      <span class="m">ℓ(v) ≤ ℓ(k)</span>,<br>
+      a hrana nikdy záporná není —<br>
+      proto přes otevřené to kratší nebude — bez vrácení!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 2</span><p>
+      Bellmanova rovnice chce minimum přes předchůdce <span class="m">k</span>:<br>
+      když <span class="m">k ∈ R</span>, tu hranu už jsem relaxoval já —<br>
+      vnitřní smyčka prošla všechny hrany z <span class="m">R</span> ven.<br>
+      Když <span class="m">k</span> leží venku? Tam se láme celý sen:
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge</span><p>
+      Kde by se důkaz zlomil? Kdyby váhy záporné byly —<br>
+      levná hrana za otevřeným vrcholem by tvrzení zabily.<br>
+      Proto Dijkstra jen s <span class="m">c ≥ 0</span>, label setting, <span class="m">O(n²)</span>,<br>
+      indukce přes velikost množiny <span class="m">R</span> je mu zárukou.
+    </p></div>
+    <div class="stanza"><span class="tag">Outro</span><p>
+      Nezáporné váhy… jinak Bellman–Ford, příteli.
+    </p></div>
+  </div>
+</section>
+
+<!-- ════════════════ 3. FORD–FULKERSON ════════════════ -->
+<section class="song" id="s3">
+  <div class="song-head">
+    <div class="song-num">3</div>
+    <div class="song-title">Augmentační (Ford–Fulkerson)</div>
+    <span class="genre">námořnická odrhovačka</span>
+    <audio controls preload="none" data-name="3 — Augmentační (Ford–Fulkerson)" src="audio/oznackuj-rezerva.mp3"></audio>
+    <div class="song-topic">Augmentující cesta (po směru <span class="m">f &lt; u</span>, proti směru <span class="m">f &gt; l</span>), výpočet <span class="m">γ</span>, labeling, zastavení</div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Verse 1</span><p>
+      Hledej cestu z <span class="m">s</span> do <span class="m">t</span>, směr hran tě netrápí,<br>
+      po směru ber hranu, když <span class="m">f &lt; u</span>,<br>
+      proti směru tehdy, když <span class="m">f &gt; l</span> —<br>
+      augmentující cesta! Jiná pravda není!
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus</span><p>
+      Po směru: <span class="m">f &lt; u</span>!<br>
+      Proti směru: <span class="m">f &gt; l</span>!<br>
+      <span class="m">γ</span> je nejmenší rezerva z celé cesty —<br>
+      po směru <span class="m">+γ</span>, proti <span class="m">−γ</span> — a běž!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 2</span><p>
+      Označkuj zdroj <span class="m">s</span> a šiř tu zprávu dál:<br>
+      po směru značkuj souseda, když <span class="m">f &lt; u</span>,<br>
+      proti směru značkuj, když <span class="m">f &gt; l</span>,<br>
+      a když označkuješ <span class="m">t</span> — cestu jsi našel, námořníku!
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge</span><p>
+      Když už cesta není — stůj! Tok je maximální!<br>
+      Složitost: <span class="m">O(m · |f*|)</span> — éf to škálu dální.<br>
+      Iracionální kapacity? Nemusí to skončit, brachu —<br>
+      Edmonds a Karp s BFS tě zbaví strachu!
+    </p></div>
+    <div class="stanza"><span class="tag">Outro</span><p>
+      Najdi tok, najdi cestu, spočti <span class="m">γ</span> — a znova!
+    </p></div>
+  </div>
+</section>
+
+<!-- ════════════════ 4. MAX-FLOW MIN-CUT ════════════════ -->
+<section class="song" id="s4">
+  <div class="song-head">
+    <div class="song-num">4</div>
+    <div class="song-title">Řez (max flow = min cut)</div>
+    <span class="genre">temný synthwave</span>
+    <audio controls preload="none" data-name="4 — Řez (max flow = min cut)" src="audio/ford-fulkerson-1956.mp3"></audio>
+    <div class="song-topic">Definice řezu, <span class="m">C(A) = Σu(δ⁺(A)) − Σl(δ⁻(A))</span>, věta 1956, čtení min. řezu z labelingu</div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Verse 1</span><p>
+      Rozděl vrcholy na dva tábory: <span class="m">s ∈ A</span>,<br>
+      <span class="m">t ∉ A</span> — a mezi nimi řez <span class="m">δ(A)</span>.<br>
+      Hrany ven, hrany dovnitř — <span class="m">δ⁺(A)</span> a <span class="m">δ⁻(A)</span>,<br>
+      kapacita řezu? Teď pozor na ten minus:
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus</span><p>
+      Kapacity VEN se sčítají,<br>
+      dolní meze DOVNITŘ se ODEČTOU!<br>
+      <span class="m">C(A) = Σ u(δ⁺) − Σ l(δ⁻)</span><br>
+      Maximální tok = minimální řez —<br>
+      Ford a Fulkerson, 1956!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 2</span><p>
+      Když labeling skončí a <span class="m">t</span> zůstane bez značky,<br>
+      označkované vrcholy tvoří <span class="m">A</span> — bez hádky.<br>
+      Hrany ven jsou plné: <span class="m">f = u</span>,<br>
+      hrany dovnitř na dolní mezi: <span class="m">f = l</span> — minimální řez tu máš!
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge (whisper)</span><p>
+      Celočíselné kapacity… celočíselný maximální tok existuje…<br>
+      Dantzig a Fulkerson… integral flow theorem…
+    </p></div>
+  </div>
+</section>
+
+<!-- ════════════════ 5. TIME-INDEXED ILP ════════════════ -->
+<section class="song" id="s5">
+  <div class="song-head">
+    <div class="song-num">5</div>
+    <div class="song-title">Pět omezení (PS1 | temp | C<sub>max</sub>)</div>
+    <span class="genre">boom bap rap</span>
+    <audio controls preload="none" data-name="5 — Pět omezení (time-indexed ILP)" src="audio/pet-omezeni.mp3"></audio>
+    <div class="song-topic">Time-indexed ILP — proměnné <span class="m">a<sub>it</sub></span> a všech 5 omezení modelu</div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Intro (spoken)</span><p>
+      <span class="m">PS1 | temp | C<sub>max</sub></span>. Time-indexed. Pět omezení. Jedem!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 1</span><p>
+      <span class="m">a<sub>it</sub> = 1</span>, když úloha <span class="m">i</span> startuje v <span class="m">t</span>,<br>
+      binárka přes celý horizont, horní mez je strop, oukej.<br>
+      Pět bloků staví model, žádný nesmíš vynechat —<br>
+      kdo zapomene na zdroje, ten jde od zkoušky spát!
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus — 5 omezení</span><p>
+      JEDNA: <span class="m">Σ<sub>t</sub> a<sub>it</sub> = 1</span> — start právě jednou!<br>
+      DVA: <span class="m">s<sub>i</sub> = Σ<sub>t</sub> t · a<sub>it</sub></span> — startovní čas!<br>
+      TŘI: <span class="m">s<sub>i</sub> + l<sub>ij</sub> ≤ s<sub>j</sub></span> — temporální vazba!<br>
+      ČTYŘI: v každém čase <span class="m">τ</span> běží nejvýš jedna — zdroj nás hlídá zas!<br>
+      PĚT: <span class="m">s<sub>i</sub> + p<sub>i</sub> ≤ C<sub>max</sub></span> — a <span class="m">C<sub>max</sub></span> minimalizuj!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 2</span><p>
+      To okno v bloku čtyři, to je finta celá:<br>
+      <span class="m">t ≤ τ &lt; t + p<sub>i</sub></span> — tak se to dělá.<br>
+      Úloha, co startuje v <span class="m">t</span>, zrovna běží v čase <span class="m">τ</span> —<br>
+      neostrá zleva, ostrá zprava — zapiš si to, čau!
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge</span><p>
+      Jednou startuješ, startem počítáš,<br>
+      vazby ctíš, zdroj nepřetížíš,<br>
+      konec pod <span class="m">C<sub>max</sub></span> — a <span class="m">C<sub>max</sub></span> tlačíš níž!
+    </p></div>
+  </div>
+</section>
+
+<!-- ════════════════ 6. MUNTZ & COFFMAN ════════════════ -->
+<section class="song" id="s6">
+  <div class="song-head">
+    <div class="song-num">6</div>
+    <div class="song-title">Level (Muntz &amp; Coffman)</div>
+    <span class="genre">drum and bass</span>
+    <audio controls preload="none" data-name="6 — Level (Muntz &amp; Coffman)" src="audio/procesory-hanulo.mp3"></audio>
+    <div class="song-topic">Level, <span class="m">β = h/|S|</span>, tři případy <span class="m">δ</span>, dokončení McNaughtonem + <span class="m">C*<sub>max</sub></span></div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Verse 1</span><p>
+      Level koncové úlohy? Prostě její <span class="m">p</span>.<br>
+      Jinak <span class="m">p + max</span> level následníků, jé!<br>
+      Počítej to odzadu, od konce ke startu —<br>
+      nejdelší cesta do cíle, tu měj v kartu.
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus</span><p>
+      Nejvyšší level bere procesory — to je zákon náš!<br>
+      Když je úloh víc než strojů: <span class="m">β = h / |S|</span>!<br>
+      <span class="m">δ</span>: někdo SKONČÍ, někdo KLESNE, někdo DOHÁNÍ —<br>
+      a McNaughton to nakonec všechno srovná, yes!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 2 — 3 případy δ</span><p>
+      Případ jedna: úloha doběhla — hotovo, šmik.<br>
+      Případ dva: přiřazená klesla pod ready čekající — přepočti vmžik.<br>
+      Případ tři: rychlejší s větší <span class="m">β</span> dohnal pomalou —<br>
+      sniž <span class="m">p</span> i levely o <span class="m">δ·β</span>, posuň čas, jedem dál!
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge — McNaughton</span><p>
+      <span class="m">C*<sub>max</sub></span>: vezmi MAXIMUM ze dvou —<br>
+      <span class="m">max p<sub>j</sub></span>, nebo <span class="m">Σp<sub>j</sub> / R</span>!<br>
+      Namotávej úlohy přes okraj jako koberec,<br>
+      každá se zlomí nejvýš jednou — McNaughton, <span class="m">O(n)</span>, věř!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 3</span><p>
+      Dva stroje, preempce, precedence — výsledek přesný!<br>
+      Preempce a les — taky přesný, to je hezký.<br>
+      Jinak aproximace: <span class="m">2 − 2/R</span> —<br>
+      Muntz a Coffman, <span class="m">O(n²)</span>, tref se a ber!
+    </p></div>
+  </div>
+</section>
+
+<!-- ════════════════ 7. AC-3 ════════════════ -->
+<section class="song" id="s7">
+  <div class="song-head">
+    <div class="song-num">7</div>
+    <div class="song-title">Pro každé a existuje b (AC-3)</div>
+    <span class="genre">synth-pop</span>
+    <audio controls preload="none" data-name="7 — Pro každé a existuje b (AC-3)" src="audio/konzistentni-fronta.mp3"></audio>
+    <div class="song-topic">Definice AC (kvantifikátory!), orientovanost, REVISE, pravidlo znovuzařazení (<span class="m">i ≠ m</span>), neúplnost</div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Verse 1</span><p>
+      Hrana z <span class="m">x<sub>i</sub></span> do <span class="m">x<sub>j</sub></span> je konzistentní jenom tehdy,<br>
+      když pro KAŽDOU hodnotu <span class="m">a ∈ D<sub>i</sub></span><br>
+      EXISTUJE <span class="m">b ∈ D<sub>j</sub></span>,<br>
+      že spolu splní všechna omezení — tak zní ty věty!
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus</span><p>
+      <span class="m">∀a ∃b</span> —<br>
+      kdo podporu nemá, z domény jde ven!<br>
+      Mazal jsi v <span class="m">D<sub>k</sub></span>? Vrať do fronty hrany DO <span class="m">k</span> —<br>
+      jen <span class="m">(m,k)</span> ne! AC-3, krásný den!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 2</span><p>
+      A pozor: hrana má SMĚR, to si pamatuj —<br>
+      <span class="m">(i,j)</span> konzistentní neznamená <span class="m">(j,i)</span>, aleluj!<br>
+      Fronta startuje se všemi orientovanými hranami,<br>
+      vyber <span class="m">(k,m)</span>, zavolej REVISE — a co s mazáními?
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge</span><p>
+      Prázdná doména? Fail — jdi domů, konec hry.<br>
+      Revize <span class="m">(k,m)</span> nerozbije hranu <span class="m">(m,k)</span> — ta klidně spí.<br>
+      A závěr zrádný, ten si vryj do hlavy:<br>
+      konzistence hran ti ŘEŠENÍ NEZARUČÍ — AC je neúplná, tak to ber!
+    </p></div>
+  </div>
+</section>
+
+<!-- ════════════════ 8. TSP NEAPROXIMOVATELNOST ════════════════ -->
+<section class="song" id="s8">
+  <div class="song-head">
+    <div class="song-num">8</div>
+    <div class="song-title">2 + (r−1)·n (TSP neaproximovatelnost)</div>
+    <span class="genre">heavy metal</span>
+    <audio controls preload="none" data-name="8 — 2 + (r−1)·n (TSP)" src="audio/hamiltonuv-okruh.mp3"></audio>
+    <div class="song-topic">Neexistence r-aproximace pro obecný TSP — konstrukce vah, mezní hodnoty, spor s HC</div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Verse 1</span><p>
+      Kdyby byla <span class="m">r</span>-aproximace na obecný TSP,<br>
+      rozhodl bych Hamiltonův okruh polynomiálně, jé!<br>
+      Vezmi graf <span class="m">G</span>, postav úplný graf na <span class="m">n</span> vrcholech,<br>
+      a teď ty váhy — ať nezůstaneš v koncích:
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus</span><p>
+      <span class="m">1</span> — když hrana v grafu JE!<br>
+      <span class="m">2 + (r−1)·n</span> — když NENÍ!<br>
+      Nejvýš <span class="m">r·n</span>? Hamilton EXISTUJE!<br>
+      Víc? Hamilton NENÍ! — Spor, pokud <span class="m">P ≠ NP</span>!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 2</span><p>
+      Když okruh existuje, <span class="m">OPT = n</span>,<br>
+      aproximace vrátí nejvýš <span class="m">r·n</span>.<br>
+      Když okruh neexistuje, jedna drahá hrana stačí:<br>
+      <span class="m">(n−1) + 2 + (r−1)·n</span> —<br>
+      <span class="m">= r·n + 1</span> — to už nic nezamlží!
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge (slow, heavy)</span><p>
+      Dej váhy <span class="m">1</span> a <span class="m">2</span> — trojúhelník platí dál…<br>
+      proto i METRICKÝ TSP je NP-těžký král!<br>
+      <span class="m">OPT = n</span> — právě když Hamilton žije…
+    </p></div>
+  </div>
+</section>
+
+<!-- ════════════════ 9. BELLMAN–FORD ════════════════ -->
+<section class="song" id="s9">
+  <div class="song-head">
+    <div class="song-num">9</div>
+    <div class="song-title">n−1 kol (Bellman–Ford)</div>
+    <span class="genre">reggae</span>
+    <audio controls preload="none" data-name="9 — n−1 kol (Bellman–Ford)" src="audio/relaxacni-hrana.mp3"></audio>
+    <div class="song-topic">Běh algoritmu, věta o k-té iteraci (ALG → indukce → Bellmanův princip), detekce záporného cyklu</div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Verse 1</span><p>
+      <span class="m">ℓ(s) = 0</span>, <span class="m">∞</span> všude jinde, jak to znáš,<br>
+      <span class="m">n−1</span> kol — a v každém VŠECHNY hrany relaxuješ.<br>
+      Label correcting, nic se nezavírá,<br>
+      <span class="m">O(n·m)</span> — a záporná hrana? Žádná díra!
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus</span><p>
+      <span class="m">n−1</span> kol, všechny hrany relaxuj!<br>
+      Po <span class="m">k</span> kolech máš cesty na nejvýš <span class="m">k</span> hran!<br>
+      Žádná cesta nemá víc než <span class="m">n−1</span> hran —<br>
+      Bellman a Ford, <span class="m">O(n·m)</span> — žádný klam!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 2 — důkaz</span><p>
+      Důkaz jede ve třech krocích, poslouchej ten ráj:<br>
+      ALGORITMUS: <span class="m">ℓ<sub>k</sub>(v) ≤ ℓ<sub>k−1</sub>(u) + c(u,v)</span>,<br>
+      INDUKCE: to je nejvýš cena cesty s <span class="m">k−1</span> hranami,<br>
+      PRINCIP OPTIMALITY: dohromady cesta s <span class="m">k</span> hranami — jaj!
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge</span><p>
+      Po konci projdi hrany ještě jednou, jen tak zkusmo:<br>
+      když <span class="m">ℓ(t) &gt; ℓ(v) + c(v,t)</span> —<br>
+      ZÁPORNÝ CYKLUS v grafu, pozor, kuš ho!<br>
+      Nedosažitelné vrcholy? Nové <span class="m">s</span> s <span class="m">0</span>-hranami, jé!
+    </p></div>
+  </div>
+</section>
+
+<!-- ════════════════ 10. GRAHAMOVA NOTACE ════════════════ -->
+<section class="song" id="s10">
+  <div class="song-head">
+    <div class="song-num">10</div>
+    <div class="song-title">α | β | γ (Grahamova notace)</div>
+    <span class="genre">europop / ABBA styl</span>
+    <span class="noaudio-badge">zatím bez nahrávky</span>
+    <div class="song-topic">Slovníček <span class="m">α|β|γ</span> — stroje, vlastnosti úloh, kritéria; rozdíl deadline (<span class="m">d̃</span>) vs. due date (<span class="m">d</span>)</div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Verse 1 — α</span><p>
+      <span class="m">α</span>, to jsou STROJE: <span class="m">1</span> je jeden stroj,<br>
+      <span class="m">P</span> jsou paralelní stejné, <span class="m">Q</span> uniformní — rychlost hraje roli svou,<br>
+      <span class="m">R</span> jsou unrelated — tabulka časů, každý stroj svůj svět,<br>
+      <span class="m">O, F, J</span>: open shop, flow shop, job shop — a <span class="m">PS</span> projekty hned!
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus</span><p>
+      <span class="m">α</span> — <span class="m">β</span> — <span class="m">γ</span>!<br>
+      Stroje — úlohy — kritérium!<br>
+      <span class="m">d̃</span> (s vlnkou) je DEADLINE — tvrdá zeď,<br>
+      <span class="m">d</span> bez vlnky DUE DATE — lateness, no problém!<br>
+      <span class="m">C<sub>max</sub></span>, <span class="m">L<sub>max</sub></span>, <span class="m">ΣC<sub>j</sub></span> —<br>
+      <span class="m">α|β|γ</span> — celé schéma, jé!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 2 — β</span><p>
+      <span class="m">β</span>, to jsou VLASTNOSTI: <span class="m">pmtn</span> — smíš přerušit,<br>
+      <span class="m">prec</span> jsou předchůdci, <span class="m">temp</span>: <span class="m">s<sub>i</sub> + l<sub>ij</sub> ≤ s<sub>j</sub></span> musíš ctít,<br>
+      <span class="m">r<sub>j</sub></span> je release time — dřív se prostě nezačne,<br>
+      <span class="m">p<sub>j</sub> = p</span> — všechno stejně dlouhé, vidíš, jak to jde snadně!
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge — γ</span><p>
+      <span class="m">γ</span>: <span class="m">C<sub>max</sub></span> je makespan — konec posledního z nás,<br>
+      <span class="m">L<sub>max</sub> = max(C<sub>j</sub> − d<sub>j</sub>)</span> — zpoždění hlas,<br>
+      <span class="m">ΣC<sub>j</sub></span>, nebo s vahami <span class="m">Σw<sub>j</sub>C<sub>j</sub></span>,<br>
+      a prázdné <span class="m">γ</span>? Jen rozhodni: jde to, nejde — oukej!
+    </p></div>
+  </div>
+</section>
+
+<!-- ════════════════ 11. KDO NA CO ════════════════ -->
+<section class="song" id="s11">
+  <div class="song-head">
+    <div class="song-num">11</div>
+    <div class="song-title">Tři zlomky (kdo na co v rozvrhování)</div>
+    <span class="genre">country-polka</span>
+    <span class="noaudio-badge">zatím bez nahrávky</span>
+    <div class="song-topic">Mapa problém → algoritmus → faktor: LS <span class="m">2−1/R</span>, LPT <span class="m">4/3−1/(3R)</span>, M&amp;C <span class="m">2−2/R</span></div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Verse 1</span><p>
+      <span class="m">P2 || C<sub>max</sub></span>? NP-těžké — two partition to ví,<br>
+      práh <span class="m">= ½ Σp<sub>j</sub></span> — tak zní redukce slovy.<br>
+      <span class="m">P | pmtn | C<sub>max</sub></span>? McNaughton, <span class="m">O(n)</span>, easy!<br>
+      Preempce, release, deadliny, jen rozhodnout? Maximální tok to jistí!
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus — 3 zlomky</span><p>
+      List scheduling: <span class="m">2 − 1/R</span>!<br>
+      LPT: <span class="m">4/3 − 1/(3R)</span>!<br>
+      Muntz a Coffman: <span class="m">2 − 2/R</span>!<br>
+      Tři zlomky pro zkoušku — tak si je pamatuj, věř!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 2</span><p>
+      <span class="m">1 || L<sub>max</sub></span>? EDD — řaď podle due date!<br>
+      Release a preempce k tomu? Horn — earliest deadline first, kamaráde!<br>
+      Precedence navíc? Chetto, Silly, Bouchentouf — okna upraví,<br>
+      release s tvrdým deadlinem bez preempce? Bratley — větve a meze — to tě zabaví!
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge</span><p>
+      <span class="m">P || C<sub>max</sub></span> bez preempce: LPT — nebo přesně Rothkopf, pseudopolynom!<br>
+      <span class="m">PS1 | temp | C<sub>max</sub></span>: time-indexed ILP — postav si dóm!<br>
+      Jeden stroj, release, deadline: NP-těžké — three partition zvoní —<br>
+      tahle mapa problém–algoritmus tě u zkoušky zachrání!
+    </p></div>
+  </div>
+</section>
+
+<!-- ════════════════ 12. KNAPSACK DP ════════════════ -->
+<section class="song" id="s12">
+  <div class="song-head">
+    <div class="song-num">12</div>
+    <div class="song-title">Stav je cena (Knapsack DP)</div>
+    <span class="genre">funk</span>
+    <span class="noaudio-badge">zatím bez nahrávky</span>
+    <div class="song-topic">DP přes ceny: stav = cena, hodnota = min. váha; rekurence, inicializace, rekonstrukce, <span class="m">O(n·C)</span>; bonus Dantzig</div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Verse 1</span><p>
+      Tenhle batoh je jiný, než ho znáš ze školy:<br>
+      stav NENÍ kapacita — stav je CENA, holky!<br>
+      <span class="m">x(k,j)</span>: nejmenší váha, jak cenu <span class="m">k</span> poskládat<br>
+      z prvních <span class="m">j</span> položek — tak se to má počítat!
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus</span><p>
+      Minimum ze dvou: NECH TO BÝT — <span class="m">x(k, j−1)</span>,<br>
+      nebo PŘIDEJ <span class="m">j</span>: <span class="m">x(k − c<sub>j</sub>, j−1) + w<sub>j</sub></span>!<br>
+      Na konci vem největší <span class="m">k</span> s váhou <span class="m">≤ W</span> —<br>
+      <span class="m">O(n·C)</span> — pseudopolynom — DP přes ceny, jé!
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 2</span><p>
+      <span class="m">x(0,0) = 0</span>, jinak <span class="m">∞</span> na startu,<br>
+      rozhodnutí si piš do <span class="m">s(k,j)</span> — neztratíš mapu.<br>
+      Zpátky pak: když <span class="m">s = 1</span>, položka <span class="m">j</span> je v batohu,<br>
+      sniž <span class="m">k</span> o <span class="m">c<sub>j</sub></span> — a couvej až k prologu!
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge — Dantzig</span><p>
+      Bonus pro fajnšmekry: seřaď podle <span class="m">c<sub>j</sub> / w<sub>j</sub></span>,<br>
+      <span class="m">h</span> je PRVNÍ položka, co se nevejde —<br>
+      vezmi LEPŠÍ z prefixu a <span class="m">h</span> samotné:<br>
+      <span class="m">2</span>-aproximace — polovina optima jistá je!
+    </p></div>
+  </div>
+</section>
+
+<!-- ════════════════ 13. AC-3 PODRUHÉ ════════════════ -->
+<section class="song" id="s13">
+  <div class="song-head">
+    <div class="song-num">13</div>
+    <div class="song-title">Á cé tři (AC-3 latino)</div>
+    <span class="genre">reggaeton</span>
+    <span class="noaudio-badge">zatím bez nahrávky</span>
+    <div class="song-topic">AC-3 jako letní hit — <span class="m">Q := E(G)</span>, REVISE, znovuzařazení (<span class="m">i ≠ m</span>), neúplnost AC</div>
+  </div>
+  <div class="lyrics">
+    <div class="stanza"><span class="tag">Intro (spoken)</span><p>
+      Á cé tři… á cé tři…<br>
+      (<span class="m">x<sub>i</sub></span>… <span class="m">x<sub>j</sub></span>… ej)
+    </p></div>
+    <div class="stanza"><span class="tag">Verse 1</span><p>
+      Tý…<br>
+      hrana <span class="m">(x<sub>i</sub>, x<sub>j</sub>)</span> — kdy je konzistentní?<br>
+      Pro každé <span class="m">a ∈ D<sub>i</sub></span> najdi <span class="m">b ∈ D<sub>j</sub></span>,<br>
+      ať spolu splní všechna omezení.<br>
+      Pozor — hrana má směr, zpátky neplatí!<br><br>
+      Jé…<br>
+      binární CSP, to je digraf <span class="m">G</span>,<br>
+      mezi <span class="m">x<sub>i</sub></span>, <span class="m">x<sub>j</sub></span> šipky obě dvě,<br>
+      celé CSP je konzistentní jenom,<br>
+      když každá z hran orientovaných sedí, jé.
+    </p></div>
+    <div class="stanza"><span class="tag">Pre-Chorus</span><p>
+      Jó, REVISE projde každé <span class="m">a ∈ D<sub>i</sub></span>,<br>
+      hledá mu podporu — <span class="m">b ∈ D<sub>j</sub></span>,<br>
+      kdo svoje <span class="m">b</span> nenajde, ten z domény letí,<br>
+      vyber si <span class="m">(k,m)</span>, REVISE to teď!
+    </p></div>
+    <div class="stanza chorus"><span class="tag">Chorus</span><p>
+      Á cé tři,<br>
+      mažu ti hodnoty z domén, á cé tři,<br>
+      kdo nemá svoje <span class="m">b</span>, zmizí za chviličku,<br>
+      doména se tenčí, kousek po kousíčku.<br><br>
+      Á cé tři,<br>
+      vracím hrany do <span class="m">k</span> zpátky, á cé tři,<br>
+      jen <span class="m">(m,k)</span> ne — tu nechám na poličku,<br>
+      fronta zas naskočí — jedem, á cé tři.
+    </p></div>
+    <div class="stanza"><span class="tag">Post-Chorus</span><p>
+      (Škrtej! Škrtej!)<br>
+      Každé <span class="m">a</span> si hledá svoje <span class="m">b</span>, to jediné (e-oh),<br>
+      kdo je sám a bez podpory, opouští parket (e-oh).<br>
+      (Škrtej! Škrtej!)<br>
+      Revize <span class="m">(k,m)</span> hraně <span class="m">(m,k)</span> neublíží (e-oh),<br>
+      ta zůstává konzistentní, klidně si spí (e-oh).
+    </p></div>
+    <div class="stanza"><span class="tag">Rap Verse</span><p>
+      Krůček po krůčku, škrtá si á cé tři,<br>
+      hodnotu za hodnotou, kousek po kousíčku,<br>
+      fronta na startu: <span class="m">Q := E(G)</span>,<br>
+      vyberu <span class="m">(k,m)</span>, reviduju <span class="m">D<sub>k</sub></span>, jé!<br>
+      Když jsem něco smazal, hrany do <span class="m">k</span> zpátky jdou,<br>
+      jen hranu <span class="m">(m,k)</span> ne — tu mazání nezviklá,<br>
+      a prázdná doména? Fail! Stopni muziku —<br>
+      v týhle části prostoru řešení nenajdu!
+    </p></div>
+    <div class="stanza"><span class="tag">Pre-Chorus 2</span><p>
+      Jó, fronta se mi tenčí, už je skoro prázdná,<br>
+      poslední REVISE — nic nemažu,<br>
+      když nic nemažu, nic nevracím do fronty,<br>
+      domény jsou konzistentní, jé!
+    </p></div>
+    <div class="stanza bridge"><span class="tag">Bridge (slow, intimate)</span><p>
+      Tři v trojúhelníku, <span class="m">{1, 2}</span> v doméně,<br>
+      každý s každým <span class="m">≠</span> — zní to nadějně…<br>
+      všechno konzistentní — a řešení žádné!<br>
+      Konzistence hran ti štěstí nezaručí,<br>
+      á cé tři zúží svět — dohledat musíš sám.
+    </p></div>
+    <div class="stanza"><span class="tag">Outro</span><p>
+      Á cé tři… (každé <span class="m">a</span> si hledá svoje <span class="m">b</span>)<br>
+      Á cé tři… (kdo nemá svoje <span class="m">b</span>, ten z domény jde)
+    </p></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  Zdrojové texty: <a href="plan/SUNO_PISNICKY.md">plan/SUNO_PISNICKY.md</a> · KO zkouška 15. 6. 2026 · vygenerováno přes Suno v5
+</footer>
+
+<script>
+  // Only one song plays at a time + show "now playing" in the header.
+  const players = document.querySelectorAll('audio');
+  const np = document.getElementById('nowplaying');
+  players.forEach(a => {
+    a.addEventListener('play', () => {
+      players.forEach(b => { if (b !== a) b.pause(); });
+      np.textContent = '▶ ' + a.dataset.name;
+    });
+    a.addEventListener('pause', () => {
+      if ([...players].every(p => p.paused)) np.textContent = '';
+    });
+  });
+</script>
+
+</body>
+</html>
