@@ -36,7 +36,7 @@
     <strong>Trojúhelníková nerovnost</strong> $c(\{i,j\}) + c(\{j,k\}) \ge c(\{k,i\})$ definuje <strong>metrický TSP</strong> — a umožňuje <strong>shortcutting</strong>: přeskočení už navštívených vrcholů v uzavřeném sledu cenu <em>nikdy nezvýší</em>.
   </div>
 
-  <p>V <a href="l3-6.html#takeaways">[L3.6] Neexistence r-aproximace pro obecný TSP</a> jsme dokázali, že obecný TSP nejde aproximovat s žádnou zárukou (pokud $P \ne NP$). Slíbená záchrana se jmenuje <strong>metric TSP</strong> (metrický TSP). Dnešní lekce ho definuje a vytěží z definice první nástroj — <strong>shortcutting</strong> (zkracování přes opakované vrcholy). Je to jeden ze tří stavebních kamenů, ze kterých pak složíme double-tree [L3.9] i Christofidese [L3.10]; zbylé dva přijdou v <a href="l3-8b.html#takeaways">[L3.8b]</a> (dolní mez) a <a href="l3-8c.html#takeaways">[L3.8c]</a> (Eulerovský tah).</p>
+  <p>V <a href="l3-6.html#takeaways">[L3.6] Neexistence r-aproximace pro obecný TSP</a> jsme dokázali, že obecný TSP nejde aproximovat s žádnou zárukou (pokud $P \ne NP$). Slíbená záchrana se jmenuje <strong>metric TSP</strong> (metrický TSP). Dnešní lekce ho definuje a vytěží z definice první nástroj — <strong>shortcutting</strong> (zkracování přes opakované vrcholy). Je to jeden ze tří stavebních kamenů, ze kterých pak složíme double-tree <a href="l3-9.html">[L3.9]</a> i Christofidese [L3.10]; zbylé dva přijdou v <a href="l3-8b.html#takeaways">[L3.8b]</a> (dolní mez) a <a href="l3-8c.html#takeaways">[L3.8c]</a> (Eulerovský tah).</p>
 
   <!-- ===== SEKCE 1: DEFINICE ===== -->
   <h2>Co přesně zabilo aproximace — a jak to zakázat</h2>
@@ -84,7 +84,7 @@
     <p><em>„But approximation algorithms do exist.“</em></p>
   </div>
 
-  <p>To je celá pointa kapitoly: NP-těžkost zůstává, ale na metrických instancích už jde slíbit záruku — faktor 2 (double-tree [L3.9]) a dokonce 3/2 (Christofides [L3.10], žebříček #1). Oba důkazy stojí na dnešním shortcuttingu.</p>
+  <p>To je celá pointa kapitoly: NP-těžkost zůstává, ale na metrických instancích už jde slíbit záruku — faktor 2 (double-tree <a href="l3-9.html">[L3.9]</a>) a dokonce 3/2 (Christofides [L3.10], žebříček #1). Oba důkazy stojí na dnešním shortcuttingu.</p>
 
   <!-- ===== SEKCE 3: +h TRIK ===== -->
   <h2>Zmetrikovat umí každý: posun $+h$ (a proč to nic neřeší)</h2>
@@ -131,7 +131,7 @@
   <!-- ===== SEKCE 5: SHORTCUTTING ===== -->
   <h2>Shortcutting: z uzavřeného sledu Hamiltonovský okruh</h2>
 
-  <p>Teď ten nástroj nasadíme. Algoritmy v [L3.9] a [L3.10] budou vyrábět <strong>uzavřený sled</strong> (closed walk, <a href="../k2/l2-1.html#takeaways">[L2.1]</a>), který projde <em>všemi</em> vrcholy — ale některými víckrát, takže to ještě není Hamiltonovský okruh. Konkrétní příklad (vlastní ilustrační instance; ceny tvoří metriku, ověříš v T02):</p>
+  <p>Teď ten nástroj nasadíme. Algoritmy v <a href="l3-9.html">[L3.9]</a> a [L3.10] budou vyrábět <strong>uzavřený sled</strong> (closed walk, <a href="../k2/l2-1.html#takeaways">[L2.1]</a>), který projde <em>všemi</em> vrcholy — ale některými víckrát, takže to ještě není Hamiltonovský okruh. Konkrétní příklad (vlastní ilustrační instance; ceny tvoří metriku, ověříš v T02):</p>
 
   <table>
     <thead><tr><th>$c(\{\cdot,\cdot\})$</th><th>B</th><th>C</th><th>D</th><th>E</th></tr></thead>
@@ -181,7 +181,7 @@
   <!-- ===== SEKCE 6: VÝHLED ===== -->
   <h2>K čemu to bude: plán na příští lekce</h2>
 
-  <p>Shortcutting je <strong>poslední krok</strong> obou aproximačních algoritmů: vyrobí z laciného uzavřeného sledu přípustný Hamiltonovský okruh, <em>aniž by pokazil cenu</em> — v řetízcích důkazů obstará nerovnost $c(E(L)) \ge c(E(H))$. Zbývá umět sled lacino <em>vyrobit</em> (Eulerovský tah nad zdvojenou kostrou, <a href="l3-8c.html#takeaways">[L3.8c]</a>) a cenu sledu svázat s neznámým $\mathrm{OPT}$ (dolní mez $\mathrm{OPT} \ge c(\mathrm{MST})$, <a href="l3-8b.html#takeaways">[L3.8b]</a> — hned další lekce). Pak už faktory 2 [L3.9] a 3/2 [L3.10] vypadnou složením tří nerovností.</p>
+  <p>Shortcutting je <strong>poslední krok</strong> obou aproximačních algoritmů: vyrobí z laciného uzavřeného sledu přípustný Hamiltonovský okruh, <em>aniž by pokazil cenu</em> — v řetízcích důkazů obstará nerovnost $c(E(L)) \ge c(E(H))$. Zbývá umět sled lacino <em>vyrobit</em> (Eulerovský tah nad zdvojenou kostrou, <a href="l3-8c.html#takeaways">[L3.8c]</a>) a cenu sledu svázat s neznámým $\mathrm{OPT}$ (dolní mez $\mathrm{OPT} \ge c(\mathrm{MST})$, <a href="l3-8b.html#takeaways">[L3.8b]</a> — hned další lekce). Pak už faktory 2 <a href="l3-9.html">[L3.9]</a> a 3/2 [L3.10] vypadnou složením tří nerovností.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>

@@ -79,7 +79,7 @@
     <div class="box-title">Definice: r-aproximační algoritmus (minimalizace)</div>
     <p>Algoritmus $A$ pro <strong>minimalizaci</strong> kriteriální funkce $J$ je <strong>r-aproximační</strong> (r-approximation algorithm), existuje-li číslo $r \ge 1$ takové, že</p>
     $$J^A(I) \;\le\; r \cdot J^*(I) \qquad \text{pro všechny instance } I \text{ problému.}$$
-    <p>Slidy definují explicitně zrcadlovou verzi pro <strong>maximalizaci</strong> (05_Knapsack, slide 6, EN 1:1): <em>„Algorithm $A$ for objective function $J$ maximization is called $r$-approximation if there exists a number $r \ge 1$ such that $J^A(I) \ge \frac{1}{r} J^*(I)$ for all instances $I$ of this problem.“</em> Minimalizační verzi slidy používají implicitně — kapitola o TSP říká „double-tree je 2-aproximace“ a dokazuje přesně nerovnost $c(E(H)) \le 2 \cdot \mathrm{OPT}$ [L3.9].</p>
+    <p>Slidy definují explicitně zrcadlovou verzi pro <strong>maximalizaci</strong> (05_Knapsack, slide 6, EN 1:1): <em>„Algorithm $A$ for objective function $J$ maximization is called $r$-approximation if there exists a number $r \ge 1$ such that $J^A(I) \ge \frac{1}{r} J^*(I)$ for all instances $I$ of this problem.“</em> Minimalizační verzi slidy používají implicitně — kapitola o TSP říká „double-tree je 2-aproximace“ a dokazuje přesně nerovnost $c(E(H)) \le 2 \cdot \mathrm{OPT}$ <a href="l3-9.html">[L3.9]</a>.</p>
   </div>
 
   <details class="try">
@@ -121,7 +121,7 @@
       <li><strong>„Vrací skoro optimální řešení, takže je to aproximační algoritmus.“</strong> NE — aproximační algoritmus je jen ten s <em>dokázanou</em> worst-case zárukou $r$ pro všechny instance. Heuristika (nearest neighbor, k-OPT) žádnou záruku nemá, ať se v experimentech chová sebelíp.</li>
       <li><strong>„Faktor 2 znamená, že výsledky bývají zhruba dvakrát horší.“</strong> NE — $r$ je strop pro nejhorší případ; o četnosti špatných případů ani o průměru neříká nic. Typicky bývá výsledek mnohem blíž optimu.</li>
       <li><strong>„U maximalizace: $J^A \le r \cdot J^*$.“</strong> NE — to platí zadarmo (nad optimum se dostat nejde) a nezaručuje nic. Správně zdola: $J^A \ge \frac{1}{r} J^*$. Směr nerovnosti si vždy zkontroluj proti tomu, kterým směrem může algoritmus „kazit“.</li>
-      <li><strong>„Když má problém aproximaci v jedné variantě, má ji i obecně.“</strong> NE — faktor je vlastnost dvojice (algoritmus, problém). Metrický TSP má 2-aproximaci [L3.9] i 3/2-aproximaci [L3.10], ale obecný TSP nemá žádnou r-aproximaci, pokud $P \ne NP$ <a href="l3-6.html">[L3.6]</a>.</li>
+      <li><strong>„Když má problém aproximaci v jedné variantě, má ji i obecně.“</strong> NE — faktor je vlastnost dvojice (algoritmus, problém). Metrický TSP má 2-aproximaci <a href="l3-9.html">[L3.9]</a> i 3/2-aproximaci [L3.10], ale obecný TSP nemá žádnou r-aproximaci, pokud $P \ne NP$ <a href="l3-6.html">[L3.6]</a>.</li>
     </ul>
   </div>
 
@@ -140,7 +140,7 @@
 
   <p>Tohle „sendvičování“ přes mez je celé tajemství důkazů faktorů a uvidíš ho v K3 třikrát:</p>
   <ul>
-    <li><strong>Double-tree pro metrický TSP</strong> [L3.9]: dolní mez = cena minimální kostry, $c(\mathrm{MST}) \le \mathrm{OPT}$ <a href="l3-8b.html#takeaways">[L3.8b]</a>. Celý důkaz faktoru 2 je pak jediný řetízek ze slidu 25: $2\,\mathrm{OPT} \ge 2\,c(E(T)) = c(E(L)) \ge c(E(H))$.</li>
+    <li><strong>Double-tree pro metrický TSP</strong> <a href="l3-9.html">[L3.9]</a>: dolní mez = cena minimální kostry, $c(\mathrm{MST}) \le \mathrm{OPT}$ <a href="l3-8b.html#takeaways">[L3.8b]</a>. Celý důkaz faktoru 2 je pak jediný řetízek ze slidu 25: $2\,\mathrm{OPT} \ge 2\,c(E(T)) = c(E(L)) \ge c(E(H))$.</li>
     <li><strong>Christofides</strong> [L3.10]: stejná kostra + chytřejší druhá mez $c(M) \le \mathrm{OPT}/2$ pro párování — dohromady faktor $\tfrac{3}{2}$.</li>
     <li><strong>Knapsack 2-aproximace</strong> [L3.11] (maximalizace): horní mez optima ze zlomkového batohu, $\sum_{i=1}^{h} c_i \ge J^*$.</li>
   </ul>
@@ -249,7 +249,7 @@ Hamiltonian circuit H is defined by the sequence {v_[1], ..., v_[n], v_[1]};</pr
           $$\forall\, r \ge 1 \;\; \exists\, I_r:\quad J^{NN}(I_r) &gt; r \cdot J^*(I_r).$$
           <p>Slovy: <strong>ať zvolíš jakkoli velký faktor $r$, existuje instance, na které ho nearest neighbor poruší</strong> — poměr $J^{NN}/J^*$ není shora omezen žádnou konstantou.</p>
           <p><strong>Co musí důkaz ukázat.</strong> Jedna konkrétní instance nestačí — ta by vyvrátila jen jedno konkrétní $r$ (např. poměr $3$ na jedné instanci vylučuje $r = 2$, ale ne $r = 5$). Důkaz musí dodat <strong>rodinu instancí</strong> $\{I_r\}$ parametrizovanou tak, aby poměr $J^{NN}(I_r)/J^*(I_r)$ rostl nade všechny meze (typicky posloupnost instancí rostoucí velikosti, na nichž poměr roste např. logaritmicky s $n$ — konstrukce takové rodiny je nad rámec slidů, slide 23 výrok jen konstatuje). U hladového pravidla je zdroj potíží intuitivně vidět: lokálně nejlevnější krok může algoritmus zavléct do kouta, odkud se vrací přes velmi drahé hrany, a tenhle efekt lze konstrukcí instance stupňovat.</p>
-          <p><strong>Pozor na rozdíl rolí:</strong> dokázat, že algoritmus aproximační <em>je</em>, znamená zvládnout $\forall I$ (řetízek nerovností přes mez — uvidíš u double-tree [L3.9] a Christofidese [L3.10]); dokázat, že <em>není</em>, znamená vyrábět protipříklady, pro každé $r$ jeden. Srovnej s neexistencí r-aproximace pro obecný TSP <a href="l3-6.html">[L3.6]</a> — tam je tvrzení ještě silnější: žádný <em>polynomiální</em> algoritmus (nejen NN) nemůže být r-aproximační pro žádné $r$, pokud $P \ne NP$.</p>
+          <p><strong>Pozor na rozdíl rolí:</strong> dokázat, že algoritmus aproximační <em>je</em>, znamená zvládnout $\forall I$ (řetízek nerovností přes mez — uvidíš u double-tree <a href="l3-9.html">[L3.9]</a> a Christofidese [L3.10]); dokázat, že <em>není</em>, znamená vyrábět protipříklady, pro každé $r$ jeden. Srovnej s neexistencí r-aproximace pro obecný TSP <a href="l3-6.html">[L3.6]</a> — tam je tvrzení ještě silnější: žádný <em>polynomiální</em> algoritmus (nejen NN) nemůže být r-aproximační pro žádné $r$, pokud $P \ne NP$.</p>
         </div>
       </details>
     </div>

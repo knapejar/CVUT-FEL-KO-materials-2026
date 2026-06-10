@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L3.9 · Double-tree algoritmus (2-aproximace metrického TSP) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k3">K3 · Důkaz / teorie</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L3.9</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L3.9</span> Kapitola K3 — Důkaz / teorie (Slot 3) · <strong>[MUST]</strong> · žebříček #3 (TSP aproximace)
+  </p>
+  <h1>Double-tree algoritmus (2-aproximace metrického TSP)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Double-tree algoritmus</strong>: MST → zdvojení hran → Eulerovský tah → shortcutting — a důkaz, že výsledný okruh $H$ splňuje $c(E(H)) \le 2 \cdot \mathrm{OPT}(K_n, c)$. První kompletně dokázaná aproximace v učebnici.
+  </div>
+
+  <p>Tři stavební kameny z minulých lekcí dnes poprvé zapadnou do sebe: shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>, dolní mez $\mathrm{OPT} \ge c(E(T))$ <a href="l3-8b.html#takeaways">[L3.8b]</a> a Eulerovský tah ze zdvojené kostry s cenou $c(E(L)) = 2\,c(E(T))$ <a href="l3-8c.html#takeaways">[L3.8c]</a>. Výsledkem je <strong>2-aproximační algoritmus</strong> ve smyslu definice z <a href="l3-1.html#takeaways">[L3.1]</a> — polynomiální algoritmus se <em>zaručeným</em> worst-case faktorem. U obecného TSP je i tohle nemožné (pokud P ≠ NP, <a href="l3-6.html#takeaways">[L3.6]</a>); metrika to mění.</p>
+
+  <!-- ===== SEKCE 1: SLOŽ SI ALGORITMUS SÁM ===== -->
+  <h2>Slož si algoritmus sám</h2>
+
+  <p>Než ti slide ukáže pseudokód, máš na něj všechno v ruce. Inventura nástrojů:</p>
+
+  <ul>
+    <li><strong>Nástroj A</strong> <a href="l3-8b.html#takeaways">[L3.8b]</a>: minimální kostra $T$ je polynomiálně spočitatelná <a href="../k0/l0-5.html#takeaways">[L0.5]</a> a levnější než neznámé optimum: $c(E(T)) \le \mathrm{OPT}$.</li>
+    <li><strong>Nástroj B</strong> <a href="l3-8c.html#takeaways">[L3.8c]</a>: zdvojení hran kostry dá Eulerovský multigraf; uzavřený tah $L$ přes všechny hrany stojí přesně $c(E(L)) = 2\,c(E(T))$.</li>
+    <li><strong>Nástroj C</strong> <a href="l3-8a.html#takeaways">[L3.8a]</a>: shortcutting převede uzavřený sled přes všechny vrcholy na Hamiltonovský okruh a díky trojúhelníkové nerovnosti <strong>nezdraží</strong>: $c(E(L)) \ge c(E(H))$.</li>
+  </ul>
+
+  <details class="try">
+    <summary>Zkus sám: poskládej z nástrojů A, B, C algoritmus pro metrický TSP — v jakém pořadí je zapojíš a co poteče mezi nimi?</summary>
+    <div class="inner">
+      <p>Přesně v pořadí A → B → C: <strong>(1)</strong> najdi MST $T$ v $K_n$; <strong>(2)</strong> zdvoj její hrany a v multigrafu najdi Eulerovský tah $L$ (existuje — všechny stupně sudé, graf souvislý); <strong>(3)</strong> shortcuttingem převeď $L$ na Hamiltonovský okruh $H$. Mezi kroky teče: kostra → uzavřený tah přes všechny vrcholy (kostra je spojuje všechny) → okruh. A cena se kontrolovaně kutálí: $c(E(T)) \le \mathrm{OPT}$, pak $\times 2$, pak už jen dolů. To je celý double-tree algoritmus — jméno má podle „zdvojeného stromu“ z kroku 2.</p>
+    </div>
+  </details>
+
+  <p>Slide 24 (EN 1:1):</p>
+
+  <div class="box">
+    <div class="box-title">Slide 24 — Double-tree Algorithm (1:1)</div>
+<pre><code>Input:  An Instance (K_n, c) of the metric TSP.
+Output: Hamiltonian circuit H.
+
+  1  Find a minimum weight spanning tree T in K_n;
+  2  By doubling every edge in T we get multigraph in which we find
+     the Eulerian walk L (i.e., a closed walk containing every edge);
+  3  Transform the Eulerian walk L to the Hamiltonian circuit H
+     in the complete graph K_n:
+        - create a sequence of nodes on the Eulerian walk L;
+        - we skip nodes that are already in the sequence;
+        - the rest creates the Hamiltonian circuit H;</code></pre>
+    <p><strong>Observation</strong> (1:1): <em>„the doubling of edges in $T$ ensures even degree of all vertices in the multigraph, which is a sufficient and necessary condition for existence of Eulerian walk.“</em> — to je přesně věta z <a href="l3-8c.html#takeaways">[L3.8c]</a>.</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: než budeme měřit cenu — proč je výstup $H$ vůbec <em>přípustné řešení</em>, tedy Hamiltonovský okruh? Projdi kroky a u každého řekni, co garantuje, že další krok má co žrát.</summary>
+    <div class="inner">
+      <p><strong>Krok 1</strong> vždy uspěje: $K_n$ je souvislý, kostra existuje a Kruskal/Prim ji najde <a href="../k0/l0-5.html#takeaways">[L0.5]</a>. <strong>Krok 2</strong>: zdvojená kostra má všechny stupně sudé a je souvislá → Eulerovský tah $L$ existuje (Observation, dokázáno v <a href="l3-8c.html#takeaways">[L3.8c]</a>); $L$ prochází všemi hranami, a protože kostra pokrývá všechny vrcholy, navštíví $L$ <em>všechny vrcholy</em> — je to uzavřený sled přes celé $V$. <strong>Krok 3</strong>: posloupnost prvních návštěv obsahuje každý vrchol právě jednou a zkratky existují, protože $K_n$ je <em>úplný</em> <a href="l3-8a.html#takeaways">[L3.8a]</a> → $H$ je Hamiltonovský okruh <a href="l3-3.html#takeaways">[L3.3]</a>. Přípustnost tedy stojí na úplnosti $K_n$ a na sudých stupních — metrika zatím nebyla potřeba; ta přijde až u <em>ceny</em>.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: BĚH NA INSTANCI ===== -->
+  <h2>Celý běh na známé instanci</h2>
+
+  <p>Pusť si celou linku najednou — na metrické $K_5$ z <a href="l3-8a.html#t-shortcut">[L3.8a]</a> (tabulka cen tam), na které jsme všechny tři kroky už jednotlivě trénovali. Detailní rozbory kroků: MST Kruskalem <a href="l3-8b.html#t-sandwich">[L3.8b] T02</a>, Eulerovský tah <a href="l3-8c.html#t-double">[L3.8c] T02</a>, shortcutting <a href="l3-8a.html#t-shortcut">[L3.8a] T02</a>.</p>
+
+  <div class="viz" id="viz-run"></div>
+
+  <!-- ===== SEKCE 3: DŮKAZ FAKTORU 2 ===== -->
+  <h2>Důkaz faktoru 2: tři nerovnosti, jeden řetízek</h2>
+
+  <p>Na instanci to vyšlo ($12 \le 22$), ale faktor musí podle definice z <a href="l3-1.html#takeaways">[L3.1]</a> platit pro <strong>každou</strong> instanci metrického TSP. Všechny tři dílčí fakty máme dokázané — zbývá je seřadit.</p>
+
+  <details class="try">
+    <summary>Zkus sám (klíčový krok): máš tři fakta — <strong>(1)</strong> $c(E(L)) \ge c(E(H))$, <strong>(2)</strong> $\mathrm{OPT}(K_n,c) \ge c(E(T))$, <strong>(3)</strong> $2\,c(E(T)) = c(E(L))$. Sestav z nich jediný řetízek nerovností, který začíná u $2\,\mathrm{OPT}$ a končí u $c(E(H))$.</summary>
+    <div class="inner">
+      <p>Začni u $2\,\mathrm{OPT}$ a postupně „sestupuj“ k výstupu algoritmu: fakt (2) vynásob dvěma ($2\,\mathrm{OPT} \ge 2\,c(E(T))$ — nerovnost se násobením kladnou konstantou nepřeklopí), fakt (3) přepiš $2\,c(E(T))$ na $c(E(L))$ a fakt (1) sestup z tahu na okruh:</p>
+      $$2\, \mathrm{OPT}(K_n, c) \;\stackrel{2.}{\ge}\; 2\, c(E(T)) \;\stackrel{3.}{=}\; c(E(L)) \;\stackrel{1.}{\ge}\; c(E(H)).$$
+      <p>Čteno od konce: $c(E(H)) \le 2\,\mathrm{OPT}$ — double-tree je 2-aproximace. Všimni si dramaturgie: <em>jediné</em> místo, kde do důkazu vstupuje neznámé $\mathrm{OPT}$, je fakt (2) — algoritmus optimum nikdy nepočítá, jen se s ním nepřímo poměřuje přes MST.</p>
+    </div>
+  </details>
+
+  <p>Slide 25 (EN 1:1) říká totéž:</p>
+
+  <div class="box">
+    <div class="box-title">Slide 25 — Double-tree Algorithm is 2-approximation Algorithm (1:1)</div>
+    <p><em>Time complexity is $\mathcal{O}(n^2)$. It is a 2-approximation algorithm for the <strong>metric TSP</strong>:</em></p>
+    <ul>
+      <li><em><strong>1.</strong> due to the triangle inequality, the skipped nodes don't prolong the route, i.e. $c(E(L)) \ge c(E(H))$</em></li>
+      <li><em><strong>2.</strong> while deleting one edge in the circuit, we create the tree. Therefore, inequality $\mathrm{OPT}(K_n, c) \ge c(E(T))$ holds</em></li>
+      <li><em><strong>3.</strong> $2 c(E(T)) = c(E(L))$ holds due to the creation of $L$ by doubling edges in $T$</em></li>
+      <li><em>above points imply $2 \mathrm{OPT}(K_n, c) \ge c(E(H))$ since:</em></li>
+    </ul>
+    $$2 \mathrm{OPT}(K_n, c) \stackrel{2.}{\ge} 2 c(E(T)) \stackrel{3.}{=} c(E(L)) \stackrel{1.}{\ge} c(E(H))$$
+  </div>
+
+  <p>Body 1–3 nejsou nové — jsou to přesně věty z <a href="l3-8a.html#takeaways">[L3.8a]</a>, <a href="l3-8b.html#takeaways">[L3.8b]</a> a <a href="l3-8c.html#takeaways">[L3.8c]</a> včetně důkazů. U zkoušky ale nestačí řetízek opsat — chtějí slyšet, <em>proč</em> každý článek drží. Závěrečná inventura:</p>
+
+  <details class="try">
+    <summary>Zkus sám (inventura předpokladů): který článek řetízku potřebuje trojúhelníkovou nerovnost, který nezápornost cen a který úplnost $K_n$? A kde přesně by se důkaz rozbil na obecném (nemetrickém) TSP?</summary>
+    <div class="inner">
+      <p><strong>Trojúhelníková nerovnost</strong>: jen článek 1 (shortcutting — zkratka není dražší než nahrazený úsek, <a href="l3-8a.html#takeaways">[L3.8a]</a>). <strong>Nezápornost</strong>: článek 2 ($\mathrm{OPT} - c(e) \le \mathrm{OPT}$ vyžaduje $c(e) \ge 0$, <a href="l3-8b.html#takeaways">[L3.8b]</a>). <strong>Úplnost $K_n$</strong>: článek 1 potřebuje, aby zkratkové hrany vůbec existovaly. Článek 3 je čisté počítání (každá hrana kostry dvakrát) — bez předpokladů.</p>
+      <p>Na obecném TSP se rozbije <strong>jen článek 1</strong>: bez metriky může být přímá hrana libovolně dražší než objížďka, shortcutting zdraží a celý řetízek se přetrhne. A nejde to opravit jinou fintou — z <a href="l3-6.html#takeaways">[L3.6]</a> víš, že obecný TSP nemá <em>žádnou</em> r-aproximaci (jinak P = NP). Metrika není kosmetický předpoklad, je to dělicí čára mezi „žádná záruka“ a „faktor 2“.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 4: SLOŽITOST + VÝHLED ===== -->
+  <h2>Složitost a co dál: proč zrovna dvojka?</h2>
+
+  <p>Slide 25 uvádí složitost $\mathcal{O}(n^2)$. (Rozklad — vlastní komentář, slide jen konstatuje: MST na úplném grafu najde Prim v $\mathcal{O}(n^2)$ <a href="../k0/l0-5.html#takeaways">[L0.5]</a>; zdvojení, Eulerovský tah Hierholzerem <a href="l3-8c.html#takeaways">[L3.8c]</a> i shortcutting jsou lineární v počtu hran multigrafu, tedy $\mathcal{O}(n)$.) Polynomialita + dokázaný faktor = aproximační algoritmus podle <a href="l3-1.html#takeaways">[L3.1]</a> — na rozdíl od nearest neighbor, který faktor nemá.</p>
+
+  <details class="try">
+    <summary>Zkus sám: kde přesně v řetízku „bydlí“ ta dvojka — a co bys musel zlevnit, kdybys chtěl faktor menší?</summary>
+    <div class="inner">
+      <p>Dvojka bydlí v článku 3: platíme <strong>celou kostru dvakrát</strong> ($c(E(L)) = 2\,c(E(T))$), protože zdvojení je nejhrubší způsob, jak vyrobit sudé stupně. Kdo chce menší faktor, musí sudé stupně zařídit <em>levněji</em> než druhou kopií kostry. Přesně to udělá Christofides [L3.10]: liché vrcholy (je jich sudý počet <a href="../k0/l0-2.html#takeaways">[L0.2]</a>) spáruje minimálním perfektním párováním $M$ s cenou $c(M) \le \mathrm{OPT}/2$ — místo $2\,c(E(T)) \le 2\,\mathrm{OPT}$ pak řetízek začíná $c(E(T)) + c(M) \le \tfrac{3}{2}\,\mathrm{OPT}$. Zbytek linky (Euler → shortcutting) zůstane stejný.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
+    <ul>
+      <li><strong>„Double-tree funguje na každý TSP.“</strong> NE — faktor 2 platí jen pro <strong>metrický</strong> TSP. Bez trojúhelníkové nerovnosti padá článek 1 (shortcutting může zdražit) a obecný TSP žádnou r-aproximaci nemá <a href="l3-6.html#takeaways">[L3.6]</a>. Přípustný okruh by algoritmus vyrobil i tak (úplnost stačí), ale beze záruky ceny.</li>
+      <li><strong>„Algoritmus vrátí okruh ceny $2\,\mathrm{OPT}$.“</strong> NE — vrátí okruh ceny <em>nejvýš</em> $2\,\mathrm{OPT}$; faktor je worst-case záruka přes všechny instance <a href="l3-1.html#takeaways">[L3.1]</a>. Na naší instanci vyšlo $12$ při $\mathrm{OPT} = 11$ — poměr $12/11$, zdaleka ne 2.</li>
+      <li><strong>„Mezivýsledky jsou řešení.“</strong> NE — MST není okruh <a href="l3-8b.html#takeaways">[L3.8b]</a> a Eulerovský tah není Hamiltonovský okruh <a href="l3-8c.html#takeaways">[L3.8c]</a> (opakuje vrcholy). Přípustné řešení je až $H$ po shortcuttingu; odevzdat „cenu $2\,c(E(T))$“ bez kroku 3 je chyba.</li>
+      <li><strong>Směr řetízku:</strong> nepiš $c(E(H)) \ge \dots$ ani $\mathrm{OPT} \le c(E(T))$. U zkoušky si řetízek kotvi takto: začíná u $2\,\mathrm{OPT}$ (největší), končí u $c(E(H))$ (výstup), a každý článek má jméno: 2 = dolní mez MST, 3 = zdvojení, 1 = shortcutting.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.9</div>
+    <ul>
+      <li><strong>Double-tree algoritmus</strong> (slide 24): 1. MST $T$ v $K_n$ → 2. zdvojit hrany, najít Eulerovský tah $L$ → 3. shortcuttingem převést $L$ na Hamiltonovský okruh $H$. Složitost $\mathcal{O}(n^2)$.</li>
+      <li><strong>Faktor 2</strong> (slide 25): $2\,\mathrm{OPT}(K_n,c) \stackrel{2.}{\ge} 2\,c(E(T)) \stackrel{3.}{=} c(E(L)) \stackrel{1.}{\ge} c(E(H))$ — článek 2 = dolní mez <a href="l3-8b.html#takeaways">[L3.8b]</a>, článek 3 = zdvojení <a href="l3-8c.html#takeaways">[L3.8c]</a>, článek 1 = shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>.</li>
+      <li>Trojúhelníková nerovnost je potřeba <strong>jen v článku 1</strong>; nezápornost v článku 2; úplnost $K_n$ pro existenci zkratek. Bez metriky záruka padá — a žádná jiná není možná <a href="l3-6.html#takeaways">[L3.6]</a>.</li>
+      <li>$\mathrm{OPT}$ vstupuje do důkazu jediným místem (článek 2) — algoritmus optimum nepočítá, poměřuje se s ním přes MST.</li>
+      <li>Dvojka = cena za druhou kopii kostry; Christofides [L3.10] ji nahradí párováním lichých vrcholů s $c(M) \le \mathrm{OPT}/2$ → faktor $\tfrac{3}{2}$.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-doubletree">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Double-tree Algorithm — 2-approximation for the metric TSP</strong>
+      <span class="task-src">zdroj: banka #32 (= slidy 24–25 06_TSP) EN 1:1, v bance Unsolved; zkouškové znění otázky vlastní formulace (přiznáno), řešení dle slidů 24–25</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (bank #32 quoted EN 1:1; exam-style question own)</span>
+        <p><strong>Input:</strong> An instance $(K_n, c)$ of the metric TSP. <strong>Output:</strong> Hamiltonian circuit $H$.</p>
+        <ol>
+          <li>Find a minimum weight spanning tree $T$ in $K_n$.</li>
+          <li>By doubling every edge in $T$ we get a multigraph in which we find the Eulerian walk $L$; i.e., a closed walk containing every edge.</li>
+          <li>Transform the Eulerian walk $L$ to the Hamiltonian circuit $H$ in the complete graph $K_n$: create a sequence of nodes on the Eulerian walk $L$; skip nodes that are already in the sequence; the rest creates the Hamiltonian circuit $H$.</li>
+        </ol>
+        <p><em>Observation: doubling the edges of $T$ ensures even degree of all vertices in the multigraph, which is a sufficient and necessary condition for existence of an Eulerian walk.</em></p>
+        <p><em>Exam-style question (own): Describe the double-tree algorithm and prove that it is a 2-approximation algorithm for the metric TSP. State where the triangle inequality is used.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Důkazová úloha (žebříček #3 pro 15. 6.): popsat algoritmus (3 kroky) a dokázat faktor 2 — tedy odvodit řetízek $2\,\mathrm{OPT} \ge 2\,c(E(T)) = c(E(L)) \ge c(E(H))$ a každý článek zdůvodnit. Bonusová podotázka míří na nejčastější doplňující dotaz u ústní: kde přesně sedí trojúhelníková nerovnost.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — algoritmus + složení řetízku.</li>
+        <li><a href="l3-8a.html#takeaways">[L3.8a] Metrický TSP + shortcutting</a> — článek 1, role metriky a úplnosti.</li>
+        <li><a href="l3-8b.html#takeaways">[L3.8b] MST jako dolní mez</a> — článek 2 (okruh − hrana = kostra).</li>
+        <li><a href="l3-8c.html#takeaways">[L3.8c] Eulerovský tah a zdvojení</a> — existence $L$ + článek 3.</li>
+        <li><a href="l3-1.html#takeaways">[L3.1] Aproximační algoritmus a faktor r</a> — co se vlastně dokazuje.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Piš důkaz jako tři očíslovaná lemmata + závěrečné složení. U každého článku si polož kontrolní otázku: 1. proč zkratka nezdraží (a proč existuje)? 2. co vznikne z optimálního okruhu po odebrání hrany a proč je to dražší než MST? 3. kolikrát tah $L$ zaplatí každou hranu kostry? Nezapomeň na půlvětu, že $H$ je vůbec přípustné (Observation → $L$ existuje; úplnost → zkratky existují) — bez ní dokazuješ cenu něčeho, co možná neexistuje.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle slidů 24–25; dílčí důkazy = [L3.8a]–[L3.8c])</summary>
+        <div class="inner">
+          <p><strong>Algoritmus.</strong> 1. Najdi minimální kostru $T$ v $K_n$. 2. Zdvoj každou hranu $T$; v multigrafu najdi uzavřený Eulerovský tah $L$. 3. Projdi $L$, vypiš posloupnost prvních návštěv vrcholů (opakované přeskoč) a uzavři ji do okruhu $H$. Složitost $\mathcal{O}(n^2)$ (Prim na $K_n$; Euler i shortcutting lineární).</p>
+          <p><strong>Přípustnost.</strong> Zdvojení dává každému vrcholu sudý stupeň $2\,|\delta_T(v)|$ a multigraf je souvislý (zdvojená kostra), takže $L$ existuje (Observation; důkaz ekvivalence <a href="l3-8c.html#t-euler">[L3.8c] T01</a>) a navštěvuje všechny vrcholy. Zkratkové hrany existují, protože $K_n$ je úplný → $H$ je Hamiltonovský okruh.</p>
+          <p><strong>Článek 1</strong> ($c(E(L)) \ge c(E(H))$): každá zkratka nahrazuje souvislý úsek tahu přímou hranou mezi jeho konci; podle (zobecněné) trojúhelníkové nerovnosti není dražší než úsek — <em>jediné</em> místo důkazu, kde se metrika používá (<a href="l3-8a.html#t-shortcut">[L3.8a] T02</a>).</p>
+          <p><strong>Článek 2</strong> ($\mathrm{OPT}(K_n,c) \ge c(E(T))$): odeber z optimálního okruhu $H^*$ libovolnou hranu $e$ → vznikne kostra, takže $c(E(T)) \le c(E(H^*)) - c(e) \le \mathrm{OPT}$ díky minimalitě MST a nezápornosti cen (<a href="l3-8b.html#t-mstlb">[L3.8b] T01</a>).</p>
+          <p><strong>Článek 3</strong> ($2\,c(E(T)) = c(E(L))$): $L$ projde každou hranu multigrafu právě jednou a multigraf obsahuje každou hranu $T$ dvakrát (<a href="l3-8c.html#t-euler">[L3.8c] T01</a>).</p>
+          <p><strong>Složení.</strong></p>
+          $$2\, \mathrm{OPT}(K_n, c) \;\stackrel{2.}{\ge}\; 2\, c(E(T)) \;\stackrel{3.}{=}\; c(E(L)) \;\stackrel{1.}{\ge}\; c(E(H)),$$
+          <p>tedy $c(E(H)) \le 2\,\mathrm{OPT}(K_n,c)$ pro každou instanci metrického TSP a double-tree je (polynomiální) 2-aproximační algoritmus. $\blacksquare$</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-assumptions">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Assumption audit — what exactly does each step need?</strong>
+      <span class="task-src">zdroj: úloha VLASTNÍ (přiznáno) — syntéza předpokladů napříč [L3.8a]–[L3.8c], trénink na doplňující otázky u ústní</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (own, EN)</span>
+        <p>Consider the double-tree algorithm and the proof of its approximation factor. For each of the following assumptions, identify <em>exactly</em> which part of the algorithm or proof needs it, and describe what breaks without it: <em>(a) completeness of $K_n$, (b) the triangle inequality, (c) non-negativity of the costs $c$.</em> <em>(d) Does the algorithm remain well defined (i.e., does it still output some Hamiltonian circuit) on a complete instance with non-negative costs that violate the triangle inequality? Does the factor-2 guarantee survive?</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Rozbor předpokladů — typická doplňující otázka, když u ústní odvyprávíš důkaz faktoru 2. Cíl: umět ke každému předpokladu říct přesnou adresu (článek řetízku / krok algoritmu), ne jen „je to potřeba někde v důkazu“.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — řetízek a inventura předpokladů (poslední try).</li>
+        <li><a href="l3-8a.html#takeaways">[L3.8a]</a> — shortcutting a role úplnosti + metriky.</li>
+        <li><a href="l3-8b.html#takeaways">[L3.8b]</a> — kde v dolní mezi sedí nezápornost.</li>
+        <li><a href="l3-6.html#takeaways">[L3.6]</a> — proč se bez metriky nedá zachránit vůbec nic.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Projdi algoritmus krok po kroku a ptej se „co by tu selhalo?“; pak projdi tři články důkazu a totéž. U (d) odděl dvě různé otázky: <em>přípustnost</em> výstupu (potřebuje jen existenci hran a Eulerova tahu) vs. <em>záruku ceny</em> (potřebuje celý řetízek).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní)</summary>
+        <div class="inner">
+          <p><strong>(a) Úplnost $K_n$:</strong> krok 3 — zkratka spojuje konce přeskočeného úseku <em>přímou hranou</em>, která musí existovat. Bez úplnosti se může stát, že okruh přes všechny vrcholy v grafu vůbec není (Hamiltonova kružnice je NP-úplná otázka <a href="l3-3.html#takeaways">[L3.3]</a>); kroky 1–2 by přitom proběhly (kostra i Euler úplnost nepotřebují, stačí souvislost).</p>
+          <p><strong>(b) Trojúhelníková nerovnost:</strong> jen článek 1 důkazu, $c(E(L)) \ge c(E(H))$. Bez ní může zkratka stát víc než nahrazený úsek a o $c(E(H))$ neumíme říct nic — viz (d).</p>
+          <p><strong>(c) Nezápornost:</strong> článek 2, přesně v kroku $c(E(H^*)) - c(e) \le \mathrm{OPT}$ (odebraná hrana nesmí mít zápornou cenu <a href="l3-8b.html#takeaways">[L3.8b]</a>). V metrickém TSP je dána definicí $c : E(K_n) \to \mathbb{R}^+$ <a href="l3-8a.html#takeaways">[L3.8a]</a>.</p>
+          <p><strong>(d)</strong> Ano, algoritmus doběhne a vrátí Hamiltonovský okruh: kostra existuje, zdvojení dá sudé stupně (čistá kombinatorika), Euler existuje, zkratky existují (úplnost). Přípustnost tedy přežije. <strong>Záruka nepřežije:</strong> článek 1 padá a faktor 2 nelze dokázat — a nejde to obejít žádným jiným důkazem ani algoritmem, protože obecný TSP s nezápornými cenami nemá žádnou r-aproximaci, pokud P ≠ NP <a href="l3-6.html#takeaways">[L3.6]</a> (instance z tamní konstrukce, ceny $1$ a $2 + (r-1)n$, trojúhelníkovou nerovnost porušují). Hranice „přípustné vždy / levné jen s metrikou“ je celá pointa.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L3.9">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k3/l3-8c.html"><span class="dir">← Předchozí</span> L3.8c · Eulerovský tah a zdvojení hran (sudý stupeň)</a>
+    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.10 · VYVRCHOLENÍ: Christofides 3/2 [FOTO])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// Stepper: celý běh double-tree na metrické K₅ z L3.8a (MST=7 Kruskalem, OPT=11 enumerací — ověřeno v L3.8b).
+// Multigraf = dvojice rovnoběžných hran s opačnými klíči ('A->B'/'B->A'), curve:0.22; zkratky C–D a D–E navíc.
+KOViz.stepper(document.getElementById('viz-run'), {
+  graph: {
+    directed: false,
+    nodes: [
+      {id:'A', x:150, y:210},
+      {id:'B', x:300, y:150},
+      {id:'C', x:470, y:80},
+      {id:'D', x:480, y:300},
+      {id:'E', x:110, y:70},
+    ],
+    edges: [
+      {from:'A', to:'B', label:'2', curve:0.22, cls:'dim'},
+      {from:'B', to:'A', label:'2', curve:0.22, cls:'dim'},
+      {from:'A', to:'E', label:'2', curve:0.22, cls:'dim'},
+      {from:'E', to:'A', label:'2', curve:0.22, cls:'dim'},
+      {from:'B', to:'C', label:'1', curve:0.22, cls:'dim'},
+      {from:'C', to:'B', label:'1', curve:0.22, cls:'dim'},
+      {from:'B', to:'D', label:'2', curve:0.22, cls:'dim'},
+      {from:'D', to:'B', label:'2', curve:0.22, cls:'dim'},
+      {from:'C', to:'D', label:'2', cls:'dim'},
+      {from:'D', to:'E', label:'5', curve:-0.4, cls:'dim'},
+    ],
+    caption: 'Metrická K₅ z [L3.8a] (tabulka cen tam; nakresleno jen 6 dvojic/hran, které běh použije). Klikej: MST → zdvojení → Euler → shortcutting → bilance.',
+  },
+  frames: [
+    {desc:'Vstup: instance (K₅, c) metrického TSP. Nakresleny jsou jen hrany, které běh použije (šedě); zbytek úplného grafu viz tabulka v [L3.8a]. Neznámé OPT = 11 (enumerace v [L3.8b] — algoritmus ho znát nebude).'},
+    {desc:'Krok 1 — MST: Kruskal [L0.5] vybere T = {B–C (1), A–B (2), A–E (2), B–D (2)}, c(E(T)) = 7. Dolní mez [L3.8b]: 7 = c(E(T)) ≤ OPT. Detailní běh Kruskala: [L3.8b] T02.',
+     nodes:{A:'hl', B:'hl', C:'hl', D:'hl', E:'hl'},
+     edges:{'A->B':'hl', 'A->E':'hl', 'B->C':'hl', 'B->D':'hl', 'B->A':'dim', 'E->A':'dim', 'C->B':'dim', 'D->B':'dim', 'C->D':'dim', 'D->E':'dim'}},
+    {desc:'Krok 2a — zdvojení: každá hrana T dvakrát → multigraf s cenou 2·7 = 14. Stupně: A 4, B 6, C 2, D 2, E 2 — všechny sudé a graf souvislý ⇒ Eulerovský tah existuje [L3.8c].',
+     nodes:{A:'hl', B:'hl', C:'hl', D:'hl', E:'hl'},
+     edges:{'A->B':'hl', 'B->A':'hl', 'A->E':'hl', 'E->A':'hl', 'B->C':'hl', 'C->B':'hl', 'B->D':'hl', 'D->B':'hl', 'C->D':'dim', 'D->E':'dim'},
+     subs:{A:'deg 4', B:'deg 6', C:'deg 2', D:'deg 2', E:'deg 2'}},
+    {desc:'Krok 2b — Eulerovský tah: L = A,B,C,B,D,B,A,E,A — každá z 8 hran multigrafu právě jednou, c(E(L)) = 14 = 2·c(E(T)) (článek 3). Čísla u vrcholů = pořadí návštěv. Konstrukce po krocích: [L3.8c] T02.',
+     nodes:{A:'good', B:'good', C:'good', D:'good', E:'good'},
+     edges:{'A->B':'good', 'B->A':'good', 'A->E':'good', 'E->A':'good', 'B->C':'good', 'C->B':'good', 'B->D':'good', 'D->B':'good', 'C->D':'dim', 'D->E':'dim'},
+     subs:{A:'1·7·9', B:'2·4·6', C:'3', D:'5', E:'8'}},
+    {desc:'Krok 3 — shortcutting [L3.8a]: opakované návštěvy v L škrtni (A,B,C,B̶,D,B̶,A̶,E,A) a úseky nahraď přímými hranami: C→D (2 ≤ 1+2) a D→E (5 ≤ 2+2+2). H = A,B,C,D,E,A, c(E(H)) = 2+1+2+5+2 = 12 ≤ 14 (článek 1).',
+     nodes:{A:'good', B:'good', C:'good', D:'good', E:'good'},
+     edges:{'A->B':'good', 'B->C':'good', 'C->D':'hl', 'D->E':'hl', 'A->E':'good', 'B->A':'dim', 'E->A':'dim', 'C->B':'dim', 'B->D':'dim', 'D->B':'dim'},
+     subs:{A:'1.', B:'2.', C:'3.', D:'4.', E:'5.'}},
+    {desc:'Bilance = celý řetízek na číslech: 2·OPT = 22 ≥ 2·c(E(T)) = 14 = c(E(L)) ≥ c(E(H)) = 12. Faktor 2 splněn s rezervou (12/11 ≈ 1,09) — záruka je worst-case [L3.1]. Obecný důkaz: sekce níže.',
+     nodes:{A:'good', B:'good', C:'good', D:'good', E:'good'},
+     edges:{'A->B':'good', 'B->C':'good', 'C->D':'good', 'D->E':'good', 'A->E':'good', 'B->A':'dim', 'E->A':'dim', 'C->B':'dim', 'B->D':'dim', 'D->B':'dim'},
+     subs:{A:'1.', B:'2.', C:'3.', D:'4.', E:'5.'}},
+  ],
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

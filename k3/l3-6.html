@@ -144,7 +144,7 @@
   </details>
 
   <details class="try">
-    <summary>Zkus sám (kontrola konzistence): v [L3.9] a [L3.10] přitom dokážeme 2- a 3/2-aproximaci TSP. Jak to jde dohromady s dnešní větou?</summary>
+    <summary>Zkus sám (kontrola konzistence): v <a href="l3-9.html">[L3.9]</a> a [L3.10] přitom dokážeme 2- a 3/2-aproximaci TSP. Jak to jde dohromady s dnešní větou?</summary>
     <div class="inner">
       <p>Ty algoritmy jsou pro <strong>metrický TSP</strong> <a href="l3-8a.html">[L3.8a]</a> — instance splňující trojúhelníkovou nerovnost $c(\{i,j\}) + c(\{j,k\}) \ge c(\{k,i\})$. Naše dnešní instance ji <em>porušují</em>: dvě levné hrany dají $1 + 1 = 2$, zatímco drahá hrana stojí $2 + (r-1)n &gt; 2$ pro každé $r &gt; 1$. Dnešní důkaz tedy o metrických instancích neříká nic — zabíjí jen aproximace slibující záruku pro <em>všechny</em> (i nemetrické) instance. Proto věta zní „for <strong>General</strong> TSP“. (Srovnej s [L3.5]: váhy 1/2 trojúhelníkovou nerovnost splňují, takže i metrický TSP je silně NP-těžký — těžkost zůstává, jen aproximovat už jde.)</p>
     </div>
@@ -160,7 +160,7 @@
     <ul>
       <li><strong>„Stačí váhy 1/2 jako u silné NP-těžkosti.“</strong> NE — mezera $n$ vs. $n+1$ je užší než rozmazání faktorem $r$; ANO-odpověď až $rn$ se s NE-hodnotami překryje. Drahá hrana musí stát $2+(r-1)n$, aby NE-případ začínal nad $rn$.</li>
       <li><strong>„V NE-případu použiju záruku $J^{\mathcal{A}} \le r\,\mathrm{OPT}$.“</strong> Nepotřebuješ ji (a argument by byl zbytečně křehký): $\mathcal{A}$ vrací přípustný okruh a <em>každý</em> okruh tam stojí $\ge rn+1$. Záruka pracuje jen v ANO-případu.</li>
-      <li><strong>„Věta zakazuje aproximovat každý TSP.“</strong> NE — jen <em>obecný</em> (nemetrický). Konstruované instance porušují trojúhelníkovou nerovnost; metrický TSP má double-tree 2-aproximaci [L3.9] i Christofidesovu 3/2 [L3.10].</li>
+      <li><strong>„Věta zakazuje aproximovat každý TSP.“</strong> NE — jen <em>obecný</em> (nemetrický). Konstruované instance porušují trojúhelníkovou nerovnost; metrický TSP má double-tree 2-aproximaci <a href="l3-9.html">[L3.9]</a> i Christofidesovu 3/2 [L3.10].</li>
       <li><strong>Směr redukce:</strong> pořád HC → TSP („kdybys měl r-aproximaci TSP, rozhodneš HC“). Obrácený převod nedokazuje nic <a href="l3-3.html#takeaways">[L3.3]</a>.</li>
       <li><strong>„$r$ je nějaká konkrétní konstanta.“</strong> Důkaz běží pro <em>libovolné</em> $r \ge 1$ — konstrukce si faktor přečte a roztáhne mezeru na míru. Proto padají všechny faktory najednou.</li>
     </ul>
@@ -173,7 +173,7 @@
       <li><strong>Konstrukce (slide 20):</strong> z grafu $G$ pro HC vyrob $K_n$ s cenami $c(\{i,j\}) = 1$ pokud $\{i,j\} \in E(G)$, jinak $2 + (r-1) \cdot n$. Převod je $O(n^2)$, polynomiální.</li>
       <li><strong>Dva disjunktní intervaly:</strong> HC existuje → $\mathrm{OPT} = n$ a r-aproximace vrátí $J^{\mathcal{A}} \in \langle n, rn\rangle$; HC neexistuje → každý okruh (tedy i výstup $\mathcal{A}$, bez záruky) stojí $\ge (n-1) + 2 + (r-1)n = rn + 1 &gt; rn$.</li>
       <li><strong>Spor:</strong> porovnáním $J^{\mathcal{A}}$ s prahem $rn$ by polynomiální r-aproximace rozhodla NP-úplný HC v polynomiálním čase → $P = NP$. Pokud $P \ne NP$, žádná polynomiální r-aproximace obecného TSP neexistuje, pro žádné $r \ge 1$.</li>
-      <li><strong>„Obecný“ je podstatné:</strong> konstruované instance porušují trojúhelníkovou nerovnost ($1+1 &lt; 2+(r-1)n$) — metrickému TSP věta neškodí, tam fungují double-tree [L3.9] a Christofides [L3.10].</li>
+      <li><strong>„Obecný“ je podstatné:</strong> konstruované instance porušují trojúhelníkovou nerovnost ($1+1 &lt; 2+(r-1)n$) — metrickému TSP věta neškodí, tam fungují double-tree <a href="l3-9.html">[L3.9]</a> a Christofides [L3.10].</li>
     </ul>
   </div>
 

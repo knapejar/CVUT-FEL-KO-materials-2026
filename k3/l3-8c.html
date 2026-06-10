@@ -116,7 +116,7 @@
   <!-- ===== SEKCE 5: K ČEMU TO BUDE ===== -->
   <h2>K čemu to bude: tři kameny jsou pohromadě</h2>
 
-  <p>Stepper skončil pointou: Eulerovský tah zdvojené MST je <strong>přesně ten sled $W$</strong>, na kterém v <a href="l3-8a.html#t-shortcut">[L3.8a]</a> běžel shortcutting ($14 \to$ okruh ceny 12). Nic z toho nebyla náhoda — byl to dopředu rozložený double-tree algoritmus. V [L3.9] už jen slepíme řetízek (slide 25):</p>
+  <p>Stepper skončil pointou: Eulerovský tah zdvojené MST je <strong>přesně ten sled $W$</strong>, na kterém v <a href="l3-8a.html#t-shortcut">[L3.8a]</a> běžel shortcutting ($14 \to$ okruh ceny 12). Nic z toho nebyla náhoda — byl to dopředu rozložený double-tree algoritmus. V <a href="l3-9.html">[L3.9]</a> už jen slepíme řetízek (slide 25):</p>
 
   $$2\, \mathrm{OPT}(K_n, c) \;\stackrel{2.}{\ge}\; 2\, c(E(T)) \;\stackrel{3.}{=}\; c(E(L)) \;\stackrel{1.}{\ge}\; c(E(H)),$$
 
@@ -138,7 +138,7 @@
     <ul>
       <li><strong>Eulerovský tah</strong> = uzavřený tah <a href="../k0/l0-3.html#takeaways">[L0.3]</a> obsahující každou hranu právě jednou; v souvislém (multi)grafu existuje <strong>⟺ každý vrchol má sudý stupeň</strong> <a href="../k0/l0-2.html#takeaways">[L0.2]</a> (slide 24: „sufficient and necessary condition“). Nutnost: každá návštěva vrcholu spáruje 2 hrany; postačitelnost: procházka se zasekne jen ve startu + vplétání (Hierholzer, polynomiální).</li>
       <li><strong>Zdvojení všech hran</strong> kostry zdvojnásobí každý stupeň → všechny sudé → Eulerovský multigraf; cena tahu $c(E(L)) = 2\,c(E(T))$ (slide 25, bod 3).</li>
-      <li>Eulerovský tah pak shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a> převede na Hamiltonovský okruh bez zdražení — s dolní mezí <a href="l3-8b.html#takeaways">[L3.8b]</a> jsou tím pohromadě všechny tři kameny řetízku $2\,\mathrm{OPT} \ge 2\,c(E(T)) = c(E(L)) \ge c(E(H))$ pro [L3.9].</li>
+      <li>Eulerovský tah pak shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a> převede na Hamiltonovský okruh bez zdražení — s dolní mezí <a href="l3-8b.html#takeaways">[L3.8b]</a> jsou tím pohromadě všechny tři kameny řetízku $2\,\mathrm{OPT} \ge 2\,c(E(T)) = c(E(L)) \ge c(E(H))$ pro <a href="l3-9.html">[L3.9]</a>.</li>
       <li>Euler ≠ Hamilton: hrany × vrcholy, polynomiální × NP-úplné <a href="l3-3.html#takeaways">[L3.3]</a>.</li>
       <li>Christofides [L3.10] nezdvojuje vše — liché vrcholy (vždy sudý počet <a href="../k0/l0-2.html#takeaways">[L0.2]</a>) opraví perfektním párováním.</li>
     </ul>
@@ -198,7 +198,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Početní procvičení celé dnešní konstrukce: zdvojit kostru, ověřit sudosti, najít Eulerovský tah, spočítat jeho cenu a shortcuttingem ho dorazit na okruh. Je to ručně provedený double-tree algoritmus — v [L3.9] k němu už jen doplníme důkaz faktoru.</p>
+      <p>Početní procvičení celé dnešní konstrukce: zdvojit kostru, ověřit sudosti, najít Eulerovský tah, spočítat jeho cenu a shortcuttingem ho dorazit na okruh. Je to ručně provedený double-tree algoritmus — v <a href="l3-9.html">[L3.9]</a> k němu už jen doplníme důkaz faktoru.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -215,7 +215,7 @@
         <div class="inner">
           <p><strong>(a)</strong> Stupně v $T$: $|\delta(A)| = 2$ ($B, E$), $|\delta(B)| = 3$ ($A, C, D$), $|\delta(C)| = |\delta(D)| = |\delta(E)| = 1$ (listy). Po zdvojení: $A$: 4, $B$: 6, $C$: 2, $D$: 2, $E$: 2 — <strong>všechny sudé</strong>; multigraf je navíc souvislý (zdvojená kostra). Podle dnešní věty (slide 24 Observation) Eulerovský tah existuje.</p>
           <p><strong>(b)</strong> Např. $L: A \to B \to C \to B \to D \to B \to A \to E \to A$ (z listů $C$, $D$, $E$ vždy zpět druhou kopií; obě kopie $A$–$B$ použity v opačných směrech). Každá z 8 hran multigrafu právě jednou, start = cíl ✓. Cena: $2 + 1 + 1 + 2 + 2 + 2 + 2 + 2 = \mathbf{14} = 2 \cdot 7 = 2\,c(E(T))$ ✓ (slide 25, bod 3 — tah platí každou hranu kostry přesně dvakrát).</p>
-          <p><strong>(c)</strong> Posloupnost prvních návštěv v $L = A,B,C,B,D,B,A,E,A$: vrcholy $B$ (druhý a třetí výskyt) a $A$ (prostřední výskyt) přeskočíme → $H = A, B, C, D, E, A$. Cena $c(E(H)) = 2 + 1 + 2 + 5 + 2 = \mathbf{12} \le 14 = c(E(L))$ — shortcutting díky trojúhelníkové nerovnosti nezdražil <a href="l3-8a.html#t-shortcut">[L3.8a]</a> (je to přesně tamní běh). Mimochodem se sendvičem z <a href="l3-8b.html#t-sandwich">[L3.8b] T02</a>: $7 \le \mathrm{OPT} \le 12$ a $12 \le 2 \cdot 7 = 14$ — faktor 2, který v [L3.9] dokážeme obecně, tu sedí.</p>
+          <p><strong>(c)</strong> Posloupnost prvních návštěv v $L = A,B,C,B,D,B,A,E,A$: vrcholy $B$ (druhý a třetí výskyt) a $A$ (prostřední výskyt) přeskočíme → $H = A, B, C, D, E, A$. Cena $c(E(H)) = 2 + 1 + 2 + 5 + 2 = \mathbf{12} \le 14 = c(E(L))$ — shortcutting díky trojúhelníkové nerovnosti nezdražil <a href="l3-8a.html#t-shortcut">[L3.8a]</a> (je to přesně tamní běh). Mimochodem se sendvičem z <a href="l3-8b.html#t-sandwich">[L3.8b] T02</a>: $7 \le \mathrm{OPT} \le 12$ a $12 \le 2 \cdot 7 = 14$ — faktor 2, který v <a href="l3-9.html">[L3.9]</a> dokážeme obecně, tu sedí.</p>
         </div>
       </details>
     </div>
@@ -227,7 +227,7 @@
 
   <div class="pager">
     <a href="../k3/l3-8b.html"><span class="dir">← Předchozí</span> L3.8b · MST jako dolní mez (OPT ≥ c(MST))</a>
-    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.9 · Double-tree algoritmus (2-aproximace metrického TSP))</a>
+    <a class="next" href="../k3/l3-9.html"><span class="dir">Další →</span> L3.9 · Double-tree algoritmus (2-aproximace metrického TSP)</a>
   </div>
 
 </div>
