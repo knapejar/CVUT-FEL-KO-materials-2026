@@ -146,7 +146,7 @@ end</code></pre>
     <summary>Zkus sám: jak stejným algoritmem najít v DAGu <em>nejdelší</em> cestu z $v_1$?</summary>
     <div class="inner">
       <p>Dvě rovnocenné cesty: <strong>(i)</strong> vynásob všechny váhy $-1$ a pusť algoritmus beze změny — graf zůstal DAG a záporné váhy mu nevadí; nejkratší cesta v $-c$ je nejdelší v $c$. <strong>(ii)</strong> Přepiš algoritmus přímo na maximum: inicializuj $l(v_i) := -\infty$ a otoč test na $l(v_i) &lt; l(v_j) + c(v_j, v_i)$.</p>
-      <p>V <em>obecném</em> grafu je nejdelší cesta těžký problém (přes kladné cykly se „nabaluje“ délka — podrobně v lekci [L2.17]); v DAGu žádný cyklus není, a tak je nejdelší cesta stejně snadná jako nejkratší. Přesně to jsme už použili u investic pana Dow Jonese <a href="l2-9.html#takeaways">[L2.9]</a>: maximalizace zhodnocení byla nejdelší cesta v DAGu let.</p>
+      <p>V <em>obecném</em> grafu je nejdelší cesta těžký problém (přes kladné cykly se „nabaluje“ délka — podrobně v lekci <a href="l2-17.html">[L2.17]</a>); v DAGu žádný cyklus není, a tak je nejdelší cesta stejně snadná jako nejkratší. Přesně to jsme už použili u investic pana Dow Jonese <a href="l2-9.html#takeaways">[L2.9]</a>: maximalizace zhodnocení byla nejdelší cesta v DAGu let.</p>
     </div>
   </details>
 
@@ -155,7 +155,7 @@ end</code></pre>
     <ul>
       <li><strong>„Prostě projdu vrcholy, jak jsou očíslované v zadání.“</strong> Vstup algoritmu chce vrcholy <em>už topologicky seřazené</em> — seřazení je součást práce (taky $\mathcal{O}(|V|+|E|)$, <a href="../k0/l0-4.html#takeaways">[L0.4]</a>). Na písemce nejdřív najdi/zdůvodni topologické pořadí (klidně graf překresli na přímku), pak teprve relaxuj.</li>
       <li><strong>„Funguje to i s pár cykly, když nejsou záporné.“</strong> Nefunguje — s jediným orientovaným cyklem topologické uspořádání vůbec neexistuje (Proposition) a algoritmus nelze ani spustit. Pak je na řadě Bellman-Ford <a href="l2-12.html#takeaways">[L2.12]</a> (či Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> pro $c \ge 0$).</li>
-      <li><strong>„Nejdelší cesta se najde snadno.“</strong> Jen v DAGu! V obecném grafu s kladnými vahami je to NP-těžký problém (lekce [L2.17]); trik ×$(-1)$ tam vyrobí záporné cykly. Pro all-pairs variantu nejdelších cest viz Floyd <a href="l2-14.html">[L2.14]</a>.</li>
+      <li><strong>„Nejdelší cesta se najde snadno.“</strong> Jen v DAGu! V obecném grafu s kladnými vahami je to NP-těžký problém (lekce <a href="l2-17.html">[L2.17]</a>); trik ×$(-1)$ tam vyrobí záporné cykly. Pro all-pairs variantu nejdelších cest viz Floyd <a href="l2-14.html">[L2.14]</a>.</li>
     </ul>
   </div>
 
@@ -165,7 +165,7 @@ end</code></pre>
     <ul>
       <li><strong>SP v DAG:</strong> topologicky seřaď vrcholy <a href="../k0/l0-4.html#takeaways">[L0.4]</a> a v tomto pořadí u každého vrcholu zrelaxuj <a href="l2-3.html#takeaways">[L2.3]</a> jeho vstupní hrany — jeden průchod, každá hrana právě jednou; značka $l(v_i)$ je po svém kroku finální (nejkratší cesta do $v_i$ nemůže použít pozdější vrcholy).</li>
       <li><strong>Lineární čas $\mathcal{O}(|V| + |E|)$</strong> včetně topologického seřazení; záporné hrany nevadí — pořadí dává topologie, ne značky, a záporný cyklus v DAGu neexistuje.</li>
-      <li><strong>Funguje i pro nejdelší cesty</strong> (váhy ×$(-1)$, nebo $-\infty$ + otočený test) — v DAGu snadné, v obecném grafu NP-těžké [L2.17].</li>
+      <li><strong>Funguje i pro nejdelší cesty</strong> (váhy ×$(-1)$, nebo $-\infty$ + otočený test) — v DAGu snadné, v obecném grafu NP-těžké <a href="l2-17.html">[L2.17]</a>.</li>
       <li>Je to „zjednodušený Bellman-Ford“ <a href="l2-12.html#takeaways">[L2.12]</a>: topologické pořadí nahradí $n-1$ průchodů jediným. <em>(Téma ústní.)</em></li>
     </ul>
   </div>

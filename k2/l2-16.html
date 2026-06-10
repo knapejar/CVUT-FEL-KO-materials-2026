@@ -155,7 +155,7 @@
 
   <div class="pager">
     <a href="../k2/l2-15.html"><span class="dir">← Předchozí</span> L2.15 · Skalování vah a zachování nejkratší cesty</a>
-    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.17 · Nejdelší cesta: kdy je těžká a kdy snadná)</a>
+    <a class="next" href="../k2/l2-17.html"><span class="dir">Další →</span> L2.17 · Nejdelší cesta: kdy je těžká a kdy snadná</a>
   </div>
 
 </div>
@@ -164,8 +164,10 @@
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <script src="../assets/js/viz.js"></script>
 <script>
-// Společná geometrie protipříkladu: levný řetízek nahoře, drahá přímá hrana dole
-const NODES = [
+// Společná geometrie protipříkladu: levný řetízek nahoře, drahá přímá hrana dole.
+// POZOR: KOViz si do objektů uzlů ukládá odkaz na vykreslený element (n._g),
+// proto každé volání dostává VLASTNÍ kopie uzlů (sdílení pole rozbíjí stepper).
+const NODES = () => [
   { id: 's', x: 75,  y: 255 },
   { id: 'a', x: 230, y: 80  },
   { id: 'b', x: 410, y: 80  },
@@ -175,7 +177,7 @@ const NODES = [
 // 1 — Protipříklad: nejlevnější cesta má nejvíc hran
 KOViz.graph(document.getElementById('viz-counter'), {
   directed: true, w: 640, h: 320, nodeR: 20,
-  nodes: NODES,
+  nodes: NODES(),
   edges: [
     { from: 's', to: 'a', label: '1', cls: 'hl' },
     { from: 'a', to: 'b', label: '1', cls: 'hl' },
@@ -190,7 +192,7 @@ KOViz.stepper(document.getElementById('viz-run'), {
   graph: {
     directed: true,
     w: 640, h: 320, nodeR: 20,
-    nodes: NODES,
+    nodes: NODES(),
     edges: [
       { from: 's', to: 'a', label: '1' },
       { from: 'a', to: 'b', label: '1' },
@@ -225,7 +227,7 @@ KOViz.stepper(document.getElementById('viz-run'), {
 // 3 — Tentýž graf s jednotkovými vahami: teď vyhrává přímá hrana
 KOViz.graph(document.getElementById('viz-unit'), {
   directed: true, w: 640, h: 320, nodeR: 20,
-  nodes: NODES,
+  nodes: NODES(),
   edges: [
     { from: 's', to: 'a', label: '1' },
     { from: 'a', to: 'b', label: '1' },

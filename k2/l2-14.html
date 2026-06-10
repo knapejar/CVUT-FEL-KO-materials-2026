@@ -192,7 +192,7 @@ end</code></pre>
     <summary>Zkus sám: písemka chce <em>nejdelší</em> cesty mezi všemi dvojicemi. Jak na to s Floydem — a kdy to smíš udělat?</summary>
     <div class="inner">
       <p>Stejný trik jako u DAGu <a href="l2-13.html#takeaways">[L2.13]</a>: <strong>vynásob všechny váhy $-1$</strong>, pusť Floyda beze změny a výsledek vynásob $-1$ zpátky ($q_{ij} = -l_{ij}$). Maximum v $c$ je minimum v $-c$.</p>
-      <p>Smíš to, jen když negovaný graf splní vstupní podmínku Floyda („free of negative cycles“) — tedy když původní graf <strong>nemá kladný cyklus</strong>. Kolem kladného cyklu by se dala délka „nabalovat“ donekonečna a nejdelší <em>cesta</em> (bez opakování vrcholů) se stává NP-těžkým problémem (podrobně v lekci [L2.17]). Záporné cykly v původním grafu naopak nevadí — po negaci jsou kladné.</p>
+      <p>Smíš to, jen když negovaný graf splní vstupní podmínku Floyda („free of negative cycles“) — tedy když původní graf <strong>nemá kladný cyklus</strong>. Kolem kladného cyklu by se dala délka „nabalovat“ donekonečna a nejdelší <em>cesta</em> (bez opakování vrcholů) se stává NP-těžkým problémem (podrobně v lekci <a href="l2-17.html">[L2.17]</a>). Záporné cykly v původním grafu naopak nevadí — po negaci jsou kladné.</p>
       <p>Ze studentského souhrnu (přepis): <em>„Varianta pre najdlhšiu cestu = ceny hrán vynásobíš $-1$ a klasicky pokračuješ.“</em></p>
     </div>
   </details>
@@ -201,7 +201,7 @@ end</code></pre>
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: tři polopravdy kolem Floyda</div>
     <ul>
       <li><strong>„Na diagonálu patří vždycky 0.“</strong> Jen když chceš vzdálenosti. Když máš z výsledku číst <strong>minimální cyklus</strong>, inicializuj $l^0_{ii} := \infty$ — a pak naopak $l^n_{ii}$ <em>není</em> vzdálenost (slide 45). Přečti si zadání, kterou variantu chce.</li>
-      <li><strong>„×(−1) pro nejdelší cesty funguje vždy.“</strong> Jen bez kladných cyklů v původním grafu — jinak negace vyrobí záporné cykly, vstupní podmínka Floyda padá a nejdelší cesta je NP-těžká [L2.17].</li>
+      <li><strong>„×(−1) pro nejdelší cesty funguje vždy.“</strong> Jen bez kladných cyklů v původním grafu — jinak negace vyrobí záporné cykly, vstupní podmínka Floyda padá a nejdelší cesta je NP-těžká <a href="l2-17.html">[L2.17]</a>.</li>
       <li><strong>„Vyšlo $l_{ii} &lt; 0$, ostatní hodnoty ale platí.“</strong> Neplatí — záporný cyklus znehodnocuje všechny dvojice, které přes něj dosáhnou <a href="l2-1.html#takeaways">[L2.1]</a>; Floyd ho umí <em>detekovat</em>, ne obejít.</li>
     </ul>
   </div>
@@ -213,7 +213,7 @@ end</code></pre>
       <li><strong>Floyd-Warshall (all-pairs SP):</strong> $l^k_{ij} = \min\{l^{k-1}_{ij},\ l^{k-1}_{ik} + l^{k-1}_{kj}\}$ pro $k = 1, \ldots, n$; $l^k_{ij}$ = nejkratší cesta $i \to j$ s mezilehlými vrcholy jen z $\{1,\ldots,k\}$. Tři vnořené smyčky, $\mathcal{O}(n^3)$, záporné hrany nevadí (vstup: bez záporných cyklů).</li>
       <li><strong>Inicializace:</strong> $l^0_{ij} = c((i,j))$ na hranách, $\infty$ mimo hrany, $0$ na diagonále; $p_{ij} := i$. Při zlepšení $p_{ij} := p_{kj}$ (předposlední vrchol úseku $k \rightsquigarrow j$).</li>
       <li><strong>Diagonála:</strong> $l_{ii} &lt; 0$ ⟺ graf má záporný cyklus. Varianta $l^0_{ii} := \infty$ najde <strong>minimální (nezáporný) cyklus</strong> — pak $l^n_{ii}$ není vzdálenost.</li>
-      <li><strong>Nejdelší cesty:</strong> váhy ×$(-1)$ → Floyd → výsledek ×$(-1)$; legální jen bez kladných cyklů v původním grafu (jinak NP-těžké, [L2.17]).</li>
+      <li><strong>Nejdelší cesty:</strong> váhy ×$(-1)$ → Floyd → výsledek ×$(-1)$; legální jen bez kladných cyklů v původním grafu (jinak NP-těžké, <a href="l2-17.html">[L2.17]</a>).</li>
       <li>Floyd na slidech <em>není</em> plně dokázán — zkouškově je to běh (matice po iteracích), ne důkaz.</li>
     </ul>
   </div>

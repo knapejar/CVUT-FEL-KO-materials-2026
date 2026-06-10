@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.17 · Nejdelší cesta: kdy je těžká a kdy snadná — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.17</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.17</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>Nejdelší cesta: kdy je těžká a kdy snadná</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Složitost <strong>nejdelší cesty (longest path)</strong> závisí na <strong>znaménku vah</strong> a na <strong>(a)cykličnosti</strong> grafu: kladné váhy + cyklus = NP-těžké (souvisí s Hamiltonovskou cestou), všechny váhy záporné nebo DAG = snadné.
+  </div>
+
+  <p>S nejdelší cestou jsme se v K2 už třikrát potkali: maximalizace zhodnocení pana Dow Jonese byla nejdelší cesta v DAGu <a href="l2-9.html#takeaways">[L2.9]</a>, jednoprůchodový algoritmus pro DAG ji zvládl trikem $\times(-1)$ <a href="l2-13.html#takeaways">[L2.13]</a> a totéž jsme udělali u all-pairs Floyda <a href="l2-14.html#takeaways">[L2.14]</a>. Pokaždé jsme ale přibalili varování „v obecném grafu je to NP-těžké — podrobně v L2.17“. Dnes ten dluh splatíme: nakreslíme si <em>přesnou hranici</em> mezi snadnými a těžkými instancemi.</p>
+
+  <!-- ===== SEKCE 1: TRIK ×(−1) A JEHO TICHÁ PODMÍNKA ===== -->
+  <h2>Trik ×(−1) a jeho tichá podmínka</h2>
+
+  <p>Slide 5 přednášky říká (EN 1:1): <em>„The longest path can be transformed to the shortest path while reversing the sign of weights. Thus, we search for the minimum instead of the maximum.“</em> To už známe jako speciální případ skalování s $k = -1$ <a href="l2-15.html#takeaways">[L2.15]</a>: maximalizace $c(P)$ je minimalizace $-c(P)$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: otočení znamének je mechanické a jde provést <em>vždy</em>. Proč tedy nejdelší cesta není <em>vždy</em> stejně snadná jako nejkratší?</summary>
+    <div class="inner">
+      <p>Protože transformace sice vždy <em>proběhne</em>, ale výsledná instance nejkratší cesty nemusí splňovat <strong>vstupní podmínky</strong> algoritmů: žádné záporné cykly <a href="l2-1.html#takeaways">[L2.1]</a> (a pro Dijkstru dokonce žádné záporné váhy <a href="l2-4.html#takeaways">[L2.4]</a>). A přesně tady je háček: $\times(-1)$ překlopí znaménko každého cyklu. <strong>Kladný cyklus v původním grafu = záporný cyklus v otočeném.</strong> Otázka „kdy je nejdelší cesta snadná“ je tedy otázka „kdy původní graf nemá kladný cyklus“.</p>
+    </div>
+  </details>
+
+  <p>Podívej se na konkrétní graf — kladné váhy a cyklus $a \rightleftarrows b$ o váze $1 + 1 = +2$:</p>
+
+  <div class="viz" id="viz-cycle"></div>
+
+  <p>Pro nejdelší cestu je kladný cyklus přesně to, co byl záporný cyklus pro nejkratší <a href="l2-1.html#takeaways">[L2.1]</a> — zrcadlově. Tam délka sledu kolem cyklu padala k $-\infty$; tady poroste nade všechny meze:</p>
+
+  <div class="viz" id="viz-sled"></div>
+
+  <details class="try">
+    <summary>Zkus sám: otoč v grafu nahoře všechny váhy ($\times(-1)$). Co dostaneš a co na to algoritmy z téhle kapitoly?</summary>
+    <div class="inner">
+      <p>Všechny váhy budou záporné a cyklus $a \rightleftarrows b$ bude mít váhu $-2$ — <strong>záporný cyklus</strong>. Z lekce <a href="l2-1.html#takeaways">[L2.1]</a> víme, co to znamená: nejkratší sled neexistuje, algoritmy ztotožňující sled s cestou (Dijkstra, Bellman-Ford, Floyd) nelze použít a hledání nejkratší cesty je v takové instanci <strong>NP-těžké</strong>. Bellman-Ford záporný cyklus aspoň <em>detekuje</em> <a href="l2-12.html#takeaways">[L2.12]</a> — ale vyřešit úlohu neumí.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-negcycle"></div>
+
+  <!-- ===== SEKCE 2: PROČ ROVNOU NP-TĚŽKÁ — HAMILTONOVSKÁ CESTA ===== -->
+  <h2>Proč rovnou NP-těžká: souvislost s Hamiltonovskou cestou</h2>
+
+  <p>„Algoritmy z K2 selžou“ ještě neznamená „neexistuje žádný chytřejší algoritmus“. U nejdelší cesty s kladnými vahami ale platí silnější tvrzení — a důvod si můžeš odvodit sám:</p>
+
+  <details class="try">
+    <summary>Zkus sám: polož všem hranám grafu $G$ s $n$ vrcholy váhu $1$ (kladnou!). Jak dlouhá může nejdelší cesta nanejvýš být — a kdy se té meze dosáhne?</summary>
+    <div class="inner">
+      <p>Cesta neopakuje vrcholy, takže má nejvýš $n - 1$ hran; s jednotkovými vahami je tedy její délka nejvýš $n - 1$. Délky $n - 1$ dosáhne právě cesta procházející <strong>všemi</strong> vrcholy — tedy <strong>Hamiltonovská cesta</strong> (Hamiltonian path). Kdybychom uměli nejdelší cestu počítat polynomiálně, uměli bychom polynomiálně rozhodnout i existenci Hamiltonovské cesty: stačí se zeptat, zda nejdelší cesta má délku $n-1$. Existence Hamiltonovské cesty je ale NP-těžký problém — takže NP-těžká je i nejdelší cesta s kladnými vahami v obecném grafu.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-ham"></div>
+
+  <p>Je to stejný druh argumentu jako redukce z Hamiltonovské <em>kružnice</em> na nejkratší cestu se záporným cyklem, kterou jsme si načrtli v <a href="l2-1.html#takeaways">[L2.1]</a> (slide 12). Formální redukce a pojmy NP-úplnosti patří do teorie (kapitola K3) — na písemku stačí věta: <em>„nejdelší cesta s kladnými vahami v obecném grafu je NP-těžká, protože by rozhodovala existenci Hamiltonovské cesty“</em>.</p>
+
+  <!-- ===== SEKCE 3: KDY JE TO SNADNÉ ===== -->
+  <h2>Kdy je nejdelší cesta snadná</h2>
+
+  <details class="try">
+    <summary>Zkus sám: teď obráceně — všechny váhy v grafu jsou <em>záporné</em>. Co udělá $\times(-1)$ a kdo to dořeší?</summary>
+    <div class="inner">
+      <p>Po otočení jsou všechny váhy <strong>kladné</strong> — nejpohodlnější možná instance nejkratší cesty. Žádné záporné cykly, žádné záporné hrany: stačí <strong>Dijkstra</strong> <a href="l2-4.html#takeaways">[L2.4]</a>. Nejdelší cesta v původním grafu je pak nalezená nejkratší cesta s délkou $\times(-1)$. Zrcadlo platí dokonale: u nejkratší cesty jsou „bezpečné“ nezáporné váhy, u nejdelší záporné.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-easy"></div>
+
+  <p>Běh na otočeném grafu (váhy už $\times(-1)$):</p>
+
+  <div class="viz" id="viz-easyrun"></div>
+
+  <details class="try">
+    <summary>Zkus sám: a co <strong>DAG</strong> <a href="../k0/l0-4.html#takeaways">[L0.4]</a> — klidně s kladnými vahami? Kde se tam schová kladný cyklus?</summary>
+    <div class="inner">
+      <p>Nikde — DAG <strong>žádný cyklus nemá</strong>, takže nemá ani kladný. Po $\times(-1)$ vzniknou sice záporné váhy, ale žádný záporný cyklus, a v topologickém pořadí to jeden průchod spočítá v $O(|V| + |E|)$ <a href="l2-13.html#takeaways">[L2.13]</a> (znaménko vah je tomu algoritmu úplně jedno). Proto byla maximalizace zhodnocení pana Dow Jonese <a href="l2-9.html#takeaways">[L2.9]</a> — nejdelší cesta v DAGu let — snadná úloha, žádný paradox.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-dag"></div>
+
+  <p>Shrnutí celé hranice v jedné tabulce. Společný jmenovatel snadných řádků: po $\times(-1)$ nevznikne záporný cyklus — tedy <strong>původní graf nesmí obsahovat kladný cyklus</strong> (to je odpověď na otázku ze slidu 11, viz úloha T01):</p>
+
+  <table>
+    <thead>
+      <tr><th>Instance nejdelší cesty</th><th>Po $\times(-1)$</th><th>Složitost</th><th>Algoritmus</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>kladné váhy</strong>, obecný graf s cyklem</td><td>záporné cykly</td><td><strong>NP-těžká</strong></td><td>— (rozhodovala by Hamiltonovskou cestu)</td></tr>
+      <tr><td><strong>všechny váhy záporné</strong> (libovolný graf)</td><td>kladné váhy</td><td>snadná</td><td>Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a></td></tr>
+      <tr><td>libovolné váhy, <strong>žádný kladný cyklus</strong></td><td>žádný záporný cyklus</td><td>snadná</td><td>Bellman-Ford <a href="l2-12.html#takeaways">[L2.12]</a></td></tr>
+      <tr><td><strong>DAG</strong>, libovolné váhy</td><td>DAG (beze změny struktury)</td><td>snadná, $O(|V|+|E|)$</td><td>jeden průchod <a href="l2-13.html#takeaways">[L2.13]</a>; all-pairs Floyd <a href="l2-14.html#takeaways">[L2.14]</a></td></tr>
+    </tbody>
+  </table>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
+    <ul>
+      <li><strong>„Nejdelší cesta se vyřeší otočením znamének — vždy.“</strong> NE. Transformace proběhne vždy, ale řešitelná je výsledná instance jen tehdy, když nevznikl záporný cyklus — tj. když původní graf <strong>nemá kladný cyklus</strong>. Jinak je úloha NP-těžká.</li>
+      <li><strong>„Kladné váhy = bezpečí.“</strong> U <em>nejkratší</em> cesty ano — u <em>nejdelší</em> je to přesně naopak: kladné váhy dělají z každého cyklu kladný cyklus. Bezpečné jsou tu váhy záporné.</li>
+      <li><strong>„Nejdelší cesta je NP-těžká, takže Dow Jones / DAG úlohy jsou těžké.“</strong> NE — NP-těžkost platí pro obecné grafy s kladnými cykly. V DAGu je nejdelší cesta vždy snadná <a href="l2-13.html#takeaways">[L2.13]</a>.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.17</div>
+    <ul>
+      <li><strong>Nejdelší cesta = nejkratší cesta po $\times(-1)$</strong> — ale transformace překlopí znaménko každého cyklu: kladný cyklus v původním grafu = záporný cyklus v otočeném.</li>
+      <li><strong>Kladné váhy v obecném grafu → NP-těžká:</strong> s jednotkovými vahami má nejdelší cesta délku $n-1$ právě tehdy, když existuje <strong>Hamiltonovská cesta</strong> — zrcadlo NP-těžkosti nejkratší cesty se záporným cyklem <a href="l2-1.html#takeaways">[L2.1]</a>.</li>
+      <li><strong>Všechny váhy záporné → snadné:</strong> $\times(-1)$ dá kladné váhy a stačí Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a>; obecněji stačí, aby graf <strong>neměl kladný cyklus</strong> (pak po otočení není záporný cyklus → Bellman-Ford <a href="l2-12.html#takeaways">[L2.12]</a>).</li>
+      <li><strong>DAG → vždy snadné:</strong> žádné cykly = žádné kladné cykly; jeden topologický průchod v $O(|V|+|E|)$ <a href="l2-13.html#takeaways">[L2.13]</a> bez ohledu na znaménka vah.</li>
+      <li>Zkoušková mantra: u výroku o nejdelší cestě se vždy ptej <em>„má graf kladný cyklus?“</em> — to je jediná hranice mezi snadným a NP-těžkým.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-poscycle">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Co graf nesmí obsahovat?</strong>
+      <span class="task-src">zdroj: prezentace/03_SPT_KO.md, slide 11 (otázka položená na slidu EN 1:1); řešení vlastní (slide odpověď neuvádí)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN 1:1, slide 11)</span>
+        <p>What the graph can not contain, when interested in the longest path?</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Krátká teoretická otázka navazující na fakta ze slidu 11: rychlost algoritmů pro nejkratší cesty stojí na tom, že nerozlišují cestu od sledu — a záporný cyklus tuhle ekvivalenci ničí. Otázka chce zrcadlový závěr pro <em>nejdelší</em> cestu: jaká struktura v grafu ji rozbije?</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — kladný cyklus jako zrcadlo záporného.</li>
+        <li><a href="l2-1.html#takeaways">[L2.1] Záporné váhy ano, záporné cykly ne</a> — proč záporný cyklus dělá nejkratší cestu NP-těžkou.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Převeď nejdelší cestu na nejkratší trikem $\times(-1)$ a zeptej se, co nesmí obsahovat <em>transformovaný</em> graf. Pak podmínku přelož zpět do řeči původního grafu. Pro plnou odpověď přidej, <em>proč</em> je ta struktura zhoubná (sled vs. cesta).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní)</summary>
+        <div class="inner">
+          <p><strong>Graf nesmí obsahovat cyklus kladné váhy (kladný cyklus).</strong></p>
+          <p><strong>Zdůvodnění.</strong> Nejdelší cesta se hledá jako nejkratší cesta po otočení znamének vah ($\times(-1)$). Algoritmy pro nejkratší cesty vyžadují graf bez záporných cyklů <a href="l2-1.html#takeaways">[L2.1]</a> — a záporný cyklus v otočeném grafu je přesně <strong>kladný cyklus v původním</strong>. Přímo v řeči nejdelší cesty: kolem kladného cyklu lze sled prodlužovat donekonečna (každý oběh přidá kladnou váhu), takže nejdelší <em>sled</em> neexistuje a algoritmy ztotožňující sled s cestou selžou; hlídat opakování vrcholů explicitně znamená NP-těžkou úlohu (s jednotkovými vahami by rozhodovala existenci Hamiltonovské cesty). Cykly záporné (a nulové) váhy naopak nevadí — po otočení jsou kladné (nulové). $\blacksquare$</p>
+          <p><strong>Poznámka k ústní:</strong> srovnej se zrcadlovým tvrzením pro nejkratší cestu („nesmí obsahovat záporný cyklus“) — jde o tutéž větu, jen s otočeným znaménkem.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-negdijkstra">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Výrok: nejdelší cesta přes ×(−1) a Dijkstru</strong>
+      <span class="task-src">úloha vlastní (cvičná) — trénink zkouškového formátu „dokaž / vyvrať protipříkladem“ z úlohy „5 výroků“, která je tématem lekce [L2.18]</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (vlastní, EN ve stylu „5 výroků“)</span>
+        <p>Decide whether the following statement holds. If it does, prove it; if it does not, give a counterexample: <em>“The longest path between two nodes in a graph with positive edge weights can always be found by multiplying all edge weights by $-1$ and running Dijkstra's algorithm.”</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Výrok kombinuje dva kroky: transformaci $\times(-1)$ (sama o sobě korektní převod max $\to$ min) a volbu algoritmu (Dijkstra). Rozhodni, zda dvojice funguje <em>vždy</em> — pozor, „vždy“ vyvrátí jediný protipříklad.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — co $\times(-1)$ udělá se znaménky vah a cyklů.</li>
+        <li><a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a> — vstupní podmínka nezáporných vah a protipříklad, proč se záporné hrany rozbije.</li>
+        <li><a href="l2-12.html#takeaways">[L2.12] Bellman-Ford</a> — kdo zvládne záporné váhy bez záporných cyklů.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Nejdřív zkontroluj vstupní podmínky: jaké váhy dostane Dijkstra po otočení kladných vah? Pak hledej co nejmenší graf, kde Dijkstra na otočených vahách uzavře cíl předčasně. Nakonec si rozmysli, jestli výrok jde „zachránit“ výměnou algoritmu — a kde ani to nepomůže.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní)</summary>
+        <div class="inner">
+          <p><strong>Výrok NEPLATÍ.</strong></p>
+          <p><strong>Protipříklad.</strong> Vrcholy $\{s, a, t\}$, kladné váhy $c(s,a) = 1$, $c(a,t) = 2$, $c(s,t) = 2$. Nejdelší $s \to t$ cesta je $s \to a \to t$ s délkou $3$. Po $\times(-1)$ jsou váhy $-1, -2, -2$ — <strong>všechny záporné</strong>, čímž padá vstupní podmínka Dijkstry <a href="l2-4.html#takeaways">[L2.4]</a>. A skutečně: Dijkstra po expanzi $s$ má $l(a) = -1$, $l(t) = -2$, jako minimum vybere a <em>uzavře</em> $t$ se značkou $-2$; hranu $(a,t)$ už nikdy netestuje (vnitřní smyčka relaxuje jen vrcholy mimo $R$). Vrátí tedy „nejkratší cestu“ $s \to t$ délky $-2$, tj. nejdelší cestu délky $2$ — ale správně je $3$. (Graf níže, pod řešením.) $\blacksquare$</p>
+          <p><strong>Proč to nejde zachránit jen tak:</strong> protipříklad je dokonce DAG — tam stačí vyměnit algoritmus: Bellman-Ford <a href="l2-12.html#takeaways">[L2.12]</a> (záporné váhy bez záporných cyklů zvládá) nebo jeden topologický průchod <a href="l2-13.html#takeaways">[L2.13]</a> vrátí správně $-3$, tedy nejdelší cestu $3$. Jakmile ale graf s kladnými vahami obsahuje <strong>cyklus</strong>, je po otočení záporný, selže i Bellman-Ford (cyklus jen detekuje) a žádná jednoduchá náhrada neexistuje — úloha je NP-těžká (tato lekce, T01).</p>
+          <p><strong>Oprava výroku</strong> (hodí se k ústní): „…can be found by multiplying weights by $-1$ and running Dijkstra“ platí, jsou-li všechny <em>původní</em> váhy <strong>záporné</strong> (po otočení kladné); pro kladné váhy platí jen v DAGu, a to s algoritmem pro záporné váhy místo Dijkstry.</p>
+        </div>
+      </details>
+
+      <div class="viz" id="viz-t02"></div>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L2.17">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k2/l2-16.html"><span class="dir">← Předchozí</span> L2.16 · Dijkstra a počet hran cesty</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.18 · VYVRCHOLENÍ: Teorie záporných cyklů / 5 výroků [FOTO])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// Společná instance s kladným cyklem a⇄b (vlastní ilustrační instance).
+// POZOR: KOViz si do objektů uzlů ukládá odkaz na vykreslený element (n._g),
+// proto každé volání dostává VLASTNÍ kopie uzlů (sdílení pole rozbíjí stepper).
+const CYC_NODES = () => [
+  { id: 's', x: 75,  y: 165 },
+  { id: 'a', x: 250, y: 165 },
+  { id: 'b', x: 420, y: 165 },
+  { id: 't', x: 565, y: 165 },
+];
+
+// 1 — Kladné váhy + kladný cyklus
+KOViz.graph(document.getElementById('viz-cycle'), {
+  directed: true, w: 640, h: 300, nodeR: 20,
+  nodes: CYC_NODES(),
+  edges: [
+    { from: 's', to: 'a', label: '2' },
+    { from: 'a', to: 'b', label: '1', curve: 0.45 },
+    { from: 'b', to: 'a', label: '1', curve: 0.45 },
+    { from: 'b', to: 't', label: '2' },
+  ],
+  caption: 'Kladné váhy a cyklus a⇄b s váhou 1+1 = +2 (instance vlastní). Nejdelší s→t CESTA je s→a→b→t s délkou 5 — ale jak ji najít?',
+});
+
+// 2 — Stepper: nejdelší sled kolem kladného cyklu roste nade všechny meze
+KOViz.stepper(document.getElementById('viz-sled'), {
+  graph: {
+    directed: true, w: 640, h: 300, nodeR: 20,
+    nodes: CYC_NODES(),
+    edges: [
+      { from: 's', to: 'a', label: '2' },
+      { from: 'a', to: 'b', label: '1', curve: 0.45 },
+      { from: 'b', to: 'a', label: '1', curve: 0.45 },
+      { from: 'b', to: 't', label: '2' },
+    ],
+  },
+  frames: [
+    {desc:'Hledáme NEJDELŠÍ s→t sled (zatím sled, ne cestu — algoritmy K2 je nerozlišují). Vyraž: s→a, délka 2.',
+     nodes:{s:'good', a:'hl'},
+     edges:{'s->a':'hl'},
+     subs:{a:'délka 2'}},
+    {desc:'a→b, délka 3. Mohli bychom zabočit do t (celkem 5 = nejdelší cesta) — ale kladný cyklus láká…',
+     nodes:{s:'good', a:'good', b:'hl'},
+     edges:{'s->a':'good', 'a->b':'hl'},
+     subs:{b:'délka 3'}},
+    {desc:'b→a: délka 4. Vrchol a je navštíven PODRUHÉ — sled to smí, cesta ne.',
+     nodes:{s:'good', b:'good', a:'hl'},
+     edges:{'s->a':'good', 'a->b':'good', 'b->a':'hl'},
+     subs:{a:'délka 4'}},
+    {desc:'a→b: délka 5. Každý oběh cyklu a⇄b přidá +2 — a nic nebrání obíhat dál.',
+     nodes:{s:'good', a:'good', b:'hl'},
+     edges:{'s->a':'good', 'a->b':'hl', 'b->a':'good'},
+     subs:{b:'délka 5'}},
+    {desc:'…po k obězích vyjde do t sled délky 5 + 2k → délka roste nade všechny meze: nejdelší SLED neexistuje. Nejdelší CESTA existuje (s→a→b→t, délka 5), ale algoritmus nerozlišující cestu od sledu ji nenajde — přesné zrcadlo záporného cyklu z [L2.1].',
+     nodes:{s:'good', a:'good', b:'good', t:'bad'},
+     edges:{'s->a':'good', 'a->b':'good', 'b->a':'good', 'b->t':'bad'},
+     subs:{t:'délka → +∞'}},
+  ],
+});
+
+// 3 — Tentýž graf po ×(−1): kladný cyklus se stal záporným
+KOViz.graph(document.getElementById('viz-negcycle'), {
+  directed: true, w: 640, h: 300, nodeR: 20,
+  nodes: CYC_NODES(),
+  edges: [
+    { from: 's', to: 'a', label: '−2' },
+    { from: 'a', to: 'b', label: '−1', curve: 0.45, cls: 'bad' },
+    { from: 'b', to: 'a', label: '−1', curve: 0.45, cls: 'bad' },
+    { from: 'b', to: 't', label: '−2' },
+  ],
+  caption: 'Tentýž graf po ×(−1): cyklus a⇄b má váhu −2 (červeně) — záporný cyklus. Instance nejkratší cesty, kterou [L2.1] zakazuje: NP-těžké.',
+});
+
+// 4 — Hamiltonovská cesta: jednotkové váhy, cyklus v2→v3→v4→v2
+KOViz.graph(document.getElementById('viz-ham'), {
+  directed: true, w: 640, h: 340, nodeR: 20,
+  nodes: [
+    { id: 'v1', x: 110, y: 90  },
+    { id: 'v2', x: 390, y: 90  },
+    { id: 'v3', x: 180, y: 270 },
+    { id: 'v4', x: 500, y: 270 },
+  ],
+  edges: [
+    { from: 'v1', to: 'v2', label: '1', cls: 'hl' },
+    { from: 'v2', to: 'v3', label: '1', cls: 'hl' },
+    { from: 'v3', to: 'v4', label: '1', cls: 'hl' },
+    { from: 'v4', to: 'v2', label: '1', curve: 0.35 },
+    { from: 'v1', to: 'v3', label: '1' },
+  ],
+  caption: 'Jednotkové (kladné!) váhy, n = 4 (instance vlastní): nejdelší cesta má délku n−1 = 3 právě tehdy, když existuje Hamiltonovská cesta — zde v1→v2→v3→v4 (modře). Graf má cyklus v2→v3→v4→v2 (váha +3), takže patří do těžké třídy instancí.',
+});
+
+// 5 — Snadný případ: všechny váhy záporné (vlastní instance)
+KOViz.graph(document.getElementById('viz-easy'), {
+  directed: true, w: 640, h: 340, nodeR: 20,
+  nodes: [
+    { id: 's', x: 75,  y: 170 },
+    { id: 'a', x: 250, y: 80  },
+    { id: 'b', x: 330, y: 270 },
+    { id: 't', x: 565, y: 170 },
+  ],
+  edges: [
+    { from: 's', to: 'a', label: '−1' },
+    { from: 's', to: 'b', label: '−4' },
+    { from: 'a', to: 'b', label: '−2' },
+    { from: 'a', to: 't', label: '−6' },
+    { from: 'b', to: 't', label: '−1' },
+  ],
+  caption: 'Všechny váhy záporné (instance vlastní): žádný cyklus tu není, a i kdyby byl, je nutně záporný — tedy po ×(−1) kladný. Nejdelší s→t cesta = s→a→b→t s délkou −4 (lepší než s→b→t za −5 i s→a→t za −7).',
+});
+
+// 6 — Stepper: Dijkstra na otočeném grafu (váhy ×(−1) → kladné)
+KOViz.stepper(document.getElementById('viz-easyrun'), {
+  graph: {
+    directed: true, w: 640, h: 340, nodeR: 20,
+    nodes: [
+      { id: 's', x: 75,  y: 170 },
+      { id: 'a', x: 250, y: 80  },
+      { id: 'b', x: 330, y: 270 },
+      { id: 't', x: 565, y: 170 },
+    ],
+    edges: [
+      { from: 's', to: 'a', label: '1' },
+      { from: 's', to: 'b', label: '4' },
+      { from: 'a', to: 'b', label: '2' },
+      { from: 'a', to: 't', label: '6' },
+      { from: 'b', to: 't', label: '1' },
+    ],
+  },
+  frames: [
+    {desc:'Otočený graf (váhy ×(−1), všechny kladné) → Dijkstra [L2.4]. Init: l(s)=0, ostatní ∞, R = ∅.',
+     nodes:{},
+     edges:{},
+     subs:{s:'l=0', a:'l=∞', b:'l=∞', t:'l=∞'}},
+    {desc:'It 1: min je s (0) → uzavři s. Expanze: (s,a): l(a):=1, p(a):=s; (s,b): l(b):=4, p(b):=s.',
+     nodes:{s:'hl'},
+     edges:{'s->a':'hl', 's->b':'hl'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=4, p=s', t:'l=∞'}},
+    {desc:'It 2: min je a (1 < 4) → uzavři a. Expanze: (a,b): 4 > 1+2 → l(b):=3, p(b):=a; (a,t): l(t):=7, p(t):=a.',
+     nodes:{s:'good', a:'hl'},
+     edges:{'s->a':'good', 'a->b':'hl', 'a->t':'hl', 's->b':'dim'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=3, p=a', t:'l=7, p=a'}},
+    {desc:'It 3: min je b (3 < 7) → uzavři b. Expanze: (b,t): 7 > 3+1 → l(t):=4, p(t):=b.',
+     nodes:{s:'good', a:'good', b:'hl'},
+     edges:{'s->a':'good', 'a->b':'good', 'b->t':'hl', 's->b':'dim', 'a->t':'dim'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=3, p=a', t:'l=4, p=b'}},
+    {desc:'It 4: zbývá t (4) → uzavři, konec. l(t)=4, rekonstrukce z p: t←b←a←s. Zpětný převod: nejdelší cesta v PŮVODNÍM grafu je s→a→b→t s délkou −4 (= 4 × (−1)).',
+     nodes:{s:'good', a:'good', b:'good', t:'good'},
+     edges:{'s->a':'good', 'a->b':'good', 'b->t':'good', 's->b':'dim', 'a->t':'dim'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=3, p=a', t:'l=4, p=b'}},
+  ],
+});
+
+// 7 — DAG: nejdelší cesta snadno i s kladnými vahami
+KOViz.graph(document.getElementById('viz-dag'), {
+  directed: true, w: 640, h: 340, nodeR: 20,
+  nodes: [
+    { id: 's', x: 75,  y: 170 },
+    { id: 'a', x: 250, y: 80  },
+    { id: 'b', x: 390, y: 270 },
+    { id: 't', x: 565, y: 170 },
+  ],
+  edges: [
+    { from: 's', to: 'a', label: '2', cls: 'hl' },
+    { from: 's', to: 'b', label: '1' },
+    { from: 'a', to: 'b', label: '3', cls: 'hl' },
+    { from: 'a', to: 't', label: '1' },
+    { from: 'b', to: 't', label: '2', cls: 'hl' },
+  ],
+  caption: 'DAG s kladnými vahami (instance vlastní): žádný cyklus → žádný kladný cyklus. Nejdelší cesta s→a→b→t s délkou 7 (modře) se najde jedním topologickým průchodem [L2.13], znaménka vah nehrají roli.',
+});
+
+// 8 — Graf k řešení T02 (záměrně AŽ ZA details.solution — prozrazuje protipříklad)
+KOViz.graph(document.getElementById('viz-t02'), {
+  directed: true, w: 640, h: 300, nodeR: 20,
+  nodes: [
+    { id: 's', x: 120, y: 220 },
+    { id: 'a', x: 320, y: 80  },
+    { id: 't', x: 520, y: 220 },
+  ],
+  edges: [
+    { from: 's', to: 'a', label: '−1' },
+    { from: 'a', to: 't', label: '−2' },
+    { from: 's', to: 't', label: '−2', cls: 'bad' },
+  ],
+  caption: 'Graf k řešení T02 po ×(−1) (pozor, spoiler — proto je až za řešením): Dijkstra po expanzi s uzavře t se značkou −2 (červená hrana) a relaxaci (a,t) už nikdy neprovede; správná nejkratší cesta je přitom s→a→t s délkou −3. Záporné váhy = vstupní podmínka Dijkstry porušena [L2.4].',
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
