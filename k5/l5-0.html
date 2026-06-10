@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L5.0 · Rozvrhování přes toky (P|pmtn,rj,dj|) [FOTO] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k5">K5 · Rozvrhování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L5.0</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L5.0</span> Kapitola K5 — Rozvrhování (Slot 5) · <strong>[MUST]</strong> · FOTO checkpoint kapitoly
+  </p>
+  <h1>Rozvrhování přes toky (P|pmtn,r<sub>j</sub>,d̃<sub>j</sub>|)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Preemptivní rozvrh na $R$ identických strojích jako <strong>maximální tok přes intervaly</strong>: body $\{r_j, \tilde{d}_j\}$ rozsekají časovou osu, síť $s \to$ úlohy $\to$ intervaly $\to t$ rozhodne feasibilitu.
+  </div>
+
+  <p>První „výpočetní“ lekce kapitoly K5 — a schválně taková, která ještě nepotřebuje žádný nový algoritmus: celou práci odvede <strong>max flow</strong>, který umíš z K4. Notaci $P \mid \mathrm{pmtn}, r_j, \tilde{d}_j \mid$ už přečteš z minulé lekce <a href="../k5/l5-1.html">[L5.1] Grahamova notace α|β|γ</a>: identické paralelní procesory (počet $R$ je v instanci), preempce povolena, release times a tvrdé deadliny — a <strong>prázdné $\gamma$ = rozhodovací problém</strong>: ptáme se jen, jestli přípustný rozvrh <em>existuje</em>. Přesně takhle padl na zkoušce 2023 (str. 3) s pokynem <em>“Formulate as Maximum flow problem.”</em></p>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Zadání problému (slide 5, 04_Flows — EN 1:1)</div>
+    <p>“Consider a $P \mid pmtn, r_j, \widetilde{d_j} \mid -$ problem — we have $n$ <strong>tasks</strong> which we want to assign to $R$ <strong>identical resources</strong> (processors). Each task has its own <strong>processing time</strong> $p_j$, <strong>release date</strong> $r_j$ and <strong>deadline</strong> $\widetilde{d_j}$. <strong>Preemption</strong> is allowed (including migration from one resource to another).”</p>
+    <p><strong>Goal:</strong> “Assign all tasks to processors so that every processor will execute no more than one task at a moment and no task will be executed simultaneously on more than one processor. This can be solved as a Maximum flow problem.”</p>
+  </div>
+
+  <p>Pracovat budeme s ukázkovou instancí ze slidů 5–6 (3 paralelní identické procesory):</p>
+
+  <table>
+    <tr><th>task</th><th>$T_1$</th><th>$T_2$</th><th>$T_3$</th><th>$T_4$</th></tr>
+    <tr><td>$p_j$</td><td>1.5</td><td>1.25</td><td>2.1</td><td>3.6</td></tr>
+    <tr><td>$r_j$</td><td>3</td><td>1</td><td>3</td><td>5</td></tr>
+    <tr><td>$\widetilde{d}_j$</td><td>5</td><td>4</td><td>7</td><td>9</td></tr>
+  </table>
+
+  <details class="try">
+    <summary>Zkus sám: proč se vůbec smí rozvrh „přepočítat na množství“? Co z pole $\beta$ to umožňuje?</summary>
+    <div class="inner">
+      <p><strong>pmtn.</strong> Bez preempce by úloha musela běžet vcelku a rozvrh by byl o <em>kombinatorickém pořadí</em> — to tok neumí. S preempcí (včetně migrace mezi procesory) můžu úlohu krájet na libovolně malé kousky a libovolně je přeskládávat. Pak přestává být důležité <em>kdy přesně</em> úloha běží — stačí vědět, <strong>kolik</strong> jí běží v jednotlivých úsecích času. A „kolik čeho kam nateče“ je přesně to, co počítá tok.</p>
+    </div>
+  </details>
+
+  <!-- ===== KROK 1 ===== -->
+  <h2>Krok 1: Rozsekej časovou osu body $r_j$ a $\tilde{d}_j$</h2>
+
+  <p>Časovou osu nebudeme dělit na jednotkové slotíky — rozdělíme ji jen v bodech, kde se „něco děje“. Nejdřív se podívej na časová okna $\langle r_j, \tilde{d}_j \rangle$ všech čtyř úloh:</p>
+
+  <div class="viz" id="viz-windows"></div>
+
+  <details class="try">
+    <summary>Zkus sám: které body rozdělí osu — a proč právě sjednocení $\{r_j\} \cup \{\tilde{d}_j\}$ a nic víc?</summary>
+    <div class="inner">
+      <p>Seřazené sjednocení všech releasů a deadlinů: $\{3,1,3,5\} \cup \{5,4,7,9\} = \{1,3,4,5,7,9\}$ — to dá <strong>5 intervalů</strong> $I_{1,3}, I_{3,4}, I_{4,5}, I_{5,7}, I_{7,9}$. Proč stačí tyhle body? <strong>Uvnitř intervalu se množina úloh, které smí běžet, nemění</strong> — žádná úloha tam nepřibyde ($r_j$) ani neztratí nárok běžet ($\tilde{d}_j$). Díky preempci můžu práci uvnitř intervalu libovolně přeskládat, takže o rozvrhu uvnitř intervalu rozhoduje jediné číslo na úlohu: <em>kolik</em> jí tam poběží. Slide 6 (EN 1:1): “Nodes $I_{1,3}, I_{3,4}, I_{4,5}, I_{5,7}$ a $I_{7,9}$ represent time interval in which the tasks can be executed (intervals are given by $r$ and $\widetilde{d}$). E.g. $I_{1,3}$ represents time interval $\langle 1, 3 \rangle$.”</p>
+    </div>
+  </details>
+
+  <!-- ===== KROK 2 ===== -->
+  <h2>Krok 2: Postav třívrstvou síť</h2>
+
+  <p>Síť má stejný vrstvený půdorys, jaký znáš z <a href="../k4/l4-5.html#takeaways">[L4.5] Modelování přiřazení jako tok (vrstvená síť)</a>: $s \to$ <strong>úlohy</strong> $\to$ <strong>intervaly</strong> $\to t$. Než ti prozradím kapacity, zkus si je rozmyslet sám:</p>
+
+  <details class="try">
+    <summary>Zkus sám: jakou kapacitu má mít hrana $s \to T_j$? A hrana $I_{x,y} \to t$?</summary>
+    <div class="inner">
+      <p><strong>$s \to T_j$: kapacita $p_j$.</strong> Tok touto hranou = kolik práce úlohy $T_j$ se celkem naplánuje; víc než $p_j$ jí není a chceme právě $p_j$ (úloha musí být dokončená — to je definiční vlastnost rozvrhování z <a href="../k5/l5-1.html">[L5.1]</a>). Ruční zkouškové řešení si k tomu píše: „$LB = 0$, $UB =$ vstupní tok do úkolu.“</p>
+      <p><strong>$I_{x,y} \to t$: kapacita $(y-x) \cdot R$.</strong> Interval délky $y-x$ nabízí na $R$ procesorech přesně $(y-x)\cdot R$ jednotek strojového času — víc práce se do něj fyzicky nevejde. Slide 6 (EN 1:1): “The upper bound for $(I_{x,y}, t)$ is the length of the interval multiplied by the number of resources.”</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám (zákeřnější): jakou kapacitu má hrana $T_j \to I_{x,y}$? Nápověda: proč to nesmí být $\infty$, i když kapacity $p_j$ a $(y-x)R$ už všechno „hlídají“?</summary>
+    <div class="inner">
+      <p><strong>Kapacita = délka intervalu $y - x$.</strong> Úloha je <em>interně sekvenční</em> — v každém okamžiku běží nejvýš na jednom procesoru (obecné omezení z <a href="../k5/l5-1.html">[L5.1]</a>). Za interval délky $y-x$ tedy stihne nejvýš $y-x$ jednotek své práce, ať je procesorů kolik chce. Slide 6 (EN 1:1): “The upper bound for the $(T_j, I_{x,y})$ arc is the length of the time interval (i.e. $y - x$), since the tasks are internally sequential.”</p>
+    </div>
+  </details>
+
+  <p>A samozřejmě: hrana $T_j \to I_{x,y}$ v síti <em>existuje jen tehdy</em>, když úloha v daném intervalu smí běžet, tj. $\langle x, y\rangle \subseteq \langle r_j, \tilde{d}_j\rangle$. Celou stavbu si proklikej:</p>
+
+  <div class="viz" id="viz-net"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „prostřední hrany kapacitu nepotřebují“</div>
+    <p>Potřebují — a je to nejčastěji zapomenutá část formulace. Bez kapacity $y-x$ na hraně $T_j \to I_{x,y}$ by tok mohl poslat třeba 3 jednotky úlohy do intervalu délky 1 — dekódováno: úloha běží <strong>na třech procesorech současně</strong>, což obecné omezení „task on at most one resource at a moment“ zakazuje. Kapacita $p_j$ na zdrojové hraně ani $(y-x)R$ na stokové tohle <em>neuhlídají</em>. Druhá zapomínaná věc: hrany kreslit jen do intervalů uvnitř okna $\langle r_j, \tilde{d}_j\rangle$.</p>
+  </div>
+
+  <!-- ===== KROK 3 ===== -->
+  <h2>Krok 3: Pusť max flow a přečti odpověď</h2>
+
+  <details class="try">
+    <summary>Zkus sám: jaká je horní mez na hodnotu toku $|f|$ v téhle síti? (Vzpomeň na řezy z K4.)</summary>
+    <div class="inner">
+      <p>Řez $A = \{s\}$ má kapacitu $\sum_j p_j$ — součet všech zdrojových hran. Podle slabé duality (<a href="../k4/l4-4.html#takeaways">[L4.4] Řez a věta max-flow/min-cut</a>) tedy $|f| \le \sum_j p_j$ vždy. Tady konkrétně $\sum p_j = 1.5 + 1.25 + 2.1 + 3.6 = 8.45$.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Kritérium feasibility</div>
+    <p>Přípustný preemptivní rozvrh existuje $\iff$ maximální tok má hodnotu $|f| = \sum_j p_j$, tj. <strong>všechny hrany ze zdroje jsou nasycené</strong> — každá úloha dostala celých svých $p_j$ jednotek práce. Stejné čtecí pravidlo jako u vrstvených přiřazovacích sítí v <a href="../k4/l4-5.html#takeaways">[L4.5]</a>. Když $|f| &lt; \sum_j p_j$, rozvrh neexistuje a <strong>minimální řez je certifikát</strong> úzkého hrdla [L4.4] — ukáže okno, do kterého se předepsaná práce nevejde.</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: v K4 jsme pořád zdůrazňovali celočíselnost toku — tady jsou kapacity 1.5, 1.25, 2.1… Proč to najednou nevadí?</summary>
+    <div class="inner">
+      <p>Protože výsledek <em>nemusí</em> být celočíselný! V [L4.5] kódoval tok rozhodnutí ano/ne (nominace, přiřazení) — zlomek nominace nedává smysl, proto byla celočíselnost klíčová. Tady tok kóduje <strong>množství odvedené práce</strong> a preempce dovoluje krájet úlohy na libovolně malé kousky: $f(T_j \to I_{x,y}) = 0.8$ prostě znamená „0.8 jednotky úlohy $T_j$ poběží někde uvnitř intervalu“. Zlomkový max flow se na rozvrh dekóduje úplně stejně dobře jako celočíselný.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: celý trik stojí a padá s pmtn</div>
+    <p>Tok rozhoduje feasibilitu <strong>preemptivní</strong> verze problému. Jakmile $\beta$ preempci nepovoluje, množstevní pohled se rozbije (úloha musí běžet vcelku — tok neumí říct „vcelku“) a problém tvrdne: už jednostrojové nepreemptivní $1 \mid r_j, \tilde{d}_j \mid C_{max}$ je silně NP-těžké a řeší se úplně jinak (Bratleyho branch &amp; bound — lekce [L5.9]). Než začneš kreslit síť, zkontroluj v notaci, že tam <em>pmtn</em> opravdu je.</p>
+  </div>
+
+  <!-- ===== KROK 4 ===== -->
+  <h2>Krok 4: Z toku zpátky rozvrh (flow → schedule)</h2>
+
+  <p>Formulací úloha na písemce obvykle končí — ale opravující na ručním řešení ze zkoušky 2023 červeně připsal <em>„chybí flow → schedule“</em>. Umět z toku vyrobit rozvrh tedy patří k plné odpovědi (a u ústní se na to ptají). Postup:</p>
+
+  <ol>
+    <li><strong>Přečti tok prostředních hran:</strong> $f(T_j \to I_{x,y})$ = kolik jednotek úlohy $T_j$ poběží uvnitř intervalu $\langle x, y\rangle$. Kirchhoff zaručuje, že se to na obou stranách sečte správně.</li>
+    <li><strong>Každý interval vyřeš samostatně:</strong> uvnitř $I_{x,y}$ máš kousky úloh o celkové délce $\le (y-x)R$, každý kousek $\le y-x$. Takové kousky vždy jdou „nalít“ na $R$ procesorů tak, aby se žádná úloha nepřekrývala sama se sebou — kousky skládej za sebe a při přetečení konce intervalu zalom na další procesor (systematicky to dělá McNaughtonův algoritmus, lekce [L5.4]; kapacita $y-x$ na hraně zaručí, že zalomený kousek nekoliduje sám se sebou).</li>
+    <li><strong>Slep intervaly za sebe</strong> a máš Gantt chart celého rozvrhu.</li>
+  </ol>
+
+  <h2>Co odevzdat u zkoušky</h2>
+  <p>U zadání „Formulate as Maximum flow problem“ odevzdej pět věcí (srovnej se čtyřmi věcmi z [L4.5] — přibyly intervaly):</p>
+  <ol>
+    <li><strong>Body a intervaly:</strong> seřazené sjednocení $\{r_j\} \cup \{\tilde{d}_j\}$ → intervaly $I_{x,y}$ (vypiš je).</li>
+    <li><strong>Vrcholy a hrany:</strong> $s \to T_j \to I_{x,y} \to t$; prostřední hrany jen pro $\langle x,y\rangle \subseteq \langle r_j, \tilde{d}_j\rangle$.</li>
+    <li><strong>Kapacity:</strong> $p_j$ / délka intervalu $y-x$ / $(y-x)\cdot R$; dolní meze 0.</li>
+    <li><strong>Kritérium:</strong> feasibilní $\iff |f| = \sum_j p_j$ (nasycené zdrojové hrany).</li>
+    <li><strong>Čtení výsledku:</strong> $f(T_j \to I_{x,y})$ = množství práce úlohy v intervalu; uvnitř intervalu rozlít na procesory (flow → schedule).</li>
+  </ol>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.0</div>
+    <ul>
+      <li><strong>Body z $\{r_j\} \cup \{\tilde{d}_j\}$ rozdělí časovou osu na intervaly</strong> (parametry dle <a href="../k5/l5-1.html#takeaways">[L5.1]</a>) — uvnitř intervalu se množina běžet-smějících úloh nemění, takže díky pmtn stačí rozhodovat <em>množství</em> práce, ne přesné časy.</li>
+      <li><strong>Síť:</strong> $s \to$ úloha (kapacita $p_j$) $\to$ interval, kde úloha smí běžet, tj. $\langle x,y\rangle \subseteq \langle r_j,\tilde d_j\rangle$ (kapacita = délka $y-x$, úloha je sekvenční!) $\to t$ (kapacita délka $\cdot R$).</li>
+      <li><strong>Feasibilita = nasycení všech hran ze zdroje:</strong> $|f| = \sum_j p_j$ (<a href="../k4/l4-4.html#takeaways">[L4.4]</a>, <a href="../k4/l4-5.html#takeaways">[L4.5]</a>); jinak rozvrh neexistuje a min řez je certifikát. Zlomkový tok nevadí — pmtn krájí úlohy libovolně.</li>
+      <li><strong>Flow → schedule:</strong> $f(T_j \to I_{x,y})$ = kolik úlohy běží v intervalu; uvnitř intervalu kousky nalít na $R$ procesorů (à la McNaughton [L5.4]) a intervaly slepit. Bez tohoto kroku je odpověď neúplná („chybí flow → schedule“).</li>
+      <li><strong>Funguje jen s pmtn</strong> — nepreemptivní varianty (např. $1|r_j,\tilde d_j|C_{max}$) jsou NP-těžké a tok je nevyřeší [L5.9].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 [FOTO] ===== -->
+  <div class="task" id="t-msp">
+    <div class="task-head foto">
+      <span class="task-id">T01</span>
+      <strong>Multiprocessor Scheduling problem with preemption, release date and deadline (zkouška 2023)</strong>
+      <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
+      <span class="task-src">zdroj: zkouška 2023, str. 3 / úloha 6 (zadání EN 1:1); řešení dle ručního zkouškového řešení, dopočet feasibility + Gantt vlastní (přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>We have $n$ <strong>tasks</strong> which we want to assign to $R$ identical <strong>resources</strong> (processors). Each task has its own <strong>processing time</strong> $p_j$, <strong>release date</strong> $r_j$ and <strong>deadline</strong> $\tilde{d}_j$. <strong>Preemption</strong> is allowed (including migration from one resource to another). Every processor will execute no more than one task at a moment and no task will be executed simultaneously on more than one processor.</p>
+        <p>2 parallel identical resources:</p>
+        <table>
+          <tr><th></th><th>$T_1$</th><th>$T_2$</th><th>$T_3$</th><th>$T_4$</th><th>$T_5$</th></tr>
+          <tr><td>$p_j$</td><td>2.1</td><td>3.2</td><td>4.1</td><td>1.6</td><td>2</td></tr>
+          <tr><td>$r_j$</td><td>0</td><td>2</td><td>0</td><td>5</td><td>5</td></tr>
+          <tr><td>$\tilde{d}_j$</td><td>5</td><td>6</td><td>6</td><td>7</td><td>7</td></tr>
+        </table>
+        <p>Formulate as Maximum flow problem.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Feasibility problém $P2 \mid \mathrm{pmtn}, r_j, \tilde{d}_j \mid$ — pět úloh s okny $\langle r_j, \tilde{d}_j\rangle$, dva identické procesory, preempce s migrací povolena. Nechtějí po tobě rozvrh hledat ručně — chtějí <strong>formulaci jako max flow</strong>: síť + kapacity + kritérium (+ čtení výsledku).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — konstrukce intervalů a sítě, kritérium feasibility, flow → schedule.</li>
+        <li><a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace α|β|γ</a> — čtení notace, $\tilde{d}_j$ vs. $d_j$, prázdné $\gamma$.</li>
+        <li><a href="../k4/l4-4.html#takeaways">[L4.4] Řez a věta max-flow/min-cut</a> — proč $|f| \le \sum p_j$ a řez jako certifikát.</li>
+        <li><a href="../k4/l4-5.html#takeaways">[L4.5] Modelování přiřazení jako tok</a> — vrstvený vzor a čtení nasycení.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Drž se čtyř kroků lekce: (1) vypiš seřazené sjednocení $\{r_j\}\cup\{\tilde d_j\}$ a z něj intervaly; (2) nakresli tři vrstvy a rozmysli, do kterých intervalů má každá úloha hranu (okno $\langle r_j,\tilde d_j\rangle$ musí interval pokrývat celý); (3) přiřaď tři druhy kapacit — u prostředních hran si vzpomeň na sekvenčnost úloh; (4) napiš kritérium nasycení a větu o čtení rozvrhu z toku. Pozor, $R = 2$, ne 3 jako v ukázce ze slidů.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><em>(Postup 1:1 podle ručního zkouškového řešení; značení intervalů dtto.)</em></p>
+          <p><strong>1. Intervaly.</strong> $R = 2$. Důležité body určující intervaly: $\mathrm{set}(M[r_j; \tilde d_j]) = \{0, 2, 5, 6, 7\}$. Intervaly: $I_{0,2} = \langle 0;2)$, $I_{2,5} = \langle 2;5)$, $I_{5,6} = \langle 5;6)$, $I_{6,7} = \langle 6;7\rangle$ — délky $2, 3, 1, 1$.</p>
+          <p><strong>2. Síť.</strong> Vrstvy $S \to$ úlohy $\{1,\dots,5\} \to$ intervaly $\to T$. Hrany úloha → interval jen tam, kde $\langle x,y\rangle \subseteq \langle r_j, \tilde d_j\rangle$: $T_1\,(0..5) \to I_{0,2}, I_{2,5}$; $T_2\,(2..6) \to I_{2,5}, I_{5,6}$; $T_3\,(0..6) \to I_{0,2}, I_{2,5}, I_{5,6}$; $T_4, T_5\,(5..7) \to I_{5,6}, I_{6,7}$.</p>
+          <p><strong>3. Kapacity.</strong> Dolní meze všude $LB = 0$. $S \to$ úloha: $UB = p_j$ (2.1, 3.2, 4.1, 1.6, 2). Úloha → interval: $UB$ = délka intervalu. Interval → $T$: $UB$ = délka $\cdot R$, tedy $4, 6, 2, 2$ (ruční řešení: „upper bounds: množství volných jednotek v intervalu → délka $I \cdot R$“).</p>
+          <div class="viz" id="viz-t01net"></div>
+          <p><strong>4. Kritérium.</strong> Spočti max flow. Přípustný rozvrh existuje $\iff |f| = \sum_j p_j = 2.1+3.2+4.1+1.6+2 = 13$, tj. všechny hrany ze zdroje nasycené. Čtení: $f(T_j \to I_{x,y})$ = kolik jednotek úlohy $T_j$ poběží v intervalu $\langle x,y\rangle$; uvnitř intervalu kousky rozliješ na 2 procesory (flow → schedule — bez této věty opravující strhával, viz červená poznámka na ručním řešení).</p>
+          <p><strong>5. Dopočet feasibility + Gantt</strong> <em>(vlastní rozšíření — ruční řešení končí formulací)</em>. Max flow hodnoty 13 skutečně dosahuje, např.:</p>
+          <table>
+            <tr><th>$f$</th><th>$I_{0,2}$</th><th>$I_{2,5}$</th><th>$I_{5,6}$</th><th>$I_{6,7}$</th><th>$\sum$</th></tr>
+            <tr><td>$T_1$</td><td>2</td><td>0.1</td><td>—</td><td>—</td><td>2.1 ✓</td></tr>
+            <tr><td>$T_2$</td><td>—</td><td>3</td><td>0.2</td><td>—</td><td>3.2 ✓</td></tr>
+            <tr><td>$T_3$</td><td>2</td><td>2.1</td><td>0</td><td>—</td><td>4.1 ✓</td></tr>
+            <tr><td>$T_4$</td><td>—</td><td>—</td><td>0.8</td><td>0.8</td><td>1.6 ✓</td></tr>
+            <tr><td>$T_5$</td><td>—</td><td>—</td><td>1</td><td>1</td><td>2 ✓</td></tr>
+            <tr><td>do $T$ (kap.)</td><td>4 (4)</td><td>5.2 (6)</td><td>2 (2)</td><td>1.8 (2)</td><td>13</td></tr>
+          </table>
+          <p>Všechny prostřední hrany respektují kapacitu = délku intervalu (max 2, 3, 1, 1) a zdrojové hrany jsou nasycené → <strong>rozvrh existuje</strong>. Rozlití uvnitř intervalů dá např. tento Gantt:</p>
+          <div class="viz" id="viz-t01gantt"></div>
+          <p>Kontrola: žádná úloha neběží na dvou procesorech naráz ($T_2$ končí na $P^1$ v čase 5 a na $P^2$ běží až $\langle 5; 5.2)$) a všechna okna jsou dodržena: $C_1 = 4.2 \le 5$, $C_2 = 5.2 \le 6$, $C_3 = 4.1 \le 6$, $C_4 = 6.8 \le 7$, $C_5 = 7 \le 7$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="box foto">
+    <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+    <p>Úlohu T01 vyřeš celou <strong>na papír</strong> (bez koukání do řešení): body → intervaly → síť se všemi kapacitami → kritérium → věta o flow → schedule. Pak pošli fotku — zkontroluju ti ji a vytknu chyby.</p>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-infeas">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Kdy rozvrh neexistuje — čtení certifikátu</strong>
+      <span class="task-src">zdroj: VLASTNÍ drill na modelu této lekce (přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; vlastní úloha)</span>
+        <p>Consider the problem $P \mid pmtn, r_j, \tilde{d}_j \mid$ with $R = 2$ identical processors and three tasks: $p = (2, 2, 2)$, $r = (0, 0, 0)$, $\tilde{d} = (2, 2, 4)$.</p>
+        <p>(i) Formulate the instance as a Maximum flow problem and decide whether a feasible preemptive schedule exists.</p>
+        <p>(ii) Now change $\tilde{d}_3$ from $4$ to $2$. Decide again and, if no schedule exists, give a certificate.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Miniaturní instance na procvičení celé pipeline — a hlavně druhé větve kritéria: co přesně odpovíš, když tok $\sum p_j$ <em>nedosáhne</em>.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — konstrukce + kritérium.</li>
+        <li><a href="../k4/l4-4.html#takeaways">[L4.4]</a> — min řez jako certifikát neexistence.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(i) Body $\{0,2,4\}$ → dva intervaly. Nakresli síť a zkus zdrojové hrany nasytit. (ii) Po změně zbude jediný interval — porovnej, kolik práce do něj <em>musí</em> a kolik se tam <em>vejde</em>; pak to řekni jazykem řezu.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Body $\{r_j\}\cup\{\tilde d_j\} = \{0,2,4\}$ → intervaly $I_{0,2}$ (délka 2) a $I_{2,4}$ (délka 2). Hrany: $T_1, T_2 \to I_{0,2}$; $T_3 \to I_{0,2}, I_{2,4}$. Kapacity: $s\to T_j$: 2, 2, 2; úloha→interval: délka = 2 všude; intervaly→$t$: $2\cdot 2 = 4$ a $4$.</p>
+          <div class="viz" id="viz-t02net"></div>
+          <p>Max flow: $T_1 = T_2 = 2$ do $I_{0,2}$ (nasytí jeho stokovou hranu na 4), $T_3 = 2$ do $I_{2,4}$. $|f| = 6 = \sum p_j$ → <strong>rozvrh existuje</strong>. Dekódování: $P^1$: $T_1\,[0,2]$, $T_3\,[2,4]$; $P^2$: $T_2\,[0,2]$.</p>
+          <p><strong>(ii)</strong> Teď $\tilde d = (2,2,2)$: body $\{0,2\}$, jediný interval $I_{0,2}$, všechny tři úlohy vedou jen do něj. Max flow: do stoku vede jediná hrana s kapacitou $2 \cdot 2 = 4$, takže $|f| \le 4 &lt; 6 = \sum p_j$ → <strong>rozvrh neexistuje</strong>. Certifikát = řez $A = \{s, T_1, T_2, T_3, I_{0,2}\}$ s kapacitou 4 (jediná hrana $I_{0,2} \to t$): v okně $\langle 0,2\rangle$ je předepsáno 6 jednotek práce, ale 2 procesory za 2 jednotky času nabídnou jen 4. Slovně přesně to, co by sis řekl selským rozumem — řez to jen říká certifikovaně [L4.4].</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <p>Příště začneme stavět hlavní příběh kapitoly: precedence a temporální omezení mezi úlohami a jejich graf — a nad nimi pak time-indexed ILP a celá rodina rozvrhovacích algoritmů, kterou na konci shrne referenční tabulka [L5.14].</p>
+
+  <label class="done-toggle" data-lesson-id="L5.0">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k5/l5-1.html"><span class="dir">← Předchozí</span> L5.1 · Grahamova notace α|β|γ</a>
+    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.2 · Precedence a temporální omezení; graf TC)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Časová okna úloh (instance slidů 5–6, R = 3): řádky zde výjimečně = úlohy, blok = okno ⟨rⱼ, d̃ⱼ⟩
+KOViz.gantt(document.getElementById('viz-windows'), {
+  tmax: 9, tstep: 1,
+  rows: [{id:'T1', label:'T₁'}, {id:'T2', label:'T₂'}, {id:'T3', label:'T₃'}, {id:'T4', label:'T₄'}],
+  blocks: [
+    {row:'T1', from:3, to:5, label:'p₁ = 1.5'},
+    {row:'T2', from:1, to:4, label:'p₂ = 1.25', cls:'good'},
+    {row:'T3', from:3, to:7, label:'p₃ = 2.1', cls:'hl'},
+    {row:'T4', from:5, to:9, label:'p₄ = 3.6', cls:'p'},
+  ],
+  marks: [
+    {t:1, label:'r₂', cls:'soft'},
+    {t:3, label:'r₁ = r₃', cls:'soft'},
+    {t:4, label:'d̃₂', cls:'soft'},
+    {t:5, label:'d̃₁ = r₄', cls:'soft'},
+    {t:7, label:'d̃₃', cls:'soft'},
+    {t:9, label:'d̃₄', cls:'soft'},
+  ],
+  caption: 'POZOR, netradiční čtení: řádek = úloha (ne procesor), blok = časové okno ⟨rⱼ, d̃ⱼ⟩, ve kterém úloha smí běžet (číslo v bloku = kolik práce se do okna musí vejít). Svislé čáry = body z {rⱼ} ∪ {d̃ⱼ} → intervaly I₁,₃, I₃,₄, I₄,₅, I₅,₇, I₇,₉.',
+});
+
+// 2 — Stavba sítě (instance slidů 5–6, R = 3) — stepper, frames = absolutní stavy
+KOViz.stepper(document.getElementById('viz-net'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'s',  x:50,  y:180, sub:'zdroj'},
+      {id:'T2', x:195, y:60,  label:'T₂'},
+      {id:'T1', x:195, y:140, label:'T₁'},
+      {id:'T3', x:195, y:220, label:'T₃'},
+      {id:'T4', x:195, y:300, label:'T₄'},
+      {id:'I13', x:430, y:40,  label:'I₁,₃'},
+      {id:'I34', x:430, y:110, label:'I₃,₄'},
+      {id:'I45', x:430, y:180, label:'I₄,₅'},
+      {id:'I57', x:430, y:250, label:'I₅,₇'},
+      {id:'I79', x:430, y:320, label:'I₇,₉'},
+      {id:'t',  x:585, y:180, sub:'stok'},
+    ],
+    edges: [
+      {from:'s', to:'T2', label:'1.25'},
+      {from:'s', to:'T1', label:'1.5'},
+      {from:'s', to:'T3', label:'2.1'},
+      {from:'s', to:'T4', label:'3.6'},
+      {from:'T2', to:'I13', label:'2'},
+      {from:'T2', to:'I34', label:'1'},
+      {from:'T1', to:'I34', label:'1'},
+      {from:'T1', to:'I45', label:'1', curve:-0.2},
+      {from:'T3', to:'I34', label:'1', curve:0.25},
+      {from:'T3', to:'I45', label:'1'},
+      {from:'T3', to:'I57', label:'2'},
+      {from:'T4', to:'I57', label:'2'},
+      {from:'T4', to:'I79', label:'2'},
+      {from:'I13', to:'t', label:'6'},
+      {from:'I34', to:'t', label:'3'},
+      {from:'I45', to:'t', label:'3'},
+      {from:'I57', to:'t', label:'6'},
+      {from:'I79', to:'t', label:'6'},
+    ],
+  },
+  frames: [
+    {desc:'Vrstva úloh: hrana s → Tⱼ s kapacitou pⱼ říká, kolik práce úlohy se celkem musí naplánovat (LB = 0, UB = pⱼ).',
+     nodes:{I13:'dim', I34:'dim', I45:'dim', I57:'dim', I79:'dim', t:'dim'},
+     edges:{'s->T2':'hl','s->T1':'hl','s->T3':'hl','s->T4':'hl',
+            'T2->I13':'dim','T2->I34':'dim','T1->I34':'dim','T1->I45':'dim','T3->I34':'dim','T3->I45':'dim','T3->I57':'dim','T4->I57':'dim','T4->I79':'dim',
+            'I13->t':'dim','I34->t':'dim','I45->t':'dim','I57->t':'dim','I79->t':'dim'}},
+    {desc:'Vrstva intervalů: body {rⱼ} ∪ {d̃ⱼ} = {1, 3, 4, 5, 7, 9} dají intervaly I₁,₃ (délka 2), I₃,₄ (1), I₄,₅ (1), I₅,₇ (2), I₇,₉ (2).',
+     nodes:{t:'dim'},
+     subs:{I13:'délka 2', I34:'délka 1', I45:'délka 1', I57:'délka 2', I79:'délka 2', s:'zdroj', t:'stok'},
+     edges:{'T2->I13':'dim','T2->I34':'dim','T1->I34':'dim','T1->I45':'dim','T3->I34':'dim','T3->I45':'dim','T3->I57':'dim','T4->I57':'dim','T4->I79':'dim',
+            'I13->t':'dim','I34->t':'dim','I45->t':'dim','I57->t':'dim','I79->t':'dim'}},
+    {desc:'Hrany úloha → interval jen tam, kde úloha smí běžet (⟨x,y⟩ ⊆ ⟨rⱼ, d̃ⱼ⟩): T₂ (1..4) → I₁,₃, I₃,₄; T₁ (3..5) → I₃,₄, I₄,₅; T₃ (3..7) → I₃,₄, I₄,₅, I₅,₇; T₄ (5..9) → I₅,₇, I₇,₉. Kapacita = délka intervalu (úloha je sekvenční!).',
+     nodes:{t:'dim'},
+     subs:{I13:'délka 2', I34:'délka 1', I45:'délka 1', I57:'délka 2', I79:'délka 2', s:'zdroj', t:'stok'},
+     edges:{'T2->I13':'hl','T2->I34':'hl','T1->I34':'hl','T1->I45':'hl','T3->I34':'hl','T3->I45':'hl','T3->I57':'hl','T4->I57':'hl','T4->I79':'hl',
+            'I13->t':'dim','I34->t':'dim','I45->t':'dim','I57->t':'dim','I79->t':'dim'}},
+    {desc:'Hrany interval → t s kapacitou délka · R (R = 3): interval nabízí tolik jednotek strojového času. Síť je hotová.',
+     subs:{I13:'délka 2', I34:'délka 1', I45:'délka 1', I57:'délka 2', I79:'délka 2', s:'zdroj', t:'stok'},
+     edges:{'I13->t':'hl','I34->t':'hl','I45->t':'hl','I57->t':'hl','I79->t':'hl'}},
+    {desc:'Kritérium: max flow nasytí všechny hrany ze zdroje ⟺ |f| = Σpⱼ = 8.45 ⟺ přípustný preemptivní rozvrh existuje. (Tady to vyjde — dopočítáno, ve slidech hodnota není.)',
+     subs:{I13:'délka 2', I34:'délka 1', I45:'délka 1', I57:'délka 2', I79:'délka 2', s:'zdroj', t:'stok'},
+     edges:{'s->T2':'good','s->T1':'good','s->T3':'good','s->T4':'good'}},
+  ],
+  caption: 'Stavba sítě pro instanci ze slidů 5–6 (R = 3 procesory): s → úlohy (pⱼ) → intervaly (délka) → t (délka · R).',
+});
+
+// 3 — T01: síť zkouškové instance 2023 (R = 2) — dle ručního řešení
+KOViz.graph(document.getElementById('viz-t01net'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s',  x:48,  y:180, label:'S', sub:'zdroj'},
+    {id:'T1', x:190, y:40,  label:'T₁'},
+    {id:'T2', x:190, y:110, label:'T₂'},
+    {id:'T3', x:190, y:180, label:'T₃'},
+    {id:'T4', x:190, y:250, label:'T₄'},
+    {id:'T5', x:190, y:320, label:'T₅'},
+    {id:'I02', x:435, y:70,  label:'I₀,₂'},
+    {id:'I25', x:435, y:145, label:'I₂,₅'},
+    {id:'I56', x:435, y:220, label:'I₅,₆'},
+    {id:'I67', x:435, y:295, label:'I₆,₇'},
+    {id:'t',  x:585, y:180, label:'T', sub:'stok'},
+  ],
+  edges: [
+    {from:'s', to:'T1', label:'2.1'},
+    {from:'s', to:'T2', label:'3.2'},
+    {from:'s', to:'T3', label:'4.1'},
+    {from:'s', to:'T4', label:'1.6'},
+    {from:'s', to:'T5', label:'2'},
+    {from:'T1', to:'I02', label:'2'},
+    {from:'T1', to:'I25', label:'3'},
+    {from:'T2', to:'I25', label:'3', curve:-0.2},
+    {from:'T2', to:'I56', label:'1', curve:0.3},
+    {from:'T3', to:'I02', label:'2', curve:-0.5},
+    {from:'T3', to:'I25', label:'3'},
+    {from:'T3', to:'I56', label:'1'},
+    {from:'T4', to:'I56', label:'1'},
+    {from:'T4', to:'I67', label:'1', curve:0.2},
+    {from:'T5', to:'I56', label:'1', curve:-0.3},
+    {from:'T5', to:'I67', label:'1'},
+    {from:'I02', to:'t', label:'0, 4'},
+    {from:'I25', to:'t', label:'0, 6'},
+    {from:'I56', to:'t', label:'0, 2'},
+    {from:'I67', to:'t', label:'0, 2'},
+  ],
+  caption: 'Síť zkouškové instance 2023 (R = 2) dle ručního řešení: kapacity pⱼ / délka intervalu / délka · R (u stokových hran formát „LB, UB“ jako v ručním řešení; LB = 0 všude).',
+});
+
+// 4 — T01: dekódovaný rozvrh (vlastní dopočet z toku, přiznáno v řešení)
+KOViz.gantt(document.getElementById('viz-t01gantt'), {
+  tmax: 7, tstep: 1,
+  rows: [{id:'P1', label:'P¹'}, {id:'P2', label:'P²'}],
+  blocks: [
+    {row:'P1', from:0, to:2,   label:'T₁'},
+    {row:'P1', from:2, to:5,   label:'T₂', cls:'hl'},
+    {row:'P1', from:5, to:7,   label:'T₅', cls:'good'},
+    {row:'P2', from:0, to:4.1, label:'T₃', cls:'p'},
+    {row:'P2', from:4.1, to:4.2, label:''},
+    {row:'P2', from:4.2, to:5, label:'idle', cls:'idle'},
+    {row:'P2', from:5, to:5.2, label:'', cls:'hl'},
+    {row:'P2', from:5.2, to:6.8, label:'T₄', cls:'bad'},
+    {row:'P2', from:6.8, to:7, label:'', cls:'idle'},
+  ],
+  marks: [
+    {t:2, label:'r₂', cls:'soft'},
+    {t:5, label:'d̃₁ = r₄ = r₅', cls:'soft'},
+    {t:6, label:'d̃₂ = d̃₃', cls:'soft'},
+    {t:7, label:'d̃₄ = d̃₅'},
+  ],
+  caption: 'Flow → schedule (vlastní dopočet): P¹ = T₁[0,2], T₂[2,5], T₅[5,7]; P² = T₃[0,4.1], T₁[4.1,4.2], idle, T₂[5,5.2], T₄[5.2,6.8], idle. Úzké bloky T₁ (0.1) a T₂ (0.2) na P² jsou bez popisku — nevešel by se. Preempce: T₁, T₂ běží nadvakrát, T₂ s migrací P¹ → P².',
+});
+
+// 5 — T02: síť vlastního drillu (i), R = 2
+KOViz.graph(document.getElementById('viz-t02net'), {
+  directed: true,
+  w: 640, h: 300,
+  nodes: [
+    {id:'s',  x:60,  y:150, sub:'zdroj'},
+    {id:'T1', x:215, y:50,  label:'T₁'},
+    {id:'T2', x:215, y:150, label:'T₂'},
+    {id:'T3', x:215, y:250, label:'T₃'},
+    {id:'I02', x:400, y:100, label:'I₀,₂'},
+    {id:'I24', x:400, y:215, label:'I₂,₄'},
+    {id:'t',  x:565, y:150, sub:'stok'},
+  ],
+  edges: [
+    {from:'s', to:'T1', label:'2'},
+    {from:'s', to:'T2', label:'2'},
+    {from:'s', to:'T3', label:'2'},
+    {from:'T1', to:'I02', label:'2'},
+    {from:'T2', to:'I02', label:'2'},
+    {from:'T3', to:'I02', label:'2', curve:0.25},
+    {from:'T3', to:'I24', label:'2'},
+    {from:'I02', to:'t', label:'4'},
+    {from:'I24', to:'t', label:'4'},
+  ],
+  caption: 'T02 (i): intervaly I₀,₂ a I₂,₄ (délky 2), R = 2. Max flow 6 = Σpⱼ → rozvrh existuje. Po změně d̃₃ = 2 (ii) hrana T₃ → I₂,₄ i celý uzel I₂,₄ zmizí a vše se tlačí přes I₀,₂ → t s kapacitou 4 < 6.',
+});
+</script>
+</body>
+</html>

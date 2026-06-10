@@ -188,7 +188,7 @@
   <details class="try">
     <summary>Zkus sám: na zkoušce (2023) padl problém $P \,|\, \mathrm{pmtn}, r_j, \tilde{d}_j \,|$ — třetí pole úplně chybí. Co to znamená?</summary>
     <div class="inner">
-      <p>Prázdné $\gamma$ = <strong>rozhodovací problém</strong> (decision problem): nic se neminimalizuje, ptáme se jen „<em>existuje</em> přípustný rozvrh?“ — tady: lze úlohy s release times a deadliny preemptivně stihnout na $R$ identických procesorech? Přesně tenhle feasibility problém budeme hned v příští lekci [L5.0] řešit převodem na maximální tok.</p>
+      <p>Prázdné $\gamma$ = <strong>rozhodovací problém</strong> (decision problem): nic se neminimalizuje, ptáme se jen „<em>existuje</em> přípustný rozvrh?“ — tady: lze úlohy s release times a deadliny preemptivně stihnout na $R$ identických procesorech? Přesně tenhle feasibility problém budeme hned v příští lekci <a href="../k5/l5-0.html">[L5.0] Rozvrhování přes toky</a> řešit převodem na maximální tok.</p>
     </div>
   </details>
 
@@ -257,7 +257,7 @@
         <div class="inner">
           <p><strong>(i)</strong> — odstavec banky úloh (EN 1:1): “The notation $PS1 \mid temp \mid C_{\max}$ denotes a project-scheduling problem on one resource. The tasks are non-preemptive, so once a task starts, it runs continuously for its processing time. The resource has capacity one, so at most one task can be processed at any time. The symbol $temp$ means temporal constraints between task start times. The objective $C_{\max}$ is the makespan, i.e. the completion time of the last task.”</p>
           <p><strong>(ii)</strong> — odstavec banky úloh (EN 1:1): “The notation $P2 \mid pmtn, prec \mid C_{\max}$ describes scheduling on two identical parallel processors. The abbreviation $pmtn$ means that preemption is allowed, so a task may be interrupted and later resumed. The abbreviation $prec$ means that the precedence constraints in the graph must be respected. The objective $C_{\max}$ is the makespan, i.e. the completion time of the last task.”</p>
-          <p><strong>(iii)</strong> <em>(řešení vlastní podle tabulek této lekce)</em>: $P$ = identické paralelní procesory, počet $R$ je součástí instance; $pmtn$ = preempce povolena; $r_j$ = úlohy mají release times (úloha $T_j$ nesmí začít před $r_j$); $\tilde{d}_j$ = úlohy mají tvrdé deadliny (musí skončit nejpozději v $\tilde{d}_j$). Třetí pole je prázdné — jde o <strong>rozhodovací problém</strong>: existuje přípustný preemptivní rozvrh, který všechna časová okna $\langle r_j, \tilde{d}_j\rangle$ stihne? (Řeší se převodem na max flow — příští lekce [L5.0].)</p>
+          <p><strong>(iii)</strong> <em>(řešení vlastní podle tabulek této lekce)</em>: $P$ = identické paralelní procesory, počet $R$ je součástí instance; $pmtn$ = preempce povolena; $r_j$ = úlohy mají release times (úloha $T_j$ nesmí začít před $r_j$); $\tilde{d}_j$ = úlohy mají tvrdé deadliny (musí skončit nejpozději v $\tilde{d}_j$). Třetí pole je prázdné — jde o <strong>rozhodovací problém</strong>: existuje přípustný preemptivní rozvrh, který všechna časová okna $\langle r_j, \tilde{d}_j\rangle$ stihne? (Řeší se převodem na max flow — příští lekce <a href="../k5/l5-0.html">[L5.0] Rozvrhování přes toky</a>.)</p>
         </div>
       </details>
     </div>
@@ -309,7 +309,7 @@
 
   <div class="pager">
     <a href="../k4/l4-15.html"><span class="dir">← Předchozí</span> L4.15 · Multikomoditní tok (ILP) [NICE]</a>
-    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.0 · Rozvrhování přes toky (P|pmtn,rj,dj|) [FOTO])</a>
+    <a class="next" href="../k5/l5-0.html"><span class="dir">Další →</span> L5.0 · Rozvrhování přes toky (P|pmtn,rj,dj|) [FOTO]</a>
   </div>
 
 </div>
