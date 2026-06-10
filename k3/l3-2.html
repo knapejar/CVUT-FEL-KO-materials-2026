@@ -153,7 +153,7 @@
   <h2>Tentýž krok očima Bellmanovy rovnice (verze ze slidů)</h2>
 
   <p>Slidy (03_SPT_KO, slide 18–19) vedou indukční krok bez explicitního sporu — ukazují, že pro uzavíraného kandidáta $v$ platí Bellmanova rovnice <a href="../k2/l2-2.html#takeaways">[L2.2]</a> $\;l(s,v) = \min_{k \ne v} \{\,l(s,k) + c(k,v)\,\}$, rozborem možných předchůdců $k$ na dva případy (EN 1:1):</p>
-  <ul>
+    <ul>
     <li><em>„for <strong>predecessors</strong> $k \in R$, since $l(s,k)$ is optimal and Bellmans equation for these nodes was calculated in the internal loop (all $e \in E^+(R)$ were tested)“</em> — $E^+(R)$ jsou hrany vedoucí z $R$ ven; každá byla relaxována při uzavírání svého počátku.</li>
     <li><em>„for <strong>predecessors</strong> $k \notin R$, since the value of $l(v)$ can not be improved by the path going through $k \notin R$ because $l(v) \le l(k \notin R)$ and the $c(k,v)$ are nonnegative.“</em> Slide dodává: $l(k \notin R)$ sice může v dalších iteracích ještě klesnout, ale přičítáním nezáporných délek se nikdy nedostane pod $l(v) = \min_{i \in V \setminus R} l(i)$.</li>
     </ul>
