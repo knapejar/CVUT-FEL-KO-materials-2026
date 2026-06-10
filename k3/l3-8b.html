@@ -123,12 +123,12 @@
 
   $$2\, \mathrm{OPT}(K_n, c) \stackrel{2.}{\ge} 2\, c(E(T)) \stackrel{3.}{=} c(E(L)) \stackrel{1.}{\ge} c(E(H))$$
 
-  <p>Bod 1 (shortcutting) máš z <a href="l3-8a.html#takeaways">[L3.8a]</a>, bod 2 je dnešní dolní mez, bod 3 (Eulerovský tah $L$ nad zdvojenou kostrou stojí $2\,c(E(T))$) přijde v [L3.8c] — a v [L3.9] už jen řetízek slepíme. Christofides [L3.10] použije bod 2 ve stejném znění (slide 27) a místo zdvojení přidá ke kostře levné párování. V obou případech: <em>algoritmus si postaví levný sled z MST, důkaz ho přes dnešní mez sváže s $\mathrm{OPT}$</em>.</p>
+  <p>Bod 1 (shortcutting) máš z <a href="l3-8a.html#takeaways">[L3.8a]</a>, bod 2 je dnešní dolní mez, bod 3 (Eulerovský tah $L$ nad zdvojenou kostrou stojí $2\,c(E(T))$) přijde v <a href="l3-8c.html#takeaways">[L3.8c]</a> — a v [L3.9] už jen řetízek slepíme. Christofides [L3.10] použije bod 2 ve stejném znění (slide 27) a místo zdvojení přidá ke kostře levné párování. V obou případech: <em>algoritmus si postaví levný sled z MST, důkaz ho přes dnešní mez sváže s $\mathrm{OPT}$</em>.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
     <ul>
-      <li><strong>„MST je (skoro) řešení TSP.“</strong> NE — kostra není okruh, není to přípustné řešení TSP. $c(\mathrm{MST})$ je jen <em>číslo-měřítko</em>; okruh z kostry teprve musíš vyrobit (zdvojení [L3.8c] + shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>) a při tom se cena až zdvojnásobí.</li>
+      <li><strong>„MST je (skoro) řešení TSP.“</strong> NE — kostra není okruh, není to přípustné řešení TSP. $c(\mathrm{MST})$ je jen <em>číslo-měřítko</em>; okruh z kostry teprve musíš vyrobit (zdvojení <a href="l3-8c.html#takeaways">[L3.8c]</a> + shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>) a při tom se cena až zdvojnásobí.</li>
       <li><strong>Směr nerovnosti:</strong> $\mathrm{OPT} \ge c(\mathrm{MST})$, nikdy naopak. Mnemotechnika: okruh = kostra + jedna hrana navíc, takže okruh je „víc než“ kostra; a optimální okruh je pořád aspoň MST, protože MST je úplně nejlevnější způsob, jak vrcholy spojit.</li>
       <li><strong>„Tahle mez potřebuje trojúhelníkovou nerovnost.“</strong> NE — stačí nezáporné ceny; platí i pro nemetrický TSP. Metrika je potřeba v <em>jiných</em> krocích (shortcutting). Naopak <strong>nezápornost vypustit nejde</strong> ($c(e) \ge 0$ drží druhou nerovnost řetízku).</li>
       <li><strong>„Dolní mez = hotová aproximace.“</strong> NE — mez sama žádný okruh nevyrábí. Faktor vznikne až spárováním s konstrukcí: okruh s cenou $\le 2\,c(\mathrm{MST})$ [L3.9], resp. $\le \tfrac{3}{2}$-násobkem [L3.10].</li>
@@ -143,7 +143,7 @@
       <li>Důkaz potřebuje jen <strong>nezáporné ceny</strong> — trojúhelníkovou nerovnost NE; mez platí pro každý TSP. Metrika je potřeba až u shortcuttingu <a href="l3-8a.html#takeaways">[L3.8a]</a>.</li>
       <li>Role dle receptu z <a href="l3-1.html#takeaways">[L3.1]</a>: $B = c(\mathrm{MST})$ je <strong>polynomiálně vypočitatelná dolní mez</strong> na neznámé $\mathrm{OPT}$ — centrální mez pro double-tree [L3.9] i Christofidese [L3.10].</li>
       <li><strong>Sendvič:</strong> libovolný přípustný okruh dává horní mez, MST dolní — $c(\mathrm{MST}) \le \mathrm{OPT} \le c(\text{okruh})$ bez znalosti optima.</li>
-      <li>MST <em>není</em> přípustné řešení TSP — je to měřítko; okruh z něj teprve vyrobí [L3.8c] + shortcutting.</li>
+      <li>MST <em>není</em> přípustné řešení TSP — je to měřítko; okruh z něj teprve vyrobí <a href="l3-8c.html#takeaways">[L3.8c]</a> + shortcutting.</li>
     </ul>
   </div>
 
@@ -221,7 +221,7 @@
           <p><strong>(b) Sendvič.</strong> Dolní mez (dnešní věta): $\mathrm{OPT} \ge c(E(T)) = 7$. Horní mez: $H$ je přípustný Hamiltonovský okruh a $\mathrm{OPT}$ je minimum přes všechny okruhy, takže $\mathrm{OPT} \le c(H) = 12$. Celkem</p>
           $$7 \;\le\; \mathrm{OPT}(K_5, c) \;\le\; 12.$$
           <p><em>(Pro kontrolu — enumerace všech 12 okruhů, kterou úloha nechtěla, dává $\mathrm{OPT} = 11$ pro okruh $A,D,C,B,E,A$; obě meze sedí.)</em></p>
-          <p><strong>(c) Konzistence s faktorem 2.</strong> Slib double-tree zní $c(H) \le 2 \cdot \mathrm{OPT}$. Nejhorší případ v sendviči je $\mathrm{OPT} = 7$: pak $2 \cdot \mathrm{OPT} = 14 \ge 12 = c(H)$ ✓. Dokonce platí $c(H) = 12 \le 14 = 2 \cdot c(E(T)) \le 2 \cdot \mathrm{OPT}$ — okruh vyrobený přes kostru a shortcutting se do dvojnásobku <em>dolní meze</em> vešel. To není náhoda: přesně tenhle řetízek v [L3.9] dokážeme obecně (chybí už jen bod 3, cena Eulerovského tahu $c(E(L)) = 2\,c(E(T))$, z [L3.8c]).</p>
+          <p><strong>(c) Konzistence s faktorem 2.</strong> Slib double-tree zní $c(H) \le 2 \cdot \mathrm{OPT}$. Nejhorší případ v sendviči je $\mathrm{OPT} = 7$: pak $2 \cdot \mathrm{OPT} = 14 \ge 12 = c(H)$ ✓. Dokonce platí $c(H) = 12 \le 14 = 2 \cdot c(E(T)) \le 2 \cdot \mathrm{OPT}$ — okruh vyrobený přes kostru a shortcutting se do dvojnásobku <em>dolní meze</em> vešel. To není náhoda: přesně tenhle řetízek v [L3.9] dokážeme obecně (chybí už jen bod 3, cena Eulerovského tahu $c(E(L)) = 2\,c(E(T))$, z <a href="l3-8c.html#takeaways">[L3.8c]</a>).</p>
         </div>
       </details>
     </div>
@@ -233,7 +233,7 @@
 
   <div class="pager">
     <a href="../k3/l3-8a.html"><span class="dir">← Předchozí</span> L3.8a · Metrický TSP + trojúhelníková nerovnost + shortcutting</a>
-    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.8c · Eulerovský tah a zdvojení hran (sudý stupeň))</a>
+    <a class="next" href="l3-8c.html"><span class="dir">Další →</span> L3.8c · Eulerovský tah a zdvojení hran (sudý stupeň)</a>
   </div>
 
 </div>

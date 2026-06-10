@@ -36,7 +36,7 @@
     <strong>Trojúhelníková nerovnost</strong> $c(\{i,j\}) + c(\{j,k\}) \ge c(\{k,i\})$ definuje <strong>metrický TSP</strong> — a umožňuje <strong>shortcutting</strong>: přeskočení už navštívených vrcholů v uzavřeném sledu cenu <em>nikdy nezvýší</em>.
   </div>
 
-  <p>V <a href="l3-6.html#takeaways">[L3.6] Neexistence r-aproximace pro obecný TSP</a> jsme dokázali, že obecný TSP nejde aproximovat s žádnou zárukou (pokud $P \ne NP$). Slíbená záchrana se jmenuje <strong>metric TSP</strong> (metrický TSP). Dnešní lekce ho definuje a vytěží z definice první nástroj — <strong>shortcutting</strong> (zkracování přes opakované vrcholy). Je to jeden ze tří stavebních kamenů, ze kterých pak složíme double-tree [L3.9] i Christofidese [L3.10]; zbylé dva přijdou v <a href="l3-8b.html#takeaways">[L3.8b]</a> (dolní mez) a [L3.8c] (Eulerovský tah).</p>
+  <p>V <a href="l3-6.html#takeaways">[L3.6] Neexistence r-aproximace pro obecný TSP</a> jsme dokázali, že obecný TSP nejde aproximovat s žádnou zárukou (pokud $P \ne NP$). Slíbená záchrana se jmenuje <strong>metric TSP</strong> (metrický TSP). Dnešní lekce ho definuje a vytěží z definice první nástroj — <strong>shortcutting</strong> (zkracování přes opakované vrcholy). Je to jeden ze tří stavebních kamenů, ze kterých pak složíme double-tree [L3.9] i Christofidese [L3.10]; zbylé dva přijdou v <a href="l3-8b.html#takeaways">[L3.8b]</a> (dolní mez) a <a href="l3-8c.html#takeaways">[L3.8c]</a> (Eulerovský tah).</p>
 
   <!-- ===== SEKCE 1: DEFINICE ===== -->
   <h2>Co přesně zabilo aproximace — a jak to zakázat</h2>
@@ -155,7 +155,7 @@
 
   <div class="viz" id="viz-walk"></div>
 
-  <p>Přesně takhle to dělá krok 3 double-tree algoritmu (slide 24, EN 1:1 — tam je vstupem Eulerovský tah $L$, což je speciální uzavřený sled; potkáš ho v [L3.8c]):</p>
+  <p>Přesně takhle to dělá krok 3 double-tree algoritmu (slide 24, EN 1:1 — tam je vstupem Eulerovský tah $L$, což je speciální uzavřený sled; potkáš ho v <a href="l3-8c.html#takeaways">[L3.8c]</a>):</p>
 
   <div class="box">
     <div class="box-title">Shortcutting = krok 3 double-tree algoritmu (slide 24, 1:1) + jeho záruka (slide 25, 1:1)</div>
@@ -181,7 +181,7 @@
   <!-- ===== SEKCE 6: VÝHLED ===== -->
   <h2>K čemu to bude: plán na příští lekce</h2>
 
-  <p>Shortcutting je <strong>poslední krok</strong> obou aproximačních algoritmů: vyrobí z laciného uzavřeného sledu přípustný Hamiltonovský okruh, <em>aniž by pokazil cenu</em> — v řetízcích důkazů obstará nerovnost $c(E(L)) \ge c(E(H))$. Zbývá umět sled lacino <em>vyrobit</em> (Eulerovský tah nad zdvojenou kostrou, [L3.8c]) a cenu sledu svázat s neznámým $\mathrm{OPT}$ (dolní mez $\mathrm{OPT} \ge c(\mathrm{MST})$, <a href="l3-8b.html#takeaways">[L3.8b]</a> — hned další lekce). Pak už faktory 2 [L3.9] a 3/2 [L3.10] vypadnou složením tří nerovností.</p>
+  <p>Shortcutting je <strong>poslední krok</strong> obou aproximačních algoritmů: vyrobí z laciného uzavřeného sledu přípustný Hamiltonovský okruh, <em>aniž by pokazil cenu</em> — v řetízcích důkazů obstará nerovnost $c(E(L)) \ge c(E(H))$. Zbývá umět sled lacino <em>vyrobit</em> (Eulerovský tah nad zdvojenou kostrou, <a href="l3-8c.html#takeaways">[L3.8c]</a>) a cenu sledu svázat s neznámým $\mathrm{OPT}$ (dolní mez $\mathrm{OPT} \ge c(\mathrm{MST})$, <a href="l3-8b.html#takeaways">[L3.8b]</a> — hned další lekce). Pak už faktory 2 [L3.9] a 3/2 [L3.10] vypadnou složením tří nerovností.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
@@ -200,7 +200,7 @@
       <li><strong>Metrický TSP</strong> (slide 22): úplný $K_n$ ($n \ge 3$), $c : E(K_n) \to \mathbb{R}^+$ s <strong>trojúhelníkovou nerovností</strong> $c(\{i,j\}) + c(\{j,k\}) \ge c(\{k,i\})$ pro všechny trojice; hledá se nejlevnější Hamiltonovský okruh <a href="l3-3.html#takeaways">[L3.3]</a>.</li>
       <li>Metrický TSP je <strong>stále silně NP-těžký</strong> (váhy 1 a 2 z <a href="l3-5.html#takeaways">[L3.5]</a> trojúhelníkovou nerovnost splňují) — ale na rozdíl od obecného TSP <a href="l3-6.html#takeaways">[L3.6]</a> <strong>aproximační algoritmy existují</strong>.</li>
       <li><strong>Zobecněná trojúhelníková nerovnost</strong> (indukcí): přímá hrana mezi konci není dražší než libovolný řetěz mezi nimi.</li>
-      <li><strong>Shortcutting:</strong> uzavřený sled přes všechny vrcholy → posloupnost prvních návštěv = Hamiltonovský okruh; každá zkratka nahrazuje úsek sledu přímou hranou, takže $c(E(L)) \ge c(E(H))$. Potřebuje <em>úplnost</em> (zkratka existuje) i <em>metriku</em> (zkratka nezdraží) — proto jdou Eulerovské tahy [L3.8c] převést na Hamiltonovský okruh bez zhoršení.</li>
+      <li><strong>Shortcutting:</strong> uzavřený sled přes všechny vrcholy → posloupnost prvních návštěv = Hamiltonovský okruh; každá zkratka nahrazuje úsek sledu přímou hranou, takže $c(E(L)) \ge c(E(H))$. Potřebuje <em>úplnost</em> (zkratka existuje) i <em>metriku</em> (zkratka nezdraží) — proto jdou Eulerovské tahy <a href="l3-8c.html#takeaways">[L3.8c]</a> převést na Hamiltonovský okruh bez zhoršení.</li>
       <li>Posun $+h$ zmetrikuje každou instanci (všechny okruhy mají $n$ hran, kritérium $+\,n h$ — výjimka z <a href="../k2/l2-15.html#takeaways">[L2.15]</a>), ale aproximační faktor se nepřenese.</li>
     </ul>
   </div>
