@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AC-3 — hranová konzistence — immersive video · KO Hitovky</title>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #11141d;
+    --text: #e8eaf0;
+    --muted: #8b93a7;
+    --accent: #ffb000;
+    --border: #232a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; overflow: hidden;
+  }
+  #topbar {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; font-size: 13px; color: var(--muted);
+  }
+  #topbar a { color: var(--muted); text-decoration: none; }
+  #topbar a:hover { color: var(--accent); }
+  #topbar .title { color: var(--text); font-weight: 700; }
+  #topbar .badge {
+    font-size: 11px; color: var(--bg); background: var(--accent);
+    border-radius: 10px; padding: 2px 9px; font-weight: 700;
+  }
+  #stagewrap {
+    flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
+    min-height: 0; padding: 0 16px;
+  }
+  #stage {
+    position: relative;
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #0b0e16; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+  }
+  #stage canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  #subtitle {
+    position: absolute; left: 4%; right: 4%; bottom: 4.5%;
+    text-align: center; pointer-events: none;
+    font-size: clamp(13px, 2.2vw, 24px); font-weight: 600; line-height: 1.35;
+    color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,0.95), 0 0 4px rgba(0,0,0,0.9);
+  }
+  #subtitle .m {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    color: #7dd3fc;
+  }
+  #bigplay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(5,7,12,0.55); cursor: pointer; z-index: 5;
+    flex-direction: column; gap: 18px;
+  }
+  #bigplay.hidden { display: none; }
+  #bigplay .pbtn {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--accent); color: #1a1200;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; box-shadow: 0 0 60px rgba(255,176,0,0.45);
+    transition: transform .15s;
+  }
+  #bigplay:hover .pbtn { transform: scale(1.08); }
+  #bigplay .hint { color: var(--text); font-size: 15px; font-weight: 600; text-shadow: 0 2px 8px #000; }
+  #bigplay .hint small { display: block; color: var(--muted); font-weight: 400; margin-top: 6px; }
+  #controls {
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 4px 16px;
+  }
+  #controls button {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    width: 42px; height: 42px; border-radius: 50%; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: border-color .15s, color .15s;
+  }
+  #controls button:hover { border-color: var(--accent); color: var(--accent); }
+  #seek {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 6px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--p, 0%), #2a3040 var(--p, 0%));
+    border-radius: 3px; outline: none; cursor: pointer;
+  }
+  #seek::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px rgba(255,176,0,0.6); cursor: pointer;
+  }
+  #seek::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; border: none;
+    background: var(--accent); cursor: pointer;
+  }
+  .time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 44px; text-align: center; }
+  @media (max-height: 560px) { #topbar { display: none; } }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="pisnicky.html">← Zpěvník</a>
+  <span class="title">Pro každé a existuje b (AC-3)</span>
+  <span class="badge">IMMERSIVE VIDEO</span>
+  <span style="margin-left:auto">mezerník = play/pauza · ←/→ = ±5 s · R = od začátku</span>
+</div>
+
+<div id="stagewrap">
+  <div id="stage">
+    <div id="subtitle"></div>
+    <div id="bigplay">
+      <div class="pbtn">▶</div>
+      <div class="hint">AC-3 — hranová konzistence: definice, fronta, REVISE, neúplnost<small>1 min 54 s · zpívaná videolekce</small></div>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btnPlay" title="Play / pauza">▶</button>
+  <button id="btnRestart" title="Od začátku">⟲</button>
+  <span class="time" id="tCur">0:00</span>
+  <input type="range" id="seek" min="0" max="114.2" step="0.01" value="0">
+  <span class="time" id="tDur">1:54</span>
+</div>
+
+<audio id="player" src="audio/konzistentni-fronta.mp3" preload="auto"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
+<script>
+(async function () {
+'use strict';
+
+// ════════════════════════════════════════════════════════════════════
+// 0) COLORS + helpers
+// ════════════════════════════════════════════════════════════════════
+const C = {
+  bg: 0x0b0e16, gold: 0xffb000, goldHi: 0xffd34d, green: 0x4ade80,
+  pink: 0xf472b6, cyan: 0x7dd3fc, violet: 0xa78bfa, white: 0xffffff,
+  dim: 0x37415a, muted: 0x8b93a7, red: 0xef4444, card: 0x141927,
+};
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - clamp01(t), 3);
+const ph = (t, a, b) => clamp01((t - a) / (b - a));
+
+// ════════════════════════════════════════════════════════════════════
+// 1) CSP INSTANCE + REAL AC-3 RUN (events hand-timed to word anchors)
+//    x₁ < x₂ < x₃, all domains {1,2,3}
+// ════════════════════════════════════════════════════════════════════
+const VX = [230, 560, 890], VY = 340;
+const VNAME = ['x₁', 'x₂', 'x₃'];
+const VALS = [1, 2, 3];
+// Real AC-3 trace (verified by hand): queue [(12),(21),(23),(32)]
+//  revise(1→2): del 3 from D₁ (no re-enqueue: only in-edge (2,1) is from m)
+//  revise(2→1): del 1 from D₂
+//  revise(2→3): del 3 from D₂ → RE-ENQUEUE (1→2); (3→2) skipped (from m)
+//  revise(3→2): del 1, del 2 from D₃
+//  revise(1→2): del 2 from D₁ → queue empty, domains {1},{2},{3}
+// Event kinds: qadd, qpop, qbounce (rejected re-enqueue), chk, del
+const RUN = [
+  { t: 49.2, k: 'qadd', e: '12' },
+  { t: 50.1, k: 'qadd', e: '21' },
+  { t: 51.0, k: 'qadd', e: '23' },
+  { t: 51.9, k: 'qadd', e: '32' },
+  { t: 53.2, k: 'qpop', e: '12' },                       // „vyber (k,m)“
+  { t: 57.6, k: 'chk', v: 0, val: 1, ok: 1, sv: 1, sval: 2 },
+  { t: 59.4, k: 'chk', v: 0, val: 2, ok: 1, sv: 1, sval: 3 },
+  { t: 61.0, k: 'chk', v: 0, val: 3, ok: 0, sv: 1 },
+  { t: 62.57, k: 'del', v: 0, val: 3 },                  // „VEN!“
+  { t: 66.7, k: 'qbounce', e: '21' },                    // „jen tu od m ne!“
+  { t: 69.3, k: 'qpop', e: '21' },
+  { t: 70.2, k: 'chk', v: 1, val: 1, ok: 0, sv: 0 },
+  { t: 71.3, k: 'del', v: 1, val: 1 },                   // „krásný den“
+  // — bridge (72–91.5): běh pauzuje —
+  { t: 91.8, k: 'qpop', e: '23' },
+  { t: 92.8, k: 'chk', v: 1, val: 2, ok: 1, sv: 2, sval: 3 },
+  { t: 94.8, k: 'chk', v: 1, val: 3, ok: 0, sv: 2 },
+  { t: 97.35, k: 'del', v: 1, val: 3 },                  // „VEN!“
+  { t: 99.2, k: 'qadd', e: '12' },                       // RE-ENQUEUE „vrať do fronty“
+  { t: 101.8, k: 'qbounce', e: '32' },                   // „jen tu od m ne!“
+  { t: 103.4, k: 'qpop', e: '32' },
+  { t: 104.1, k: 'chk', v: 2, val: 1, ok: 0, sv: 1 },
+  { t: 104.7, k: 'del', v: 2, val: 1 },                  // „krásný…
+  { t: 105.1, k: 'chk', v: 2, val: 2, ok: 0, sv: 1 },
+  { t: 105.7, k: 'del', v: 2, val: 2 },                  //  …den!“
+  { t: 106.2, k: 'chk', v: 2, val: 3, ok: 1, sv: 1, sval: 2 },
+  { t: 106.8, k: 'qpop', e: '12' },
+  { t: 107.3, k: 'chk', v: 0, val: 1, ok: 1, sv: 1, sval: 2 },
+  { t: 107.9, k: 'chk', v: 0, val: 2, ok: 0, sv: 1 },
+  { t: 108.5, k: 'del', v: 0, val: 2 },
+];
+const EDGE_LABEL = { '12': 'x₁→x₂', '21': 'x₂→x₁', '23': 'x₂→x₃', '32': 'x₃→x₂' };
+// state of run at time t (deterministic)
+function runState(t) {
+  const delT = {};       // 'v:val' -> time deleted
+  const queue = [];      // [{e, tAdd}]
+  const bounces = [];    // [{e, t}]
+  let popped = null;     // {e, t}
+  let check = null;      // active chk
+  for (const ev of RUN) {
+    if (ev.t > t) break;
+    if (ev.k === 'qadd') queue.push({ e: ev.e, tAdd: ev.t });
+    else if (ev.k === 'qpop') {
+      const i = queue.findIndex(q => q.e === ev.e);
+      if (i >= 0) queue.splice(i, 1);
+      popped = { e: ev.e, t: ev.t };
+    }
+    else if (ev.k === 'qbounce') bounces.push({ e: ev.e, t: ev.t });
+    else if (ev.k === 'del') delT[ev.v + ':' + ev.val] = ev.t;
+    else if (ev.k === 'chk') check = { ...ev };
+  }
+  if (check && t > check.t + 1.7) check = null;
+  return { delT, queue, bounces, popped, check };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 2) PIXI SETUP
+// ════════════════════════════════════════════════════════════════════
+const app = new PIXI.Application({ width: 1280, height: 720, antialias: true, background: C.bg });
+document.getElementById('stage').appendChild(app.view);
+const starLayer = new PIXI.Container();
+const sceneLayer = new PIXI.Container();
+const fxLayer = new PIXI.Container();
+app.stage.addChild(starLayer, sceneLayer, fxLayer);
+
+const dotG = new PIXI.Graphics();
+dotG.beginFill(0xffffff, 1).drawCircle(0, 0, 32).endFill();
+const dotTex = app.renderer.generateTexture(dotG);
+const stars = [];
+for (let i = 0; i < 70; i++) {
+  const s = new PIXI.Sprite(dotTex);
+  s.anchor.set(0.5);
+  s.x = Math.random() * 1280; s.y = Math.random() * 720;
+  s.scale.set(0.015 + Math.random() * 0.035);
+  s.alpha = 0.12 + Math.random() * 0.25;
+  s.tint = Math.random() < 0.25 ? C.gold : 0x9fb4ff;
+  s._vy = 2 + Math.random() * 6; s._tw = Math.random() * 6.28;
+  starLayer.addChild(s); stars.push(s);
+}
+const parts = [];
+function burst(x, y, tint, count = 18, speed = 220, size = 0.1) {
+  for (let i = 0; i < count; i++) {
+    const p = new PIXI.Sprite(dotTex);
+    p.anchor.set(0.5); p.x = x; p.y = y; p.tint = tint;
+    p.blendMode = PIXI.BLEND_MODES.ADD;
+    const a = Math.random() * 6.283, v = speed * (0.3 + Math.random() * 0.8);
+    p._vx = Math.cos(a) * v; p._vy = Math.sin(a) * v;
+    p._life = 0.6 + Math.random() * 0.7; p._t = 0;
+    p.scale.set(size * (0.5 + Math.random()));
+    fxLayer.addChild(p); parts.push(p);
+  }
+}
+app.ticker.add(() => {
+  const dt = app.ticker.deltaMS / 1000;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p._t += dt; p.x += p._vx * dt; p.y += p._vy * dt;
+    p._vy += 220 * dt; p.alpha = clamp01(1 - p._t / p._life);
+    if (p._t > p._life) { fxLayer.removeChild(p); p.destroy(); parts.splice(i, 1); }
+  }
+  for (const s of stars) {
+    s.y += s._vy * dt; s._tw += dt * 2;
+    s.alpha = 0.1 + 0.18 * (0.5 + 0.5 * Math.sin(s._tw));
+    if (s.y > 730) { s.y = -10; s.x = Math.random() * 1280; }
+  }
+});
+function txt(str, size, color, weight = '800', family = "'Segoe UI', system-ui, sans-serif") {
+  const t = new PIXI.Text(str, {
+    fontFamily: family, fontSize: size, fill: color, fontWeight: weight,
+    align: 'center', dropShadow: true, dropShadowColor: 0x000000,
+    dropShadowBlur: 8, dropShadowAlpha: 0.6, dropShadowDistance: 2,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  return t;
+}
+const MATH = "'Cambria Math', Cambria, Georgia, serif";
+
+// curved directed edge with arrowhead
+function arcEdge(g, x1, y1, x2, y2, bend, width, color, alpha) {
+  const mx = (x1 + x2) / 2, my = (y1 + y2) / 2;
+  const dx = x2 - x1, dy = y2 - y1, l = Math.hypot(dx, dy);
+  const cx = mx - dy / l * bend, cy = my + dx / l * bend;
+  g.lineStyle(width, color, alpha);
+  g.moveTo(x1, y1);
+  g.quadraticCurveTo(cx, cy, x2, y2);
+  // arrowhead from curve tangent at end
+  const tx = x2 - cx, ty = y2 - cy, tl = Math.hypot(tx, ty);
+  const ux = tx / tl, uy = ty / tl, hs = 10 + width;
+  g.lineStyle(0);
+  g.beginFill(color, alpha);
+  g.moveTo(x2, y2);
+  g.lineTo(x2 - ux * hs - uy * hs * 0.55, y2 - uy * hs + ux * hs * 0.55);
+  g.lineTo(x2 - ux * hs + uy * hs * 0.55, y2 - uy * hs - ux * hs * 0.55);
+  g.closePath().endFill();
+  return { cx, cy };
+}
+function chipPos(v, val) { return { x: VX[v] + (val - 2) * 58, y: VY + 28 }; }
+
+// ════════════════════════════════════════════════════════════════════
+// 3) THE LAB — variable cards + domain chips + queue panel
+//    fully re-rendered from runState(t)  → seek-safe
+// ════════════════════════════════════════════════════════════════════
+function buildLab(c) {
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const chipT = [];
+  for (let v = 0; v < 3; v++) for (const val of VALS) {
+    const t = txt(String(val), 26, 0xffffff, '900');
+    const P = chipPos(v, val); t.x = P.x; t.y = P.y; c.addChild(t);
+    chipT.push({ v, val, t });
+  }
+  const nameT = VNAME.map((nm, v) => {
+    const t = txt(nm, 30, C.cyan, '900', MATH); t.x = VX[v]; t.y = VY - 42; c.addChild(t); return t;
+  });
+  const qTitle = txt('FRONTA Q', 22, C.gold, '900'); qTitle.x = 1130; qTitle.y = 152; c.addChild(qTitle);
+  const qChips = {}; // key e+tAdd index -> text
+  const banner = txt('', 26, C.cyan, '800', MATH); banner.x = 560; banner.y = 116; c.addChild(banner);
+  const bannerSub = txt('', 18, C.muted, '600'); bannerSub.x = 560; bannerSub.y = 150; c.addChild(bannerSub);
+  const fired = new Set();
+  const qSlotY = i => 195 + i * 52;
+
+  function render(t, opts = {}) {
+    const st = runState(t);
+    g.clear();
+    const A = opts.alpha ?? 1;
+    if (A <= 0.01) { c.visible = false; return st; } else c.visible = true;
+    c.alpha = A;
+    // — variable cards —
+    for (let v = 0; v < 3; v++) {
+      g.lineStyle(2, C.dim, 1);
+      g.beginFill(C.card, 0.92);
+      g.drawRoundedRect(VX[v] - 110, VY - 70, 220, 140, 16);
+      g.endFill();
+    }
+    // — constraint arcs (4 oriented edges) —
+    const arcs = {
+      '12': [VX[0] + 95, VY - 50, VX[1] - 95, VY - 50, -46],
+      '21': [VX[1] - 95, VY + 50, VX[0] + 95, VY + 50, -46],
+      '23': [VX[1] + 95, VY - 50, VX[2] - 95, VY - 50, -46],
+      '32': [VX[2] - 95, VY + 50, VX[1] + 95, VY + 50, -46],
+    };
+    const activeE = st.popped && (!st.check || true) ? st.popped.e : null;
+    for (const [e, [ax, ay, bx, by, bd]] of Object.entries(arcs)) {
+      const on = e === activeE;
+      arcEdge(g, ax, ay, bx, by, bd, on ? 5 : 3, on ? C.cyan : C.dim, on ? 1 : 0.8);
+    }
+    // constraint labels
+    // (drawn once as texts? keep simple: re-usable static texts)
+    if (!fired.has('clbl')) {
+      fired.add('clbl');
+      const mk = (s, x, y) => { const tt = txt(s, 22, C.violet, '800', MATH); tt.x = x; tt.y = y; c.addChild(tt); };
+      mk('x₁ < x₂', (VX[0] + VX[1]) / 2, VY - 122);
+      mk('x₂ < x₃', (VX[1] + VX[2]) / 2, VY - 122);
+    }
+    // — REVISE banner —
+    if (st.popped && t < 108.6) {
+      const [k, m] = st.popped.e.split('');
+      banner.text = `REVISE(${EDGE_LABEL[st.popped.e]})`;
+      bannerSub.text = `pro každé a ∈ D${'₁₂₃'[+k - 1]} hledám podporu b ∈ D${'₁₂₃'[+m - 1]}`;
+      banner.alpha = bannerSub.alpha = opts.banner === false ? 0 : 1;
+    } else { banner.alpha = 0; bannerSub.alpha = 0; }
+    // — domain chips —
+    for (const ch of chipT) {
+      const key = ch.v + ':' + ch.val;
+      const dT = st.delT[key];
+      const P = chipPos(ch.v, ch.val);
+      let cx = P.x, cy = P.y, rot = 0, al = 1, col = 0x202a40;
+      const isChk = st.check && st.check.v === ch.v && st.check.val === ch.val;
+      const isSup = st.check && st.check.ok && st.check.sv === ch.v && st.check.sval === ch.val && t > st.check.t + 0.45;
+      if (dT !== undefined && t >= dT) {
+        const p = clamp01((t - dT) / 1.15);
+        cy += 470 * p * p; rot = p * (ch.val % 2 ? 2.3 : -2.0); al = 1 - p;
+        col = C.red;
+        if (!fired.has('d' + key)) { fired.add('d' + key); burst(P.x, P.y, C.red, 24, 280, 0.11); }
+      } else if (isChk) {
+        col = st.check.ok ? 0x14532d : 0x7f1d1d;
+      } else if (isSup) col = 0x14532d;
+      g.lineStyle(2, dT !== undefined && t >= dT ? C.red : (isChk ? (st.check.ok ? C.green : C.red) : 0x3b4663), al);
+      g.beginFill(col, 0.95 * al);
+      // rotated chip via manual polygon when falling (cheap: small rect rotation skipped — draw at offset)
+      g.drawRoundedRect(cx - 22, cy - 22, 44, 44, 9);
+      g.endFill();
+      ch.t.x = cx; ch.t.y = cy; ch.t.alpha = al; ch.t.rotation = rot;
+      // support line
+      if (isChk && st.check.ok && t > st.check.t + 0.3) {
+        const S = chipPos(st.check.sv, st.check.sval);
+        const lp = ph(t, st.check.t + 0.3, st.check.t + 0.7);
+        g.lineStyle(4, C.green, 0.9);
+        g.moveTo(P.x, P.y);
+        g.lineTo(lerp(P.x, S.x, easeOut(lp)), lerp(P.y, S.y, easeOut(lp)));
+        if (lp >= 1 && !fired.has('s' + key + st.check.t)) { fired.add('s' + key + st.check.t); burst(S.x, S.y, C.green, 8, 130, 0.07); }
+      }
+      if (isChk && !st.check.ok && t > st.check.t + 0.3) {
+        // failing sweep: red lines to every living chip of D_m
+        g.lineStyle(3, C.red, 0.55);
+        for (const val2 of VALS) {
+          if (st.delT[st.check.sv + ':' + val2] !== undefined && t >= st.delT[st.check.sv + ':' + val2]) continue;
+          const S = chipPos(st.check.sv, val2);
+          g.moveTo(P.x, P.y); g.lineTo(S.x, S.y);
+        }
+      }
+    }
+    // — queue panel —
+    g.lineStyle(2, C.gold, 0.5);
+    g.beginFill(0x161208, 0.6);
+    g.drawRoundedRect(1042, 170, 176, 290, 14);
+    g.endFill();
+    // queue chips (texts created lazily, positioned per state)
+    st.queue.forEach((q, i) => {
+      const id = q.e + '@' + q.tAdd;
+      if (!qChips[id]) {
+        const tt = txt(EDGE_LABEL[q.e], 21, 0xffffff, '800', MATH);
+        c.addChild(tt); qChips[id] = tt;
+      }
+      const tt = qChips[id];
+      const inP = easeOut(ph(t, q.tAdd, q.tAdd + 0.6));
+      tt.x = lerp(700, 1130, inP); tt.y = qSlotY(i); tt.alpha = inP * A;
+      g.lineStyle(2, q.tAdd > 95 ? C.pink : 0x4a3b14, tt.alpha);
+      g.beginFill(0x1f1a0c, 0.9 * tt.alpha);
+      g.drawRoundedRect(tt.x - 72, tt.y - 19, 144, 38, 8);
+      g.endFill();
+      if (q.tAdd > 95 && inP >= 1 && !fired.has('re' + id)) { fired.add('re' + id); burst(1130, qSlotY(i), C.pink, 16, 180, 0.09); }
+    });
+    // hide texts of chips no longer in queue
+    for (const id of Object.keys(qChips)) {
+      if (!st.queue.find(q => q.e + '@' + q.tAdd === id)) qChips[id].alpha = 0;
+    }
+    // bounce animation (rejected (m,k) re-enqueue)
+    for (const b of st.bounces) {
+      const p = (t - b.t) / 1.4;
+      if (p < 0 || p > 1) continue;
+      const [k] = b.e.split('');
+      const from = { x: VX[+k - 1], y: VY };
+      const target = { x: 1064, y: 195 };
+      let bx2, by2;
+      if (p < 0.45) { const q2 = easeOut(p / 0.45); bx2 = lerp(from.x, target.x, q2); by2 = lerp(from.y, target.y, q2); }
+      else { const q2 = easeOut((p - 0.45) / 0.55); bx2 = lerp(target.x, from.x - 60, q2); by2 = lerp(target.y, from.y + 140, q2); }
+      const al2 = p < 0.45 ? 1 : 1 - (p - 0.45) / 0.55;
+      g.lineStyle(2, C.red, al2);
+      g.beginFill(0x2a1010, 0.9 * al2);
+      g.drawRoundedRect(bx2 - 72, by2 - 19, 144, 38, 8);
+      g.endFill();
+      if (!fired.has('bt' + b.t)) {
+        fired.add('bt' + b.t);
+        const tt = txt(EDGE_LABEL[b.e], 21, C.red, '800', MATH); tt._bounce = b.t; c.addChild(tt); qChips['b' + b.t] = tt;
+      }
+      const tt = qChips['b' + b.t];
+      if (tt) { tt.x = bx2; tt.y = by2; tt.alpha = al2; }
+      if (p > 0.45 && p < 0.6 && !fired.has('bx' + b.t)) { fired.add('bx' + b.t); burst(target.x, target.y, C.red, 18, 220, 0.1); }
+      if (p > 0.45 && p < 1) {
+        // NE! stamp
+        if (!fired.has('bn' + b.t)) { fired.add('bn' + b.t); const ne = txt('to je od m — NE!', 24, C.red, '900'); ne.x = 1000; ne.y = 130; ne.rotation = -0.08; ne._bounce = b.t; c.addChild(ne); qChips['n' + b.t] = ne; }
+        const ne = qChips['n' + b.t]; if (ne) ne.alpha = al2;
+      } else if (qChips['n' + b.t]) qChips['n' + b.t].alpha = Math.max(0, qChips['n' + b.t].alpha - 0.05);
+    }
+    return st;
+  }
+  return { render };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 4) SCENES
+// ════════════════════════════════════════════════════════════════════
+const scenes = [];
+function scene(t0, t1, build) {
+  const s = { t0, t1, st: null };
+  s.init = () => { s.st = build(); sceneLayer.addChild(s.st.c); };
+  s.update = (lt) => s.st && s.st.update(lt);
+  s.destroy = () => { if (s.st) { sceneLayer.removeChild(s.st.c); s.st.c.destroy({ children: true }); s.st = null; } };
+  scenes.push(s);
+  return s;
+}
+function caption(c, str, color = C.gold, y = 48, size = 28) {
+  const t = txt(str, size, color, '800');
+  t.x = 640; t.y = y; c.addChild(t);
+  return t;
+}
+function makeC() { const c = new PIXI.Container(); const g = new PIXI.Graphics(); c.addChild(g); return { c, g }; }
+
+// ── INTRO [0 – 6.9] — Hej! beat punches ──
+scene(0, 6.9, () => {
+  const { c, g } = makeC();
+  const t1 = txt('AC-3', 130, C.gold, '900'); t1.x = 640; t1.y = 250; t1.alpha = 0;
+  const t2 = txt('hranová konzistence', 42, 0xdfe6f5, '700'); t2.x = 640; t2.y = 360; t2.alpha = 0;
+  const t3 = txt('∀a ∃b', 56, C.cyan, '900', MATH); t3.x = 640; t3.y = 460; t3.alpha = 0;
+  c.addChild(t1, t2, t3);
+  const beats = [0.01, 0.30, 0.60, 1.0];
+  const fired = new Set();
+  return { c, update(lt) {
+    beats.forEach((b, i) => {
+      if (lt > b && !fired.has(i)) { fired.add(i); burst(340 + i * 200, 250, [C.gold, C.cyan, C.pink, C.violet][i], 22, 280, 0.12); }
+    });
+    t1.alpha = easeOut(ph(lt, 0.2, 1.0));
+    t1.scale.set(lerp(1.6, 1, easeOut(ph(lt, 0.2, 1.2))) * (1 + 0.05 * Math.max(0, Math.sin(lt * 7))));
+    t2.alpha = easeOut(ph(lt, 1.4, 2.2));
+    t3.alpha = easeOut(ph(lt, 2.6, 3.4));
+    t3.scale.set(1 + 0.06 * Math.sin(lt * 5));
+    g.clear();
+  } };
+});
+
+// ── VERSE 1: DEFINICE [6.9 – 24.27] ──
+scene(6.9, 24.27, () => {
+  const { c, g } = makeC();
+  const cap = caption(c, 'KDY je hrana (xᵢ → xⱼ) konzistentní?', C.cyan, 48, 30);
+  const XI = { x: 400, y: 380 }, XJ = { x: 880, y: 380 };
+  const niT = txt('xᵢ', 34, C.cyan, '900', MATH); niT.x = XI.x; niT.y = XI.y - 96;
+  const njT = txt('xⱼ', 34, C.cyan, '900', MATH); njT.x = XJ.x; njT.y = XJ.y - 96;
+  c.addChild(niT, njT);
+  const chipsI = VALS.map((v, i) => { const t = txt('a' + '₁₂₃'[i], 24, 0xffffff, '800', MATH); t.x = XI.x + (i - 1) * 64; t.y = XI.y; c.addChild(t); return t; });
+  const chipsJ = VALS.map((v, i) => { const t = txt('b' + '₁₂₃'[i], 24, 0xffffff, '800', MATH); t.x = XJ.x + (i - 1) * 64; t.y = XJ.y; c.addChild(t); return t; });
+  const forall = txt('∀ pro KAŽDOU hodnotu a ∈ Dᵢ', 32, C.gold, '900', MATH); forall.x = 640; forall.y = 540; forall.alpha = 0; c.addChild(forall);
+  const exists = txt('∃ EXISTUJE podpora b ∈ Dⱼ', 32, C.green, '900', MATH); exists.x = 640; exists.y = 600; exists.alpha = 0; c.addChild(exists);
+  const omez = txt('…tak, že (a, b) splní omezení C', 26, C.violet, '700', MATH); omez.x = 640; omez.y = 656; omez.alpha = 0; c.addChild(omez);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 6.9;
+    g.clear();
+    // cards
+    [[XI, 'i'], [XJ, 'j']].forEach(([P]) => {
+      g.lineStyle(2, C.dim, 1);
+      g.beginFill(C.card, 0.92).drawRoundedRect(P.x - 125, P.y - 64, 250, 128, 16).endFill();
+    });
+    // edge
+    const eIn = easeOut(ph(lt, 7.2, 8.6));
+    if (eIn > 0) arcEdge(g, XI.x + 110, XI.y - 46, lerp(XI.x + 130, XJ.x - 110, eIn), XI.y - 46 - 30 * Math.sin(eIn * Math.PI), -40, 4, C.cyan, 0.95);
+    // chips
+    const sweep = lt >= 12.96 && lt < 16.0 ? Math.floor(ph(lt, 12.96, 15.9) * 3) : -1;
+    chipsI.forEach((t, i) => {
+      const on = sweep === i;
+      g.lineStyle(2, on ? C.gold : 0x3b4663, 1);
+      g.beginFill(on ? 0x4a3608 : 0x202a40, 0.95).drawRoundedRect(t.x - 26, t.y - 24, 52, 48, 9).endFill();
+      t.scale.set(on ? 1.18 : 1);
+      if (on && !fired.has('sw' + i)) { fired.add('sw' + i); burst(t.x, t.y, C.gold, 8, 130, 0.07); }
+    });
+    const supOn = lt >= 16.0;
+    chipsJ.forEach((t, i) => {
+      const hl = supOn && i === 1 && lt < 19.7; // b₂ jako ukázková podpora
+      g.lineStyle(2, hl ? C.green : 0x3b4663, 1);
+      g.beginFill(hl ? 0x14532d : 0x202a40, 0.95).drawRoundedRect(t.x - 26, t.y - 24, 52, 48, 9).endFill();
+    });
+    // support lines during ∃
+    if (supOn && lt < 19.7) {
+      const lp = ph(lt, 16.2, 17.4);
+      g.lineStyle(4, C.green, 0.9);
+      chipsI.forEach((t) => {
+        g.moveTo(t.x, t.y);
+        g.lineTo(lerp(t.x, chipsJ[1].x, easeOut(lp)), lerp(t.y, chipsJ[1].y, easeOut(lp)));
+      });
+      if (lp >= 1 && !fired.has('sup')) { fired.add('sup'); burst(chipsJ[1].x, chipsJ[1].y, C.green, 16, 180, 0.09); }
+    }
+    forall.alpha = lt >= 12.9 ? easeOut(ph(lt, 12.9, 13.6)) : 0;
+    exists.alpha = lt >= 16.0 ? easeOut(ph(lt, 16.0, 16.8)) : 0;
+    omez.alpha = lt >= 19.7 ? easeOut(ph(lt, 19.7, 20.6)) : 0;
+    if (lt >= 19.7 && !fired.has('om')) { fired.add('om'); burst(640, 656, C.violet, 14, 160, 0.08); }
+    if (lt >= 22.0) cap.text = '…to musí platit pro VŠECHNA a — tak zní ty věty!';
+  } };
+});
+
+// ── CHORUS factory (anchors per chorus, with live lab in 2nd/3rd) ──
+// an = { a:∀a∃b, pod: 'kdo podporu nemá', ven, maz: 'mazal jsi v D_k', vrat, ne, ac, den }
+function chorusScene(t0, t1, an, withLab) {
+  scene(t0, t1, () => {
+    const { c, g } = makeC();
+    let lab = null;
+    if (withLab) { const lc = new PIXI.Container(); lc.y = 60; c.addChild(lc); lab = buildLab(lc); }
+    const w1 = txt('∀a ∃b', withLab ? 56 : 96, C.cyan, '900', MATH); w1.x = withLab ? 200 : 640; w1.y = withLab ? 60 : 200; w1.alpha = 0;
+    const w2 = txt('kdo podporu nemá…', withLab ? 30 : 44, 0xdfe6f5, '800'); w2.x = withLab ? 560 : 640; w2.y = withLab ? 50 : 320; w2.alpha = 0;
+    const w3 = txt('z domény jde VEN!', withLab ? 34 : 60, C.red, '900'); w3.x = withLab ? 560 : 640; w3.y = withLab ? 86 : 400; w3.alpha = 0;
+    const q1 = txt('škrtáš v Dₖ? → vrať hrany DO k', withLab ? 28 : 40, C.gold, '800', MATH); q1.x = withLab ? 590 : 640; q1.y = withLab ? 50 : 280; q1.alpha = 0;
+    const q2 = txt('jen tu od m NE!', withLab ? 30 : 52, C.red, '900'); q2.x = withLab ? 950 : 640; q2.y = withLab ? 88 : 380; q2.alpha = 0;
+    const ac = txt('AC-3', withLab ? 44 : 110, C.gold, '900'); ac.x = withLab ? 200 : 640; ac.y = withLab ? 96 : 300; ac.alpha = 0;
+    const den = txt('krásný den! ☀', withLab ? 30 : 50, C.goldHi, '800'); den.x = withLab ? 200 : 640; den.y = withLab ? 140 : 430; den.alpha = 0;
+    c.addChild(w1, w2, w3, q1, q2, ac, den);
+    // demo chip ejection for chorus 1 (no lab yet)
+    const demo = !withLab ? txt('7', 30, 0xffffff, '900') : null;
+    if (demo) { demo.x = 640; demo.y = 520; c.addChild(demo); }
+    const fired = new Set();
+    return { c, update(lt0) {
+      const lt = lt0 + t0;
+      const inA = lt < an.maz;
+      w1.alpha = lt > an.a ? 1 : 0;
+      if (lt > an.a && !fired.has('a')) { fired.add('a'); burst(w1.x, w1.y, C.cyan, 26, 280, 0.13); }
+      w1.scale.set(1 + 0.05 * Math.sin(lt * 6) * w1.alpha);
+      w2.alpha = lt > an.pod && inA ? 1 : (inA ? 0 : Math.max(0, w2.alpha - 0.06));
+      w3.alpha = lt > an.ven - 0.15 && inA ? 1 : (inA ? 0 : Math.max(0, w3.alpha - 0.06));
+      if (lt > an.ven && !fired.has('ven')) { fired.add('ven'); burst(w3.x, w3.y, C.red, 26, 300, 0.12); }
+      w3.scale.set(lerp(1.6, 1, easeOut(ph(lt, an.ven - 0.15, an.ven + 0.35))));
+      const inB = lt >= an.maz;
+      q1.alpha = inB && lt > an.maz ? 1 : 0;
+      if (inB && lt > an.maz && !fired.has('q1')) { fired.add('q1'); burst(q1.x, q1.y, C.gold, 18, 220, 0.1); }
+      q2.alpha = inB && lt > an.ne ? 1 : 0;
+      if (inB && lt > an.ne && !fired.has('q2')) { fired.add('q2'); burst(q2.x, q2.y, C.red, 18, 240, 0.1); }
+      q2.rotation = -0.06; q2.scale.set(lerp(1.5, 1, easeOut(ph(lt, an.ne, an.ne + 0.4))));
+      ac.alpha = lt > an.ac ? 1 : 0;
+      if (lt > an.ac && !fired.has('ac')) { fired.add('ac'); burst(ac.x, ac.y, C.gold, 26, 300, 0.13); }
+      den.alpha = lt > an.den ? 1 : 0;
+      if (lt > an.den && !fired.has('den')) { fired.add('den'); burst(den.x, den.y, C.goldHi, 30, 320, 0.13); }
+      // chorus 1 demo: a value chip gets ejected on "VEN!"
+      if (demo) {
+        const p = ph(lt, an.ven, an.ven + 1.2);
+        demo.x = 640 + 420 * easeOut(p); demo.y = 520 + 160 * p * p; demo.rotation = p * 2.5;
+        demo.alpha = 1 - p;
+        g.clear();
+        g.lineStyle(2, p > 0 ? C.red : 0x3b4663, demo.alpha);
+        g.beginFill(p > 0 ? 0x7f1d1d : 0x202a40, 0.95 * demo.alpha);
+        g.drawRoundedRect(demo.x - 24, demo.y - 24, 48, 48, 9);
+        g.endFill();
+      }
+      if (lab) lab.render(lt, { banner: true });
+    } };
+  });
+}
+// CH1 — bez labu, čisté hesla (word anchors)
+chorusScene(24.27, 40.0, { a: 24.35, pod: 26.6, ven: 30.54, maz: 31.0, vrat: 33.2, ne: 35.2, ac: 37.4, den: 39.12 }, false);
+
+// ── VERSE 2: SMĚR + FRONTA [40 – 57.13] ──
+scene(40.0, 57.13, () => {
+  const { c, g } = makeC();
+  const cap = caption(c, '');
+  const labC = new PIXI.Container(); labC.y = 60; c.addChild(labC);
+  const lab = buildLab(labC);
+  // direction demo overlay (40–49)
+  const dir = new PIXI.Container(); c.addChild(dir);
+  const XI = { x: 440, y: 350 }, XJ = { x: 840, y: 350 };
+  const d1 = txt('(i → j)  ✓', 40, C.green, '900', MATH); d1.x = 640; d1.y = 210; d1.alpha = 0; dir.addChild(d1);
+  const d2 = txt('(j → i)  ?', 40, C.red, '900', MATH); d2.x = 640; d2.y = 500; d2.alpha = 0; dir.addChild(d2);
+  const dg = new PIXI.Graphics(); dir.addChildAt(dg, 0);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 40.0;
+    const inDir = lt < 49.0;
+    dir.visible = inDir;
+    if (inDir) {
+      cap.text = lt < 45 ? 'POZOR: hrana má SMĚR!' : '(i,j) konzistentní ⇏ (j,i) konzistentní';
+      cap.style.fill = C.red;
+      dg.clear();
+      [[XI, 'xᵢ'], [XJ, 'xⱼ']].forEach(([P]) => {
+        dg.lineStyle(2, C.dim, 1);
+        dg.beginFill(C.card, 0.92).drawCircle(P.x, P.y, 52).endFill();
+      });
+      arcEdge(dg, XI.x + 40, XI.y - 38, XJ.x - 40, XJ.y - 38, -52, 5, lt > 41.2 ? C.green : C.dim, 1);
+      arcEdge(dg, XJ.x - 40, XJ.y + 38, XI.x + 40, XI.y + 38, -52, 5, lt > 45.0 ? C.red : C.dim, 1);
+      d1.alpha = easeOut(ph(lt, 41.2, 42.0));
+      d2.alpha = easeOut(ph(lt, 45.0, 45.8));
+      d2.scale.set(1 + 0.06 * Math.sin(lt * 7) * d2.alpha);
+      if (lt > 45.1 && !fired.has('d2')) { fired.add('d2'); burst(640, 500, C.red, 20, 240, 0.11); }
+      lab.render(lt, { alpha: 0 });
+    } else {
+      cap.text = lt < 53 ? 'Q := všechny ORIENTOVANÉ hrany' : 'vyber (k,m) z fronty → zavolej REVISE';
+      cap.style.fill = C.gold;
+      lab.render(lt, { alpha: 1 });
+      if (lt > 49.3 && !fired.has('q')) { fired.add('q'); burst(1130, 200, C.gold, 18, 220, 0.1); }
+    }
+  } };
+});
+
+// CH2 — S LIVE BĚHEM: první REVISE, škrt na „VEN!“, bounce (x₂→x₁) na „NE!“
+chorusScene(57.13, 72.0, { a: 57.2, pod: 58.6, ven: 62.57, maz: 63.0, vrat: 64.6, ne: 66.7, ac: 69.3, den: 70.0 }, true);
+
+// ── BRIDGE [72 – 91.51] — fail · spící hrana · neúplnost ──
+scene(72.0, 91.51, () => {
+  const { c, g } = makeC();
+  const cap = caption(c, '');
+  // A) empty domain fail
+  const failT = txt('FAIL', 100, C.red, '900'); failT.x = 640; failT.y = 330; failT.alpha = 0; c.addChild(failT);
+  const failS = txt('prázdná doména ⇒ v téhle větvi řešení NENÍ — jdi domů', 26, C.muted, '700'); failS.x = 640; failS.y = 430; failS.alpha = 0; c.addChild(failS);
+  const fchips = VALS.map((v, i) => { const t = txt(String(v), 26, 0xffffff, '900'); t.x = 540 + i * 100; t.y = 240; c.addChild(t); return t; });
+  // B) sleeping edge
+  const zzz = txt('(m, k) klidně spí… Zzz', 36, C.violet, '800', MATH); zzz.x = 640; zzz.y = 480; zzz.alpha = 0; c.addChild(zzz);
+  // C) incompleteness triangle
+  const tri = new PIXI.Container(); tri.alpha = 0; c.addChild(tri);
+  const tg = new PIXI.Graphics(); tri.addChild(tg);
+  const TP = [{ x: 640, y: 200 }, { x: 460, y: 480 }, { x: 820, y: 480 }];
+  const tnames = ['x', 'y', 'z'].map((nm, i) => { const t = txt(nm + ': {1,2}', 26, C.cyan, '800', MATH); t.x = TP[i].x + (i === 0 ? 0 : (i === 1 ? -95 : 95)); t.y = TP[i].y + (i === 0 ? -62 : 50); tri.addChild(t); return t; });
+  const stamp = txt('AC JE NEÚPLNÁ!', 64, C.red, '900'); stamp.x = 640; stamp.y = 620; stamp.alpha = 0; stamp.rotation = -0.04; c.addChild(stamp);
+  const nez = txt('všechno konzistentní — a řešení ŽÁDNÉ', 26, 0xdfe6f5, '700'); nez.x = 640; nez.y = 560; nez.alpha = 0; c.addChild(nez);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 72.0;
+    g.clear();
+    const inA = lt < 77.0, inB = lt < 81.0;
+    // A: chips shatter rapidly, FAIL on word
+    if (inA) {
+      cap.text = 'Co když REVISE smaže ÚPLNĚ VŠECHNO?'; cap.style.fill = C.red;
+      fchips.forEach((t, i) => {
+        const dT = 73.4 + i * 0.45;
+        let cy = 240, rot = 0, al = 1;
+        if (lt >= dT) {
+          const p = clamp01((lt - dT) / 1.0);
+          cy += 380 * p * p; rot = p * 2.2; al = 1 - p;
+          if (!fired.has('f' + i)) { fired.add('f' + i); burst(t.x, 240, C.red, 18, 240, 0.1); }
+        }
+        t.y = cy; t.rotation = rot; t.alpha = al;
+        g.lineStyle(2, lt >= dT ? C.red : 0x3b4663, al);
+        g.beginFill(lt >= dT ? 0x7f1d1d : 0x202a40, 0.95 * al).drawRoundedRect(t.x - 24, t.y - 24, 48, 48, 9).endFill();
+      });
+      g.lineStyle(3, C.red, 0.8);
+      g.drawRoundedRect(470, 190, 340, 100, 14);
+      failT.alpha = lt > 75.0 ? 1 : 0;
+      failT.scale.set(lerp(2.2, 1, easeOut(ph(lt, 75.0, 75.5))));
+      if (lt > 75.0 && !fired.has('fail')) { fired.add('fail'); burst(640, 330, C.red, 40, 360, 0.15); }
+      failS.alpha = easeOut(ph(lt, 75.6, 76.4));
+    } else { failT.alpha = Math.max(0, failT.alpha - 0.08); failS.alpha = 0; fchips.forEach(t => t.alpha = 0); }
+    // B: sleeping edge
+    if (!inA && inB) {
+      cap.text = 'REVISE(k,m) škrtá jen v Dₖ — hraně (m,k) nesáhne'; cap.style.fill = C.violet;
+      const K = { x: 440, y: 330 }, M = { x: 840, y: 330 };
+      g.lineStyle(2, C.dim, 1);
+      g.beginFill(C.card, 0.92).drawCircle(K.x, K.y, 50).endFill();
+      g.beginFill(C.card, 0.92).drawCircle(M.x, M.y, 50).endFill();
+      const sweepP = (lt * 0.7) % 1;
+      arcEdge(g, K.x + 38, K.y - 36, M.x - 38, M.y - 36, -50, 5, C.cyan, 1);
+      g.beginFill(C.cyan, 1).drawCircle(lerp(K.x + 38, M.x - 38, sweepP), K.y - 70 + 24 * Math.abs(sweepP - 0.5) * 2, 7).endFill();
+      arcEdge(g, M.x - 38, M.y + 36, K.x + 38, K.y + 36, -50, 4, 0x3b4663, 0.7);
+      zzz.alpha = lt > 80.2 ? 1 : easeOut(ph(lt, 78.5, 79.3)) * 0.7;
+      zzz.y = 480 - 6 * Math.sin(lt * 2);
+      if (lt > 80.2 && !fired.has('z')) { fired.add('z'); burst(640, 480, C.violet, 14, 150, 0.08); }
+    } else zzz.alpha = Math.max(0, zzz.alpha - 0.06);
+    // C: triangle incompleteness
+    if (lt >= 81.0) {
+      cap.text = lt < 87.0 ? 'Trojúhelník: x≠y, y≠z, x≠z — domény {1,2}' : 'konzistence hran ti ŘEŠENÍ NEZARUČÍ';
+      cap.style.fill = lt < 87.0 ? C.cyan : C.red;
+      tri.alpha = Math.min(1, tri.alpha + 0.07);
+      tg.clear();
+      const eP = [[0, 1], [1, 2], [2, 0]];
+      eP.forEach(([a, b], i) => {
+        const ok = ph(lt, 82.2 + i * 0.8, 82.8 + i * 0.8);
+        tg.lineStyle(5, ok >= 1 ? C.green : C.dim, 0.9);
+        tg.moveTo(TP[a].x, TP[a].y); tg.lineTo(TP[b].x, TP[b].y);
+        if (ok >= 1 && !fired.has('e' + i)) { fired.add('e' + i); burst((TP[a].x + TP[b].x) / 2, (TP[a].y + TP[b].y) / 2, C.green, 10, 140, 0.08); }
+      });
+      TP.forEach((P, i) => {
+        // assignment attempt at 85–87: x=1, y=2, z=??
+        let col = C.card, ring = C.dim;
+        if (lt > 85.0 && i === 0) { col = 0x14532d; ring = C.green; }
+        if (lt > 85.7 && i === 1) { col = 0x14532d; ring = C.green; }
+        if (lt > 86.4 && i === 2) { col = 0x7f1d1d; ring = C.red; }
+        tg.lineStyle(3, ring, 1);
+        tg.beginFill(col, 0.95).drawCircle(P.x, P.y, 44).endFill();
+      });
+      if (lt > 86.4 && !fired.has('zfail')) { fired.add('zfail'); burst(TP[2].x, TP[2].y, C.red, 26, 280, 0.12); }
+      // labels on attempt
+      nez.alpha = easeOut(ph(lt, 85.0, 86.0));
+      stamp.alpha = lt > 87.5 ? 1 : 0;
+      stamp.scale.set(lerp(2.0, 1, easeOut(ph(lt, 87.5, 88.1))) * (1 + 0.04 * Math.sin(lt * 8)));
+      if (lt > 87.5 && !fired.has('stamp')) { fired.add('stamp'); burst(640, 620, C.red, 40, 360, 0.15); }
+    }
+  } };
+});
+
+// CH3 — LIVE BĚH part 2: revise(2→3) škrt na „VEN!“, RE-ENQUEUE (1→2), bounce (3→2), finiš
+chorusScene(91.51, 107.0, { a: 91.6, pod: 94.3, ven: 97.32, maz: 98.0, vrat: 99.2, ne: 101.8, ac: 103.9, den: 104.58 }, true);
+
+// ── OUTRO [107 – 114.2+] — fronta prázdná, jediné řešení ──
+scene(107.0, 116, () => {
+  const { c } = makeC();
+  const labC = new PIXI.Container(); labC.y = 30; c.addChild(labC);
+  const lab = buildLab(labC);
+  const done = txt('Q = ∅  →  KONZISTENTNÍ ✓', 40, C.green, '900', MATH); done.x = 640; done.y = 560; done.alpha = 0; c.addChild(done);
+  const sol = txt('zbylo jediné řešení:  x₁=1 < x₂=2 < x₃=3', 30, C.goldHi, '800', MATH); sol.x = 640; sol.y = 620; sol.alpha = 0; c.addChild(sol);
+  const fin = txt('Hotovo. Oditeruj na papír — L6.3', 20, C.muted, '600'); fin.x = 640; fin.y = 668; fin.alpha = 0; c.addChild(fin);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 107.0;
+    lab.render(lt, { banner: lt < 109 });
+    done.alpha = easeOut(ph(lt, 109.3, 110.3));
+    done.scale.set(1 + 0.03 * Math.sin(lt * 4));
+    sol.alpha = easeOut(ph(lt, 110.6, 111.6));
+    fin.alpha = easeOut(ph(lt, 112.5, 113.5));
+    if (lt > 109.5 && !fired.has('d')) { fired.add('d'); burst(640, 560, C.green, 34, 320, 0.14); }
+    if (lt > 110.8 && !fired.has('s')) {
+      fired.add('s');
+      [0, 1, 2].forEach(v => { const P = chipPos(v, v + 1); burst(P.x, P.y + 30, C.goldHi, 20, 240, 0.11); });
+    }
+  } };
+});
+
+// ════════════════════════════════════════════════════════════════════
+// 5) SUBTITLES (whisper word-level synced; lines per plan/SUNO_PISNICKY.md)
+// ════════════════════════════════════════════════════════════════════
+const M_ = s => `<span class="m">${s}</span>`;
+const LINES = [
+  [0.0, 4.0, `Hej, hej, hej!`],
+  [6.0, 12.0, `Hrana z ${M_('x<sub>i</sub>')} do ${M_('x<sub>j</sub>')} je konzistentní jenom tehdy,`],
+  [12.0, 16.0, `když pro KAŽDOU hodnotu ${M_('a')} z domény ${M_('D<sub>i</sub>')}`],
+  [16.0, 19.0, `EXISTUJE ${M_('b')} v doméně ${M_('D<sub>j</sub>')},`],
+  [19.0, 24.2, `že spolu splní všechna omezení — tak zní ty věty!`],
+  [24.27, 31.0, `Pro každé ${M_('a')} existuje ${M_('b')} — kdo podporu nemá, z domény jde ven!`],
+  [31.0, 40.0, `Mazal jsi v doméně ${M_('k')}? Vrať do fronty hrany DO ${M_('k')} — jen tu od ${M_('m')} ne! AC-3, krásný den!`],
+  [40.0, 45.0, `A pozor: hrana má SMĚR, to si pamatuj —`],
+  [45.0, 49.0, `${M_('(i,j)')} konzistentní neznamená ${M_('(j,i)')}, aleluj!`],
+  [49.0, 53.0, `Fronta startuje se všemi orientovanými hranami,`],
+  [53.0, 57.1, `vyber ${M_('(k,m)')}, zavolej REVISE — a co s mazáními?`],
+  [57.13, 63.0, `Pro každé ${M_('a')} existuje ${M_('b')} — kdo podporu nemá, z domény jde ven!`],
+  [63.0, 72.0, `Mazal jsi v doméně ${M_('k')}? Vrať do fronty hrany DO ${M_('k')} — jen tu od ${M_('m')} ne! AC-3, krásný den!`],
+  [72.5, 77.0, `Prázdná doména? Fail — jdi domů, konec hry.`],
+  [77.0, 81.0, `Revize ${M_('(k,m)')} nerozbije hranu ${M_('(m,k)')} — ta klidně spí.`],
+  [81.0, 85.0, `A závěr zrádný, ten si vryj do hlavy:`],
+  [85.0, 87.0, `konzistence hran ti ŘEŠENÍ NEZARUČÍ —`],
+  [87.0, 91.5, `AC je neúplná, tak to ber!`],
+  [91.51, 98.0, `Pro každé ${M_('a')} existuje ${M_('b')} — kdo podporu nemá, z domény jde ven!`],
+  [98.0, 107.0, `Mazal jsi v doméně ${M_('k')}? Vrať do fronty hrany DO ${M_('k')} — jen tu od ${M_('m')} ne! AC-3, krásný den!`],
+  [107.0, 113.0, `Revize ${M_('(k,m)')} nerozbije hranu ${M_('(m,k)')} — ta klidně spí!`],
+  [113.0, 115.0, `A závěr zrádný, ten si vryj do hlavy…`],
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 6) PLAYER / SCENE MANAGER / CONTROLS
+// ════════════════════════════════════════════════════════════════════
+const player = document.getElementById('player');
+const subEl = document.getElementById('subtitle');
+const bigplay = document.getElementById('bigplay');
+const btnPlay = document.getElementById('btnPlay');
+const btnRestart = document.getElementById('btnRestart');
+const seek = document.getElementById('seek');
+const tCur = document.getElementById('tCur');
+const tDur = document.getElementById('tDur');
+
+let curScene = null, lastLocal = -1, curLine = -1;
+function tick() {
+  const t = player.currentTime;
+  const s = scenes.find(sc => t >= sc.t0 && t < sc.t1) || scenes[scenes.length - 1];
+  if (s !== curScene) { curScene && curScene.destroy(); curScene = s; s.init(); lastLocal = -1; }
+  const localT = t - s.t0;
+  if (localT < lastLocal - 0.05) { s.destroy(); s.init(); }
+  s.update(localT);
+  lastLocal = localT;
+  const li = LINES.findIndex(([a, b]) => t >= a && t < b);
+  if (li !== curLine) {
+    curLine = li;
+    subEl.innerHTML = li >= 0 ? LINES[li][2] : '';
+    subEl.style.opacity = li >= 0 ? 1 : 0;
+  }
+  if (!seekDragging) {
+    seek.value = t;
+    seek.style.setProperty('--p', (t / (player.duration || 114.2) * 100) + '%');
+  }
+  tCur.textContent = fmtTime(t);
+  requestAnimationFrame(tick);
+}
+function fmtTime(t) { t = Math.max(0, t || 0); return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`; }
+
+let seekDragging = false;
+seek.addEventListener('input', () => {
+  seekDragging = true;
+  player.currentTime = +seek.value;
+  seek.style.setProperty('--p', (+seek.value / (player.duration || 114.2) * 100) + '%');
+});
+seek.addEventListener('change', () => { seekDragging = false; });
+function togglePlay() { if (player.paused) player.play(); else player.pause(); }
+player.addEventListener('play', () => { btnPlay.textContent = '⏸'; bigplay.classList.add('hidden'); });
+player.addEventListener('pause', () => { btnPlay.textContent = '▶'; if (player.currentTime < 0.05 || player.ended) bigplay.classList.remove('hidden'); });
+player.addEventListener('ended', () => { bigplay.classList.remove('hidden'); bigplay.querySelector('.hint').innerHTML = 'Ještě jednou?<small>R = od začátku</small>'; });
+player.addEventListener('loadedmetadata', () => {
+  seek.max = player.duration;
+  tDur.textContent = fmtTime(player.duration);
+});
+btnPlay.addEventListener('click', togglePlay);
+btnRestart.addEventListener('click', () => { player.currentTime = 0; player.play(); });
+bigplay.addEventListener('click', () => { player.play(); });
+document.getElementById('stage').addEventListener('click', (e) => {
+  if (e.target.closest('#bigplay')) return;
+  togglePlay();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  else if (e.code === 'ArrowRight') player.currentTime = Math.min(player.duration || 114, player.currentTime + 5);
+  else if (e.code === 'ArrowLeft') player.currentTime = Math.max(0, player.currentTime - 5);
+  else if (e.key === 'r' || e.key === 'R' || e.code === 'Home') { player.currentTime = 0; player.play(); }
+});
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
