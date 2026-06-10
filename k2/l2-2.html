@@ -178,7 +178,7 @@
     <div class="task-head">
       <span class="task-id">T01</span>
       <strong>Bellman's Principle of Optimality — proof</strong>
-      <span class="task-src">zdroj: prezentace/03_SPT_KO.md, slide 13–14 (1:1; téma na ústní)</span>
+      <span class="task-src">zdroj: prezentace/03_SPT_KO.md, slide 13–14 (1:1; stavební kámen důkazu korektnosti Bellman-Forda v K3)</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -187,7 +187,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Dokázat Bellmanův princip optimality v přesné formulaci s počtem hran: odstřihnutím poslední hrany nejkratší „$\le k$-hranové“ cesty vznikne nejkratší „$\le (k-1)$-hranová“ cesta do předposledního vrcholu. Typická otázka k ústní — chtějí slyšet strukturu sporu a místo, kde se použije předpoklad bez záporných cyklů.</p>
+      <p>Dokázat Bellmanův princip optimality v přesné formulaci s počtem hran: odstřihnutím poslední hrany nejkratší „$\le k$-hranové“ cesty vznikne nejkratší „$\le (k-1)$-hranová“ cesta do předposledního vrcholu. Na této větě stojí důkaz korektnosti Bellman-Forda (probereme v K3) a SP důkazy jsou u ústní/důkazového slotu oblíbené — klíčem je struktura sporu a místo, kde se použije předpoklad bez záporných cyklů.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -249,7 +249,7 @@
       <details class="solution">
         <summary>d) Úplné řešení</summary>
         <div class="inner">
-          <p><strong>Levá strana.</strong> $s$–$j$ cesty: přímá hrana $i \to j$ (délka $5$) a $i \to k \to j$ (délka $6 - 2 = 4$). Tedy $l(i,j) = 4$.</p>
+          <p><strong>Levá strana.</strong> $i$–$j$ cesty (tj. cesty z $s=i$ do $j$): přímá hrana $i \to j$ (délka $5$) a $i \to k \to j$ (délka $6 - 2 = 4$). Tedy $l(i,j) = 4$.</p>
           <p><strong>Pravá strana.</strong> Kandidáti $v \ne j$ s hranou do $j$:</p>
           <ul>
             <li>$v = i$: $\;l(i,i) + c(i,j) = 0 + 5 = 5$,</li>
