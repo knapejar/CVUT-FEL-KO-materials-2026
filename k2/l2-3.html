@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.3 · Relaxace hrany — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.3</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.3</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>Relaxace hrany</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Elementární algoritmický krok <em>relaxace hrany</em>: <code>if l(w) &gt; l(v) + c(v,w) then l(w) := l(v) + c(v,w); p(w) := v</code> — jediný stavební kámen, ze kterého jsou poskládané všechny algoritmy na nejkratší cesty v této kapitole.
+  </div>
+
+  <p>Prerekvizity: <a href="l2-2.html#takeaways">[L2.2] Bellmanův princip optimality + Bellmanova rovnice</a>. Tam jsme skončili pozorováním, že Bellmanova rovnice je <em>soustava rovnic</em> svazující neznámé vzdálenosti — a slíbili si, že algoritmy budou různé strategie jejího řešení. Dnes si postavíme jejich společný elementární krok.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Od rovnice k výpočtu: pracovní odhady místo vzdáleností</h2>
+  <p>Bellmanova rovnice $l(s,w) = \min_{v \ne w}\{\,l(s,v) + c(v,w)\,\}$ mluví o hotových vzdálenostech. Algoritmus je ale na začátku nezná — musí s <em>něčím</em> začít a postupně se k vzdálenostem propracovat.</p>
+
+  <details class="try">
+    <summary>Zkus sám: s jakými hodnotami $l(\cdot)$ může algoritmus poctivě začít, když o grafu zatím nic nespočítal?</summary>
+    <div class="inner">
+      <p>Jediné, co víme zadarmo: do startu se dostanu prázdnou cestou ($l(s) = 0$) a o ostatních vrcholech nevím nic — žádnou cestu do nich jsem zatím neviděl, takže <strong>$l(v) = \infty$ pro $v \ne s$</strong>. Přesně tak začínají všechny algoritmy kapitoly (slide 16 i 29):</p>
+      <pre><code>l(s) := 0;   l(v) := ∞  pro v ≠ s;</code></pre>
+      <p>Hodnotám $l(v)$ se říká <strong>labels</strong> (značky): jsou to <em>pracovní odhady</em> vzdáleností, ne vzdálenosti samotné. Algoritmus je bude postupně snižovat, dokud se neusadí na správných hodnotách.</p>
+    </div>
+  </details>
+
+  <p>Vedle značky $l(v)$ si budeme držet ještě <strong>předchůdce</strong> $p(v)$ — odkud jsme do $v$ aktuálně nejlevněji přišli. K čemu je, uvidíš za chvíli.</p>
+
+  <h2>Jeden krok: relaxace hrany</h2>
+  <p>Teď ten klíčový nápad. Mám rozpracované značky a koukám na <em>jedinou</em> hranu $(v,w)$ s váhou $c(v,w)$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: co mi hrana $(v,w)$ říká o značkách $l(v)$ a $l(w)$? Kdy a jak pomocí ní můžu odhad $l(w)$ zlepšit?</summary>
+    <div class="inner">
+      <p>Když se do $v$ umím dostat za $l(v)$, pak prodloužením o hranu $(v,w)$ se do $w$ dostanu za $l(v) + c(v,w)$. Pokud je to <strong>méně než můj dosavadní odhad $l(w)$</strong>, našel jsem lepší příchod do $w$ — přepíšu značku a zapamatuji si, kudy to šlo: $p(w) := v$. Pokud to méně není, nedělám nic.</p>
+      <p>To je celé. Tenhle test-a-přepis je přesně člen $l(s,v) + c(v,w)$ z Bellmanovy rovnice, vyhodnocený pro jednu konkrétní hranu na aktuálních odhadech.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Relaxace hrany — <em>edge relaxation</em> (vnitřní krok ze slidů 16 a 29)</div>
+    <pre><code>if l(w) &gt; l(v) + c(v,w) then
+    l(w) := l(v) + c(v,w);   p(w) := v;
+end</code></pre>
+    <p>Tento krok je doslova (znak po znaku) vnitřní smyčka Dijkstrova algoritmu (slide 16) <em>i</em> Bellman-Fordova algoritmu (slide 29). V literatuře se mu říká <strong>relax</strong> — hrana $(v,w)$ je „napjatá“ (porušuje nerovnost), relaxací ji „povolíme“.</p>
+  </div>
+
+  <p>Prohlédni si jednu relaxaci krok za krokem:</p>
+
+  <div class="viz" id="viz-relax"></div>
+
+  <h2>K čemu je vektor předchůdců $p$</h2>
+  <p>Slidy 16 a 29 popisují výstup algoritmů shodně: vektory $l$ <em>a</em> $p$ — pro $v \in V(G)$ je $l(v)$ délka nejkratší cesty z $s$ a $p(v)$ předchozí vrchol na ní; pro $v$ nedosažitelný z $s$ je $l(v) = \infty$ a $p(v)$ nedefinované.</p>
+
+  <details class="try">
+    <summary>Zkus sám: vzdálenost $l(w)$ už mám — jak z hodnot $p(\cdot)$ zrekonstruuji samotnou nejkratší <em>cestu</em> do $w$?</summary>
+    <div class="inner">
+      <p><strong>Couváním:</strong> $p(w)$ říká, odkud nejkratší cesta do $w$ přišla; $p(p(w))$ odkud přišla tam; … a tak dál, dokud nedojdu do $s$. Posloupnost pak otočím: $s \to \dots \to p(p(w)) \to p(w) \to w$.</p>
+      <p>Každý vrchol si pamatuje jen <em>jednoho</em> předchůdce, takže hrany $\{(p(v), v)\}$ dohromady tvoří strom zakořeněný v $s$ — <strong>shortest paths tree, SPT</strong> (strom nejkratších cest). Jeden vektor $p$ tak kóduje nejkratší cesty do <em>všech</em> vrcholů najednou.</p>
+    </div>
+  </details>
+
+  <h2>Co relaxace zaručuje (a co ne)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: může se značka $l(w)$ relaxacemi někdy „pokazit“ — tj. klesnout <em>pod</em> skutečnou vzdálenost $l(s,w)$?</summary>
+    <div class="inner">
+      <p>Ne (v grafu bez záporných cyklů). Každá konečná hodnota $l(w)$ vznikla řetězem relaxací $s \to \dots \to w$, takže je to délka <em>skutečného spojení</em> z $s$ do $w$ v grafu. A žádné spojení nemůže být kratší než nejkratší cesta — případné cykly v něm mají váhu $\ge 0$, takže jejich vypuštění délku nezvýší.</p>
+      <p>Značky se tedy ke vzdálenostem blíží vždy <strong>shora</strong>: $l(w) \ge l(s,w)$ po celou dobu běhu a relaxace je jen snižují. Otázka je, <em>kdy</em> dolů „dopadnou“ — a na to odpovídá další pozorování.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: kdy už nemá smysl relaxovat? Co o značkách víš ve chvíli, kdy se žádnou relaxací nedají snížit?</summary>
+    <div class="inner">
+      <p>„Žádná hrana se nedá relaxovat“ znamená, že pro <strong>každou</strong> hranu $(v,w)$ platí $l(w) \le l(v) + c(v,w)$. Spolu s předchozím pozorováním ($l$ nikdy nepodleze vzdálenosti a každá konečná značka je dosažitelná skutečným spojením) to znamená, že značky splňují Bellmanovu rovnici z <a href="l2-2.html#takeaways">[L2.2]</a> — a jsou rovny vzdálenostem. Stav „nic nejde relaxovat“ je tedy <strong>cíl výpočtu</strong>: relaxace je lokální krok směrem ke splnění Bellmanovy rovnice.</p>
+      <p>(Tohle je zatím intuice — pořádné důkazy korektnosti Dijkstry a Bellman-Forda patří do kapitoly K3, tady v K2 nás zajímá běh a použití.)</p>
+    </div>
+  </details>
+
+  <h2>Na pořadí relaxací záleží</h2>
+  <p>Správné značky dostaneme, ať relaxujeme v jakémkoli pořadí — jen to může trvat různě dlouho. Sleduj na miniaturním řetízku:</p>
+
+  <div class="viz" id="viz-order"></div>
+
+  <details class="try">
+    <summary>Zkus sám: co z toho plyne pro návrh algoritmu? Čím se asi budou lišit algoritmy téhle kapitoly, když elementární krok mají všechny stejný?</summary>
+    <div class="inner">
+      <p>Právě <strong>strategií pořadí relaxací</strong>:</p>
+      <ul>
+        <li><strong>Dijkstra</strong> [L2.4] volí pořadí chytře — vždy expanduje vrchol s nejmenší značkou (potřebuje k tomu nezáporné váhy),</li>
+        <li><strong>Bellman-Ford</strong> [L2.12] nic nevymýšlí — relaxuje všechny hrany pořád dokola (zvládne i záporné váhy),</li>
+        <li><strong>SP v DAG</strong> [L2.13] relaxuje hrany v topologickém pořadí — každou právě jednou,</li>
+        <li><strong>Floyd-Warshall</strong> [L2.14] dělá týž porovnávací krok pro všechny dvojice vrcholů najednou.</li>
+      </ul>
+      <p>Až je v dalších lekcích uvidíš, hledej v pseudokódu vždy stejné jádro — tenhle <code>if</code>.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: značka ≠ vzdálenost (dokud běh neskončí)</div>
+    <ul>
+      <li>Během výpočtu je $l(w)$ jen <strong>horní odhad</strong> — hodnotu nesmíš číst jako výsledek, dokud algoritmus negarantuje, že už je trvalá. (Dijkstra značky „zatrvalňuje“ postupně po vrcholech, Bellman-Ford až úplně na konci — rozdíl <em>label-setting</em> vs. <em>label-correcting</em> rozebereme u běhů obou algoritmů.)</li>
+      <li>Test je <strong>ostrá nerovnost</strong> $l(w) \gt l(v) + c(v,w)$: při rovnosti se nic nepřepisuje (žádné zbytečné přepisování $p$). Relaxace samotné nevadí ani záporné váhy hran — potíže se zápornými váhami nastanou až u <em>strategie pořadí</em> (Dijkstra [L2.4] vs. Bellman-Ford [L2.12]).</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.3</div>
+    <ul>
+      <li><strong>Relaxace hrany $(v,w)$:</strong> <code>if l(w) &gt; l(v) + c(v,w) then l(w) := l(v) + c(v,w); p(w) := v</code>. Inicializace: $l(s) = 0$, $l(v) = \infty$ jinak.</li>
+      <li>Udržujeme <strong>dva vektory</strong>: značky $l(\cdot)$ (pracovní horní odhady vzdáleností) a předchůdce $p(\cdot)$ — couváním po $p$ zrekonstruuješ nejkratší cestu; hrany $(p(v),v)$ tvoří strom nejkratších cest (SPT).</li>
+      <li>Relaxace vyplývá přímo z Bellmanovy rovnice <a href="l2-2.html#takeaways">[L2.2]</a> — je to její „lokální krok“: značky klesají shora ke vzdálenostem a když už žádná hrana relaxovat nejde, Bellmanova rovnice platí a $l$ = vzdálenosti.</li>
+      <li>Relaxace je <strong>společné jádro</strong> Dijkstry [L2.4], Bellman-Forda [L2.12], SP v DAG [L2.13] i Floyda [L2.14] — algoritmy se liší jen strategií <em>pořadí</em> relaxací (a na pořadí záleží: viz úloha T01).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-order">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Order of relaxations on a chain</strong>
+      <span class="task-src">zdroj: prezentace/03_SPT_KO.md, slide 30 (příklad k Bellman-Fordovi — algoritmus sám probereme v [L2.12])</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, dle slidu 30)</span>
+        <p>Consider the chain of 4 nodes with edges $(1,2)$, $(2,3)$, $(3,4)$ of weights $-2$, $1$, $2$. Find the shortest paths tree from node $1$ by repeated passes in which every edge of the graph is relaxed. Assuming the edges to be processed <strong>(i) in the worst order, from right to left</strong>, and <strong>(ii) in the best order, from left to right</strong> — how many passes over all edges does each ordering require to obtain the shortest paths tree?</p>
+      </div>
+
+      <div class="viz" id="viz-t01"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Řetízek $1 \to 2 \to 3 \to 4$. Opakovaně projíždíme všechny tři hrany a relaxujeme; ptáme se, kolik průchodů je potřeba, když hrany v průchodu bereme zprava doleva (nejhorší pořadí), a kolik, když je bereme zleva doprava (nejlepší pořadí).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — relaxace hrany, inicializace $l(1)=0$, $l(v)=\infty$ jinak.</li>
+        <li><a href="l2-2.html#takeaways">[L2.2]</a> — proč se vzdálenosti smí skládat z mezivýsledků.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Veď si vektor $l = (l(1), l(2), l(3), l(4))$ a v každém průchodu poctivě otestuj všechny tři hrany v zadaném pořadí. Klíčové pozorování: relaxace $(v,w)$ něco udělá, jen když už $l(v)$ je konečné — informace se šíří od startu „po směru“ hran. Co se stane, když hrany testuju proti směru šíření?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i) Nejhorší pořadí — zprava doleva:</strong> v každém průchodu testujeme $(3,4)$, $(2,3)$, $(1,2)$. Init $l = (0, \infty, \infty, \infty)$.</p>
+          <ul>
+            <li><strong>Průchod 1:</strong> $(3,4)$: $l(3)=\infty$, nic. $(2,3)$: $l(2)=\infty$, nic. $(1,2)$: $\infty \gt 0+(-2)$ → $l(2):=-2$, $p(2):=1$. Stav $l = (0, -2, \infty, \infty)$ — provedl se jen krok a).</li>
+            <li><strong>Průchod 2:</strong> $(3,4)$: nic. $(2,3)$: $\infty \gt -2+1$ → $l(3):=-1$, $p(3):=2$. $(1,2)$: nic. Stav $l = (0, -2, -1, \infty)$ — krok b).</li>
+            <li><strong>Průchod 3:</strong> $(3,4)$: $\infty \gt -1+2$ → $l(4):=1$, $p(4):=3$. Stav $l = (0, -2, -1, 1)$ — krok c). SPT hotov: <strong>3 průchody</strong>.</li>
+          </ul>
+          <p><strong>(ii) Nejlepší pořadí — zleva doprava:</strong> $(1,2)$: $l(2):=-2$; hned poté $(2,3)$: $l(3):=-1$; hned poté $(3,4)$: $l(4):=1$. Kroky a), b), c) proběhnou všechny v <strong>1 průchodu</strong>.</p>
+          <p>V obou případech vyjde týž výsledek $l = (0,-2,-1,1)$, $p = (-, 1, 2, 3)$ — pořadí nemění výsledek, jen počet průchodů. Informace teče od startu po hranách: pořadí „proti proudu“ posune frontu poznání o jediný vrchol za průchod. Přesně tahle úvaha za chvíli dá Bellman-Fordovi [L2.12] jeho hranici $n-1$ průchodů — a chytrá volba pořadí je celý trik Dijkstry [L2.4] a SP v DAG [L2.13].</p>
+        </div>
+      </details>
+
+      <p>Krokovaná verze řešení (pozor, spoiler — nejdřív si to zkus na papír):</p>
+      <div class="viz" id="viz-t01-run"></div>
+    </div>
+  </div>
+
+  <div class="task" id="t-fixpoint">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Relax until done &amp; reconstruct the path from p</strong>
+      <span class="task-src">zdroj: prezentace/03_SPT_KO.md, slide 16/29 (význam vektorů l a p)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, dle slidů 16 a 29)</span>
+        <p>Consider the digraph with nodes $s$, $a$, $b$, $c$ and edges $(s,a)$, $(s,b)$, $(a,b)$, $(a,c)$, $(b,c)$ with weights $1$, $4$, $2$, $5$, $1$. The vectors $l$ and $p$ currently hold $l(s)=0$, $l(a)=1$, $l(b)=4$, $l(c)=6$ and $p(a)=s$, $p(b)=s$, $p(c)=a$.</p>
+        <p>(i) Which edges can still be relaxed, i.e. satisfy $l(w) \gt l(v) + c(v,w)$? (ii) Perform relaxations until no edge can be relaxed and give the final vectors $l$ and $p$. (iii) Use the vector $p$ to reconstruct the shortest $s$–$c$ path.</p>
+      </div>
+
+      <div class="viz" id="viz-t02"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Rozpracovaný výpočet: značky $l$ a předchůdci $p$ uprostřed běhu. Máme (i) najít hrany, které ještě jdou relaxovat, (ii) dorelaxovat do stavu, kdy už nic nejde (= Bellmanova rovnice platí, značky jsou vzdálenosti), a (iii) z vektoru $p$ vyčíst nejkratší cestu do $c$.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — test relaxace, stav „nic nejde relaxovat“, rekonstrukce cesty couváním po $p$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Projdi všech pět hran a u každé spočti $l(v) + c(v,w)$ vs. $l(w)$ — pozor, test je <em>ostrý</em> (rovnost nestačí). Po každé provedené relaxaci se situace mění, takže hrany, které dřív neprošly testem, otestuj znovu. U (iii) začni v $c$ a couvej.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Test všech hran na stavu $l = (0, 1, 4, 6)$:</p>
+          <ul>
+            <li>$(s,a)$: $1 \gt 0+1$? Ne (rovnost).</li>
+            <li>$(s,b)$: $4 \gt 0+4$? Ne (rovnost).</li>
+            <li>$(a,b)$: $4 \gt 1+2 = 3$? <strong>Ano</strong> — relaxovatelná.</li>
+            <li>$(a,c)$: $6 \gt 1+5 = 6$? Ne (rovnost — ostrý test nepustí).</li>
+            <li>$(b,c)$: $6 \gt 4+1 = 5$? <strong>Ano</strong> — relaxovatelná.</li>
+          </ul>
+          <p><strong>(ii)</strong> Relaxuj $(a,b)$: $l(b) := 3$, $p(b) := a$. Tím se změnil vstup hrany $(b,c)$ — otestuj znovu: $6 \gt 3+1 = 4$ → relaxuj: $l(c) := 4$, $p(c) := b$. Další kolo testů: $(s,a)$ rovnost, $(s,b)$: $3 \gt 4$? ne, $(a,b)$ rovnost, $(a,c)$: $4 \gt 6$? ne, $(b,c)$ rovnost — <strong>nic nejde relaxovat</strong>. Finální stav:</p>
+          <p>$$l = (l(s), l(a), l(b), l(c)) = (0,\, 1,\, 3,\, 4), \qquad p(a) = s,\; p(b) = a,\; p(c) = b.$$</p>
+          <p>(Kdybychom v (ii) začali hranou $(b,c)$, dostali bychom dočasně $l(c)=5$ — a po relaxaci $(a,b)$ by hrana $(b,c)$ prošla testem znovu: $5 \gt 3+1$. Výsledek je stejný, jen o krok později — pořadí mění průběh, ne výsledek, přesně jako v T01.)</p>
+          <p><strong>(iii)</strong> Couvání z $c$: $p(c) = b$, $p(b) = a$, $p(a) = s$ → otočením dostaneme nejkratší cestu $$s \to a \to b \to c$$ s délkou $1 + 2 + 1 = 4 = l(c)$ ✓. Hrany $(s,a), (a,b), (b,c)$ jsou zároveň strom nejkratších cest (SPT) z $s$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L2.3">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l2-2.html"><span class="dir">← Předchozí</span> L2.2 · Bellmanův princip optimality + Bellmanova rovnice</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.4 · Dijkstrův algoritmus (běh))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Jedna relaxace hrany (v,w) krok za krokem
+KOViz.stepper(document.getElementById('viz-relax'), {
+  graph: {
+    directed: true,
+    w: 640, h: 300,
+    nodes: [
+      {id:'s', x:90,  y:190},
+      {id:'v', x:320, y:80},
+      {id:'w', x:550, y:190},
+    ],
+    edges: [
+      {from:'s', to:'v', label:'5'},
+      {from:'v', to:'w', label:'2'},
+      {from:'s', to:'w', label:'9'},
+    ],
+  },
+  frames: [
+    {desc:'Aktuální značky (pod uzly): l(s)=0, l(v)=5 a l(w)=9 — do w zatím známe jen přímou hranu, takže p(w)=s. Otázka: může hrana (v,w) odhad w zlepšit?',
+     nodes:{s:'hl', v:'good', w:'good'},
+     edges:{},
+     subs:{s:'l=0', v:'l=5, p=s', w:'l=9, p=s'}},
+    {desc:'Test relaxace hrany (v,w): l(w) = 9 &gt; l(v) + c(v,w) = 5 + 2 = 7 → hrana je „napjatá“. Přepiš: l(w) := 7, p(w) := v.',
+     nodes:{s:'hl', v:'good', w:'hl'},
+     edges:{'v->w':'hl'},
+     subs:{s:'l=0', v:'l=5, p=s', w:'l=7, p=v'}},
+    {desc:'Zopakuj relaxaci (v,w): 7 &gt; 5+2 už neplatí → nic se nestane. Stejně dopadne (s,w): 7 &gt; 0+9 neplatí. Neúspěšný test nechá vše beze změny — relaxace značky nikdy nezhorší, jen snižují.',
+     nodes:{s:'hl', v:'good', w:'good'},
+     edges:{'v->w':'dim', 's->w':'dim'},
+     subs:{s:'l=0', v:'l=5, p=s', w:'l=7, p=v'}},
+  ],
+});
+
+// 2 — Na pořadí relaxací záleží (miniřetízek s→a→b)
+KOViz.stepper(document.getElementById('viz-order'), {
+  graph: {
+    directed: true,
+    w: 640, h: 220,
+    nodes: [
+      {id:'s', x:110, y:110},
+      {id:'a', x:320, y:110},
+      {id:'b', x:530, y:110},
+    ],
+    edges: [
+      {from:'s', to:'a', label:'2'},
+      {from:'a', to:'b', label:'3'},
+    ],
+  },
+  frames: [
+    {desc:'Init: l(s)=0, ostatní ∞. Dvě hrany → v jednom průchodu je můžu relaxovat ve dvou pořadích. Zkusme nejdřív (a,b), pak (s,a).',
+     nodes:{s:'hl'},
+     edges:{},
+     subs:{s:'l=0', a:'l=∞', b:'l=∞'}},
+    {desc:'Relaxace (a,b): l(a)=∞, takže l(b) &gt; ∞ + 3 neplatí — nic. Pak (s,a): ∞ &gt; 0+2 → l(a):=2, p(a):=s. Po 1. průchodu je b stále neobjevené.',
+     nodes:{s:'hl', a:'good'},
+     edges:{'s->a':'good', 'a->b':'dim'},
+     subs:{s:'l=0', a:'l=2, p=s', b:'l=∞'}},
+    {desc:'Je potřeba 2. průchod: (a,b): ∞ &gt; 2+3 → l(b):=5, p(b):=a. Hotovo za 2 průchody.',
+     nodes:{s:'hl', a:'good', b:'good'},
+     edges:{'s->a':'good', 'a->b':'good'},
+     subs:{s:'l=0', a:'l=2, p=s', b:'l=5, p=a'}},
+    {desc:'Opačné pořadí — (s,a), pak (a,b): l(a):=2 a hned nato l(b):=5. Týž výsledek za jediný průchod. Pořadí relaxací nemění výsledek, jen rychlost — a přesně strategií pořadí se liší algoritmy dalších lekcí.',
+     nodes:{s:'hl', a:'good', b:'good'},
+     edges:{'s->a':'good', 'a->b':'good'},
+     subs:{s:'l=0', a:'l=2, p=s', b:'l=5, p=a'}},
+  ],
+});
+
+// 3 — Graf k úloze T01 (slide 30): řetízek 1→2→3→4
+KOViz.graph(document.getElementById('viz-t01'), {
+  directed: true,
+  w: 640, h: 180,
+  nodes: [
+    {id:'1', x:110, y:80},
+    {id:'2', x:250, y:80},
+    {id:'3', x:390, y:80},
+    {id:'4', x:530, y:80},
+  ],
+  edges: [
+    {from:'1', to:'2', label:'−2'},
+    {from:'2', to:'3', label:'1'},
+    {from:'3', to:'4', label:'2'},
+  ],
+  caption: 'Řetízek ze slidu 30: hrany (1,2) = −2, (2,3) = 1, (3,4) = 2. Start s = 1, init l = (0, ∞, ∞, ∞).',
+});
+
+// 4 — Krokované řešení T01: nejhorší vs. nejlepší pořadí
+KOViz.stepper(document.getElementById('viz-t01-run'), {
+  graph: {
+    directed: true,
+    w: 640, h: 180,
+    nodes: [
+      {id:'1', x:110, y:80},
+      {id:'2', x:250, y:80},
+      {id:'3', x:390, y:80},
+      {id:'4', x:530, y:80},
+    ],
+    edges: [
+      {from:'1', to:'2', label:'−2'},
+      {from:'2', to:'3', label:'1'},
+      {from:'3', to:'4', label:'2'},
+    ],
+  },
+  frames: [
+    {desc:'Init l = (0, ∞, ∞, ∞). Nejhorší pořadí: v každém průchodu testujeme hrany zprava doleva — (3,4), (2,3), (1,2).',
+     nodes:{1:'hl'},
+     edges:{},
+     subs:{1:'l=0', 2:'l=∞', 3:'l=∞', 4:'l=∞'}},
+    {desc:'Průchod 1: (3,4) nic (l(3)=∞), (2,3) nic (l(2)=∞), (1,2): ∞ &gt; 0−2 → l(2):=−2, p(2):=1. Jen krok a).',
+     nodes:{1:'hl', 2:'good'},
+     edges:{'1->2':'hl'},
+     subs:{1:'l=0', 2:'l=−2', 3:'l=∞', 4:'l=∞'}},
+    {desc:'Průchod 2: (3,4) nic, (2,3): ∞ &gt; −2+1 → l(3):=−1, p(3):=2, (1,2) nic. Krok b).',
+     nodes:{1:'hl', 2:'good', 3:'good'},
+     edges:{'1->2':'good', '2->3':'hl'},
+     subs:{1:'l=0', 2:'l=−2', 3:'l=−1', 4:'l=∞'}},
+    {desc:'Průchod 3: (3,4): ∞ &gt; −1+2 → l(4):=1, p(4):=3. Krok c) — SPT hotov po 3 průchodech.',
+     nodes:{1:'hl', 2:'good', 3:'good', 4:'good'},
+     edges:{'1->2':'good', '2->3':'good', '3->4':'hl'},
+     subs:{1:'l=0', 2:'l=−2', 3:'l=−1', 4:'l=1'}},
+    {desc:'Nejlepší pořadí — zleva doprava v jediném průchodu: (1,2) → l(2):=−2, (2,3) → l(3):=−1, (3,4) → l(4):=1. Kroky a), b), c) naráz: 1 průchod. Výsledek je v obou případech stejný.',
+     nodes:{1:'hl', 2:'good', 3:'good', 4:'good'},
+     edges:{'1->2':'good', '2->3':'good', '3->4':'good'},
+     subs:{1:'l=0', 2:'l=−2', 3:'l=−1', 4:'l=1'}},
+  ],
+});
+
+// 5 — Graf k úloze T02 (rozpracovaný výpočet)
+KOViz.graph(document.getElementById('viz-t02'), {
+  directed: true,
+  w: 640, h: 330,
+  nodes: [
+    {id:'s', x:90,  y:170, sub:'l=0'},
+    {id:'a', x:220, y:70,  sub:'l=1, p=s'},
+    {id:'b', x:430, y:280, sub:'l=4, p=s'},
+    {id:'c', x:560, y:170, sub:'l=6, p=a'},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'1'},
+    {from:'s', to:'b', label:'4'},
+    {from:'a', to:'b', label:'2', curve:-0.3},
+    {from:'a', to:'c', label:'5'},
+    {from:'b', to:'c', label:'1'},
+  ],
+  caption: 'Stav uprostřed běhu (T02): pod uzly aktuální značky l a předchůdci p. Které hrany ještě jdou relaxovat?',
+});
+</script>
+</body>
+</html>
