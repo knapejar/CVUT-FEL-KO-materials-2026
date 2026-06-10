@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.2 · Bellmanův princip optimality + Bellmanova rovnice — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.2</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.2</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>Bellmanův princip optimality + Bellmanova rovnice</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Podcesta nejkratší cesty je sama nejkratší (<em>optimal substructure</em>) — a z toho plynoucí <em>Bellmanova rovnice</em> $l(s,w) = \min_{v \ne w}\{\,l(s,v) + c(v,w)\,\}$, na které stojí všechny algoritmy této kapitoly.
+  </div>
+
+  <p>Prerekvizity: <a href="l2-1.html#takeaways">[L2.1] Záporné váhy ano, záporné cykly ne</a> — od teď v celé kapitole standardně předpokládáme <strong>graf bez záporných cyklů</strong> (víme už, proč: jinak je úloha NP-těžká). V této lekci si odvodíme strukturální vlastnost, díky které jde vzdálenosti <em>počítat</em>, místo abychom je hledali probíráním všech cest.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Proč nestačí „projít všechny cesty“</h2>
+  <p>Vzdálenost $l(s,w)$ jsme v <a href="l2-1.html#takeaways">[L2.1]</a> definovali jako délku nejkratší $s$–$w$ cesty — a taky jsme si ukázali, že nejkratší cesta vždy existuje (když je $w$ dosažitelný). Definice ale neříká nic o tom, <em>jak</em> ji najít.</p>
+
+  <details class="try">
+    <summary>Zkus sám: kolik různých $s$–$w$ cest může mít graf s $n$ vrcholy? Stačil by „hrubou silou“ výčet všech cest?</summary>
+    <div class="inner">
+      <p>Až <strong>exponenciálně mnoho</strong>. Stačí si představit „řetěz diamantů“: $s$ → (nahoru nebo dolů) → spoj → (nahoru nebo dolů) → spoj → … → $w$. Každý diamant zdvojnásobí počet cest, takže $k$ diamantů dá $2^k$ cest. Výčet všech cest je tedy beznadějný — potřebujeme <strong>strukturální vlastnost</strong>, která dovolí skládat vzdálenosti z menších vzdáleností, bez probírání cest.</p>
+    </div>
+  </details>
+
+  <h2>Podcesta nejkratší cesty je sama nejkratší</h2>
+  <p>Vezmi nejkratší cestu $P$ z $s$ do $w$ a označ její <em>poslední hranu</em> $e = (v, w)$. Když hranu $e$ odstřihneš, zbude začátek cesty — z $s$ do $v$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: může být ten zbylý začátek z $s$ do $v$ „špatný“, tj. <em>ne</em>-nejkratší $s$–$v$ cesta?</summary>
+    <div class="inner">
+      <p>Intuice říká, že ne — a zdůvodnění je <strong>výměnný argument</strong> (sporem): kdyby existovala kratší $s$–$v$ cesta $Q$, vyměníme začátek — vezmeme $Q$ a přilepíme hranu $e=(v,w)$. Dostaneme spojení z $s$ do $w$ <em>kratší než $P$</em>, což je spor s tím, že $P$ je nejkratší.</p>
+      <p>Jeden háček tu ale je: co když $Q$ prochází <em>přes</em> $w$? Pak $Q + e$ opakuje vrchol $w$ — není to cesta, ale jen <strong>sled</strong> <a href="../k0/l0-3.html#takeaways">[L0.3]</a>, a sled nejkratší cestu „nepřebije“ jen tak. Přesně tady do hry vstoupí předpoklad <em>bez záporných cyklů</em> — viz důkaz níže.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-substructure"></div>
+
+  <p>Slidy tuhle vlastnost vyslovují obecně pro <em>libovolný</em> vrchol na nejkratší cestě (nejen předposlední) — říká se jí <strong>optimal substructure</strong> (optimální podstruktura):</p>
+
+  <div class="box">
+    <div class="box-title">Optimal substructure — nejkratší cesta se skládá z nejkratších segmentů (slide 15)</div>
+    <p>Mějme graf bez záporných cyklů. Pokud nejkratší cesta z $s$ do $w$ obsahuje vrchol $v$, pak její úsek z $s$ do $v$ je nejkratší $s$–$v$ cesta, úsek z $v$ do $w$ je nejkratší $v$–$w$ cesta a platí
+    $$l(s,w) = l(s,v) + l(v,w).$$</p>
+  </div>
+
+  <h2>Věta přesně: Bellmanův princip optimality</h2>
+  <p>Přesná formulace ze slidu 13 je o kousek jemnější — počítá <strong>hrany</strong>. Značení: $P^k$ je nejkratší mezi všemi $s$–$w$ cestami <em>s nejvýše $k$ hranami</em> a $P^{k}[s,v]$ znamená úsek cesty $P^k$ od $s$ do $v$.</p>
+
+  <div class="box">
+    <div class="box-title">Věta — Bellman's Principle of Optimality (slide 13)</div>
+    <p>Mějme digraf $G$, váhy $c : E(G) \to \mathbb{R}$, bez záporných cyklů. Nechť $k \in \mathbb{N}$ a $s$, $w$ jsou dva vrcholy. Nechť $P^k$ je nejkratší mezi všemi $s$–$w$ cestami s nejvýše $k$ hranami a $e = (v,w)$ jeho poslední hrana. Pak $P^{k-1}[s,v]$ (tj. $P^k$ bez hrany $e$) je nejkratší mezi všemi $s$–$v$ cestami s <strong>nejvýše $k-1$ hranami</strong>.</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: proč se věta obtěžuje s počítáním hran („nejvýše $k$“), místo aby mluvila prostě o nejkratších cestách?</summary>
+    <div class="inner">
+      <p>Dva důvody:</p>
+      <ul>
+        <li>Verze s počtem hran je <strong>silnější a obecnější</strong>: každá cesta má nejvýše $|V|-1$ hran, takže volbou $k \ge |V|-1$ dostaneš „obyčejnou“ verzi o nejkratších cestách zadarmo.</li>
+        <li>Přesně v tomhle tvaru (po vrstvách „nejvýše $k$ hran“) větu později použijí algoritmy, které vzdálenosti budují postupným přidáváním hran — uvidíš to u Bellman-Forda [L2.12]; jeho důkaz korektnosti na této větě stojí a probereme ho až v kapitole K3 (lekce o korektnosti Bellman-Forda).</li>
+      </ul>
+    </div>
+  </details>
+
+  <h3>Důkaz sporem — dva případy</h3>
+  <p>Předpokládejme pro spor, že existuje $s$–$v$ cesta $Q$ kratší než $P^{k-1}[s,v]$, s nejvýše $k-1$ hranami. Rozlišíme, jestli $Q$ prochází vrcholem $w$, nebo ne.</p>
+
+  <details class="try">
+    <summary>Zkus sám — případ 1: $Q_1$ je kratší než $P^{k-1}[s,v]$, má nejvýše $k-1$ hran a vrchol $w$ <em>neobsahuje</em>. Kde je spor?</summary>
+    <div class="inner">
+      <p>Přilep hranu $e$ (slide 13):</p>
+      $$c(E(Q_1)) \lt c(E(P^{k-1}[s,v])) \quad \ldots \text{ přičti } c(e)$$
+      $$c(E(Q_1)) + c(e) \lt c(E(P^{k-1}[s,v])) + c(e) = c(E(P^k))$$
+      <p>$Q_1$ neobsahuje $w$, takže $Q_1 + e$ je pořádná <strong>cesta</strong> z $s$ do $w$ — a má nejvýše $(k-1)+1 = k$ hran. Jenže je kratší než $P^k$, který byl mezi takovými cestami nejkratší. <strong>Spor.</strong> (Všimni si: tady jsme záporné cykly vůbec nepotřebovali.)</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám — případ 2: $Q_2$ vrchol $w$ <em>obsahuje</em>, takže $Q_2 + e$ není cesta. Jak spor zachránit — a kde se konečně použije „bez záporných cyklů“?</summary>
+    <div class="inner">
+      <p>Rozstřihni $Q_2$ ve vrcholu $w$ na dva úseky (slide 14):</p>
+      $$c(E(Q_2[s,w])) + c(E(Q_2[w,v])) \lt c(E(P^{k-1}[s,v])) \quad \ldots \text{ přičti } c(e)$$
+      $$c(E(Q_2[s,w])) + \underbrace{c(E(Q_2[w,v])) + c(e)}_{\ge\, 0} \lt \underbrace{c(E(P^{k-1}[s,v])) + c(e)}_{c(E(P^k))}$$
+      <p>Klíčový krok: úsek $Q_2[w,v]$ spolu s hranou $e=(v,w)$ tvoří <strong>cyklus</strong> ($w \to \dots \to v \to w$) — a graf nemá záporné cykly, takže jeho váha je $\ge 0$. Když člen $\ge 0$ vynecháme, nerovnost se jen zesílí:</p>
+      $$c(E(Q_2[s,w])) \lt c(E(P^k))$$
+      <p>Jenže $Q_2[s,w]$ je $s$–$w$ <strong>cesta</strong> (úsek cesty $Q_2$) s nejvýše $k-1$ hranami — kratší než $P^k$. <strong>Spor.</strong> Tohle je přesně místo, kvůli kterému celá kapitola předpokládá grafy bez záporných cyklů: se záporným cyklem by se „objížďka přes $w$“ mohla vyplatit a princip optimality by padl (protipříklad si spočítáš v úloze T02).</p>
+    </div>
+  </details>
+
+  <h2>Bellmanova rovnice</h2>
+  <p>Princip optimality teď otočíme v <em>návod na výpočet</em>. Chci znát $l(s,w)$ a vím, že nejkratší cesta do $w$ musí do $w$ <em>nějakou</em> hranou přijít.</p>
+
+  <details class="try">
+    <summary>Zkus sám: poslední hrana nejkratší $s$–$w$ cesty vede z nějakého vrcholu $v$. Vyjádři $l(s,w)$ jen pomocí vzdáleností $l(s,v)$ a vah hran $c(v,w)$.</summary>
+    <div class="inner">
+      <p>Dvě pozorování:</p>
+      <ul>
+        <li>Pro <em>každý</em> vrchol $v$ s hranou do $w$ platí $l(s,w) \le l(s,v) + c(v,w)$ — to je přesně důsledek trojúhelníkové nerovnosti z <a href="l2-1.html#takeaways">[L2.1]</a> (cesta přes $v$ je jedna z možností).</li>
+        <li>Pro vrchol $v$, ze kterého vede <em>poslední hrana</em> nejkratší cesty, platí podle principu optimality <strong>rovnost</strong>: $l(s,w) = l(s,v) + c(v,w)$.</li>
+      </ul>
+      <p>Dohromady: $l(s,w)$ je <strong>minimum</strong> výrazu $l(s,v) + c(v,w)$ přes možné předchůdce $v$.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Bellmanova rovnice (slide 15)</div>
+    <p>$$l(s,w) = \min_{v \ne w}\,\{\,l(s,v) + c(v,w)\,\}$$</p>
+    <p>platí, pokud graf neobsahuje záporný cyklus.</p>
+    <p><em>Jak číst:</em> minimum běží fakticky přes předchůdce $w$ — pro neexistující hranu ber $c(v,w) = \infty$. Rovnice je vyslovena pro cílové vrcholy $w \ne s$; pro start klademe $l(s,s) = 0$ (prázdná cesta).</p>
+  </div>
+
+  <p>Vyzkoušej si rovnici na konkrétním vrcholu — známe vzdálenosti do všech předchůdců $w$ a krokujeme minimum:</p>
+
+  <div class="viz" id="viz-bellman-eq"></div>
+
+  <details class="try">
+    <summary>Zkus sám: rovnice mluví o $l(s,v)$ — tedy o dalších neznámých. Není to definice kruhem? K čemu je rovnice, která vzdálenosti jen „svazuje mezi sebou“?</summary>
+    <div class="inner">
+      <p>Je to <strong>soustava rovnic</strong>: jedna rovnice pro každý vrchol $w$, neznámé jsou všechny vzdálenosti $l(s,\cdot)$. A přesně tak na ni budeme nahlížet: algoritmy téhle kapitoly jsou <em>různé strategie, jak soustavu vyřešit</em> —</p>
+      <ul>
+        <li><strong>Dijkstra</strong> [L2.4]: vyhodnocuje rovnice „od nejbližších vrcholů“ (potřebuje nezáporné váhy),</li>
+        <li><strong>Bellman-Ford</strong> [L2.12]: vyhodnocuje je opakovaně po vrstvách „nejvýše $k$ hran“ (zvládne záporné váhy),</li>
+        <li><strong>SP v DAG</strong> [L2.13]: vyhodnocí je v topologickém pořadí jedním průchodem,</li>
+        <li><strong>Floyd-Warshall</strong> [L2.14]: řeší rovnice pro všechny dvojice najednou.</li>
+      </ul>
+      <p>Společný elementární krok všech čtyř — porovnání $l(w)$ s $l(v) + c(v,w)$ pro jednu hranu — se jmenuje <strong>relaxace hrany</strong> a je to přesně téma příští lekce [L2.3].</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: „bez záporných cyklů“ není okrasná fráze</div>
+    <ul>
+      <li>Bellmanova rovnice i princip optimality <strong>předpokládají graf bez záporného cyklu</strong>. Se záporným cyklem rovnice prostě <em>neplatí</em> — minimum na pravé straně „podleze“ skutečnou vzdálenost, protože odpovídá sledu, ne cestě (spočítáš v T02; souvisí s rozbitou trojúhelníkovou nerovností z <a href="l2-1.html#takeaways">[L2.1]</a>).</li>
+      <li>V důkazu se předpoklad používá jen v <strong>případu 2</strong> (objížďka přes $w$ + poslední hrana = cyklus s váhou $\ge 0$). Když se na ústní zeptají „kde přesně důkaz potřebuje nezáporné cykly?“, tohle je odpověď.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.2</div>
+    <ul>
+      <li><strong>Optimal substructure:</strong> nejkratší cesta se skládá z nejkratších segmentů — obsahuje-li nejkratší $s$–$w$ cesta vrchol $v$, je $l(s,w) = l(s,v) + l(v,w)$.</li>
+      <li><strong>Bellmanův princip optimality</strong> (přesná verze): je-li $P^k$ nejkratší $s$–$w$ cesta s nejvýše $k$ hranami a $e=(v,w)$ její poslední hrana, pak $P^{k-1}[s,v]$ je nejkratší $s$–$v$ cesta s nejvýše $k-1$ hranami. Důkaz sporem; předpoklad „bez záporných cyklů“ je potřeba jen v případě, kdy kratší objížďka prochází přes $w$.</li>
+      <li><strong>Bellmanova rovnice:</strong> $l(s,w) = \min_{v \ne w}\{\,l(s,v) + c(v,w)\,\}$ — platí v grafu bez záporného cyklu; „$\le$“ je trojúhelníková nerovnost, „$=$“ dosahuje předchůdce na nejkratší cestě.</li>
+      <li>Tato vlastnost je důvod, proč fungují Dijkstra [L2.4], Bellman-Ford [L2.12], SP v DAG [L2.13] i Floyd [L2.14] — všechny jsou strategie řešení Bellmanovy rovnice; jejich společný lokální krok je relaxace hrany [L2.3].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-principle-proof">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Bellman's Principle of Optimality — proof</strong>
+      <span class="task-src">zdroj: prezentace/03_SPT_KO.md, slide 13–14 (1:1; téma na ústní)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, dle slidů 13–14)</span>
+        <p>Suppose we have digraph $G$, weights $c : E(G) \to \mathbb{R}$, no negative cycles. Let $k \in \mathbb{N}$, and let $s$ and $w$ be two vertices. Let $P^k$ be a shortest one among all $s$-$w$-paths with at most $k$ edges, and let $e = (v,w)$ be its final edge. Prove that $P^{k-1}[s,v]$ (i.e. $P^k$ without the edge $e$) is a shortest one among all $s$-$v$-paths with at most $k-1$ edges.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Dokázat Bellmanův princip optimality v přesné formulaci s počtem hran: odstřihnutím poslední hrany nejkratší „$\le k$-hranové“ cesty vznikne nejkratší „$\le (k-1)$-hranová“ cesta do předposledního vrcholu. Typická otázka k ústní — chtějí slyšet strukturu sporu a místo, kde se použije předpoklad bez záporných cyklů.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li><a href="l2-1.html#takeaways">[L2.1] Záporné váhy ano, záporné cykly ne</a> — záporný cyklus, rozdíl cesta vs. sled.</li>
+        <li><a href="../k0/l0-3.html#takeaways">[L0.3] Cesta, sled, tah, cyklus</a> — slepení dvou cest nemusí být cesta.</li>
+        <li>Tato lekce — výměnný argument a rozdělení na dva případy.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Jdi sporem: předpokládej kratší $s$–$v$ cestu $Q$ s nejvýše $k-1$ hranami. Přirozený tah je „přilep hranu $e$ a překonej $P^k$“ — ale ohlídej si, jestli $Q + e$ je vůbec cesta. To přirozeně rozdělí důkaz na dva případy podle toho, zda $Q$ obsahuje vrchol $w$. V druhém případě hledej v obrázku cyklus — a vzpomeň si, co o cyklech říká předpoklad věty.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Sporem.</strong> Nechť existuje $s$–$v$ cesta $Q$ s $|E(Q)| \le k-1$ a $c(E(Q)) \lt c(E(P^{k-1}[s,v]))$. Rozlišíme dva případy.</p>
+          <p><strong>Případ 1: $Q_1$ neobsahuje $w$.</strong> Přičtením $c(e)$ k oběma stranám:</p>
+          $$c(E(Q_1)) \lt c(E(P^{k-1}[s,v]))$$
+          $$c(E(Q_1)) + c(e) \lt c(E(P^{k-1}[s,v])) + c(e) = c(E(P^k))$$
+          <p>Protože $Q_1$ neobsahuje $w$, je $Q_1$ + $e$ regulérní $s$–$w$ <em>cesta</em> s nejvýše $(k-1)+1 = k$ hranami — a je kratší než $P^k$. To je spor s volbou $P^k$ (nejkratší mezi $s$–$w$ cestami s nejvýše $k$ hranami).</p>
+          <p><strong>Případ 2: $Q_2$ obsahuje $w$.</strong> Rozdělíme $Q_2$ ve vrcholu $w$ na dvě části a přičteme $c(e)$:</p>
+          $$c(E(Q_2[s,w])) + c(E(Q_2[w,v])) \lt c(E(P^{k-1}[s,v]))$$
+          $$c(E(Q_2[s,w])) + \underbrace{c(E(Q_2[w,v])) + c(e)}_{\ge\, 0} \lt \underbrace{c(E(P^{k-1}[s,v])) + c(e)}_{c(E(P^k))}$$
+          <p>Úsek $Q_2[w,v]$ spolu s hranou $e = (v,w)$ tvoří cyklus; graf nemá záporné cykly, takže označený součet je $\ge 0$ a lze ho z levé strany vypustit:</p>
+          $$c(E(Q_2[s,w])) \lt c(E(P^k))$$
+          <p>Jenže $Q_2[s,w]$ je $s$–$w$ cesta s nejvýše $k-1$ hranami, tedy přípustný kandidát pro $P^k$ — a je kratší. Spor.</p>
+          <p>V obou případech spor ⟹ žádná kratší $Q$ neexistuje a $P^{k-1}[s,v]$ je nejkratší mezi $s$–$v$ cestami s nejvýše $k-1$ hranami. $\blacksquare$</p>
+          <p><em>Pointa k ústní:</em> předpoklad „no negative cycles“ se použije <strong>pouze v případu 2</strong> — zaručuje, že cyklus $Q_2[w,v] + e$ má nezápornou váhu.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-equation-negcycle">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Bellman's equation and a negative cycle</strong>
+      <span class="task-src">zdroj: prezentace/03_SPT_KO.md, slide 15 (rovnice) + graf ze slidu 11</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, dle slidů 11 a 15)</span>
+        <p>Bellman's equation $l(s,w) = \min_{v \ne w} \{l(s,v) + c(v,w)\}$ holds if the graph does not contain a negative cycle. Consider the digraph with nodes $i$, $j$, $k$ and edges $(i,j)$ with weight $5$, $(i,k)$ with weight $6$, $(j,k)$ with weight $-1$, and $(k,j)$ with weight $-2$. Evaluate both sides of Bellman's equation for $s = i$ and $w = j$. Does the equation hold? Explain why.</p>
+      </div>
+
+      <div class="viz" id="viz-t02"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejný trojvrcholový graf, na kterém v <a href="l2-1.html#t-triangle">[L2.1] (úloha T01)</a> padla trojúhelníková nerovnost. Teď na něm máme vyhodnotit obě strany Bellmanovy rovnice pro $s=i$, $w=j$ a vysvětlit výsledek.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — Bellmanova rovnice a její předpoklad „bez záporného cyklu“.</li>
+        <li><a href="l2-1.html#takeaways">[L2.1]</a> — vzdálenost = délka nejkratší <em>cesty</em>; co dělá záporný cyklus se sledy.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Levá strana: spočti $l(i,j)$ výčtem cest (graf je maličký). Pravá strana: minimum běží přes $v \in \{i, k\}$ — nezapomeň na člen $v=i$ s $l(i,i)=0$. Až ti vyjdou různá čísla, ptej se: kterému <em>spojení</em> z $i$ do $j$ odpovídá hodnota pravé strany? Je to cesta?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Levá strana.</strong> $s$–$j$ cesty: přímá hrana $i \to j$ (délka $5$) a $i \to k \to j$ (délka $6 - 2 = 4$). Tedy $l(i,j) = 4$.</p>
+          <p><strong>Pravá strana.</strong> Kandidáti $v \ne j$ s hranou do $j$:</p>
+          <ul>
+            <li>$v = i$: $\;l(i,i) + c(i,j) = 0 + 5 = 5$,</li>
+            <li>$v = k$: $\;l(i,k) + c(k,j) = 4 + (-2) = 2$ &nbsp;(kde $l(i,k) = \min\{6,\; 5-1\} = 4$ po cestě $i \to j \to k$).</li>
+          </ul>
+          <p>Minimum je $\min\{5, 2\} = 2$.</p>
+          <p><strong>Závěr:</strong> $4 = l(i,j) \ne \min_{v \ne j}\{l(i,v) + c(v,j)\} = 2$ — <strong>rovnice neplatí</strong>. Nic jiného se čekat nedalo: graf obsahuje záporný cyklus $j \to k \to j$ s váhou $(-1) + (-2) = -3$, takže předpoklad rovnice je porušen.</p>
+          <p><strong>Proč přesně to selhalo:</strong> hodnota $2$ na pravé straně odpovídá slepení nejkratší $i$–$k$ cesty ($i \to j \to k$) s hranou $(k,j)$. To ale není cesta — vrchol $j$ se opakuje. Je to <em>sled</em> $i \to j \to k \to j$, který obsahuje právě ten záporný cyklus; v důkazu principu optimality je to přesně případ 2, kde se bez nezáporného cyklu nelze obejít. Stejný mechanismus rozbil trojúhelníkovou nerovnost v <a href="l2-1.html#t-triangle">[L2.1] T01</a> — všimni si, že porušený důsledek $l(i,j) \le l(i,k) + c(k,j)$ je přesně člen $v=k$ z Bellmanovy rovnice.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L2.2">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l2-1.html"><span class="dir">← Předchozí</span> L2.1 · Záporné váhy ano, záporné cykly ne</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.3 · Relaxace hrany)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Podcesta nejkratší cesty je sama nejkratší (výměnný argument na konkrétním grafu)
+KOViz.stepper(document.getElementById('viz-substructure'), {
+  graph: {
+    directed: true,
+    nodes: [
+      {id:'s', x:70,  y:200},
+      {id:'a', x:230, y:95},
+      {id:'b', x:230, y:300},
+      {id:'v', x:400, y:200},
+      {id:'w', x:570, y:200},
+    ],
+    edges: [
+      {from:'s', to:'a', label:'2'},
+      {from:'a', to:'v', label:'3'},
+      {from:'s', to:'b', label:'4'},
+      {from:'b', to:'v', label:'2'},
+      {from:'v', to:'w', label:'2'},
+      {from:'b', to:'w', label:'7', curve:0.35},
+    ],
+  },
+  frames: [
+    {desc:'Nejkratší cesta z s do w: P = s→a→v→w, délka 2+3+2 = <b>7</b> (alternativy: s→b→v→w = 8, s→b→w = 11). Poslední hrana P je e = (v,w).',
+     nodes:{s:'hl', a:'good', v:'good', w:'hl'},
+     edges:{'s->a':'good', 'a->v':'good', 'v->w':'good'},
+     subs:{w:'l(s,w)=7'}},
+    {desc:'Odstřihni poslední hranu e: zbude začátek P z s do v, délka 2+3 = <b>5</b>. Je to nejkratší s–v cesta? Jediná další s–v cesta s→b→v má 4+2 = 6 &gt; 5 — <b>ano, je</b>.',
+     nodes:{s:'hl', a:'good', v:'hl'},
+     edges:{'s->a':'good', 'a->v':'good', 'v->w':'dim', 'b->w':'dim'},
+     subs:{v:'l(s,v)=5'}},
+    {desc:'Proč to jinak dopadnout nemůže (výměnný argument): KDYBY existovala s–v cesta Q délky např. 4, pak Q + hrana (v,w) dá spojení s→w délky 4+2 = 6 &lt; 7 — spor s tím, že P je nejkratší. Háček „co když Q prochází přes w“ řeší případ 2 důkazu.',
+     nodes:{s:'hl', v:'good', w:'hl'},
+     edges:{'v->w':'good', 'b->w':'dim'},
+     subs:{v:'Q: 4?', w:'4+2=6 < 7'}},
+  ],
+});
+
+// 2 — Vyhodnocení Bellmanovy rovnice pro vrchol w (minimum přes předchůdce)
+KOViz.stepper(document.getElementById('viz-bellman-eq'), {
+  graph: {
+    directed: true,
+    nodes: [
+      {id:'s', x:70,  y:180},
+      {id:'a', x:260, y:70},
+      {id:'b', x:260, y:180},
+      {id:'c', x:260, y:290},
+      {id:'w', x:540, y:180},
+    ],
+    edges: [
+      {from:'s', to:'a', label:'1'},
+      {from:'s', to:'b', label:'4'},
+      {from:'s', to:'c', label:'2'},
+      {from:'a', to:'w', label:'6'},
+      {from:'b', to:'w', label:'2'},
+      {from:'c', to:'w', label:'3'},
+    ],
+  },
+  frames: [
+    {desc:'Vzdálenosti do všech předchůdců w už známe (čísla pod uzly). Hledáme l(s,w): Bellmanova rovnice říká „projdi hrany vstupující do w a vezmi minimum l(s,v) + c(v,w)“.',
+     nodes:{s:'hl', a:'good', b:'good', c:'good', w:'hl'},
+     edges:{},
+     subs:{s:'l=0', a:'l=1', b:'l=4', c:'l=2', w:'l=?'}},
+    {desc:'Kandidát přes v = a: l(s,a) + c(a,w) = 1 + 6 = <b>7</b>.',
+     nodes:{s:'hl', a:'hl', b:'good', c:'good', w:'hl'},
+     edges:{'a->w':'hl'},
+     subs:{s:'l=0', a:'l=1', b:'l=4', c:'l=2', w:'≤ 7'}},
+    {desc:'Kandidát přes v = b: l(s,b) + c(b,w) = 4 + 2 = <b>6</b>. Zatím nejlepší.',
+     nodes:{s:'hl', a:'good', b:'hl', c:'good', w:'hl'},
+     edges:{'b->w':'hl'},
+     subs:{s:'l=0', a:'l=1', b:'l=4', c:'l=2', w:'≤ 6'}},
+    {desc:'Kandidát přes v = c: l(s,c) + c(c,w) = 2 + 3 = <b>5</b>. Nové minimum.',
+     nodes:{s:'hl', a:'good', b:'good', c:'hl', w:'hl'},
+     edges:{'c->w':'hl'},
+     subs:{s:'l=0', a:'l=1', b:'l=4', c:'l=2', w:'≤ 5'}},
+    {desc:'l(s,w) = min{7, 6, 5} = <b>5</b>. Minima dosahuje v = c: poslední hrana nejkratší cesty je (c,w) a před ní jde nejkratší cesta s→c — přesně optimal substructure.',
+     nodes:{s:'hl', a:'good', b:'good', c:'good', w:'good'},
+     edges:{'s->c':'good', 'c->w':'good'},
+     subs:{s:'l=0', a:'l=1', b:'l=4', c:'l=2', w:'l=5'}},
+  ],
+});
+
+// 3 — Graf k úloze T02 (slide 11): záporný cyklus j→k→j
+KOViz.graph(document.getElementById('viz-t02'), {
+  directed: true,
+  w: 640, h: 300,
+  nodes: [
+    {id:'i', x:120, y:220},
+    {id:'k', x:320, y:70},
+    {id:'j', x:520, y:220},
+  ],
+  edges: [
+    {from:'i', to:'j', label:'5'},
+    {from:'i', to:'k', label:'6'},
+    {from:'j', to:'k', label:'−1', curve:0.55},
+    {from:'k', to:'j', label:'−2', curve:0.55},
+  ],
+  caption: 'Graf ze slidu 11: hrany (i,j) = 5, (i,k) = 6, (j,k) = −1, (k,j) = −2. Hrany mezi j a k tvoří záporný cyklus j→k→j s váhou −3 — předpoklad Bellmanovy rovnice je porušen.',
+});
+</script>
+</body>
+</html>
