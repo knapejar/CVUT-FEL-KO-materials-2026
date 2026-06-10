@@ -388,11 +388,15 @@
     for (let i = xmin; i <= xmax + 1e-9; i += xstep) {
       const t = svgEl("text", { x: X(i), y: Y(0) + 17, "text-anchor": "middle" }); t.textContent = Math.round(i * 1e6) / 1e6; ax.appendChild(t);
     }
-    for (let j = ystep; j <= ymax + 1e-9; j += ystep) {
+    // ylabel: "" (prázdný řetězec) = osa y nemá význam → potlač popisek i hodnoty na ose y
+    const noYAxis = spec.ylabel === "";
+    if (!noYAxis) for (let j = ystep; j <= ymax + 1e-9; j += ystep) {
       const t = svgEl("text", { x: X(xmin) - 9, y: Y(j) + 4, "text-anchor": "end" }); t.textContent = j; ax.appendChild(t);
     }
     const lx = svgEl("text", { x: X(xmax) + 4, y: Y(0) - 8 }); lx.textContent = spec.xlabel || "x"; ax.appendChild(lx);
-    const ly = svgEl("text", { x: X(xmin) + 12, y: Y(ymax) - 6 }); ly.textContent = spec.ylabel || "f(x)"; ax.appendChild(ly);
+    if (!noYAxis) {
+      const ly = svgEl("text", { x: X(xmin) + 12, y: Y(ymax) - 6 }); ly.textContent = spec.ylabel !== undefined ? spec.ylabel : "f(x)"; ax.appendChild(ly);
+    }
     svg.appendChild(ax);
 
     el.appendChild(svg);

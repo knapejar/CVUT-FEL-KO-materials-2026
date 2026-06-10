@@ -66,7 +66,7 @@
   <div class="viz" id="viz-ratio"></div>
 
   <h2>A co kdyby $x_4 \ge 1$ v zadání nebylo? Podmínka $x_4 \ne 0$</h2>
-  <p>Ruční řešení zkoušky 2023 si k podmínce (3) poznamenalo: $x_4 \ne 0 \Rightarrow (x_4 &gt; 0) \lor (x_4 &lt; 0)$ — a zavedlo binárku $z \in \{0,1\}$. Proč binárku?</p>
+  <p>Ruční řešení zkoušky 2023 si k podmínce (3) poznamenalo: $x_4 \ne 0 \Rightarrow (x_4 &gt; 0) \lor (x_4 &lt; 0)$ — a zavedlo binárku $z \in \{0,1\}$. Proč binárku? (Pro tuto hypotetickou variantu předpokládejme, že by pro $x_4$ platila stejná dolní mez $-5000$ jako pro ostatní proměnné — v originále má $x_4$ dolní mez $1$, takže tam není co řešit.)</p>
 
   <details class="try">
     <summary>Zkus sám: umíš „$x_4 \ne 0$“ napsat jako jedno lineární omezení? Co ti brání?</summary>
@@ -86,7 +86,7 @@
     <div class="inner">
       $$x_4 \ge 1 - M(1 - z), \qquad x_4 \le -1 + M z, \qquad z \in \{0,1\}.$$
       <p>Pro $z = 1$ platí naostro $x_4 \ge 1$ a druhé omezení je uvolněné ($x_4 \le -1 + M$); pro $z = 0$ naopak platí $x_4 \le -1$. Volba $M$: vypnuté omezení musí být splnitelné pro <em>všechny</em> hodnoty v mezích — z $1 - M \le -5000$ plyne $M \ge 5001$, z $-1 + M \ge 1000$ plyne $M \ge 1001$. Stačí tedy např. $M = 5001$.</p>
-      <p>Tohle je přesně ten případ, kde se bez přepínače neobejdeš — stejně jako u obecné $\max |x|$ s neurčitým znaménkem z <a href="l1-10.html#takeaways">[L1.10]</a>. Není náhoda, že je to tatáž binárka: obě konstrukce rozhodují, <em>na které straně nuly</em> proměnná leží.</p>
+      <p>Tohle je přesně ten případ, kde se bez přepínače neobejdeš — stejně jako u obecné $\max |x|$ s neurčitým znaménkem z <a href="l1-10.html#takeaways">[L1.10]</a>. Není náhoda, že je to tatáž binárka: obě konstrukce rozhodují, <em>na které straně nuly</em> proměnná leží. (V <a href="l1-10.html">[L1.10]</a> jsme tento znaménkový přepínač značili $s$ — tady držíme $z$ podle ručního řešení zkoušky 2023; je to táž role, jen jiné písmeno.)</p>
     </div>
   </details>
 
@@ -180,7 +180,7 @@
           <p><strong>Podmínka (2):</strong> „$x_1$ is at least $\max\{2x_2, x_3\}$“ = $x_1$ je aspoň tak velké jako <em>každý</em> z obou výrazů — konjunkce, dvě nerovnosti zadarmo:</p>
           $$x_1 \ge 2 x_2, \qquad x_1 \ge x_3.$$
           <p><strong>Podmínka (3):</strong> vynásobením jmenovatelem $\frac{x_1}{x_4} = 4 \iff x_1 = 4 x_4$ (lineární rovnost). Dělení nulou nehrozí: podmínka (5) vynucuje $x_4 \ge 1$, takže $x_4 = 0$ je vyloučené. Navíc z $x_1 = 4x_4 \ge 4 &gt; 0$ plyne vynucené znaménko $x_1$, takže $|x_1| = x_1$ v kritériu (viz <a href="l1-10.html#takeaways">[L1.10]</a>).</p>
-          <p><strong>Varianta — kdyby zadání dávalo jen $x_4 \ne 0$:</strong> pro $x_4 \in \mathbb{Z}$ je $x_4 \ne 0 \iff (x_4 \ge 1) \lor (x_4 \le -1)$. Disjunkce → binárka $z \in \{0,1\}$ + big-M:</p>
+          <p><strong>Varianta — kdyby zadání dávalo jen $x_4 \ne 0$</strong> (a pro $x_4$ stejnou dolní mez $-5000$ jako pro ostatní proměnné)<strong>:</strong> pro $x_4 \in \mathbb{Z}$ je $x_4 \ne 0 \iff (x_4 \ge 1) \lor (x_4 \le -1)$. Disjunkce → binárka $z \in \{0,1\}$ + big-M:</p>
           $$x_4 \ge 1 - M(1 - z), \qquad x_4 \le -1 + M z, \qquad z \in \{0,1\}.$$
           <p>Velikost $M$ při mezích $-5000 \le x_4 \le 1000$: vypnutá větev musí povolit celé rozpětí — $1 - M \le -5000 \Rightarrow M \ge 5001$ a $-1 + M \ge 1000 \Rightarrow M \ge 1001$, tedy např. $M = 5001$. Pozor: v této variantě by už znaménko $x_1$ <em>nebylo</em> vynucené ($x_4$ smí být záporné), takže i $|x_1|$ v kritériu by potřebovalo znaménkový přepínač jako $|x_2|$ — viz řešení T02 v <a href="l1-10.html">[L1.10]</a>.</p>
           <p><strong>Zbytek modelu</strong> (kritérium $\max |x_1| + |x_2|$, disjunkce (1) s $y \in \{0,1\}$ a $M = 11000$, meze (5)) je kompletně vyřešený v úloze T02 lekce <a href="l1-10.html">[L1.10]</a> — výsledný model si tam porovnej.</p>
@@ -226,15 +226,15 @@ KOViz.fnPlot(document.getElementById('viz-neq'), {
   xmin: -4, xmax: 4, ymax: 2, xstep: 1, ystep: 1,
   xlabel: 'x₄', ylabel: '',
   segments: [
-    {x1: -4, y1: 1, x2: -1, y2: 1, label: 'x₄ ≤ −1 (z = 0)', labelAt: 0.45, labelDx: -52, labelDy: -14},
-    {x1: 1, y1: 1, x2: 4, y2: 1, label: 'x₄ ≥ 1 (z = 1)', labelAt: 0.55, labelDx: -42, labelDy: -14},
+    {x1: -4, y1: 1, x2: -1, y2: 1, dashed: true, label: 'x₄ ≤ −1 (z = 0)', labelAt: 0.45, labelDx: -52, labelDy: -14},
+    {x1: 1, y1: 1, x2: 4, y2: 1, dashed: true, label: 'x₄ ≥ 1 (z = 1)', labelAt: 0.55, labelDx: -42, labelDy: -14},
   ],
   points: [
-    {x: -1, y: 1},
-    {x: 1, y: 1},
-    {x: 0, y: 1, open: true, label: 'x₄ = 0 zakázáno', dx: -48, dy: 26},
+    {x: -4, y: 1}, {x: -3, y: 1}, {x: -2, y: 1}, {x: -1, y: 1},
+    {x: 1, y: 1}, {x: 2, y: 1}, {x: 3, y: 1}, {x: 4, y: 1},
+    {x: 0, y: 1, open: true, label: 'x₄ = 0 zakázáno', dx: -130, dy: 26},
   ],
-  caption: 'Přípustné hodnoty celočíselného x₄ ≠ 0: dvě oddělené poloosy s dírou v nule. Jedno lineární omezení díru vyříznout neumí → disjunkce (x₄ ≥ 1) ∨ (x₄ ≤ −1) s binárním přepínačem z a big-M.'
+  caption: 'Přípustné hodnoty celočíselného x₄ ≠ 0: plné body v celočíselných pozicích (čárkované úsečky jsou jen vodítka obou větví), s dírou v nule. Jedno lineární omezení díru vyříznout neumí → disjunkce (x₄ ≥ 1) ∨ (x₄ ≤ −1) s binárním přepínačem z a big-M.'
 });
 
 // x1 ≥ max{2x2, x3} pro x3 = 3: průnik dvou polorovin (AND)

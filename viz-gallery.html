@@ -40,6 +40,9 @@
   <h2>4d · Function plot se záporným rozsahem x (xmin)</h2>
   <div class="viz" id="g4d"></div>
 
+  <h2>4e · Function plot jako číselná osa (ylabel: '' potlačí popisky osy y)</h2>
+  <div class="viz" id="g4e"></div>
+
   <h2>5 · Stepper (krokování algoritmu)</h2>
   <div class="viz" id="g5"></div>
 
@@ -157,6 +160,18 @@ KOViz.fnPlot(document.getElementById('g4d'), {
   ],
   points: [{x: 0, y: 0}],
   caption: 'Ukázka 4d: KOViz.fnPlot s xmin &lt; 0 — graf z = |x|; čárkovaná svislice vyznačuje x = 0.'
+});
+
+// 4e — číselná osa: ylabel '' potlačí popisek osy y i hodnoty (ystep ticky)
+KOViz.fnPlot(document.getElementById('g4e'), {
+  xmin: -3, xmax: 3, ymax: 2, xstep: 1, ystep: 1,
+  xlabel: 'x', ylabel: '',
+  segments: [{x1: 1, y1: 1, x2: 3, y2: 1, dashed: true, label: 'x ≥ 1', labelAt: 0.5, labelDx: -16, labelDy: -14}],
+  points: [
+    {x: 1, y: 1}, {x: 2, y: 1}, {x: 3, y: 1},
+    {x: 0, y: 1, open: true, label: 'x = 0 mimo', dx: -130, dy: 26},
+  ],
+  caption: 'Ukázka 4e: KOViz.fnPlot jako číselná osa — ylabel: \'\' potlačí popisek „f(x)“ i číselné hodnoty na ose y (osa y zde nemá význam).'
 });
 
 // 5 — stepper (mini Dijkstra na 4 uzlech)
