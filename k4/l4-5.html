@@ -197,7 +197,7 @@
           </ul>
           <p>(Pořadí vrstev volíme $s \to C \to R \to P \to t$: rezidenti musí být <em>uprostřed</em>, protože jen oni mají vztah ke klubům i ke stranám. Ruční náčrt v souhrnu uvádí vrstvy v pořadí $R \to C \to P$ — tam ale členství ve straně nejde vyjádřit hranou z klubového vrcholu; zrcadlově obrácená síť $s \to P \to R \to C \to t$ by naopak fungovala taky. Volba pořadí je naše — přiznáno.)</p>
           <p><strong>Kritérium.</strong> Pro každý tok platí $|f| \le q$ (řez $A = \{s\}$ má kapacitu $q$, <a href="l4-4.html#takeaways">[L4.4]</a>). Rada existuje $\iff$ hodnota maximálního toku je rovna $q$, tj. max tok <strong>nasytí všechny hrany $s \to C_j$</strong>. Kapacity jsou celočíselné, takže existuje celočíselný maximální tok (Integral Flow Theorem, slide 17) — F-F ho rovnou vydá — a nominace přečteš z hran $C_j \to R_i$ s $f = 1$: klub $C_j$ nominuje $R_i$. Kvóty jsou dodrženy, protože do $t$ ze strany $P_k$ proteče nejvýš $u_k$. Pokud max tok $&lt; q$, rada neexistuje a minimální řez (z posledního značkování, <a href="l4-4.html#takeaways">[L4.4]</a>) je certifikát: ukazuje skupinu klubů, jejichž členové se „mačkají“ v příliš malých kvótách. Na příkladu $r = 7$, $q = 4$, $p = 3$: tatáž síť se $4$ klubovými a $3$ stranickými vrcholy; rada existuje $\iff |f_{\max}| = 4$.</p>
-          <p><strong>b) Varianta s minimem i maximem (slide 19).</strong> Jediná změna: hrana $p_k \to t$ dostane <em>dolní mez</em> $l(e) = \min_k$ a horní $u(e) = \max_k$. Tím ale síť přestane mít $l \equiv 0$, takže nulový tok už <strong>není přípustný</strong> a samotné „pusť F-F od nuly“ nestačí: nejdřív je potřeba najít <em>počáteční přípustný tok</em> při nenulových dolních mezích — to je přesně rozhodovací úloha „feasible flow“, kterou řeší následující lekce [L4.6] a [L4.7] (transformace na max flow s nulovými $l$). Odpověď pak zní: přípustné přiřazení existuje $\iff$ existuje přípustný tok v této síti nasycující všechny hrany $s \to k_j$; jinak neexistuje (certifikátem je opět řez).</p>
+          <p><strong>b) Varianta s minimem i maximem (slide 19).</strong> Jediná změna: hrana $p_k \to t$ dostane <em>dolní mez</em> $l(e) = \min_k$ a horní $u(e) = \max_k$. Tím ale síť přestane mít $l \equiv 0$, takže nulový tok už <strong>není přípustný</strong> a samotné „pusť F-F od nuly“ nestačí: nejdřív je potřeba najít <em>počáteční přípustný tok</em> při nenulových dolních mezích — to je přesně rozhodovací úloha „feasible flow“, kterou řeší následující lekce <a href="l4-6.html#takeaways">[L4.6]</a> a [L4.7] (transformace na max flow s nulovými $l$). Odpověď pak zní: přípustné přiřazení existuje $\iff$ existuje přípustný tok v této síti nasycující všechny hrany $s \to k_j$; jinak neexistuje (certifikátem je opět řez).</p>
         </div>
       </details>
 
@@ -251,7 +251,7 @@
 
   <div class="pager">
     <a href="../k4/l4-4.html"><span class="dir">← Předchozí</span> L4.4 · Řez a věta max-flow/min-cut [FOTO]</a>
-    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.6 · Feasible flow with balances)</a>
+    <a class="next" href="../k4/l4-6.html"><span class="dir">Další →</span> L4.6 · Feasible flow with balances</a>
   </div>
 
 </div>
