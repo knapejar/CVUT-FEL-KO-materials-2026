@@ -253,6 +253,15 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
         <li><span class="lid">L3.8c</span><a href="k3/l3-8c.html">Eulerovský tah a sudé stupně</a></li>
         <li><span class="lid">L3.9</span><a href="k3/l3-9.html">Double-tree (2-aproximace)</a></li>
       </ul>
+      <h3>Co si vzít k testu</h3>
+      <p>Text je postavený jako hotová osnova odpovědi. Refrén = pět kroků algoritmu v přesném pořadí
+      (kostra → liché vrcholy → párování → Eulerův tah → zkratka) — když dostaneš „popište Christofidesův
+      algoritmus“, vypiš refrén. Bridge = celý důkaz faktoru: čtyři nerovnosti se řetězí do
+      <span class="m">c(H) ≤ c(L) = c(T)+c(M) ≤ OPT + OPT/2 = 3/2·OPT</span>; každý řádek bridge je jedna
+      nerovnost včetně zdůvodnění („okruh bez hrany je kostra“ = proč OPT ≥ c(T)). Verse 3 je pojistka
+      proti záměně s double-tree: rozdíl je jen v kroku 3 (matching místo zdvojení hran) a právě ten
+      zlepší faktor 2 na 3/2. Sudost množiny W („vždycky je jich sudý počet“) je drobnost, na kterou se
+      zkoušející rád zeptá — bez ní by perfektní párování neexistovalo.</p>
     </div></div>
   </div>
 </section>
@@ -317,6 +326,16 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
         <li><span class="lid">L2.4</span><a href="k2/l2-4.html">Dijkstrův algoritmus (běh)</a></li>
         <li><span class="lid">L2.2</span><a href="k2/l2-2.html">Bellmanův princip + rovnice</a></li>
       </ul>
+      <h3>Co si vzít k testu</h3>
+      <p>Titulní fráze „jednou zavřený, navždy zavřený“ JE indukční invariant — věta, kterou odpověď
+      na „dokažte korektnost Dijkstry“ začíná: label vrcholu se po uzavření do R už nezmění a je správný.
+      Refrén dává obě ingredience zdůvodnění: zavíraný vrchol má nejmenší label ze všech otevřených
+      (<span class="m">ℓ(v) ≤ ℓ(k)</span>) a hrany jsou nezáporné, takže žádná cesta přes dosud otevřený
+      vrchol nemůže být kratší. Verse 2 = rozbor Bellmanovy rovnice na dva případy předchůdce k: k ∈ R
+      (hranu už vnitřní smyčka zrelaxovala) vs. k mimo R (tady se použije nezápornost). Bridge odpovídá
+      na oblíbenou podotázku „KDE přesně důkaz potřebuje nezáporné váhy“ — levná hrana schovaná za
+      otevřeným vrcholem by invariant zabila. Outro = poslední věta odpovědi: se zápornými hranami
+      přepni na Bellman–Forda.</p>
     </div></div>
   </div>
 </section>
@@ -381,6 +400,16 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
         <li><span class="lid">L4.3</span><a href="k4/l4-3.html">Ford–Fulkerson: iterativní augmentace (běh)</a></li>
         <li><span class="lid">L4.1</span><a href="k4/l4-1.html">Síť, tok, Kirchhoffův zákon</a></li>
       </ul>
+      <h3>Co si vzít k testu</h3>
+      <p>Píseň je návod na běhovou úlohu „proveďte iterace Ford–Fulkersona“. Verse 1 + refrén = definice
+      augmentující cesty: jde se z s do t BEZ ohledu na orientaci hran, po směru smí hrana s
+      <span class="m">f &lt; u</span>, proti směru s <span class="m">f &gt; l</span> — a pak update:
+      <span class="m">γ</span> je minimum rezerv přes celou cestu, po směru přičíst, proti směru odečíst.
+      Verse 2 = labeling (jak se cesta hledá): značky se šíří od s, označkování t znamená nalezenou cestu.
+      Bridge = zastavovací podmínka (žádná cesta → tok je maximální) plus dvě teoretické drobnosti na
+      podotázky: složitost závisí na hodnotě toku (<span class="m">O(m·|f*|)</span> — proto
+      „pseudopolynomiální“) a s iracionálními kapacitami nemusí skončit, což řeší Edmonds–Karp s BFS.
+      U každé iterace v testu si odzpívej refrén: najdi cestu, spočti γ, přičti/odečti.</p>
     </div></div>
   </div>
 </section>
@@ -439,6 +468,16 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
         <li><span class="lid">L4.4</span><a href="k4/l4-4.html">Řez a věta max-flow/min-cut [FOTO]</a></li>
         <li><span class="lid">L4.3</span><a href="k4/l4-3.html">Ford–Fulkerson (běh + labeling)</a></li>
       </ul>
+      <h3>Co si vzít k testu</h3>
+      <p>Celá píseň krouží kolem jediného vzorce, ve kterém se nejvíc chybuje: kapacita řezu
+      <span class="m">C(A) = Σu(δ⁺(A)) − Σl(δ⁻(A))</span>. Refrén ti vtlouká to MINUS — dolní meze hran
+      vedoucích DOVNITŘ se odečítají, ne sčítají ani neignorují. Verse 1 = definice řezu (s uvnitř A,
+      t venku). Verse 2 je pracovní postup na úlohu „najděte minimální řez“: nech doběhnout labeling,
+      označkované vrcholy tvoří A, a kontrola správnosti — hrany ven musí být plné
+      (<span class="m">f = u</span>), hrany dovnitř na dolní mezi (<span class="m">f = l</span>).
+      Letopočet v refrénu (Ford a Fulkerson 1956) je na otázku „jak se věta jmenuje a od koho je“.
+      Šeptaný bridge = celočíselnost: s celočíselnými kapacitami existuje celočíselný maximální tok
+      (integral flow theorem) — bývá to bonusová podotázka.</p>
     </div></div>
   </div>
 </section>
@@ -504,6 +543,15 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
         <li><span class="lid">L5.2</span><a href="k5/l5-2.html">Precedence a temporální omezení</a><span class="todo">(připravujeme)</span></li>
         <li><span class="lid">L1.15</span><a href="k1/l1-15.html">Časově indexované proměnné v ILP</a></li>
       </ul>
+      <h3>Co si vzít k testu</h3>
+      <p>Refrén je doslova šablona odpovědi na „napište time-indexed ILP model“: pět omezení v pořadí,
+      v jakém je máš vypsat — (1) start právě jednou, (2) definice startovního času, (3) temporální
+      vazby, (4) zdrojové omezení, (5) konec pod C<sub>max</sub> + minimalizace. Verse 1 ti připomíná
+      začít definicí proměnné (<span class="m">a<sub>it</sub></span> binární přes celý horizont) — bez
+      ní model nedává smysl a body padají. Verse 2 je nejčastější zdroj ztracených bodů: okno v omezení 4.
+      Úloha startující v t právě běží v čase τ ⟺ <span class="m">t ≤ τ &lt; t + p<sub>i</sub></span> —
+      „neostrá zleva, ostrá zprava“; kdo otočí nerovnosti, počítá úlohu v čase, kdy už neběží.
+      A jak píseň varuje: nejčastěji se zapomíná celý blok 4 (zdroje).</p>
     </div></div>
   </div>
 </section>
@@ -572,6 +620,16 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
         <li><span class="lid">L5.10</span><a href="k5/l5-10.html">Muntz &amp; Coffman [FOTO]</a><span class="todo">(připravujeme)</span></li>
         <li><span class="lid">L5.4</span><a href="k5/l5-4.html">McNaughton (P|pmtn|Cmax)</a><span class="todo">(připravujeme)</span></li>
       </ul>
+      <h3>Co si vzít k testu</h3>
+      <p>Sloky jdou v pořadí, v jakém běhovou úlohu Muntz &amp; Coffman počítáš. Verse 1: nejdřív levely,
+      odzadu (level = p pro koncové, jinak p + max level následníků — tj. nejdelší cesta do cíle).
+      Refrén: pravidlo přidělování — nejvyšší level dostává procesory, a když je ready úloh víc než
+      strojů, dělí se výkon rovným dílem <span class="m">β = h/|S|</span>. Verse 2: tři události, kdy se
+      přepočítává (úloha skončí / přiřazená klesne pod čekající / pomalejší je dohnána) — mezi nimi
+      odečítáš <span class="m">δ·β</span>. Bridge: výsledný profil se dokončí McNaughtonem — vzorec
+      <span class="m">C*<sub>max</sub> = max(max p<sub>j</sub>, Σp<sub>j</sub>/R)</span> a namotávání
+      „přes okraj“, každá úloha zlomená nejvýš jednou. Verse 3 na teoretickou podotázku: kdy je M&amp;C
+      přesný (2 stroje, nebo strom precedencí) a jinak faktor <span class="m">2 − 2/R</span>.</p>
     </div></div>
   </div>
 </section>
@@ -633,6 +691,16 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
         <li><span class="lid">L6.1</span><a href="k6/l6-1.html">CSP a arc consistency</a><span class="todo">(připravujeme)</span></li>
         <li><span class="lid">L6.2</span><a href="k6/l6-2.html">REVISE a redukce domén</a><span class="todo">(připravujeme)</span></li>
       </ul>
+      <h3>Co si vzít k testu</h3>
+      <p>Verse 1 je definice arc consistency tak, jak ji chtějí slyšet doslova — s oběma kvantifikátory:
+      pro KAŽDÉ <span class="m">a ∈ D<sub>i</sub></span> EXISTUJE <span class="m">b ∈ D<sub>j</sub></span>
+      splňující omezení. Verse 2 dodává druhou půlku definice: hrana má SMĚR, (i,j) konzistentní
+      neříká nic o (j,i) — proto fronta startuje se VŠEMI orientovanými hranami. Refrén = jediné
+      pravidlo, kterým se AC-3 liší od naivního opakování: po škrtu v doméně k vrať do fronty hrany
+      vedoucí DO k, kromě (m,k) — protože revize (k,m) konzistenci hrany (m,k) nemohla rozbít (bridge
+      to říká explicitně, je to oblíbená „proč?“ podotázka). Bridge dává i dvě závěrečné věty každé
+      odpovědi: prázdná doména = fail celé větve, a hlavně — arc consistency NEZARUČUJE řešení, AC je
+      neúplná (protipříklad: trojúhelník s ≠ a doménami {1,2}).</p>
     </div></div>
   </div>
 </section>
@@ -694,6 +762,16 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
         <li><span class="lid">L3.5</span><a href="k3/l3-5.html">TSP je silně NP-těžký (váhy 1/2)</a></li>
         <li><span class="lid">L3.3</span><a href="k3/l3-3.html">Hamiltonovská kružnice a NP-úplnost</a></li>
       </ul>
+      <h3>Co si vzít k testu</h3>
+      <p>Struktura písně = struktura důkazu sporem. Verse 1: předpoklad a konstrukce — kdyby existovala
+      r-aproximace obecného TSP, vezmu instanci Hamiltonova okruhu (graf G na n vrcholech), doplním na
+      úplný graf. Refrén: klíčová volba vah, kterou si musíš pamatovat přesně — 1 pro hrany z G,
+      <span class="m">2 + (r−1)·n</span> pro ostatní — a rozhodovací pravidlo: výsledek aproximace
+      ≤ r·n ⟺ Hamilton existuje. Verse 2 počítá, PROČ mezera funguje: s okruhem je OPT = n (aproximace
+      vrátí ≤ r·n), bez okruhu i nejlepší okruh obsahuje aspoň jednu drahou hranu, takže
+      (n−1)·1 + 2 + (r−1)·n = r·n + 1 — víc, než aproximace smí vrátit. Tím by polynomiální algoritmus
+      rozhodl NP-úplný problém → spor s P ≠ NP. Bridge = navazující věta: s váhami 1 a 2 platí
+      trojúhelníková nerovnost, takže i METRICKÝ TSP je NP-těžký (jen ne neaproximovatelný).</p>
     </div></div>
   </div>
 </section>
@@ -755,6 +833,16 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
         <li><span class="lid">L2.12</span><a href="k2/l2-12.html">Bellman–Ford + detekce záporného cyklu (běh)</a></li>
         <li><span class="lid">L2.18</span><a href="k2/l2-18.html">Teorie záporných cyklů / 5 výroků [FOTO]</a></li>
       </ul>
+      <h3>Co si vzít k testu</h3>
+      <p>Verse 1 = běh algoritmu (inicializace + n−1 kol přes všechny hrany, label correcting, žádné
+      zavírání — kontrast k Dijkstrovi). Refrén = věta o k-té iteraci, jádro důkazu korektnosti: po k
+      kolech je <span class="m">ℓ<sub>k</sub>(v)</span> nejvýš délka nejkratšího sledu o ≤ k hranách;
+      a protože žádná cesta nemá víc než n−1 hran, po n−1 kolech je hotovo. Verse 2 ti dává tři kroky
+      důkazu indukčního kroku v pořadí, v jakém je napsat: ALGORITMUS (relaxace dává
+      <span class="m">ℓ<sub>k</sub>(v) ≤ ℓ<sub>k−1</sub>(u) + c(u,v)</span>) → INDUKČNÍ PŘEDPOKLAD
+      (ℓ<sub>k−1</sub> ohraničený sledy o k−1 hranách) → PRINCIP OPTIMALITY (spojením sled o k hranách).
+      Bridge = dvě praktické podotázky: detekce záporného cyklu (jeden průchod navíc — jde-li ještě
+      relaxovat, cyklus existuje) a trik na nedosažitelné vrcholy (nový zdroj s nulovými hranami).</p>
     </div></div>
   </div>
 </section>
@@ -819,6 +907,15 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
       <ul class="refs">
         <li><span class="lid">L5.1</span><a href="k5/l5-1.html">Grahamova notace α|β|γ</a><span class="todo">(připravujeme)</span></li>
       </ul>
+      <h3>Co si vzít k testu</h3>
+      <p>Píseň kopíruje tři pozice zápisu: Verse 1 = α (stroje), Verse 2 = β (vlastnosti úloh),
+      Bridge = γ (kritérium). Když v testu čteš zadání typu <span class="m">1 | pmtn, r<sub>j</sub> | L<sub>max</sub></span>,
+      přehraj si příslušnou sloku a přelož každé písmeno — píseň je slovník. Refrén vtlouká rozdíl,
+      na kterém se nejvíc chybuje: <span class="m">d̃</span> s vlnkou je DEADLINE (tvrdá zeď, nesmí se
+      překročit — rozvrh jinak není přípustný), <span class="m">d</span> bez vlnky je DUE DATE (smí se
+      přejet, jen se měří zpoždění/lateness). Z γ si pamatuj definici
+      <span class="m">L<sub>max</sub> = max(C<sub>j</sub> − d<sub>j</sub>)</span> a poslední řádek bridge:
+      prázdné γ znamená čistě rozhodovací problém („existuje přípustný rozvrh?“), žádná optimalizace.</p>
     </div></div>
   </div>
 </section>
@@ -885,6 +982,17 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
         <li><span class="lid">L5.9</span><a href="k5/l5-9.html">Bratleyho algoritmus (B&amp;B)</a><span class="todo">(připravujeme)</span></li>
         <li><span class="lid">L5.11</span><a href="k5/l5-11.html">Rothkopf DP</a><span class="todo">(připravujeme)</span></li>
       </ul>
+      <h3>Co si vzít k testu</h3>
+      <p>Tohle je tahák „problém → algoritmus → záruka“ pro celý rozvrhovací slot. Refrén = tři
+      aproximační zlomky, které se navzájem pletou; pamatuj si je jako trojici v tomhle pořadí:
+      list scheduling <span class="m">2 − 1/R</span>, LPT <span class="m">4/3 − 1/(3R)</span>,
+      Muntz &amp; Coffman <span class="m">2 − 2/R</span>. Sloky mapují, kdo řeší co PŘESNĚ a co je
+      NP-těžké: P2||C<sub>max</sub> je NP-těžké redukcí z 2-partition (práh = půlka sumy p);
+      s preempcí to McNaughton zvládne v O(n); rozhodovací verze s preempcí, release a deadliny jde
+      přes maximální tok. Verse 2 = jednostrojové úlohy: EDD na 1||L<sub>max</sub>, Horn (EDF) když
+      přibude release+preempce, Chetto–Silly–Bouchentouf upraví okna při precedencích, Bratley (B&amp;B)
+      bez preempce s tvrdými deadliny. U otázky „jakým algoritmem a s jakou zárukou“ odpověz přesně
+      jedním řádkem téhle písně.</p>
     </div></div>
   </div>
 </section>
@@ -948,6 +1056,16 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
         <li><span class="lid">L7.1</span><a href="k7/l7-1.html">Knapsack DP (tabulka + backtracking)</a><span class="todo">(připravujeme)</span></li>
         <li><span class="lid">L3.11</span><a href="k3/l3-11.html">Knapsack: greedy + 2-aproximace (důkaz)</a></li>
       </ul>
+      <h3>Co si vzít k testu</h3>
+      <p>První věc, kterou v odpovědi řekni, je pointa Verse 1: tahle DP NENÍ školní tabulka přes
+      kapacitu — stav je CENA k a hodnota <span class="m">x(k,j)</span> je nejmenší váha, kterou cenu k
+      poskládáš z prvních j položek. Refrén = rekurence (minimum z „nech být“
+      <span class="m">x(k, j−1)</span> a „přidej j“ <span class="m">x(k−c<sub>j</sub>, j−1) + w<sub>j</sub></span>),
+      čtení výsledku (největší k s váhou ≤ W) a složitost <span class="m">O(n·C)</span> — pseudopolynom,
+      protože C je suma cen, ne velikost vstupu. Verse 2 = detaily, bez kterých běhová úloha nestojí:
+      inicializace (x(0,0)=0, jinak ∞) a rekonstrukce řešení zpětným průchodem přes uložená rozhodnutí
+      s(k,j). Bridge je samostatná testová otázka „2-aproximace knapsacku“: seřaď podle c/w, h je první
+      položka, co se nevejde, a lepší z {prefix 1..h−1} a {h samotná} má aspoň polovinu optima.</p>
     </div></div>
   </div>
 </section>
