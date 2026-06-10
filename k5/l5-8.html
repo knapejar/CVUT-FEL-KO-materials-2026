@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L5.8 · Chetto-Silly-Bouchentouf (prec → nezávislé, pak EDF) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k5">K5 · Rozvrhování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L5.8</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L5.8</span> Kapitola K5 — Rozvrhování (Slot 5) · <strong>[MUST]</strong>
+  </p>
+  <h1>Chetto-Silly-Bouchentouf (prec → nezávislé, pak EDF)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Precedence zabuduj do časových parametrů.</strong> Dopředný průchod DAGem zpřísní release times ($r_j'$), zpětný průchod zpřísní deadliny ($\tilde{d}_j'$) — a úlohy se pak smí považovat za <em>nezávislé</em> a rozvrhnout obyčejným EDF z <a href="../k5/l5-7.html">[L5.7]</a>. Tak řeší algoritmus Chetto-Silly-Bouchentouf (CSB) problém $1\,|\,\mathrm{pmtn}, \mathrm{prec}, r_j, d_j = \tilde{d}_j\,|\,L_{\max}$.
+  </div>
+
+  <p>Z mapy slidu 27 (<a href="../k5/l5-7.html#takeaways">[L5.7] EDD a Hornův algoritmus</a>) zbývá poslední polynomiální řádek: $1\,|\,\mathrm{pmtn}, \mathrm{prec}, r_j, d_j = \tilde{d}_j\,|\,L_{\max}$ — „transformation to independent task set and then solved EDF“. Precedence (hrana $T_j \to T_k$ = „$T_k$ smí začít až po dokončení $T_j$“) znáš z <a href="../k5/l5-2.html#takeaways">[L5.2] Precedence a temporální omezení</a>; dnes je nebudeme kreslit do grafu temporálních omezení, ale <em>přepočítáme kvůli nim $r_j$ a $\tilde{d}_j$</em>.</p>
+
+  <!-- ===== SEKCE 1: CO SE POKAZI ===== -->
+  <h2>Co se pokazí, když EDF pustíš rovnou</h2>
+
+  <p>Pracovní instance (vlastní mini-instance — přiznáno): čtyři preemptivní úlohy na jednom stroji, $r = (0, 1, 0, 2)$, $p = (2, 2, 3, 1)$, $d = \tilde{d} = (10, 4, 9, 12)$, precedence $T_1 \to T_3$, $T_2 \to T_3$, $T_2 \to T_4$:</p>
+
+  <div class="viz" id="viz-dag"></div>
+
+  <details class="try">
+    <summary>Zkus sám: zapomeň na chvíli na precedence a pusť na instanci čisté EDF z [L5.7] („v každém okamžiku ready úloha s nejmenším deadlinem“). Co se rozbije hned v čase $t = 0$?</summary>
+    <div class="inner">
+      <p>V $t = 0$ jsou ready $T_1$ ($\tilde{d}_1 = 10$) a $T_3$ ($r_3 = 0$, $\tilde{d}_3 = 9$). EDF vybere <strong>$T_3$ — následníka, jehož předchůdci $T_1$ a $T_2$ ještě ani nezačali</strong>. Porušení precedence. EDF je na precedence slepé: kouká jen na $r$ a $\tilde{d}$. Trik CSB: <em>přepiš $r$ a $\tilde{d}$ tak, aby precedence „byly vidět“ už v časových parametrech</em> — pak EDF nic porušit nemůže.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: ODVOZENI FORMULI ===== -->
+  <h2>Zabuduj precedence do $r$ a $\tilde{d}$</h2>
+
+  <details class="try">
+    <summary>Zkus sám: hrana $T_h \to T_j$ říká, že $T_j$ smí začít až po dokončení $T_h$. Před jaký čas se start $T_j$ <em>reálně</em> nikdy nedostane? Odvoď nové $r_j'$ — a rozmysli, jestli do vzorce patří původní $r_h$, nebo už upravené $r_h'$.</summary>
+    <div class="inner">
+      <p>$T_h$ nemůže skončit dřív než v $r_h + p_h$ — takže $T_j$ nemá smysl uvolňovat před $\max\{r_j,\ r_h + p_h\}$ přes všechny bezprostřední předchůdce. Jenže $T_h$ může být sám zdržen <em>svými</em> předchůdci, takže správně je <strong>$r_h' + p_h$ s už upravenou hodnotou</strong>: $r_j' = \max\{r_j,\ \max\{r_h' + p_h\}\}$. Proto se DAG prochází <strong>dopředně v topologickém pořadí</strong> — úloha přijde na řadu, až když mají upravené $r'$ všichni její bezprostřední předchůdci.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: a symetricky — hrana $T_j \to T_k$ s deadlinem $\tilde{d}_k$ následníka. Do kdy <em>nejpozději</em> musí být hotová $T_j$, aby $T_k$ vůbec mohla stihnout svůj deadline? Odvoď $\tilde{d}_j'$.</summary>
+    <div class="inner">
+      <p>$T_k$ potřebuje po dokončení $T_j$ ještě aspoň $p_k$ času, takže $T_j$ musí skončit do $\tilde{d}_k' - p_k$ (zase s <em>upravenou</em> hodnotou — $T_k$ může být přitlačen svými následníky). Přes všechny bezprostřední následníky: $\tilde{d}_j' = \min\{\tilde{d}_j,\ \min\{\tilde{d}_k' - p_k\}\}$ — <strong>zpětný průchod od úloh bez následníků</strong>. Pozor na častou chybu: odečítá se $p_k$ <em>následníka</em>, ne vlastní $p_j$.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 35 (EN 1:1) — Problem $1\,|\,\mathrm{pmtn}, \mathrm{prec}, r_j, d_j = \tilde{d}_j\,|\,L_{\max}$</div>
+    <p>“<strong>Chetto, Silly, Bouchentouf algorithm</strong> transforms set $\mathcal{T}$ of dependent tasks into $\mathcal{T}'$ <strong>of independent tasks</strong> by modification of timing parameters:</p>
+    <ul>
+      <li><strong>modification of the release dates</strong>
+        <ol>
+          <li>For any task without predecessors set $r_j' = r_j$.</li>
+          <li>Select task $T_j$ such that its release date has not been modified but the release dates of all immediate predecessors $T_h$ have been modified. If no such task exists, exit.</li>
+          <li>Set $r_j' = \max\{r_j,\ \max\{r_h' + p_h \mid T_h \text{ is immediate predecessor of } T_j\}\}$ and jump to step 2.</li>
+        </ol>
+      </li>
+      <li><strong>modification of deadlines</strong>
+        <ol>
+          <li>For any task without successors set $\tilde{d}_j' = \tilde{d}_j$.</li>
+          <li>Select a task $T_j$ such that its deadline has not been modified but the deadlines of all immediate successors $T_k$ have been modified. If no such task exists, exit.</li>
+          <li>Set $\tilde{d}_j' = \min\{\tilde{d}_j,\ \min\{\tilde{d}_k' - p_k \mid T_k \text{ is immediate successor of } T_j\}\}$ and jump to step 2.</li>
+        </ol>
+      </li>
+      <li><strong>EDF is executed</strong> on independent tasks in $\mathcal{T}'$”</li>
+    </ul>
+  </div>
+
+  <!-- ===== SEKCE 3: BEH TRANSFORMACE ===== -->
+  <h2>Běh transformace na pracovní instanci</h2>
+
+  <p>Projdi si oba průchody krok za krokem (čísla pod uzly = právě spočtené $r'$ a $\tilde{d}'$):</p>
+
+  <div class="viz" id="viz-pass"></div>
+
+  <!-- ===== SEKCE 4: EDF ===== -->
+  <h2>Pak už jen EDF</h2>
+
+  <p>Na transformované instanci $\mathcal{T}'$: $r' = (0, 1, 3, 3)$, $p = (2, 2, 3, 1)$, $\tilde{d}' = (6, 4, 9, 12)$ — <em>bez precedencí</em> — běží Hornův algoritmus/EDF přesně podle pseudokódu z <a href="../k5/l5-7.html">[L5.7]</a>:</p>
+
+  <div class="viz" id="viz-edf"></div>
+
+  <details class="try">
+    <summary>Zkus sám: zkontroluj ve výsledném rozvrhu všechny tři precedence. A najdi okamžik, kde by EDF s <em>původním</em> $\tilde{d}_1 = 10$ pořadí rozbilo.</summary>
+    <div class="inner">
+      <p>$C_1 = 4 \le s_3 = 4$ ✓, $C_2 = 3 \le s_3 = 4$ ✓, $C_2 = 3 \le s_4 = 7$ ✓ — všechny precedence drží, ač o nich EDF „neví“. Kritický okamžik je $t = 3$: ready jsou rozdělaná $T_1$ a čerstvě uvolněné $T_3$, $T_4$. Díky zpřísnění $\tilde{d}_1' = 6 &lt; \tilde{d}_3' = 9$ vyhraje předchůdce $T_1$; s původním $\tilde{d}_1 = 10 &gt; 9$ by EDF pustilo následníka $T_3$ před nedokončeného předchůdce.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 5: KOREKTNOST ===== -->
+  <h2>Proč je to korektní</h2>
+
+  <details class="try">
+    <summary>Zkus sám: dvě obavy. (1) Nezahodí zpřísnění $r' \ge r$, $\tilde{d}' \le \tilde{d}$ nějaký dobrý rozvrh? (2) Proč EDF na $\mathcal{T}'$ <em>nikdy</em> nespustí následníka před dokončením předchůdce? (Nápověda k (2): porovnej $\tilde{d}_j'$ a $\tilde{d}_k'$ pro $T_j \to T_k$ — ostře?)</summary>
+    <div class="inner">
+      <p>(1) Zpřísněné meze jsme <em>odvodili</em> z precedencí: žádný rozvrh respektující precedence stejně nemůže začít $T_j$ před $r_j'$ ani dokončit po $\tilde{d}_j'$ (jinak by následníci nestihli). Takže množina přípustných rozvrhů se nezmenšila — jen jsme ji popsali časovými okny. A obráceně: kdo stihne přísnější okna, stihne i původní. (2) Pro hranu $T_j \to T_k$ platí $\tilde{d}_j' \le \tilde{d}_k' - p_k &lt; \tilde{d}_k'$ <strong>ostře</strong> (protože $p_k &gt; 0$) — dokud je předchůdce nedokončený a ready, EDF ho vždy upřednostní; a díky $r_k' \ge r_j' + p_j$ se následník ani neuvolní, dokud předchůdce nemohl doběhnout.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 36 (EN 1:1) — No problem constraints are violated by Chetto, Silly, Bouchentouf algorithm</div>
+    <ul>
+      <li>“$r_j' \ge r_j$ and $\tilde{d}_j' \le \tilde{d}_j$, therefore, the <strong>schedulability of $\mathcal{T}'$</strong> with respect to the timing constraints (release dates and deadlines) <strong>implies also schedulability of $\mathcal{T}$</strong> with respect to the timing constraints</li>
+      <li>due to the structure of the Horn's alg. (consider a set of released tasks and choose the one with smallest deadline) and modification of the timing constraints the scheduled <strong>tasks of $\mathcal{T}'$ are ordered in the same way</strong> as given by the precedence constraints, therefore, <strong>precedence constraints of $\mathcal{T}$ are not violated</strong>”</li>
+    </ul>
+  </div>
+
+  <p>Celé to tedy je polynomiální recept na $1\,|\,\mathrm{pmtn}, \mathrm{prec}, r_j, d_j = \tilde{d}_j\,|\,L_{\max}$: dva průchody DAGem + EDF; optimalita EDF z <a href="../k5/l5-7.html#takeaways">[L5.7]</a> se přenáší a EDF na $\mathcal{T}'$ pořád <strong>rozhoduje schedulabilitu</strong> ($L_{\max} \le 0$ ⟺ existuje přípustný rozvrh — teď i vůči precedencím). Pro <em>více</em> procesorů tahle transformace nestačí: feasibilitu $P\,|\,\mathrm{pmtn}, r_j, \tilde{d}_j\,|$ řeší toky v <a href="../k5/l5-0.html#takeaways">[L5.0]</a>, $P\,|\,\mathrm{pmtn}, \mathrm{prec}\,|\,C_{max}$ Muntz &amp; Coffman [L5.10]; nepreemptivní jednostrojový případ s deadliny řeší Bratleyho B&amp;B [L5.9].</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
+    <p><strong>① „Stačí dosadit původní hodnoty sousedů.“</strong> Ne — průchody jdou v topologickém pořadí a používají <em>už upravené</em> hodnoty: $r_h' + p_h$ (ne $r_h + p_h$), $\tilde{d}_k' - p_k$ (ne $\tilde{d}_k - p_k$). Krok 2 pseudokódu to vynucuje („…all immediate predecessors have been modified“). <strong>② Čí $p$ se přičítá/odečítá?</strong> U release přičítáš $p_h$ <em>předchůdce</em>, u deadline odečítáš $p_k$ <em>následníka</em> — nikdy vlastní $p_j$. <strong>③ EDF běží na $r', \tilde{d}'$, ale $L_{\max}$ vyhodnoť proti původním $d_j$</strong> — $\tilde{d}'$ je jen pracovní nástroj transformace ($\tilde{d}_j' \le \tilde{d}_j$, takže s $\tilde{d}'$ by sis výsledek uměle zhoršil). <strong>④ Jen jeden stroj.</strong> CSB stojí na tom, že EDF na jednom stroji s ostře menším $\tilde{d}'$ předchůdce nikdy nepředběhne — na více procesorech běží úlohy vedle sebe a argument padá (tam Muntz &amp; Coffman [L5.10]).</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.8</div>
+    <ul>
+      <li><strong>CSB = transformace na nezávislé úlohy + EDF</strong> pro $1\,|\,\mathrm{pmtn}, \mathrm{prec}, r_j, d_j = \tilde{d}_j\,|\,L_{\max}$ (polynomiální).</li>
+      <li><strong>Dopředný průchod:</strong> $r_j' = \max\{r_j,\ \max_{T_h \to T_j}\{r_h' + p_h\}\}$ — od úloh bez předchůdců, s už upravenými $r_h'$.</li>
+      <li><strong>Zpětný průchod:</strong> $\tilde{d}_j' = \min\{\tilde{d}_j,\ \min_{T_j \to T_k}\{\tilde{d}_k' - p_k\}\}$ — od úloh bez následníků, odečítá se $p$ následníka.</li>
+      <li><strong>Korektnost:</strong> $r_j' \ge r_j$, $\tilde{d}_j' \le \tilde{d}_j$ ⟹ schedulabilita $\mathcal{T}'$ implikuje schedulabilitu $\mathcal{T}$; EDF předchůdce nikdy nepředběhne ($\tilde{d}_j' &lt; \tilde{d}_k'$ ostře), takže precedence drží samy.</li>
+      <li><strong>Vyhodnocení:</strong> $L_{\max} = \max_j(C_j - d_j)$ proti <em>původním</em> due datům; $L_{\max} \le 0$ ⟺ existuje přípustný rozvrh (EDF rozhoduje schedulabilitu i s precedencemi).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ULOHA T01 ===== -->
+  <div class="task" id="t-csb">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Chetto, Silly, Bouchentouf algorithm for $1\,|\,\mathrm{pmtn}, \mathrm{prec}, r_j, d_j = \tilde{d}_j\,|\,L_{\max}$</strong>
+      <span class="task-src">zdroj: zkouška KO_21_06_2021 / zkoušky 2023 (EN 1:1) = příklad slidu 37 = task bank #39</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“a) Using Chetto, Silly, Bouchentouf algorithm solve the following instance of mono-processor scheduling of preemptive tasks with precedence relations, release dates and due-dates equal to deadlines while minimizing the maximum lateness. Indicate values of main variables in separate steps of the algorithm. Draw the Gantt chart.</p>
+        <p>$$r = (0, 3, 2, 6, 3)$$ $$p = (2, 3, 2, 2, 3)$$ $$\tilde{d} = d = (3, 7, 13, 9, 13)$$</p>
+        <p>Precedence graph (edge list, source $T_1$ on the left, sink $T_5$ on the right): $T_1 \to T_2$, $T_1 \to T_3$, $T_2 \to T_4$, $T_2 \to T_5$, $T_3 \to T_5$, $T_4 \to T_5$.</p>
+        <p>b) Calculate the $L_{\max}$ value of the optimal solution.”</p>
+      </div>
+
+      <div class="viz" id="viz-t01dag"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Pět preemptivních úloh na jednom stroji s release times, deadliny rovnými due datům <em>a precedencemi</em> (DAG se zdrojem $T_1$ a stokem $T_5$). Máme spustit CSB: oba průchody s vypsanými mezivýpočty („values of main variables in separate steps“), pak EDF, Gantt a $L_{\max}$.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — vzorce obou průchodů a topologické pořadí (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k5/l5-7.html#takeaways">[L5.7] EDD a Hornův algoritmus</a> — běh EDF (rozhodovací body, $\delta$, preempce).</li>
+        <li><a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace</a> — čtení $1\,|\,\mathrm{pmtn}, \mathrm{prec}, r_j, d_j = \tilde{d}_j\,|\,L_{\max}$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Nejdřív dopředný průchod od $T_1$ (jediná bez předchůdců), pak zpětný od $T_5$ (jediná bez následníků) — u každé úlohy vypiš celý $\max$/$\min$ se všemi bezprostředními sousedy, to jsou ty „main variables in separate steps“. Pak zahoď hrany a vede tabulka iterací EDF jako v [L5.7]: $t_1$, $t_2$, ready množina s $\tilde{d}'$, vítěz, $\delta$. Nakonec $L_j = C_j - d_j$ proti původním due datům.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (hodnoty $r'$, $\tilde{d}'$, Gantt i $L_{\max}$ dle slidu 37)</summary>
+        <div class="inner">
+          <p><strong>Dopředný průchod (release dates), topologicky $T_1, T_2, T_3, T_4, T_5$:</strong></p>
+          <table>
+            <thead><tr><th>$T_j$</th><th>bezpr. předchůdci</th><th>$r_j' = \max\{r_j,\ \max\{r_h' + p_h\}\}$</th><th>$r_j'$</th></tr></thead>
+            <tbody>
+              <tr><td>$T_1$</td><td>—</td><td>$r_1' = r_1$</td><td>$0$</td></tr>
+              <tr><td>$T_2$</td><td>$T_1$</td><td>$\max\{3,\ 0 + 2\}$</td><td>$3$</td></tr>
+              <tr><td>$T_3$</td><td>$T_1$</td><td>$\max\{2,\ 0 + 2\}$</td><td>$2$</td></tr>
+              <tr><td>$T_4$</td><td>$T_2$</td><td>$\max\{6,\ 3 + 3\}$</td><td>$6$</td></tr>
+              <tr><td>$T_5$</td><td>$T_2, T_3, T_4$</td><td>$\max\{3,\ 3 + 3,\ 2 + 2,\ 6 + 2\}$</td><td>$8$</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Zpětný průchod (deadliny), topologicky $T_5, T_4, T_3, T_2, T_1$:</strong></p>
+          <table>
+            <thead><tr><th>$T_j$</th><th>bezpr. následníci</th><th>$\tilde{d}_j' = \min\{\tilde{d}_j,\ \min\{\tilde{d}_k' - p_k\}\}$</th><th>$\tilde{d}_j'$</th></tr></thead>
+            <tbody>
+              <tr><td>$T_5$</td><td>—</td><td>$\tilde{d}_5' = \tilde{d}_5$</td><td>$13$</td></tr>
+              <tr><td>$T_4$</td><td>$T_5$</td><td>$\min\{9,\ 13 - 3\}$</td><td>$9$</td></tr>
+              <tr><td>$T_3$</td><td>$T_5$</td><td>$\min\{13,\ 13 - 3\}$</td><td>$10$</td></tr>
+              <tr><td>$T_2$</td><td>$T_4, T_5$</td><td>$\min\{7,\ 9 - 2,\ 13 - 3\}$</td><td>$7$</td></tr>
+              <tr><td>$T_1$</td><td>$T_2, T_3$</td><td>$\min\{3,\ 7 - 3,\ 10 - 2\}$</td><td>$3$</td></tr>
+            </tbody>
+          </table>
+          <p>Shodně se slidem 37: $r' = (0, 3, 2, 6, 8)$, $\tilde{d}' = (3, 7, 10, 9, 13)$.</p>
+          <p><strong>EDF na nezávislých úlohách $\mathcal{T}'$</strong> (vítěz tučně, $\tilde{d}'$ v závorkách):</p>
+          <table>
+            <thead><tr><th>#</th><th>$t_1$</th><th>$t_2$</th><th>$T'$ (ready)</th><th>$\delta$</th><th>naplánováno</th><th>po kroku</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>0</td><td>2</td><td>$\mathbf{T_1}(3)$</td><td>$\min\{2, 2\} = 2$</td><td>$T_1\ \langle 0, 2)$</td><td>$T_1$ hotová, $C_1 = 2$</td></tr>
+              <tr><td>2</td><td>2</td><td>3</td><td>$\mathbf{T_3}(10)$</td><td>$\min\{2, 1\} = 1$</td><td>$T_3\ \langle 2, 3)$</td><td>$p_3 := 1$ (preempce)</td></tr>
+              <tr><td>3</td><td>3</td><td>6</td><td>$T_3(10),\ \mathbf{T_2}(7)$</td><td>$\min\{3, 3\} = 3$</td><td>$T_2\ \langle 3, 6)$</td><td>$T_2$ hotová, $C_2 = 6$</td></tr>
+              <tr><td>4</td><td>6</td><td>8</td><td>$T_3(10),\ \mathbf{T_4}(9)$</td><td>$\min\{2, 2\} = 2$</td><td>$T_4\ \langle 6, 8)$</td><td>$T_4$ hotová, $C_4 = 8$</td></tr>
+              <tr><td>5</td><td>8</td><td>$\infty$</td><td>$\mathbf{T_3}(10),\ T_5(13)$</td><td>$\min\{1, \infty\} = 1$</td><td>$T_3\ \langle 8, 9)$</td><td>$T_3$ hotová, $C_3 = 9$</td></tr>
+              <tr><td>6</td><td>9</td><td>$\infty$</td><td>$\mathbf{T_5}(13)$</td><td>$\min\{3, \infty\} = 3$</td><td>$T_5\ \langle 9, 12)$</td><td>$T_5$ hotová, $C_5 = 12$</td></tr>
+            </tbody>
+          </table>
+          <p>Všimni si role transformace: v iteraci 2 je $T_3$ preemptována releasem naléhavější $T_2$; v iteraci 4 vyhrává $T_4$ nad $T_3$ díky zpřísněnému $\tilde{d}_3' = 10$; a $T_5$ se díky $r_5' = 8$ vůbec neuvolní, dokud nemohli doběhnout všichni její předchůdci.</p>
+          <div class="viz" id="viz-t01gantt"></div>
+          <p>Lateness proti původním $d = (3, 7, 13, 9, 13)$: $L_1 = 2 - 3 = -1$, $L_2 = 6 - 7 = -1$, $L_3 = 9 - 13 = -4$, $L_4 = 8 - 9 = -1$, $L_5 = 12 - 13 = -1$.</p>
+          <p>$$L_{\max} = -1.$$</p>
+          <p><strong>b)</strong> CSB + EDF je pro $1\,|\,\mathrm{pmtn}, \mathrm{prec}, r_j, d_j = \tilde{d}_j\,|\,L_{\max}$ optimální (slide 27 + optimalita EDF z [L5.7] + korektnost transformace, slide 36), takže $L_{\max}$ optimálního řešení je přímo hodnota z bodu a): $L_{\max}^* = -1$ — vše stíháme s rezervou 1.</p>
+          <p><em>Pozn. k podkladům (přiznáno): textový přepis obrázku slidu 37 vyjmenovává jen hrany $T_1 \to T_2$, $T_1 \to T_3$, $T_2 \to T_4$, $T_2 \to T_5$, $T_3 \to T_5$ — bez $T_4 \to T_5$. Obě zkoušková zadání (21. 6. 2021 i 2023) a banka #39 hranu $T_4 \to T_5$ uvádějí a vlastní řešení slidu ji potvrzuje: $r_5' = 8 = r_4' + p_4$ vyjde jen s ní. Počítáme tedy se všemi šesti hranami.</em></p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ULOHA T02 ===== -->
+  <div class="task" id="t-csbdrill">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>CSB drill + rozhodnutí schedulability</strong>
+      <span class="task-src">zdroj: VLASTNÍ drill (přiznáno); formulace po vzoru zkouškového zadání, algoritmus dle slidů 35–36</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN — vlastní, přiznáno)</span>
+        <p>Using the Chetto, Silly, Bouchentouf algorithm solve the following instance of mono-processor scheduling of preemptive tasks with precedence relations, release dates and due-dates equal to deadlines:</p>
+        <p>$$r = (0, 0, 1, 0), \qquad p = (1, 2, 2, 2), \qquad \tilde{d} = d = (9, 3, 8, 6),$$</p>
+        <p>precedence constraints $T_1 \to T_2$, $T_1 \to T_3$, $T_3 \to T_4$.</p>
+        <p>(i) Compute the modified release dates $r'$ and modified deadlines $\tilde{d}'$.</p>
+        <p>(ii) Run EDF on the transformed independent-task instance, draw the Gantt chart and compute $L_{\max}$.</p>
+        <p>(iii) Does a feasible schedule (meeting all deadlines) exist for this instance? Justify your answer.</p>
+      </div>
+
+      <div class="viz" id="viz-t02dag"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Čtyři preemptivní úlohy, jeden stroj, precedence tvoří vidličku s řetízkem ($T_1$ před vším, $T_3$ před $T_4$). Část (iii) chce verdikt feasibility — vzpomeň si, co EDF rozhoduje.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — oba průchody + korektnost (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k5/l5-7.html#takeaways">[L5.7]</a> — EDF rozhoduje schedulabilitu ($L_{\max} \le 0$ ⟺ feasible).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Pozor na dvě místa, kde se meze opravdu mění: $\tilde{d}_3$ stlačí následník $T_4$ (i když $\tilde{d}_4 &lt; \tilde{d}_3$ — právě proto!) a $\tilde{d}_1$ stlačí <em>oba</em> následníci. U (iii) nehádej: výsledné $L_{\max}$ je sám o sobě certifikát — ale rozmysli si, kterým směrem implikace platí a proč je tu i opačná (optimalita EDF).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
+        <div class="inner">
+          <p><strong>(i) Dopředný průchod</strong> ($T_1$ bez předchůdců): $r_1' = 0$; $r_2' = \max\{0,\ 0 + 1\} = 1$; $r_3' = \max\{1,\ 0 + 1\} = 1$; $r_4' = \max\{0,\ r_3' + p_3 = 1 + 2\} = 3$. Tedy $r' = (0, 1, 1, 3)$.</p>
+          <p><strong>Zpětný průchod</strong> ($T_2$, $T_4$ bez následníků): $\tilde{d}_2' = 3$; $\tilde{d}_4' = 6$; $\tilde{d}_3' = \min\{8,\ \tilde{d}_4' - p_4 = 6 - 2\} = 4$; $\tilde{d}_1' = \min\{9,\ \tilde{d}_2' - p_2 = 3 - 2,\ \tilde{d}_3' - p_3 = 4 - 2\} = 1$. Tedy $\tilde{d}' = (1, 3, 4, 6)$ — všimni si, jak řetízek $T_3 \to T_4$ propadl až do $\tilde{d}_1'$.</p>
+          <p><strong>(ii) EDF</strong> na $r' = (0, 1, 1, 3)$, $\tilde{d}' = (1, 3, 4, 6)$:</p>
+          <table>
+            <thead><tr><th>#</th><th>$t_1$</th><th>$t_2$</th><th>$T'$ (ready)</th><th>$\delta$</th><th>naplánováno</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>0</td><td>1</td><td>$\mathbf{T_1}(1)$</td><td>$\min\{1, 1\} = 1$</td><td>$T_1\ \langle 0, 1)$, $C_1 = 1$</td></tr>
+              <tr><td>2</td><td>1</td><td>3</td><td>$\mathbf{T_2}(3),\ T_3(4)$</td><td>$\min\{2, 2\} = 2$</td><td>$T_2\ \langle 1, 3)$, $C_2 = 3$</td></tr>
+              <tr><td>3</td><td>3</td><td>$\infty$</td><td>$\mathbf{T_3}(4),\ T_4(6)$</td><td>$\min\{2, \infty\} = 2$</td><td>$T_3\ \langle 3, 5)$, $C_3 = 5$</td></tr>
+              <tr><td>4</td><td>5</td><td>$\infty$</td><td>$\mathbf{T_4}(6)$</td><td>$\min\{2, \infty\} = 2$</td><td>$T_4\ \langle 5, 7)$, $C_4 = 7$</td></tr>
+            </tbody>
+          </table>
+          <div class="viz" id="viz-t02gantt"></div>
+          <p>Lateness proti původním $d = (9, 3, 8, 6)$: $L_1 = 1 - 9 = -8$, $L_2 = 3 - 3 = 0$, $L_3 = 5 - 8 = -3$, $L_4 = 7 - 6 = 1$, tedy $$L_{\max} = 1 \quad (\text{určuje } T_4).$$</p>
+          <p><strong>(iii) Ne, přípustný rozvrh neexistuje.</strong> CSB + EDF minimalizuje $L_{\max}$, takže $L_{\max}^* = 1 &gt; 0$ znamená, že <em>žádný</em> rozvrh všechny deadliny nestihne (EDF rozhoduje schedulabilitu, [L5.7]). Ručně to lze nahlédnout i bez věty: celková práce je $\sum p_j = 7$, takže úloha dokončená jako poslední má $C \ge 7$; poslední přitom může být jen $T_2$, nebo $T_4$ (předchůdce nikdy nekončí po svém následníkovi: $C_1 &lt; C_2$ a $C_3 &lt; C_4$). Skončí-li poslední $T_2$: $L_2 \ge 7 - 3 = 4$; skončí-li $T_4$: $L_4 \ge 7 - 6 = 1$. V každém případě $L_{\max} \ge 1$ — a EDF hodnoty $1$ dosáhlo, je tedy optimální a verdikt je definitivní.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L5.8">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k5/l5-7.html"><span class="dir">← Předchozí</span> L5.7 · EDD a Hornův algoritmus (1|pmtn,r_j|Lmax)</a>
+    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.9 · Bratleyho algoritmus (1|r_j,d̃_j|Cmax, B&amp;B))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// ===== Pracovni instance (vlastni, priznano) =====
+// r=(0,1,0,2), p=(2,2,3,1), d=d~=(10,4,9,12); hrany T1->T3, T2->T3, T2->T4
+// dopredny: r' = (0,1,3,3)   [r3'=max{0,0+2,1+2}=3; r4'=max{2,1+2}=3]
+// zpetny:   d~' = (6,4,9,12) [d2'=min{4,9-3,12-1}=4; d1'=min{10,9-3}=6]
+// EDF: T1<0,1) pmtn, T2<1,3) C2=3, T1<3,4) C1=4, T3<4,7) C3=7, T4<7,8) C4=8
+// L = (-6,-1,-2,-4) vuci puvodnim d -> Lmax = -1.
+
+var DAG_NODES = [
+  { id: 't1', x: 150, y: 70,  label: 'T₁', sub: 'r=0, p=2, d̃=10' },
+  { id: 't2', x: 150, y: 200, label: 'T₂', sub: 'r=1, p=2, d̃=4' },
+  { id: 't3', x: 380, y: 100, label: 'T₃', sub: 'r=0, p=3, d̃=9' },
+  { id: 't4', x: 380, y: 235, label: 'T₄', sub: 'r=2, p=1, d̃=12' },
+];
+var DAG_EDGES = [
+  { from: 't1', to: 't3' },
+  { from: 't2', to: 't3' },
+  { from: 't2', to: 't4' },
+];
+
+KOViz.graph(document.getElementById('viz-dag'), {
+  w: 640, h: 310,
+  nodes: DAG_NODES,
+  edges: DAG_EDGES,
+  caption: 'Pracovní instance (vlastní — přiznáno): DAG precedencí T₁→T₃, T₂→T₃, T₂→T₄; pod uzly původní parametry r, p, d̃ (= d).',
+});
+
+// ===== Stepper obou pruchodu transformace =====
+(function () {
+  var S = {
+    t1r: 'r′ = 0', t2r: 'r′ = 1', t3r: 'r′ = 3', t4r: 'r′ = 3',
+    t1rd: 'r′ = 0 · d̃′ = 6', t2rd: 'r′ = 1 · d̃′ = 4', t3rd: 'r′ = 3 · d̃′ = 9', t4rd: 'r′ = 3 · d̃′ = 12',
+  };
+  KOViz.stepper(document.getElementById('viz-pass'), {
+    graph: {
+      w: 640, h: 310,
+      nodes: DAG_NODES.map(function (n) { return { id: n.id, x: n.x, y: n.y, label: n.label }; }),
+      edges: DAG_EDGES,
+    },
+    frames: [
+      { desc: '<strong>Dopředný průchod.</strong> Úlohy bez předchůdců: r₁′ = r₁ = 0, r₂′ = r₂ = 1.',
+        nodes: { t1: 'hl', t2: 'hl' },
+        subs: { t1: S.t1r, t2: S.t2r } },
+      { desc: 'T₃ — oba bezprostřední předchůdci už upraveni: r₃′ = max{r₃, r₁′ + p₁, r₂′ + p₂} = max{0, 0 + 2, 1 + 2} = <strong>3</strong> (zpřísněno z 0).',
+        nodes: { t3: 'hl' },
+        edges: { 't1->t3': 'hl', 't2->t3': 'hl' },
+        subs: { t1: S.t1r, t2: S.t2r, t3: S.t3r } },
+      { desc: 'T₄: r₄′ = max{r₄, r₂′ + p₂} = max{2, 1 + 2} = <strong>3</strong>. Nikdo neupravený nezbývá → konec dopředného průchodu: r′ = (0, 1, 3, 3).',
+        nodes: { t4: 'hl' },
+        edges: { 't2->t4': 'hl' },
+        subs: { t1: S.t1r, t2: S.t2r, t3: S.t3r, t4: S.t4r } },
+      { desc: '<strong>Zpětný průchod.</strong> Úlohy bez následníků: d̃₃′ = d̃₃ = 9, d̃₄′ = d̃₄ = 12.',
+        nodes: { t3: 'hl', t4: 'hl' },
+        subs: { t1: S.t1r, t2: S.t2r, t3: S.t3rd, t4: S.t4rd } },
+      { desc: 'T₂ — oba bezprostřední následníci už upraveni: d̃₂′ = min{d̃₂, d̃₃′ − p₃, d̃₄′ − p₄} = min{4, 9 − 3, 12 − 1} = <strong>4</strong> (vlastní deadline je nejpřísnější — odečítá se p následníka!).',
+        nodes: { t2: 'hl' },
+        edges: { 't2->t3': 'hl', 't2->t4': 'hl' },
+        subs: { t1: S.t1r, t2: S.t2rd, t3: S.t3rd, t4: S.t4rd } },
+      { desc: 'T₁: d̃₁′ = min{d̃₁, d̃₃′ − p₃} = min{10, 9 − 3} = <strong>6</strong> — zpřísněno z 10! Právě tahle hodnota později zařídí, že EDF předchůdce T₁ nepředběhne.',
+        nodes: { t1: 'hl' },
+        edges: { 't1->t3': 'hl' },
+        subs: { t1: S.t1rd, t2: S.t2rd, t3: S.t3rd, t4: S.t4rd } },
+      { desc: 'Hotovo: r′ = (0, 1, 3, 3), d̃′ = (6, 4, 9, 12). Teď hrany <em>zahodíme</em> — úlohy 𝒯′ jsou nezávislé a nastupuje EDF.',
+        nodes: { t1: 'good', t2: 'good', t3: 'good', t4: 'good' },
+        edges: { 't1->t3': 'dim', 't2->t3': 'dim', 't2->t4': 'dim' },
+        subs: { t1: S.t1rd, t2: S.t2rd, t3: S.t3rd, t4: S.t4rd } },
+    ],
+    caption: 'Transformace CSB: dopředný průchod (kroky 1–3) upravuje release times, zpětný (kroky 4–6) deadliny; vždy v topologickém pořadí a s už upravenými hodnotami sousedů.',
+  });
+})();
+
+// ===== EDF beh na T' (gantt stepper) =====
+// r'=(0,1,3,3), p=(2,2,3,1), d~'=(6,4,9,12)
+// it1: t1=0,t2=1,T'={T1(6)},δ=min{2,1}=1 -> T1<0,1), p1:=1 (preempce v t=1)
+// it2: t1=1,t2=3,T'={T1(6),T2(4)},EDF=T2,δ=min{2,2}=2 -> T2<1,3), C2=3
+// it3: t1=3,t2=∞,T'={T1(6),T3(9),T4(12)},EDF=T1,δ=1 -> T1<3,4), C1=4
+// it4: t1=4,T'={T3,T4},EDF=T3,δ=3 -> T3<4,7), C3=7
+// it5: t1=7,T'={T4},δ=1 -> T4<7,8), C4=8
+(function () {
+  var marksMod = [
+    { t: 1, label: 'r₂′', cls: 'soft' },
+    { t: 3, label: 'r₃′=r₄′', cls: 'soft' },
+    { t: 4, label: 'd̃₂′' },
+    { t: 6, label: 'd̃₁′' },
+    { t: 9, label: 'd̃₃′' },
+    { t: 12, label: 'd̃₄′' },
+  ];
+  var marksOrig = [
+    { t: 4, label: 'd₂' },
+    { t: 9, label: 'd₃' },
+    { t: 10, label: 'd₁' },
+    { t: 12, label: 'd₄' },
+  ];
+  KOViz.gantt(document.getElementById('viz-edf'), {
+    tmax: 12, tstep: 1,
+    rows: [{ id: 't1', label: 'T₁' }, { id: 't2', label: 'T₂' }, { id: 't3', label: 'T₃' }, { id: 't4', label: 'T₄' }],
+    marks: marksMod,
+    frames: [
+      { desc: 't₁ = 0: ready jen T₁ (r₂′ = 1, r₃′ = r₄′ = 3) → t₂ = 1; δ = min{p₁, t₂ − t₁} = min{2, 1} = 1 → T₁ na ⟨0, 1), p₁ := 1.',
+        blocks: [{ row: 't1', from: 0, to: 1, label: 'T₁', cls: 'hl' }] },
+      { desc: 't₁ = 1: přišla T₂ s d̃₂′ = 4 &lt; d̃₁′ = 6 → <strong>preempce</strong> T₁ (zbývá 1). t₂ = 3; δ = min{2, 2} = 2 → T₂ na ⟨1, 3), C₂ = 3.',
+        blocks: [{ row: 't1', from: 0, to: 1, label: 'T₁' }, { row: 't2', from: 1, to: 3, label: 'T₂', cls: 'hl' }] },
+      { desc: 't₁ = 3: uvolněny T₃, T₄. Ready {T₁ (zbývá 1, d̃′ = 6), T₃ (9), T₄ (12)} → EDF vybere <strong>T₁</strong> — díky zpřísněnému d̃₁′ = 6 &lt; 9 předchůdce vyhrává; s původním d̃₁ = 10 by vyhrála T₃! δ = min{1, ∞} = 1 → T₁ na ⟨3, 4), C₁ = 4.',
+        blocks: [{ row: 't1', from: 0, to: 1, label: 'T₁' }, { row: 't2', from: 1, to: 3, label: 'T₂', cls: 'good' }, { row: 't1', from: 3, to: 4, label: 'T₁', cls: 'hl' }] },
+      { desc: 't₁ = 4: ready {T₃ (9), T₄ (12)} → T₃; δ = min{3, ∞} = 3 → T₃ na ⟨4, 7), C₃ = 7.',
+        blocks: [{ row: 't1', from: 0, to: 1, label: 'T₁', cls: 'good' }, { row: 't2', from: 1, to: 3, label: 'T₂', cls: 'good' }, { row: 't1', from: 3, to: 4, label: 'T₁', cls: 'good' }, { row: 't3', from: 4, to: 7, label: 'T₃', cls: 'hl' }] },
+      { desc: 't₁ = 7: zbývá T₄; δ = min{1, ∞} = 1 → T₄ na ⟨7, 8), C₄ = 8. Množina T je prázdná → konec.',
+        blocks: [{ row: 't1', from: 0, to: 1, label: 'T₁', cls: 'good' }, { row: 't2', from: 1, to: 3, label: 'T₂', cls: 'good' }, { row: 't1', from: 3, to: 4, label: 'T₁', cls: 'good' }, { row: 't3', from: 4, to: 7, label: 'T₃', cls: 'good' }, { row: 't4', from: 7, to: 8, label: 'T₄', cls: 'hl' }] },
+      { desc: 'Vyhodnocení proti <strong>původním</strong> due datům (značky se přepnuly na d): L₁ = 4 − 10 = −6, L₂ = 3 − 4 = −1, L₃ = 7 − 9 = −2, L₄ = 8 − 12 = −4 → <strong>Lmax = −1</strong> (T₂). Precedence drží: C₁ = 4 ≤ s₃ = 4, C₂ = 3 ≤ s₃ i s₄.',
+        marks: marksOrig,
+        blocks: [{ row: 't1', from: 0, to: 1, label: 'T₁', cls: 'good' }, { row: 't2', from: 1, to: 3, label: 'T₂', cls: 'good' }, { row: 't1', from: 3, to: 4, label: 'T₁', cls: 'good' }, { row: 't3', from: 4, to: 7, label: 'T₃', cls: 'good' }, { row: 't4', from: 7, to: 8, label: 'T₄', cls: 'good' }] },
+    ],
+    caption: 'EDF na transformované instanci 𝒯′: r′ = (0, 1, 3, 3), d̃′ = (6, 4, 9, 12) (čárkované značky; v posledním kroku původní d). Řádek = úloha, stroj je jeden — bloky se nepřekrývají. Lmax = −1.',
+  });
+})();
+
+// ===== T01: DAG zkouskove instance =====
+KOViz.graph(document.getElementById('viz-t01dag'), {
+  w: 640, h: 320,
+  nodes: [
+    { id: 't1', x: 90,  y: 160, label: 'T₁' },
+    { id: 't2', x: 260, y: 75,  label: 'T₂' },
+    { id: 't3', x: 260, y: 245, label: 'T₃' },
+    { id: 't4', x: 430, y: 75,  label: 'T₄' },
+    { id: 't5', x: 430, y: 245, label: 'T₅' },
+  ],
+  edges: [
+    { from: 't1', to: 't2' },
+    { from: 't1', to: 't3' },
+    { from: 't2', to: 't4' },
+    { from: 't2', to: 't5', curve: 0.15 },
+    { from: 't3', to: 't5' },
+    { from: 't4', to: 't5' },
+  ],
+  caption: 'T01 — precedenční DAG zkouškové instance: zdroj T₁ vlevo, stok T₅ vpravo dole; r = (0, 3, 2, 6, 3), p = (2, 3, 2, 2, 3), d̃ = d = (3, 7, 13, 9, 13).',
+});
+
+// ===== T01: vysledny Gantt (= slide 37) =====
+// r'=(0,3,2,6,8), d~'=(3,7,10,9,13); T1<0,2) T3<2,3) T2<3,6) T4<6,8) T3<8,9) T5<9,12)
+// C=(2,6,9,8,12); L vuci d=(3,7,13,9,13): (-1,-1,-4,-1,-1) -> Lmax=-1
+KOViz.gantt(document.getElementById('viz-t01gantt'), {
+  tmax: 13, tstep: 1,
+  rows: [{ id: 't1', label: 'T₁' }, { id: 't2', label: 'T₂' }, { id: 't3', label: 'T₃' }, { id: 't4', label: 'T₄' }, { id: 't5', label: 'T₅' }],
+  blocks: [
+    { row: 't1', from: 0, to: 2, label: 'T₁', cls: 'good' },
+    { row: 't3', from: 2, to: 3, label: 'T₃', cls: 'good' },
+    { row: 't2', from: 3, to: 6, label: 'T₂', cls: 'good' },
+    { row: 't4', from: 6, to: 8, label: 'T₄', cls: 'good' },
+    { row: 't3', from: 8, to: 9, label: 'T₃', cls: 'good' },
+    { row: 't5', from: 9, to: 12, label: 'T₅', cls: 'good' },
+  ],
+  marks: [
+    { t: 2, label: 'r₃′', cls: 'soft' },
+    { t: 6, label: 'r₄′', cls: 'soft' },
+    { t: 8, label: 'r₅′', cls: 'soft' },
+    { t: 3, label: 'd₁' },
+    { t: 7, label: 'd₂' },
+    { t: 9, label: 'd₄' },
+    { t: 13, label: 'd₃=d₅' },
+  ],
+  caption: 'T01 — výsledný EDF rozvrh (shodný s Ganttem slidu 37): T₁ ⟨0,2), T₃ ⟨2,3)∪⟨8,9) s preempcí, T₂ ⟨3,6), T₄ ⟨6,8), T₅ ⟨9,12). C = (2, 6, 9, 8, 12), Lmax = −1.',
+});
+
+// ===== T02: DAG drilu =====
+KOViz.graph(document.getElementById('viz-t02dag'), {
+  w: 640, h: 300,
+  nodes: [
+    { id: 't1', x: 120, y: 150, label: 'T₁', sub: 'r=0, p=1, d̃=9' },
+    { id: 't2', x: 330, y: 70,  label: 'T₂', sub: 'r=0, p=2, d̃=3' },
+    { id: 't3', x: 330, y: 225, label: 'T₃', sub: 'r=1, p=2, d̃=8' },
+    { id: 't4', x: 530, y: 225, label: 'T₄', sub: 'r=0, p=2, d̃=6' },
+  ],
+  edges: [
+    { from: 't1', to: 't2' },
+    { from: 't1', to: 't3' },
+    { from: 't3', to: 't4' },
+  ],
+  caption: 'T02 — DAG drilu (vlastní instance, přiznáno): T₁→T₂, T₁→T₃, T₃→T₄.',
+});
+
+// ===== T02: vysledny Gantt =====
+// r'=(0,1,1,3), d~'=(1,3,4,6); T1<0,1) T2<1,3) T3<3,5) T4<5,7)
+// C=(1,3,5,7); L vuci d=(9,3,8,6): (-8,0,-3,1) -> Lmax=1
+KOViz.gantt(document.getElementById('viz-t02gantt'), {
+  tmax: 9, tstep: 1,
+  rows: [{ id: 't1', label: 'T₁' }, { id: 't2', label: 'T₂' }, { id: 't3', label: 'T₃' }, { id: 't4', label: 'T₄' }],
+  blocks: [
+    { row: 't1', from: 0, to: 1, label: 'T₁', cls: 'good' },
+    { row: 't2', from: 1, to: 3, label: 'T₂', cls: 'good' },
+    { row: 't3', from: 3, to: 5, label: 'T₃', cls: 'good' },
+    { row: 't4', from: 5, to: 7, label: 'T₄', cls: 'bad' },
+  ],
+  marks: [
+    { t: 3, label: 'd₂' },
+    { t: 6, label: 'd₄' },
+    { t: 8, label: 'd₃' },
+    { t: 9, label: 'd₁' },
+  ],
+  caption: 'T02 — EDF rozvrh: T₁ ⟨0,1), T₂ ⟨1,3), T₃ ⟨3,5), T₄ ⟨5,7). T₄ končí v 7 &gt; d₄ = 6 (červeně) → Lmax = 1 &gt; 0, deadliny nelze stihnout.',
+});
+</script>
+</body>
+</html>

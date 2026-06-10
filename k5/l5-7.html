@@ -106,7 +106,7 @@
     </ul>
   </div>
 
-  <p>Tahle mapa je zkoušková klasika: druhý řádek (NP-hard bez preempce — nepreemptivní příbuzný s deadliny se řeší Bratleyho B&amp;B, [L5.9]), třetí a čtvrtý řádek je dnešní lekce, poslední řádek (precedence) vyřeší transformace Chetto-Silly-Bouchentouf v [L5.8]. Že preempce dělá z těžkých problémů lehké, jsi už viděl u <a href="../k5/l5-4.html#takeaways">[L5.4] McNaughton (P|pmtn|Cmax)</a>.</p>
+  <p>Tahle mapa je zkoušková klasika: druhý řádek (NP-hard bez preempce — nepreemptivní příbuzný s deadliny se řeší Bratleyho B&amp;B, [L5.9]), třetí a čtvrtý řádek je dnešní lekce, poslední řádek (precedence) vyřeší transformace Chetto-Silly-Bouchentouf v <a href="../k5/l5-8.html">[L5.8] Chetto-Silly-Bouchentouf</a>. Že preempce dělá z těžkých problémů lehké, jsi už viděl u <a href="../k5/l5-4.html#takeaways">[L5.4] McNaughton (P|pmtn|Cmax)</a>.</p>
 
   <!-- ===== SEKCE 3: HORN ===== -->
   <h2>Hornův algoritmus = iterované EDD</h2>
@@ -176,7 +176,7 @@ end</code></pre>
     <p>“Using the same argument adopted in the proof of EDD optimality for $1\,||\,L_{\max}$, it is easy to show that each swap cannot increase the maximum lateness of the task set $L_{\max}$.” <em>(Oba důkazy — EDD i Horn/EDF — patří mezi férově zkoušené „dokažte“ u ústní.)</em></p>
   </div>
 
-  <p>Verze s deadliny ($d_j = \tilde{d}_j$) je krok k real-time rozvrhování: EDF nejen minimalizuje $L_{\max}$, ale tím pádem <strong>rozhoduje schedulabilitu</strong> — přípustný rozvrh existuje právě tehdy, když EDF skončí s $L_{\max} \le 0$. (Feasibilitu pro <em>více</em> procesorů $P\,|\,\mathrm{pmtn}, r_j, \tilde{d}_j\,|$ jsme řešili toky v <a href="../k5/l5-0.html#takeaways">[L5.0] Rozvrhování přes toky</a>.) A když přibudou precedence, předzpracují se úpravou $r_j', \tilde{d}_j'$ a pustí se zase EDF — to je Chetto-Silly-Bouchentouf, příští lekce [L5.8].</p>
+  <p>Verze s deadliny ($d_j = \tilde{d}_j$) je krok k real-time rozvrhování: EDF nejen minimalizuje $L_{\max}$, ale tím pádem <strong>rozhoduje schedulabilitu</strong> — přípustný rozvrh existuje právě tehdy, když EDF skončí s $L_{\max} \le 0$. (Feasibilitu pro <em>více</em> procesorů $P\,|\,\mathrm{pmtn}, r_j, \tilde{d}_j\,|$ jsme řešili toky v <a href="../k5/l5-0.html#takeaways">[L5.0] Rozvrhování přes toky</a>.) A když přibudou precedence, předzpracují se úpravou $r_j', \tilde{d}_j'$ a pustí se zase EDF — to je Chetto-Silly-Bouchentouf, příští lekce <a href="../k5/l5-8.html">[L5.8]</a>.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
@@ -190,7 +190,7 @@ end</code></pre>
       <li><strong>$1\,||\,L_{\max}$ řeší EDD:</strong> seřaď podle neklesajících due dat, $\mathcal{O}(n \log n)$; optimalita výměnným (swap) argumentem — prohození sousedů $T_b T_a$ s $d_a \le d_b$ nikdy nezvýší $L_{\max}$.</li>
       <li><strong>$1\,|\,r_j\,|\,L_{\max}$ je NP-hard</strong> (vyplatí se čekat na naléhavou úlohu); <strong>s preempcí je to polynomiální</strong> — Hornův algoritmus = v každém okamžiku běží ready úloha s nejmenším $d_j$, preempce nastává jen při příchodu naléhavější úlohy (v release timech).</li>
       <li><strong>Běh Horna:</strong> rozhodovací body $t_1$ (releasy + dokončení), $\delta = \min\{p_k, t_2 - t_1\}$; výstup nakresli jako Gantt a spočti $L_{\max} = \max_j (C_j - d_j)$ — záporná hodnota je v pořádku (earliness).</li>
-      <li><strong>S $d_j = \tilde{d}_j$ se Hornovi říká EDF</strong> (Earliest Deadline First): minimalizuje $L_{\max}$ a rozhoduje schedulabilitu (feasible ⟺ $L_{\max} \le 0$). Precedence se předzpracují transformací CSB [L5.8]; nepreemptivní případ s deadliny řeší Bratleyho B&amp;B [L5.9].</li>
+      <li><strong>S $d_j = \tilde{d}_j$ se Hornovi říká EDF</strong> (Earliest Deadline First): minimalizuje $L_{\max}$ a rozhoduje schedulabilitu (feasible ⟺ $L_{\max} \le 0$). Precedence se předzpracují transformací CSB <a href="../k5/l5-8.html#takeaways">[L5.8]</a>; nepreemptivní případ s deadliny řeší Bratleyho B&amp;B [L5.9].</li>
     </ul>
   </div>
 
@@ -297,7 +297,7 @@ end</code></pre>
 
   <div class="pager">
     <a href="../k5/l5-6b.html"><span class="dir">← Předchozí</span> L5.6b · LP relaxace jako dolní mez v B&amp;B</a>
-    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.8 · Chetto-Silly-Bouchentouf (prec → nezávislé, pak EDF))</a>
+    <a class="next" href="../k5/l5-8.html"><span class="dir">Další →</span> L5.8 · Chetto-Silly-Bouchentouf (prec → nezávislé, pak EDF)</a>
   </div>
 
 </div>
