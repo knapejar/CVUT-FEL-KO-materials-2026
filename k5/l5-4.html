@@ -36,7 +36,7 @@
     <strong>Wrap-around plnění</strong> na $R$ strojů s preempcí: spočti $C_{max}^* = \max\{\max_i p_i, \frac{1}{R}\sum_i p_i\}$, nalévej úlohy sekvenčně do „polic“ délky $C_{max}^*$ a při přetečení rozřízni úlohu na další stroj — optimum v $\mathcal{O}(n)$.
   </div>
 
-  <p>Z <a href="../k5/l5-1.html">[L5.1] Grahamovy notace</a> víš, co znamená $P \,|\, \mathrm{pmtn} \,|\, C_{max}$: $R$ identických paralelních procesorů, <strong>nezávislé preemptivní úlohy</strong> (prázdná $\beta$ jinak = bez precedencí, $r_j = 0$), minimalizuj makespan. A z pmtn-demos v [L5.1] už tušíš, že preempce umí stlačit $C_{max}$ pod nepreemptivní optimum. Dnes ten princip proměníme v kompletní algoritmus — <strong>McNaughtonův</strong> — který je u zkoušky stavebním kamenem: sám o sobě je cvičná klasika a o pár lekcí dál ho bude volat Muntz&nbsp;&amp;&nbsp;Coffman [L5.10] jako podprogram („Use McNaughton to re-schedule parts with more tasks on less res.“).</p>
+  <p>Z <a href="../k5/l5-1.html">[L5.1] Grahamovy notace</a> víš, co znamená $P \,|\, \mathrm{pmtn} \,|\, C_{max}$: $R$ identických paralelních procesorů, <strong>nezávislé preemptivní úlohy</strong> (prázdná $\beta$ jinak = bez precedencí, $r_j = 0$), minimalizuj makespan. A z pmtn-demos v [L5.1] už tušíš, že preempce umí stlačit $C_{max}$ pod nepreemptivní optimum. Dnes ten princip proměníme v kompletní algoritmus — <strong>McNaughtonův</strong> — který je u zkoušky stavebním kamenem: sám o sobě je cvičná klasika a o pár lekcí dál ho bude volat Muntz&nbsp;&amp;&nbsp;Coffman <a href="../k5/l5-10.html">[L5.10]</a> jako podprogram („Use McNaughton to re-schedule parts with more tasks on less res.“).</p>
 
   <!-- ===== SEKCE 1: MAPA ===== -->
   <h2>Ostrov „easy“ v NP-hard moři (slide 38)</h2>
@@ -60,7 +60,7 @@
     </ul>
   </div>
 
-  <p>Mapu si zapamatuj: preempce sama o sobě dělá z $C_{max}$ na identických strojích <em>snadný</em> problém (dnešní lekce); preempce + časová okna $r_j, \tilde{d}_j$ = toky <a href="../k5/l5-0.html">[L5.0]</a>; jakmile ale přibudou precedence, je to zase NP-hard a McNaughton přežívá jen jako podprogram aproximačního Muntze&amp;Coffmana [L5.10]. Nepreemptivní $P\,||\,C_{max}$ řeší DP Rothkopf [L5.11] (pseudopolynomiálně) a aproximačně list scheduling / LPT [L5.12].</p>
+  <p>Mapu si zapamatuj: preempce sama o sobě dělá z $C_{max}$ na identických strojích <em>snadný</em> problém (dnešní lekce); preempce + časová okna $r_j, \tilde{d}_j$ = toky <a href="../k5/l5-0.html">[L5.0]</a>; jakmile ale přibudou precedence, je to zase NP-hard a McNaughton přežívá jen jako podprogram aproximačního Muntze&amp;Coffmana <a href="../k5/l5-10.html">[L5.10]</a>. Nepreemptivní $P\,||\,C_{max}$ řeší DP Rothkopf [L5.11] (pseudopolynomiálně) a aproximačně list scheduling / LPT [L5.12].</p>
 
   <!-- ===== SEKCE 2: DOLNI MEZ ===== -->
   <h2>Jak rychle to vůbec může být hotovo?</h2>
@@ -136,7 +136,7 @@ end</code></pre>
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy kolem McNaughtona</div>
     <ul>
       <li><strong>„$C_{max}^* = \frac{1}{R}\sum p_i$“ — NE.</strong> Bez složky $\max_i p_i$ vyrobíš rozvrh, kde se rozříznutá dlouhá úloha překrývá sama se sebou. Když $\max_i p_i$ dominuje (viz T01 níže), stroje <em>musí</em> zahálet a průměr $\frac{1}{R}\sum p_i$ je nedosažitelný.</li>
-      <li><strong>McNaughton platí jen pro $P \,|\, \mathrm{pmtn} \,|\, C_{max}$</strong> — nezávislé úlohy, bez precedencí, bez release times. S precedencemi je problém NP-hard a řeší se aproximačně (Muntz&amp;Coffman [L5.10]); s okny $r_j, \tilde{d}_j$ jde feasibilita přes toky <a href="../k5/l5-0.html">[L5.0]</a>.</li>
+      <li><strong>McNaughton platí jen pro $P \,|\, \mathrm{pmtn} \,|\, C_{max}$</strong> — nezávislé úlohy, bez precedencí, bez release times. S precedencemi je problém NP-hard a řeší se aproximačně (Muntz&amp;Coffman <a href="../k5/l5-10.html">[L5.10]</a>); s okny $r_j, \tilde{d}_j$ jde feasibilita přes toky <a href="../k5/l5-0.html">[L5.0]</a>.</li>
       <li><strong>Bez pmtn nelze „zaokrouhlit“:</strong> nepreemptivní $P2\,||\,C_{max}$ je NP-hard (2-Partition, slide 38) — z McNaughtonova rozvrhu nepreemptivní optimum slepením kusů nedostaneš (T02 níže ukazuje instanci, kde je nepreemptivní optimum ostře horší).</li>
     </ul>
   </div>
@@ -148,7 +148,7 @@ end</code></pre>
       <li><strong>McNaughton ($P \,|\, \mathrm{pmtn} \,|\, C_{max}$, $\mathcal{O}(n)$):</strong> $C_{max}^* = \max\{\max_i p_i,\ \frac{1}{R}\sum_i p_i\}$; úlohy v libovolném pořadí nalévej sekvenčně do polic délky $C_{max}^*$, při přetečení nech kus $[t, C_{max}^*]$ na stroji $v$ a zbytkem pokračuj na stroji $v{+}1$ od času $0$ (wrap-around).</li>
       <li><strong>Dvě složky meze:</strong> $\max p_i$ = sekvenčnost úlohy (kusy nesmí běžet současně — a zaručuje, že zalomený zbytek délky $p_i - (C_{max}^* - t) \le t$ nekoliduje sám se sebou); $\frac{1}{R}\sum p_i$ = stroje bez zahálení (vše se vejde do $R$ polic).</li>
       <li><strong>Optimální</strong> pro nezávislé preemptivní úlohy: rozvrh dosáhne dolní meze $C_{max}^*$. Každá úloha má nejvýš 2 části, preempcí je nejvýš $R - 1$ (kontrola Ganttu!).</li>
-      <li><strong>Hranice platnosti:</strong> bez pmtn NP-hard už pro $R = 2$ (2-Partition <a href="../k1/l1-1.html#t-2partition">[L1.1]</a> → Rothkopf [L5.11] / LPT [L5.12]); s precedencemi NP-hard → Muntz&amp;Coffman [L5.10] používá McNaughtona jako podprogram; s $r_j, \tilde{d}_j$ feasibilita → toky <a href="../k5/l5-0.html">[L5.0]</a>. Volba metody: tahák [L5.14].</li>
+      <li><strong>Hranice platnosti:</strong> bez pmtn NP-hard už pro $R = 2$ (2-Partition <a href="../k1/l1-1.html#t-2partition">[L1.1]</a> → Rothkopf [L5.11] / LPT [L5.12]); s precedencemi NP-hard → Muntz&amp;Coffman <a href="../k5/l5-10.html">[L5.10]</a> používá McNaughtona jako podprogram; s $r_j, \tilde{d}_j$ feasibilita → toky <a href="../k5/l5-0.html">[L5.0]</a>. Volba metody: tahák [L5.14].</li>
       <li>U zkoušky: spočti $C_{max}^*$ (obě složky vypiš!), nakresli Gantt, vyznač preempce a případné zahálení.</li>
     </ul>
   </div>
@@ -158,7 +158,7 @@ end</code></pre>
     <div class="task-head">
       <span class="task-id">T01</span>
       <strong>McNaughton's Algorithm for P |pmtn| C<sub>max</sub> — Example 2</strong>
-      <span class="task-src">zdroj: slide 39 (Input/Output EN 1:1) + slide 40 Example 2; cvičná příprava na Muntz&amp;Coffmana [L5.10]</span>
+      <span class="task-src">zdroj: slide 39 (Input/Output EN 1:1) + slide 40 Example 2; cvičná příprava na Muntz&amp;Coffmana <a href="../k5/l5-10.html">[L5.10]</a></span>
     </div>
     <div class="task-body">
       <div class="assignment">

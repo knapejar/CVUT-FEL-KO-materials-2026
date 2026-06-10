@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L5.10 · Muntz &amp; Coffman (P|pmtn,prec|Cmax) [FOTO] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k5">K5 · Rozvrhování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L5.10</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L5.10</span> Kapitola K5 — Rozvrhování (Slot 5) · <strong>[MUST]</strong> · FOTO checkpoint kapitoly
+  </p>
+  <h1>Muntz &amp; Coffman (P |pmtn,prec| C<sub>max</sub>)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Úrovňový (level) algoritmus</strong>: priorita úlohy = <em>level</em> (nejdelší cesta z úlohy do koncové úlohy, měřená v $p_i$); úlohy se stejným levelem <strong>sdílejí kapacitu</strong> procesorů rychlostí $\beta = h/|\mathcal{S}|$; čas skáče o $\delta$ (tři typy událostí) a na závěr sdílené úseky přerozvrhne McNaughton <a href="../k5/l5-4.html">[L5.4]</a>.
+  </div>
+
+  <p>Z mapy ve <a href="../k5/l5-4.html">[L5.4] McNaughton</a> víš, že $P \,|\, \mathrm{pmtn}, \mathrm{prec} \,|\, C_{max}$ je <strong>NP-hard</strong> — preempce sama už nestačí, jakmile graf precedencí <a href="../k5/l5-2.html">[L5.2]</a> svazuje, co smí běžet kdy. Dnešní lekce je doložená zkoušková klasika (termín <strong>1.&nbsp;6.&nbsp;2026</strong>; stejná úloha padla 2.&nbsp;6.&nbsp;2021 i 9.&nbsp;7.&nbsp;2021): <strong>Muntz&amp;Coffmanův úrovňový algoritmus</strong>. U zkoušky se po tobě chce přesně to, co říká zadání: levely při inicializaci, množina volných úloh $\mathcal{Z}$ v každé iteraci a Ganttův diagram.</p>
+
+  <!-- ===== SEKCE 1: LEVEL ===== -->
+  <h2>Level úlohy: kolik práce je „pode mnou“</h2>
+
+  <details class="try">
+    <summary>Zkus sám: máš DAG precedencí a chceš jednočíselnou prioritu úlohy — „jak moc spěchá“. Jaká veličina z grafu se nabízí?</summary>
+    <div class="inner">
+      <p>Zdržením úlohy $T_j$ zdržíš celý <em>řetěz jejích následníků</em>. Nejhorší takový řetěz je <strong>nejdelší cesta z $T_j$ do koncové úlohy</strong>, měřená součtem $p_i$ (včetně $p_j$) — tomu se říká <strong>level</strong> úlohy. Je to dolní mez na čas, který od startu $T_j$ ještě uplyne do konce rozvrhu. Stejná myšlenka „kritické cesty“ jako nejdelší cesty v <a href="../k5/l5-2.html#takeaways">[L5.2] grafu temporálních omezení</a> — tam dávala earliest starty, tady dává priority.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 51 (EN 1:1) — Muntz&amp;Coffman's Level Algorithm for $P \,|\,pmtn, prec\,|\, C_{\max}$</div>
+    <p>“<strong>Principle:</strong></p>
+    <ul>
+      <li>tasks are picked from <strong>the list ordered by the level</strong> of tasks</li>
+      <li><strong>the level of task</strong> $T_j$ — sum of $p_i$ (including $p_j$) along the <strong>longest path</strong> from $T_j$ to a terminal task (a task with no successor)</li>
+      <li>when more tasks of the same level are assigned to less resources, each task gets <strong>part of the resource capacity</strong> $\beta$</li>
+      <li>the algorithm moves forward to time $\tau$ when <strong>one of the tasks ends</strong> or the task with a lower level should be processed by a bigger capacity $\beta$ than the tasks with a higher level</li>
+    </ul>
+    <p>For $P2 \,|\,pmtn, prec\,|\, C_{\max}$ and $P \,|\,pmtn, forest\,|\, C_{\max}$, the algorithm is <strong>exact</strong>. For $P \,|\,pmtn, prec\,|\, C_{\max}$ <strong>approximation</strong> alg. with factor $r_{MC} = 2 - \frac{2}{R}$. Time complexity is $\mathcal{O}(n^2)$.</p>
+    <p>“<strong>Input:</strong> $R$, the number of parallel identical resources, $n$, the number of preemptive tasks, proc. times $(p_1, p_2, \ldots, p_n)$ and DAG. <strong>Output:</strong> $n$-elements vectors $s^1, \ldots, s^k, \ldots s^K$ and $z^1, \ldots, z^k, \ldots z^K$ where $s_i^k$ is the start time of the $k$-th part of task $T_i$ and $z_i^k$ is corresponding resource ID.”</p>
+  </div>
+
+  <p>Levely počítáš <strong>odzadu</strong> (od koncových úloh): koncová úloha má $L_i = p_i$, jinak
+  $$L_i = p_i + \max\{L_j : T_i \to T_j\}.$$
+  Důležité pro běh algoritmu: jakmile úloha kus práce odvede, její <em>aktuální</em> level klesá — je to vždy <strong>zbývající</strong> $p_i$ plus nejdelší cesta dál, tedy $L_i$ minus odvedená práce.</p>
+
+  <p>Celou lekci si odpracujeme na téhle mini-instanci (vlastní, přiznáno — zkouškové instance tě čekají v T01 a T02), $R = 2$:</p>
+
+  <div class="viz" id="viz-dag"></div>
+
+  <details class="try">
+    <summary>Zkus sám: spočti levely $L_1, \ldots, L_5$ — v obrázku už sice jsou, ale ověř si je poctivě výpočtem odzadu (začni u koncové $T_5$).</summary>
+    <div class="inner">
+      <p>$L_5 = p_5 = 1$ (koncová). $L_4 = p_4 + L_5 = 2 + 1 = 3$. $L_1 = p_1 + L_5 = 3 + 1 = 4$ (jediný následník $T_1$ je $T_5$). $L_2 = p_2 + L_4 = 2 + 3 = 5$ a stejně $L_3 = 2 + 3 = 5$. Tedy $L = (4, 5, 5, 3, 1)$ — nejvíc „hoří“ $T_2$ a $T_3$, protože za nimi stojí řetěz $T_4 \to T_5$.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: ALGORITMUS ===== -->
+  <h2>Hlavní smyčka: $\mathcal{Z}$, $\mathcal{S}$, $\beta$, $\delta$</h2>
+
+  <p>V každém okamžiku $t$ algoritmus sestaví $\mathcal{Z}$ = <strong>volné úlohy</strong> (nedokončené, jejichž <em>všichni</em> předchůdci jsou hotovi) a rozdává procesory od nejvyššího aktuálního levelu dolů. Háček nastane, když má víc úloh stejný level, než zbývá procesorů.</p>
+
+  <details class="try">
+    <summary>Zkus sám: tři volné úlohy mají shodný (nejvyšší) level, procesory zbývají dva. Které dvě vybereš?</summary>
+    <div class="inner">
+      <p>Chyták — <strong>žádné dvě</strong>. Ať vybereš kterékoli, třetí zaostane, její level zůstane vyšší a za chvíli bys ji stejně musel prohodit zpět: vznikla by smršť preempcí. Muntz&amp;Coffman to řeší elegantně: všechny tři poběží „současně“ a každá dostane <strong>část kapacity</strong> $\beta = h/|\mathcal{S}| = 2/3$ — jejich levely pak klesají stejně rychle a žádná nezaostává. Že na reálných procesorech nemůžou běžet tři úlohy na dvou strojích, vyřeší až závěrečný McNaughton — hlavní smyčka počítá s „kapalinovou“ fikcí.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 52 (EN 1:1) — pseudokód</div>
+<pre><code>compute the level of all tasks ; t := 0; h := R;        // h free res.
+while unfinished tasks exist do
+    construct Z;                          // tasks that are free at time t
+    while h > 0 and |Z| > 0 do            // free resources, free tasks
+        construct S;                      // tasks in Z with the highest level
+        if |S| > h then                   // more tasks than resources
+            assign part of capacity β := h/|S| to tasks in S; h := 0;
+        else
+            assign one resource to each task in S; β := 1; h := h - |S|;
+        end
+        Z := Z \ S;
+    end
+    compute δ;                            // see explanation below
+    decrease proc.times and levels by (δ)·β;   // finished part
+    t := t + δ; h := R;
+end
+Use McNaughton to re-schedule parts with more tasks on less res.;</code></pre>
+    <p>“$t + \delta$ is time when (1) EITHER one <strong>task is finished</strong> (2) OR a current level of an assigned task becomes <strong>lower than a level of an unassigned ready task</strong> (3) OR a task executed at <strong>faster rate</strong> $\beta$ starts to have current level <strong>below</strong> the current level of a task executed at <strong>slower rate</strong> $\beta$.”</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: proč jsou to právě tyhle tři události? Co mají společného?</summary>
+    <div class="inner">
+      <p>Mezi událostmi je rozhodnutí (kdo běží a jakou rychlostí) <em>stabilní</em>: levely klesají lineárně rychlostmi $\beta$ a pořadí podle levelu se nemění. Přehodnotit ho musíš přesně tehdy, když se změní vstup rozhodnutí: <strong>(1)</strong> úloha skončí (změní se $\mathcal{Z}$ — a může uvolnit následníky), <strong>(2)</strong> běžící úloha klesne na level <em>čekající</em> volné úlohy (čekající si od teď zaslouží podíl — kdyby běžící klesla pod ni, dostávala by „horší“ úloha víc kapacity), <strong>(3)</strong> rychleji obsluhovaná úloha dožene pomaleji obsluhovanou (od teď musí sdílet stejné $\beta$, jinak by se pořadí přetočilo). Ve všech třech případech se $\delta$ spočítá z lineárních rovnic „kdy se dvě hladiny protnou / kdy zbývající práce dojde na nulu“ — bereš <strong>minimum</strong> přes všechny kandidáty.</p>
+    </div>
+  </details>
+
+  <p>Přesně takhle běží i příklad ze slidu 53 (8 úloh, $R = 2$, $p = (3,4,3,5,3,1,2,0)$, $level = (8,9,8,5,5,1,2,0)$) — první dvě iterace cituji, protože krásně ukazují případy (3) a (1):</p>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 53 (EN 1:1, výňatek) — Example</div>
+    <ul>
+      <li>“$t = 0$, $p = (3, 4, 3, 5, 3, 1, 2, 0)$, $level = (8, 9, 8, 5, 5, 1, 2, 0)$, $\mathcal{Z} = \{T_1, T_2, T_3\}$: $h = 2, \mathcal{S} = \{T_2\}, \beta = 1$; $h = 1, \mathcal{S} = \{T_1, T_3\}, \beta = 0.5$; <strong>$\delta = 2$ due to the case (3)</strong>” — $T_2$ klesá rychlostí 1 z levelu 9, dvojice $T_1, T_3$ rychlostí 0,5 z levelu 8; protnou se: $9 - \delta = 8 - 0{,}5\,\delta \Rightarrow \delta = 2$.</li>
+      <li>“$t = 2$, $p = (2, 2, 2, 5, 3, 1, 2, 0)$, $level = (7, 7, 7, 5, 5, 1, 2, 0)$, $\mathcal{Z} = \{T_1, T_2, T_3\}$: $h = 2, \mathcal{S} = \{T_1, T_2, T_3\}, \beta = 0.67$; <strong>$\delta = 3$ due to the case (1)</strong>” — tři úlohy po 2 jednotkách rychlostí $\tfrac{2}{3}$: hotovo za $2 / \tfrac{2}{3} = 3$.</li>
+    </ul>
+    <p style="color:var(--ink-soft);font-size:14px">(Slide pokračuje dalšími iteracemi a grafem „levels–time“; přepis obrázku je dál nečitelný, proto si celý běh poctivě projdeme na vlastní instanci níže.)</p>
+  </div>
+
+  <!-- ===== SEKCE 3: BEH ===== -->
+  <h2>Celý běh na mini-instanci</h2>
+
+  <p>Proklikej běh na instanci z obrázku výše ($R = 2$, $L = (4,5,5,3,1)$). Sleduj, jak se v každé iteraci znovu staví $\mathcal{Z}$ a $\mathcal{S}$, kdy se sdílí kapacita a která ze tří událostí určí $\delta$:</p>
+
+  <div class="viz" id="viz-run"></div>
+
+  <details class="try">
+    <summary>Zkus sám: dolní mez z [L5.4] dává $C_{max} \ge \max\{\max_i L_i,\ \tfrac{1}{R}\sum_i p_i\} = \max\{5, \tfrac{10}{2}\} = 5$. Algoritmus skončil v $5{,}5$. Selhal?</summary>
+    <div class="inner">
+      <p>Neselhal — pro $R = 2$ je Muntz&amp;Coffman <strong>exaktní</strong> (slide 51), takže $5{,}5$ je optimum a chyba je v <em>mezi</em>: je platná, ale tady nedosažitelná. Silnější argument: $T_5$ smí začít, až jsou hotové $T_1$ i $T_4$ — a před $T_5$ tedy musí být odvedena <em>veškerá</em> práce $T_1, T_2, T_3, T_4$, tj. $9$ jednotek. Dva stroje ji odvedou nejdřív za $4{,}5$, takže $C_{max} \ge 4{,}5 + p_5 = 5{,}5$. Mimochodem: s preempcí je <strong>zlomkové $C_{max}$ normální</strong> — nenech se u zkoušky vyděsit polovinami a třetinami.</p>
+    </div>
+  </details>
+
+  <p>Závěrečný krok („Use McNaughton to re-schedule…“) je doslova volání <a href="../k5/l5-4.html#takeaways">[L5.4]</a> uvnitř každého sdíleného úseku: úsek $[1;\,2{,}5]$ je okno délky $1{,}5$ se třemi kusy práce po $1$ — McNaughtonovo $C^*_{max} = \max\{1, \tfrac{3}{2}\} = 1{,}5$ přesně vyplní okno a wrap-around zaručí, že se kusy téže úlohy nepřekrývají. Sdílené $\beta$ je jen účetní fikce; skutečný rozvrh střídá úlohy po kusech.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy kolem Muntz&amp;Coffmana</div>
+    <ul>
+      <li><strong>Levely nejsou statické.</strong> Po každé iteraci klesnou běžícím úlohám o $\delta \cdot \beta$ („decrease proc. times and levels“). Kdo třídí pořád podle <em>počátečních</em> levelů, vyrobí jiný (a obecně horší) rozvrh — přesně tahle zkratka je v kolujících ručních řešeních, viz T01.</li>
+      <li><strong>Bez sdílení kapacity to není Muntz&amp;Coffman.</strong> „Prostě pustím $R$ nejvyšších levelů“ je list scheduling [L5.12]; chybí $\beta = h/|\mathcal{S}|$ i případy (2), (3) — a v T01 to dává $14$ místo optimálních $13{,}5$.</li>
+      <li><strong>$\lceil \sum p_i / R \rceil$ není při pmtn dolní mez.</strong> Zaokrouhlovat smíš jen bez preempce (kde jsou všechny časy celé); s pmtn je mez $\sum p_i / R$ — a $C_{max}$ klidně zlomkové.</li>
+      <li><strong>$\mathcal{Z}$ = úlohy se <em>všemi</em> předchůdci hotovými.</strong> Volný procesor neznamená, že smíš sáhnout po úloze, které „už skoro“ doběhl předchůdce — klidně se zahálí (T02, iterace 2 a 4).</li>
+      <li><strong>Exaktní jen pro $R = 2$ a lesy (forest);</strong> obecně je to aproximace s faktorem $2 - \tfrac{2}{R}$. A nezapomeň na závěrečný McNaughton — odevzdat „rozvrh“, kde tři úlohy sdílejí dva stroje, nelze.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.10</div>
+    <ul>
+      <li><strong>Level</strong> $L_i = p_i + \max\{L_j : T_i \to T_j\}$ (koncová úloha: $L_i = p_i$) = nejdelší cesta do koncové úlohy; počítej odzadu. Aktuální level = $L_i$ minus odvedená práce.</li>
+      <li><strong>Iterace:</strong> $\mathcal{Z}$ = volné úlohy (všichni předchůdci hotovi) → po skupinách od nejvyššího levelu: $\mathcal{S}$ dostane $\beta = 1$, a když $|\mathcal{S}| &gt; h$, sdílí $\beta = h/|\mathcal{S}|$. Pak $\delta$ = minimum přes tři události: (1) úloha skončí, (2) běžící klesne na level čekající, (3) rychlejší dožene pomalejší.</li>
+      <li><strong>Krok 2:</strong> sdílené úseky přerozvrhni McNaughtonem <a href="../k5/l5-4.html#takeaways">[L5.4]</a> uvnitř každého okna $[t, t+\delta]$ — teprve to je odevzdatelný Gantt.</li>
+      <li><strong>Kvalita:</strong> exaktní pro $P2\,|\,pmtn,prec\,|\,C_{max}$ a $P\,|\,pmtn,forest\,|\,C_{max}$; obecně aproximace $r_{MC} = 2 - \tfrac{2}{R}$; složitost $\mathcal{O}(n^2)$. Dolní meze: $\max_i L_i$ (kritická cesta) a $\tfrac{1}{R}\sum p_i$ — $C_{max}$ smí být zlomkové.</li>
+      <li><strong>U zkoušky:</strong> zadání chce doslova „list of levels at initialization“, „$\mathcal{Z}$ for each iteration“ a Gantt — piš tabulku iterací ($t$, $\mathcal{Z}$ s aktuálními levely, $\mathcal{S}$, $\beta$, $\delta$ + který případ) a Gantt nakonec.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ULOHA T01 (FOTO) ===== -->
+  <div class="task" id="t-muntz">
+    <div class="task-head foto">
+      <span class="task-id">T01</span>
+      <strong>Muntz&amp;Coffman's Level Algorithm for P |pmtn, prec| C<sub>max</sub></strong>
+      <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
+      <span class="task-src">zdroj: zkouška 02.06.2021 (= banka #40, zadání EN 1:1); tatáž úloha doložena na termínu 1. 6. 2026</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Solve the following instance $P2 \mid pmtn, prec \mid C_{\max}$ by Muntz&amp;Coffman's Level Algorithm. Record a list of levels at initialization and $\mathcal{Z}$, set of free tasks, for each iteration of the main loop. Precedence relations are given by the following graph. Processing time is behind the slash of each task. Draw the Gantt chart.”</p>
+        <div class="viz" id="viz-t01dag"></div>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Deset úloh, dva procesory, preempce povolena, DAG precedencí (u uzlu $T_i/p_i$). Chce se: ① levely při inicializaci, ② pro každou iteraci hlavní smyčky množina $\mathcal{Z}$ (a prakticky i $\mathcal{S}$, $\beta$, $\delta$ — bez nich iterace nezdůvodníš), ③ Ganttův diagram. <em>Pozn. k přepisu zdroje (přiznáno):</em> jiný přepis téže stránky uvádí navíc hranu $T_2 \to T_3$; řešíme verzi z banky (bez ní) — s hranou $T_2 \to T_3$ by vyšlo $L_2 = 4 + 9 = 13$, což odporuje tabulce levelů v doloženém řešení banky ($L_2 = 10$).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — levely, $\mathcal{Z}/\mathcal{S}/\beta/\delta$, McNaughtonův dokončovací krok (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k5/l5-4.html#takeaways">[L5.4] McNaughton</a> — wrap-around plnění sdílených úseků.</li>
+        <li><a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace</a> — čtení $P2 \,|\, \mathrm{pmtn}, \mathrm{prec} \,|\, C_{max}$ a kreslení Ganttu.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Nejdřív levely odzadu: koncové $T_8, T_9, T_{10}$ mají $L = p$; pak $T_6, T_7$, pak $T_4$, $T_3$, $T_5$ a nakonec zdroje $T_1, T_2$. Pak veď tabulku iterací: v každém řádku $t$, $\mathcal{Z}$ s <em>aktuálními</em> levely, rozdělení procesorů a $\delta$ s důvodem (1)/(2)/(3). Pozor hned na $t = 0$: tři volné úlohy s levely $11, 10, 9$ — kdy nastane událost (2)? A na konci ($t = 11$): levely $2, 2, 1$ — nejdřív běží dvojka, pak sdílí trojice. Nakonec sdílené úseky $[3,6]$, $[6,9]$, $[12;\,13{,}5]$ rozbal McNaughtonem.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení <em>(běh dle pseudokódu slidu 52, provedení vlastní — přiznáno; levely shodné s doloženým řešením banky)</em></summary>
+        <div class="inner">
+          <p><strong>① Levely při inicializaci</strong> (odzadu; banka doslova: “A terminal task … has level equal to its processing time. For any other task, the level is the processing time of the task plus the largest level among its immediate successors: $L_i = p_i + \max\{L_j : T_i \to T_j\}$.”):</p>
+          <table>
+            <tr><th>$T_i$</th><td>$T_1$</td><td>$T_2$</td><td>$T_3$</td><td>$T_4$</td><td>$T_5$</td><td>$T_6$</td><td>$T_7$</td><td>$T_8$</td><td>$T_9$</td><td>$T_{10}$</td></tr>
+            <tr><th>$p_i$</th><td>2</td><td>4</td><td>5</td><td>2</td><td>6</td><td>2</td><td>1</td><td>1</td><td>2</td><td>2</td></tr>
+            <tr><th>$L_i$</th><td>11</td><td>10</td><td>9</td><td>6</td><td>9</td><td>4</td><td>3</td><td>1</td><td>2</td><td>2</td></tr>
+          </table>
+          <p>Např. $L_6 = 2 + \max\{1, 2\} = 4$, $L_4 = 2 + \max\{4, 3\} = 6$, $L_1 = 2 + \max\{9, 6\} = 11$.</p>
+          <p><strong>② Iterace hlavní smyčky</strong> (v $\mathcal{Z}$ uvádím aktuální levely; $\beta$ po skupinách $\mathcal{S}$):</p>
+          <table>
+            <tr><th>#</th><th>$t$</th><th>$\mathcal{Z}$ (aktuální levely)</th><th>$\mathcal{S}$ a $\beta$</th><th>$\delta$</th><th>událost</th></tr>
+            <tr><td>1</td><td>0</td><td>$T_1(11),\,T_2(10),\,T_5(9)$</td><td>$\{T_1\}\,\beta{=}1$; $\{T_2\}\,\beta{=}1$; $T_5$ čeká</td><td>1</td><td>(2) level $T_2$ klesl na $9$ = level $T_5$</td></tr>
+            <tr><td>2</td><td>1</td><td>$T_1(10),\,T_2(9),\,T_5(9)$</td><td>$\{T_1\}\,\beta{=}1$; $\{T_2, T_5\}\,\beta{=}\tfrac12$</td><td>1</td><td>(1) $T_1$ hotova v $t=2$ → uvolní $T_3$</td></tr>
+            <tr><td>3</td><td>2</td><td>$T_3(9),\,T_2(8{,}5),\,T_5(8{,}5)$</td><td>$\{T_3\}\,\beta{=}1$; $\{T_2, T_5\}\,\beta{=}\tfrac12$</td><td>1</td><td>(3) rychlejší $T_3$ dohnala $T_2, T_5$</td></tr>
+            <tr><td>4</td><td>3</td><td>$T_2(8),\,T_3(8),\,T_5(8)$</td><td>$\{T_2, T_3, T_5\}\,\beta{=}\tfrac23$</td><td>3</td><td>(1) $T_2$ hotova v $t=6$ → uvolní $T_4$</td></tr>
+            <tr><td>5</td><td>6</td><td>$T_3(6),\,T_4(6),\,T_5(6)$</td><td>$\{T_3, T_4, T_5\}\,\beta{=}\tfrac23$</td><td>3</td><td>(1) $T_3$ i $T_4$ hotovy v $t=9$ → uvolní $T_6$</td></tr>
+            <tr><td>6</td><td>9</td><td>$T_5(4),\,T_6(4)$</td><td>$\{T_5, T_6\}\,\beta{=}1$</td><td>1</td><td>(1) $T_5$ hotova v $t=10$ → uvolní $T_7$</td></tr>
+            <tr><td>7</td><td>10</td><td>$T_6(3),\,T_7(3)$</td><td>$\{T_6, T_7\}\,\beta{=}1$</td><td>1</td><td>(1) $T_6$ i $T_7$ hotovy v $t=11$ → uvolní $T_8, T_9, T_{10}$</td></tr>
+            <tr><td>8</td><td>11</td><td>$T_9(2),\,T_{10}(2),\,T_8(1)$</td><td>$\{T_9, T_{10}\}\,\beta{=}1$; $T_8$ čeká</td><td>1</td><td>(2) level $T_9, T_{10}$ klesl na $1$ = level $T_8$</td></tr>
+            <tr><td>9</td><td>12</td><td>$T_8(1),\,T_9(1),\,T_{10}(1)$</td><td>$\{T_8, T_9, T_{10}\}\,\beta{=}\tfrac23$</td><td>1,5</td><td>(1) vše hotovo: $C_{max} = 13{,}5$</td></tr>
+          </table>
+          <p><strong>③ Gantt</strong> — sdílené úseky ($[1,3]$ na $P^2$, $[3,6]$, $[6,9]$, $[12;\,13{,}5]$) rozbalí McNaughton (např. $[3,6]$: tři úlohy po $2$ v okně $3$ → $C^* = \max\{2, \tfrac{6}{2}\} = 3$, wrap-around). Proklikej oba pohledy:</p>
+          <div class="viz" id="viz-t01gantt"></div>
+          <p><strong>Optimalita:</strong> $\sum_i p_i = 27$, takže $C_{max} \ge \tfrac{27}{2} = 13{,}5$ — rozvrh meze dosahuje (žádné zahálení), a pro $R = 2$ je M&amp;C beztak exaktní. <strong>Optimum je $C_{max} = 13{,}5$.</strong></p>
+          <p style="color:var(--ink-soft);font-size:14px"><strong>Pozor (přiznaná odchylka od kolujícího řešení):</strong> řešení v bance úloh jede zjednodušenou variantu — statické levely, bez sdílení kapacity — a dostává $C_{max} = 14$ s argumentem $C_{max} \ge \lceil 27/2 \rceil = 14$. Zaokrouhlení nahoru ale při povolené preempci neplatí ($C_{max}$ smí být zlomkové) a běh věrný pseudokódu slidu 52 (výše) končí v $13{,}5$. U zkoušky se drž slidů: sdílení $\beta = h/|\mathcal{S}|$ a tři případy $\delta$ jsou přesně to, co zadání slovy „Muntz&amp;Coffman's Level Algorithm“ myslí.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="box foto">
+    <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+    <p>Tohle je doložená zkoušková úloha (02.06.2021, znovu 1. 6. 2026). Vyřeš ji celou NA PAPÍR bez koukání do řešení: tabulka levelů, tabulka iterací ($t$, $\mathcal{Z}$ s aktuálními levely, $\mathcal{S}$, $\beta$, $\delta$ + případ), McNaughtonovo rozbalení sdílených úseků a finální Gantt s $C_{max}$. Pošli mi fotku — zkontroluju ti ji a vytknu chyby (nejčastější: statické levely, zapomenuté sdílení $\beta$ a úloha vytažená do $\mathcal{Z}$ dřív, než doběhli všichni předchůdci).</p>
+  </div>
+
+  <!-- ===== ULOHA T02 ===== -->
+  <div class="task" id="t-muntzdrill">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Muntz&amp;Coffman — druhá zkoušková instance</strong>
+      <span class="task-src">zdroj: zkouškový přepis Master_Zkouska_KO str. 19 (termín 09.07.2021; zadání EN 1:1)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Solve the following instance of $P2 \,|\,pmtn, prec\,|\, C_{max}$ problem by Muntz&amp;Coffman's Level Algorithm. Record a list of levels at initialization and $\mathcal{Z}$, set of free tasks, for each iteration of the main loop. Precedence relations are given by the following graph. Processing time is behind the slash of each task label. Draw the Gantt chart.”</p>
+        <div class="viz" id="viz-t02dag"></div>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejné zadání jako T01, jiná instance: devět úloh, dva procesory. Tahle instance je „hodnější“ (skoro pořád $\beta = 1$), ale má dvě vlastní pasti: dvakrát se <strong>zahálí</strong>, přestože práce zbývá (předchůdci nejsou hotovi), a na konci jedna trojice sdílí — tentokrát jen jeden volný procesor pro dvě úlohy ($\beta = \tfrac12$).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — celý aparát (<a href="#takeaways">takeaways</a>); McNaughton <a href="../k5/l5-4.html#takeaways">[L5.4]</a> na závěrečný úsek.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Levely odzadu ($T_7, T_8, T_9$ jsou koncové). Hned po dokončení $T_1$ v $t = 2$ se zeptej: je $T_3$ volná? (Má <em>dva</em> předchůdce.) A v $t = 7$ pečlivě: tři volné úlohy s levely $2, 1, 1$ a dva procesory — kdo dostane celý procesor a kdo půlku?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení <em>(vlastní — přiznáno; ruční řešení v přepisu je z velké části nečitelné/škrtané)</em></summary>
+        <div class="inner">
+          <p><strong>① Levely:</strong> $L_7 = 1$, $L_8 = 2$, $L_9 = 2$; $L_5 = 2 + \max\{1,2\} = 4$, $L_6 = 1 + \max\{2,2\} = 3$; $L_3 = 1 + 4 = 5$, $L_4 = 2 + \max\{4,3\} = 6$; $L_1 = 2 + 5 = 7$, $L_2 = 3 + \max\{5,6\} = 9$. Tedy $L = (7, 9, 5, 6, 4, 3, 1, 2, 2)$.</p>
+          <p><strong>② Iterace:</strong></p>
+          <table>
+            <tr><th>#</th><th>$t$</th><th>$\mathcal{Z}$ (aktuální levely)</th><th>$\mathcal{S}$ a $\beta$</th><th>$\delta$</th><th>událost</th></tr>
+            <tr><td>1</td><td>0</td><td>$T_2(9),\,T_1(7)$</td><td>$\{T_2\}\,\beta{=}1$; $\{T_1\}\,\beta{=}1$</td><td>2</td><td>(1) $T_1$ hotova v $t=2$</td></tr>
+            <tr><td>2</td><td>2</td><td>$T_2(7)$</td><td>$\{T_2\}\,\beta{=}1$ — $P^2$ <strong>zahálí</strong> ($T_3$ čeká na $T_2$!)</td><td>1</td><td>(1) $T_2$ hotova v $t=3$ → uvolní $T_3, T_4$</td></tr>
+            <tr><td>3</td><td>3</td><td>$T_4(6),\,T_3(5)$</td><td>$\{T_4\}\,\beta{=}1$; $\{T_3\}\,\beta{=}1$</td><td>1</td><td>(1) $T_3$ hotova v $t=4$</td></tr>
+            <tr><td>4</td><td>4</td><td>$T_4(5)$</td><td>$\{T_4\}\,\beta{=}1$ — $P^2$ <strong>zahálí</strong> ($T_5$ čeká na $T_4$)</td><td>1</td><td>(1) $T_4$ hotova v $t=5$ → uvolní $T_5, T_6$</td></tr>
+            <tr><td>5</td><td>5</td><td>$T_5(4),\,T_6(3)$</td><td>$\{T_5\}\,\beta{=}1$; $\{T_6\}\,\beta{=}1$</td><td>1</td><td>(1) $T_6$ hotova v $t=6$ → uvolní $T_9$</td></tr>
+            <tr><td>6</td><td>6</td><td>$T_5(3),\,T_9(2)$</td><td>$\{T_5\}\,\beta{=}1$; $\{T_9\}\,\beta{=}1$</td><td>1</td><td>(1) $T_5$ hotova v $t=7$ → uvolní $T_7, T_8$</td></tr>
+            <tr><td>7</td><td>7</td><td>$T_8(2),\,T_7(1),\,T_9(1)$</td><td>$\{T_8\}\,\beta{=}1$; $\{T_7, T_9\}\,\beta{=}\tfrac12$</td><td>2</td><td>(1) vše hotovo: $C_{max} = 9$</td></tr>
+          </table>
+          <p><strong>③ Gantt</strong> — jediný sdílený úsek $[7,9]$ na $P^2$ rozbalí McNaughton (okno $2$, kusy $1 + 1$):</p>
+          <div class="viz" id="viz-t02gantt"></div>
+          <p><strong>Optimalita:</strong> tady rozhoduje druhá mez — kritická cesta: $\max_i L_i = L_2 = 9$ (řetěz $T_2 \to T_4 \to T_5 \to T_8$, $3+2+2+2 = 9$), zatímco $\tfrac{1}{R}\sum p_i = \tfrac{16}{2} = 8$. Rozvrh končí v $C_{max} = 9 = L_2$ → <strong>optimální</strong>; ta dvě zahálení ($[2,3]$, $[4,5]$ na $P^2$) jsou vynucená precedencemi, ne chyba.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L5.10">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k5/l5-9.html"><span class="dir">← Předchozí</span> L5.9 · Bratleyho algoritmus (1|r_j,d̃_j|Cmax, B&amp;B)</a>
+    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.11 · Rothkopf DP pro P||Cmax)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// ===== 1 — Mini-instance: DAG s levely (vlastní instance, přiznáno) =====
+KOViz.graph(document.getElementById('viz-dag'), {
+  h: 360,
+  nodes: [
+    { id: 't2', x: 95,  y: 60,  label: 'T₂/2', sub: 'L = 5' },
+    { id: 't3', x: 95,  y: 185, label: 'T₃/2', sub: 'L = 5' },
+    { id: 't1', x: 95,  y: 310, label: 'T₁/3', sub: 'L = 4' },
+    { id: 't4', x: 320, y: 120, label: 'T₄/2', sub: 'L = 3' },
+    { id: 't5', x: 540, y: 215, label: 'T₅/1', sub: 'L = 1' },
+  ],
+  edges: [
+    { from: 't2', to: 't4' },
+    { from: 't3', to: 't4' },
+    { from: 't4', to: 't5' },
+    { from: 't1', to: 't5' },
+  ],
+  caption: 'Mini-instance (vlastní, přiznáno): R = 2, uzel = Tᵢ/pᵢ, pod uzlem level Lᵢ = pᵢ + max level následníků. Koncová úloha: L₅ = p₅ = 1; zdroje T₁, T₂, T₃.',
+});
+
+// ===== 2 — Běh M&C na mini-instanci (gantt stepper; frames = ABSOLUTNÍ stavy) =====
+// Iterace (ověřeno simulací dle pseudokódu slidu 52):
+// t=0: S={T2,T3} β=1, T1 čeká; δ=1 (case 2). t=1: S={T1,T2,T3} β=2/3; δ=1.5 (case 1).
+// t=2.5: S={T1,T4} β=1; δ=2 (case 1). t=4.5: S={T5} β=1; δ=1. Cmax=5.5.
+KOViz.gantt(document.getElementById('viz-run'), {
+  tmax: 5.5, tstep: 1,
+  rows: [{ id: 'P1', label: 'P¹' }, { id: 'P2', label: 'P²' }],
+  blocks: [],
+  frames: [
+    { desc: 'Inicializace: levely L = (4, 5, 5, 3, 1) spočtené odzadu; t = 0, Z = {T₁, T₂, T₃} (zdroje DAGu).',
+      blocks: [], marks: [] },
+    { desc: 'Iterace 1 (t = 0): S = {T₂, T₃} (level 5) → každá celý procesor (β = 1); T₁ (level 4) čeká. δ = 1 — případ (2): level běžících klesne na 4 = level čekající T₁.',
+      blocks: [
+        { row: 'P1', from: 0, to: 1, label: 'T₂', cls: 'hl' },
+        { row: 'P2', from: 0, to: 1, label: 'T₃', cls: 'hl' },
+      ], marks: [] },
+    { desc: 'Iterace 2 (t = 1): všechny tři mají level 4 → |S| = 3 > h = 2 → sdílení β = 2/3. δ = 1,5 — případ (1): T₂ a T₃ dokončí zbylou 1 jednotku rychlostí 2/3 za 1,5.',
+      blocks: [
+        { row: 'P1', from: 0, to: 1, label: 'T₂' },
+        { row: 'P2', from: 0, to: 1, label: 'T₃' },
+        { row: 'P1', from: 1, to: 2.5, label: 'T₁·T₂·T₃ (β=⅔)', cls: 'p' },
+        { row: 'P2', from: 1, to: 2.5, label: 'T₁·T₂·T₃ (β=⅔)', cls: 'p' },
+      ], marks: [] },
+    { desc: 'Iterace 3 (t = 2,5): T₂, T₃ hotovy → T₄ volná (level 3); T₁ má zbytek 2, level 3. S = {T₁, T₄}, β = 1. δ = 2 — případ (1): obě skončí v t = 4,5.',
+      blocks: [
+        { row: 'P1', from: 0, to: 1, label: 'T₂' },
+        { row: 'P2', from: 0, to: 1, label: 'T₃' },
+        { row: 'P1', from: 1, to: 2.5, label: 'T₁·T₂·T₃ (β=⅔)', cls: 'p' },
+        { row: 'P2', from: 1, to: 2.5, label: 'T₁·T₂·T₃ (β=⅔)', cls: 'p' },
+        { row: 'P1', from: 2.5, to: 4.5, label: 'T₁', cls: 'hl' },
+        { row: 'P2', from: 2.5, to: 4.5, label: 'T₄', cls: 'hl' },
+      ], marks: [] },
+    { desc: 'Iterace 4 (t = 4,5): T₁ i T₄ hotovy → T₅ volná. S = {T₅}, β = 1; druhý procesor zahálí (nic jiného není volné). δ = 1 → Cmax = 5,5.',
+      blocks: [
+        { row: 'P1', from: 0, to: 1, label: 'T₂' },
+        { row: 'P2', from: 0, to: 1, label: 'T₃' },
+        { row: 'P1', from: 1, to: 2.5, label: 'T₁·T₂·T₃ (β=⅔)', cls: 'p' },
+        { row: 'P2', from: 1, to: 2.5, label: 'T₁·T₂·T₃ (β=⅔)', cls: 'p' },
+        { row: 'P1', from: 2.5, to: 4.5, label: 'T₁' },
+        { row: 'P2', from: 2.5, to: 4.5, label: 'T₄' },
+        { row: 'P1', from: 4.5, to: 5.5, label: 'T₅', cls: 'hl' },
+        { row: 'P2', from: 4.5, to: 5.5, label: 'idle', cls: 'idle' },
+      ],
+      marks: [{ t: 5.5, label: 'Cmax = 5,5' }] },
+    { desc: 'Krok 2 — McNaughton na sdílený úsek [1; 2,5]: tři kusy po 1 v okně 1,5 → C* = max{1, 3/2} = 1,5; wrap-around: T₁ [1,2]→P¹, T₂ [2; 2,5]→P¹ + zbytek [1; 1,5]→P² (kusy se nepřekrývají: 0,5 ≤ 1), T₃ [1,5; 2,5]→P². Hotový Gantt; Cmax = 5,5 je optimum (M&C je pro R = 2 exaktní).',
+      blocks: [
+        { row: 'P1', from: 0, to: 1, label: 'T₂' },
+        { row: 'P1', from: 1, to: 2, label: 'T₁', cls: 'good' },
+        { row: 'P1', from: 2, to: 2.5, label: 'T₂', cls: 'good' },
+        { row: 'P1', from: 2.5, to: 4.5, label: 'T₁' },
+        { row: 'P1', from: 4.5, to: 5.5, label: 'T₅' },
+        { row: 'P2', from: 0, to: 1, label: 'T₃' },
+        { row: 'P2', from: 1, to: 1.5, label: 'T₂', cls: 'good' },
+        { row: 'P2', from: 1.5, to: 2.5, label: 'T₃', cls: 'good' },
+        { row: 'P2', from: 2.5, to: 4.5, label: 'T₄' },
+        { row: 'P2', from: 4.5, to: 5.5, label: 'idle', cls: 'idle' },
+      ],
+      marks: [{ t: 5, label: 'Σp/R = 5', cls: 'soft' }, { t: 5.5, label: 'Cmax = 5,5' }] },
+  ],
+  caption: 'Běh Muntz&Coffmana na mini-instanci (R = 2). Fialové bloky = sdílená kapacita (účetní fikce hlavní smyčky), poslední krok = skutečný rozvrh po McNaughtonovi [L5.4]. Dolní mez max{max Lᵢ, Σp/R} = 5 tu není dosažitelná — optimum je 5,5.',
+});
+
+// ===== 3 — T01: DAG zkoušky 02.06.2021 (= banka #40; levely dle řešení banky) =====
+KOViz.graph(document.getElementById('viz-t01dag'), {
+  h: 370,
+  nodes: [
+    { id: 't1',  x: 70,  y: 95,  label: 'T₁/2',  sub: 'L = 11' },
+    { id: 't2',  x: 70,  y: 235, label: 'T₂/4',  sub: 'L = 10' },
+    { id: 't3',  x: 235, y: 60,  label: 'T₃/5',  sub: 'L = 9' },
+    { id: 't4',  x: 235, y: 190, label: 'T₄/2',  sub: 'L = 6' },
+    { id: 't5',  x: 235, y: 320, label: 'T₅/6',  sub: 'L = 9' },
+    { id: 't6',  x: 405, y: 120, label: 'T₆/2',  sub: 'L = 4' },
+    { id: 't7',  x: 405, y: 265, label: 'T₇/1',  sub: 'L = 3' },
+    { id: 't8',  x: 565, y: 50,  label: 'T₈/1',  sub: 'L = 1' },
+    { id: 't9',  x: 565, y: 185, label: 'T₉/2',  sub: 'L = 2' },
+    { id: 't10', x: 565, y: 320, label: 'T₁₀/2', sub: 'L = 2' },
+  ],
+  edges: [
+    { from: 't1', to: 't3' }, { from: 't1', to: 't4' }, { from: 't2', to: 't4' },
+    { from: 't3', to: 't6' }, { from: 't4', to: 't6' }, { from: 't4', to: 't7' },
+    { from: 't5', to: 't7' }, { from: 't6', to: 't8' }, { from: 't6', to: 't9' },
+    { from: 't7', to: 't9' }, { from: 't7', to: 't10' },
+  ],
+  caption: 'T01 — precedenční graf zkoušky 02.06.2021 (uzel = Tᵢ/pᵢ; levely pod uzly = krok ① řešení). Zdroje T₁, T₂, T₅; koncové T₈, T₉, T₁₀.',
+});
+
+// ===== 4 — T01: Gantt (2 pohledy: výstup hlavní smyčky se sdílením / po McNaughtonovi) =====
+// Běh i rozvrh ověřeny simulací (totals, překryvy, precedence, Cmax = 13.5).
+KOViz.gantt(document.getElementById('viz-t01gantt'), {
+  tmax: 13.5, tstep: 1,
+  rows: [{ id: 'P1', label: 'P¹' }, { id: 'P2', label: 'P²' }],
+  blocks: [],
+  frames: [
+    { desc: 'Pohled 1 — výstup hlavní smyčky: fialové úseky = sdílená kapacita (β = ½ na P² v [1,3]; β = ⅔ na obou v [3,6], [6,9] a [12; 13,5]). Takhle se rozvrh odevzdat nedá — tři úlohy na dvou strojích.',
+      blocks: [
+        { row: 'P1', from: 0,  to: 2,  label: 'T₁' },
+        { row: 'P2', from: 0,  to: 1,  label: 'T₂' },
+        { row: 'P2', from: 1,  to: 3,  label: 'T₂·T₅ (β=½)', cls: 'p' },
+        { row: 'P1', from: 2,  to: 3,  label: 'T₃' },
+        { row: 'P1', from: 3,  to: 6,  label: 'T₂·T₃·T₅ (β=⅔)', cls: 'p' },
+        { row: 'P2', from: 3,  to: 6,  label: 'T₂·T₃·T₅ (β=⅔)', cls: 'p' },
+        { row: 'P1', from: 6,  to: 9,  label: 'T₃·T₄·T₅ (β=⅔)', cls: 'p' },
+        { row: 'P2', from: 6,  to: 9,  label: 'T₃·T₄·T₅ (β=⅔)', cls: 'p' },
+        { row: 'P1', from: 9,  to: 10, label: 'T₅' },
+        { row: 'P2', from: 9,  to: 10, label: 'T₆' },
+        { row: 'P1', from: 10, to: 11, label: 'T₆' },
+        { row: 'P2', from: 10, to: 11, label: 'T₇' },
+        { row: 'P1', from: 11, to: 12, label: 'T₉' },
+        { row: 'P2', from: 11, to: 12, label: 'T₁₀' },
+        { row: 'P1', from: 12, to: 13.5, label: 'T₈·T₉·T₁₀', cls: 'p' },
+        { row: 'P2', from: 12, to: 13.5, label: 'T₈·T₉·T₁₀', cls: 'p' },
+      ],
+      marks: [{ t: 13.5, label: 'Cmax = 13,5' }] },
+    { desc: 'Pohled 2 — po McNaughtonovi (finální Gantt): každý sdílený úsek rozbalen wrap-aroundem; žádná úloha neběží na dvou strojích současně, žádné zahálení (27 = 2 · 13,5). Cmax = 13,5 = Σp/R → optimum.',
+      blocks: [
+        { row: 'P1', from: 0,    to: 2,    label: 'T₁' },
+        { row: 'P1', from: 2,    to: 3,    label: 'T₃' },
+        { row: 'P1', from: 3,    to: 5,    label: 'T₂', cls: 'good' },
+        { row: 'P1', from: 5,    to: 8,    label: 'T₃', cls: 'good' },
+        { row: 'P1', from: 8,    to: 9,    label: 'T₄', cls: 'good' },
+        { row: 'P1', from: 9,    to: 10,   label: 'T₅' },
+        { row: 'P1', from: 10,   to: 11,   label: 'T₆' },
+        { row: 'P1', from: 11,   to: 12,   label: 'T₉' },
+        { row: 'P1', from: 12,   to: 13,   label: 'T₈', cls: 'good' },
+        { row: 'P1', from: 13,   to: 13.5, label: 'T₉', cls: 'good' },
+        { row: 'P2', from: 0,    to: 1.5,  label: 'T₂' },
+        { row: 'P2', from: 1.5,  to: 2,    label: 'T₅' },
+        { row: 'P2', from: 2,    to: 2.5,  label: 'T₂' },
+        { row: 'P2', from: 2.5,  to: 3,    label: 'T₅' },
+        { row: 'P2', from: 3,    to: 4,    label: 'T₃', cls: 'good' },
+        { row: 'P2', from: 4,    to: 6,    label: 'T₅', cls: 'good' },
+        { row: 'P2', from: 6,    to: 7,    label: 'T₄', cls: 'good' },
+        { row: 'P2', from: 7,    to: 9,    label: 'T₅', cls: 'good' },
+        { row: 'P2', from: 9,    to: 10,   label: 'T₆' },
+        { row: 'P2', from: 10,   to: 11,   label: 'T₇' },
+        { row: 'P2', from: 11,   to: 12,   label: 'T₁₀' },
+        { row: 'P2', from: 12,   to: 12.5, label: 'T₉', cls: 'good' },
+        { row: 'P2', from: 12.5, to: 13.5, label: 'T₁₀', cls: 'good' },
+      ],
+      marks: [{ t: 13.5, label: 'Cmax = 13,5 = Σp/R' }] },
+  ],
+  caption: 'T01 — Gantt: pohled 1 = sdílené úseky hlavní smyčky, pohled 2 = finální rozvrh po McNaughtonovi (zeleně bloky vzniklé rozbalením sdílení; provedení vlastní — přiznáno). Cmax = 13,5.',
+});
+
+// ===== 5 — T02: DAG zkoušky 09.07.2021 (přepis Master_Zkouska_KO str. 19) =====
+KOViz.graph(document.getElementById('viz-t02dag'), {
+  h: 370,
+  nodes: [
+    { id: 't1', x: 75,  y: 90,  label: 'T₁/2', sub: 'L = 7' },
+    { id: 't2', x: 75,  y: 265, label: 'T₂/3', sub: 'L = 9' },
+    { id: 't3', x: 225, y: 90,  label: 'T₃/1', sub: 'L = 5' },
+    { id: 't4', x: 225, y: 265, label: 'T₄/2', sub: 'L = 6' },
+    { id: 't5', x: 375, y: 90,  label: 'T₅/2', sub: 'L = 4' },
+    { id: 't6', x: 375, y: 265, label: 'T₆/1', sub: 'L = 3' },
+    { id: 't7', x: 530, y: 55,  label: 'T₇/1', sub: 'L = 1' },
+    { id: 't8', x: 530, y: 195, label: 'T₈/2', sub: 'L = 2' },
+    { id: 't9', x: 530, y: 330, label: 'T₉/2', sub: 'L = 2' },
+  ],
+  edges: [
+    { from: 't1', to: 't3' }, { from: 't2', to: 't3' }, { from: 't2', to: 't4' },
+    { from: 't3', to: 't5' }, { from: 't4', to: 't5' }, { from: 't4', to: 't6' },
+    { from: 't5', to: 't7' }, { from: 't5', to: 't8' }, { from: 't6', to: 't8' },
+    { from: 't6', to: 't9' },
+  ],
+  caption: 'T02 — precedenční graf zkoušky 09.07.2021 (uzel = Tᵢ/pᵢ; levely pod uzly = krok ① řešení). Zdroje T₁, T₂; koncové T₇, T₈, T₉.',
+});
+
+// ===== 6 — T02: Gantt (sdílení jen v [7,9] na P²) =====
+KOViz.gantt(document.getElementById('viz-t02gantt'), {
+  tmax: 9, tstep: 1,
+  rows: [{ id: 'P1', label: 'P¹' }, { id: 'P2', label: 'P²' }],
+  blocks: [],
+  frames: [
+    { desc: 'Pohled 1 — výstup hlavní smyčky: jediné sdílení je v iteraci 7 ({T₇, T₉} na jeden volný procesor, β = ½). Všimni si vynucených zahálení [2,3] a [4,5] na P² — T₃ resp. T₅ ještě nemají hotové všechny předchůdce.',
+      blocks: [
+        { row: 'P1', from: 0, to: 3, label: 'T₂' },
+        { row: 'P2', from: 0, to: 2, label: 'T₁' },
+        { row: 'P2', from: 2, to: 3, label: 'idle', cls: 'idle' },
+        { row: 'P1', from: 3, to: 5, label: 'T₄' },
+        { row: 'P2', from: 3, to: 4, label: 'T₃' },
+        { row: 'P2', from: 4, to: 5, label: 'idle', cls: 'idle' },
+        { row: 'P1', from: 5, to: 7, label: 'T₅' },
+        { row: 'P2', from: 5, to: 6, label: 'T₆' },
+        { row: 'P2', from: 6, to: 7, label: 'T₉' },
+        { row: 'P1', from: 7, to: 9, label: 'T₈' },
+        { row: 'P2', from: 7, to: 9, label: 'T₇·T₉ (β=½)', cls: 'p' },
+      ],
+      marks: [{ t: 9, label: 'Cmax = 9' }] },
+    { desc: 'Pohled 2 — po McNaughtonovi: úsek [7,9] na P² = okno 2 s kusy T₇ (1) a T₉ (1) → T₇ [7,8], T₉ [8,9]. Cmax = 9 = L₂ (kritická cesta T₂→T₄→T₅→T₈) → optimum.',
+      blocks: [
+        { row: 'P1', from: 0, to: 3, label: 'T₂' },
+        { row: 'P2', from: 0, to: 2, label: 'T₁' },
+        { row: 'P2', from: 2, to: 3, label: 'idle', cls: 'idle' },
+        { row: 'P1', from: 3, to: 5, label: 'T₄' },
+        { row: 'P2', from: 3, to: 4, label: 'T₃' },
+        { row: 'P2', from: 4, to: 5, label: 'idle', cls: 'idle' },
+        { row: 'P1', from: 5, to: 7, label: 'T₅' },
+        { row: 'P2', from: 5, to: 6, label: 'T₆' },
+        { row: 'P2', from: 6, to: 7, label: 'T₉' },
+        { row: 'P1', from: 7, to: 9, label: 'T₈' },
+        { row: 'P2', from: 7, to: 8, label: 'T₇', cls: 'good' },
+        { row: 'P2', from: 8, to: 9, label: 'T₉', cls: 'good' },
+      ],
+      marks: [{ t: 8, label: 'Σp/R = 8', cls: 'soft' }, { t: 9, label: 'Cmax = 9 = L₂' }] },
+  ],
+  caption: 'T02 — Gantt (provedení vlastní — přiznáno): dvě precedencemi vynucená zahálení na P², jediné sdílení [7,9] rozbalené McNaughtonem. Cmax = 9 dosahuje meze kritické cesty L₂ = 9.',
+});
+</script>
+</body>
+</html>
