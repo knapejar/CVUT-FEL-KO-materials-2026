@@ -100,7 +100,7 @@
     </div>
   </details>
 
-  <p>Na <strong>základu logaritmu nezáleží</strong>: $\log_b x = \ln x / \ln b$, takže změna základu jen přenásobí <em>všechny</em> váhy stejnou kladnou konstantou — a to pořadí cest podle délky nezmění (k škálování vah se vrátíme v lekci [L2.15]). V ručních příkladech se hodí základ 2, když jsou spolehlivosti mocniny $\tfrac12$; obecně se píše $\ln$ nebo prostě $\log$.</p>
+  <p>Na <strong>základu logaritmu nezáleží</strong>: $\log_b x = \ln x / \ln b$, takže změna základu jen přenásobí <em>všechny</em> váhy stejnou kladnou konstantou — a to pořadí cest podle délky nezmění (ke škálování vah se vrátíme v lekci [L2.15]). V ručních příkladech se hodí základ 2, když jsou spolehlivosti mocniny $\tfrac12$; obecně se píše $\ln$ nebo prostě $\log$.</p>
 
   <h2>Celý převod na příkladu</h2>
   <p>Síť z úvodu po transformaci $c(i,j) = -\log_2 p(i,j)$ (např. $-\log_2 0{,}5 = 1$, $-\log_2 0{,}125 = 3$):</p>
@@ -188,17 +188,17 @@
             <li><em>Výběr:</em> mezi neuzavřenými vyber vrchol s <strong>maximální</strong> $l(v)$ a uzavři ho.</li>
             <li><em>Relaxace:</em> $\textbf{if } l(w) &lt; l(v) \cdot p(v,w) \textbf{ then } l(w) := l(v) \cdot p(v,w);\; p(w) := v$.</li>
           </ul>
+          <p><em>Pozor na značení:</em> $p(w)$ je vektor <strong>předchůdců</strong> podle konvence z <a href="l2-4.html#takeaways">[L2.4]</a> (předchozí vrchol na cestě) — nezaměnit se spolehlivostí hrany $p(v,w)$, která má dva argumenty.</p>
           <p>Struktura algoritmu je shodná s Dijkstrou: $n$ iterací, v každé výběr extrému přes $O(n)$ vrcholů a relaxace $O(n)$ hran — celkem $O(n^2)$. Funguje ze stejného důvodu jako Dijkstra: násobení koeficientem $p \in (0,1]$ značku <strong>nikdy nezvětší</strong> (zrcadlo přičítání nezáporné váhy), takže vrchol s maximální značkou už si nemůže polepšit přes jiný neuzavřený vrchol a jeho uzavření je definitivní. (Formální důkaz = zrcadlový důkaz korektnosti Dijkstry, patří do kapitoly K3.)</p>
           <p><strong>(c) Obecně NE.</strong> Oba algoritmy se opírají o $p(i,j) \le 1$:</p>
           <ul>
             <li>V (a) dá hrana s $p &gt; 1$ váhu $-\log p &lt; 0$ — graf má záporné hrany a Dijkstrův label-setting argument padá (protipříklad v <a href="l2-4.html#takeaways">[L2.4]</a>). Cyklus se součinem koeficientů $&gt; 1$ se navíc zobrazí na <strong>záporný cyklus</strong>, se kterým je shortest path dokonce NP-těžký <a href="l2-1.html#takeaways">[L2.1]</a>.</li>
             <li>V (b) ekvivalentně: hrana s $p &gt; 1$ může značku <em>zvětšit</em>, takže uzavřený vrchol by si později polepšil — hladový výběr maxima přestane být korektní.</li>
           </ul>
-          <p>Společný protipříklad je na grafu pod úlohou: nejspolehlivější je cesta $s \to a \to t$ s $0{,}1 \cdot 10 = 1$, ale obě varianty uzavřou $t$ hned po $s$ (transformovaná váha $-\log_2 0{,}9 \approx 0{,}152$ je menší než $-\log_2 0{,}1 \approx 3{,}32$, resp. značka $0{,}9 &gt; 0{,}1$) a vrátí přímou hranu s $p = 0{,}9$. Odpověď: ne — s koeficienty $&gt; 1$ není korektnost zaručena.</p>
+          <p>Společný protipříklad je na grafu níže: nejspolehlivější je cesta $s \to a \to t$ s $0{,}1 \cdot 10 = 1$, ale obě varianty uzavřou $t$ hned po $s$ (transformovaná váha $-\log_2 0{,}9 \approx 0{,}152$ je menší než $-\log_2 0{,}1 \approx 3{,}32$, resp. značka $0{,}9 &gt; 0{,}1$) a vrátí přímou hranu s $p = 0{,}9$. Odpověď: ne — s koeficienty $&gt; 1$ není korektnost zaručena.</p>
+          <div class="viz" id="viz-counter"></div>
         </div>
       </details>
-
-      <div class="viz" id="viz-counter"></div>
     </div>
   </div>
 
@@ -350,7 +350,7 @@ KOViz.stepper(document.getElementById('viz-run'), {
      nodes:{s:'good', a:'hl'},
      edges:{'s->a':'good', 'a->t':'hl', 's->t':'dim'},
      subs:{s:'l=0', a:'l=1, p=s', b:'l=3, p=s', t:'l=2, p=a'}},
-    {desc:'It 3: min je t (2 &lt; 3) → uzavři t. Cíl je v R → můžeme skončit (early stop z L2.4); b zůstane neuzavřené. Nejkratší cesta: s → a → t, l(t)=2.',
+    {desc:'It 3: min je t (2 &lt; 3) → uzavři t. Cíl je v R → můžeme skončit dřív (viz L2.4: při jediném cíli t lze běh ukončit jeho zařazením do R); b zůstane neuzavřené. Nejkratší cesta: s → a → t, l(t)=2.',
      nodes:{s:'good', a:'good', t:'hl'},
      edges:{'s->a':'good', 'a->t':'good', 's->t':'dim'},
      subs:{s:'l=0', a:'l=1, p=s', b:'l=3, p=s', t:'l=2, p=a'}},
@@ -362,7 +362,7 @@ KOViz.stepper(document.getElementById('viz-run'), {
   caption: 'Dijkstra na vahách −log₂ p; poslední krok je převod l(t) zpět na pravděpodobnost.',
 });
 
-// 5 — Protipříklad k T01(c): koeficient p &gt; 1 (graf pod řešením — pozor, spoiler)
+// 5 — Protipříklad k T01(c): koeficient p > 1 (graf uvnitř details.solution u T01)
 KOViz.graph(document.getElementById('viz-counter'), {
   directed: true,
   w: 640, h: 280,
@@ -376,7 +376,7 @@ KOViz.graph(document.getElementById('viz-counter'), {
     {from:'a', to:'t', label:'10', cls:'bad'},
     {from:'s', to:'t', label:'0.9'},
   ],
-  caption: 'Protipříklad k (c) — spoiler k řešení T01: s koeficientem 10 &gt; 1 je nejlepší cesta s→a→t (0.1 · 10 = 1 &gt; 0.9), ale obě varianty algoritmu uzavřou t hned po s a vrátí přímou hranu.',
+  caption: 'Protipříklad k (c): s koeficientem 10 &gt; 1 je nejlepší cesta s→a→t (0.1 · 10 = 1 &gt; 0.9), ale obě varianty algoritmu uzavřou t hned po s a vrátí přímou hranu.',
 });
 </script>
 </body>
