@@ -43,7 +43,7 @@
     <p>“Reduce the domains to be arc consistent. Record the steps of the algorithm (the queue content prior to the revision of each arc).”</p>
   </div>
 
-  <p>Je to nejmechaničtější úloha celé zkoušky — žádný důkaz, žádný nápad, jen pečlivé oditerování algoritmu AC-3. Kapitola K6 ji rozkládá na tři kroky: dnes <strong>pojmy</strong> (co je CSP a kdy je hrana konzistentní), v [L6.2] <strong>procedura REVISE</strong> (jak nekonzistenci opravit škrtáním hodnot) a v [L6.3] <strong>algoritmus AC-3</strong> s frontou hran — tam si přesně tohle zadání celé propočítáš.</p>
+  <p>Je to nejmechaničtější úloha celé zkoušky — žádný důkaz, žádný nápad, jen pečlivé oditerování algoritmu AC-3. Kapitola K6 ji rozkládá na tři kroky: dnes <strong>pojmy</strong> (co je CSP a kdy je hrana konzistentní), v <a href="../k6/l6-2.html">[L6.2]</a> <strong>procedura REVISE</strong> (jak nekonzistenci opravit škrtáním hodnot) a v [L6.3] <strong>algoritmus AC-3</strong> s frontou hran — tam si přesně tohle zadání celé propočítáš.</p>
 
   <!-- ===== CO JE CSP ===== -->
   <h2>Co je CSP</h2>
@@ -126,7 +126,7 @@
     </div>
   </details>
 
-  <p>Celý <strong>CSP je arc consistent</strong>, právě když jsou AC <em>všechny</em> hrany jeho grafu — v příkladu výše tedy jen instance ③. Zkouškové zadání „reduce the domains to be arc consistent“ chce přesně tohle: škrtat hodnoty bez podpory tak dlouho, až jsou všechny hrany AC. Jak škrtat systematicky (procedura REVISE) se naučíš v [L6.2] a jak u toho nezešílet z opakovaných kontrol (fronta algoritmu AC-3) v [L6.3].</p>
+  <p>Celý <strong>CSP je arc consistent</strong>, právě když jsou AC <em>všechny</em> hrany jeho grafu — v příkladu výše tedy jen instance ③. Zkouškové zadání „reduce the domains to be arc consistent“ chce přesně tohle: škrtat hodnoty bez podpory tak dlouho, až jsou všechny hrany AC. Jak škrtat systematicky (procedura REVISE) se naučíš v <a href="../k6/l6-2.html">[L6.2]</a> a jak u toho nezešílet z opakovaných kontrol (fronta algoritmu AC-3) v [L6.3].</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: dvě klasické chyby u hranové konzistence</div>
@@ -159,7 +159,7 @@
       <div class="assignment">
         <span class="lbl">Assignment (original, EN)</span>
         <p>“CSP with variables and domains: $x_1 \in \{1, 2, 3\},\ x_2 \in \{1, 2, 3\},\ x_3 \in \{2, 3\}$ and constraints $x_1 &gt; x_2,\ x_2 \ne x_3,\ x_2 + x_3 &gt; 4$.”</p>
-        <p><em>(Instrukce vlastní — na slidu instance pokračuje aplikací procedury REVISE, tu potkáš v [L6.2]:)</em> Draw the constraint digraph. For each arc decide whether it is arc consistent with respect to the initial domains; for every inconsistent arc list the value(s) without support. Is the CSP arc consistent?</p>
+        <p><em>(Instrukce vlastní — na slidu instance pokračuje aplikací procedury REVISE, tu potkáš v <a href="../k6/l6-2.html">[L6.2]</a>:)</em> Draw the constraint digraph. For each arc decide whether it is arc consistent with respect to the initial domains; for every inconsistent arc list the value(s) without support. Is the CSP arc consistent?</p>
       </div>
 
       <h4>a) Co je v zadání?</h4>
@@ -185,7 +185,7 @@
             <li>$(x_2, x_3)$, obě omezení najednou ($b \ne a$ a $a + b &gt; 4$): $a{=}1$: $b{=}2$ dá součet $3$ ✗, $b{=}3$ dá $4 \not&gt; 4$ ✗ → bez podpory; $a{=}2 \to b{=}3$ ($2 \ne 3$, $5 &gt; 4$) ✓; $a{=}3 \to b{=}2$ ✓. <strong>Není AC</strong>, bez podpory $1 \in D_2$.</li>
             <li>$(x_3, x_2)$: $a{=}2 \to b{=}3$ ✓; $a{=}3 \to b{=}2$ ✓. <strong>AC.</strong></li>
           </ul>
-          <p><strong>CSP arc consistent není</strong> — tři hrany ze čtyř jsou nekonzistentní. (Kontrola proti slidu 27: tabulka revizí tam začíná škrtnutím hodnoty $1$ z $D_1$ na hraně $(x_1, x_2)$ a u zbylých hran uvádí stavy non-AC / non-AC / AC — sedí. Jak se z téhle diagnózy stane škrtání, je obsah [L6.2].)</p>
+          <p><strong>CSP arc consistent není</strong> — tři hrany ze čtyř jsou nekonzistentní. (Kontrola proti slidu 27: tabulka revizí tam začíná škrtnutím hodnoty $1$ z $D_1$ na hraně $(x_1, x_2)$ a u zbylých hran uvádí stavy non-AC / non-AC / AC — sedí. Jak se z téhle diagnózy stane škrtání, je obsah <a href="../k6/l6-2.html">[L6.2]</a>.)</p>
         </div>
       </details>
     </div>
@@ -249,7 +249,7 @@
 
   <div class="pager">
     <a href="../k5/l5-14.html"><span class="dir">← Předchozí</span> L5.14 · Referenční tabulka: problém → algoritmus (tahák)</a>
-    <a class="next" href="../index.html#k6"><span class="dir">Další →</span> Pokračování se připravuje (L6.2 · REVISE a redukce domén)</a>
+    <a class="next" href="../k6/l6-2.html"><span class="dir">Další →</span> L6.2 · REVISE a redukce domén</a>
   </div>
 
 </div>

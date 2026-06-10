@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L6.2 · REVISE a redukce domén — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k6">K6 · CSP / AC-3</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L6.2</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L6.2</span> Kapitola K6 — CSP / Arc Consistency (Slot 6) · <strong>[MUST]</strong>
+  </p>
+  <h1>REVISE a redukce domén</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Procedura <strong>REVISE</strong>: pro orientovanou hranu $(x_i, x_j)$ smaže z domény $D_i$ každou hodnotu, která nemá v $D_j$ podporu — a vrátí příznak <code>deleted</code>, jestli se vůbec něco mazalo.
+  </div>
+
+  <p>V <a href="../k6/l6-1.html">[L6.1] CSP a arc consistency</a> umíš hranu <em>diagnostikovat</em>: $(x_i, x_j)$ je AC ⟺ každá hodnota $a \in D_i$ má v $D_j$ podporu. Zkouškové zadání ale neříká „rozhodni“, říká <em>„<strong>reduce</strong> the domains to be arc consistent“</em> — chce zákrok, ne diagnózu. Dnes se naučíš ten zákrok pro <strong>jednu hranu</strong>; jak hrany správně řadit do fronty (celý AC-3) přijde v [L6.3].</p>
+
+  <!-- ===== OD DIAGNOZY K ZAKROKU ===== -->
+  <h2>Od diagnózy k zákroku</h2>
+
+  <details class="try">
+    <summary>Zkus sám: v [L6.1] jsi u instance z přednášky ($D_2 = D_3 = \{1,2,3\}$, omezení $x_2 + 1 = x_3$) zjistil, že hrana $(x_2, x_3)$ není AC — hodnota $3 \in D_2$ nemá podporu. Co s tou hodnotou udělat, aby hrana AC byla? A smíš to udělat bezpečně — nepřijdeš o nějaké řešení CSP?</summary>
+    <div class="inner">
+      <p><strong>Smazat ji z $D_2$.</strong> Bezpečné to je: hodnota bez podpory nemůže být v žádném řešení (řešení musí splnit všechna omezení, tedy i pro $x_3$ by musel existovat partner — a ten neexistuje). Mazáním hodnot bez podpory se množina řešení nemění; zmenšuje se jen prostor, který bude muset prohledávat search. Přesně tohle dělá procedura REVISE — projde <em>všechny</em> hodnoty $a \in D_i$ a ty bez podpory škrtne.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/book-open.svg" class="ico" alt="">REVISE Procedure (slide 26, EN 1:1)</div>
+    <p>“This procedure deletes every value $a$ from domain $D_i$, if the value is not consistent with domain $D_j$.”</p>
+<pre><code>procedure REVISE
+Input:  Domain D_i to be revised. Domain D_j. Set of constraints C.
+Output: Binary variable deleted indicating deletion of some value
+        from D_i. Revised domain D_i.
+
+deleted := 0;
+for a ∈ D_i do
+    if there is no b ∈ D_j ; x_i = a, x_j = b satisfies all x_i, x_j constraints
+      then
+        D_i := D_i \ a;          // delete a from D_i
+        deleted := 1;
+    end
+end</code></pre>
+  </div>
+
+  <p>Čtení po řádcích: REVISE dostane <strong>doménu ocasu</strong> $D_i$ (tu, která se bude revidovat), <strong>doménu hlavy</strong> $D_j$ (ta jen dodává podpory) a omezení. Projde každé $a \in D_i$; když pro něj neexistuje podpora $b \in D_j$ splňující <strong>všechna</strong> omezení dvojice $x_i, x_j$ najednou, hodnotu smaže a nastaví <code>deleted := 1</code>. Po doběhnutí je hrana $(x_i, x_j)$ zaručeně AC — a příznak <code>deleted</code> říká, jestli se doména vůbec změnila (k čemu je dobrý, uvidíš za chvíli). Jedno volání REVISE = oprava <strong>jedné orientované hrany</strong>; $D_j$ se nedotkne.</p>
+
+  <div class="viz" id="viz-one"></div>
+
+  <!-- ===== REVISE V AKCI ===== -->
+  <h2>REVISE v akci: instance ze slidu 27</h2>
+  <p>Vezmi instanci, kterou jsi v <a href="../k6/l6-1.html#t-accheck">[L6.1] úloze T01</a> diagnostikoval: $x_1 \in \{1,2,3\}$, $x_2 \in \{1,2,3\}$, $x_3 \in \{2,3\}$, omezení $x_1 &gt; x_2$, $x_2 \ne x_3$, $x_2 + x_3 &gt; 4$. Tři hrany ze čtyř vyšly non-AC. Slide 27 teď hrany reviduje jednu po druhé v pořadí $(x_1, x_2), (x_2, x_1), (x_2, x_3), (x_3, x_2)$ — krokuj a u každého kroku si <em>nejdřív sám</em> rozmysli, co REVISE smaže:</p>
+
+  <div class="viz" id="viz-run"></div>
+
+  <p>Slide 27 vede o průchodu účetnictví — tabulku revizí: kterou hranu revidujeme, co se smazalo, jak vypadá zmenšená doména a které hrany jsou <em>po</em> tomto kroku AC (tabulka 1:1 dle slidu, horní indexy $^{1)}$–$^{4)}$ číslují škrtnutí):</p>
+
+  <table>
+    <thead>
+      <tr><th>revised arc</th><th>deleted</th><th>revised domain</th><th>$(x_1, x_2)$</th><th>$(x_2, x_1)$</th><th>$(x_2, x_3)$</th><th>$(x_3, x_2)$</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>$(x_1, x_2)$</td><td>$1^{1)}$</td><td>$x_1 \in \{2, 3\}$</td><td>AC</td><td>non-AC</td><td>non-AC</td><td>AC</td></tr>
+      <tr><td>$(x_2, x_1)$</td><td>$3^{2)}$</td><td>$x_2 \in \{1, 2\}$</td><td>AC</td><td>AC</td><td>non-AC</td><td>non-AC</td></tr>
+      <tr><td>$(x_2, x_3)$</td><td>$1^{3)}$</td><td>$x_2 \in \{2\}$</td><td><strong>non-AC</strong></td><td>AC</td><td>AC</td><td>non-AC</td></tr>
+      <tr><td>$(x_3, x_2)$</td><td>$2^{4)}$</td><td>$x_3 \in \{3\}$</td><td><strong>non-AC</strong></td><td>AC</td><td>AC</td><td>AC</td></tr>
+    </tbody>
+  </table>
+
+  <details class="try">
+    <summary>Zkus sám (než krokneš na 5. snímek): prošli jsme všechny čtyři hrany a každou jsme procedurou REVISE opravili. Jsou teď všechny hrany AC? Podívej se na poslední řádek tabulky.</summary>
+    <div class="inner">
+      <p><strong>Nejsou!</strong> Hrana $(x_1, x_2)$ — kterou jsme revidovali jako <em>první</em> a po revizi byla AC — je na konci průchodu zase non-AC. Mezitím se totiž doména $D_2$ zmenšila na $\{2\}$ a hodnota $2 \in D_1$ tím přišla o svou jedinou podporu ($b = 1$ už v $D_2$ není a $2 &gt; 2$ neplatí). Oprava jedné hrany může <em>rozbít</em> hranu opravenou dříve.</p>
+    </div>
+  </details>
+
+  <p>Slide 27 (EN 1:1): <em>“After revision, some of the arcs are still <strong>nonconsistent</strong> — the reason is that some of the domains have been reduced — continue in the revision until all the arc are consistent (but you have to do it without perpetual AC checking of all arcs — see AC-3 alg.).”</em> Druhý průchod už je krátký:</p>
+
+  <table>
+    <thead>
+      <tr><th>revised arc</th><th>deleted</th><th>revised domain</th><th>$(x_1, x_2)$</th><th>$(x_2, x_1)$</th><th>$(x_2, x_3)$</th><th>$(x_3, x_2)$</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>$(x_1, x_2)$</td><td>$2^{5)}$</td><td>$x_1 \in \{3\}$</td><td>AC</td><td>AC</td><td>AC</td><td>AC</td></tr>
+    </tbody>
+  </table>
+
+  <p>Výsledek: $D_1 = \{3\}$, $D_2 = \{2\}$, $D_3 = \{3\}$ — všechny hrany AC; tady dokonce zbylo jediné přiřazení $x_1 = 3$, $x_2 = 2$, $x_3 = 3$ (zkontroluj: $3 &gt; 2$ ✓, $2 \ne 3$ ✓, $2 + 3 = 5 &gt; 4$ ✓). Pozor ale, to je náhoda téhle instance — obecně AC dává jen zmenšené domény, ne řešení (<a href="../k6/l6-1.html#takeaways">[L6.1] takeaways</a>: produkt domén je nadmnožina řešení).</p>
+
+  <!-- ===== KTERE HRANY ZNOVU ===== -->
+  <h2>Které hrany se mohly rozbít?</h2>
+  <p>Opakovat slepě všechny průchody, dokud se nic nemaže, by fungovalo — ale je to plýtvání (slide tomu říká „perpetual AC checking“). Příznak <code>deleted</code> umožňuje chytřejší otázku:</p>
+
+  <details class="try">
+    <summary>Zkus sám: REVISE$(D_i, D_j)$ právě smazalo nějaké hodnoty z $D_i$. Kterým hranám grafu se tím <em>mohla</em> pokazit konzistence? Projdi si tři skupiny: hrany <em>z</em> $x_i$ ven, hrany <em>do</em> $x_i$, a hrany, kterých se $x_i$ vůbec netýká.</summary>
+    <div class="inner">
+      <p>Hrany bez $x_i$ se nezměnily vůbec. Hrany <em>ven</em> z $x_i$, tj. $(x_i, x_k)$: jejich ocas se <em>zmenšil</em> — hodnoty, které zbyly, mají své podpory v $D_k$ pořád, takže AC se pokazit nemůže (ubyly jen „kontrolované“ hodnoty). Pokazit se mohly jen hrany <strong>do</strong> $x_i$, tj. $(x_k, x_i)$: doména $D_i$ je pro ně <em>zásobárna podpor</em> a ta se právě ztenčila — hodnota $c \in D_k$, jejíž jedinou podporou bylo smazané $a$, je teď bez podpory. Přesně to jsi viděl v příkladu: zmenšení $D_2$ rozbilo hranu $(x_1, x_2)$.</p>
+    </div>
+  </details>
+
+  <p>Jedna jemnost navíc (slide 28, EN 1:1): <em>“The revision of $(x_k, x_m)$ does not change the arc consistency of $(x_m, x_k)$.”</em> Proč? Hodnota $a$ smazaná z $D_k$ neměla v $D_m$ <em>žádného</em> partnera — takže nebyla podporou žádné hodnoty $b \in D_m$ a její zmizení hraně $(x_m, x_k)$ nic nevzalo. Protisměrnou hranu právě revidovaného omezení tedy znovu kontrolovat netřeba. Z těchhle dvou pozorování („po smazání z $D_i$ přezkoumej hrany do $x_i$“ + „protisměrku ne“) se v [L6.3] poskládá fronta algoritmu AC-3 — včetně přesného pravidla, které hrany do fronty vracet.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: tři klasické chyby u REVISE</div>
+    <ul>
+      <li><strong>REVISE mění JEN doménu ocasu $D_i$.</strong> Hlava $D_j$ jen dodává podpory a zůstane netknutá — i když je hrana $(x_j, x_i)$ sebevíc nekonzistentní. Na tu je potřeba samostatné volání REVISE$(D_j, D_i)$.</li>
+      <li><strong>Podpora musí splnit VŠECHNA omezení dvojice najednou.</strong> U dvojice $\{x_2, x_3\}$ s omezeními $x_2 \ne x_3$ a $x_2 + x_3 &gt; 4$ nestačí partner pro každé omezení zvlášť — musí to být tentýž $b$.</li>
+      <li><strong>Jeden průchod hranami nestačí.</strong> Každá jednotlivá hrana je po své revizi AC, ale pozdější zmenšení domény ji může rozbít zpětně. Reviduj, dokud existuje nekonzistentní hrana — u zkoušky tohle hlídá fronta AC-3 ([L6.3]).</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L6.2</div>
+    <ul>
+      <li><strong>REVISE$(D_i, D_j, C)$</strong> smaže z $D_i$ každou hodnotu $a$ bez podpory v $D_j$ (podpora musí splnit <em>všechna</em> omezení dvojice najednou) a vrátí příznak <code>deleted</code> + zmenšenou $D_i$. Po volání je hrana $(x_i, x_j)$ AC; mění se <strong>jen doména ocasu</strong>.</li>
+      <li><strong>Mazání je bezpečné:</strong> hodnota bez podpory nemůže být v žádném řešení — množina řešení CSP se redukcí domén nemění.</li>
+      <li><strong>Zmenšení $D_i$ může rozbít jen hrany $(x_k, x_i)$ směřující do $x_i$</strong> ($D_i$ je jejich zásobárna podpor). Hrany z $x_i$ ven ne — a protisměrka právě revidovaného omezení také ne (slide 28).</li>
+      <li><strong>Jeden průchod všemi hranami nestačí</strong> — opravená hrana se může pozdějšími škrty rozbít zpětně. Revidovat se musí, dokud nejsou všechny hrany AC; systematicky (bez „perpetual checking“) to dělá fronta AC-3 v [L6.3].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-revisexam">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Zkoušková instance: průchod procedurou REVISE</strong>
+      <span class="task-src">zdroj: zkouška KO 02.06.2021 = banka #41 (zadání 1:1); dnešní instrukce vlastní</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Let us consider the CSP problem given by:</p>
+        <ul>
+          <li>variables $X = \{x_1, x_2, x_3\}$,</li>
+          <li>constraints $x_1 = x_2$, $x_2 = x_3 + 1$,</li>
+          <li>domains $D_1 = \{1, 2\}$, $D_2 = \{1, 2\}$, $D_3 = \{1, 2\}$.</li>
+        </ul>
+        <p>Reduce the domains to be arc consistent. Record the steps of the algorithm (the queue content prior to the revision of each arc).”</p>
+      </div>
+
+      <p><em>Dnešní (vlastní) instrukce — záznam fronty si necháme do [L6.3], dnes proveď redukci ve stylu slidu 27:</em> apply REVISE to the arcs in the order $(x_1, x_2), (x_2, x_1), (x_2, x_3), (x_3, x_2)$; for each call record the deleted value(s) and the revised domain. Then decide which arcs may have become inconsistent again, finish the revision, and state the final arc-consistent domains.</p>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Zkoušková instance Slotu 6 (v <a href="../k6/l6-1.html#t-examcheck">[L6.1] T02</a> už máš její graf a diagnózu: non-AC jsou $(x_2, x_3)$ a $(x_3, x_2)$). Dnes domény skutečně zredukovat: čtyři volání REVISE v pevném pořadí + dokončení druhým kolem tam, kde se něco rozbilo.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — procedura REVISE, „mění se jen ocas“, které hrany se mohly rozbít.</li>
+        <li><a href="../k6/l6-1.html">[L6.1] CSP a arc consistency</a> — graf omezení, vzorce podpor pro $x_2 = x_3 + 1$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>U každého volání si <em>nejdřív</em> napiš vzorec podpory: pro $x_1 = x_2$ je to $b = a$ (oba směry), pro hranu $(x_2, x_3)$ je podpora hodnoty $a \in D_2$ rovna $b = a - 1$, pro $(x_3, x_2)$ je to $b = a + 1$. Pak mechanicky škrtej. Po průchodu se ptej: které domény se zmenšily a které hrany <em>do</em> nich vedou? Ty zkontroluj znovu.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Krokuj běh (snímky = stavy po jednotlivých voláních REVISE):</p>
+          <div class="viz" id="viz-t01"></div>
+          <ol>
+            <li><strong>REVISE$(D_1, D_2)$</strong> pro $x_1 = x_2$: $a{=}1 \to b{=}1$ ✓, $a{=}2 \to b{=}2$ ✓ → nic se nemaže, <code>deleted</code> $= 0$.</li>
+            <li><strong>REVISE$(D_2, D_1)$:</strong> symetricky nic, <code>deleted</code> $= 0$.</li>
+            <li><strong>REVISE$(D_2, D_3)$</strong> pro $x_2 = x_3 + 1$ (podpora $b = a - 1$): $a{=}1$ potřebuje $b = 0 \notin D_3$ ✗ smazat; $a{=}2 \to b{=}1$ ✓ → $D_2 = \{2\}$, <code>deleted</code> $= 1$.</li>
+            <li><strong>REVISE$(D_3, D_2)$</strong> (podpora $b = a + 1$, už proti $D_2 = \{2\}$): $a{=}1 \to b{=}2$ ✓; $a{=}2$ potřebuje $b = 3 \notin D_2$ ✗ smazat → $D_3 = \{1\}$, <code>deleted</code> $= 1$.</li>
+          </ol>
+          <p><strong>Co se mohlo rozbít?</strong> Zmenšily se $D_2$ (krok 3) a $D_3$ (krok 4). Do $x_2$ vedou hrany $(x_1, x_2)$ a $(x_3, x_2)$ — druhá se revidovala <em>až po</em> zmenšení $D_2$, takže stačí znovu $(x_1, x_2)$. Do $x_3$ vede jen $(x_2, x_3)$, což je protisměrka hrany revidované v kroku 4 — dle slidu 28 se rozbít nemohla (a vskutku: $a{=}2 \to b{=}1 \in D_3$ ✓).</p>
+          <ol start="5">
+            <li><strong>REVISE$(D_1, D_2)$ podruhé</strong> ($D_2 = \{2\}$): $a{=}1$ bez podpory ✗ smazat; $a{=}2 \to b{=}2$ ✓ → $D_1 = \{2\}$, <code>deleted</code> $= 1$. Teď jsou všechny čtyři hrany AC.</li>
+          </ol>
+          <p><strong>Výsledek:</strong> $D_1 = \{2\}$, $D_2 = \{2\}$, $D_3 = \{1\}$ — odpovídá jedinému přiřazení $x_1 = 2$, $x_2 = 2$, $x_3 = 1$ (kontrola: $2 = 2$ ✓, $2 = 1 + 1$ ✓). Stejné domény dává i vzorový průběh AC-3 v bance #41 — v [L6.3] tenhle běh zopakuješ i se záznamem fronty před každou revizí, přesně jak chce zadání.</p>
+          <p><em>Poznámka:</em> dochované ruční řešení zkoušky škrtá zrcadlové hodnoty (čte $x_3 = x_2 + 1$) — rozpor je rozebraný v <a href="../k6/l6-1.html#t-examcheck">[L6.1] T02</a>; tady počítáme doslovně dle tištěného $x_2 = x_3 + 1$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-reviseorder">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Drill: záleží na pořadí revizí?</strong>
+      <span class="task-src">instance: prezentace 08_CP, slide 27 (1:1); obrácené pořadí a otázky vlastní</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; instance 1:1 ze slidu 27, pokyny vlastní)</span>
+        <p>“CSP with variables and domains: $x_1 \in \{1, 2, 3\},\ x_2 \in \{1, 2, 3\},\ x_3 \in \{2, 3\}$ and constraints $x_1 &gt; x_2,\ x_2 \ne x_3,\ x_2 + x_3 &gt; 4$.”</p>
+        <p>Apply REVISE to the arcs in the <strong>reversed</strong> order $(x_3, x_2), (x_2, x_3), (x_2, x_1), (x_1, x_2)$, then finish the revision wherever an arc may have become inconsistent again. Record the deleted values and the revised domains after each call. Do you obtain the same final domains as with the order used on slide 27?</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejná instance, jakou výklad propočítal v pořadí slidu 27 — teď hrany revidovat pozpátku. Otázka míří na to, co je na výsledku REVISE „náhoda pořadí“ a co ne.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — REVISE, podpora proti všem omezením najednou, které hrany rozbít šly.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Mechanika je stejná, jen jiné pořadí — pozor, že u dvojice $\{x_2, x_3\}$ musí podpora splnit obě omezení současně. Po průchodu zkontroluj hrany vedoucí do zmenšených domén. A než začneš počítat, tipni si: vyjde totéž?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — slide počítá jen původní pořadí)</summary>
+        <div class="inner">
+          <div class="viz" id="viz-t02"></div>
+          <ol>
+            <li><strong>REVISE$(D_3, D_2)$:</strong> $a{=}2$: podpora $b \ne 2$, $b + 2 &gt; 4$ → $b{=}3$ ✓; $a{=}3 \to b{=}2$ ✓ → nic, <code>deleted</code> $= 0$.</li>
+            <li><strong>REVISE$(D_2, D_3)$:</strong> $a{=}1$: $b{=}2$ dá součet $3$ ✗, $b{=}3$ dá $4 \not&gt; 4$ ✗ → smazat; $a{=}2 \to b{=}3$ ✓; $a{=}3 \to b{=}2$ ✓ → $D_2 = \{2, 3\}$.</li>
+            <li><strong>REVISE$(D_2, D_1)$</strong> pro $x_1 &gt; x_2$ (podpora $b &gt; a$): $a{=}2 \to b{=}3$ ✓; $a{=}3$ potřebuje $b &gt; 3$ ✗ smazat → $D_2 = \{2\}$.</li>
+            <li><strong>REVISE$(D_1, D_2)$</strong> (podpora $b &lt; a$, $D_2 = \{2\}$): $a{=}1$ ✗ smazat, $a{=}2$ ✗ smazat (potřebuje $b &lt; 2$), $a{=}3 \to b{=}2$ ✓ → $D_1 = \{3\}$ — jedno volání REVISE klidně smaže <em>víc</em> hodnot najednou.</li>
+          </ol>
+          <p><strong>Dokončení:</strong> zmenšily se $D_2$ (kroky 2, 3) a $D_1$ (krok 4). Do $x_1$ vede jen protisměrka $(x_2, x_1)$ → netřeba. Do $x_2$ vedou $(x_1, x_2)$ — revidována až po posledním zmenšení $D_2$ ✓ — a $(x_3, x_2)$, revidovaná ještě před škrty → znovu:</p>
+          <ol start="5">
+            <li><strong>REVISE$(D_3, D_2)$ podruhé</strong> ($D_2 = \{2\}$): $a{=}2$: jediný kandidát $b{=}2$ porušuje $x_2 \ne x_3$ ✗ smazat; $a{=}3 \to b{=}2$ ✓ ($5 &gt; 4$) → $D_3 = \{3\}$. Do $x_3$ vede jen protisměrka $(x_2, x_3)$ → hotovo.</li>
+          </ol>
+          <p><strong>Výsledek: $D_1 = \{3\}$, $D_2 = \{2\}$, $D_3 = \{3\}$ — přesně totéž co v pořadí slidu 27</strong>, jen se hodnoty škrtaly v jiných krocích (a celkem to opět dalo 5 volání REVISE). Pořadí revizí mění <em>průběh</em>, ne výsledné domény — výsledné maximální arc-consistent domény jsou pro danou instanci jednoznačné <em>(vlastní pozorování nad rámec slidů; u zkoušky se na pořadí fronty držte zadaného/kanonického pořadí, ať examinátor snadno kontroluje)</em>.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L6.2">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k6/l6-1.html"><span class="dir">← Předchozí</span> L6.1 · CSP a arc consistency</a>
+    <a class="next" href="../index.html#k6"><span class="dir">Další →</span> Pokračování se připravuje (L6.3 · AC-3 algoritmus + oditerování [FOTO])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Jedno volání REVISE na hraně (x2,x3) instance z přednášky (slide 29: x2 + 1 = x3)
+KOViz.stepper(document.getElementById('viz-one'), {
+  graph: {
+    directed: true,
+    w: 640, h: 230,
+    nodes: [
+      {id:'x2', x:220, y:105, label:'x₂', sub:'{1, 2, 3}'},
+      {id:'x3', x:440, y:105, label:'x₃', sub:'{1, 2, 3}'},
+    ],
+    edges: [
+      {from:'x2', to:'x3', curve:0.25, label:'x₂ + 1 = x₃'},
+      {from:'x3', to:'x2', curve:0.25},
+    ],
+  },
+  frames: [
+    {desc:'REVISE(D₂, D₃, C) opravuje hranu (x₂,x₃): projde každé a ∈ D₂ a hledá podporu b = a + 1 v D₃. Doména hlavy D₃ se nezmění, ať se děje cokoliv.',
+     nodes:{}, edges:{'x2->x3':'hl'},
+     subs:{x2:'{1, 2, 3}', x3:'{1, 2, 3}'}},
+    {desc:'a = 1: podpora b = 2 ∈ D₃ ✓ — hodnota zůstává. a = 2: podpora b = 3 ∈ D₃ ✓ — zůstává.',
+     nodes:{x3:'hl'}, edges:{'x2->x3':'hl'},
+     subs:{x2:'{1, 2, 3}', x3:'{1, 2, 3}'}},
+    {desc:'a = 3: podpora by musela být b = 4 ∉ D₃ ✗ — REVISE hodnotu 3 maže z D₂ a nastavuje deleted := 1. D₂ = {1, 2}.',
+     nodes:{x2:'hl'}, edges:{'x2->x3':'hl'},
+     subs:{x2:'{1, 2}', x3:'{1, 2, 3}'}},
+    {desc:'Hotovo: hrana (x₂,x₃) je teď AC, REVISE vrací deleted = 1 a D₂ = {1, 2}. Pozor: protisměrná hrana (x₃,x₂) zůstává nekonzistentní (1 ∈ D₃ je bez podpory) — na ni je potřeba samostatné volání REVISE(D₃, D₂).',
+     nodes:{x2:'good'}, edges:{'x2->x3':'good', 'x3->x2':'bad'},
+     subs:{x2:'{1, 2}', x3:'{1, 2, 3}'}},
+  ],
+  caption: 'Jedno volání REVISE = oprava jedné orientované hrany. Maže se jen z domény ocasu D₂; D₃ se nedotkne.',
+});
+
+// 2 — Hlavní běh: aplikace REVISE dle slidu 27 (x1 > x2, x2 ≠ x3, x2 + x3 > 4)
+KOViz.stepper(document.getElementById('viz-run'), {
+  graph: {
+    directed: true,
+    w: 640, h: 250,
+    nodes: [
+      {id:'x1', x:120, y:110, label:'x₁', sub:'{1, 2, 3}'},
+      {id:'x2', x:320, y:110, label:'x₂', sub:'{1, 2, 3}'},
+      {id:'x3', x:520, y:110, label:'x₃', sub:'{2, 3}'},
+    ],
+    edges: [
+      {from:'x1', to:'x2', curve:0.3, label:'x₁ > x₂'},
+      {from:'x2', to:'x1', curve:0.3},
+      {from:'x2', to:'x3', curve:0.3, label:'x₂ ≠ x₃, x₂+x₃ > 4'},
+      {from:'x3', to:'x2', curve:0.3},
+    ],
+  },
+  frames: [
+    {desc:'Výchozí stav (slide 27): D₁ = {1,2,3}, D₂ = {1,2,3}, D₃ = {2,3}. Z diagnózy v [L6.1] T01 víš: AC je jen (x₃,x₂). Revidujeme v pořadí (x₁,x₂), (x₂,x₁), (x₂,x₃), (x₃,x₂).',
+     nodes:{}, edges:{},
+     subs:{x1:'{1, 2, 3}', x2:'{1, 2, 3}', x3:'{2, 3}'}},
+    {desc:'REVISE(D₁, D₂) pro x₁ > x₂: a = 1 potřebuje b < 1 — žádná podpora ✗, smazat¹⁾. D₁ = {2, 3}. Hrana (x₁,x₂) je AC.',
+     nodes:{x1:'hl'}, edges:{'x1->x2':'hl'},
+     subs:{x1:'{2, 3}', x2:'{1, 2, 3}', x3:'{2, 3}'}},
+    {desc:'REVISE(D₂, D₁) (podpora b > a v D₁ = {2,3}): a = 3 potřebuje b > 3 ✗, smazat²⁾. D₂ = {1, 2}. Hrany (x₁,x₂) i (x₂,x₁) jsou AC.',
+     nodes:{x2:'hl'}, edges:{'x2->x1':'hl'},
+     subs:{x1:'{2, 3}', x2:'{1, 2}', x3:'{2, 3}'}},
+    {desc:'REVISE(D₂, D₃) — podpora musí splnit OBĚ omezení najednou: a = 1: b = 2 dá součet 3 ✗, b = 3 dá 4 (ne > 4) ✗ → smazat³⁾. D₂ = {2}.',
+     nodes:{x2:'hl'}, edges:{'x2->x3':'hl'},
+     subs:{x1:'{2, 3}', x2:'{2}', x3:'{2, 3}'}},
+    {desc:'REVISE(D₃, D₂) (D₂ = {2}): a = 2: jediný kandidát b = 2 porušuje x₂ ≠ x₃ ✗ → smazat⁴⁾; a = 3: b = 2 ✓ (3 ≠ 2, 5 > 4). D₃ = {3}. Průchod všemi hranami je hotov — jsou všechny AC?',
+     nodes:{x3:'hl'}, edges:{'x3->x2':'hl'},
+     subs:{x1:'{2, 3}', x2:'{2}', x3:'{3}'}},
+    {desc:'NEJSOU. Hrana (x₁,x₂), revidovaná jako první, je zase non-AC: D₂ se mezitím zmenšila na {2} a hodnota 2 ∈ D₁ přišla o podporu (2 > 2 neplatí). Slide 27: „continue in the revision until all the arc are consistent“.',
+     nodes:{x2:'hl'}, edges:{'x1->x2':'bad'},
+     subs:{x1:'{2, 3}', x2:'{2}', x3:'{3}'}},
+    {desc:'REVISE(D₁, D₂) podruhé: a = 2 bez podpory ✗ smazat⁵⁾; a = 3 → b = 2 ✓. D₁ = {3}. Všechny hrany AC: D₁ = {3}, D₂ = {2}, D₃ = {3} — zbylo jediné přiřazení (3, 2, 3).',
+     nodes:{x1:'good', x2:'good', x3:'good'}, edges:{'x1->x2':'good', 'x2->x1':'good', 'x2->x3':'good', 'x3->x2':'good'},
+     subs:{x1:'{3}', x2:'{2}', x3:'{3}'}},
+  ],
+  caption: 'Aplikace REVISE dle slidu 27: pět škrtnutí ¹⁾–⁵⁾, poslední až ve druhém průchodu — oprava (x₂,x₃) zpětně rozbila dřív opravenou hranu (x₁,x₂).',
+});
+
+// 3 — T01: průchod REVISE na zkouškové instanci 02.06.2021 (x1 = x2, x2 = x3 + 1)
+KOViz.stepper(document.getElementById('viz-t01'), {
+  graph: {
+    directed: true,
+    w: 640, h: 250,
+    nodes: [
+      {id:'x1', x:120, y:110, label:'x₁', sub:'{1, 2}'},
+      {id:'x2', x:320, y:110, label:'x₂', sub:'{1, 2}'},
+      {id:'x3', x:520, y:110, label:'x₃', sub:'{1, 2}'},
+    ],
+    edges: [
+      {from:'x1', to:'x2', curve:0.3, label:'x₁ = x₂'},
+      {from:'x2', to:'x1', curve:0.3},
+      {from:'x2', to:'x3', curve:0.3, label:'x₂ = x₃ + 1'},
+      {from:'x3', to:'x2', curve:0.3},
+    ],
+  },
+  frames: [
+    {desc:'Výchozí stav: D₁ = D₂ = D₃ = {1, 2}. Pořadí revizí: (x₁,x₂), (x₂,x₁), (x₂,x₃), (x₃,x₂).',
+     nodes:{}, edges:{},
+     subs:{x1:'{1, 2}', x2:'{1, 2}', x3:'{1, 2}'}},
+    {desc:'1) REVISE(D₁, D₂) pro x₁ = x₂ (podpora b = a): 1 → 1 ✓, 2 → 2 ✓. Nic se nemaže, deleted = 0.',
+     nodes:{}, edges:{'x1->x2':'hl'},
+     subs:{x1:'{1, 2}', x2:'{1, 2}', x3:'{1, 2}'}},
+    {desc:'2) REVISE(D₂, D₁): symetricky nic, deleted = 0.',
+     nodes:{}, edges:{'x2->x1':'hl'},
+     subs:{x1:'{1, 2}', x2:'{1, 2}', x3:'{1, 2}'}},
+    {desc:'3) REVISE(D₂, D₃) pro x₂ = x₃ + 1 (podpora b = a − 1): a = 1 potřebuje b = 0 ∉ D₃ ✗ smazat; a = 2 → b = 1 ✓. D₂ = {2}, deleted = 1.',
+     nodes:{x2:'hl'}, edges:{'x2->x3':'hl'},
+     subs:{x1:'{1, 2}', x2:'{2}', x3:'{1, 2}'}},
+    {desc:'4) REVISE(D₃, D₂) (podpora b = a + 1, D₂ = {2}): a = 1 → b = 2 ✓; a = 2 potřebuje b = 3 ∉ D₂ ✗ smazat. D₃ = {1}, deleted = 1.',
+     nodes:{x3:'hl'}, edges:{'x3->x2':'hl'},
+     subs:{x1:'{1, 2}', x2:'{2}', x3:'{1}'}},
+    {desc:'D₂ se zmenšila v kroku 3 → hrana (x₁,x₂) je zase podezřelá. A vskutku: a = 1 ∈ D₁ už nemá podporu (D₂ = {2}).',
+     nodes:{x2:'hl'}, edges:{'x1->x2':'bad'},
+     subs:{x1:'{1, 2}', x2:'{2}', x3:'{1}'}},
+    {desc:'5) REVISE(D₁, D₂) podruhé: a = 1 ✗ smazat; a = 2 → b = 2 ✓. D₁ = {2}. Všechny hrany AC: D₁ = {2}, D₂ = {2}, D₃ = {1} — jediné přiřazení x₁ = x₂ = 2, x₃ = 1.',
+     nodes:{x1:'good', x2:'good', x3:'good'}, edges:{'x1->x2':'good', 'x2->x1':'good', 'x2->x3':'good', 'x3->x2':'good'},
+     subs:{x1:'{2}', x2:'{2}', x3:'{1}'}},
+  ],
+  caption: 'T01: redukce domén zkouškové instance — tři škrty (1 z D₂, 2 z D₃, 1 z D₁), poslední ve druhém kole. Výsledek sedí se vzorovým během banky #41.',
+});
+
+// 4 — T02: obrácené pořadí revizí na instanci slidu 27
+KOViz.stepper(document.getElementById('viz-t02'), {
+  graph: {
+    directed: true,
+    w: 640, h: 250,
+    nodes: [
+      {id:'x1', x:120, y:110, label:'x₁', sub:'{1, 2, 3}'},
+      {id:'x2', x:320, y:110, label:'x₂', sub:'{1, 2, 3}'},
+      {id:'x3', x:520, y:110, label:'x₃', sub:'{2, 3}'},
+    ],
+    edges: [
+      {from:'x1', to:'x2', curve:0.3, label:'x₁ > x₂'},
+      {from:'x2', to:'x1', curve:0.3},
+      {from:'x2', to:'x3', curve:0.3, label:'x₂ ≠ x₃, x₂+x₃ > 4'},
+      {from:'x3', to:'x2', curve:0.3},
+    ],
+  },
+  frames: [
+    {desc:'Výchozí stav jako na slidu 27, ale revidujeme pozpátku: (x₃,x₂), (x₂,x₃), (x₂,x₁), (x₁,x₂).',
+     nodes:{}, edges:{},
+     subs:{x1:'{1, 2, 3}', x2:'{1, 2, 3}', x3:'{2, 3}'}},
+    {desc:'1) REVISE(D₃, D₂): a = 2 → b = 3 ✓ (2 ≠ 3, 5 > 4); a = 3 → b = 2 ✓. Nic se nemaže, deleted = 0.',
+     nodes:{}, edges:{'x3->x2':'hl'},
+     subs:{x1:'{1, 2, 3}', x2:'{1, 2, 3}', x3:'{2, 3}'}},
+    {desc:'2) REVISE(D₂, D₃): a = 1: b = 2 dá součet 3 ✗, b = 3 dá 4 ✗ → smazat; a = 2 → b = 3 ✓; a = 3 → b = 2 ✓. D₂ = {2, 3}.',
+     nodes:{x2:'hl'}, edges:{'x2->x3':'hl'},
+     subs:{x1:'{1, 2, 3}', x2:'{2, 3}', x3:'{2, 3}'}},
+    {desc:'3) REVISE(D₂, D₁) (podpora b > a): a = 2 → b = 3 ✓; a = 3 potřebuje b > 3 ✗ → smazat. D₂ = {2}.',
+     nodes:{x2:'hl'}, edges:{'x2->x1':'hl'},
+     subs:{x1:'{1, 2, 3}', x2:'{2}', x3:'{2, 3}'}},
+    {desc:'4) REVISE(D₁, D₂) (podpora b < a, D₂ = {2}): a = 1 ✗ smazat, a = 2 ✗ smazat, a = 3 → b = 2 ✓. D₁ = {3} — jedno volání smazalo DVĚ hodnoty.',
+     nodes:{x1:'hl'}, edges:{'x1->x2':'hl'},
+     subs:{x1:'{3}', x2:'{2}', x3:'{2, 3}'}},
+    {desc:'D₂ se zmenšovala v krocích 2 a 3 → hrana (x₃,x₂) (revidovaná ještě před škrty) je podezřelá: a = 2 má jediného kandidáta b = 2, ten porušuje x₂ ≠ x₃ ✗.',
+     nodes:{x2:'hl'}, edges:{'x3->x2':'bad'},
+     subs:{x1:'{3}', x2:'{2}', x3:'{2, 3}'}},
+    {desc:'5) REVISE(D₃, D₂) podruhé: a = 2 ✗ smazat; a = 3 → b = 2 ✓. D₃ = {3}. Vše AC: D₁ = {3}, D₂ = {2}, D₃ = {3} — stejné finální domény jako v pořadí slidu 27.',
+     nodes:{x1:'good', x2:'good', x3:'good'}, edges:{'x1->x2':'good', 'x2->x1':'good', 'x2->x3':'good', 'x3->x2':'good'},
+     subs:{x1:'{3}', x2:'{2}', x3:'{3}'}},
+  ],
+  caption: 'T02: obrácené pořadí — jiný průběh (jiné kroky škrtají jiné hodnoty), ale stejné finální domény D₁ = {3}, D₂ = {2}, D₃ = {3} a opět 5 volání REVISE.',
+});
+</script>
+</body>
+</html>
