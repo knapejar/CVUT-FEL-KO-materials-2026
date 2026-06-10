@@ -149,7 +149,7 @@
     <summary>Pro zvídavé: jak z grafu $G$ vyrobit instanci nejkratší cesty, která „pozná“ Hamiltonovskou kružnici?</summary>
     <div class="inner">
       <p>Konstrukce ze slidu 12: vezmi $G$ a všem hranám dej váhu $-1$ (graf $G'$). Zvol libovolný vrchol $v$ a vytvoř jeho duplikát $v'$ včetně hran. Přidej zdroj $s$, cíl $t$ a hrany $(s, v)$ a $(v', t)$ s váhou $0$. Pak nejkratší cesta z $s$ do $t$ v $G'$ má délku $-|V(G)|$ <em>právě tehdy</em>, když v $G$ existuje Hamiltonovská kružnice: cesta dlouhá $-|V(G)|$ musí použít $|V(G)|$ hran váhy $-1$ bez opakování vrcholů — tedy obejít všechny vrcholy a vrátit se „do $v$“ (přes duplikát $v'$). A protože každý cyklus v $G$ se v $G'$ stal záporným cyklem, umí takové grafy řešit jen algoritmus, který zvládá záporné cykly — kdyby byl polynomiální, řešil by polynomiálně i NP-těžkou Hamiltonovskou kružnici.</p>
-      <p>Tady nám stačí závěr; důkazové techniky tohohle typu (redukce) si budeš procvičovat v kapitole K3. Souhrnnou zkouškovou úlohu na záporné cykly potkáš ve FOTO vyvrcholení <a href="l2-18.html">[L2.18]</a>.</p>
+      <p>Tady nám stačí závěr; důkazové techniky tohohle typu (redukce) si budeš procvičovat v kapitole K3 — TSP verzi téhle redukce provedeme celou v <a href="../k3/l3-5.html">[L3.5]</a>. Souhrnnou zkouškovou úlohu na záporné cykly potkáš ve FOTO vyvrcholení <a href="l2-18.html">[L2.18]</a>.</p>
     </div>
   </details>
 
