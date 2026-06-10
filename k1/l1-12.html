@@ -85,7 +85,7 @@
     <div class="inner">
       <p>„Aspoň jeden ze skupiny“ = OR přes všechny binárky skupiny — a OR už znáš z <a href="l1-3.html#takeaways">[L1.3]</a> jako $\sum \ge 1$. Tady tedy rovnou:</p>
       $$S_1 \ge 1, \qquad S_2 \ge 1.$$
-      <p>Žádná pomocná proměnná, žádné big-M. „Aspoň jeden z mnoha“ je v ILP ta levná strana logiky. A protože jde o „any of his hideouts“ i „any of the men“, sčítá se přes <em>všechny</em> muže $j$ — je jedno, kdo to ponese.</p>
+      <p>Žádná pomocná proměnná, žádné big-M. „Aspoň jeden z mnoha“ je v ILP ta levná strana logiky. A protože zadání nerozlišuje skrýše ani konkrétní muže („to <em>any</em> of his hideouts“), sčítá se přes <em>všechny</em> muže $j$ — je jedno, kdo to ponese.</p>
     </div>
   </details>
 
@@ -146,7 +146,7 @@
         <li>$S_3 = 0$: nerovnost dá $S_4 \le 0$, tedy <strong>nic ze skupiny 4 se neveze</strong> — přesně kontrapozice implikace;</li>
         <li>$S_3 \ge 1$: pravá strana je aspoň $M$ = maximum dosažitelného $S_4$, nerovnost <strong>nic neomezuje</strong>.</li>
       </ul>
-      <p>Roli binárního přepínače tu sehrál sám součet $S_3$ — big-M trik <a href="l1-4.html#takeaways">[L1.4]</a> s „přepínačem zadarmo“. Na zkoušce jsou správně obě varianty (indikátory i zkratka); zkratka je rychlejší na napsání a má méně míst, kde udělat chybu.</p>
+      <p>Roli binárního přepínače tu sehrál sám součet $S_3$ — big-M trik <a href="l1-4.html#takeaways">[L1.4]</a> s „přepínačem zadarmo“. Obě varianty (indikátory i zkratka) jsou ekvivalentní a obě jsou korektní ILP formulace zadání; zkratka je rychlejší na napsání a má méně míst, kde udělat chybu.</p>
     </div>
   </details>
 
@@ -229,7 +229,7 @@
           $$S_1 \ge 1, \qquad S_2 \ge 1.$$
           <p><strong>(b) skupina 4 jen se skupinou 3</strong> — indikátorová varianta:</p>
           $$S_4 \le M\,\delta_4, \qquad \delta_3 \le S_3, \qquad \delta_4 \le \delta_3.$$
-          <p>Řetěz: veze-li se cokoli ze 4, pak $\delta_4 = 1$ → $\delta_3 = 1$ → $S_3 \ge 1$. <em>Ekvivalentní úsporná varianta (taky plný počet bodů):</em> jediná nerovnost $S_4 \le M \cdot S_3$.</p>
+          <p>Řetěz: veze-li se cokoli ze 4, pak $\delta_4 = 1$ → $\delta_3 = 1$ → $S_3 \ge 1$. <em>Ekvivalentní úsporná varianta (stejně korektní formulace):</em> jediná nerovnost $S_4 \le M \cdot S_3$.</p>
           <p><strong>(c) rozdíl cen nákladů ≤ $P_{max}$</strong> — konstrukce z <a href="l1-8.html#takeaways">[L1.8]</a> nad hodnotami $P_j = \sum_i p_i\, m_i^j$:</p>
           $$P^{+} \ge \sum_{i=1}^{n} p_i\, m_i^j \quad \forall j, \qquad P^{-} \le \sum_{i=1}^{n} p_i\, m_i^j \quad \forall j, \qquad P^{+} - P^{-} \le P_{max}.$$
           <p>Nerovnosti běží přes všechny muže — muž bez nákladu přispívá hodnotou $0$, takže $P^{-} \le 0$, a rozdíl ho korektně zahrne. Pro omezení „rozptyl ≤“ jsou jednostranné meze $P^{+}, P^{-}$ přesně to pravé (viz <a href="l1-8.html#takeaways">[L1.8]</a>).</p>
