@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.11 · Časově expandovaná síť (constrained SP) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.11</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.11</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>Časově expandovaná síť (constrained SP)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Pro každý časový okamžik $k = 0, 1, \ldots, \tau$ vyrobíme <strong>kopii každého vrcholu</strong>: vrchol $(v, k)$ znamená „jsem ve $v$ v čase $k$“. Hrana $(i,j)$ s dobou průchodu $\tau_{ij}$ pak vede z $(i,k)$ do $(j,\, k + \tau_{ij})$ — a omezení „doba cesty nejvýše $\tau$“ se promění v obyčejné hledání nejkratší cesty.
+  </div>
+
+  <p>Zkouška 9.&nbsp;7.&nbsp;2021 dala na každou hranu <em>dvě</em> čísla: délku a dobu průchodu — a chtěla nejkratší cestu, která stihne časový limit. V <a href="l2-10.html#takeaways">[L2.10] Stavový automat jako graf</a> jsme si slíbili, že tahle úloha je taky stavový automat, jen se stavem „(kde jsem, kolik je hodin)“. Dnes ten slib splníme — konstrukci se říká <strong>time-expanded network</strong> (časově expandovaná síť) a celá úloha <strong>constrained shortest path</strong> (nejkratší cesta s omezením).</p>
+
+  <!-- ===== SEKCE 1 ===== -->
+  <h2>Dvě čísla na hraně: délka a doba</h2>
+  <p>Každá hrana $(i,j)$ sítě $G$ nese <strong>délku</strong> $c_{ij} \in \mathbb{R}$ (tu minimalizujeme) a <strong>dobu průchodu</strong> (traversal time) $\tau_{ij} \in \mathbb{Z}_0^+$ (tu jen hlídáme). Hledáme cestu z $s$ do $t$ s nejmenším součtem délek mezi cestami, jejichž součet dob nepřekročí limit $\tau$. Na tomhle grafu (vlastní příklad — rukopisný graf z písemky se nedochoval čitelně) si to ohmatej, limit je $\tau = 4$:</p>
+
+  <div class="viz" id="viz-orig"></div>
+
+  <details class="try">
+    <summary>Zkus sám: najdi nejkratší cestu jen podle délek $c$ (na doby nehleď). Stihne limit $\tau = 4$?</summary>
+    <div class="inner">
+      <p>Nejlevnější je $s \to a \to t$ s délkou $1 + 1 = 2$. Jenže její doba je $2 + 3 = 5 &gt; 4$ — limit poruší. Obyčejná Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> nad $c$ tedy vrátí <em>nepřípustnou</em> odpověď.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: tak vezmeme místo toho nejrychlejší cestu (Dijkstra nad dobami $\tau_{ij}$). Pomůže to?</summary>
+    <div class="inner">
+      <p>Nejrychlejší je $s \to b \to t$ s dobou $1 + 1 = 2$ — limit splní, ale stojí $4 + 4 = 8$. Správná odpověď je přitom $s \to a \to b \to t$: délka $1 + 1 + 4 = 6$, doba $2 + 1 + 1 = 4 \le 4$. Tenhle kompromis <em>neuvidí ani jedno</em> z obou jednokriteriálních hledání. Nejkratší cesta umí optimalizovat jen jedno číslo — druhé kritérium musíme dostat <strong>do grafu</strong>.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2 ===== -->
+  <h2>Expanze: kopie vrcholu pro každý čas</h2>
+
+  <details class="try">
+    <summary>Zkus sám: recept z <a href="l2-9.html#takeaways">[L2.9]</a>/<a href="l2-10.html#takeaways">[L2.10]</a> začíná otázkou „co je stav?“. Jaká informace tady určuje, co můžu dělat dál?</summary>
+    <div class="inner">
+      <p>Nestačí vědět, <em>kde</em> jsem — záleží i na tom, <em>kolik času už uteklo</em> (od toho se odvíjí, které pokračování ještě stihnu). Stav je dvojice $(v, k)$: vrchol $v$ a čas $k \in \{0, \ldots, \tau\}$. Víc pamatovat netřeba: budoucnost závisí jen na pozici a zbývajícím čase.</p>
+    </div>
+  </details>
+
+  <p>Postavíme tedy nový graf $H$ — <strong>časovou expanzi</strong> sítě $G$ s limitem $T := \tau$:</p>
+  <p>$$V(H) = \{(v, k) : v \in V(G),\ k = 0, 1, \ldots, T\},$$</p>
+  <p>a pro každou původní hranu $(i,j) \in E(G)$ a každé $k$ takové, že $k + \tau_{ij} \le T$, přidáme hranu</p>
+  <p>$$\big((i,k),\ (j,\, k + \tau_{ij})\big) \in E(H) \quad \text{s cenou } c_{ij}.$$</p>
+  <p>Všimni si, co se stalo s limitem: hrany, které by ho přestřelily ($k + \tau_{ij} &gt; T$), <strong>vůbec nevzniknou</strong>. Omezení už není „podmínka navíc“ — je zadrátované do tvaru grafu. V $H$ zbývá optimalizovat jediné kritérium, délky $c_{ij}$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: kde v $H$ začínáme a kde končíme? Pozor, cíl je záludný stejně jako v <a href="l2-10.html#takeaways">[L2.10]</a>.</summary>
+    <div class="inner">
+      <p>Start je kopie $(s, 0)$. Cíl ale není jeden vrchol: „dorazit do $t$ nejpozději v čase $T$“ splňuje <strong>každá</strong> kopie $(t, k)$, $k = 0, \ldots, T$ — cíl je množina. Řešení známe z <a href="l2-10.html#takeaways">[L2.10]</a>: přidej <strong>super-cíl</strong> $t^*$ a hrany $(t,k) \to t^*$ s cenou $0$, pak hledej obyčejnou nejkratší cestu $(s,0) \to t^*$.</p>
+      <p>Alternativa z vzorového řešení: přidej <strong>čekací hrany</strong> $(v,k) \to (v,k+1)$ s cenou $0$ (stejný trik jako čekání u pana Dow Jonese v <a href="l2-9.html#takeaways">[L2.9]</a>) a hledej cestu jen do $(t, T)$. Čekací hrany totiž převedou podmínku „příchod <em>nejpozději</em> v $T$“ na „příchod <em>přesně</em> v $T$“ — kdo dorazí dřív, počká zadarmo.</p>
+    </div>
+  </details>
+
+  <p>Takhle vypadá expanze našeho příkladu pro $T = 4$ (řádky = vrcholy $G$, sloupce = čas):</p>
+
+  <div class="viz" id="viz-exp"></div>
+
+  <p>Spousta kopií je mrtvá: do $(s,1), \ldots, (s,4)$ nebo $(t,0)$ nic nevede, z $(a,4)$ a $(b,4)$ se už nikam nestihne. Rukopisné řešení z písemky k tomu má lakonickou poznámku <em>„remove all disconnected nodes and invalid paths“</em> — škrtnout je můžeš, ale nemusíš: prohledávání se k nim stejně nikdy nedostane.</p>
+
+  <!-- ===== SEKCE 3 ===== -->
+  <h2>Běh: Dijkstra na expandované síti</h2>
+
+  <details class="try">
+    <summary>Zkus sám (než pustíš krokování): kolik vrcholů a hran má $H$ pro náš příklad?</summary>
+    <div class="inner">
+      <p>Kopií je $|V(G)| \cdot (T+1) = 4 \cdot 5 = 20$, plus super-cíl $t^*$, celkem $21$. Hran: kopie původních hran $3 + 4 + 4 + 2 + 4 = 17$ (hrana $s \to a$ má 3 kopie, $a \to t$ jen 2 — víc se jich do limitu nevejde) a $5$ nulových hran do $t^*$, celkem $22$. Vyčíslení velikosti patří k formulaci — to je lekce z <a href="l2-10.html#takeaways">[L2.10]</a>.</p>
+    </div>
+  </details>
+
+  <p>Délky v našem příkladu jsou nezáporné, takže na $H$ stačí Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> z $(s,0)$:</p>
+
+  <div class="viz" id="viz-run"></div>
+
+  <!-- ===== SEKCE 4 ===== -->
+  <h2>Co expanze stojí — a co všechno vydrží</h2>
+  <p>Cena za trik: $H$ má $n(\tau+1)$ vrcholů a nejvýše $m(\tau+1)$ hran (plus hrany super-cíle). Velikost tedy roste s <strong>číselnou hodnotou</strong> limitu $\tau$, ne s délkou jeho zápisu — pro malý graf a $\tau = 10^6$ má expanze miliony kopií. Pro rozumně malá $\tau$ je to ale naprosto praktická a u zkoušky standardní konstrukce.</p>
+
+  <details class="try">
+    <summary>Zkus sám: zadání připouští $c_{ij} \in \mathbb{R}$ — klidně záporné délky. Kdy to v $H$ vadí?</summary>
+    <div class="inner">
+      <p>Skoro nikdy! Pokud mají všechny hrany $\tau_{ij} \ge 1$, vede každá hrana $H$ do <em>ostře vyššího</em> času — po hranách se nedá vrátit, takže $H$ nemá cykly: je to DAG <a href="../k0/l0-4.html">[L0.4]</a>. Záporné délky pak nevadí; dokonce i záporný <em>cyklus</em> v $G$ se v $H$ neškodně „rozbalí“ do konečného řetězu kopií, protože každý jeho oběh spotřebuje čas a limit ho utne. Na DAG navíc existuje levný průchod v topologickém pořadí [L2.13].</p>
+      <p>Pozor jen na hrany s $\tau_{ij} = 0$: ty zůstávají uvnitř jedné časové vrstvy, cyklus z takových hran v $H$ přežije — a má-li zápornou délku, jsme zpět u potíží z <a href="l2-1.html#takeaways">[L2.1]</a>. (Záporné hrany bez záporných cyklů řeší Bellman-Fordův algoritmus [L2.12] — příští lekce.)</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 5 ===== -->
+  <h2>Silná souvislost ti cestu nezaručí</h2>
+
+  <details class="try">
+    <summary>Zkus sám: část (b) zkouškové úlohy. Je-li $G$ silně souvislý (z každého vrcholu se dá dojet do každého), existuje přípustná cesta vždy?</summary>
+    <div class="inner">
+      <p><strong>Ne.</strong> Silná souvislost říká jen, že <em>nějaká</em> cesta $s \to t$ existuje — neříká nic o jejím čase. Stačí protipříklad ze vzorového řešení: dva vrcholy, hrana $s \to t$ s dobou $10$, hrana $t \to s$ s dobou $10$, limit $\tau = 5$. Graf je silně souvislý, ale žádná $s$–$t$ cesta limit nesplní. V expandované síti se to projeví čistě: z $(s,0)$ nevede vůbec žádná hrana ($0 + 10 &gt; 5$), takže $t^*$ zůstane nedosažitelný — $l(t^*) = \infty$.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-strong"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: tři pasti časové expanze</div>
+    <ul>
+      <li><strong>„Nejpozději v $\tau$“ ≠ „přesně v $\tau$“.</strong> Bez čekacích hran je cílem celá množina kopií $(t,0), \ldots, (t,\tau)$ (super-cíl $t^*$); kdo hledá cestu jen do $(t,\tau)$, řeší jinou úlohu — a může mu vyjít $\infty$, i když přípustná cesta existuje. S čekacími hranami je naopak jediný cíl $(t,\tau)$ v pořádku.</li>
+      <li><strong>„Silně souvislé ⇒ cesta existuje“ je polopravda.</strong> Limit může zabít všechny $s$–$t$ cesty najednou (protipříklad výše) — přesně na to se ptá část (b) zkoušky.</li>
+      <li><strong>Velikost vyčísli.</strong> $n(\tau+1)$ vrcholů a až $m(\tau+1)$ hran — roste s hodnotou $\tau$, ne s velikostí zápisu zadání. U zkoušky počty kopií a hran vždy uveď (stejná disciplína jako stavová exploze v <a href="l2-10.html#takeaways">[L2.10]</a>).</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.11</div>
+    <ul>
+      <li><strong>Časová expanze:</strong> kopie $(v,k)$ pro $k = 0,\ldots,\tau$; hrana $(i,j)$ s dobou $\tau_{ij}$ a délkou $c_{ij}$ dává hrany $(i,k) \to (j,\,k+\tau_{ij})$ s cenou $c_{ij}$, ale jen pro $k + \tau_{ij} \le \tau$ — <strong>limit je zadrátovaný do grafu</strong>.</li>
+      <li><strong>Constrained SP (doba $\le \tau$) = obyčejné SP v $H$</strong> z $(s,0)$ do super-cíle $t^*$ (kopie $(t,k)$ napojené hranami s cenou $0$); ekvivalentně čekací hrany $(v,k) \to (v,k+1)$ s cenou $0$ a jediný cíl $(t,\tau)$.</li>
+      <li><strong>Velikost:</strong> $n(\tau+1)$ vrcholů, až $m(\tau+1)$ hran — roste s číselnou hodnotou $\tau$.</li>
+      <li><strong>$\tau_{ij} \ge 1$ ⇒ $H$ je DAG</strong> (čas jen roste) — záporné délky, ba i záporný cyklus v $G$, nevadí; pozor na hrany s $\tau_{ij} = 0$.</li>
+      <li><strong>I v silně souvislém grafu nemusí cesta v limitu existovat</strong> ($s \rightleftarrows t$ s dobami $10$, $\tau = 5$).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-csp">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Constrained Shortest Path Problem</strong>
+      <span class="task-src">zdroj: zkouška 09.07.2021 (Master_Zkouska_KO / KO_09_07_2021, za 5,5 b.) = banka #11 (Solved, [E] Exact exam task; banka píše délku $\ell_e$ místo $c_{ij}$, jinak znění shodné)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“In a network $G$ we associate two numbers with each arc: its length $c_{ij} \in \mathbb{R}$ and its traversal time $\tau_{ij} \in \mathbb{Z}_0^+$. We would like to determine a shortest-length path from the source node $s$ to the sink node $t$ with the additional constraint that the traversal time of the path does not exceed $\tau$.</p>
+        <p>a) Formulate this problem as a shortest path problem (hint: use time expansion of the network).</p>
+        <p>b) Does the path necessarily exist if the network $G$ is strongly connected?”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Přesně látka této lekce: síť se dvěma čísly na hraně (délka, doba průchodu), hledá se nejkratší cesta $s \to t$ s dobou nejvýše $\tau$. Část (a) chce <em>konstrukci</em> (převod na obyčejné SP přes časovou expanzi — nápověda ji rovnou prozrazuje), část (b) je rychlá rozhodovací otázka s argumentem: ano s důkazem, nebo ne s protipříkladem.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — kopie $(v,k)$, podmínka $k + \tau_{ij} \le \tau$, super-cíl / čekací hrany.</li>
+        <li><a href="l2-10.html#takeaways">[L2.10] Stavový automat jako graf</a> — cíl jako množina stavů → super-cíl, vyčíslení velikosti.</li>
+        <li><a href="l2-9.html#takeaways">[L2.9] Modelování reálné úlohy jako SP</a> — recept stav–přechod–cena, čekací hrany.</li>
+        <li><a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a> — řešení výsledného SP pro $c \ge 0$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>V (a) piš konstrukci formálně: co jsou vrcholy $H$ (a co kopie <em>znamená</em>), které hrany vzniknou a s jakou cenou, kde je start a co všechno je cíl. Nezapomeň na podmínku $k + \tau_{ij} \le \tau$ — bez ní limit nikde není! — a na to, že cíl je množina kopií. Na závěr vyčísli velikost $H$. V (b) si rozmysli, co silná souvislost zaručuje (existenci <em>nějaké</em> cesty) a co ne (její dobu) — protipříklad pak stačí dvouvrcholový.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle vzorového řešení banky #11)</summary>
+        <div class="inner">
+          <p><strong>(a) Časově expandovaný graf.</strong> Položme $T := \tau$. Vytvoříme graf $H$ s vrcholy</p>
+          <p>$$V(H) = \{(v, k) : v \in V(G),\ k = 0, 1, \ldots, T\}.$$</p>
+          <p>Vrchol $(v,k)$ znamená „cesta je ve vrcholu $v$ v čase $k$“. Pro každou původní hranu $(i,j) \in E(G)$ a každé $k$ takové, že $k + \tau_{ij} \le T$, přidáme hranu</p>
+          <p>$$\big((i,k),\ (j,\, k + \tau_{ij})\big) \in E(H) \quad \text{s cenou } c_{ij}.$$</p>
+          <p>Pak řešíme obyčejný problém nejkratší cesty z $(s, 0)$ do <em>libovolného</em> z vrcholů $(t, k)$, $k = 0, \ldots, T$. Ekvivalentně: přidáme umělý cíl $t^*$ a nulové hrany $(t,k) \to t^*$ pro $k = 0, \ldots, T$ a hledáme nejkratší cestu $(s,0) \to t^*$. Každá cesta v $H$ odpovídá cestě v $G$ se stejnou délkou a dobou průchodu $\le T$ a naopak — hrany porušující limit v $H$ neexistují. Velikost: $|V(H)| = n(T+1) + 1$, $|E(H)| \le m(T+1) + (T+1)$.</p>
+          <p><em>Poznámka (čekací hrany):</em> místo mnoha kopií cíle $(t,k)$ lze přidat čekací hrany $(v,k) \to (v, k+1)$ s cenou $0$ a hledat cestu jen z $(s,0)$ do $(t,T)$. Tyto hrany pouze převádějí podmínku „příchod nejpozději v čase $T$“ na „příchod přesně v čase $T$“.</p>
+          <p><strong>(b) Existence: NE.</strong> Silná souvislost nezaručuje přípustnost při časovém limitu. Protipříklad: $s \to t$ s dobou průchodu $10$, $t \to s$ s dobou průchodu $10$, limit $T = 5$. Graf je silně souvislý, ale žádná $s$–$t$ cesta limit nesplní. (Takhle stručně — „it doesn't necessarily exist, it's possible that all paths violate the constraint of not exceeding $\tau$“ — to stálo v dochovaném studentském řešení a bylo uznáno ✓.)</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L2.11">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k2/l2-10.html"><span class="dir">← Předchozí</span> L2.10 · Stavový automat jako graf</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.12 · Bellman-Fordův algoritmus + detekce záporného cyklu (běh))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// ---- Původní síť G: dvě čísla na hraně ----
+KOViz.graph(document.getElementById('viz-orig'), {
+  directed: true,
+  w: 640, h: 360, nodeR: 20,
+  nodes: [
+    { id: 's', x: 80,  y: 180, label: 's' },
+    { id: 'a', x: 290, y: 70,  label: 'a' },
+    { id: 'b', x: 290, y: 290, label: 'b' },
+    { id: 't', x: 520, y: 180, label: 't' },
+  ],
+  edges: [
+    { from: 's', to: 'a', label: 'c=1 · τ=2' },
+    { from: 's', to: 'b', label: 'c=4 · τ=1' },
+    { from: 'a', to: 'b', label: 'c=1 · τ=1' },
+    { from: 'a', to: 't', label: 'c=1 · τ=3' },
+    { from: 'b', to: 't', label: 'c=4 · τ=1' },
+  ],
+  caption: 'Síť G s délkou c a dobou průchodu τ na každé hraně (vlastní instance ve formátu zadání). Hledáme nejkratší cestu s→t podle c, jejíž součet dob nepřekročí limit τ = 4.',
+});
+
+// ---- Časová expanze H pro T = 4 (sdílený popis pro statický obrázek i stepper) ----
+const HN = [
+  // [id, row(y), col(k), label]
+  ['s0','s',0],['s1','s',1],['s2','s',2],['s3','s',3],['s4','s',4],
+  ['a0','a',0],['a1','a',1],['a2','a',2],['a3','a',3],['a4','a',4],
+  ['b0','b',0],['b1','b',1],['b2','b',2],['b3','b',3],['b4','b',4],
+  ['t0','t',0],['t1','t',1],['t2','t',2],['t3','t',3],['t4','t',4],
+];
+const ROWY = { s: 55, a: 148, b: 241, t: 334 };
+const COLX = [80, 250, 420, 590, 760];
+function hNodes(saHl) {
+  const ns = HN.map(([id, row, k]) => ({ id, x: COLX[k], y: ROWY[row], label: row + ',' + k }));
+  ns.push({ id: 'tst', x: 915, y: 408, label: 't*' });
+  return ns;
+}
+function hEdges(saHl) {
+  return [
+    // kopie s→a (c=1, τ=2)
+    { from: 's0', to: 'a2', label: '1', cls: saHl ? 'hl' : undefined },
+    { from: 's1', to: 'a3', label: '1', cls: saHl ? 'hl' : undefined },
+    { from: 's2', to: 'a4', label: '1', cls: saHl ? 'hl' : undefined },
+    // kopie s→b (c=4, τ=1)
+    { from: 's0', to: 'b1', label: '4' }, { from: 's1', to: 'b2', label: '4' },
+    { from: 's2', to: 'b3', label: '4' }, { from: 's3', to: 'b4', label: '4' },
+    // kopie a→b (c=1, τ=1)
+    { from: 'a0', to: 'b1', label: '1' }, { from: 'a1', to: 'b2', label: '1' },
+    { from: 'a2', to: 'b3', label: '1' }, { from: 'a3', to: 'b4', label: '1' },
+    // kopie a→t (c=1, τ=3) — jen 2 kopie, víc se do limitu nevejde
+    { from: 'a0', to: 't3', label: '1' }, { from: 'a1', to: 't4', label: '1' },
+    // kopie b→t (c=4, τ=1)
+    { from: 'b0', to: 't1', label: '4' }, { from: 'b1', to: 't2', label: '4' },
+    { from: 'b2', to: 't3', label: '4' }, { from: 'b3', to: 't4', label: '4' },
+    // super-cíl: nulové hrany ze všech kopií t
+    { from: 't0', to: 'tst', curve: 0.30 }, { from: 't1', to: 'tst', curve: 0.25 },
+    { from: 't2', to: 'tst', curve: 0.20 }, { from: 't3', to: 'tst', curve: 0.10 },
+    { from: 't4', to: 'tst', label: '0' },
+  ];
+}
+
+// statický obrázek expanze
+KOViz.graph(document.getElementById('viz-exp'), {
+  directed: true,
+  w: 960, h: 445, nodeR: 17,
+  nodes: hNodes(),
+  edges: hEdges(true),
+  caption: 'Časová expanze H pro T = 4: řádky = vrcholy G, sloupce = čas k = 0…4. Modře zvýrazněné jsou tři kopie jediné původní hrany s→a (τ=2): z (s,0), (s,1) a (s,2); kopie z (s,3) by dorazila v čase 5 > 4, proto neexistuje. Všech pět nulových hran vpravo vede do super-cíle t* (popisek 0 jen u poslední).',
+});
+
+// ---- Stepper: Dijkstra na H z (s,0) do t* ----
+const runFrames = [
+  {
+    nodes: { s0: 'hl' },
+    subs: { s0: 'l=0' },
+    desc: 'Inicializace <a href="l2-3.html#takeaways">[L2.3]</a>: l(s,0)=0, všechny ostatní kopie ∞. Hledáme nejkratší cestu z (s,0) do super-cíle t*.',
+  },
+  {
+    nodes: { s0: 'good', a2: 'hl', b1: 'hl' },
+    edges: { 's0->a2': 'hl', 's0->b1': 'hl' },
+    subs: { s0: 'l=0', a2: 'l=1', b1: 'l=4' },
+    desc: 'Uzavři (s,0) — jediné konečné minimum. Expanze: (a,2) ← 0+1 = 1, (b,1) ← 0+4 = 4. Nic jiného z (s,0) nevede.',
+  },
+  {
+    nodes: { s0: 'good', a2: 'good', b1: 'hl', b3: 'hl' },
+    edges: { 's0->a2': 'good', 's0->b1': 'hl', 'a2->b3': 'hl' },
+    subs: { s0: 'l=0', a2: 'l=1', b1: 'l=4', b3: 'l=2' },
+    desc: 'Minimum na hranici je (a,2) s l=1 → uzavři. Z (a,2) vede jediná hrana: (b,3) ← 1+1 = 2. Hrana a→t (τ=3) by z času 2 dorazila v čase 5 > 4 — v H vůbec neexistuje. Limit pracuje za nás.',
+  },
+  {
+    nodes: { s0: 'good', a2: 'good', b3: 'good', b1: 'hl', t4: 'hl' },
+    edges: { 's0->a2': 'good', 'a2->b3': 'good', 's0->b1': 'hl', 'b3->t4': 'hl' },
+    subs: { s0: 'l=0', a2: 'l=1', b1: 'l=4', b3: 'l=2', t4: 'l=6' },
+    desc: 'Minimum (b,3) s l=2 → uzavři; (t,4) ← 2+4 = 6. První kopie cíle dostala značku.',
+  },
+  {
+    nodes: { s0: 'good', a2: 'good', b3: 'good', b1: 'good', t4: 'hl', t2: 'hl' },
+    edges: { 's0->a2': 'good', 'a2->b3': 'good', 's0->b1': 'good', 'b3->t4': 'hl', 'b1->t2': 'hl' },
+    subs: { s0: 'l=0', a2: 'l=1', b1: 'l=4', b3: 'l=2', t4: 'l=6', t2: 'l=8' },
+    desc: 'Minimum (b,1) s l=4 → uzavři; (t,2) ← 4+4 = 8. To je ta rychlá, ale drahá cesta s→b→t — Dijkstra ji vidí, ale prohrává.',
+  },
+  {
+    nodes: { s0: 'good', a2: 'good', b3: 'good', b1: 'good', t4: 'good', t2: 'hl', tst: 'hl' },
+    edges: { 's0->a2': 'good', 'a2->b3': 'good', 's0->b1': 'good', 'b3->t4': 'good', 'b1->t2': 'hl', 't4->tst': 'hl' },
+    subs: { s0: 'l=0', a2: 'l=1', b1: 'l=4', b3: 'l=2', t4: 'l=6', t2: 'l=8', tst: 'l=6' },
+    desc: 'Minimum (t,4) s l=6 → uzavři; super-cíl t* ← 6+0 = 6.',
+  },
+  {
+    nodes: { s0: 'hl', a2: 'hl', b3: 'hl', t4: 'hl', tst: 'hl', b1: 'good' },
+    edges: { 's0->a2': 'hl', 'a2->b3': 'hl', 'b3->t4': 'hl', 't4->tst': 'hl', 's0->b1': 'dim', 'b1->t2': 'dim' },
+    subs: { s0: 'l=0', a2: 'l=1', b1: 'l=4', b3: 'l=2', t4: 'l=6', t2: 'l=8', tst: 'l=6' },
+    desc: 'Minimum je t* s l=6 → uzavřen cíl, konec (early stop <a href="l2-4.html#takeaways">[L2.4]</a>; (t,2) s l=8 už nikdo neuzavře). Couvání po předchůdcích: t* ← (t,4) ← (b,3) ← (a,2) ← (s,0), tedy cesta <strong>s→a→b→t: délka 6, doba 2+1+1 = 4 ≤ 4</strong>. ✓',
+  },
+];
+KOViz.stepper(document.getElementById('viz-run'), {
+  graph: {
+    directed: true, w: 960, h: 445, nodeR: 17,
+    nodes: hNodes(),
+    edges: hEdges(false),
+  },
+  frames: runFrames,
+  caption: 'Běh Dijkstry [L2.4] na expandované síti H z (s,0) do super-cíle t*. Mrtvé kopie (s,1)…(s,4), (a,0), (t,0)… zůstávají ∞ — prohledávání se k nim nikdy nedostane, u zkoušky je můžeš rovnou škrtnout.',
+});
+
+// ---- Protipříklad k části (b): silně souvislé ≠ přípustné ----
+KOViz.graph(document.getElementById('viz-strong'), {
+  directed: true,
+  w: 640, h: 220, nodeR: 20,
+  nodes: [
+    { id: 's', x: 220, y: 110, label: 's' },
+    { id: 't', x: 420, y: 110, label: 't' },
+  ],
+  edges: [
+    { from: 's', to: 't', label: 'τ = 10', curve: 0.7 },
+    { from: 't', to: 's', label: 'τ = 10', curve: 0.7 },
+  ],
+  caption: 'Protipříklad ze vzorového řešení: graf je silně souvislý, ale pro limit τ = 5 žádná s→t cesta nevyhovuje (0 + 10 > 5) — v expanzi z (s,0) nevede ani jedna hrana.',
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
