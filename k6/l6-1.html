@@ -36,7 +36,7 @@
     Trojice $(X, D, C)$ definující <strong>constraint satisfaction problem</strong> (problém splňování omezení) a pojem <strong>arc consistency</strong> (hranová konzistence): kdy je orientovaná hrana $(x_i, x_j)$ grafu omezení konzistentní.
   </div>
 
-  <p>Poslední slotová kapitola. Slot 6 padá zhruba v polovině zkoušek a když padne, vypadá takhle (zkouška 02.06.2021, znovu doložena 1.&nbsp;6.&nbsp;2026):</p>
+  <p>Poslední slotová kapitola. Slot 6 padá zhruba v polovině zkoušek a když padne, vypadá takhle (zkouška 02.06.2021; AC-3 jako typ úlohy znovu padl 1.&nbsp;6.&nbsp;2026):</p>
 
   <div class="box info">
     <div class="box-title"><img src="../assets/icons/flag.svg" class="ico" alt="">Ukázka zkouškového zadání (EN, 1:1)</div>
@@ -73,7 +73,7 @@
   <details class="try">
     <summary>Zkus sám: po propagaci zbylo $x \in \{4,5\}$, $y \in \{4,5\}$. Znamená to, že každá kombinace zbylých hodnot je řešení?</summary>
     <div class="inner">
-      <p>Ne — $x = 4$, $y = 5$ porušuje $x \ge y$, a přitom obě hodnoty v doménách přežily (každá má jiného „partnera“, se kterým funguje). Slide 22 to říká přesně: <em>“propagation alone is not enough — the product of the domains (including infeasible $x = 4$, $y = 5$) is a superset of the solution”</em>. Kartézský součin zredukovaných domén je jen <strong>nadmnožina</strong> množiny řešení; zbytek dořeší prohledávání (search) s větvením. Pro zkouškovou úlohu Slotu 6 je ale podstatný právě jen ten propagační krok — a k němu potřebujeme přesné lokální kritérium, <em>kdy</em> se smí hodnota škrtnout. To kritérium je arc consistency.</p>
+      <p>Ne — $x = 4$, $y = 5$ porušuje $x \ge y$, a přitom obě hodnoty v doménách přežily (každá má jiného „partnera“, se kterým funguje). Slide 22 to vystihuje takto: <em>“propagation alone is not enough — the product of the domains (including infeasible $x = 4$, $y = 5$) is a superset of the solution”</em>. Kartézský součin zredukovaných domén je jen <strong>nadmnožina</strong> množiny řešení; zbytek dořeší prohledávání (search) s větvením. Pro zkouškovou úlohu Slotu 6 je ale podstatný právě jen ten propagační krok — a k němu potřebujeme přesné lokální kritérium, <em>kdy</em> se smí hodnota škrtnout. To kritérium je arc consistency.</p>
     </div>
   </details>
 
@@ -153,7 +153,7 @@
     <div class="task-head">
       <span class="task-id">T01</span>
       <strong>Které hrany jsou arc consistent?</strong>
-      <span class="task-src">zdroj: prezentace 08_CP, slide 27 (instance 1:1; instrukce vlastní)</span>
+      <span class="task-src">zdroj: prezentace 08_CP_KO, slide 27 (instance 1:1; instrukce vlastní)</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -196,7 +196,7 @@
     <div class="task-head">
       <span class="task-id">T02</span>
       <strong>Zkoušková instance: graf a první diagnóza</strong>
-      <span class="task-src">zdroj: zkouška KO 02.06.2021 (doložena 1. 6. 2026); zadání 1:1, dnešní instrukce vlastní</span>
+      <span class="task-src">zdroj: zkouška KO 02.06.2021 (téma AC-3 doloženo i 1.&nbsp;6.&nbsp;2026); zadání 1:1, dnešní instrukce vlastní</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -336,7 +336,7 @@ KOViz.stepper(document.getElementById('viz-ac3ex'), {
      nodes:{},
      edges:{'a1->b1':'bad', 'b1->a1':'bad', 'a2->b2':'good', 'b2->a2':'bad', 'a3->b3':'good', 'b3->a3':'good'}},
   ],
-  caption: 'Tři příklady pro x₁ ≤ x₂ (po vzoru slidu 25 — „no arc is AC / only (x₁,x₂) is AC / both arcs are AC“; domény vlastní volba). Zelená = AC, červená = non-AC.',
+  caption: 'Tři příklady pro x₁ ≤ x₂ (po vzoru slidu 25 — “no arc is AC / only (x₁,x₂) is AC / both arcs are AC”; domény vlastní volba). Zelená = AC, červená = non-AC.',
 });
 
 // 4 — T01: graf omezení instance slidu 27
