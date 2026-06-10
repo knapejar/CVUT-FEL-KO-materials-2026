@@ -45,7 +45,7 @@
     <span class="lbl">Problem statement (slidy, EN)</span>
     <p><strong>Shortest Path.</strong> <em>Instance:</em> Digraph $G$, weights $c : E(G) \to \mathbb{R}$, nodes $s, t \in V(G)$. <em>Goal:</em> Find the shortest $s$–$t$ path $P$, i.e. one of minimum weight $c(E(P))$, or decide that $t$ is unreachable from $s$.</p>
   </div>
-  <p>Česky: v orientovaném grafu s ohodnocením hran $c$ hledáme <strong>nejkratší cestu</strong> (shortest path) z $s$ do $t$ — cestu s nejmenším součtem vah hran. <strong>Délka cesty</strong> $P$ je $c(E(P)) = \sum_{e \in E(P)} c(e)$ a <strong>vzdálenost</strong> $l(s,t)$ je délka nejkratší $s$–$t$ cesty. Příbuzné varianty: z $s$ do <em>všech</em> vrcholů (<strong>shortest path tree — SPT</strong>, strom nejkratších cest), ze všech do $t$ (stačí otočit hrany), a mezi <em>všemi dvojicemi</em> (<strong>all pairs shortest path</strong>). Variantu $s \to t$ se podle slidů stejně řeší algoritmy pro SPT — asymptoticky rychlejší algoritmus jen pro jednu dvojici není znám.</p>
+  <p>Česky: v orientovaném grafu s ohodnocením hran $c$ hledáme <strong>nejkratší cestu</strong> (shortest path) z $s$ do $t$ — cestu s nejmenším součtem vah hran. <strong>Délka cesty</strong> $P$ je $c(E(P)) = \sum_{e \in E(P)} c(e)$ a <strong>vzdálenost</strong> $l(s,t)$ je délka nejkratší $s$–$t$ cesty. Příbuzné varianty: z $s$ do <em>všech</em> vrcholů (<strong>shortest path tree — SPT</strong>, strom nejkratších cest), ze všech do $t$ (stačí otočit hrany), a mezi <em>všemi dvojicemi</em> (<strong>all pairs shortest path</strong>). Varianta $s \to t$ se podle slidů často řeší algoritmy pro SPT (případně all-pairs) — asymptoticky rychlejší algoritmus jen pro jednu dvojici není znám; výpočet lze ukončit při dosažení $t$.</p>
 
   <details class="try">
     <summary>Zkus sám: všimni si v definici oboru vah — $c : E(G) \to \mathbb{R}$, tedy i záporné. K čemu by záporná váha hrany byla dobrá?</summary>
@@ -80,7 +80,7 @@
   <details class="try">
     <summary>Zkus sám: nejkratší cesta tedy existuje vždy (když je $t$ dosažitelný). Tak proč je záporný cyklus vůbec problém?</summary>
     <div class="inner">
-      <p>Problém není <em>existence</em>, ale <em>nalezení</em>. Rychlost algoritmů pro nejkratší cesty stojí podle slidů na tom, že <strong>se nestarají o opakování vrcholů</strong> — nerozlišují cestu od sledu. To si můžou dovolit jen tehdy, když nejkratší sled „automaticky“ odpovídá nejkratší cestě. Záporný cyklus tuhle ekvivalenci zničí (nejkratší sled neexistuje) — a najednou je potřeba opakování vrcholů hlídat <em>explicitně</em>, což dělá úlohu <strong>NP-těžkou</strong> <a href="../k0/l0-7.html#takeaways">[L0.7]</a>.</p>
+      <p>Problém není <em>existence</em>, ale <em>nalezení</em>. Rychlost algoritmů pro nejkratší cesty stojí podle slidů na tom, že <strong>se nestarají o opakování vrcholů</strong> — nerozlišují cestu od sledu. To si můžou dovolit jen tehdy, když nejkratší sled „automaticky“ odpovídá nejkratší cestě. Záporný cyklus tuhle ekvivalenci zničí (nejkratší sled neexistuje) — a najednou je potřeba opakování vrcholů hlídat <em>explicitně</em>, což dělá úlohu <strong>NP-těžkou</strong> — pojem jsme zavedli u ILP v <a href="../k0/l0-7.html#takeaways">[L0.7] Co je ILP a LP relaxace</a> (žádný polynomiální algoritmus není znám).</p>
     </div>
   </details>
 
@@ -248,7 +248,7 @@
 
   <div class="pager">
     <a href="../k1/l1-15.html"><span class="dir">← Předchozí</span> L1.15 · Časově/pozičně indexované proměnné (K1)</a>
-    <a class="next" href="l2-2.html"><span class="dir">Další →</span> L2.2 · Bellmanův princip optimality + Bellmanova rovnice</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.2 · Bellmanův princip optimality)</a>
   </div>
 
 </div>
