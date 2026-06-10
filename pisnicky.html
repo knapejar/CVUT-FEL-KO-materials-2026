@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KO Hitovky — zpěvník (vlevo zpěv, vpravo vysvětlení)</title>
+<title>KO Hitovky — zpěvník (vlevo zpěv s notací, vpravo vysvětlení)</title>
 <style>
   :root {
     --bg: #0f1117;
@@ -20,7 +20,7 @@
   body {
     background: var(--bg); color: var(--text);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    line-height: 1.55;
+    line-height: 1.6;
   }
   header {
     position: sticky; top: 0; z-index: 10;
@@ -105,20 +105,39 @@
   }
   .explain h3:first-child { margin-top: 0; }
   .explain p { font-size: 13.5px; color: var(--text); margin-bottom: 6px; }
-  .explain p.dim { color: var(--muted); font-size: 12.5px; }
   table.notace { width: 100%; border-collapse: collapse; font-size: 13px; }
   table.notace td {
     padding: 4px 8px 4px 0; vertical-align: top;
     border-bottom: 1px solid var(--border);
   }
-  table.notace td.sung { color: var(--muted); font-style: italic; width: 55%; }
+  table.notace td.sung { color: var(--muted); font-style: italic; width: 48%; }
   table.notace tr:last-child td { border-bottom: none; }
+
+  /* plain (uncolored) math in explanations */
   .m {
     font-family: 'Cambria Math', Cambria, Georgia, serif;
     font-style: italic; color: var(--math); font-size: 14.5px;
     white-space: nowrap;
   }
   .m sub, .m sup { font-size: 11px; font-style: normal; }
+
+  /* ── colored notation highlights: same class left (lyrics) and right (table) ── */
+  .hl {
+    font-family: 'Cambria Math', Cambria, Georgia, serif;
+    font-style: italic; font-size: 14.5px;
+    padding: 0 4px; border-radius: 5px; white-space: nowrap;
+  }
+  .hl sub, .hl sup { font-size: 11px; font-style: normal; }
+  .c1 { background: rgba(125,211,252,0.15); color: #7dd3fc; }
+  .c2 { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+  .c3 { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+  .c4 { background: rgba(52,211,153,0.15);  color: #4ade80; }
+  .c5 { background: rgba(244,114,182,0.16); color: #f9a8d4; }
+  .c6 { background: rgba(251,146,60,0.17);  color: #fdba74; }
+  .c7 { background: rgba(147,197,253,0.16); color: #93c5fd; }
+  .c8 { background: rgba(253,224,71,0.14);  color: #fde047; }
+  .c9 { background: rgba(226,232,240,0.13); color: #e2e8f0; }
+
   ul.refs { list-style: none; font-size: 13px; }
   ul.refs li { padding: 3px 0; }
   ul.refs a { color: var(--text); text-decoration: none; border-bottom: 1px dotted var(--muted); }
@@ -136,7 +155,7 @@
 <body>
 
 <header>
-  <h1>🎸 KO Hitovky <span class="sub">zkouška 15. 6. 2026 — vlevo text přesně jak se zpívá, vpravo co to znamená</span></h1>
+  <h1>🎸 KO Hitovky <span class="sub">zkouška 15. 6. 2026 — vlevo zpěv (notace místo hláskování), vpravo vysvětlení</span></h1>
   <div id="nowplaying"></div>
 </header>
 
@@ -157,9 +176,10 @@
 </nav>
 
 <main>
-<p class="intro">Vlevo je text <strong>1:1 tak, jak ho Suno zpívá</strong> („ó en na třetí“) — zpívej z levého sloupce.
-Vpravo najdeš, o čem píseň je, převod zpívaných frází na správnou matematickou notaci a odkazy na lekce z osnovy.
-Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/opravíme v další iteraci.</p>
+<p class="intro">Vlevo je text písně tak, jak se zpívá — ale hláskované symboly („es“, „ó en na třetí“) jsou
+zapsané správnou notací (<span class="hl c1">s</span>, <span class="hl c1">O(n³)</span>): čteš symbol, zpíváš jeho jméno.
+Barevné podbarvení vlevo odpovídá stejně podbarvenému řádku v pravé tabulce, kde najdeš, co se přesně zpívá a co symbol znamená.
+Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme v další iteraci.</p>
 
 <!-- ════════════════ 1. CHRISTOFIDES ════════════════ -->
 <section class="song" id="s1">
@@ -173,11 +193,11 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
     <div class="lyrics">
       <div class="col-label">🎤 Zpívej</div>
       <div class="stanza"><span class="tag">Intro (spoken)</span><p>
-        Metrický té es pé. Christofides. Jedna a půl.
+        Metrický <span class="hl c3">TSP</span>. Christofides. Jedna a půl.
       </p></div>
       <div class="stanza"><span class="tag">Verse 1</span><p>
         Najdi nejlevnější kostru, budem jí říkat T,<br>
-        vrcholy lichého stupně hoď do množiny dvojité vé.<br>
+        vrcholy lichého stupně hoď do množiny <span class="hl c1">W</span>.<br>
         Vždycky je jich sudý počet — to je jistá věc,<br>
         nejlevnější párování M na nich najdi přec!
       </p></div>
@@ -185,7 +205,7 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
         Kostra! Liché! Párování!<br>
         Euler! Zkratka! Hotovo!<br>
         Jedna a půl krát optimum,<br>
-        ó en na třetí — Christofidovo!
+        <span class="hl c2">O(n³)</span> — Christofidovo!
       </p></div>
       <div class="stanza"><span class="tag">Verse 2</span><p>
         Kostra T plus matching M — všechny stupně sudé jsou,<br>
@@ -201,8 +221,8 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
       </p></div>
       <div class="stanza"><span class="tag">Verse 3</span><p>
         Double-tree je chudší bratr: hrany kostry zdvojí,<br>
-        faktor dva, ó en na druhou — s tím se nespokojíš.<br>
-        Christofides místo zdvojení vezme matching em —<br>
+        faktor dva, <span class="hl c5">O(n²)</span> — s tím se nespokojíš.<br>
+        Christofides místo zdvojení vezme matching <span class="hl c4">M</span> —<br>
         proto jedna a půl optima, a důkaz máme všem!
       </p></div>
       <div class="stanza"><span class="tag">Outro</span><p>
@@ -215,16 +235,17 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
       <p>Christofidesův algoritmus = nejlepší známá aproximace <strong>metrického TSP</strong>.
       5 kroků: MST → vrcholy lichého stupně → min. párování → Eulerův tah → shortcutting.
       Bridge je celý důkaz faktoru 3/2 — u zkoušky nejčastější důkaz (žebříček #1).</p>
-      <h3>Zpíváš → notace</h3>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">množina dvojité vé</td><td><span class="m">W</span> = vrcholy lichého stupně v MST</td></tr>
+        <tr><td class="sung">té es pé</td><td><span class="hl c3">TSP</span> — obchodní cestující</td></tr>
+        <tr><td class="sung">dvojité vé</td><td><span class="hl c1">W</span> = vrcholy lichého stupně v MST</td></tr>
+        <tr><td class="sung">ó en na třetí</td><td><span class="hl c2">O(n³)</span> — složitost (kvůli matchingu)</td></tr>
+        <tr><td class="sung">matching em</td><td><span class="hl c4">M</span> = min-weight perfect matching na W</td></tr>
+        <tr><td class="sung">ó en na druhou</td><td><span class="hl c5">O(n²)</span> — double-tree</td></tr>
         <tr><td class="sung">jedna a půl krát optimum</td><td><span class="m">c(H) ≤ 3/2 · OPT</span></td></tr>
-        <tr><td class="sung">ó en na třetí</td><td><span class="m">O(n³)</span></td></tr>
         <tr><td class="sung">optimum je víc než kostra</td><td><span class="m">OPT ≥ c(T)</span></td></tr>
         <tr><td class="sung">půl optima je víc než matching</td><td><span class="m">OPT/2 ≥ c(M)</span></td></tr>
-        <tr><td class="sung">T plus M se rovná L</td><td><span class="m">c(T) + c(M) = c(L)</span></td></tr>
-        <tr><td class="sung">L je víc než H</td><td><span class="m">c(L) ≥ c(H)</span> (shortcutting + trojúhelník)</td></tr>
-        <tr><td class="sung">faktor dva, ó en na druhou</td><td>double-tree: <span class="m">2·OPT</span>, <span class="m">O(n²)</span></td></tr>
+        <tr><td class="sung">T plus M se rovná L, L je víc než H</td><td><span class="m">c(T)+c(M) = c(L) ≥ c(H)</span></td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
@@ -249,27 +270,27 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
     <div class="lyrics">
       <div class="col-label">🎤 Zpívej</div>
       <div class="stanza"><span class="tag">Verse 1</span><p>
-        V esku začni s nulou, všude jinde nekonečno,<br>
+        V <span class="hl c6">s</span> začni s nulou, všude jinde nekonečno,<br>
         množina R je prázdná — kdo v ní skončí, skončil věčně.<br>
-        Vyber vrchol s nejmenším el a zavři ho do R,<br>
+        Vyber vrchol s nejmenším <span class="hl c1">ℓ</span> a zavři ho do R,<br>
         relaxuj hrany, co vedou ven — a znova, dokola.
       </p></div>
       <div class="stanza chorus"><span class="tag">Chorus</span><p>
-        Jednou zavřený, navždy zavřený — el už se nezmění,<br>
-        el vé je menší nebo rovno el ká,<br>
+        Jednou zavřený, navždy zavřený — <span class="hl c1">ℓ</span> už se nezmění,<br>
+        <span class="hl c2">ℓ(v) ≤ ℓ(k)</span>,<br>
         a hrana nikdy záporná není —<br>
         proto přes otevřené to kratší nebude — bez vrácení!
       </p></div>
       <div class="stanza"><span class="tag">Verse 2</span><p>
-        Bellmanova rovnice chce minimum přes předchůdce ká:<br>
-        když ká leží v R, tu hranu už jsem relaxoval já —<br>
+        Bellmanova rovnice chce minimum přes předchůdce <span class="hl c4">k</span>:<br>
+        když <span class="hl c4">k</span> leží v R, tu hranu už jsem relaxoval já —<br>
         vnitřní smyčka prošla všechny hrany z R ven.<br>
-        Když ká leží venku? Tam se láme celý sen:
+        Když <span class="hl c4">k</span> leží venku? Tam se láme celý sen:
       </p></div>
       <div class="stanza bridge"><span class="tag">Bridge</span><p>
         Kde by se důkaz zlomil? Kdyby váhy záporné byly —<br>
         levná hrana za otevřeným vrcholem by tvrzení zabily.<br>
-        Proto Dijkstra jen s nezápornými, label setting, ó en na druhou,<br>
+        Proto Dijkstra jen s nezápornými, label setting, <span class="hl c5">O(n²)</span>,<br>
         indukce přes velikost množiny R je mu zárukou.
       </p></div>
       <div class="stanza"><span class="tag">Outro</span><p>
@@ -281,15 +302,15 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
       <h3>O čem to je</h3>
       <p><strong>Důkaz korektnosti Dijkstry</strong> (žebříček #2): indukce přes rostoucí množinu
       uzavřených vrcholů <span class="m">R</span>. Invariant: jakmile se vrchol zavře, jeho label je
-      definitivní nejkratší vzdálenost. Klíčové místo, KDE se použije nezápornost hran — bez ní celý argument padá.</p>
-      <h3>Zpíváš → notace</h3>
+      definitivní. Klíčové je místo, KDE se použije nezápornost hran — bez ní argument padá.</p>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">v esku začni s nulou, jinde nekonečno</td><td><span class="m">ℓ(s) = 0</span>, <span class="m">ℓ(v) = ∞</span></td></tr>
-        <tr><td class="sung">vrchol s nejmenším el</td><td><span class="m">v = argmin ℓ</span> mimo <span class="m">R</span></td></tr>
-        <tr><td class="sung">el vé je menší nebo rovno el ká</td><td><span class="m">ℓ(v) ≤ ℓ(k)</span> pro otevřené <span class="m">k</span></td></tr>
-        <tr><td class="sung">minimum přes předchůdce ká</td><td><span class="m">ℓ(v) = min<sub>k</sub> {ℓ(k) + c(k,v)}</span></td></tr>
-        <tr><td class="sung">hrana nikdy záporná není</td><td><span class="m">c(e) ≥ 0</span> — tady se nezápornost POUŽIJE</td></tr>
-        <tr><td class="sung">label setting, ó en na druhou</td><td>label setting, <span class="m">O(n²)</span></td></tr>
+        <tr><td class="sung">v esku začni s nulou</td><td><span class="hl c6">s</span> = zdroj; <span class="m">ℓ(s) = 0</span>, jinde <span class="m">∞</span></td></tr>
+        <tr><td class="sung">vrchol s nejmenším el</td><td><span class="hl c1">ℓ</span> = label (délka cesty); vyber min mimo R</td></tr>
+        <tr><td class="sung">el vé je menší nebo rovno el ká</td><td><span class="hl c2">ℓ(v) ≤ ℓ(k)</span> pro každý otevřený k</td></tr>
+        <tr><td class="sung">předchůdce ká</td><td><span class="hl c4">k</span>; Bellman: <span class="m">ℓ(v) = min<sub>k</sub>{ℓ(k)+c(k,v)}</span></td></tr>
+        <tr><td class="sung">ó en na druhou</td><td><span class="hl c5">O(n²)</span>, label setting</td></tr>
+        <tr><td class="sung">hrana nikdy záporná není</td><td><span class="m">c(e) ≥ 0</span> — TADY se nezápornost použije</td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
@@ -313,7 +334,7 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
     <div class="lyrics">
       <div class="col-label">🎤 Zpívej</div>
       <div class="stanza"><span class="tag">Verse 1</span><p>
-        Hledej cestu z es do té, směr hran tě netrápí,<br>
+        Hledej cestu z <span class="hl c6">s</span> do <span class="hl c6">t</span>, směr hran tě netrápí,<br>
         po směru ber hranu, když je tok pod kapacitou,<br>
         proti směru tehdy, když je tok nad dolní mezí —<br>
         augmentující cesta! Jiná pravda není!
@@ -321,23 +342,23 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
       <div class="stanza chorus"><span class="tag">Chorus</span><p>
         Po směru: míň než kapacita!<br>
         Proti směru: víc než dolní mez!<br>
-        Gama je nejmenší rezerva z celé cesty —<br>
+        <span class="hl c3">γ</span> je nejmenší rezerva z celé cesty —<br>
         po směru přičti, proti odečti — a běž!
       </p></div>
       <div class="stanza"><span class="tag">Verse 2</span><p>
-        Označkuj zdroj es a šiř tu zprávu dál:<br>
-        po směru značkuj souseda, když éf je menší než ú,<br>
-        proti směru značkuj, když éf je větší než el,<br>
-        a když označkuješ té — cestu jsi našel, námořníku!
+        Označkuj zdroj <span class="hl c6">s</span> a šiř tu zprávu dál:<br>
+        po směru značkuj souseda, když <span class="hl c1">f &lt; u</span>,<br>
+        proti směru značkuj, když <span class="hl c2">f &gt; l</span>,<br>
+        a když označkuješ <span class="hl c6">t</span> — cestu jsi našel, námořníku!
       </p></div>
       <div class="stanza bridge"><span class="tag">Bridge</span><p>
         Když už cesta není — stůj! Tok je maximální!<br>
-        Složitost: hrany krát hodnota toku — éf to škálu dální.<br>
+        Složitost: hrany krát hodnota toku — <span class="hl c5">f</span> to škálu dální.<br>
         Iracionální kapacity? Nemusí to skončit, brachu —<br>
-        Edmonds a Karp s bé ef es tě zbaví strachu!
+        Edmonds a Karp s <span class="hl c4">BFS</span> tě zbaví strachu!
       </p></div>
       <div class="stanza"><span class="tag">Outro</span><p>
-        Najdi tok, najdi cestu, spočti gamu — a znova!
+        Najdi tok, najdi cestu, spočti <span class="hl c3">γ</span> — a znova!
       </p></div>
     </div>
     <div class="explain-wrap"><div class="explain">
@@ -346,15 +367,14 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
       <p><strong>Ford–Fulkerson</strong>: opakovaně hledej augmentující cestu (neorientovaně!),
       spočti rezervu <span class="m">γ</span> a pošli ji po cestě. Labeling = šíření značek od zdroje;
       když se označkuje <span class="m">t</span>, cesta existuje. Když ne, tok je maximální.</p>
-      <h3>Zpíváš → notace</h3>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">z es do té</td><td>z <span class="m">s</span> do <span class="m">t</span></td></tr>
-        <tr><td class="sung">po směru: tok pod kapacitou / éf menší než ú</td><td>forward hrana: <span class="m">f(e) &lt; u(e)</span></td></tr>
-        <tr><td class="sung">proti směru: tok nad dolní mezí / éf větší než el</td><td>backward hrana: <span class="m">f(e) &gt; l(e)</span></td></tr>
-        <tr><td class="sung">gama je nejmenší rezerva</td><td><span class="m">γ = min</span> rezerv po cestě</td></tr>
-        <tr><td class="sung">po směru přičti, proti odečti</td><td><span class="m">f ← f ± γ</span></td></tr>
-        <tr><td class="sung">hrany krát hodnota toku</td><td><span class="m">O(m · |f*|)</span></td></tr>
-        <tr><td class="sung">bé ef es</td><td>BFS → Edmonds–Karp <span class="m">O(n·m²)</span></td></tr>
+        <tr><td class="sung">z es do té</td><td><span class="hl c6">s</span> = zdroj, <span class="hl c6">t</span> = stok</td></tr>
+        <tr><td class="sung">éf je menší než ú</td><td><span class="hl c1">f &lt; u</span> — po směru (tok pod kapacitou)</td></tr>
+        <tr><td class="sung">éf je větší než el</td><td><span class="hl c2">f &gt; l</span> — proti směru (tok nad dolní mezí)</td></tr>
+        <tr><td class="sung">gama</td><td><span class="hl c3">γ</span> = min rezerv; <span class="m">f ← f ± γ</span></td></tr>
+        <tr><td class="sung">éf to škálu dální</td><td><span class="hl c5">f</span>; složitost <span class="m">O(m·|f*|)</span></td></tr>
+        <tr><td class="sung">bé ef es</td><td><span class="hl c4">BFS</span> → Edmonds–Karp <span class="m">O(n·m²)</span></td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
@@ -378,9 +398,9 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
     <div class="lyrics">
       <div class="col-label">🎤 Zpívej</div>
       <div class="stanza"><span class="tag">Verse 1</span><p>
-        Rozděl vrcholy na dva tábory: es patří do á,<br>
-        té zůstává venku — a mezi nimi řez, delta á.<br>
-        Hrany ven, hrany dovnitř — delta plus a delta minus,<br>
+        Rozděl vrcholy na dva tábory: <span class="hl c6">s</span> patří do <span class="hl c6">A</span>,<br>
+        <span class="hl c6">t</span> zůstává venku — a mezi nimi řez, <span class="hl c1">δ(A)</span>.<br>
+        Hrany ven, hrany dovnitř — <span class="hl c2">δ⁺</span> a <span class="hl c2">δ⁻</span>,<br>
         kapacita řezu? Teď pozor na ten minus:
       </p></div>
       <div class="stanza chorus"><span class="tag">Chorus</span><p>
@@ -390,9 +410,9 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
         Ford a Fulkerson, devatenáct set padesát šest!
       </p></div>
       <div class="stanza"><span class="tag">Verse 2</span><p>
-        Když labeling skončí a té zůstane bez značky,<br>
-        označkované vrcholy tvoří á — bez hádky.<br>
-        Hrany ven jsou plné: éf se rovná ú,<br>
+        Když labeling skončí a <span class="hl c6">t</span> zůstane bez značky,<br>
+        označkované vrcholy tvoří <span class="hl c6">A</span> — bez hádky.<br>
+        Hrany ven jsou plné: <span class="hl c4">f = u</span>,<br>
         hrany dovnitř na dolní mezi — minimální řez tu máš!
       </p></div>
       <div class="stanza bridge"><span class="tag">Bridge (whisper)</span><p>
@@ -406,14 +426,14 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
       <p><strong>Věta max-flow = min-cut</strong> (Ford &amp; Fulkerson 1956). Definice řezu a hlavně
       vzorec kapacity řezu s tím zrádným minusem. Druhá sloka: jak přečíst minimální řez
       z posledního (neúspěšného) labelingu.</p>
-      <h3>Zpíváš → notace</h3>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">es patří do á, té zůstává venku</td><td><span class="m">s ∈ A</span>, <span class="m">t ∉ A</span></td></tr>
-        <tr><td class="sung">řez, delta á</td><td><span class="m">δ(A)</span></td></tr>
-        <tr><td class="sung">delta plus a delta minus</td><td><span class="m">δ⁺(A)</span> (ven), <span class="m">δ⁻(A)</span> (dovnitř)</td></tr>
-        <tr><td class="sung">kapacity ven sčítej, dolní meze dovnitř odečti</td><td><span class="m">C(A) = Σ u(δ⁺(A)) − Σ l(δ⁻(A))</span></td></tr>
-        <tr><td class="sung">hrany ven jsou plné: éf se rovná ú</td><td><span class="m">f(e) = u(e)</span> pro <span class="m">e ∈ δ⁺(A)</span></td></tr>
-        <tr><td class="sung">hrany dovnitř na dolní mezi</td><td><span class="m">f(e) = l(e)</span> pro <span class="m">e ∈ δ⁻(A)</span></td></tr>
+        <tr><td class="sung">es patří do á, té zůstává venku</td><td><span class="hl c6">s ∈ A</span>, <span class="hl c6">t ∉ A</span></td></tr>
+        <tr><td class="sung">řez, delta á</td><td><span class="hl c1">δ(A)</span> = hrany mezi A a zbytkem</td></tr>
+        <tr><td class="sung">delta plus a delta minus</td><td><span class="hl c2">δ⁺(A)</span> ven, <span class="hl c2">δ⁻(A)</span> dovnitř</td></tr>
+        <tr><td class="sung">kapacity ven sčítej, dolní meze dovnitř odečti</td><td><span class="m">C(A) = Σu(δ⁺(A)) − Σl(δ⁻(A))</span></td></tr>
+        <tr><td class="sung">éf se rovná ú</td><td><span class="hl c4">f = u</span> na hranách ven (plné)</td></tr>
+        <tr><td class="sung">hrany dovnitř na dolní mezi</td><td><span class="m">f = l</span> na hranách dovnitř</td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
@@ -436,48 +456,48 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
     <div class="lyrics">
       <div class="col-label">🎤 Zpívej</div>
       <div class="stanza"><span class="tag">Intro (spoken)</span><p>
-        Pé es jedna. Temp. Cé max. Time-indexed. Pět omezení. Jedem!
+        <span class="hl c1">PS1. temp. C<sub>max</sub>.</span> Time-indexed. Pět omezení. Jedem!
       </p></div>
       <div class="stanza"><span class="tag">Verse 1</span><p>
-        Á í té je jedna, když úloha í startuje v té,<br>
+        <span class="hl c2">a<sub>it</sub></span> je jedna, když úloha <span class="hl c2">i</span> startuje v <span class="hl c2">t</span>,<br>
         binárka přes celý horizont, horní mez je strop, oukej.<br>
         Pět bloků staví model, žádný nesmíš vynechat —<br>
         kdo zapomene na zdroje, ten jde od zkoušky spát!
       </p></div>
       <div class="stanza chorus"><span class="tag">Chorus</span><p>
-        JEDNA: suma á í té přes té je jedna — start právě jednou!<br>
-        DVA: es í je suma té krát á í té — startovní čas!<br>
-        TŘI: es í plus el í jé menší rovno es jé — temporální vazba!<br>
-        ČTYŘI: v každém čase tau běží nejvýš jedna — zdroj nás hlídá zas!<br>
-        PĚT: es í plus pé í menší rovno cé max — a cé max minimalizuj!
+        JEDNA: <span class="hl c3">Σ<sub>t</sub> a<sub>it</sub> = 1</span> — start právě jednou!<br>
+        DVA: <span class="hl c4">s<sub>i</sub> = Σ<sub>t</sub> t·a<sub>it</sub></span> — startovní čas!<br>
+        TŘI: <span class="hl c5">s<sub>i</sub> + l<sub>ij</sub> ≤ s<sub>j</sub></span> — temporální vazba!<br>
+        ČTYŘI: v každém čase <span class="hl c6">τ</span> běží nejvýš jedna — zdroj nás hlídá zas!<br>
+        PĚT: <span class="hl c7">s<sub>i</sub> + p<sub>i</sub> ≤ C<sub>max</sub></span> — a <span class="hl c7">C<sub>max</sub></span> minimalizuj!
       </p></div>
       <div class="stanza"><span class="tag">Verse 2</span><p>
         To okno v bloku čtyři, to je finta celá:<br>
-        té menší rovno tau, tau OSTŘE pod té plus pé í — tak se to dělá.<br>
-        Úloha, co startuje v té, zrovna běží v čase tau —<br>
+        <span class="hl c8">t ≤ τ, τ &lt; t + p<sub>i</sub></span> — tak se to dělá.<br>
+        Úloha, co startuje v <span class="hl c2">t</span>, zrovna běží v čase <span class="hl c6">τ</span> —<br>
         neostrá zleva, ostrá zprava — zapiš si to, čau!
       </p></div>
       <div class="stanza bridge"><span class="tag">Bridge</span><p>
         Jednou startuješ, startem počítáš,<br>
         vazby ctíš, zdroj nepřetížíš,<br>
-        konec pod cé max — a cé max tlačíš níž!
+        konec pod <span class="hl c7">C<sub>max</sub></span> — a <span class="hl c7">C<sub>max</sub></span> tlačíš níž!
       </p></div>
     </div>
     <div class="explain-wrap"><div class="explain">
       <div class="col-label">📖 Vysvětlení</div>
       <h3>O čem to je</h3>
-      <p><strong>Time-indexed ILP pro <span class="m">PS1 | temp | C<sub>max</sub></span></strong> —
-      nejrecyklovanější ILP úloha rozvrhovacího slotu. Binární proměnná <span class="m">a<sub>it</sub></span>
-      říká, kdy úloha startuje; refrén je všech 5 omezení v pořadí.</p>
-      <h3>Zpíváš → notace (5 omezení)</h3>
+      <p><strong>Time-indexed ILP</strong> pro projektové rozvrhování s temporálními vazbami —
+      nejrecyklovanější ILP úloha rozvrhovacího slotu. Refrén = všech 5 omezení v pořadí.</p>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">á í té je jedna, když í startuje v té</td><td><span class="m">a<sub>it</sub> ∈ {0,1}</span></td></tr>
-        <tr><td class="sung">1: suma á í té přes té je jedna</td><td><span class="m">Σ<sub>t</sub> a<sub>it</sub> = 1</span></td></tr>
-        <tr><td class="sung">2: es í je suma té krát á í té</td><td><span class="m">s<sub>i</sub> = Σ<sub>t</sub> t·a<sub>it</sub></span></td></tr>
-        <tr><td class="sung">3: es í plus el í jé menší rovno es jé</td><td><span class="m">s<sub>i</sub> + l<sub>ij</sub> ≤ s<sub>j</sub></span></td></tr>
-        <tr><td class="sung">4: v čase tau běží nejvýš jedna</td><td><span class="m">Σ<sub>i</sub> Σ<sub>t: t ≤ τ &lt; t+p<sub>i</sub></sub> a<sub>it</sub> ≤ 1</span></td></tr>
-        <tr><td class="sung">5: es í plus pé í menší rovno cé max</td><td><span class="m">s<sub>i</sub> + p<sub>i</sub> ≤ C<sub>max</sub></span>, <span class="m">min C<sub>max</sub></span></td></tr>
-        <tr><td class="sung">neostrá zleva, ostrá zprava</td><td><span class="m">t ≤ τ &lt; t + p<sub>i</sub></span></td></tr>
+        <tr><td class="sung">pé es jedna, temp, cé max</td><td><span class="hl c1">PS1 | temp | C<sub>max</sub></span> — Grahamův zápis problému</td></tr>
+        <tr><td class="sung">á í té je jedna, když í startuje v té</td><td><span class="hl c2">a<sub>it</sub> ∈ {0,1}</span> — binární start. proměnná</td></tr>
+        <tr><td class="sung">suma á í té přes té je jedna</td><td><span class="hl c3">Σ<sub>t</sub> a<sub>it</sub> = 1</span> — každá úloha startuje právě jednou</td></tr>
+        <tr><td class="sung">es í je suma té krát á í té</td><td><span class="hl c4">s<sub>i</sub> = Σ<sub>t</sub> t·a<sub>it</sub></span> — definice startu</td></tr>
+        <tr><td class="sung">es í plus el í jé menší rovno es jé</td><td><span class="hl c5">s<sub>i</sub> + l<sub>ij</sub> ≤ s<sub>j</sub></span> — temporální vazba</td></tr>
+        <tr><td class="sung">v každém čase tau…</td><td><span class="hl c6">τ</span>: <span class="m">Σ<sub>i</sub> Σ<sub>t≤τ&lt;t+p<sub>i</sub></sub> a<sub>it</sub> ≤ 1</span> — zdroj</td></tr>
+        <tr><td class="sung">es í plus pé í menší rovno cé max</td><td><span class="hl c7">s<sub>i</sub> + p<sub>i</sub> ≤ C<sub>max</sub></span>, <span class="m">min C<sub>max</sub></span></td></tr>
+        <tr><td class="sung">té menší rovno tau, tau ostře pod té plus pé í</td><td><span class="hl c8">t ≤ τ &lt; t + p<sub>i</sub></span> — okno „běží v τ“</td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
@@ -501,53 +521,52 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
     <div class="lyrics">
       <div class="col-label">🎤 Zpívej</div>
       <div class="stanza"><span class="tag">Verse 1</span><p>
-        Level koncové úlohy? Prostě její pé.<br>
-        Jinak pé plus maximum levelů následníků, jé!<br>
+        Level koncové úlohy? Prostě její <span class="hl c1">p</span>.<br>
+        Jinak <span class="hl c1">p</span> plus maximum levelů následníků, jé!<br>
         Počítej to odzadu, od konce ke startu —<br>
         nejdelší cesta do cíle, tu měj v kartu.
       </p></div>
       <div class="stanza chorus"><span class="tag">Chorus</span><p>
         Nejvyšší level bere procesory — to je zákon náš!<br>
-        Když je úloh víc než strojů: beta je há lomeno es!<br>
-        Delta: někdo SKONČÍ, někdo KLESNE, někdo DOHÁNÍ —<br>
+        Když je úloh víc než strojů: <span class="hl c2">β = h / |S|</span>!<br>
+        <span class="hl c3">δ</span>: někdo SKONČÍ, někdo KLESNE, někdo DOHÁNÍ —<br>
         a McNaughton to nakonec všechno srovná, yes!
       </p></div>
       <div class="stanza"><span class="tag">Verse 2</span><p>
         Případ jedna: úloha doběhla — hotovo, šmik.<br>
         Případ dva: přiřazená klesla pod ready čekající — přepočti vmžik.<br>
-        Případ tři: rychlejší s větší betou dohnal pomalou —<br>
-        sniž pé i levely o delta krát beta, posuň čas, jedem dál!
+        Případ tři: rychlejší s větší <span class="hl c2">β</span> dohnal pomalou —<br>
+        sniž <span class="hl c1">p</span> i levely o <span class="hl c3">δ·β</span>, posuň čas, jedem dál!
       </p></div>
       <div class="stanza bridge"><span class="tag">Bridge</span><p>
-        Cé max s hvězdičkou: vezmi MAXIMUM ze dvou —<br>
-        nejdelší úloha, nebo suma pé lomeno er!<br>
+        <span class="hl c4">C*<sub>max</sub></span>: vezmi MAXIMUM ze dvou —<br>
+        nejdelší úloha, nebo <span class="hl c4">Σp / R</span>!<br>
         Namotávej úlohy přes okraj jako koberec,<br>
-        každá se zlomí nejvýš jednou — McNaughton, ó en, věř!
+        každá se zlomí nejvýš jednou — McNaughton, <span class="hl c5">O(n)</span>, věř!
       </p></div>
       <div class="stanza"><span class="tag">Verse 3</span><p>
         Dva stroje, preempce, precedence — výsledek přesný!<br>
         Preempce a les — taky přesný, to je hezký.<br>
-        Jinak aproximace: dvě minus dvě lomeno er —<br>
-        Muntz a Coffman, ó en na druhou, tref se a ber!
+        Jinak aproximace: <span class="hl c6">2 − 2/R</span> —<br>
+        Muntz a Coffman, <span class="hl c7">O(n²)</span>, tref se a ber!
       </p></div>
     </div>
     <div class="explain-wrap"><div class="explain">
       <div class="col-label">📖 Vysvětlení</div>
       <h3>O čem to je</h3>
       <p><strong>Muntz &amp; Coffman</strong> (<span class="m">P | pmtn, prec | C<sub>max</sub></span>):
-      level = nejdelší cesta do konce, nejvyšší level dostává procesory, při remíze se stroje dělí
+      level = nejdelší cesta do konce, nejvyšší level dostává procesory, při remíze se výkon dělí
       (<span class="m">β</span>). Tři události <span class="m">δ</span> přepočítávají přiřazení;
-      výsledný „kapacitní profil“ dokončí McNaughtonovo namotávání.</p>
-      <h3>Zpíváš → notace</h3>
+      výsledný profil dokončí McNaughtonovo namotávání.</p>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">level koncové úlohy je její pé</td><td><span class="m">level(i) = p<sub>i</sub></span> (koncová)</td></tr>
-        <tr><td class="sung">pé plus maximum levelů následníků</td><td><span class="m">level(i) = p<sub>i</sub> + max<sub>j∈succ(i)</sub> level(j)</span></td></tr>
-        <tr><td class="sung">beta je há lomeno es</td><td><span class="m">β = h / |S|</span></td></tr>
-        <tr><td class="sung">sniž pé i levely o delta krát beta</td><td><span class="m">p ← p − δ·β</span></td></tr>
-        <tr><td class="sung">nejdelší úloha, nebo suma pé lomeno er</td><td><span class="m">C*<sub>max</sub> = max(max<sub>j</sub> p<sub>j</sub>, Σp<sub>j</sub>/R)</span></td></tr>
-        <tr><td class="sung">McNaughton, ó en</td><td><span class="m">O(n)</span></td></tr>
-        <tr><td class="sung">dvě minus dvě lomeno er</td><td>faktor <span class="m">2 − 2/R</span></td></tr>
-        <tr><td class="sung">ó en na druhou</td><td><span class="m">O(n²)</span></td></tr>
+        <tr><td class="sung">prostě její pé</td><td><span class="hl c1">p</span>; level(i) = <span class="m">p<sub>i</sub> + max level následníků</span></td></tr>
+        <tr><td class="sung">beta je há lomeno es</td><td><span class="hl c2">β = h / |S|</span> — díl procesoru na úlohu (h strojů, |S| úloh)</td></tr>
+        <tr><td class="sung">delta (krát beta)</td><td><span class="hl c3">δ</span> = čas do další události; sniž p o <span class="hl c3">δ·β</span></td></tr>
+        <tr><td class="sung">cé max s hvězdičkou… suma pé lomeno er</td><td><span class="hl c4">C*<sub>max</sub> = max(max p<sub>j</sub>, Σp<sub>j</sub>/R)</span> — McNaughton</td></tr>
+        <tr><td class="sung">McNaughton, ó en</td><td><span class="hl c5">O(n)</span> — každá úloha se zlomí nejvýš 1×</td></tr>
+        <tr><td class="sung">dvě minus dvě lomeno er</td><td><span class="hl c6">2 − 2/R</span> — aproximační faktor M&amp;C</td></tr>
+        <tr><td class="sung">ó en na druhou</td><td><span class="hl c7">O(n²)</span> — složitost M&amp;C</td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
@@ -562,36 +581,36 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
 <section class="song" id="s7">
   <div class="song-head">
     <div class="song-num">7</div>
-    <div class="song-title">Pro každé á existuje bé (AC-3)</div>
+    <div class="song-title">Pro každé a existuje b (AC-3)</div>
     <span class="genre">synth-pop</span>
-    <audio controls preload="none" data-name="7 — Pro každé á existuje bé (AC-3)" src="audio/konzistentni-fronta.mp3"></audio>
+    <audio controls preload="none" data-name="7 — Pro každé a existuje b (AC-3)" src="audio/konzistentni-fronta.mp3"></audio>
   </div>
   <div class="song-body">
     <div class="lyrics">
       <div class="col-label">🎤 Zpívej</div>
       <div class="stanza"><span class="tag">Verse 1</span><p>
-        Hrana z iks í do iks jé je konzistentní jenom tehdy,<br>
-        když pro KAŽDOU hodnotu á z domény dé í<br>
-        EXISTUJE bé v doméně dé jé,<br>
+        Hrana z <span class="hl c1">x<sub>i</sub></span> do <span class="hl c1">x<sub>j</sub></span> je konzistentní jenom tehdy,<br>
+        když pro KAŽDOU hodnotu <span class="hl c2">a</span> z domény <span class="hl c2">D<sub>i</sub></span><br>
+        EXISTUJE <span class="hl c3">b</span> v doméně <span class="hl c3">D<sub>j</sub></span>,<br>
         že spolu splní všechna omezení — tak zní ty věty!
       </p></div>
       <div class="stanza chorus"><span class="tag">Chorus</span><p>
-        Pro každé á existuje bé —<br>
+        Pro každé <span class="hl c2">a</span> existuje <span class="hl c3">b</span> —<br>
         kdo podporu nemá, z domény jde ven!<br>
-        Mazal jsi v doméně ká? Vrať do fronty hrany DO ká —<br>
-        jen tu od em ne! Á cé tři, krásný den!
+        Mazal jsi v doméně <span class="hl c5">k</span>? Vrať do fronty hrany DO <span class="hl c5">k</span> —<br>
+        jen tu od <span class="hl c5">m</span> ne! <span class="hl c6">AC-3</span>, krásný den!
       </p></div>
       <div class="stanza"><span class="tag">Verse 2</span><p>
         A pozor: hrana má SMĚR, to si pamatuj —<br>
-        í jé konzistentní neznamená jé í, aleluj!<br>
+        <span class="hl c4">(i,j)</span> konzistentní neznamená <span class="hl c4">(j,i)</span>, aleluj!<br>
         Fronta startuje se všemi orientovanými hranami,<br>
-        vyber ká em, zavolej REVISE — a co s mazáními?
+        vyber <span class="hl c4">(k,m)</span>, zavolej REVISE — a co s mazáními?
       </p></div>
       <div class="stanza bridge"><span class="tag">Bridge</span><p>
         Prázdná doména? Fail — jdi domů, konec hry.<br>
-        Revize ká em nerozbije hranu em ká — ta klidně spí.<br>
+        Revize <span class="hl c4">(k,m)</span> nerozbije hranu <span class="hl c4">(m,k)</span> — ta klidně spí.<br>
         A závěr zrádný, ten si vryj do hlavy:<br>
-        konzistence hran ti ŘEŠENÍ NEZARUČÍ — á cé je neúplná, tak to ber!
+        konzistence hran ti ŘEŠENÍ NEZARUČÍ — <span class="hl c6">AC</span> je neúplná, tak to ber!
       </p></div>
     </div>
     <div class="explain-wrap"><div class="explain">
@@ -600,15 +619,14 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
       <p><strong>Arc consistency + AC-3</strong>: definice s kvantifikátory, orientovanost hran,
       REVISE a pravidlo znovuzařazení do fronty. Pointa: AC je <strong>neúplná</strong> — i plně
       konzistentní CSP nemusí mít řešení (protipříklad: trojúhelník s ≠).</p>
-      <h3>Zpíváš → notace</h3>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">hrana z iks í do iks jé</td><td>hrana <span class="m">(x<sub>i</sub>, x<sub>j</sub>)</span></td></tr>
-        <tr><td class="sung">pro každé á … existuje bé</td><td><span class="m">∀a ∈ D<sub>i</sub> ∃b ∈ D<sub>j</sub></span></td></tr>
-        <tr><td class="sung">í jé neznamená jé í</td><td><span class="m">(i,j)</span> AC ⇏ <span class="m">(j,i)</span> AC</td></tr>
-        <tr><td class="sung">fronta se všemi hranami</td><td><span class="m">Q := E(G)</span></td></tr>
-        <tr><td class="sung">vyber ká em</td><td>vyber <span class="m">(k,m)</span> z fronty</td></tr>
-        <tr><td class="sung">vrať hrany do ká, jen tu od em ne</td><td>přidej <span class="m">(i,k)</span> pro <span class="m">i ≠ m</span></td></tr>
-        <tr><td class="sung">revize ká em nerozbije em ká</td><td>REVISE<span class="m">(k,m)</span> nemění AC hrany <span class="m">(m,k)</span></td></tr>
+        <tr><td class="sung">hrana z iks í do iks jé</td><td><span class="hl c1">(x<sub>i</sub>, x<sub>j</sub>)</span> — orientovaná hrana CSP</td></tr>
+        <tr><td class="sung">každé á z domény dé í</td><td><span class="hl c2">∀a ∈ D<sub>i</sub></span></td></tr>
+        <tr><td class="sung">existuje bé v doméně dé jé</td><td><span class="hl c3">∃b ∈ D<sub>j</sub></span> — „podpora“ hodnoty a</td></tr>
+        <tr><td class="sung">í jé / jé í / ká em / em ká</td><td><span class="hl c4">(i,j) ≠ (j,i)</span>; REVISE bere <span class="hl c4">(k,m)</span></td></tr>
+        <tr><td class="sung">doména ká, hrany do ká, od em ne</td><td>škrtáš v <span class="hl c5">D<sub>k</sub></span> → přidej <span class="hl c5">(i,k)</span> pro <span class="hl c5">i ≠ m</span></td></tr>
+        <tr><td class="sung">á cé (tři)</td><td><span class="hl c6">AC-3</span> — algoritmus arc consistency</td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
@@ -632,28 +650,28 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
     <div class="lyrics">
       <div class="col-label">🎤 Zpívej</div>
       <div class="stanza"><span class="tag">Verse 1</span><p>
-        Kdyby byla er-aproximace na obecný té es pé,<br>
+        Kdyby byla <span class="hl c1">r</span>-aproximace na obecný <span class="hl c3">TSP</span>,<br>
         rozhodl bych Hamiltonův okruh polynomiálně, jé!<br>
-        Vezmi graf gé, postav úplný graf na en vrcholech,<br>
+        Vezmi graf <span class="hl c2">G</span>, postav úplný graf na <span class="hl c2">n</span> vrcholech,<br>
         a teď ty váhy — ať nezůstaneš v koncích:
       </p></div>
       <div class="stanza chorus"><span class="tag">Chorus</span><p>
         JEDNA — když hrana v grafu JE!<br>
-        DVA PLUS ER MINUS JEDNA KRÁT EN — když NENÍ!<br>
-        Nejvýš er krát en? Hamilton EXISTUJE!<br>
-        Víc? Hamilton NENÍ! — Spor, pokud pé není en pé!
+        <span class="hl c4">2 + (r−1)·n</span> — když NENÍ!<br>
+        Nejvýš <span class="hl c1">r·n</span>? Hamilton EXISTUJE!<br>
+        Víc? Hamilton NENÍ! — Spor, pokud <span class="hl c5">P ≠ NP</span>!
       </p></div>
       <div class="stanza"><span class="tag">Verse 2</span><p>
-        Když okruh existuje, optimum je přesně en,<br>
-        aproximace vrátí nejvýš er krát en.<br>
+        Když okruh existuje, optimum je přesně <span class="hl c2">n</span>,<br>
+        aproximace vrátí nejvýš <span class="hl c1">r·n</span>.<br>
         Když okruh neexistuje, jedna drahá hrana stačí:<br>
-        en minus jedna, plus dva, plus er minus jedna krát en —<br>
-        er krát en PLUS JEDNA — to už nic nezamlží!
+        <span class="hl c4">n−1, + 2, + (r−1)·n</span> —<br>
+        <span class="hl c4">r·n + 1</span> — to už nic nezamlží!
       </p></div>
       <div class="stanza bridge"><span class="tag">Bridge (slow, heavy)</span><p>
         Dej váhy jedna a dva — trojúhelník platí dál…<br>
-        proto i METRICKÝ té es pé je en pé těžký král!<br>
-        Optimum rovno en — právě když Hamilton žije…
+        proto i METRICKÝ <span class="hl c3">TSP</span> je <span class="hl c5">NP</span>-těžký král!<br>
+        Optimum rovno <span class="hl c2">n</span> — právě když Hamilton žije…
       </p></div>
     </div>
     <div class="explain-wrap"><div class="explain">
@@ -661,16 +679,15 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
       <h3>O čem to je</h3>
       <p><strong>Neexistence r-aproximace pro obecný TSP</strong> (žebříček #3). Důkaz sporem:
       kdyby existovala, rozhodla by NP-úplný Hamiltonův okruh v polynomiálním čase.
-      Klíč = konstrukce vah, která mezi „okruh je“ a „okruh není“ vytvoří mezeru větší než faktor <span class="m">r</span>.</p>
-      <h3>Zpíváš → notace</h3>
+      Klíč = váhy, které mezi „okruh je“ a „okruh není“ udělají mezeru větší než faktor <span class="m">r</span>.</p>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">jedna — když hrana v grafu je</td><td><span class="m">c(e) = 1</span> pro <span class="m">e ∈ E(G)</span></td></tr>
-        <tr><td class="sung">dva plus er minus jedna krát en — když není</td><td><span class="m">c(e) = 2 + (r−1)·n</span> jinak</td></tr>
-        <tr><td class="sung">optimum je přesně en</td><td>HC existuje ⟹ <span class="m">OPT = n</span></td></tr>
-        <tr><td class="sung">aproximace vrátí nejvýš er krát en</td><td><span class="m">J<sup>A</sup> ≤ r·OPT = r·n</span></td></tr>
-        <tr><td class="sung">en minus jedna, plus dva, plus er minus jedna krát en</td><td><span class="m">(n−1)·1 + 2 + (r−1)·n = r·n + 1</span></td></tr>
-        <tr><td class="sung">pokud pé není en pé</td><td>spor, pokud <span class="m">P ≠ NP</span></td></tr>
-        <tr><td class="sung">váhy jedna a dva</td><td><span class="m">c ∈ {1, 2}</span> ⟹ metrický TSP je NP-těžký</td></tr>
+        <tr><td class="sung">er(-aproximace), er krát en</td><td><span class="hl c1">r</span> = faktor; mez <span class="hl c1">r·n</span></td></tr>
+        <tr><td class="sung">graf gé, en vrcholů, optimum přesně en</td><td><span class="hl c2">G</span>, <span class="hl c2">n</span>; HC existuje ⟹ <span class="hl c2">OPT = n</span></td></tr>
+        <tr><td class="sung">té es pé</td><td><span class="hl c3">TSP</span></td></tr>
+        <tr><td class="sung">dva plus er minus jedna krát en</td><td><span class="hl c4">c(e) = 2 + (r−1)·n</span> pro hrany mimo G; bez HC pak okruh ≥ <span class="hl c4">r·n + 1</span></td></tr>
+        <tr><td class="sung">pé není en pé</td><td><span class="hl c5">P ≠ NP</span> — předpoklad sporu</td></tr>
+        <tr><td class="sung">váhy jedna a dva</td><td><span class="m">c ∈ {1,2}</span> ⟹ i metrický TSP je NP-těžký</td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
@@ -694,44 +711,44 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
     <div class="lyrics">
       <div class="col-label">🎤 Zpívej</div>
       <div class="stanza"><span class="tag">Verse 1</span><p>
-        Nula v esku, nekonečno všude jinde, jak to znáš,<br>
-        en minus jedna kol — a v každém VŠECHNY hrany relaxuješ.<br>
+        Nula v <span class="hl c6">s</span>, nekonečno všude jinde, jak to znáš,<br>
+        <span class="hl c1">n−1</span> kol — a v každém VŠECHNY hrany relaxuješ.<br>
         Label correcting, nic se nezavírá,<br>
-        ó en krát em — a záporná hrana? Žádná díra!
+        <span class="hl c2">O(n·m)</span> — a záporná hrana? Žádná díra!
       </p></div>
       <div class="stanza chorus"><span class="tag">Chorus</span><p>
-        En minus jedna kol, všechny hrany relaxuj!<br>
-        Po ká kolech máš cesty na nejvýš ká hran!<br>
-        Žádná cesta nemá víc než en minus jedna hran —<br>
-        Bellman a Ford, ó en em — žádný klam!
+        <span class="hl c1">n−1</span> kol, všechny hrany relaxuj!<br>
+        Po <span class="hl c3">k</span> kolech máš cesty na nejvýš <span class="hl c3">k</span> hran!<br>
+        Žádná cesta nemá víc než <span class="hl c1">n−1</span> hran —<br>
+        Bellman a Ford, <span class="hl c2">O(n·m)</span> — žádný klam!
       </p></div>
       <div class="stanza"><span class="tag">Verse 2</span><p>
         Důkaz jede ve třech krocích, poslouchej ten ráj:<br>
-        ALGORITMUS: el ká je nejvýš el ká minus jedna plus cena hrany,<br>
-        INDUKCE: to je nejvýš cena cesty s ká minus jedna hranami,<br>
-        PRINCIP OPTIMALITY: dohromady cesta s ká hranami — jaj!
+        ALGORITMUS: <span class="hl c4">ℓ<sub>k</sub></span> je nejvýš <span class="hl c4">ℓ<sub>k−1</sub></span> plus cena hrany,<br>
+        INDUKCE: to je nejvýš cena cesty s <span class="hl c3">k−1</span> hranami,<br>
+        PRINCIP OPTIMALITY: dohromady cesta s <span class="hl c3">k</span> hranami — jaj!
       </p></div>
       <div class="stanza bridge"><span class="tag">Bridge</span><p>
         Po konci projdi hrany ještě jednou, jen tak zkusmo:<br>
-        když el té je větší než el vé plus cé vé té —<br>
+        když <span class="hl c5">ℓ(t) &gt; ℓ(v) + c(v,t)</span> —<br>
         ZÁPORNÝ CYKLUS v grafu, pozor, kuš ho!<br>
-        Nedosažitelné vrcholy? Nové es s nulovými hranami, jé!
+        Nedosažitelné vrcholy? Nové <span class="hl c6">s</span> s nulovými hranami, jé!
       </p></div>
     </div>
     <div class="explain-wrap"><div class="explain">
       <div class="col-label">📖 Vysvětlení</div>
       <h3>O čem to je</h3>
-      <p><strong>Bellman–Ford</strong> (žebříček #4): label-correcting algoritmus, zvládá záporné hrany.
+      <p><strong>Bellman–Ford</strong> (žebříček #4): label-correcting, zvládá záporné hrany.
       Důkaz korektnosti = věta o k-té iteraci (řetěz ALG → indukce → Bellmanův princip).
       Extra průchod po konci detekuje záporný cyklus. <em>(Téma ústní zkoušky.)</em></p>
-      <h3>Zpíváš → notace</h3>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">nula v esku, nekonečno jinde</td><td><span class="m">ℓ(s)=0</span>, <span class="m">ℓ(v)=∞</span></td></tr>
-        <tr><td class="sung">en minus jedna kol</td><td><span class="m">n−1</span> iterací přes všechny hrany</td></tr>
-        <tr><td class="sung">ó en krát em / ó en em</td><td><span class="m">O(n·m)</span></td></tr>
-        <tr><td class="sung">po ká kolech cesty na nejvýš ká hran</td><td><span class="m">ℓ<sub>k</sub>(v) ≤</span> délka nejkr. sledu o <span class="m">≤ k</span> hranách</td></tr>
-        <tr><td class="sung">el ká je nejvýš el ká minus jedna plus cena hrany</td><td><span class="m">ℓ<sub>k</sub>(v) ≤ ℓ<sub>k−1</sub>(u) + c(u,v)</span></td></tr>
-        <tr><td class="sung">el té větší než el vé plus cé vé té</td><td><span class="m">ℓ(t) &gt; ℓ(v) + c(v,t)</span> ⟹ záporný cyklus</td></tr>
+        <tr><td class="sung">nula v esku, nové es</td><td><span class="hl c6">s</span>; <span class="m">ℓ(s)=0</span>, jinde <span class="m">∞</span></td></tr>
+        <tr><td class="sung">en minus jedna kol</td><td><span class="hl c1">n−1</span> iterací (delší cesta neexistuje)</td></tr>
+        <tr><td class="sung">ó en krát em / ó en em</td><td><span class="hl c2">O(n·m)</span></td></tr>
+        <tr><td class="sung">po ká kolech, cesty na ká hran</td><td><span class="hl c3">k</span>: <span class="m">ℓ<sub>k</sub>(v) ≤</span> délka nejkr. sledu o ≤ k hranách</td></tr>
+        <tr><td class="sung">el ká je nejvýš el ká minus jedna plus cena</td><td><span class="hl c4">ℓ<sub>k</sub>(v) ≤ ℓ<sub>k−1</sub>(u) + c(u,v)</span></td></tr>
+        <tr><td class="sung">el té větší než el vé plus cé vé té</td><td><span class="hl c5">ℓ(t) &gt; ℓ(v) + c(v,t)</span> ⟹ záporný cyklus</td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
@@ -755,30 +772,30 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
     <div class="lyrics">
       <div class="col-label">🎤 Zpívej</div>
       <div class="stanza"><span class="tag">Verse 1</span><p>
-        Alfa, to jsou STROJE: jednička je jeden stroj,<br>
-        pé jsou paralelní stejné, kvé uniformní — rychlost hraje roli svou,<br>
-        er jsou unrelated — tabulka časů, každý stroj svůj svět,<br>
-        ó ef jé: open shop, flow shop, job shop — a pé es projekty hned!
+        <span class="hl c1">α</span>, to jsou STROJE: jednička je jeden stroj,<br>
+        <span class="hl c2">P</span> jsou paralelní stejné, <span class="hl c2">Q</span> uniformní — rychlost hraje roli svou,<br>
+        <span class="hl c2">R</span> jsou unrelated — tabulka časů, každý stroj svůj svět,<br>
+        <span class="hl c2">O, F, J</span>: open shop, flow shop, job shop — a <span class="hl c2">PS</span> projekty hned!
       </p></div>
       <div class="stanza chorus"><span class="tag">Chorus</span><p>
-        Alfa — beta — gama!<br>
+        <span class="hl c1">α</span> — <span class="hl c1">β</span> — <span class="hl c1">γ</span>!<br>
         Stroje — úlohy — kritérium!<br>
-        Vlnka nad dé je DEADLINE — tvrdá zeď,<br>
-        bez vlnky DUE DATE — lateness, no problém!<br>
-        Cé max, el max, suma cé jé —<br>
-        alfa beta gama — celé schéma, jé!
+        Vlnka nad <span class="hl c3">d</span> je DEADLINE — tvrdá zeď,<br>
+        bez vlnky <span class="hl c4">d</span> DUE DATE — lateness, no problém!<br>
+        <span class="hl c5">C<sub>max</sub></span>, <span class="hl c5">L<sub>max</sub></span>, <span class="hl c5">ΣC<sub>j</sub></span> —<br>
+        <span class="hl c1">α β γ</span> — celé schéma, jé!
       </p></div>
       <div class="stanza"><span class="tag">Verse 2</span><p>
-        Beta, to jsou VLASTNOSTI: pé em té en — smíš přerušit,<br>
-        prec jsou předchůdci, temp: es í plus el í jé pod es jé musíš ctít,<br>
-        er jé je release time — dřív se prostě nezačne,<br>
-        pé jé rovno konstanta — všechno stejně dlouhé, vidíš, jak to jde snadně!
+        <span class="hl c1">β</span>, to jsou VLASTNOSTI: <span class="hl c6">pmtn</span> — smíš přerušit,<br>
+        prec jsou předchůdci, temp: <span class="hl c7">s<sub>i</sub> + l<sub>ij</sub></span> pod <span class="hl c7">s<sub>j</sub></span> musíš ctít,<br>
+        <span class="hl c8">r<sub>j</sub></span> je release time — dřív se prostě nezačne,<br>
+        <span class="hl c9">p<sub>j</sub> = konstanta</span> — všechno stejně dlouhé, vidíš, jak to jde snadně!
       </p></div>
       <div class="stanza bridge"><span class="tag">Bridge</span><p>
-        Gama: cé max je makespan — konec posledního z nás,<br>
-        el max: maximum z cé jé minus dé jé — zpoždění hlas,<br>
-        suma cé jé, nebo s vahami suma vé jé cé jé,<br>
-        a prázdné gama? Jen rozhodni: jde to, nejde — oukej!
+        <span class="hl c1">γ</span>: <span class="hl c5">C<sub>max</sub></span> je makespan — konec posledního z nás,<br>
+        <span class="hl c5">L<sub>max</sub></span>: maximum z <span class="hl c5">C<sub>j</sub> − d<sub>j</sub></span> — zpoždění hlas,<br>
+        <span class="hl c5">ΣC<sub>j</sub></span>, nebo s vahami <span class="hl c5">Σw<sub>j</sub>C<sub>j</sub></span>,<br>
+        a prázdné <span class="hl c1">γ</span>? Jen rozhodni: jde to, nejde — oukej!
       </p></div>
     </div>
     <div class="explain-wrap"><div class="explain">
@@ -786,18 +803,18 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
       <h3>O čem to je</h3>
       <p><strong>Grahamova notace <span class="m">α | β | γ</span></strong> — slovníček, kterým se
       zapisují všechny rozvrhovací problémy: stroje | vlastnosti úloh | kritérium.
-      Nejzrádnější detail: rozdíl deadline (<span class="m">d̃</span>, tvrdý) vs. due date (<span class="m">d</span>, měkký).</p>
-      <h3>Zpíváš → notace</h3>
+      Nejzrádnější detail: deadline (<span class="m">d̃</span>, tvrdý) vs. due date (<span class="m">d</span>, měkký).</p>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">alfa: jednička, pé, kvé, er</td><td><span class="m">1</span>, <span class="m">P</span> (identické), <span class="m">Q</span> (uniformní), <span class="m">R</span> (unrelated)</td></tr>
-        <tr><td class="sung">ó ef jé a pé es</td><td><span class="m">O</span>, <span class="m">F</span>, <span class="m">J</span> (shopy), <span class="m">PS</span> (projekty)</td></tr>
-        <tr><td class="sung">vlnka nad dé je deadline</td><td><span class="m">d̃<sub>j</sub></span> = deadline (nesmí se překročit)</td></tr>
-        <tr><td class="sung">bez vlnky due date</td><td><span class="m">d<sub>j</sub></span> = due date (smí, počítá se lateness)</td></tr>
-        <tr><td class="sung">pé em té en</td><td><span class="m">pmtn</span> = preempce povolena</td></tr>
-        <tr><td class="sung">temp: es í plus el í jé pod es jé</td><td><span class="m">s<sub>i</sub> + l<sub>ij</sub> ≤ s<sub>j</sub></span></td></tr>
-        <tr><td class="sung">er jé je release time</td><td><span class="m">r<sub>j</sub></span></td></tr>
-        <tr><td class="sung">el max: maximum z cé jé minus dé jé</td><td><span class="m">L<sub>max</sub> = max<sub>j</sub> (C<sub>j</sub> − d<sub>j</sub>)</span></td></tr>
-        <tr><td class="sung">suma cé jé / suma vé jé cé jé</td><td><span class="m">ΣC<sub>j</sub></span> / <span class="m">Σw<sub>j</sub>C<sub>j</sub></span></td></tr>
+        <tr><td class="sung">alfa / beta / gama</td><td><span class="hl c1">α | β | γ</span> = stroje | úlohy | kritérium</td></tr>
+        <tr><td class="sung">pé, kvé, er, ó ef jé, pé es</td><td><span class="hl c2">P</span> identické, <span class="hl c2">Q</span> uniformní, <span class="hl c2">R</span> unrelated, <span class="hl c2">O/F/J</span> shopy, <span class="hl c2">PS</span> projekty</td></tr>
+        <tr><td class="sung">vlnka nad dé</td><td><span class="hl c3">d̃<sub>j</sub></span> = deadline (nesmí se překročit)</td></tr>
+        <tr><td class="sung">bez vlnky dé</td><td><span class="hl c4">d<sub>j</sub></span> = due date (smí; měří se lateness)</td></tr>
+        <tr><td class="sung">cé max, el max, suma cé jé, suma vé jé cé jé</td><td><span class="hl c5">C<sub>max</sub></span>, <span class="hl c5">L<sub>max</sub> = max(C<sub>j</sub>−d<sub>j</sub>)</span>, <span class="hl c5">ΣC<sub>j</sub></span>, <span class="hl c5">Σw<sub>j</sub>C<sub>j</sub></span></td></tr>
+        <tr><td class="sung">pé em té en</td><td><span class="hl c6">pmtn</span> = preempce povolena</td></tr>
+        <tr><td class="sung">es í plus el í jé pod es jé</td><td><span class="hl c7">s<sub>i</sub> + l<sub>ij</sub> ≤ s<sub>j</sub></span> = temp</td></tr>
+        <tr><td class="sung">er jé</td><td><span class="hl c8">r<sub>j</sub></span> = release time</td></tr>
+        <tr><td class="sung">pé jé rovno konstanta</td><td><span class="hl c9">p<sub>j</sub> = p</span> — stejné délky</td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
@@ -819,27 +836,27 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
     <div class="lyrics">
       <div class="col-label">🎤 Zpívej</div>
       <div class="stanza"><span class="tag">Verse 1</span><p>
-        Pé dva a cé max? En pé těžké — two partition to ví,<br>
-        práh je půlka sumy pé — tak zní redukce slovy.<br>
-        Pé s preempcí a cé max? McNaughton, ó en, easy!<br>
+        <span class="hl c1">P2</span> a <span class="hl c1">C<sub>max</sub></span>? <span class="hl c2">NP</span>-těžké — two partition to ví,<br>
+        práh je půlka sumy <span class="hl c8">p</span> — tak zní redukce slovy.<br>
+        <span class="hl c1">P</span> s preempcí a <span class="hl c1">C<sub>max</sub></span>? McNaughton, <span class="hl c7">O(n)</span>, easy!<br>
         Preempce, release, deadliny, jen rozhodnout? Maximální tok to jistí!
       </p></div>
       <div class="stanza chorus"><span class="tag">Chorus</span><p>
-        List scheduling: DVĚ minus JEDNA lomeno er!<br>
-        El pé té: ČTYŘI TŘETINY minus TŘETINA lomeno er!<br>
-        Muntz a Coffman: DVĚ minus DVĚ lomeno er!<br>
+        List scheduling: <span class="hl c3">2 − 1/R</span>!<br>
+        <span class="hl c4">LPT</span>: <span class="hl c4">4/3 − ⅓/R</span>!<br>
+        Muntz a Coffman: <span class="hl c5">2 − 2/R</span>!<br>
         Tři zlomky pro zkoušku — tak si je pamatuj, věř!
       </p></div>
       <div class="stanza"><span class="tag">Verse 2</span><p>
-        Jeden stroj a el max? É dé dé — řaď podle due date!<br>
+        Jeden stroj a <span class="hl c1">L<sub>max</sub></span>? <span class="hl c6">EDD</span> — řaď podle due date!<br>
         Release a preempce k tomu? Horn — earliest deadline first, kamaráde!<br>
         Precedence navíc? Chetto, Silly, Bouchentouf — okna upraví,<br>
         release s tvrdým deadlinem bez preempce? Bratley — větve a meze — to tě zabaví!
       </p></div>
       <div class="stanza bridge"><span class="tag">Bridge</span><p>
-        Pé a cé max bez preempce: el pé té — nebo přesně Rothkopf, pseudopolynom!<br>
-        Pé es jedna s temp: time-indexed í el pé — postav si dóm!<br>
-        Jeden stroj, release, deadline: en pé těžké — three partition zvoní —<br>
+        <span class="hl c1">P</span> a <span class="hl c1">C<sub>max</sub></span> bez preempce: <span class="hl c4">LPT</span> — nebo přesně Rothkopf, pseudopolynom!<br>
+        <span class="hl c1">PS1</span> s temp: time-indexed <span class="hl c9">ILP</span> — postav si dóm!<br>
+        Jeden stroj, release, deadline: <span class="hl c2">NP</span>-těžké — three partition zvoní —<br>
         tahle mapa problém–algoritmus tě u zkoušky zachrání!
       </p></div>
     </div>
@@ -848,17 +865,17 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
       <h3>O čem to je</h3>
       <p><strong>Mapa problém → algoritmus → faktor</strong> pro rozvrhovací slot. Tři aproximační
       zlomky, které se nejvíc pletou, plus kdo řeší co přesně (EDD, Horn, CSB, Bratley, McNaughton, Rothkopf).</p>
-      <h3>Zpíváš → notace</h3>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">pé dva a cé max — en pé těžké</td><td><span class="m">P2 || C<sub>max</sub></span> NP-těžké, práh <span class="m">½Σp<sub>j</sub></span></td></tr>
-        <tr><td class="sung">pé s preempcí a cé max — McNaughton, ó en</td><td><span class="m">P | pmtn | C<sub>max</sub></span> → McNaughton <span class="m">O(n)</span></td></tr>
-        <tr><td class="sung">list scheduling: dvě minus jedna lomeno er</td><td>LS: <span class="m">2 − 1/R</span></td></tr>
-        <tr><td class="sung">el pé té: čtyři třetiny minus třetina lomeno er</td><td>LPT: <span class="m">4/3 − 1/(3R)</span></td></tr>
-        <tr><td class="sung">Muntz a Coffman: dvě minus dvě lomeno er</td><td>M&amp;C: <span class="m">2 − 2/R</span></td></tr>
-        <tr><td class="sung">jeden stroj a el max — é dé dé</td><td><span class="m">1 || L<sub>max</sub></span> → EDD</td></tr>
-        <tr><td class="sung">release a preempce — Horn</td><td><span class="m">1 | pmtn, r<sub>j</sub> | L<sub>max</sub></span> → EDF</td></tr>
-        <tr><td class="sung">Bratley — větve a meze</td><td><span class="m">1 | r<sub>j</sub>, d̃<sub>j</sub> | C<sub>max</sub></span> → B&amp;B</td></tr>
-        <tr><td class="sung">přesně Rothkopf, pseudopolynom</td><td><span class="m">P || C<sub>max</sub></span> → DP</td></tr>
+        <tr><td class="sung">pé dva a cé max, jeden stroj a el max…</td><td><span class="hl c1">P2 || C<sub>max</sub></span>, <span class="hl c1">P | pmtn | C<sub>max</sub></span>, <span class="hl c1">1 || L<sub>max</sub></span>, <span class="hl c1">PS1 | temp | C<sub>max</sub></span></td></tr>
+        <tr><td class="sung">en pé těžké</td><td><span class="hl c2">NP</span>-těžké (2-partition / 3-partition)</td></tr>
+        <tr><td class="sung">dvě minus jedna lomeno er</td><td>List scheduling: <span class="hl c3">2 − 1/R</span></td></tr>
+        <tr><td class="sung">el pé té: čtyři třetiny minus třetina lomeno er</td><td><span class="hl c4">LPT: 4/3 − 1/(3R)</span></td></tr>
+        <tr><td class="sung">dvě minus dvě lomeno er</td><td>Muntz &amp; Coffman: <span class="hl c5">2 − 2/R</span></td></tr>
+        <tr><td class="sung">é dé dé</td><td><span class="hl c6">EDD</span> = earliest due date</td></tr>
+        <tr><td class="sung">ó en</td><td><span class="hl c7">O(n)</span> — McNaughton</td></tr>
+        <tr><td class="sung">půlka sumy pé</td><td>práh 2-partition = <span class="hl c8">½ Σp<sub>j</sub></span></td></tr>
+        <tr><td class="sung">í el pé</td><td><span class="hl c9">ILP</span> (time-indexed, viz píseň 5)</td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
@@ -887,25 +904,25 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
       <div class="stanza"><span class="tag">Verse 1</span><p>
         Tenhle batoh je jiný, než ho znáš ze školy:<br>
         stav NENÍ kapacita — stav je CENA, holky!<br>
-        Iks ká jé: nejmenší váha, jak cenu ká poskládat<br>
-        z prvních jé položek — tak se to má počítat!
+        <span class="hl c1">x(k,j)</span>: nejmenší váha, jak cenu <span class="hl c1">k</span> poskládat<br>
+        z prvních <span class="hl c1">j</span> položek — tak se to má počítat!
       </p></div>
       <div class="stanza chorus"><span class="tag">Chorus</span><p>
-        Minimum ze dvou: NECH TO BÝT — iks ká, jé minus jedna,<br>
-        nebo PŘIDEJ jé: iks, ká minus cé jé, plus váha vé jé!<br>
-        Na konci vem největší ká s váhou nejvýš dvojité vé —<br>
-        ó en krát cé — pseudopolynom — dé pé přes ceny, jé!
+        Minimum ze dvou: NECH TO BÝT — <span class="hl c2">x(k, j−1)</span>,<br>
+        nebo PŘIDEJ <span class="hl c1">j</span>: <span class="hl c3">x(k − c<sub>j</sub>)</span>, plus váha <span class="hl c3">w<sub>j</sub></span>!<br>
+        Na konci vem největší <span class="hl c1">k</span> s váhou nejvýš <span class="hl c4">W</span> —<br>
+        <span class="hl c5">O(n·C)</span> — pseudopolynom — <span class="hl c6">DP</span> přes ceny, jé!
       </p></div>
       <div class="stanza"><span class="tag">Verse 2</span><p>
         Nula nula je nula, jinak nekonečno na startu,<br>
-        rozhodnutí si piš do es ká jé — neztratíš mapu.<br>
-        Zpátky pak: když es je jedna, položka jé je v batohu,<br>
-        sniž ká o cé jé — a couvej až k prologu!
+        rozhodnutí si piš do <span class="hl c7">s(k,j)</span> — neztratíš mapu.<br>
+        Zpátky pak: když <span class="hl c7">s</span> je jedna, položka <span class="hl c1">j</span> je v batohu,<br>
+        sniž <span class="hl c1">k</span> o <span class="hl c8">c<sub>j</sub></span> — a couvej až k prologu!
       </p></div>
       <div class="stanza bridge"><span class="tag">Bridge</span><p>
-        Bonus pro fajnšmekry: seřaď podle cé lomeno vé,<br>
-        há je PRVNÍ položka, co se nevejde —<br>
-        vezmi LEPŠÍ z prefixu a há samotné:<br>
+        Bonus pro fajnšmekry: seřaď podle <span class="hl c8">c / w</span>,<br>
+        <span class="hl c9">h</span> je PRVNÍ položka, co se nevejde —<br>
+        vezmi LEPŠÍ z prefixu a <span class="hl c9">h</span> samotné:<br>
         dvojková aproximace — polovina optima jistá je!
       </p></div>
     </div>
@@ -914,16 +931,17 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
       <h3>O čem to je</h3>
       <p><strong>Knapsack DP indexovaná CENOU</strong> — kurz učí neobvyklou variantu: stav je cena,
       hodnota tabulky je minimální váha. Bonus v bridgi: Dantzigův greedy a 2-aproximace.</p>
-      <h3>Zpíváš → notace</h3>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">iks ká jé: nejmenší váha pro cenu ká z prvních jé</td><td><span class="m">x(k,j)</span> = min. váha podmnožiny prvních <span class="m">j</span> položek s cenou <span class="m">k</span></td></tr>
-        <tr><td class="sung">nech to být: iks ká, jé minus jedna</td><td><span class="m">x(k, j−1)</span></td></tr>
-        <tr><td class="sung">přidej jé: iks, ká minus cé jé, plus váha vé jé</td><td><span class="m">x(k − c<sub>j</sub>, j−1) + w<sub>j</sub></span></td></tr>
-        <tr><td class="sung">největší ká s váhou nejvýš dvojité vé</td><td><span class="m">max {k : x(k,n) ≤ W}</span></td></tr>
-        <tr><td class="sung">ó en krát cé</td><td><span class="m">O(n·C)</span>, <span class="m">C = Σc<sub>j</sub></span></td></tr>
-        <tr><td class="sung">nula nula je nula, jinak nekonečno</td><td><span class="m">x(0,0)=0</span>, jinak <span class="m">∞</span></td></tr>
-        <tr><td class="sung">seřaď podle cé lomeno vé</td><td>Dantzig: řaď dle <span class="m">c<sub>j</sub>/w<sub>j</sub></span> klesající</td></tr>
-        <tr><td class="sung">vezmi lepší z prefixu a há samotné</td><td><span class="m">max(Σ<sub>1..h−1</sub> c<sub>j</sub>, c<sub>h</sub>) ≥ OPT/2</span></td></tr>
+        <tr><td class="sung">iks ká jé, cena ká, prvních jé položek</td><td><span class="hl c1">x(k,j)</span> = min. váha pro cenu k z prvních j položek</td></tr>
+        <tr><td class="sung">iks ká, jé minus jedna</td><td><span class="hl c2">x(k, j−1)</span> — položku j nepřidám</td></tr>
+        <tr><td class="sung">iks, ká minus cé jé, plus váha vé jé</td><td><span class="hl c3">x(k−c<sub>j</sub>, j−1) + w<sub>j</sub></span> — položku j přidám</td></tr>
+        <tr><td class="sung">váha nejvýš dvojité vé</td><td><span class="hl c4">W</span> = kapacita; výsledek <span class="m">max{k : x(k,n) ≤ W}</span></td></tr>
+        <tr><td class="sung">ó en krát cé</td><td><span class="hl c5">O(n·C)</span>, <span class="m">C = Σc<sub>j</sub></span> — pseudopolynom</td></tr>
+        <tr><td class="sung">dé pé</td><td><span class="hl c6">DP</span> = dynamické programování</td></tr>
+        <tr><td class="sung">es ká jé / es je jedna</td><td><span class="hl c7">s(k,j)</span> = rozhodnutí pro rekonstrukci</td></tr>
+        <tr><td class="sung">cé jé / cé lomeno vé</td><td><span class="hl c8">c<sub>j</sub></span>; Dantzig řadí dle <span class="hl c8">c<sub>j</sub>/w<sub>j</sub></span></td></tr>
+        <tr><td class="sung">há</td><td><span class="hl c9">h</span> = první nevejdoucí; <span class="m">max(Σ<sub>1..h−1</sub>c<sub>j</sub>, c<sub>h</sub>) ≥ OPT/2</span></td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
@@ -947,91 +965,92 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme/
     <div class="lyrics">
       <div class="col-label">🎤 Zpívej</div>
       <div class="stanza"><span class="tag">Intro (spoken)</span><p>
-        Á cé tři… á cé tři…<br>
-        (iks í… iks jé… ej)
+        <span class="hl c8">AC-3</span>… <span class="hl c8">AC-3</span>…<br>
+        (<span class="hl c1">x<sub>i</sub></span>… <span class="hl c1">x<sub>j</sub></span>… ej)
       </p></div>
       <div class="stanza"><span class="tag">Verse 1</span><p>
         Tý…<br>
-        hrana iks í iks jé — kdy je konzistentní?<br>
-        Pro každé á z dé í najdi bé v dé jé,<br>
+        hrana <span class="hl c1">x<sub>i</sub> x<sub>j</sub></span> — kdy je konzistentní?<br>
+        Pro každé <span class="hl c2">a</span> z <span class="hl c2">D<sub>i</sub></span> najdi <span class="hl c3">b</span> v <span class="hl c3">D<sub>j</sub></span>,<br>
         ať spolu splní všechna omezení.<br>
         Pozor — hrana má směr, zpátky neplatí!<br><br>
         Jé…<br>
-        binární cé es pé, to je digraf gé,<br>
-        mezi iks í, iks jé šipky obě dvě,<br>
-        celé cé es pé je konzistentní jenom,<br>
+        binární <span class="hl c4">CSP</span>, to je digraf <span class="hl c4">G</span>,<br>
+        mezi <span class="hl c1">x<sub>i</sub></span>, <span class="hl c1">x<sub>j</sub></span> šipky obě dvě,<br>
+        celé <span class="hl c4">CSP</span> je konzistentní jenom,<br>
         když každá z hran orientovaných sedí, jé.
       </p></div>
       <div class="stanza"><span class="tag">Pre-Chorus</span><p>
-        Jó, rivajz projde každé á v doméně dé í,<br>
-        hledá mu podporu — bé v dé jé,<br>
-        kdo svoje bé nenajde, ten z domény letí,<br>
-        vyber si ká em, rivajz to teď!
+        Jó, <span class="hl c5">REVISE</span> projde každé <span class="hl c2">a</span> v doméně <span class="hl c2">D<sub>i</sub></span>,<br>
+        hledá mu podporu — <span class="hl c3">b</span> v <span class="hl c3">D<sub>j</sub></span>,<br>
+        kdo svoje <span class="hl c3">b</span> nenajde, ten z domény letí,<br>
+        vyber si <span class="hl c6">(k,m)</span>, <span class="hl c5">REVISE</span> to teď!
       </p></div>
       <div class="stanza chorus"><span class="tag">Chorus</span><p>
-        Á cé tři,<br>
-        mažu ti hodnoty z domén, á cé tři,<br>
-        kdo nemá svoje bé, zmizí za chviličku,<br>
+        <span class="hl c8">AC-3</span>,<br>
+        mažu ti hodnoty z domén, <span class="hl c8">AC-3</span>,<br>
+        kdo nemá svoje <span class="hl c3">b</span>, zmizí za chviličku,<br>
         doména se tenčí, kousek po kousíčku.<br><br>
-        Á cé tři,<br>
-        vracím hrany do ká zpátky, á cé tři,<br>
-        jen tu od em ne — tu nechám na poličku,<br>
-        fronta zas naskočí — jedem, á cé tři.
+        <span class="hl c8">AC-3</span>,<br>
+        vracím hrany do <span class="hl c7">k</span> zpátky, <span class="hl c8">AC-3</span>,<br>
+        jen tu od <span class="hl c7">m</span> ne — tu nechám na poličku,<br>
+        fronta zas naskočí — jedem, <span class="hl c8">AC-3</span>.
       </p></div>
       <div class="stanza"><span class="tag">Post-Chorus</span><p>
         (Škrtej! Škrtej!)<br>
-        Každé á si hledá svoje bé, to jediné (e-oh),<br>
+        Každé <span class="hl c2">a</span> si hledá svoje <span class="hl c3">b</span>, to jediné (e-oh),<br>
         kdo je sám a bez podpory, opouští parket (e-oh).<br>
         (Škrtej! Škrtej!)<br>
-        Revize ká em hraně em ká neublíží (e-oh),<br>
+        Revize <span class="hl c6">(k,m)</span> hraně <span class="hl c6">(m,k)</span> neublíží (e-oh),<br>
         ta zůstává konzistentní, klidně si spí (e-oh).
       </p></div>
       <div class="stanza"><span class="tag">Rap Verse</span><p>
-        Krůček po krůčku, škrtá si á cé tři,<br>
+        Krůček po krůčku, škrtá si <span class="hl c8">AC-3</span>,<br>
         hodnotu za hodnotou, kousek po kousíčku,<br>
-        fronta na startu: všechny hrany z grafu gé,<br>
-        vyberu ká em, reviduju dé ká, jé!<br>
-        Když jsem něco smazal, hrany do ká zpátky jdou,<br>
-        jen hranu od em ne — tu mazání nezviklá,<br>
+        fronta na startu: všechny hrany z grafu <span class="hl c4">G</span>,<br>
+        vyberu <span class="hl c6">(k,m)</span>, reviduju <span class="hl c7">D<sub>k</sub></span>, jé!<br>
+        Když jsem něco smazal, hrany do <span class="hl c7">k</span> zpátky jdou,<br>
+        jen hranu od <span class="hl c7">m</span> ne — tu mazání nezviklá,<br>
         a prázdná doména? Fail! Stopni muziku —<br>
         v týhle části prostoru řešení nenajdu!
       </p></div>
       <div class="stanza"><span class="tag">Pre-Chorus 2</span><p>
         Jó, fronta se mi tenčí, už je skoro prázdná,<br>
-        poslední rivajz — nic nemažu,<br>
+        poslední <span class="hl c5">REVISE</span> — nic nemažu,<br>
         když nic nemažu, nic nevracím do fronty,<br>
         domény jsou konzistentní, jé!
       </p></div>
       <div class="stanza bridge"><span class="tag">Bridge (slow, intimate)</span><p>
-        Tři v trojúhelníku, jedna dvě v doméně,<br>
+        Tři v trojúhelníku, <span class="hl c9">{1, 2}</span> v doméně,<br>
         každý s každým nerovná se — zní to nadějně…<br>
         všechno konzistentní — a řešení žádné!<br>
         Konzistence hran ti štěstí nezaručí,<br>
-        á cé tři zúží svět — dohledat musíš sám.
+        <span class="hl c8">AC-3</span> zúží svět — dohledat musíš sám.
       </p></div>
       <div class="stanza"><span class="tag">Outro</span><p>
-        Á cé tři…<br>
-        (každé á si hledá svoje bé)<br>
-        Á cé tři…<br>
-        (kdo nemá svoje bé, ten z domény jde)
+        <span class="hl c8">AC-3</span>…<br>
+        (každé <span class="hl c2">a</span> si hledá svoje <span class="hl c3">b</span>)<br>
+        <span class="hl c8">AC-3</span>…<br>
+        (kdo nemá svoje <span class="hl c3">b</span>, ten z domény jde)
       </p></div>
     </div>
     <div class="explain-wrap"><div class="explain">
       <div class="col-label">📖 Vysvětlení</div>
       <h3>O čem to je</h3>
-      <p>Stejná látka jako píseň 7, ale jako letní latino hit — kdo si nepamatuje synth-pop,
-      zapamatuje si reggaeton. Metafora: každé <span class="m">a</span> si hledá partnera
-      <span class="m">b</span> (podporu); kdo ho nemá, opouští parket (REVISE maže).
+      <p>Stejná látka jako píseň 7, ale jako letní latino hit. Metafora: každé <span class="m">a</span>
+      si hledá partnera <span class="m">b</span> (podporu); kdo ho nemá, opouští parket (REVISE maže).
       Bridge = neúplnost AC: i když všichni mají pár, „svatba“ (řešení) zaručená není.</p>
-      <h3>Zpíváš → notace</h3>
+      <h3>Zpíváš → znamená</h3>
       <table class="notace">
-        <tr><td class="sung">hrana iks í iks jé</td><td><span class="m">(x<sub>i</sub>, x<sub>j</sub>)</span></td></tr>
-        <tr><td class="sung">pro každé á z dé í najdi bé v dé jé</td><td><span class="m">∀a ∈ D<sub>i</sub> ∃b ∈ D<sub>j</sub></span></td></tr>
-        <tr><td class="sung">binární cé es pé, to je digraf gé</td><td>binární CSP = digraf <span class="m">G</span> (obě orientace)</td></tr>
-        <tr><td class="sung">fronta na startu: všechny hrany z grafu gé</td><td><span class="m">Q := E(G)</span></td></tr>
-        <tr><td class="sung">vyberu ká em, reviduju dé ká</td><td>REVISE<span class="m">(k,m)</span> škrtá v <span class="m">D<sub>k</sub></span></td></tr>
-        <tr><td class="sung">hrany do ká zpátky, jen tu od em ne</td><td>přidej <span class="m">(i,k)</span>, <span class="m">i ≠ m</span></td></tr>
-        <tr><td class="sung">tři v trojúhelníku, jedna dvě v doméně</td><td>3 proměnné, <span class="m">D = {1,2}</span>, vše <span class="m">≠</span> → AC, ale řešení nemá</td></tr>
+        <tr><td class="sung">iks í, iks jé</td><td><span class="hl c1">x<sub>i</sub></span>, <span class="hl c1">x<sub>j</sub></span> — proměnné CSP</td></tr>
+        <tr><td class="sung">á z dé í</td><td><span class="hl c2">∀a ∈ D<sub>i</sub></span></td></tr>
+        <tr><td class="sung">bé v dé jé</td><td><span class="hl c3">∃b ∈ D<sub>j</sub></span> — podpora</td></tr>
+        <tr><td class="sung">cé es pé, graf gé</td><td><span class="hl c4">CSP</span>; binární CSP = digraf <span class="hl c4">G</span></td></tr>
+        <tr><td class="sung">rivajz</td><td><span class="hl c5">REVISE</span> — škrtá nepodporované hodnoty</td></tr>
+        <tr><td class="sung">ká em / em ká</td><td>hrana <span class="hl c6">(k,m)</span>; revize nemění <span class="hl c6">(m,k)</span></td></tr>
+        <tr><td class="sung">do ká / od em / dé ká</td><td>škrt v <span class="hl c7">D<sub>k</sub></span> → vrať <span class="hl c7">(i,k)</span>, <span class="hl c7">i ≠ m</span></td></tr>
+        <tr><td class="sung">á cé tři</td><td><span class="hl c8">AC-3</span>; fronta <span class="m">Q := E(G)</span></td></tr>
+        <tr><td class="sung">jedna dvě v doméně</td><td><span class="hl c9">D = {1, 2}</span>, trojúhelník ≠ → AC, ale bez řešení</td></tr>
       </table>
       <h3>Materiály</h3>
       <ul class="refs">
