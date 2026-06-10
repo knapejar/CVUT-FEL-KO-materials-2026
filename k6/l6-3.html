@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>L6.3 · AC-3 algoritmus + oditerování [FOTO] — KO</title>
+<title>L6.3 · AC-3 algoritmus + oditerování — KO</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <link rel="stylesheet" href="../assets/css/style.css">
 </head>
@@ -36,7 +36,7 @@
     <strong>Fronta hran $Q$</strong> algoritmu AC-3: inicializuj ji všemi hranami grafu, opakovaně z ní ber hranu a volej REVISE — a když se doména $D_k$ zmenší, vrať do fronty hrany $(x_i, x_k)$ pro $i \ne m$.
   </div>
 
-  <p>Z <a href="../k6/l6-2.html#takeaways">[L6.2] REVISE a redukce domén</a> víš dvě věci: jedno volání REVISE opraví jednu orientovanou hranu, ale <strong>jeden průchod všemi hranami nestačí</strong> — pozdější škrt může zpětně rozbít hranu opravenou dřív. Také už víš, <em>které</em> hrany se zmenšením $D_i$ mohly rozbít: jen hrany $(x_k, x_i)$ vedoucí <em>do</em> $x_i$, a protisměrka právě revidovaného omezení ani ta ne. Dnes z toho poskládáme algoritmus <strong>AC-3</strong> — a hlavně se naučíš jeho běh <strong>oditerovat na papír</strong> přesně ve formátu, který chce zkouškové zadání: <em>„Record the steps of the algorithm (the queue content prior to the revision of each arc).“</em></p>
+  <p>Z <a href="../k6/l6-2.html#takeaways">[L6.2] REVISE a redukce domén</a> víš dvě věci: jedno volání REVISE opraví jednu orientovanou hranu, ale <strong>jeden průchod všemi hranami nestačí</strong> — pozdější škrt může zpětně rozbít hranu opravenou dřív. Také už víš, <em>které</em> hrany se zmenšením $D_i$ mohly rozbít: jen hrany $(x_k, x_i)$ vedoucí <em>do</em> $x_i$ — a ani protisměrka právě revidovaného omezení ne. Dnes z toho poskládáme algoritmus <strong>AC-3</strong> — a hlavně se naučíš jeho běh <strong>oditerovat na papír</strong> přesně ve formátu, který chce zkouškové zadání: <em>„Record the steps of the algorithm (the queue content prior to the revision of each arc).“</em></p>
 
   <!-- ===== FRONTA MISTO PRUCHODU ===== -->
   <h2>Fronta místo věčných průchodů</h2>
@@ -174,7 +174,7 @@ end</code></pre>
       <span class="task-id">T01</span>
       <strong>CSP — Arc Consistency Check Using AC-3</strong>
       <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
-      <span class="task-src">zdroj: zkouška KO 02.06.2021 = banka #41 (zadání EN 1:1); táž úloha doložena na termínu 1. 6. 2026</span>
+      <span class="task-src">zdroj: zkouška KO 2.&nbsp;6.&nbsp;2021 = banka #41 (zadání EN 1:1); táž úloha doložena na termínu 1.&nbsp;6.&nbsp;2026</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -243,7 +243,7 @@ end</code></pre>
     <div class="task-body">
       <div class="assignment">
         <span class="lbl">Assignment (original, EN)</span>
-        <p>“For a binary CSP, define arc consistency and describe the AC-3 algorithm.”</p>
+        <p>“For a binary CSP, define arc consistency and describe the AC-3 algorithm. Use the following source definitions.”</p>
       </div>
 
       <h4>a) Co je v zadání?</h4>
@@ -264,7 +264,7 @@ end</code></pre>
         <div class="inner">
           <ol>
             <li><strong>Binární CSP a graf:</strong> CSP $= (X, D, C)$, kde každé omezení váže dvě proměnné; reprezentace digrafem $G$ — uzly = proměnné, omezení nad $x_i, x_j$ dává <em>obě</em> orientované hrany $(x_i, x_j)$ a $(x_j, x_i)$ ([L6.1]).</li>
-            <li><strong>Definice AC (EN, slide 25):</strong> “Arc $(x_i, x_j)$ is arc consistent iff for each value $a \in D_i$ there exists $b \in D_j$ such that the assignment $x_i = a$, $x_j = b$ meets all binary constraints for variables $x_i, x_j$.” CSP je AC ⟺ všechny hrany jsou AC. AC je <strong>orientovaná</strong>: AC hrany $(x_i, x_j)$ neimplikuje AC hrany $(x_j, x_i)$.</li>
+            <li><strong>Definice AC (EN, slide 25):</strong> “Arc $(x_i, x_j)$ is arc consistent iff for each value $a \in D_i$ there exists $b \in D_j$ such that the assignment $x_i = a$, $x_j = b$ meets all binary constraints for the variables $x_i, x_j$.” CSP je AC ⟺ všechny hrany jsou AC. AC je <strong>orientovaná</strong>: AC hrany $(x_i, x_j)$ neimplikuje AC hrany $(x_j, x_i)$.</li>
             <li><strong>REVISE$(D_i, D_j, C)$:</strong> smaže z $D_i$ každou hodnotu bez podpory v $D_j$ a vrátí příznak <code>deleted</code> (pseudokód v [L6.2]). Mazání je bezpečné — hodnota bez podpory nemůže být v žádném řešení, množina řešení se nemění.</li>
             <li><strong>AC-3:</strong> pseudokód viz box ve výkladu výše (slide 28). Klíčové věty: fronta startuje všemi hranami $E(G)$; hrana se do fronty vrací, <em>jen</em> pokud její konzistenci mohl rozbít škrt — tedy hrany $(x_i, x_k)$ do zmenšené $D_k$, s výjimkou $i = m$, protože revize $(x_k, x_m)$ konzistenci $(x_m, x_k)$ nemění; vyprázdnění $D_k$ ⟹ <code>fail</code> $= 1$ (v této části stavového prostoru není řešení). Konec při $Q = \emptyset$ ⟹ všechny hrany AC.</li>
             <li><strong>Neúplnost:</strong> AC je jen propagace — instance může být AC, a přesto nepřípustná (trojúhelník $x_1 \ne x_2 \ne x_3 \ne x_1$ nad doménami $\{1, 2\}$, slide 30). Výstup AC-3 = zmenšené domény (nadmnožina řešení), ne rozhodnutí o řešitelnosti; proto se AC kombinuje s prohledáváním, případně silnější konzistencí (path consistency).</li>
