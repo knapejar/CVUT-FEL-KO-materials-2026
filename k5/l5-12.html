@@ -36,7 +36,7 @@
     <strong>List scheduling (LS):</strong> kdykoliv se uvolní stroj, přiřaď mu první <em>připravenou</em> úlohu ze seznamu $L$. Pro $P\,|\,prec\,|\,C_{max}$ (i $P\,||\,C_{max}$) je to aproximační algoritmus s faktorem $r_{LS} = 2 - \frac{1}{R}$ [Graham 1966]; setřídění $L$ podle nerostoucích $p_i$ (<strong>LPT</strong>) zlepší faktor na $r_{LPT} = \frac{4}{3} - \frac{1}{3R}$ (jen pro $P\,||\,C_{max}$).
   </div>
 
-  <p>Nepreemptivní $P\,||\,C_{max}$ je NP-hard a s precedencemi $P\,|\,prec\,|\,C_{max}$ to lepší není (víc v [L5.13]). Exaktní Rothkopf <a href="../k5/l5-11.html">[L5.11]</a> platí pseudopolynomiální daň a precedence vůbec neumí; Muntz&amp;Coffman <a href="../k5/l5-10.html">[L5.10]</a> potřebuje preempci. Co zbývá, když je úloh hodně, precedence v zadání a preempce zakázaná? <strong>Heuristika se zárukou</strong> — aproximační algoritmus ve smyslu <a href="../k3/l3-1.html">[L3.1]</a>: nevrátí nutně optimum, ale dokazatelně nikdy nepřekročí $r \cdot C^*_{max}$. Dnes ta nejslavnější: <strong>list scheduling</strong> (slidy 41–46). Notaci $P\,|\,prec\,|\,C_{max}$ čteš dle <a href="../k5/l5-1.html">[L5.1]</a>: identické paralelní stroje, nepreemptivní úlohy s precedencemi (DAG), minimalizuj makespan.</p>
+  <p>Nepreemptivní $P\,||\,C_{max}$ je NP-hard a s precedencemi $P\,|\,prec\,|\,C_{max}$ to lepší není (víc o NP-těžkosti rozvrhování v <a href="../k5/l5-13.html">[L5.13]</a>). Exaktní Rothkopf <a href="../k5/l5-11.html">[L5.11]</a> platí pseudopolynomiální daň a precedence vůbec neumí; Muntz&amp;Coffman <a href="../k5/l5-10.html">[L5.10]</a> potřebuje preempci. Co zbývá, když je úloh hodně, precedence v zadání a preempce zakázaná? <strong>Heuristika se zárukou</strong> — aproximační algoritmus ve smyslu <a href="../k3/l3-1.html">[L3.1]</a>: nevrátí nutně optimum, ale dokazatelně nikdy nepřekročí $r \cdot C^*_{max}$. Dnes ta nejslavnější: <strong>list scheduling</strong> (slidy 41–46). Notaci $P\,|\,prec\,|\,C_{max}$ čteš dle <a href="../k5/l5-1.html">[L5.1]</a>: identické paralelní stroje, nepreemptivní úlohy s precedencemi (DAG), minimalizuj makespan.</p>
 
   <!-- ===== SEKCE 1: ALGORITMUS ===== -->
   <h2>Algoritmus: první připravená úloha ze seznamu (slide 41)</h2>
@@ -334,7 +334,7 @@ end
 
   <div class="pager">
     <a href="../k5/l5-11.html"><span class="dir">← Předchozí</span> L5.11 · Rothkopf DP pro P||Cmax</a>
-    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.13 · NP-těžkost rozvrhování (redukce) [NICE])</a>
+    <a class="next" href="../k5/l5-13.html"><span class="dir">Další →</span> L5.13 · NP-těžkost rozvrhování (redukce)</a>
   </div>
 
 </div>
