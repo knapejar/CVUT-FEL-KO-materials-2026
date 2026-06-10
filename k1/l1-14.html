@@ -141,7 +141,7 @@
       (1-y_2) M + (1-y_1) M + x_{4,j} &\ge x_{6,j-1}
       \end{aligned} \qquad \forall j$$
       <p>Čti první řádek pro $y_1 = y_2 = 0$: $x_{5,j+1} \le x_{4,j}$ pro všechna $j$, tedy „kdekoli je $t_5$, hned vlevo od ní sedí $t_4$“ — scénář aktivní. Pro ostatní volby $(y_1, y_2)$ ho člen $M$ vypne. Protože vše jsou binárky, stačí $M = 1$ — a velikost big-M vždy zdůvodni (<a href="l1-4.html#takeaways">[L1.4]</a>). Okraje tu nezlobí jen díky (iv): $t_5$, $t_6$ nikdy nesedí v $b_1$ ani $b_n$, takže posunuté indexy pokryjí všechny jejich možné pozice.</p>
-      <p><strong>Verdikt:</strong> funguje to, ale je to 4× víc nerovností, dvě proměnné navíc, kvantifikátor a okraje k pohlídání — hodnotitel u téhle verze nechal otazníky a strhl body. Jednořádková součtová implikace je kratší a bezpečnější. Big-M disjunkci si šetři na případy, kdy NEBO spojuje <em>obecné nerovnosti</em>, ne binárky.</p>
+      <p><strong>Verdikt:</strong> funguje to, ale je to 4× víc nerovností, dvě proměnné navíc, kvantifikátor a okraje k pohlídání — hodnotitel u téhle verze nechal otazníky („$\le$ ?“, „kvantifikátor ?“): verze je delší, hůř čitelná a riskuješ, že hodnotitele nepřesvědčíš. Jednořádková součtová implikace je kratší a bezpečnější. Big-M disjunkci si šetři na případy, kdy NEBO spojuje <em>obecné nerovnosti</em>, ne binárky.</p>
     </div>
   </details>
 
@@ -211,14 +211,14 @@
       <details class="solution">
         <summary>d) Úplné řešení</summary>
         <div class="inner">
-          <p><strong>(a) ILP model.</strong> Proměnné: $x_{ij} \in \{0,1\}$ $\forall i, j \in 1 \dots n$, $x_{ij} = 1$ ⟺ hračka $t_i$ je v boxu $b_j$. Parametry: $d_{ij} \in \mathbb{R}_0^+$, $n \in \mathbb{Z}^+$.</p>
+          <p><strong>(a) ILP model.</strong> Proměnné: $x_{ij} \in \{0,1\}$ $\forall i, j \in 1 \dots n$, $x_{ij} = 1$ ⟺ hračka $t_i$ je v boxu $b_j$. Parametry: $d_{ij} \in \mathbb{R}_0^+$, $n \in \mathbb{Z}^+$ (podmínky (iii)–(v) mluví o $t_1 \dots t_6$, předpokládáme tedy $n \ge 6$).</p>
           <p><strong>(ii) Kritérium:</strong></p>
           $$\min\; z = \sum_{i=1}^{n} \sum_{j=1}^{n} d_{ij}\, x_{ij}.$$
           <p><strong>(i) Každý box právě jedna hračka, každá hračka právě jeden box:</strong></p>
           $$\sum_{i=1}^{n} x_{ij} = 1 \quad \forall j \in 1 \dots n, \qquad\qquad \sum_{j=1}^{n} x_{ij} = 1 \quad \forall i \in 1 \dots n.$$
           <p><strong>(iii) $t_1$ hned vlevo od $t_2$</strong> — posun indexu + okrajová pojistka:</p>
           $$x_{1,j} = x_{2,j+1} \quad \forall j \in 1 \dots n-1, \qquad x_{1,n} = 0, \qquad x_{2,1} = 0.$$
-          <p>(Bez $x_{1,n} = 0$ by prošlo $t_1$ v $b_n$ a $t_2$ v $b_1$ — všechny rovnosti by platily vacuózně.)</p>
+          <p>(Bez $x_{1,n} = 0$ by prošlo $t_1$ v $b_n$ a $t_2$ v $b_1$ — všechny rovnosti by platily naprázdno — říkaly by jen $0 = 0$.)</p>
           <p><strong>(iv) $t_5, t_6$ ne na krajích:</strong></p>
           $$x_{5,1} = x_{5,n} = x_{6,1} = x_{6,n} = 0.$$
           <p><strong>(v) $t_4$ hned vedle $t_5$ nebo $t_6$</strong> — implikace do součtu sousedních binárek:</p>
@@ -233,7 +233,7 @@
           \end{aligned} \qquad \forall j \in 1 \dots n.$$
           <p>Funguje (okraje kryje (iv)), ale součtová verze je kratší a na písemce bezpečnější.</p>
           <p><strong>(b) Assignment problem / minimum weight perfect matching.</strong> Bipartitní graf $G = (T \cup B, E)$; pro každé povolené přiřazení hrana $(t_i, b_j)$ s váhou $w(t_i, b_j) = d_{ij}$. Podmínka (iv) <em>zůstává</em> (škrtnuty jsou jen (iii) a (v)) a promítne se do množiny hran:</p>
-          $$(t_5, b_1),\; (t_5, b_n),\; (t_6, b_1),\; (t_6, b_n) \;\notin\; E,$$
+          $$(t_5, b_1),\; (t_5, b_n),\; (t_6, b_1),\; (t_6, b_n) \;\notin\; E \qquad (n \ge 6),$$
           <p>nebo — má-li odpověď stát na úplném $K_{n,n}$ — tyto čtyři hrany dostanou prohibitivní váhu $w = M$ (dost velkou, aby do optima nevstoupily). Perfektní párování vybírá právě jednu hranu u každé hračky i každého boxu, je tedy přesně bijekce hračky↔boxy; minimalizace váhy párování minimalizuje celkovou vzdálenost při respektování (iv). Úloha je řešitelná polynomiálně — výpočet přes min-cost flow v K4 [L4.12].</p>
         </div>
       </details>
