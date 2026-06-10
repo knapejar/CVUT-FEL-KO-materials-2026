@@ -71,7 +71,7 @@
 
   <div class="box info">
     <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Pozor na orientaci: přednáška vs. zkouškové řešení</div>
-    <p>Slidy 8–9 předvádějí DP pro batoh primárně <strong>indexované cenou</strong> ($x_k^j$ = minimální váha, kterou lze dosáhnout ceny $k$ z položek $1..j$, složitost $O(nC)$) — to je varianta příští lekce [L7.2] a základ aproximačního schématu. Slide 10 ale dodává (EN 1:1): <em>“If the weights are integers, we can solve the problem by dynamic programming while selecting the solution having the higher cost for given weight.”</em> Přesně tuhle <strong>váhovou (kapacitní) tabulku</strong> používá vzorové řešení banky i ruční zkoušková řešení — váhy v zadáních jsou malá celá čísla, kdežto ceny mohou být i necelé (slide 10 schválně volí $c = (3.1,\, 4.2,\, 5.1,\, 4.3)$). Dnešní lekce = kapacitní tabulka.</p>
+    <p>Slidy 8–9 předvádějí DP pro batoh primárně <strong>indexované cenou</strong> ($x_k^j$ = minimální váha, kterou lze dosáhnout ceny $k$ z položek $1..j$, složitost $O(nC)$) — to je varianta příští lekce <a href="l7-2.html">[L7.2]</a> a základ aproximačního schématu. Slide 10 ale dodává (EN 1:1): <em>“If the weights are integers, we can solve the problem by dynamic programming while selecting the solution having the higher cost for given weight.”</em> Přesně tuhle <strong>váhovou (kapacitní) tabulku</strong> používá vzorové řešení banky i ruční zkoušková řešení — váhy v zadáních jsou malá celá čísla, kdežto ceny mohou být i necelé (slide 10 schválně volí $c = (3.1,\, 4.2,\, 5.1,\, 4.3)$). Dnešní lekce = kapacitní tabulka.</p>
   </div>
 
   <h2>Tabulka a její vyplnění</h2>
@@ -119,7 +119,7 @@
       <li><strong>Greedy podle $c_j/w_j$ není DP.</strong> Dochované řešení z 09.07.2021 vyřešilo instanci hladově podle podílů — a hodnotitel za 0,5 bodu připsal: <em>„Není DP a ani není naznačen žádný postup.“</em> Zadání říká „Using dynamic programming“ a „Write down all iterations of the algorithm“ — bez tabulky (všech iterací) nejsou body, i kdyby čísla náhodou vyšla. (A greedy obecně optimum nedává — je to jen 2-aproximace <a href="../k3/l3-11.html#takeaways">[L3.11]</a>.)</li>
       <li><strong>Větev „vzít“ čte řádek $j-1$, ne $j$.</strong> Jinak počítáš unbounded batoh — u zkouškové instance by vyšlo 10 místo 8 (T01).</li>
       <li><strong>„Unique“ nestačí tvrdit.</strong> Zdůvodni: žádná buňka na zpětné cestě nemá remízu (= jediná cesta), případně kombinatoricky, že žádná jiná množina hodnoty nedosáhne.</li>
-      <li><strong>Kapacitní tabulka chce celočíselné váhy</strong> (sloupce = kapacity $0..W$). Necelé váhy a celé ceny → tabulka indexovaná cenou, [L7.2].</li>
+      <li><strong>Kapacitní tabulka chce celočíselné váhy</strong> (sloupce = kapacity $0..W$). Necelé váhy a celé ceny → tabulka indexovaná cenou, <a href="l7-2.html">[L7.2]</a>.</li>
     </ul>
   </div>
 
@@ -133,7 +133,7 @@
       <li><strong>Složitost $O(nW)$ čas i paměť</strong> (paměť jde na $O(W)$) — <em>pseudopolynomiální</em> <a href="../k3/l3-5.html#takeaways">[L3.5]</a>; při $W \le 10n$ je to $O(n^2)$, na takové třídě instancí polynomiální.</li>
       <li><strong>Backtracking z $(n, W)$:</strong> $F(j,W') = F(j{-}1,W')$ → položka nevzata (krok nahoru); jinak vzata a skok na $(j{-}1, W'{-}w_j)$; konec v řádku 0. U této tabulky je optimum vždy v pravém dolním rohu (přidání kapacity ani položek nemůže cenu snížit).</li>
       <li><strong>Unikátnost:</strong> optimum je jediné ⟺ žádná buňka na zpětné cestě nemá remízu obou voleb; remíza = větvení = více optimálních množin. Zkouška se ptá pravidelně („Is this solution unique and why?“).</li>
-      <li>Kapacitní tabulka vyžaduje celočíselné váhy (ceny smí být necelé); duální varianta indexovaná cenou ($O(nC)$, slidy 8–9) je [L7.2].</li>
+      <li>Kapacitní tabulka vyžaduje celočíselné váhy (ceny smí být necelé); duální varianta indexovaná cenou ($O(nC)$, slidy 8–9) je <a href="l7-2.html">[L7.2]</a>.</li>
     </ul>
   </div>
 
@@ -179,7 +179,7 @@
           <p>$$S = \{I_1, I_2, I_5\}, \qquad w_1+w_2+w_5 = 1+1+3 = 5 \le 5, \qquad c_1+c_2+c_5 = 2+2+4 = \mathbf{8}.$$</p>
           <p><strong>Unikátnost: ANO.</strong> V žádné buňce zpětné cesty nenastala remíza — např. v $(7,5)$ dává „vzít $I_7$“ jen $F(6,4)+1 = 7 \ne 8$, v $(6,5)$ dává „vzít $I_6$“ jen $F(5,1)+3 = 5$, v $(5,5)$ dává „nevzít“ jen $6$ — takže tabulkou vede <em>jediná</em> optimální cesta (přesně argument ručního zkouškového řešení: „existuje jen jedna cesta … do optima“). Kombinatorická kontrola: hodnoty 8 lze složit jen jako $2+2+4$ ($\{I_1,I_2,I_5\}$, váha 5 ✓), $2+2+2+2$ ($\{I_1..I_4\}$, váha 6 ✗) nebo $4+3+1$ ($\{I_5,I_6,I_7\}$, váha 8 ✗) — projde jediná množina. (Identické dvojice $I_1{=}I_2$ a $I_3{=}I_4$ tu alternativu nevyrobí: obě položky první dvojice v řešení jsou, druhá dvojice v něm není celá.)</p>
           <p><strong>b)</strong> Tabulka má $(n+1)(W+1)$ buněk, konstantní práce na buňku: čas i paměť $O(nW)$, paměť lze srazit na $O(W)$. Obecně je to <em>pseudopolynomiální</em> algoritmus <a href="../k3/l3-5.html#takeaways">[L3.5]</a>; na instancích s $W \le 10n$ ale $O(nW) \le O(n \cdot 10n) = O(n^2)$ — algoritmus je na této třídě <strong>polynomiální v počtu položek $n$</strong>.</p>
-          <p style="color:var(--ink-soft);font-size:14.5px"><strong>Poznámky ke zdrojům (přiznáno):</strong> ① Ruční tabulka zkoušky 2023 je s naší identická (řádky $I_1..I_7$, poslední řádek $0,2,4,5,6,8$, hodnota 8 zakroužkovaná jako „maximální cena“) a množina $\{I_1, I_2, I_5\}$ souhlasí; přepis ale u závěru uvádí „$c_{opt} = 6$“ — to odporuje vlastní tabulce i součtu $2+2+4=8$ a řešení banky #27 (= 8), počítáme tedy 8. ② Červená poznámka hodnotitele u unikátnosti (přepis, přibližně): „Když zde nepíšete kombinatorické řešení, je možné uvést, že opt. řešení nemusí být v pravém dolním rohu.“ — u <em>kapacitní</em> tabulky v rohu optimum vždy je (monotonie po řádcích i sloupcích); výhrada míří na obecné DP z přednášky indexované cenou [L7.2], kde optimum = nejvyšší dosažitelná cena $k$ s $x_k^n \le W$, nikoli roh. ③ Drill z poznámky banky: v <em>unbounded</em> variantě (větev „vzít“ čte řádek $j$) by optimum bylo $5 \cdot 2 = 10$ — pětkrát položka $I_1$ — a unikátní by nebylo ($I_2$ je identická).</p>
+          <p style="color:var(--ink-soft);font-size:14.5px"><strong>Poznámky ke zdrojům (přiznáno):</strong> ① Ruční tabulka zkoušky 2023 je s naší identická (řádky $I_1..I_7$, poslední řádek $0,2,4,5,6,8$, hodnota 8 zakroužkovaná jako „maximální cena“) a množina $\{I_1, I_2, I_5\}$ souhlasí; přepis ale u závěru uvádí „$c_{opt} = 6$“ — to odporuje vlastní tabulce i součtu $2+2+4=8$ a řešení banky #27 (= 8), počítáme tedy 8. ② Červená poznámka hodnotitele u unikátnosti (přepis, přibližně): „Když zde nepíšete kombinatorické řešení, je možné uvést, že opt. řešení nemusí být v pravém dolním rohu.“ — u <em>kapacitní</em> tabulky v rohu optimum vždy je (monotonie po řádcích i sloupcích); výhrada míří na obecné DP z přednášky indexované cenou <a href="l7-2.html">[L7.2]</a>, kde optimum = nejvyšší dosažitelná cena $k$ s $x_k^n \le W$, nikoli roh. ③ Drill z poznámky banky: v <em>unbounded</em> variantě (větev „vzít“ čte řádek $j$) by optimum bylo $5 \cdot 2 = 10$ — pětkrát položka $I_1$ — a unikátní by nebylo ($I_2$ je identická).</p>
         </div>
       </details>
     </div>
@@ -230,7 +230,7 @@
 
   <div class="pager">
     <a href="../k6/l6-3.html"><span class="dir">← Předchozí</span> L6.3 · AC-3 algoritmus + oditerování [FOTO]</a>
-    <a class="next" href="../index.html#k7"><span class="dir">Další →</span> Pokračování se připravuje (L7.2 · Knapsack DP indexovaný cenou (cost-indexed) [NICE])</a>
+    <a class="next" href="../k7/l7-2.html"><span class="dir">Další →</span> L7.2 · Knapsack DP indexovaný cenou (cost-indexed)</a>
   </div>
 
 </div>

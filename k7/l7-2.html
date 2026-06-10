@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L7.2 · Knapsack DP indexovaný cenou (cost-indexed) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k7">K7 · Knapsack</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L7.2</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L7.2</span> Kapitola K7 — Knapsack (doplňková) · <strong>[NICE]</strong>
+  </p>
+  <h1>Knapsack DP indexovaný cenou (cost-indexed)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>DP tabulka indexovaná cenou</strong>: buňka $x_k^j$ = <em>minimální váha</em>, kterou lze dosáhnout ceny přesně $k$ výběrem z položek $1..j$ — duál ke kapacitní tabulce z <a href="l7-1.html#takeaways">[L7.1]</a>, složitost $O(nC)$, optimum se čte jako nejpravější dosažitelná cena posledního řádku.
+  </div>
+
+  <p>V <a href="l7-1.html#takeaways">[L7.1] Knapsack DP (tabulka + backtracking)</a> jsi vyplňoval tabulku <em>položky × kapacita</em> a v každé buňce maximalizoval cenu. Přednáška (slidy 8–9) ale předvádí DP pro batoh primárně v <strong>opačné orientaci</strong> — a právě tahle orientace je základem aproximačního schématu, na které navazuje 2-aproximace z <a href="../k3/l3-11.html#takeaways">[L3.11]</a>. Nejdřív ale proč vůbec tabulku otáčet:</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Otočení tabulky: co když váhy nejsou hezká celá čísla?</h2>
+
+  <details class="try">
+    <summary>Zkus sám: kapacitní tabulka z [L7.1] má sloupce $W' = 0, 1, \ldots, W$ — to vyžaduje <em>celočíselné váhy</em>. Co uděláš, když váhy jsou reálné (třeba $w = (2{,}7;\ 3{,}14;\ \ldots)$), ale <em>ceny</em> jsou malá celá čísla?</summary>
+    <div class="inner">
+      <p>Prohodíš role: sloupce nebudou kapacity, ale <strong>ceny</strong> $k = 0, 1, \ldots, C$ (kde $C$ je nějaká horní mez optima, třeba $\sum_j c_j$). A protože cena je teď „adresa sloupce“, nemůže být zároveň hodnotou buňky — do buňky se ukládá to druhé, co o výběru potřebuješ vědět: <strong>váha</strong>. Tabulka diskretizuje tu veličinu, která je celočíselná; druhá smí být libovolná reálná. Přesně proto slide 9 deklaruje vstup jako $c_1, \ldots, c_n \in \mathbb{Z}_0^+$, ale $w_1, \ldots, w_n, W \in \mathbb{R}_0^+$.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: ve sloupci ceny $k$ se může „srazit“ víc výběrů se stejnou cenou. Kterého zástupce si buňka má pamatovat — a proč právě toho?</summary>
+    <div class="inner">
+      <p><strong>Nejlehčího.</strong> Všechny výběry s cenou $k$ jsou v cílové funkci k nerozeznání; liší se jen tím, kolik kapacity spotřebují — a méně je vždy bezpečnější (lehčí výběr projde kapacitním testem $\le W$ kdykoli projde těžší a nechává víc místa zbytku položek). Buňka tedy minimalizuje váhu, zatímco v kapacitní tabulce maximalizovala cenu: <em>směr optimalizace v buňce se otočil spolu s tabulkou</em>. To je zase „diamond“ ze slidu 10: dvě cesty stavovým prostorem do téhož stavu, necháváme si lepší.</p>
+    </div>
+  </details>
+
+  <p>Definice ze slidu 8 (EN 1:1): <em>“Variable $x_k^j$ represents the <strong>minimum weight with cost $k$</strong> which can be achieved as a selection of items from set $\{1, \ldots, j\}$.”</em> Ceny, kterých z položek $1..j$ dosáhnout nejde, mají $x_k^j = \infty$.</p>
+
+  <h2>Rekurence, kapacitní filtr a bit $s_k^j$</h2>
+
+  <p>Rozhodnutí o položce $j$ je stejné „vzít / nevzít“ jako v [L7.1] — jen se obě větve čtou v řeči vah (slide 8, EN 1:1):</p>
+  <p>$$x_k^j = \begin{cases} x_{k - c_j}^{j-1} + w_j & \text{if item } j \text{ was added;} \\ x_k^{j-1} & \text{if item } j \text{ wasn't added.} \end{cases}$$</p>
+  <p>Kdy se položka přidá, říká podmínka (*) ze slidu 8 (EN 1:1): <em>“Item $j$ is added to the selection of items from $1, \ldots, j$ if for the given price $k$ this set reaches the <strong>lower or equal weight</strong> as set $1, \ldots, j-1$.”</em> V pseudokódu je to test $x_{k-c_j}^{j-1} + w_j \le \min\{W,\ x_k^{j-1}\}$ — a do bitu $s_k^j$ se zapamatuje, která větev vyhrála (slide 8: <em>“In variable $s_k^j$ we memorize which of the two possible cases has happened. It is later used to reconstruct the selection.”</em>).</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč je v testu $\min\{W,\ x_k^{j-1}\}$, a ne jen $x_k^{j-1}$? Co by se rozbilo bez té $W$?</summary>
+    <div class="inner">
+      <p>Je to <strong>kapacitní filtr</strong>: výběr s váhou $&gt; W$ se do batohu nikdy nevejde, takže nemá smysl ho ukládat — buňka by lhala, že cena $k$ je dosažitelná. Díky filtru platí invariant <em>každá konečná hodnota v tabulce je $\le W$</em>, a proto se na konci optimum smí číst prostě jako největší $k$ s $x_k^n &lt; \infty$ — bez dodatečné kontroly přípustnosti. (V kapacitní tabulce [L7.1] filtr nebyl potřeba: tam přípustnost hlídaly samy sloupce $W' \le W$.) A proč $x_{k-c_j}^{j-1}$ čte řádek $j-1$, ne $j$? Stejný důvod jako v [L7.1]: 0/1 batoh — čtení vlastního řádku by položku $j$ přidávalo opakovaně (unbounded).</p>
+    </div>
+  </details>
+
+  <p>Celý algoritmus ze slidu 9 (EN 1:1, vstup/výstup i pseudokód):</p>
+  <div class="assignment">
+    <span class="lbl">Dynamic Programming (Integer Costs) for Knapsack — slide 9, EN 1:1</span>
+    <p><strong>Input:</strong> Costs $c_1, \ldots, c_n \in \mathbb{Z}_0^+$, weights $w_1, \ldots, w_n, W \in \mathbb{R}_0^+$.<br>
+    <strong>Output:</strong> $S \subseteq \{1, \ldots, n\}$; $\sum_{j \in S} w_j \le W$ and $\sum_{j \in S} c_j$ is maximum.</p>
+<pre><code>Let C be the arbitrary upper bound of the solution, e.g. C = sum_{j=1}^{n} c_j;
+x_0^0 := 0; x_k^0 := infinity for k = 1, ..., C;
+for j := 1 to n do
+    for k := 0 to C do  x_k^j := x_k^{j-1}; s_k^j := 0 ;
+    for k := c_j to C do
+        if x_{k-c_j}^{j-1} + w_j &lt;= min{W, x_k^{j-1}} then
+            x_k^j := x_{k-c_j}^{j-1} + w_j; s_k^j := 1;
+        end
+    end
+end
+i := max{k in {0, ..., C} : x_k^n &lt; infinity}; S := empty;
+for j := n downto 1 do
+    if s_i^j = 1 then S := S union {j}; i := i - c_j;
+end</code></pre>
+  </div>
+
+  <h2>Kde je optimum? (Tentokrát NE v rohu)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: v kapacitní tabulce bylo optimum vždy v pravém dolním rohu $(n, W)$. Kde se čte z tabulky indexované cenou — a proč roh nefunguje?</summary>
+    <div class="inner">
+      <p>Sloupce jsou teď <em>ceny</em> a cena je cílová funkce: chceš <strong>nejpravější sloupec posledního řádku, který je vůbec dosažitelný</strong> — $i := \max\{k : x_k^n &lt; \infty\}$ (díky kapacitnímu filtru je každá konečná buňka automaticky $\le W$). Pravý dolní roh je sloupec $k = C$, a $C$ je jen <em>horní mez</em> (např. $\sum_j c_j$ = „vezmu úplně všechno“) — té většinou žádný přípustný výběr nedosáhne, takže v rohu typicky sedí $\infty$. Přesně na tohle mířila červená poznámka hodnotitele u zkouškové úlohy (citovaná v řešení T01 lekce [L7.1]): „opt. řešení nemusí být v pravém dolním rohu.“</p>
+    </div>
+  </details>
+
+  <h2>Krok za krokem: blackboard example ze slidu 8</h2>
+  <p>Slide 8 dává k tabuli instanci (integer costs): $n = 4$, $w = (21, 35, 52, 17)$, $c = (10, 20, 30, 10)$, $W = 100$ — instance je ze slidu, vyplnění a krokování níže je naše (přiznáno). Mez $C = \sum c_j = 70$. Všechny ceny jsou násobky 10, takže dosažitelné jsou jen sloupce $k \in \{0, 10, \ldots, 70\}$ — kreslíme jen ty (formálně je to substituce $c'_j = c_j / 10$, tedy zaokrouhlovací trik ze slidu 11 s $t = 10$, zde beze ztráty, protože 10 dělí všechny ceny — k tomu se vrátíme dole).</p>
+
+  <div class="viz" id="viz-dp"></div>
+
+  <h2>Unikátnost: tahle tabulka umí mlčet</h2>
+
+  <details class="try">
+    <summary>Zkus sám: poslední krok stepperu ukázal druhé optimum $\{I_1, I_3, I_4\}$ (cena 50, váha $90 \le 100$), které v tabulce <em>není vidět</em> — žádná remíza. Proč pravidlo z [L7.1] „unikátní ⟺ žádná remíza na zpětné cestě“ tady selhává? A kdy přesto platí?</summary>
+    <div class="inner">
+      <p>Buňka si pamatuje jen <strong>nejlehčího</strong> zástupce dané ceny. Výběr se stejnou cenou a <em>vyšší</em> váhou prohraje souboj o buňku a zmizí — ale pokud jeho váha pořád je $\le W$, je to plnohodnotné optimum (cílová funkce váhu nehodnotí!). U nás: na $(I_4, k{=}50)$ kandidát „vzít“ s váhou $x_{40}^3 + 17 = 73 + 17 = 90$ prohrál s 87, žádná remíza nevznikla, a přitom $90 \le 100$ — druhé optimum spolklo. Remíza (rovnost vah) tedy pořád <em>zaručuje</em> více optim, ale její absence unikátnost <strong>nezaručuje</strong>. Kdy absence remíz stačí? Třeba když $x_i^n = W$ přesně: pak každé optimum musí vážit právě $W$ (mezi minimem a $W$ není místo), dvě různá optima by se v buňce posledního rozdílu potkala se <em>stejnou</em> vahou — a to už remíza je. Jinak je potřeba prohrávající větve na zpětné cestě zkontrolovat ručně (vejde se i s dokončením pod $W$?), nebo argumentovat kombinatoricky výčtem (T02).</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: čím se cost-indexed tabulka liší (a kde se ztrácí body)</div>
+    <ul>
+      <li><strong>Optimum NENÍ v pravém dolním rohu</strong> — čte se $i = \max\{k : x_k^n &lt; \infty\}$, nejpravější konečná buňka posledního řádku (roh $k = C$ bývá $\infty$). Záměna s kapacitní tabulkou [L7.1], kde roh funguje vždy, je nejčastější přehmat.</li>
+      <li><strong>V buňce se minimalizuje, ne maximalizuje.</strong> Hodnota = váha (čím míň, tím líp); test vzetí je $x_{k-c_j}^{j-1} + w_j \le \min\{W, x_k^{j-1}\}$ — bez kapacitního filtru $W$ by tabulka hlásila nepřípustné „dosažitelné“ ceny.</li>
+      <li><strong>Unikátnost neodečteš jen z remíz:</strong> stejně drahé, ale těžší výběry (s váhou $\le W$) tabulka zahodí beze stopy — viz dvojče $\{I_1, I_3, I_4\}$ výše. Remíza ⇒ víc optim; žádná remíza ⇏ unikátní (výjimka: $x_i^n = W$, viz try výše).</li>
+      <li><strong>Sloupce = ceny vyžadují celočíselné ceny</strong> (váhy smí být reálné). Obráceně — celé váhy, necelé ceny — patří kapacitní tabulce [L7.1] (slide 10 schválně volí $c = (3.1, 4.2, 5.1, 4.3)$).</li>
+    </ul>
+  </div>
+
+  <h2>Složitost $O(nC)$ — a kterou tabulku kdy vytáhnout</h2>
+
+  <details class="try">
+    <summary>Zkus sám: kolik buněk má cost-indexed tabulka a co to znamená pro složitost? A rozhodni: instance se sliby (a) „celé váhy, $W \le 10n$“, (b) „celé ceny, $c_j \le 5$“ — kterou tabulkou na kterou?</summary>
+    <div class="inner">
+      <p>$(n+1)(C+1)$ buněk, konstantní práce na buňku → $\mathcal{O}(nC)$ (slide 8); rekonstrukce $O(n)$. Stejný příběh jako u $O(nW)$ v [L7.1]: $C$ je číslo zapsané v $O(\log C)$ bitech, takže algoritmus je <strong>pseudopolynomiální</strong> <a href="../k3/l3-5.html#takeaways">[L3.5]</a> — tentokrát v <em>cenách</em>, ne ve vahách. (a) $W \le 10n$ zkrotí kapacitní tabulku: $O(nW) = O(n^2)$ — sliby o $W$ cost-indexed tabulce nepomáhají, její velikost řídí $C$. (b) $c_j \le 5$ dává $C = \sum c_j \le 5n$, tedy $O(nC) = O(n^2)$ pro cost-indexed — a kapacitní tabulka může být obrovská, je-li $W$ veliké. Pravidlo: <strong>tabulku indexuj tou veličinou, která je celočíselná a malá</strong>; každý slib v zadání ($W \le 10n$, malé ceny, …) je nápověda, kterou orientací počítat. U našeho příkladu: kapacitní tabulka $5 \times 101 = 505$ buněk, cost-indexed po vydělení deseti $5 \times 8 = 40$.</p>
+    </div>
+  </details>
+
+  <h2>Výhled: proč je tahle varianta základ FPTAS</h2>
+  <p>Složitost $O(nC)$ visí na velikosti cen — a ceny jdou <strong>zmenšit zaokrouhlením</strong>. Slide 11 (EN 1:1): <em>“Divide all costs $c_1, \ldots, c_n$ by 2 and round them down. The algorithm becomes faster, but we can obtain a suboptimal solution.”</em> Obecně $\bar{c}_j := \lfloor c_j / t \rfloor$ zrychlí DP $t$-krát za cenu ztráty přesnosti — tím vzniká volitelný kompromis rychlost × kvalita. Aproximační schéma ze slidu 12 pak: ① spustí 2-aproximaci <a href="../k3/l3-11.html#takeaways">[L3.11]</a> a jejím výsledkem $c(S_1)$ zkalibruje $t := \max\{1, \frac{\epsilon\, c(S_1)}{n}\}$ a mez $C := \frac{2c(S_1)}{t}$, ② pustí toto DP na zaokrouhlených cenách, ③ vrátí lepší z obou řešení — výsledkem je $(1+\epsilon)$-aproximace v $O(n^2 \cdot \frac{1}{\epsilon})$ (slide 13). Klíčové pro dnešek: zaokrouhlují se <em>ceny</em>, proto schéma potřebuje DP <em>indexované cenou</em> — kapacitní tabulce by zaokrouhlení cen velikost nezmenšilo. Víc do hloubky FPTAS nejdeme (pro 15. 6. stačí vědět, že existuje a jak do sebe kroky zapadají).</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L7.2</div>
+    <ul>
+      <li><strong>Stav = cena, hodnota = minimální váha:</strong> $x_k^j$ = min. váha výběru z položek $1..j$ s cenou přesně $k$; $x_0^0 = 0$, jinak $\infty$. Vzít/nevzít: $x_k^j = x_{k-c_j}^{j-1} + w_j$, pokud $\le \min\{W, x_k^{j-1}\}$ (kapacitní filtr + „lower or equal weight“), jinak opis; rozhodnutí se pamatuje v bitu $s_k^j$.</li>
+      <li><strong>Optimum = nejpravější konečná buňka posledního řádku</strong>, $i = \max\{k : x_k^n &lt; \infty\}$ — NE pravý dolní roh. Rekonstrukce: $j = n..1$, při $s_i^j = 1$ přidej $j$ a sniž $i$ o $c_j$.</li>
+      <li><strong>Složitost $O(nC)$</strong>, $C$ = horní mez optima (např. $\sum_j c_j$) — pseudopolynomiální v cenách <a href="../k3/l3-5.html#takeaways">[L3.5]</a>; duál k $O(nW)$ z <a href="l7-1.html#takeaways">[L7.1]</a>. Indexuj tabulku veličinou, která je celočíselná a malá (ceny zde smí být jen celé, váhy libovolné reálné).</li>
+      <li><strong>Unikátnost čti opatrně:</strong> remíza vah na zpětné cestě ⇒ více optim; ale tabulka skrývá stejně drahé těžší výběry ($\le W$) — bez remíz unikátnost zaručena jen při $x_i^n = W$, jinak doověř (prohrávající větve / výčtem).</li>
+      <li><strong>Základ FPTAS:</strong> $\bar{c}_j = \lfloor c_j/t \rfloor$ zmenší $C$ (a běh) $t$-krát; schéma slidu 12 = 2-aproximace <a href="../k3/l3-11.html#takeaways">[L3.11]</a> na kalibraci $t$ + toto DP + lepší z obou → $(1+\epsilon)$-aproximace v $O(n^2/\epsilon)$.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-costdp">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Formulace DP s celočíselnými cenami</strong>
+      <span class="task-src">zdroj: task bank #28 (study task ze slidů 8–9), zadání EN 1:1</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Given costs $c_1, \ldots, c_n \in \mathbb{Z}_0^+$, weights $w_1, \ldots, w_n$, and capacity $W$, formulate the dynamic-programming algorithm based on integer costs. Let $C$ be an upper bound on the solution value, for example</p>
+        <p>$$C = \sum_{j=1}^{n} c_j.$$</p>
+        <p>Define the DP state $x_k^j$, give the recurrence and initialization, explain how the selected set is reconstructed from $s_k^j$, and state the time complexity.”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Teoretická (ústní) otázka: zformulovat cost-indexed DP pro 0/1 batoh — definice stavu, rekurence s inicializací, rekonstrukce výběru z bitů $s_k^j$ a složitost. Žádná čísla, čistě formulace.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice $x_k^j$, podmínka (*), pseudokód, čtení optima, $O(nC)$.</li>
+        <li><a href="../k3/l3-5.html#takeaways">[L3.5] Silná NP-těžkost</a> — zařazení „pseudopolynomiální“.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Odpověz strukturou ze zadání: ① stav, ② rekurence + inicializace (nezapomeň kapacitní filtr $\min\{W, \cdot\}$ — bez něj je formulace špatně), ③ kde se čte optimum (ne roh!), ④ rekonstrukce, ⑤ složitost a proč pseudopolynomiální. Zkus si to říct nahlas bez koukání, pak porovnej.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>① Stav.</strong> $x_k^j$ = minimální váha, které lze dosáhnout výběrem z položek $\{1, \ldots, j\}$ s celkovou cenou přesně $k$, pro $j = 0..n$, $k = 0..C$ (slide 8: <em>“minimum weight with cost $k$ which can be achieved as a selection of items from set $\{1,\ldots,j\}$”</em>); nedosažitelné ceny mají $\infty$.</p>
+          <p><strong>② Inicializace a rekurence.</strong> $x_0^0 := 0$, $x_k^0 := \infty$ pro $k = 1..C$. Pro $j = 1..n$ nejdřív celý řádek opiš ($x_k^j := x_k^{j-1}$, $s_k^j := 0$) a pak pro $k = c_j..C$:</p>
+          <p>$$\text{if } x_{k-c_j}^{j-1} + w_j \le \min\{W,\ x_k^{j-1}\} \text{ then } x_k^j := x_{k-c_j}^{j-1} + w_j;\ s_k^j := 1.$$</p>
+          <p>Tedy položka $j$ se přidá, pokud pro danou cenu $k$ dosáhne <em>nižší nebo stejné váhy</em> (podmínka (*)) — a $\min\{W, \cdot\}$ zároveň filtruje výběry, které se do batohu nevejdou: každá konečná hodnota tabulky je $\le W$.</p>
+          <p><strong>③ Optimum.</strong> $i := \max\{k \in \{0,\ldots,C\} : x_k^n &lt; \infty\}$ — nejvyšší dosažitelná (a díky filtru automaticky přípustná) cena. Pozor, není to pravý roh tabulky: sloupce $k$ blízko $C$ bývají $\infty$.</p>
+          <p><strong>④ Rekonstrukce z $s_k^j$.</strong> Začni $i$ v posledním řádku, $S := \emptyset$; pro $j = n$ dolů k $1$: je-li $s_i^j = 1$, byla položka $j$ při ceně $i$ vzata → $S := S \cup \{j\}$ a $i := i - c_j$ (přesun do sloupce, ze kterého rekurence četla); jinak jen o řádek výš. Po $j = 1$ je $S$ hledaný výběr.</p>
+          <p><strong>⑤ Složitost.</strong> $(n+1)(C+1)$ buněk, $O(1)$ na buňku → $\mathcal{O}(nC)$, rekonstrukce $O(n)$. Protože $C$ je hodnota zapsaná na $O(\log C)$ bitech, je algoritmus <strong>pseudopolynomiální</strong> <a href="../k3/l3-5.html#takeaways">[L3.5]</a>. Mez $C$ smí být libovolná horní mez optima — default $\sum_j c_j$; těsnější mez (např. $2\,c(S_1)$ z 2-aproximace <a href="../k3/l3-11.html#takeaways">[L3.11]</a>, jak to dělá aproximační schéma slidu 12) tabulku zmenší.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-costexam">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Zkoušková instance podruhé — cost-indexed tabulkou</strong>
+      <span class="task-src">zdroj: zkouška 2023 (str. 4, úloha 6b), zadání EN 1:1 — táž instance jako T01 v [L7.1], zde řešená druhou orientací tabulky (volba orientace naše, přiznáno; zadání konkrétní tabulku nepředepisuje)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Using dynamic programming, solve the following instance of Knapsack Problem:</p>
+        <ul>
+          <li>number of items: $n = 7$</li>
+          <li>knapsack capacity: $W = 5$</li>
+          <li>costs $\mathbf{c} = (2, 2, 2, 2, 4, 3, 1)$</li>
+          <li>weights $\mathbf{w} = (1, 1, 2, 2, 3, 4, 1)$</li>
+        </ul>
+        <p>a) Compute the optimal solution (objective value and items in knapsack) of this instance of Knapsack Problem. Write down all iterations of the algorithm. Is this solution unique and why?</p>
+        <p>b) What can you say about the computational complexity of the algorithm for instances where $W \le 10n$?”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejná zkoušková instance jako v <a href="l7-1.html#t-knapsackdp">[L7.1] T01</a> — tam vyřešená kapacitní tabulkou (optimum 8, $\{I_1, I_2, I_5\}$, unikátní). Tady ji projdeš cost-indexed tabulkou: jednak jako drill dnešní lekce, jednak abys viděl, že obě orientace dají totéž — a že otázka b) je vlastně test, <em>kterou</em> orientaci sliby zadání zvýhodňují.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — rekurence, kapacitní filtr, čtení optima, rekonstrukce, unikátnost.</li>
+        <li><a href="l7-1.html#takeaways">[L7.1]</a> — výsledek ke kontrole + odpověď b) pro kapacitní tabulku.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Mez $C = \sum c_j = 16$ → tabulka $8$ řádků ($j = 0..7$) × $17$ sloupců ($k = 0..16$). Vyplňuj po řádcích; u každého $k \ge c_j$ proveď test s $\min\{W{=}5, \cdot\}$ — hlídej remízy (rovnost vah) kvůli unikátnosti. Pak najdi nejpravější konečnou buňku posledního řádku a rekonstruuj podle bitů $s$. Pro b) si rozmysli, které tabulce slib $W \le 10n$ vůbec pomáhá. Nejdřív na papír, pak krokuj.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>a) Všechny iterace</strong> (kroky 1–8 vyplnění řádků, 9–14 rekonstrukce):</p>
+          <div class="viz" id="viz-t02"></div>
+          <p>Čtení optima: $i = \max\{k : x_k^7 &lt; \infty\} = \mathbf{8}$ (sloupce $9..16$ jsou $\infty$), $x_8^7 = 5 \le W$. Rekonstrukce: $s_8^7 = 0$, $s_8^6 = 0$, $s_8^5 = 1$ → $I_5$, $i = 4$; $s_4^4 = 0$, $s_4^3 = 0$, $s_4^2 = 1$ → $I_2$, $i = 2$; $s_2^1 = 1$ → $I_1$, $i = 0$. Tedy</p>
+          <p>$$S = \{I_1, I_2, I_5\}, \qquad c_1 + c_2 + c_5 = \mathbf{8}, \qquad w_1 + w_2 + w_5 = 5 \le 5$$</p>
+          <p>— přesně výsledek kapacitní tabulky z <a href="l7-1.html#t-knapsackdp">[L7.1] T01</a> (i ruční zkouškové tabulky a banky #27).</p>
+          <p><strong>Unikátnost: ANO.</strong> Tady je potřeba dnešní opatrnost: remízy vah v tabulce jsou — $(I_2, k{=}2)$: $\{I_1\}$ vs. $\{I_2\}$, váha 1; $(I_4, k{=}6)$ a $(I_5, k{=}6)$: váha 4 — ale žádná neleží na zpětné cestě (cesta jde sloupci $8 \to 8 \to 8 \to 4 \to 4 \to 4 \to 2 \to 0$ a v každé buňce je rozhodnutí jednoznačné: vzít je buď vynucené, $x_k^{j-1} = \infty$, nebo prohrává ostře). A protože $x_8^7 = 5 = W$ <em>přesně</em>, skryté těžší dvojče tu nehrozí: každé optimum musí vážit právě 5 (mezi minimální vahou 5 a $W = 5$ není místo), takže druhé optimum by na cestě vyrobilo remízu — a ta tam není. Kombinatorická kontrola jako v [L7.1]: cenu 8 složíš jen jako $2{+}2{+}4$ (váha 5 ✓), $2{+}2{+}2{+}2$ (váha 6 ✗) nebo $4{+}3{+}1$ (váha 8 ✗).</p>
+          <p><strong>b)</strong> Slib $W \le 10n$ mluví o <em>vahách</em>, takže pomáhá <strong>kapacitní</strong> tabulce: $O(nW) \le O(n \cdot 10n) = O(n^2)$ — polynomiální na této třídě instancí (odpověď zkoušky, viz <a href="l7-1.html#t-knapsackdp">[L7.1] T01</a>). Dnešní cost-indexed algoritmus běží v $O(nC)$ a $W \le 10n$ jeho velikost nijak neomezuje ($C = \sum c_j$ může růst dál) — správná strategie u zkoušky je tedy na b) odpovídat kapacitní tabulkou. Mimochodem zde: kapacitní tabulka $8 \times 6 = 48$ buněk vs. cost-indexed $8 \times 17 = 136$ — i pro ruční počítání tu vyhrává [L7.1].</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L7.2">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k7/l7-1.html"><span class="dir">← Předchozí</span> L7.1 · Knapsack DP (tabulka + backtracking)</a>
+    <a class="next" href="../index.html"><span class="dir">Další →</span> Konec učebnice — zpět na přehled</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// pomocník: řádek hodnot + volitelné třídy buněk {sloupec: cls}; '∞' se kreslí ztlumeně
+function dpRow(vals, marks) {
+  return vals.map(function (v, i) {
+    var cls = marks && marks[i] ? marks[i] : (v === '∞' ? 'dim' : null);
+    return cls ? { t: v, cls: cls } : v;
+  });
+}
+function dpEmpty(n) { return Array(n).fill(null); }
+
+/* ===== 1) Výklad: blackboard example slidu 8 (integer costs)
+   n=4, w=(21,35,52,17), c=(10,20,30,10), W=100, C=70 — sloupce k = 0,10,...,70.
+   Instance ze slidu; vyplnění, krokování i pozorování o druhém optimu jsou naše. ===== */
+var S0 = [0, '∞', '∞', '∞', '∞', '∞', '∞', '∞'];
+var S1 = [0, 21, '∞', '∞', '∞', '∞', '∞', '∞'];
+var S2 = [0, 21, 35, 56, '∞', '∞', '∞', '∞'];
+var S3 = [0, 21, 35, 52, 73, 87, '∞', '∞'];
+var S4 = [0, 17, 35, 52, 69, 87, '∞', '∞'];
+var SM = dpEmpty(8);
+
+KOViz.dpTable(document.getElementById('viz-dp'), {
+  corner: 'j \\ k',
+  cols: ['0', '10', '20', '30', '40', '50', '60', '70'],
+  rows: ['∅ <small>(j=0)</small>',
+         'I₁ <small>c=10 w=21</small>',
+         'I₂ <small>c=20 w=35</small>',
+         'I₃ <small>c=30 w=52</small>',
+         'I₄ <small>c=10 w=17</small>'],
+  frames: [
+    {desc: 'Inicializace: prázdný výběr má cenu 0 a váhu 0 → x⁰₀ = 0; ostatní ceny zatím dosáhnout nejde → ∞.',
+     cells: [dpRow(S0), SM, SM, SM, SM]},
+    {desc: 'Řádek I₁ (c=10, w=21): nová je jen cena k=10: x⁰₀ + 21 = 21 ≤ min{100, ∞} → zapiš 21, s=1. Zbytek řádku opis (s=0).',
+     cells: [dpRow(S0), dpRow(S1, {1:'hl'}), SM, SM, SM], rowCls: {1:'hl'}},
+    {desc: 'Řádek I₂ (c=20, w=35): k=20: x¹₀ + 35 = 35 → zapiš (s=1); k=30: x¹₁₀ + 35 = 21 + 35 = 56 → zapiš (s=1). Čárkovaně zdroje rekurence (sloupce k−20 v řádku výš).',
+     cells: [dpRow(S0), dpRow(S1, {0:'src', 1:'src'}), dpRow(S2, {2:'hl', 3:'hl'}), SM, SM], rowCls: {2:'hl'}},
+    {desc: 'Řádek I₃ (c=30, w=52): k=30: x²₀ + 52 = 52 ≤ min{100, 56} → PŘEPIS 56 → 52 ({I₃} je lehčí než {I₁,I₂} — „diamond“, necháváme lepšího zástupce); k=40: 21+52 = 73; k=50: 35+52 = 87; k=60: 56+52 = 108 > 100 → kapacitní filtr, zůstává ∞.',
+     cells: [dpRow(S0), dpRow(S1), dpRow(S2, {0:'src', 1:'src', 2:'src', 3:'src'}), dpRow(S3, {3:'hl', 4:'hl', 5:'hl', 6:'bad'}), SM], rowCls: {3:'hl'}},
+    {desc: 'Řádek I₄ (c=10, w=17): k=10: 0+17 = 17 ≤ min{100, 21} → 17 (s=1, lehčí než {I₁}); k=30: x³₂₀ + 17 = 35+17 = 52 ≤ min{100, 52} → REMÍZA vah, podle (*) „lower or equal“ se zapisuje s=1 ({I₂,I₄} střídá {I₃}); k=40: 52+17 = 69 ≤ 73 → 69 (s=1); k=50: 73+17 = 90 ≤ min{100, 87}? NE (90 > 87) → opis 87, s=0. Tabulka hotová.',
+     cells: [dpRow(S0), dpRow(S1), dpRow(S2), dpRow(S3, {1:'src', 2:'src', 3:'src', 4:'src'}), dpRow(S4, {1:'hl', 3:'hl', 4:'hl', 5:'hl'})], rowCls: {4:'hl'}},
+    {desc: 'ČTENÍ OPTIMA: i = max{k : x⁴ₖ < ∞} = 50 → optimální cena 50, váha x⁴₅₀ = 87 ≤ 100 ✓. Pozor: pravý dolní roh (k = 70) je ∞ — optimum NENÍ v rohu, sloupce 60 a 70 jsou nedosažitelné.',
+     cells: [dpRow(S0), dpRow(S1), dpRow(S2), dpRow(S3), dpRow(S4, {5:'good', 6:'bad', 7:'bad'})]},
+    {desc: 'REKONSTRUKCE, j=4 (i=50): s⁴₅₀ = 0 (vzetí prohrálo: 90 > 87) → I₄ NEVZATA, i zůstává 50, o řádek výš.',
+     cells: [dpRow(S0), dpRow(S1), dpRow(S2), dpRow(S3, {5:'hl'}), dpRow(S4, {5:'good'})]},
+    {desc: 'j=3 (i=50): s³₅₀ = 1 → I₃ VZATA (87 = x²₂₀ + 52 = 35 + 52); i = 50 − 30 = 20.',
+     cells: [dpRow(S0), dpRow(S1), dpRow(S2, {2:'hl'}), dpRow(S3, {5:'good'}), dpRow(S4, {5:'good'})], rowCls: {3:'good'}},
+    {desc: 'j=2 (i=20): s²₂₀ = 1 → I₂ VZATA (35 = x¹₀ + 35); i = 20 − 20 = 0. j=1 (i=0): s¹₀ = 0 → I₁ ne. KONEC: S = {I₂, I₃}, cena 20+30 = 50, váha 35+52 = 87 ≤ 100 ✓.',
+     cells: [dpRow(S0, {0:'good'}), dpRow(S1, {0:'good'}), dpRow(S2, {2:'good'}), dpRow(S3, {5:'good'}), dpRow(S4, {5:'good'})], rowCls: {2:'good', 3:'good'}},
+    {desc: 'JEŠTĚ JEDNOU SE PODÍVEJ (naše pozorování): {I₁, I₃, I₄} má cenu 10+30+10 = 50 a váhu 21+52+17 = 90 ≤ 100 — DRUHÉ optimum! V tabulce po něm není stopa: v buňce (I₄, k=50) prohrálo 90 > 87 (červeně zdroj 73 = x³₄₀ = {I₁,I₃}) a tabulka si nechala jen lehčí {I₂,I₃}. Žádná remíza nevznikla — a optimum přesto není unikátní. Viz výklad o unikátnosti pod tabulkou.',
+     cells: [dpRow(S0), dpRow(S1), dpRow(S2), dpRow(S3, {4:'bad'}), dpRow(S4, {5:'bad'})], rowCls: {4:'hl'}},
+  ],
+  caption: 'Blackboard example slidu 8 (integer costs): n = 4, w = (21, 35, 52, 17), c = (10, 20, 30, 10), W = 100, C = Σc = 70; kreslíme jen dosažitelné sloupce k = 0, 10, …, 70 (ceny jsou násobky 10). Kroky 1–5 vyplnění, 6 čtení optima, 7–9 rekonstrukce, 10 skryté druhé optimum.',
+});
+
+/* ===== 2) T02: zkoušková instance 2023 (= L7.1 T01) cost-indexed tabulkou
+   n=7, W=5, c=(2,2,2,2,4,3,1), w=(1,1,2,2,3,4,1), C = Σc = 16 ===== */
+var I = '∞';
+var X0 = [0, I, I, I, I, I, I, I, I, I, I, I, I, I, I, I, I];
+var X1 = [0, I, 1, I, I, I, I, I, I, I, I, I, I, I, I, I, I];
+var X2 = [0, I, 1, I, 2, I, I, I, I, I, I, I, I, I, I, I, I];
+var X3 = [0, I, 1, I, 2, I, 4, I, I, I, I, I, I, I, I, I, I];
+var X4 = [0, I, 1, I, 2, I, 4, I, I, I, I, I, I, I, I, I, I];
+var X5 = [0, I, 1, I, 2, I, 4, I, 5, I, I, I, I, I, I, I, I];
+var X6 = [0, I, 1, 4, 2, 5, 4, I, 5, I, I, I, I, I, I, I, I];
+var X7 = [0, 1, 1, 2, 2, 3, 4, 5, 5, I, I, I, I, I, I, I, I];
+var XM = dpEmpty(17);
+
+KOViz.dpTable(document.getElementById('viz-t02'), {
+  corner: 'j \\ k',
+  cols: ['0','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16'],
+  rows: ['∅ <small>(j=0)</small>',
+         'I₁ <small>c=2 w=1</small>',
+         'I₂ <small>c=2 w=1</small>',
+         'I₃ <small>c=2 w=2</small>',
+         'I₄ <small>c=2 w=2</small>',
+         'I₅ <small>c=4 w=3</small>',
+         'I₆ <small>c=3 w=4</small>',
+         'I₇ <small>c=1 w=1</small>'],
+  frames: [
+    {desc: 'Inicializace: x⁰₀ = 0, jinak ∞. Mez C = Σcⱼ = 16 → sloupce k = 0..16.',
+     cells: [dpRow(X0), XM, XM, XM, XM, XM, XM, XM]},
+    {desc: 'Iterace I₁ (c=2, w=1): k=2: x⁰₀ + 1 = 1 ≤ min{5, ∞} → 1, s=1. Vyšší k nedosažitelné.',
+     cells: [dpRow(X0), dpRow(X1, {2:'hl'}), XM, XM, XM, XM, XM, XM], rowCls: {1:'hl'}},
+    {desc: 'Iterace I₂ (c=2, w=1): k=2: x¹₀ + 1 = 1 ≤ min{5, 1} → REMÍZA vah ({I₁} i {I₂} váží 1), dle (*) se zapisuje s=1; k=4: x¹₂ + 1 = 2 → 2, s=1.',
+     cells: [dpRow(X0), dpRow(X1, {0:'src', 2:'src'}), dpRow(X2, {2:'hl', 4:'hl'}), XM, XM, XM, XM, XM], rowCls: {2:'hl'}},
+    {desc: 'Iterace I₃ (c=2, w=2): k=2: 0+2 = 2 ≤ min{5, 1}? ne; k=4: 1+2 = 3 ≤ min{5, 2}? ne; k=6: x²₄ + 2 = 4 ≤ min{5, ∞} → 4, s=1.',
+     cells: [dpRow(X0), dpRow(X1), dpRow(X2, {4:'src'}), dpRow(X3, {6:'hl'}), XM, XM, XM, XM], rowCls: {3:'hl'}},
+    {desc: 'Iterace I₄ (c=2, w=2): k=6: x³₄ + 2 = 4 ≤ min{5, 4} → REMÍZA, s=1; k=8: x³₆ + 2 = 6 ≤ min{5, ∞}? NE (6 > W=5, kapacitní filtr) → ∞. Jinde beze změny.',
+     cells: [dpRow(X0), dpRow(X1), dpRow(X2), dpRow(X3, {4:'src', 6:'src'}), dpRow(X4, {6:'hl', 8:'bad'}), XM, XM, XM], rowCls: {4:'hl'}},
+    {desc: 'Iterace I₅ (c=4, w=3): k=4: 0+3 = 3 ≤ min{5, 2}? ne; k=6: x⁴₂ + 3 = 4 ≤ min{5, 4} → REMÍZA, s=1; k=8: x⁴₄ + 3 = 5 ≤ min{5, ∞} = 5 → 5, s=1 (vejde se přesně).',
+     cells: [dpRow(X0), dpRow(X1), dpRow(X2), dpRow(X3), dpRow(X4, {2:'src', 4:'src'}), dpRow(X5, {6:'hl', 8:'hl'}), XM, XM], rowCls: {5:'hl'}},
+    {desc: 'Iterace I₆ (c=3, w=4): k=3: 0+4 = 4 → 4, s=1; k=5: x⁵₂ + 4 = 5 ≤ min{5, ∞} → 5, s=1; k=7: x⁵₄ + 4 = 6 > 5 → ∞; k=9 a výš: > 5 nebo z ∞.',
+     cells: [dpRow(X0), dpRow(X1), dpRow(X2), dpRow(X3), dpRow(X4), dpRow(X5, {0:'src', 2:'src'}), dpRow(X6, {3:'hl', 5:'hl'}), XM], rowCls: {6:'hl'}},
+    {desc: 'Iterace I₇ (c=1, w=1): k=1: 0+1 = 1 → s=1; k=3: x⁶₂ + 1 = 2 ≤ min{5, 4} → 2, s=1; k=5: x⁶₄ + 1 = 3 ≤ min{5, 5} → 3, s=1; k=7: x⁶₆ + 1 = 5 ≤ min{5, ∞} → 5, s=1; k=9: x⁶₈ + 1 = 6 > 5 → ∞. Tabulka hotová.',
+     cells: [dpRow(X0), dpRow(X1), dpRow(X2), dpRow(X3), dpRow(X4), dpRow(X5), dpRow(X6, {0:'src', 2:'src', 4:'src', 6:'src'}), dpRow(X7, {1:'hl', 3:'hl', 5:'hl', 7:'hl'})], rowCls: {7:'hl'}},
+    {desc: 'ČTENÍ OPTIMA: i = max{k : x⁷ₖ < ∞} = 8 (sloupce 9–16 jsou ∞), x⁷₈ = 5 ≤ W ✓ → optimální cena 8. Roh (k=16) by znamenal „vzal jsem všechno“ — nedosažitelný.',
+     cells: [dpRow(X0), dpRow(X1), dpRow(X2), dpRow(X3), dpRow(X4), dpRow(X5), dpRow(X6), dpRow(X7, {8:'good', 16:'bad'})]},
+    {desc: 'REKONSTRUKCE, j=7 (i=8): s⁷₈ = 0 (vzetí I₇: x⁶₇ + 1 = ∞) → I₇ ne. j=6 (i=8): s⁶₈ = 0 (x⁵₅ + 4 = ∞) → I₆ ne.',
+     cells: [dpRow(X0), dpRow(X1), dpRow(X2), dpRow(X3), dpRow(X4), dpRow(X5, {8:'hl'}), dpRow(X6, {8:'good'}), dpRow(X7, {8:'good'})]},
+    {desc: 'j=5 (i=8): s⁵₈ = 1 → I₅ VZATA (5 = x⁴₄ + 3 = 2 + 3; „nevzít“ bylo nemožné, x⁴₈ = ∞); i = 8 − 4 = 4.',
+     cells: [dpRow(X0), dpRow(X1), dpRow(X2), dpRow(X3), dpRow(X4, {4:'hl'}), dpRow(X5, {8:'good'}), dpRow(X6, {8:'good'}), dpRow(X7, {8:'good'})], rowCls: {5:'good'}},
+    {desc: 'j=4 (i=4): s⁴₄ = 0 (vzetí: x³₂ + 2 = 3 > 2, ostře horší) → I₄ ne. j=3 (i=4): s³₄ = 0 (1+2 = 3 > 2) → I₃ ne.',
+     cells: [dpRow(X0), dpRow(X1), dpRow(X2, {4:'hl'}), dpRow(X3, {4:'good'}), dpRow(X4, {4:'good'}), dpRow(X5, {8:'good'}), dpRow(X6, {8:'good'}), dpRow(X7, {8:'good'})], rowCls: {5:'good'}},
+    {desc: 'j=2 (i=4): s²₄ = 1 → I₂ VZATA (2 = x¹₂ + 1; „nevzít“ nemožné, x¹₄ = ∞); i = 4 − 2 = 2.',
+     cells: [dpRow(X0), dpRow(X1, {2:'hl'}), dpRow(X2, {4:'good'}), dpRow(X3, {4:'good'}), dpRow(X4, {4:'good'}), dpRow(X5, {8:'good'}), dpRow(X6, {8:'good'}), dpRow(X7, {8:'good'})], rowCls: {2:'good', 5:'good'}},
+    {desc: 'j=1 (i=2): s¹₂ = 1 → I₁ VZATA (1 = x⁰₀ + 1; „nevzít“ nemožné, x⁰₂ = ∞); i = 0 → KONEC. S = {I₁, I₂, I₅}, cena 2+2+4 = 8, váha 1+1+3 = 5 ≤ 5 ✓ — shoda s kapacitní tabulkou [L7.1]. Na cestě nebyla žádná remíza a x⁷₈ = 5 = W → optimum unikátní (viz řešení).',
+     cells: [dpRow(X0, {0:'good'}), dpRow(X1, {2:'good'}), dpRow(X2, {4:'good'}), dpRow(X3, {4:'good'}), dpRow(X4, {4:'good'}), dpRow(X5, {8:'good'}), dpRow(X6, {8:'good'}), dpRow(X7, {8:'good'})], rowCls: {1:'good', 2:'good', 5:'good'}},
+  ],
+  caption: 'T02: zkoušková instance 2023 cost-indexed tabulkou (C = Σc = 16). Kroky 1–8 vyplnění (všechny iterace), 9 čtení optima (nejpravější konečná buňka, ne roh), 10–14 rekonstrukce podle bitů s. Výsledek 8 = {I₁, I₂, I₅} se shoduje s kapacitní tabulkou z L7.1.',
+});
+</script>
+</body>
+</html>
