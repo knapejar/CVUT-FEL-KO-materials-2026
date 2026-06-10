@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L4.5 · Modelování přiřazení jako tok (vrstvená síť) [FOTO] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k4">K4 · Toky a řezy</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L4.5</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L4.5</span> Kapitola K4 — Toky a řezy (Slot 4) · <strong>[MUST]</strong> · FOTO checkpoint
+  </p>
+  <h1>Modelování přiřazení jako tok (vrstvená síť) [FOTO]</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Vrstvená síť: $s$ → vrstva → vrstva → $t$, kde kapacity hran kódují omezení úlohy.</strong> Přiřazovací úlohu („kdo koho zastupuje“, „kdo kde sedí“) neřešíš žádným novým algoritmem — <em>postavíš si síť</em> tak, aby přípustné přiřazení = celočíselný tok, a odpověď ANO/NE přečteš z toho, jestli maximální tok <strong>nasytí všechny hrany ze zdroje</strong>.
+  </div>
+
+  <p>V <a href="l4-1.html#takeaways">[L4.1]</a>–<a href="l4-4.html#takeaways">[L4.4]</a> jsi síť vždycky dostal nakreslenou v zadání a počítal jsi na ní. Na zkoušce 1. 6. 2026 ale padla úloha „<strong>Residents &amp; council</strong>“ — a v ní žádná síť není. Jen text o klubech, radě města a kvótách. Tvoje práce je síť <em>vyrobit</em>: zvolit vrcholy, hrany a hlavně <strong>kapacity</strong> tak, aby tok přesně odpovídal hledanému přiřazení. To je dnešní (a jediná) nová věc — a rovnou FOTO checkpoint.</p>
+
+  <!-- ===== SEKCE 1: ÚLOHA BEZ SÍTĚ ===== -->
+  <h2>Úloha, ve které žádná síť není (slide 19)</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 19 — Example Flow.lower.representatives: Distinct Representatives [AMO93], 1:1</div>
+    <p><em>Assignment problem with an additional constraint.<br>
+    Let us have $n$ residents of a town, each of them is a member of at least one club $k_1, \ldots, k_l$ and belongs to exactly one age group $p_1, \ldots, p_r$. Each club must nominate one of its members to the town's governing council so that the number of council members belonging to the age group is constrained by its minimum and maximum. One resident represents at most one club. Find a feasible assignment of the representatives or prove that it does not exist. Formulate as the Maximum Flow Problem.</em></p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: než začneš kreslit — co bude v téhle úloze „jednotka toku“? Co poteče sítí?</summary>
+    <div class="inner">
+      <p>Jedna <strong>nominace</strong> (jedno křeslo v radě). Klubů je $l$, každý nominuje právě jednoho člena — sítí má tedy protéct přesně $l$ jednotek, každá po trase „klub → jeho člen → členova věková skupina“. Jakmile víš, co teče, vrstvy se nabídnou samy: zdroj, kluby, rezidenti, věkové skupiny, stok.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: KAPACITY KÓDUJÍ OMEZENÍ ===== -->
+  <h2>Tři omezení → tři kapacity</h2>
+
+  <p>Celé kouzlo modelování je v tom, že každé slovní omezení přeložíš na <strong>kapacitu jedné hrany</strong>. Projdi si je po jednom (v jednodušší variantě z 1. 6. 2026 jsou místo věkových skupin politické strany $P_k$ a kvóta je jen horní: nejvýš $u_k$ radních ze strany $P_k$):</p>
+
+  <details class="try">
+    <summary>Zkus sám: „each club must nominate <em>one</em> of its members“ — jak tokem říct, že klub $C_j$ nominuje právě jednoho?</summary>
+    <div class="inner">
+      <p>Hrana $s \to C_j$ s kapacitou $u = 1$. Tím říkáš „nejvýš jedna nominace na klub“ — a „právě jedna“ z toho uděláš až na konci požadavkem, aby <strong>všechny hrany ze zdroje byly nasycené</strong> ($f = u = 1$ na každé). Samotná síť umí vynutit jen „nejvýš“; „přesně“ je otázka na hodnotu maximálního toku.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: „one resident represents <em>at most one</em> club“ — to je omezení na vrchol $R_i$, ne na hranu. Jak ho vynutíš kapacitami hran?</summary>
+    <div class="inner">
+      <p>Stačí si všimnout, že všechno, co do $R_i$ přiteče, musí odtéct jeho výstupními hranami (Kirchhoff <a href="l4-1.html#takeaways">[L4.1]</a>). Rezident patří do <em>právě jedné</em> strany, takže z $R_i$ vede <strong>jediná</strong> hrana $R_i \to P_k$ — dáš jí kapacitu $1$ a průtok vrcholem $R_i$ je omezen jedničkou. Obecný trik: omezení „přes vrchol nejvýš $c$“ se modeluje kapacitou $c$ na hraně, kterou všechen tok vrcholem musí projít (kdyby výstupních hran bylo víc, vrchol rozdělíš na $R_i^{in} \to R_i^{out}$ a kapacitu dáš spojovací hraně).</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: „nejvýš $u_k$ radních ze strany $P_k$“ — kam s kvótou?</summary>
+    <div class="inner">
+      <p>Na hranu $P_k \to t$ s kapacitou $u_k$. Každá nominace člena strany $P_k$ musí do stoku projít právě touhle hranou, takže jich projde nejvýš $u_k$. (A ve variantě slidu 19 s <em>minimem i maximem</em> dostane táž hrana navíc dolní mez $l(e) = $ minimum — k tomu se vrátíme v úloze T01.)</p>
+    </div>
+  </details>
+
+  <p>Dohromady: <strong>čtyři vrstvy</strong> $s \to C_j \to R_i \to P_k \to t$. Hrany $C_j \to R_i$ existují přesně pro členství „$R_i$ je v klubu $C_j$“ (kapacita 1), hrana $R_i \to P_k$ vede do rezidentovy strany. Tady je konkrétní mini-instance, na které budeme celou lekci pracovat:</p>
+
+  <div class="viz" id="viz-model"></div>
+
+  <!-- ===== SEKCE 3: VZOR ===== -->
+  <h2>Vzor: vrstvená (třívrstvá bipartitní) síť</h2>
+
+  <p>Stejný půdorys potkáš pořád dokola, jen se přejmenují vrstvy: <strong>$s$ → kategorie s požadavky → lidé/jednotky → kategorie s kvótami → $t$</strong>. Hrany ze zdroje říkají, <em>kolik čeho se musí stát</em> (jedna nominace na klub); prostřední hrany říkají, <em>co je dovoleno</em> (členství, kompatibilita); hrany do stoku říkají, <em>kolik se kam vejde</em> (kvóty $u_k$, kapacity stolů). Tímhle vzorem se modeluje i večeře rodin u stolů (úloha T02 dole), bipartitní párování (uvidíš v [L4.9]) a preemptivní rozvrhování přes intervaly (slide 5–6; na to dojde v kapitole K5, lekce [L5.0]).</p>
+
+  <!-- ===== SEKCE 4: FEASIBILITA ===== -->
+  <h2>Odpověď ANO/NE čteš z nasycení hran ze zdroje</h2>
+
+  <details class="try">
+    <summary>Zkus sám: jakou největší hodnotu může mít tok v naší síti? (Vzpomeň na řezy z <a href="l4-4.html#takeaways">[L4.4]</a>.)</summary>
+    <div class="inner">
+      <p>Řez $A = \{s\}$ má kapacitu $C(A) = \sum_j u(s \to C_j) = q$ (počet klubů; v mini-instanci $3$). Slabá dualita <a href="l4-4.html#takeaways">[L4.4]</a> dává $|f| \le q$ pro každý tok. Maximální tok tedy buď $q$ <em>dosáhne</em> (všechny hrany ze zdroje nasycené), nebo zůstane pod ním.</p>
+    </div>
+  </details>
+
+  <p>A přesně to je kritérium, které u zkoušky <strong>musíš napsat</strong>:</p>
+
+  <div class="box">
+    <div class="box-title"><img src="../assets/icons/list-checks.svg" class="ico" alt="">Recept: přiřazení jako max flow (co odevzdat u zkoušky)</div>
+    <ol>
+      <li><strong>Vrcholy:</strong> $s$, vrstva požadavků (kluby), vrstva lidí (rezidenti), vrstva kvót (strany/skupiny), $t$.</li>
+      <li><strong>Hrany + kapacity:</strong> $s \to C_j$ s $u=1$ (každý klub jedna nominace); $C_j \to R_i$ s $u=1$ pro členy; $R_i \to P_k$ s $u=1$ do rezidentovy strany; $P_k \to t$ s $u = u_k$. Dolní meze $l \equiv 0$.</li>
+      <li><strong>Kritérium:</strong> přípustné přiřazení existuje $\iff$ hodnota maximálního toku $= q$, tj. maximální tok <strong>nasytí všechny hrany ze zdroje</strong>.</li>
+      <li><strong>Zdůvodnění čtení výsledku:</strong> kapacity jsou celočíselné → existuje celočíselný maximální tok (viz níže), hrany $C_j \to R_i$ s $f = 1$ jsou přímo nominace.</li>
+    </ol>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: v mini-instanci zmenši kvóty na $u_1 = u_2 = 1$. Existuje rada? Najdi odpověď bez spouštění algoritmu — jedním řezem.</summary>
+    <div class="inner">
+      <p>Neexistuje. Vezmi $A = V \setminus \{t\}$: jeho kapacita je $C(A) = u_1 + u_2 = 2 &lt; 3 = q$, takže $|f| \le 2$ pro každý tok a hrany ze zdroje nasytit nejdou — tři nominace se nevejdou do dvou stranických křesel. Tohle je přesně role minimálního řezu z <a href="l4-4.html#takeaways">[L4.4]</a>: když odpověď zní NE, min řez je <strong>certifikát</strong>, kudy vede úzké hrdlo.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 5: INTEGRALITA ===== -->
+  <h2>Proč si tok smíš přečíst jako přiřazení (slide 17)</h2>
+
+  <p>Jedna věc by tě měla hryzat: tok je obecně reálné číslo. Co kdyby maximální tok poslal klubem $C_1$ půlku nominace přes $R_1$ a půlku přes $R_2$? Tady zachraňuje celočíselnost:</p>
+
+  <div class="box">
+    <div class="box-title">Slide 17 — Integral Flow Theorem (Dantzig and Fulkerson [1956]), 1:1</div>
+    <p><em>If the capacities of the network are integers, and there exists a feasible flow, then there exists <strong>an integer-valued maximum flow</strong>.</em></p>
+    <p><em>This follows from total unimodularity of the incidence matrix of a digraph $G$, which is matrix $\mathbf{A}$ in LP formulation $\mathbf{A} \cdot x \le b$. Alternatively we can prove it as follows: If all capacities are integers, $\gamma$ in 3) of the Ford-Fulkerson algorithm is always an integer. Since there is a maximum flow of finite value, the algorithm terminates after a finite number of steps.</em></p>
+  </div>
+
+  <p>Druhý argument znáš z vlastní zkušenosti: Ford-Fulkerson <a href="l4-3.html#takeaways">[L4.3]</a> startuje z nulového toku a každá augmentace přičítá celočíselné $\gamma$ — celočíselnost se nemá kde pokazit. (První argument přes totální unimodularitu je tentýž, který jsi viděl u <a href="../k3/l3-12.html#takeaways">[L3.12] TUM</a>.) V naší síti jsou všechny kapacity $1$ nebo $u_k$, takže existuje maximální tok s $f(e) \in \{0, 1\}$ na hranách vrstev — a hrany $C_j \to R_i$ s $f = 1$ <strong>jsou</strong> hledané nominace.</p>
+
+  <!-- ===== SEKCE 6: BĚH NAŽIVO ===== -->
+  <h2>Naživo: nominace Ford-Fulkersonem</h2>
+
+  <p>Postavená síť je obyčejná síť — žádný nový algoritmus nepotřebuješ. Proklikej si běh Ford-Fulkersona <a href="l4-3.html#takeaways">[L4.3]</a> na mini-instanci (popisek hrany $= l, f, u$). Sleduj hlavně třetí iteraci: jde přes <strong>zpětné hrany</strong> a v řeči úlohy to znamená, že algoritmus <em>přehodí dřívější nominaci</em>, aby uvolnil místo v kvótě.</p>
+
+  <div class="viz" id="viz-ffrun"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy při modelování</div>
+    <p><strong>1) „Stačí nakreslit vrstvy a hrany.“</strong> Nestačí — bez kapacity $1$ <em>přes</em> prostřední vrstvu (tady na jediné hraně $R_i \to P_k$) by jeden rezident mohl zastupovat dva kluby a model lže. Každé slovní omezení musí mít svou kapacitu; u omezení na vrchol si vždy ověř, kudy všechen tok vrcholem protéká.
+    <strong>2) „Síť = odpověď.“</strong> Maximální tok existuje vždy — odpověď NE poznáš jen podle $|f| &lt; q$. Bez věty „přiřazení existuje $\iff$ max tok nasytí hrany ze zdroje“ je formulace u zkoušky neúplná.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.5</div>
+    <ul>
+      <li><strong>Vrstvený vzor:</strong> $s$ → kategorie s požadavky → lidé → kategorie s kvótami → $t$; hrany prostřední vrstvy = co je dovoleno (členství/kompatibilita).</li>
+      <li><strong>Kapacity kódují omezení:</strong> „právě jedna nominace na klub“ = $u(s \to C_j) = 1$ + nasycení; „jeden člověk nejvýš jednou“ = kapacita $1$ na hraně, kterou všechen tok vrcholem musí projít; kvóty = kapacity hran do $t$.</li>
+      <li><strong>Feasibilita:</strong> přiřazení existuje $\iff$ max tok nasytí všechny hrany ze zdroje ($|f| = q$); víc než $q$ to být nemůže (řez $A = \{s\}$, <a href="l4-4.html#takeaways">[L4.4]</a>). Když NE, min řez je certifikát úzkého hrdla.</li>
+      <li><strong>Celočíselnost (Dantzig-Fulkerson, slide 17):</strong> celočíselné kapacity → existuje celočíselný max tok (F-F ho rovnou najde) → hrany s $f = 1$ čteš přímo jako přiřazení.</li>
+      <li><strong>U zkoušky odevzdej čtyři věci:</strong> vrcholy, hrany s kapacitami, kritérium nasycení, čtení výsledku z celočíselného toku.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 [FOTO] ===== -->
+  <div class="task" id="t-residents">
+    <div class="task-head foto">
+      <span class="task-id">T01</span>
+      <strong>Residents &amp; council (Problem of Representatives)</strong>
+      <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
+      <span class="task-src">zdroj: zkouška KO 01.06.2026 (doložena svědectvím, přesný přepis se nedochoval) ≈ AMO93 Application 6.2 dle ko_souhrn (EN 1:1) + varianta slide 19 (EN 1:1) ≈ test2_2015; řešení dle této lekce</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, 1:1 — AMO93 Application 6.2 „Problem of Representatives“)</span>
+        <p>A town has $r$ residents $R_1, R_2, \ldots, R_r$; $q$ clubs $C_1, C_2, \ldots, C_q$; and $p$ political parties $P_1, P_2, \ldots, P_p$. Each resident is a member of at least one club and can belong to exactly one political party. Each club must nominate one of its members to represent it on the town's governing council so that the number of council members belonging to the political party $P_k$ is at most $u_k$. Is it possible to find a council that satisfies this "balancing" property? <em>(Formulate as a maximum flow problem; illustrate on an example with $r = 7$, $q = 4$, $p = 3$.)</em></p>
+        <p><strong>b) Variant (slide 19, 1:1):</strong> …each of them is a member of at least one club $k_1, \ldots, k_l$ and belongs to exactly one <strong>age group</strong> $p_1, \ldots, p_r$. Each club must nominate one of its members to the town's governing council so that the number of council members belonging to the age group is constrained by its <strong>minimum and maximum</strong>. One resident represents at most one club. Find a feasible assignment of the representatives or prove that it does not exist. Formulate as the Maximum Flow Problem.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Modelovací úloha slotu 4 z 1. 6. 2026: žádná síť, jen text. Kluby nominují po jednom členovi do rady, každý rezident má právě jednu stranu (resp. věkovou skupinu) a strany mají kvóty — v základní verzi jen horní ($\le u_k$), ve variantě b) navíc dolní (minimum). Máš formulovat max-flow problém a říct, kdy rada existuje.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — vrstvený vzor, kapacity, kritérium nasycení, celočíselnost (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-4.html#takeaways">[L4.4]</a> — řez jako strop ($|f| \le q$) a certifikát odpovědi NE.</li>
+        <li><a href="l4-1.html#takeaways">[L4.1]</a> — síť $(G, l, u, s, t)$, role dolních mezí $l(e)$ (pro variantu b).</li>
+        <li><a href="l4-3.html#takeaways">[L4.3]</a> — čím max tok spočítáš a proč vyjde celočíselný.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Polož si tři otázky z lekce: (i) co je jednotka toku? (nominace — sítí má protéct $q$ jednotek); (ii) které slovní omezení patří na kterou hranu? („právě jeden za klub“ → hrany ze zdroje; „rezident nejvýš jednou“ → jediná hrana z $R_i$; kvóty → hrany do stoku); (iii) jak z čísla $|f|$ přečteš odpověď ANO/NE? U varianty b) navíc: kam v síti patří <em>minimum</em> — a co dolní meze udělají s tvrzením „nulový tok je vždy přípustný start“?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Konstrukce sítě.</strong> Vrcholy: $s$, $C_1, \ldots, C_q$, $R_1, \ldots, R_r$, $P_1, \ldots, P_p$, $t$. Hrany (všude $l = 0$):</p>
+          <ul>
+            <li>$s \to C_j$, $u = 1$, pro každý klub — každý klub nejvýš jedna nominace;</li>
+            <li>$C_j \to R_i$, $u = 1$, právě když $R_i$ je členem $C_j$ — nominovat lze jen vlastního člena;</li>
+            <li>$R_i \to P_k$, $u = 1$, kde $P_k$ je (jediná) strana rezidenta $R_i$ — jediná výstupní hrana s kapacitou 1 vynucuje „one resident represents at most one club“;</li>
+            <li>$P_k \to t$, $u = u_k$ — nejvýš $u_k$ radních ze strany $P_k$.</li>
+          </ul>
+          <p>(Pořadí vrstev volíme $s \to C \to R \to P \to t$: rezidenti musí být <em>uprostřed</em>, protože jen oni mají vztah ke klubům i ke stranám. Ruční náčrt v souhrnu uvádí vrstvy v pořadí $R \to C \to P$ — tam ale členství ve straně nejde vyjádřit hranou z klubového vrcholu; zrcadlově obrácená síť $s \to P \to R \to C \to t$ by naopak fungovala taky. Volba pořadí je naše — přiznáno.)</p>
+          <p><strong>Kritérium.</strong> Pro každý tok platí $|f| \le q$ (řez $A = \{s\}$ má kapacitu $q$, <a href="l4-4.html#takeaways">[L4.4]</a>). Rada existuje $\iff$ hodnota maximálního toku je rovna $q$, tj. max tok <strong>nasytí všechny hrany $s \to C_j$</strong>. Kapacity jsou celočíselné, takže existuje celočíselný maximální tok (Integral Flow Theorem, slide 17) — F-F ho rovnou vydá — a nominace přečteš z hran $C_j \to R_i$ s $f = 1$: klub $C_j$ nominuje $R_i$. Kvóty jsou dodrženy, protože do $t$ ze strany $P_k$ proteče nejvýš $u_k$. Pokud max tok $&lt; q$, rada neexistuje a minimální řez (z posledního značkování, <a href="l4-4.html#takeaways">[L4.4]</a>) je certifikát: ukazuje skupinu klubů, jejichž členové se „mačkají“ v příliš malých kvótách. Na příkladu $r = 7$, $q = 4$, $p = 3$: tatáž síť se $4$ klubovými a $3$ stranickými vrcholy; rada existuje $\iff |f_{\max}| = 4$.</p>
+          <p><strong>b) Varianta s minimem i maximem (slide 19).</strong> Jediná změna: hrana $p_k \to t$ dostane <em>dolní mez</em> $l(e) = \min_k$ a horní $u(e) = \max_k$. Tím ale síť přestane mít $l \equiv 0$, takže nulový tok už <strong>není přípustný</strong> a samotné „pusť F-F od nuly“ nestačí: nejdřív je potřeba najít <em>počáteční přípustný tok</em> při nenulových dolních mezích — to je přesně rozhodovací úloha „feasible flow“, kterou řeší následující lekce [L4.6] a [L4.7] (transformace na max flow s nulovými $l$). Odpověď pak zní: přípustné přiřazení existuje $\iff$ existuje přípustný tok v této síti nasycující všechny hrany $s \to k_j$; jinak neexistuje (certifikátem je opět řez).</p>
+        </div>
+      </details>
+
+      <div class="box foto">
+        <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+        <p>Vyřeš úlohu NA PAPÍR bez koukání do řešení — přesně tahle formulace padla 1. 6. 2026. Nakresli síť (klidně pro malý příklad $r = 7$, $q = 4$, $p = 3$), ke <strong>každé hraně napiš kapacitu</strong> a nezapomeň na čtyři povinné věci z receptu: vrcholy, hrany+kapacity, kritérium nasycení hran ze zdroje, čtení výsledku z celočíselného toku. Přidej dvě věty k variantě b) (kam patří minimum a proč pak nejde startovat z nulového toku). Pošli mi fotku — zkontroluju ti to.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-dining">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Dining problem — max flow + feasibilita</strong>
+      <span class="task-src">zdroj: ko_souhrn str. 7–8 (dochován jen CZ/SK přepis s parametry — EN znění je VLASTNÍ rekonstrukce, přiznáno); řešení VLASTNÍ dle vzoru této lekce</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN — rekonstrukce dle přepisu, přiznáno)</span>
+        <p>Several families go out to dinner together. There are $p$ families, the $i$-th family has $a(i)$ members; there are $q$ tables, the $i$-th table has capacity $b(i)$. To increase their social interaction, no two members of the same family may sit at the same table. Formulate the problem of finding a seating assignment as a maximum flow problem and determine when the seating is feasible.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejný vzor jako rezidenti, jen o vrstvu kratší: rozesadit členy rodin ke stolům tak, aby u žádného stolu neseděli dva členové téže rodiny. „Jednotka toku“ = jeden usazený člověk; protéct musí $\sum_i a(i)$ jednotek.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — kapacity kódují omezení, kritérium nasycení, celočíselnost (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-4.html#takeaways">[L4.4]</a> — řezový strop pro rychlou kontrolu feasibility.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(i) Které omezení je „požadavek“ (hrany ze zdroje) a které „kvóta“ (hrany do stoku)? (ii) Jak jedinou kapacitou říct „nejvýš jeden člen rodiny $i$ u stolu $j$“ — potřebuješ na to vůbec vrchol pro každého člena? (iii) Kdy je rozesazení přípustné — co musí nasytit maximální tok?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — přepis obsahuje jen náčrt)</summary>
+        <div class="inner">
+          <p><strong>Síť</strong> (všude $l = 0$): $s \to F_i$ s kapacitou $a(i)$ (celá rodina se musí usadit); $F_i \to S_j$ s kapacitou $1$ pro <em>každou</em> dvojici rodina–stůl (nejvýš jeden člen rodiny $i$ u stolu $j$ — tady je celé „párty pravidlo“, žádné vrcholy pro jednotlivé členy nejsou potřeba, členové jedné rodiny jsou zaměnitelní); $S_j \to t$ s kapacitou $b(j)$ (kapacita stolu).</p>
+          <div class="viz" id="viz-dining"></div>
+          <p><strong>Kritérium.</strong> Rozesazení existuje $\iff$ maximální tok má hodnotu $\sum_i a(i)$, tj. nasytí všechny hrany $s \to F_i$. Celočíselný max tok (slide 17, kapacity celé) pak čteš po hranách: $f(F_i \to S_j) = 1$ znamená „jeden člen rodiny $i$ sedí u stolu $j$“; Kirchhoff zaručí, že rodina $i$ obsadí přesně $a(i)$ různých stolů a stůl $j$ nejvýš $b(j)$ lidí. Rychlé řezové kontroly nutnosti: $a(i) \le q$ pro každou rodinu (členové potřebují různé stoly) a $\sum_i a(i) \le \sum_j b(j)$ — když některá neplatí, příslušný řez má kapacitu $&lt; \sum_i a(i)$ a odpověď je NE.</p>
+          <p><em>Poznámka:</em> ruční náčrt v souhrnu kreslí navíc vrcholy pro jednotlivé členy s kapacitou 1; to funguje taky, ale je to zbytečně velká síť — kapacita $a(i)$ na hraně $s \to F_i$ udělá tutéž práci.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L4.5">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k4/l4-4.html"><span class="dir">← Předchozí</span> L4.4 · Řez a věta max-flow/min-cut [FOTO]</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.6 · Feasible flow with balances)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Statický model: mini-instance Residents & council (popisek hrany = kapacita u(e), l ≡ 0)
+// Kluby: C1 {R1,R2}, C2 {R2,R3}, C3 {R3,R4}; strany: P1 = {R1,R3} (u1=2), P2 = {R2,R4} (u2=1).
+KOViz.graph(document.getElementById('viz-model'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s',  x:60,  y:180, sub:'zdroj'},
+    {id:'C1', x:190, y:70,  label:'C₁'},
+    {id:'C2', x:190, y:180, label:'C₂'},
+    {id:'C3', x:190, y:290, label:'C₃'},
+    {id:'R1', x:330, y:45,  label:'R₁'},
+    {id:'R2', x:330, y:135, label:'R₂'},
+    {id:'R3', x:330, y:225, label:'R₃'},
+    {id:'R4', x:330, y:315, label:'R₄'},
+    {id:'P1', x:470, y:120, label:'P₁'},
+    {id:'P2', x:470, y:240, label:'P₂'},
+    {id:'t',  x:585, y:180, sub:'stok'},
+  ],
+  edges: [
+    {from:'s',  to:'C1', label:'1'},
+    {from:'s',  to:'C2', label:'1'},
+    {from:'s',  to:'C3', label:'1'},
+    {from:'C1', to:'R1', label:'1'},
+    {from:'C1', to:'R2', label:'1'},
+    {from:'C2', to:'R2', label:'1'},
+    {from:'C2', to:'R3', label:'1'},
+    {from:'C3', to:'R3', label:'1'},
+    {from:'C3', to:'R4', label:'1'},
+    {from:'R1', to:'P1', label:'1'},
+    {from:'R2', to:'P2', label:'1', curve:0.3},
+    {from:'R3', to:'P1', label:'1', curve:-0.3},
+    {from:'R4', to:'P2', label:'1'},
+    {from:'P1', to:'t',  label:'u₁=2'},
+    {from:'P2', to:'t',  label:'u₂=1'},
+  ],
+  caption: 'Mini-instance (vlastní, přiznáno): kluby C₁ = {R₁, R₂}, C₂ = {R₂, R₃}, C₃ = {R₃, R₄}; strany P₁ = {R₁, R₃} s kvótou u₁ = 2, P₂ = {R₂, R₄} s kvótou u₂ = 1. Popisek hrany = kapacita u(e), všechny dolní meze l ≡ 0. Rada existuje ⟺ max tok = 3.',
+});
+
+// 2 — Stepper: běh Ford-Fulkersona na mini-instanci (popisek hrany = l, f, u; framy = ABSOLUTNÍ stavy)
+KOViz.stepper(document.getElementById('viz-ffrun'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'s',  x:60,  y:180, sub:'zdroj'},
+      {id:'C1', x:190, y:70,  label:'C₁'},
+      {id:'C2', x:190, y:180, label:'C₂'},
+      {id:'C3', x:190, y:290, label:'C₃'},
+      {id:'R1', x:330, y:45,  label:'R₁'},
+      {id:'R2', x:330, y:135, label:'R₂'},
+      {id:'R3', x:330, y:225, label:'R₃'},
+      {id:'R4', x:330, y:315, label:'R₄'},
+      {id:'P1', x:470, y:120, label:'P₁'},
+      {id:'P2', x:470, y:240, label:'P₂'},
+      {id:'t',  x:585, y:180, sub:'stok'},
+    ],
+    edges: [
+      {from:'s',  to:'C1', label:'0,0,1'},
+      {from:'s',  to:'C2', label:'0,0,1'},
+      {from:'s',  to:'C3', label:'0,0,1'},
+      {from:'C1', to:'R1', label:'0,0,1'},
+      {from:'C1', to:'R2', label:'0,0,1'},
+      {from:'C2', to:'R2', label:'0,0,1'},
+      {from:'C2', to:'R3', label:'0,0,1'},
+      {from:'C3', to:'R3', label:'0,0,1'},
+      {from:'C3', to:'R4', label:'0,0,1'},
+      {from:'R1', to:'P1', label:'0,0,1'},
+      {from:'R2', to:'P2', label:'0,0,1', curve:0.3},
+      {from:'R3', to:'P1', label:'0,0,1', curve:-0.3},
+      {from:'R4', to:'P2', label:'0,0,1'},
+      {from:'P1', to:'t',  label:'0,0,2'},
+      {from:'P2', to:'t',  label:'0,0,1'},
+    ],
+  },
+  frames: [
+    {desc:'Start: l ≡ 0, takže nulový tok je přípustný, |f| = 0. Cíl: nasytit všechny tři hrany ze zdroje (|f| = q = 3).',
+     nodes:{s:'hl'}, edges:{}},
+    {desc:'Iterace ①: augmentující cesta s→C₁→R₂→P₂→t, γ = 1. Klub C₁ zatím nominuje R₂ (strana P₂). |f| = 1.',
+     nodes:{},
+     edges:{'s->C1':'hl', 'C1->R2':'hl', 'R2->P2':'hl', 'P2->t':'hl'},
+     labels:{'s->C1':'0,1,1', 'C1->R2':'0,1,1', 'R2->P2':'0,1,1', 'P2->t':'0,1,1'}},
+    {desc:'Iterace ②: cesta s→C₂→R₃→P₁→t, γ = 1. Klub C₂ nominuje R₃ (strana P₁). |f| = 2.',
+     nodes:{},
+     edges:{'s->C2':'hl', 'C2->R3':'hl', 'R3->P1':'hl', 'P1->t':'hl'},
+     labels:{'s->C1':'0,1,1', 'C1->R2':'0,1,1', 'R2->P2':'0,1,1', 'P2->t':'0,1,1',
+             's->C2':'0,1,1', 'C2->R3':'0,1,1', 'R3->P1':'0,1,1', 'P1->t':'0,1,2'}},
+    {desc:'Iterace ③ — značkování: dopředně s→C₃→R₄→P₂ a stop — hrana P₂→t je nasycená (1 = 1, červeně). Pravidlo 3 značí ZPĚTNĚ přes R₂→P₂ (f = 1 > 0) do R₂ a přes C₁→R₂ do C₁; pak dopředně C₁→R₁→P₁→t (P₁→t má 1 < 2). γ = min(1,1,1, 1,1, 1,1,1) = 1.',
+     nodes:{C3:'hl', R4:'hl', P2:'hl', R2:'hl', C1:'hl', R1:'hl', P1:'hl'},
+     edges:{'s->C3':'hl', 'C3->R4':'hl', 'R4->P2':'hl', 'P2->t':'bad', 'R2->P2':'bad', 'C1->R2':'bad', 'C1->R1':'hl', 'R1->P1':'hl', 'P1->t':'hl'},
+     labels:{'s->C1':'0,1,1', 'C1->R2':'0,1,1', 'R2->P2':'0,1,1', 'P2->t':'0,1,1',
+             's->C2':'0,1,1', 'C2->R3':'0,1,1', 'R3->P1':'0,1,1', 'P1->t':'0,1,2'}},
+    {desc:'Po augmentaci ③: na zpětných hranách se odečetlo (R₂→P₂ i C₁→R₂ zpět na 0), na dopředných přičetlo. |f| = 3 = q — všechny hrany ze zdroje nasycené → odpověď ANO.',
+     nodes:{s:'good'},
+     edges:{'s->C1':'good', 's->C2':'good', 's->C3':'good'},
+     labels:{'s->C1':'0,1,1', 's->C2':'0,1,1', 's->C3':'0,1,1',
+             'C1->R1':'0,1,1', 'C1->R2':'0,0,1', 'C2->R3':'0,1,1', 'C3->R4':'0,1,1',
+             'R1->P1':'0,1,1', 'R2->P2':'0,0,1', 'R3->P1':'0,1,1', 'R4->P2':'0,1,1',
+             'P1->t':'0,2,2', 'P2->t':'0,1,1'}},
+    {desc:'Čtení výsledku z hran C→R s f = 1: rada = {C₁ → R₁, C₂ → R₃, C₃ → R₄}; R₂ nevybrán. Kvóty: P₁ má 2 ≤ u₁ = 2, P₂ má 1 ≤ u₂ = 1 ✓. Všimni si role zpětných hran v ③: algoritmus PŘEHODIL nominaci C₁ z R₂ na R₁, aby v kvótě P₂ uvolnil místo pro R₄.',
+     nodes:{R1:'good', R3:'good', R4:'good'},
+     edges:{'C1->R1':'hl', 'C2->R3':'hl', 'C3->R4':'hl'},
+     labels:{'s->C1':'0,1,1', 's->C2':'0,1,1', 's->C3':'0,1,1',
+             'C1->R1':'0,1,1', 'C1->R2':'0,0,1', 'C2->R3':'0,1,1', 'C3->R4':'0,1,1',
+             'R1->P1':'0,1,1', 'R2->P2':'0,0,1', 'R3->P1':'0,1,1', 'R4->P2':'0,1,1',
+             'P1->t':'0,2,2', 'P2->t':'0,1,1'},
+     subs:{R1:'za C₁', R3:'za C₂', R4:'za C₃', R2:'—', s:'zdroj', t:'stok'}},
+  ],
+  caption: 'Běh Ford-Fulkersona na mini-instanci (popisek = l, f, u). Iterace ③ jde přes zpětné hrany R₂→P₂ a C₁→R₂ (červeně): v řeči úlohy přehození nominace klubu C₁ z R₂ na R₁. Konec: |f| = 3 = q, rada existuje.',
+});
+
+// 3 — T02 Dining problem: síť pro p = 2 rodiny, q = 3 stoly (uvnitř details — řešení)
+KOViz.graph(document.getElementById('viz-dining'), {
+  directed: true,
+  w: 640, h: 320,
+  nodes: [
+    {id:'s',  x:70,  y:160, sub:'zdroj'},
+    {id:'F1', x:230, y:90,  label:'F₁'},
+    {id:'F2', x:230, y:230, label:'F₂'},
+    {id:'S1', x:420, y:60,  label:'S₁'},
+    {id:'S2', x:420, y:160, label:'S₂'},
+    {id:'S3', x:420, y:260, label:'S₃'},
+    {id:'t',  x:575, y:160, sub:'stok'},
+  ],
+  edges: [
+    {from:'s',  to:'F1', label:'a₁=2'},
+    {from:'s',  to:'F2', label:'a₂=3'},
+    {from:'F1', to:'S1', label:'1'},
+    {from:'F1', to:'S2', label:'1'},
+    {from:'F1', to:'S3', label:'1', curve:0.25},
+    {from:'F2', to:'S1', label:'1', curve:-0.25},
+    {from:'F2', to:'S2', label:'1'},
+    {from:'F2', to:'S3', label:'1'},
+    {from:'S1', to:'t',  label:'b₁=2'},
+    {from:'S2', to:'t',  label:'b₂=2'},
+    {from:'S3', to:'t',  label:'b₃=1'},
+  ],
+  caption: 'Dining problem pro p = 2 rodiny (a = 2, 3) a q = 3 stoly (b = 2, 2, 1) — vlastní ilustrační instance. Hrany F→S mají kapacitu 1 (nejvýš jeden člen rodiny u stolu). Rozesazení existuje ⟺ max tok = a₁ + a₂ = 5 (zde ano: F₂ obsadí S₁, S₂, S₃, F₁ obsadí S₁, S₂).',
+});
+</script>
+</body>
+</html>
