@@ -41,7 +41,7 @@
   <!-- ===== SEKCE 1: STAV ===== -->
   <h2>Co si stačí pamatovat? Jen zátěže (slide 47)</h2>
 
-  <p>DP stojí a padá s volbou <strong>stavu</strong>. U knapsacku (uvidíš v [L7.1]) je stavem „kapacita“, u Rothkopfa to bude vektor obsazenosti strojů. Proč to stačí?</p>
+  <p>DP stojí a padá s volbou <strong>stavu</strong>. U knapsacku (uvidíš v <a href="../k7/l7-1.html">[L7.1]</a>) je stavem „kapacita“, u Rothkopfa to bude vektor obsazenosti strojů. Proč to stačí?</p>
 
   <details class="try">
     <summary>Zkus sám: u $P \,||\, C_{max}$ chceš najít celý rozvrh — start časy a stroje. Proč o částečném rozvrhu prvních $i$ úloh stačí vědět jen $R$ čísel: kolik práce už leží na kterém stroji?</summary>
@@ -142,7 +142,7 @@ Assign tasks T_n, T_{n-1}, ..., T_1 in the reverse direction;
   <details class="try">
     <summary>Zkus sám: $\mathcal{O}(n \cdot UB^R)$ vypadá jako polynom. Není to spor s NP-těžkostí $P2 \,||\, C_{max}$ (2-Partition, [L1.1])?</summary>
     <div class="inner">
-      <p>Není. Vstup kóduje číslo $UB$ binárně na $\log_2 UB$ bitech — $UB$ samotné je tedy v délce vstupu <strong>exponenciální</strong>. Algoritmus polynomiální v <em>hodnotách</em> čísel (ne v délce jejich zápisu) je <strong>pseudopolynomiální</strong> — přesně tohle smí u <em>slabě</em> (weakly) NP-těžkých problémů existovat, viz $\mathcal{O}(nW)$ knapsack [L7.1]. A pozor na druhý exponent: $UB^{\mathbf{R}}$ — polynomialita v $UB$ drží jen pro <strong>konstantní</strong> počet strojů.</p>
+      <p>Není. Vstup kóduje číslo $UB$ binárně na $\log_2 UB$ bitech — $UB$ samotné je tedy v délce vstupu <strong>exponenciální</strong>. Algoritmus polynomiální v <em>hodnotách</em> čísel (ne v délce jejich zápisu) je <strong>pseudopolynomiální</strong> — přesně tohle smí u <em>slabě</em> (weakly) NP-těžkých problémů existovat, viz $\mathcal{O}(nW)$ knapsack <a href="../k7/l7-1.html">[L7.1]</a>. A pozor na druhý exponent: $UB^{\mathbf{R}}$ — polynomialita v $UB$ drží jen pro <strong>konstantní</strong> počet strojů.</p>
     </div>
   </details>
 

@@ -6,6 +6,7 @@
      KOViz.fnPlot(el, spec)    — graf funkce po úsecích (nespojité / po částech lineární fce)
      KOViz.stepper(el, spec)   — krokovaná vizualizace (frames přepínají stavy grafu)
      KOViz.gantt(el, spec)     — Ganttův diagram rozvrhu (řádek = procesor, blok = úloha)
+     KOViz.dpTable(el, spec)   — krokovaná DP tabulka (HTML <table>, frames = absolutní stavy)
      KOViz.icon(name)          — vrátí <img> ikonu z assets/icons
    Všechny barvy jdou přes CSS třídy (viz style.css), takže fungují v obou tématech.
    ============================================================ */
@@ -601,5 +602,98 @@
     return { svg, setState, goto: gotoFn };
   }
 
-  window.KOViz = { graph, lpRegion, fnPlot, stepper, gantt, icon };
+  /* ---------- DP TABLE ----------
+     Krokovaná DP tabulka (knapsack apod.) jako HTML <table>.
+     spec = {
+       corner  : HTML levého horního rohu (např. "j \\ W′")
+       cols    : popisky sloupců (HTML)
+       rows    : popisky řádků (HTML)
+       cells   : statická matice rows×cols; buňka = null | text | {t, cls}
+                 cls: hl (aktuální) / src (zdroj rekurence, čárkovaně) / good (cesta) / bad / dim
+       frames  : [{desc, cells, rowCls?}] — volitelné krokování; každý frame je
+                 ABSOLUTNÍ stav (kompletní matice, ne diff); rowCls = {idx řádku: cls}
+                 zvýrazní popisek řádku. Bez frames se kreslí staticky spec.cells.
+       caption
+     }
+     Vrací {table, setState(cells, rowCls), goto(n)}  */
+  function dpTable(el, spec) {
+    el.classList.add("viz");
+    const wrap = document.createElement("div");
+    wrap.className = "dptab-wrap";
+    const table = document.createElement("table");
+    table.className = "dptab";
+    const thead = document.createElement("thead");
+    const hr = document.createElement("tr");
+    const corner = document.createElement("th");
+    corner.innerHTML = spec.corner || "";
+    hr.appendChild(corner);
+    (spec.cols || []).forEach(c => {
+      const th = document.createElement("th"); th.innerHTML = c; hr.appendChild(th);
+    });
+    thead.appendChild(hr); table.appendChild(thead);
+    const tbody = document.createElement("tbody");
+    const tds = [], rowThs = [];
+    (spec.rows || []).forEach(r => {
+      const tr = document.createElement("tr");
+      const th = document.createElement("th"); th.innerHTML = r; tr.appendChild(th); rowThs.push(th);
+      const rowTds = [];
+      (spec.cols || []).forEach(() => { const td = document.createElement("td"); tr.appendChild(td); rowTds.push(td); });
+      tds.push(rowTds); tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    wrap.appendChild(table); el.appendChild(wrap);
+
+    function setState(cells, rowCls) {
+      tds.forEach((rowTds, ri) => {
+        rowThs[ri].className = (rowCls && rowCls[ri]) || "";
+        rowTds.forEach((td, ci) => {
+          const c = cells && cells[ri] ? cells[ri][ci] : null;
+          if (c === null || c === undefined) { td.innerHTML = ""; td.className = "empty"; }
+          else if (typeof c === "object") { td.innerHTML = "" + c.t; td.className = c.cls || ""; }
+          else { td.innerHTML = "" + c; td.className = ""; }
+        });
+      });
+    }
+
+    let gotoFn = null;
+    if (spec.frames && spec.frames.length) {
+      const ctrls = document.createElement("div");
+      ctrls.className = "viz-controls";
+      const btnReset = vbtn("rotate-ccw", "Začátek");
+      const btnPrev = vbtn("skip-back", "Krok zpět");
+      const btnNext = vbtn("skip-forward", "Další krok");
+      const state = document.createElement("span");
+      state.className = "vstate";
+      ctrls.appendChild(btnReset); ctrls.appendChild(btnPrev); ctrls.appendChild(btnNext); ctrls.appendChild(state);
+      el.appendChild(ctrls);
+      const desc = document.createElement("div");
+      desc.className = "viz-caption";
+      el.appendChild(desc);
+      const frames = spec.frames;
+      let i = 0;
+      const apply = () => {
+        const f = frames[i] || {};
+        setState(f.cells !== undefined ? f.cells : spec.cells, f.rowCls);
+        desc.innerHTML = "<strong>Krok " + (i + 1) + "/" + frames.length + ":</strong> " + (f.desc || "");
+        state.textContent = (i + 1) + " / " + frames.length;
+        btnPrev.disabled = i === 0; btnNext.disabled = i === frames.length - 1;
+      };
+      btnNext.onclick = () => { if (i < frames.length - 1) { i++; apply(); } };
+      btnPrev.onclick = () => { if (i > 0) { i--; apply(); } };
+      btnReset.onclick = () => { i = 0; apply(); };
+      apply();
+      gotoFn = n => { i = Math.max(0, Math.min(frames.length - 1, n)); apply(); };
+    } else {
+      setState(spec.cells, null);
+    }
+
+    if (spec.caption) {
+      const c = document.createElement("div");
+      c.className = "viz-caption"; c.innerHTML = spec.caption;
+      el.appendChild(c);
+    }
+    return { table, setState, goto: gotoFn };
+  }
+
+  window.KOViz = { graph, lpRegion, fnPlot, stepper, gantt, dpTable, icon };
 })();

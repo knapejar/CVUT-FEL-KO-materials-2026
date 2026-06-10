@@ -126,7 +126,7 @@
   <p>NP-těžkost některých problémů stojí na <strong>velkých číslech</strong> v instanci. Ukázkový příklad je problém batohu (knapsack):</p>
 
   <details class="try">
-    <summary>Zkus sám: knapsack je NP-těžký, a přitom ho dynamické programování řeší v čase $O(nC)$, kde $C$ je kapacita batohu (uvidíš v [L7.1]). Není to spor — polynomiální algoritmus na NP-těžký problém?</summary>
+    <summary>Zkus sám: knapsack je NP-těžký, a přitom ho dynamické programování řeší v čase $O(nC)$, kde $C$ je kapacita batohu (uvidíš v <a href="../k7/l7-1.html">[L7.1]</a>). Není to spor — polynomiální algoritmus na NP-těžký problém?</summary>
     <div class="inner">
       <p>Není. „Polynomiální“ se měří vůči <strong>velikosti zápisu vstupu</strong> $size(I)$ — a číslo $C$ se zapisuje binárně na $\log_2 C$ bitů. Čas $O(nC)$ je tedy v počtu bitů <em>exponenciální</em>: $C = 2^{\log_2 C}$. Pro $C \approx 10^{15}$ (16 cifer zápisu!) je tabulka DP beznadějně velká. Algoritmům polynomiálním v $size(I)$ <strong>a zároveň v hodnotě největšího čísla</strong> $largest(I)$ se říká <strong>pseudopolynomiální (pseudopolynomial)</strong> — jsou polynomiální jen „když jsou čísla malá“.</p>
       <p>Pro knapsack je to skvělá zpráva: NP-těžkost se dá obejít, dokud jsou čísla rozumná. Otázka dne: jde to stejně u TSP?</p>
@@ -152,7 +152,7 @@
 
   <div class="box info">
     <div class="box-title">Kontrast: proč knapsack silně NP-těžký NENÍ</div>
-    <p>Slide 17 (EN 1:1): <em>„On the other hand: $L$ … Knapsack, $L_p$ … Knapsack with bounded integer costs for which the Dynamic prog. table has polynomial number ($n \ast p(\mathit{size}(I))$) of columns, i.e. <strong>Knapsack</strong> is not strongly NP-hard.“</em> Omezíš-li čísla polynomem, DP tabulka se polynomiálně zmenší a knapsack se řeší v polynomiálním čase — restrikce tedy NP-těžká není (pokud $P \ne NP$). DP tabulku propočítáš v [L7.1], 2-aproximaci knapsacku dokážeme v <a href="l3-11.html#takeaways">[L3.11]</a>.</p>
+    <p>Slide 17 (EN 1:1): <em>„On the other hand: $L$ … Knapsack, $L_p$ … Knapsack with bounded integer costs for which the Dynamic prog. table has polynomial number ($n \ast p(\mathit{size}(I))$) of columns, i.e. <strong>Knapsack</strong> is not strongly NP-hard.“</em> Omezíš-li čísla polynomem, DP tabulka se polynomiálně zmenší a knapsack se řeší v polynomiálním čase — restrikce tedy NP-těžká není (pokud $P \ne NP$). DP tabulku propočítáš v <a href="../k7/l7-1.html">[L7.1]</a>, 2-aproximaci knapsacku dokážeme v <a href="l3-11.html#takeaways">[L3.11]</a>.</p>
   </div>
 
   <div class="box danger">
@@ -171,7 +171,7 @@
     <ul>
       <li><strong>Konstrukce (slide 18):</strong> z grafu $G$ pro HC vyrob úplný graf $K_n$; $c(\{i,j\}) = 1$ pokud $\{i,j\} \in E(G)$, jinak $2$. Převod je $O(n^2)$, nic neřeší, jen přepisuje.</li>
       <li><strong>Ekvivalence:</strong> HC v $G$ existuje ⟺ optimum TSP $= n$. (⇒: HC = okruh ze samých jedniček; ⇐: okruh má $n$ hran ceny $\ge 1$, jediná dvojka by dala $\ge n+1$.) Bez HC je $\mathrm{OPT} \ge n+1$ — mezi ANO a NE je mezera.</li>
-      <li><strong>Silně NP-těžký (slide 17):</strong> restrikce $L_p$ na instance s $largest(I) \le p(size(I))$ je NP-těžká. U TSP: ceny $\in \{1,2\}$, $largest(I) = 2 \le n$ → TSP je silně NP-těžký → <strong>žádný pseudopolynomiální algoritmus, pokud $P \ne NP$</strong>. Kontrast: knapsack silně NP-těžký není (DP $O(nC)$, [L7.1]).</li>
+      <li><strong>Silně NP-těžký (slide 17):</strong> restrikce $L_p$ na instance s $largest(I) \le p(size(I))$ je NP-těžká. U TSP: ceny $\in \{1,2\}$, $largest(I) = 2 \le n$ → TSP je silně NP-těžký → <strong>žádný pseudopolynomiální algoritmus, pokud $P \ne NP$</strong>. Kontrast: knapsack silně NP-těžký není (DP $O(nC)$, <a href="../k7/l7-1.html">[L7.1]</a>).</li>
       <li><strong>Stejná šablona, jiné ceny:</strong> nahradíš-li 2 hodnotou $2 + (r-1)n$, mezera se roztáhne tak, že ji rozezná i r-aproximace — to je důkaz neexistence r-aproximace v <a href="l3-6.html">[L3.6]</a>.</li>
     </ul>
   </div>

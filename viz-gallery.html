@@ -52,6 +52,9 @@
   <h2>5c · Gantt s krokováním (frames = absolutní stavy) a značkami</h2>
   <div class="viz" id="g5c"></div>
 
+  <h2>5d · DP tabulka s krokováním (KOViz.dpTable, frames = absolutní stavy)</h2>
+  <div class="viz" id="g5d"></div>
+
   <h2>6 · Matematika + boxy</h2>
   <p>Inline $\sum_{i=1}^n c_i x_i \le B$ a display:</p>
   $$\min \; C_{max} \quad \text{s.t.} \quad s_i + p_i \le s_j \;\; \forall (i,j) \in E$$
@@ -247,6 +250,24 @@ KOViz.gantt(document.getElementById('g5c'), {
      marks: [{t:3, label:'Cmax = 3', cls:'good'}]},
   ],
   caption: 'Ukázka 5c: KOViz.gantt s frames — každý frame je ABSOLUTNÍ stav (kompletní blocks/marks), ovládání jako u stepperu.',
+});
+
+// 5d — DP tabulka s krokováním (mini knapsack: c=(3,2), w=(2,1), W=2)
+KOViz.dpTable(document.getElementById('g5d'), {
+  corner: 'j \\ W′',
+  cols: ['0', '1', '2'],
+  rows: ['∅ (j=0)', 'I₁ <small>c=3 w=2</small>', 'I₂ <small>c=2 w=1</small>'],
+  frames: [
+    {desc: 'Inicializace: řádek j=0 samé nuly; zbytek prázdný (třída <code>empty</code>).',
+     cells: [[0,0,0], [null,null,null], [null,null,null]]},
+    {desc: 'Řádek I₁: pro W′=2 vezmu max(0, 0+3)=3 — aktuální buňka <code>hl</code>, zdroje rekurence <code>src</code>.',
+     cells: [[0,{t:0,cls:'src'},{t:0,cls:'src'}], [0,0,{t:3,cls:'hl'}], [null,null,null]],
+     rowCls: {1:'hl'}},
+    {desc: 'Hotová tabulka, optimum a cesta backtrackingu třídou <code>good</code>.',
+     cells: [[{t:0,cls:'good'},0,0], [0,0,{t:3,cls:'good'}], [0,2,{t:3,cls:'good'}]],
+     rowCls: {1:'good'}},
+  ],
+  caption: 'Ukázka 5d: KOViz.dpTable — HTML tabulka, frames = ABSOLUTNÍ stavy (kompletní matice cells); třídy buněk hl/src/good/bad/dim, prázdná buňka = null.',
 });
 </script>
 </body>

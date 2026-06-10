@@ -161,7 +161,7 @@
     <ul>
       <li><strong>Směr redukce se nedá otočit.</strong> Dokazuješ-li těžkost problému $X$, převádíš <em>známý těžký</em> problém <em>na</em> $X$ (3-PARTITION → Bratley → $PS1\,|\,temp\,|$). „Můj problém umím zapsat jako ILP, a ILP je NP-těžké, tedy můj problém je NP-těžký“ je klasický nesmysl — na ILP převedeš i hledání maxima v poli.</li>
       <li><strong>NP-těžký ≠ neřešitelný.</strong> Bratleyho B&amp;B <a href="../k5/l5-9.html#takeaways">[L5.9]</a>, position-based ILP <a href="../k5/l5-6b.html">[L5.6b]</a> i time-indexed ILP <a href="../k5/l5-3.html#takeaways">[L5.3]</a> ty problémy řeší exaktně — jen bez polynomiální záruky.</li>
-      <li><strong>„Silně“ NP-těžký = ani pseudopolynomiální algoritmus</strong> (pokud $P \ne NP$), viz <a href="../k3/l3-5.html#takeaways">[L3.5]</a>. Time-indexed ILP s $n \cdot UB$ proměnnými tomu neodporuje — exponenciální řešení ILP žádná polynomiálnost není. Kontrast: knapsack je NP-těžký jen „slabě“ a DP $O(nC)$ má [L7.1].</li>
+      <li><strong>„Silně“ NP-těžký = ani pseudopolynomiální algoritmus</strong> (pokud $P \ne NP$), viz <a href="../k3/l3-5.html#takeaways">[L3.5]</a>. Time-indexed ILP s $n \cdot UB$ proměnnými tomu neodporuje — exponenciální řešení ILP žádná polynomiálnost není. Kontrast: knapsack je NP-těžký jen „slabě“ a DP $O(nC)$ má <a href="../k7/l7-1.html">[L7.1]</a>.</li>
       <li><strong>Těžkost je o deadlinech $\tilde{d}_j$, ne o due dates $d_j$</strong> (rozdíl <a href="../k5/l5-1.html#takeaways">[L5.1]</a>): tvrdé okno $\langle r_j, \tilde{d}_j \rangle$ je to, co dělá z plotů ploty. A pozor na speciální případy: pro $p_j = 1$ je $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ polynomiální (slide 13) — NP-těžkost obecného problému nezakazuje lehké podtřídy.</li>
     </ul>
   </div>

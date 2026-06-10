@@ -320,6 +320,24 @@ summary::-webkit-details-marker { display: none; }
 .viz svg .gmark.good line { stroke: var(--good); }
 .viz svg .gmark.good text { fill: var(--good); }
 
+/* DP tabulka (KOViz.dpTable) */
+.dptab-wrap { overflow-x: auto; padding: 12px 12px 4px; }
+.dptab { border-collapse: collapse; margin: 0 auto; font-size: 14.5px; }
+.dptab th, .dptab td {
+  border: 1px solid var(--line); min-width: 46px; padding: 5px 9px;
+  text-align: center; font-family: Consolas, "Courier New", monospace;
+}
+.dptab th { background: var(--bg-soft); color: var(--ink-soft); font-weight: 600; font-size: 13.5px; }
+.dptab th.hl { color: var(--accent); }
+.dptab th.good { color: var(--good); }
+.dptab td { color: var(--ink); background: var(--bg-card); }
+.dptab td.empty { background: var(--bg-soft); }
+.dptab td.hl { background: var(--accent-soft); color: var(--accent); font-weight: 700; outline: 2px solid var(--accent); outline-offset: -2px; }
+.dptab td.src { outline: 2px dashed var(--accent); outline-offset: -2px; }
+.dptab td.good { background: var(--good-soft); color: var(--good); font-weight: 700; }
+.dptab td.bad { background: var(--bad-soft); color: var(--bad); font-weight: 700; }
+.dptab td.dim { color: var(--ink-soft); }
+
 /* mřížka LP regionu */
 .viz svg .grid line { stroke: var(--line); stroke-width: 1; }
 .viz svg .axis line, .viz svg .axis path { stroke: var(--ink-soft); stroke-width: 1.6; }

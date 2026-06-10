@@ -50,7 +50,7 @@
     <p><em>It is one of the “easiest” NP-hard problems. Sometimes it is called <strong>0/1 Knapsack problem</strong>.</em></p>
   </div>
 
-  <p>„Easiest NP-hard“ není básnická licence: batoh <strong>není silně NP-těžký</strong> <a href="l3-5.html#takeaways">[L3.5]</a> — má pseudopolynomiální DP (propočítáš v [L7.1]) a dokonce aproximační schéma. Dnešní 2-aproximace je nejhrubší a nejrychlejší stupeň té škály.</p>
+  <p>„Easiest NP-hard“ není básnická licence: batoh <strong>není silně NP-těžký</strong> <a href="l3-5.html#takeaways">[L3.5]</a> — má pseudopolynomiální DP (propočítáš v <a href="../k7/l7-1.html">[L7.1]</a>) a dokonce aproximační schéma. Dnešní 2-aproximace je nejhrubší a nejrychlejší stupeň té škály.</p>
 
   <details class="try">
     <summary>Zkus sám: představ si, že položky smíš <em>řezat</em> — vzít 80 % položky za 80 % ceny. Kterou položkou je nejvýhodnější začít plnit?</summary>
@@ -192,7 +192,7 @@
   <!-- ===== SEKCE 5: CO DÁL ===== -->
   <h2>Kam to vede</h2>
 
-  <p>2-aproximace není u batohu konec, ale začátek: slide 12 ji používá jako <strong>krok 1 aproximačního schématu</strong> (FPTAS) — její výstup $c(S_1)$ kalibruje zaokrouhlení cen a horní mez DP tabulky, výsledkem je $(1+\epsilon)$-aproximace v $\mathcal{O}(n^2 \cdot \frac{1}{\epsilon})$ pro libovolně malé $\epsilon$. Detaily ve volitelné [L7.2]; samotnou DP tabulku (přesné řešení, pseudopolynomiálně) propočítáš v [L7.1]. Pro 15. 6. je jádro dnešek: mez + dva kandidáti + $\max$.</p>
+  <p>2-aproximace není u batohu konec, ale začátek: slide 12 ji používá jako <strong>krok 1 aproximačního schématu</strong> (FPTAS) — její výstup $c(S_1)$ kalibruje zaokrouhlení cen a horní mez DP tabulky, výsledkem je $(1+\epsilon)$-aproximace v $\mathcal{O}(n^2 \cdot \frac{1}{\epsilon})$ pro libovolně malé $\epsilon$. Detaily ve volitelné [L7.2]; samotnou DP tabulku (přesné řešení, pseudopolynomiálně) propočítáš v <a href="../k7/l7-1.html">[L7.1]</a>. Pro 15. 6. je jádro dnešek: mez + dva kandidáti + $\max$.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
@@ -201,7 +201,7 @@
       <li><strong>„$\sum_{i=1}^{h-1} c_i$ je horní mez optima.“</strong> NE — prefix je <em>přípustné řešení</em>, tedy DOLNÍ mez. Horní mez vznikne až přidáním $c_h$: $\sum_{i=1}^{h} c_i \ge J^*_F \ge J^*$ (množina $\{1,\dots,h\}$ sama je nepřípustná!).</li>
       <li><strong>„Faktor 2 platí jen vůči frakčnímu optimu.“</strong> NE — řetízek končí u celočíselného $J^*$: $J^A \ge B/2 \ge J^*/2$; frakční optimum je jen mezistanice při výrobě meze.</li>
       <li><strong>„Předpoklad $w_j \le W$ je kosmetika.“</strong> NE — bez něj nemusí být $\{h\}$ přípustné a věta padá. Proto důkaz začíná vyhozením položek těžších než $W$.</li>
-      <li><strong>„Batoh je silně NP-těžký, aproximace je to nejlepší, co jde.“</strong> NE — silně NP-těžký není <a href="l3-5.html#takeaways">[L3.5]</a>: má pseudopolynomiální DP [L7.1] a FPTAS [L7.2]. (Kontrast: TSP nemá bez metriky vůbec žádnou r-aproximaci <a href="l3-6.html#takeaways">[L3.6]</a>.)</li>
+      <li><strong>„Batoh je silně NP-těžký, aproximace je to nejlepší, co jde.“</strong> NE — silně NP-těžký není <a href="l3-5.html#takeaways">[L3.5]</a>: má pseudopolynomiální DP <a href="../k7/l7-1.html">[L7.1]</a> a FPTAS [L7.2]. (Kontrast: TSP nemá bez metriky vůbec žádnou r-aproximaci <a href="l3-6.html#takeaways">[L3.6]</a>.)</li>
     </ul>
   </div>
 
@@ -213,7 +213,7 @@
       <li><strong>Horní mez:</strong> $J^* \le J^*_F = \sum_{i=1}^{h-1} c_i + x_h c_h \le \sum_{i=1}^{h} c_i = B$ — frakční batoh je stroj na mez $B$ pro maximalizační vzor z <a href="l3-1.html#takeaways">[L3.1]</a>.</li>
       <li><strong>2-aproximace</strong> (slidy 6–7): vezmi lepší z $\{1,\dots,h-1\}$ a $\{h\}$; $J^A = \max \ge \frac{B}{2} \ge \frac{J^*}{2}$, složitost $\mathcal{O}(n)$. Předpoklady: $w_j \le W$ (přípustnost $\{h\}$), $\sum_i w_i &gt; W$ (existence $h$), seřazené poměry (platnost meze).</li>
       <li>Prefix sám i $\{h\}$ sám jsou <strong>libovolně špatné</strong> — faktor 2 vyrábí teprve $\max$ (dvě čísla se součtem $\ge J^*$ nemohou být obě pod $J^*/2$).</li>
-      <li>Batoh není silně NP-těžký <a href="l3-5.html#takeaways">[L3.5]</a>: 2-aproximace → DP [L7.1] → FPTAS [L7.2] (2-aproximace je jeho krok 1).</li>
+      <li>Batoh není silně NP-těžký <a href="l3-5.html#takeaways">[L3.5]</a>: 2-aproximace → DP <a href="../k7/l7-1.html">[L7.1]</a> → FPTAS [L7.2] (2-aproximace je jeho krok 1).</li>
     </ul>
   </div>
 

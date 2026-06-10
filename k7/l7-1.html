@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L7.1 · Knapsack DP (tabulka + backtracking) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k7">K7 · Knapsack</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L7.1</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L7.1</span> Kapitola K7 — Knapsack (doplňková) · <strong>[MUST]</strong>
+  </p>
+  <h1>Knapsack DP (tabulka + backtracking)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>DP tabulka</strong> pro 0/1 batoh indexovaná <em>položkami × kapacitou</em>: buňka $F(j, W')$ = nejlepší cena z položek $1..j$ při kapacitě $W'$, vyplnění v $O(nW)$ a <strong>backtracking</strong> (zpětný průchod), který z hotové tabulky vyčte vybrané položky i (ne)unikátnost optima.
+  </div>
+
+  <p>Batoh už znáš: definici, Dantzigův greedy pro frakční variantu i 2-aproximaci jsi viděl v <a href="../k3/l3-11.html#takeaways">[L3.11] Fractional knapsack a 2-aproximace</a>, a v <a href="../k3/l3-5.html#takeaways">[L3.5] Silná NP-těžkost</a> padlo, že batoh má pseudopolynomiální DP. Dnes to DP konečně postavíme a propočítáme — přesně v podobě, kterou chce zkouška (doložené zadání 2023 i 09.07.2021, propočítáš v T01). Připomenutí zadání problému (slide 3, EN 1:1):</p>
+
+  <div class="assignment">
+    <span class="lbl">Knapsack problem (slide 3, EN 1:1)</span>
+    <p><strong>Instance:</strong> Nonnegative integers $n, c_1, \ldots, c_n, w_1, \ldots, w_n, W$ […] <strong>Goal:</strong> Find a subset $S \subseteq \{1, \ldots, n\}$ such that $\sum_{j \in S} w_j \le W$ and $\sum_{j \in S} c_j$ is the maximum.</p>
+  </div>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Stav: co si stačí pamatovat</h2>
+  <p>Rozhoduj o položkách postupně: nejdřív o $I_1$, pak o $I_2$, … U každé jsou jen dvě možnosti — <strong>vzít / nevzít</strong> (binární rozhodnutí jako $x_j \in \{0,1\}$ v <a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a>). Naivně je to strom $2^n$ větví.</p>
+
+  <details class="try">
+    <summary>Zkus sám: rozhodl jsi o položkách $1..j$ (nějak). Co jediné z té historie potřebuje zbytek úlohy (rozhodování o $j{+}1..n$) znát, aby mohl pokračovat optimálně?</summary>
+    <div class="inner">
+      <p>Jen <strong>kolik kapacity zbývá</strong>. Zbytek úlohy „maximalizuj cenu z položek $j{+}1..n$ do zbylé kapacity“ vůbec nezajímá, <em>které</em> z položek $1..j$ jsi vzal — dvě různé historie se stejnou zbylou kapacitou mají identickou budoucnost. Stav tedy je dvojice $(j, W')$: <em>uvažovány položky $1..j$, k dispozici kapacita $W'$</em>. Stavů je jen $(n+1)(W+1)$ místo $2^n$ větví — dvě větve stromu, které se potkají ve stejném stavu, stačí počítat jednou a nechat si tu lepší. Slide 10 tomu říká <strong>diamonds</strong> (kosočtverce ve stavovém prostoru) a vlastnosti <strong>optimal substructure</strong> + <strong>overlapping subproblems</strong>; lepší řešení v každém stavu vybíráme díky <strong>Bellman's Principle of Optimality</strong>.</p>
+    </div>
+  </details>
+
+  <p>Definuj tedy (značení podle vzorového řešení z banky úloh):</p>
+  <p>$$F(j, W') = \text{nejlepší dosažitelná cena výběru z položek } 1, \ldots, j \text{ s váhou} \le W'.$$</p>
+
+  <h2>Rekurence: vzít × nevzít</h2>
+  <p>Buňku $F(j, W')$ spočteš porovnáním obou rozhodnutí o položce $j$:</p>
+  <p>$$F(j, W') = \begin{cases} F(j-1,\, W'), & w_j > W' \quad (\text{nevejde se}),\\[2pt] \max\bigl\{\underbrace{F(j-1,\, W')}_{\text{nevzít}},\ \underbrace{F(j-1,\, W' - w_j) + c_j}_{\text{vzít}}\bigr\}, & w_j \le W', \end{cases}$$</p>
+  <p>se základem $F(0, W') = 0$ (bez položek je cena 0) a $F(j, 0) = 0$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč se ve větvi „vzít“ čte $F(j-1,\, W'-w_j)$, tedy řádek $j-1$ — a ne $F(j,\, W'-w_j)$ ze stejného řádku $j$?</summary>
+    <div class="inner">
+      <p>Protože řešíme <strong>0/1 knapsack</strong>: položku $j$ smíš vzít nejvýš jednou. Jakmile ji vezmeš, o zbytek kapacity se smí ucházet už jen položky $1..j{-}1$. Kdybys četl řádek $j$, mohla by se položka $j$ „vzít“ opakovaně — to je rekurence pro <em>unbounded</em> (neomezený) batoh: $F(j,W') = \max\{F(j{-}1,W'),\ F(j,W'-w_j)+c_j\}$. Rozdíl jediného indexu úplně mění úlohu (vzorové řešení banky to explicitně zdůrazňuje) — a u zkouškové instance by dal jiný výsledek, viz T01.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Pozor na orientaci: přednáška vs. zkouškové řešení</div>
+    <p>Slidy 8–9 předvádějí DP pro batoh primárně <strong>indexované cenou</strong> ($x_k^j$ = minimální váha, kterou lze dosáhnout ceny $k$ z položek $1..j$, složitost $O(nC)$) — to je varianta příští lekce [L7.2] a základ aproximačního schématu. Slide 10 ale dodává (EN 1:1): <em>“If the weights are integers, we can solve the problem by dynamic programming while selecting the solution having the higher cost for given weight.”</em> Přesně tuhle <strong>váhovou (kapacitní) tabulku</strong> používá vzorové řešení banky i ruční zkoušková řešení — váhy v zadáních jsou malá celá čísla, kdežto ceny mohou být i necelé (slide 10 schválně volí $c = (3.1,\, 4.2,\, 5.1,\, 4.3)$). Dnešní lekce = kapacitní tabulka.</p>
+  </div>
+
+  <h2>Tabulka a její vyplnění</h2>
+  <p>Tabulka má řádky $j = 0..n$ a sloupce $W' = 0..W$; vyplňuje se po řádcích (řádek $j$ čte jen řádek $j-1$). Projdi si to na příkladu ze slidu 10 (blackboard example, integer weights): $n = 4$, $w = (2, 3, 4, 5)$, $c = (3.1,\, 4.2,\, 5.1,\, 4.3)$, $W = 8$ — instance je ze slidu, samotné vyplnění a krokování je naše. Nejdřív ale:</p>
+
+  <details class="try">
+    <summary>Zkus sám: řádek $I_1$ ($c=3.1$, $w=2$) má hodnoty $0, 0, 3.1, 3.1, \ldots, 3.1$. Vyplň z něj řádek $I_2$ ($c=4.2$, $w=3$) pro $W' = 0..8$, než si to pustíš ve steperu.</summary>
+    <div class="inner">
+      <p>$W' \in \{0,1\}$: nevejde se ani jedna → $0, 0$. $W'=2$: $I_2$ se nevejde → opiš $3.1$. $W'=3$: $\max\{3.1,\ F(1,0)+4.2\} = \max\{3.1, 4.2\} = 4.2$. $W'=4$: $\max\{3.1,\ F(1,1)+4.2\} = 4.2$. $W'=5..8$: $\max\{3.1,\ 3.1+4.2\} = 7.3$ (obě položky najednou). Celý řádek: $0, 0, 3.1, 4.2, 4.2, 7.3, 7.3, 7.3, 7.3$.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-dp"></div>
+
+  <h2>Backtracking: z čísel zpět k položkám</h2>
+
+  <details class="try">
+    <summary>Zkus sám: tabulka ti dala jediné číslo — optimum $9.3$. Zadání ale chce <em>items in knapsack</em>. Jak z hotové tabulky poznáš, jestli byla položka $j$ v optimu vzata?</summary>
+    <div class="inner">
+      <p>Zopakuj v buňce rozhodnutí, kterým vznikla: stojíš-li na $(j, W')$ a $F(j, W') = F(j-1, W')$, mohla být položka $j$ <strong>nevzata</strong> — posuň se o řádek výš beze změny sloupce. Pokud se hodnoty liší, muselo platit „vzít“: $F(j, W') = F(j-1, W'-w_j) + c_j$ — položka $j$ <strong>je v řešení</strong> a skočíš na $(j-1,\, W'-w_j)$. Start v pravém dolním rohu $(n, W)$, konec v řádku $0$. (Přednáškový pseudokód si k tomu ukládá bit $s_k^j$, „which of the two possible cases has happened — it is later used to reconstruct the selection“; s tabulkou před sebou ho ale zrekonstruuješ i bez ukládání.)</p>
+    </div>
+  </details>
+
+  <p>Pokračuj ve steperu výše: kroky 6–9 předvádějí zpětný průchod — výsledek $S = \{I_2, I_3\}$, cena $4.2 + 5.1 = 9.3$, váha $3 + 4 = 7 \le 8$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: zkouška se pravidelně ptá „Is this solution unique and why?“ (tj. existuje více optimálních řešení? — opakuje to i studentský souhrn). Kdy z tabulky poznáš, že optim je víc?</summary>
+    <div class="inner">
+      <p>Každé optimální řešení odpovídá nějaké zpětné cestě tabulkou. Optimum <strong>není jediné</strong>, právě když se při backtrackingu v některé buňce na optimální cestě <strong>obě volby remizují</strong>: $F(j-1, W') = F(j-1, W'-w_j) + c_j = F(j,W')$ — cesta se větví a každá větev dá jiný výběr položek (jedna s $I_j$, druhá bez). Je-li v každé buňce cesty rozhodnutí jednoznačné (žádná remíza), je cesta jediná a optimum unikátní. V příkladu ze slidu: na $(4,8)$ dává „vzít“ jen $F(3,3)+4.3 = 8.5 \ne 9.3$, na $(3,8)$ dává „nevzít“ jen $7.3$, na $(2,4)$ „nevzít“ $3.1$, na $(1,1)$ „vzít“ se nevejde — vše jednoznačné, $\{I_2, I_3\}$ je unikátní. Pozor: argument musíš projít po <em>celé</em> cestě, ne jen v rohu (propočítáš si to na remíze v T02).</p>
+    </div>
+  </details>
+
+  <h2>Složitost: $O(nW)$ — a co je to za třídu?</h2>
+
+  <details class="try">
+    <summary>Zkus sám: vyplnění stojí $O(nW)$ — konstantní práce na buňku, $(n+1)(W+1)$ buněk; backtracking jen $O(n)$ kroků. Batoh je přitom NP-těžký. Je $O(nW)$ polynomiální algoritmus? A co se změní, když zadání slíbí $W \le 10n$?</summary>
+    <div class="inner">
+      <p>Není — $W$ je ve vstupu zapsáno binárně na $O(\log W)$ bitů, takže $O(nW)$ je exponenciální v délce vstupu: <strong>pseudopolynomiální</strong> algoritmus, přesně jak rozebírá <a href="../k3/l3-5.html#takeaways">[L3.5]</a> (batoh proto není <em>silně</em> NP-těžký). Když ale zadání omezí $W \le 10n$, dostaneš $O(nW) \le O(n \cdot 10n) = O(n^2)$ — na téhle třídě instancí běží DP <strong>polynomiálně v $n$</strong>. To je doslova otázka b) zkouškové úlohy (T01). Bonus ze vzorového řešení: paměť jde srazit na $O(W)$, protože řádek $j$ čte jen řádek $j-1$.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: za co se u téhle úlohy ztrácí body</div>
+    <ul>
+      <li><strong>Greedy podle $c_j/w_j$ není DP.</strong> Dochované řešení z 09.07.2021 vyřešilo instanci hladově podle podílů — a hodnotitel za 0,5 bodu připsal: <em>„Není DP a ani není naznačen žádný postup.“</em> Zadání říká „Using dynamic programming“ a „Write down all iterations of the algorithm“ — bez tabulky (všech iterací) nejsou body, i kdyby čísla náhodou vyšla. (A greedy obecně optimum nedává — je to jen 2-aproximace <a href="../k3/l3-11.html#takeaways">[L3.11]</a>.)</li>
+      <li><strong>Větev „vzít“ čte řádek $j-1$, ne $j$.</strong> Jinak počítáš unbounded batoh — u zkouškové instance by vyšlo 10 místo 8 (T01).</li>
+      <li><strong>„Unique“ nestačí tvrdit.</strong> Zdůvodni: žádná buňka na zpětné cestě nemá remízu (= jediná cesta), případně kombinatoricky, že žádná jiná množina hodnoty nedosáhne.</li>
+      <li><strong>Kapacitní tabulka chce celočíselné váhy</strong> (sloupce = kapacity $0..W$). Necelé váhy a celé ceny → tabulka indexovaná cenou, [L7.2].</li>
+    </ul>
+  </div>
+
+  <p>Mimochodem, stejnou DP techniku „stav = dosažitelné hodnoty, rekurence vzít/nevzít“ už jsi potkal u Rothkopfa <a href="../k5/l5-11.html#takeaways">[L5.11]</a> (stav = zátěže strojů) — a princip „kombinuj optima podproblémů“ i u Floyda <a href="../k2/l2-14.html#takeaways">[L2.14]</a>.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L7.1</div>
+    <ul>
+      <li><strong>Stav $(j, W')$, tabulka $(n+1) \times (W+1)$:</strong> $F(j,W') = \max\{F(j{-}1,W'),\ F(j{-}1,W'{-}w_j) + c_j\}$ (druhá volba jen pro $w_j \le W'$); základ $F(0,\cdot) = 0$. Větev „vzít“ čte řádek $j-1$ — řádek $j$ by byl unbounded batoh.</li>
+      <li><strong>Složitost $O(nW)$ čas i paměť</strong> (paměť jde na $O(W)$) — <em>pseudopolynomiální</em> <a href="../k3/l3-5.html#takeaways">[L3.5]</a>; při $W \le 10n$ je to $O(n^2)$, na takové třídě instancí polynomiální.</li>
+      <li><strong>Backtracking z $(n, W)$:</strong> $F(j,W') = F(j{-}1,W')$ → položka nevzata (krok nahoru); jinak vzata a skok na $(j{-}1, W'{-}w_j)$; konec v řádku 0. U této tabulky je optimum vždy v pravém dolním rohu (přidání kapacity ani položek nemůže cenu snížit).</li>
+      <li><strong>Unikátnost:</strong> optimum je jediné ⟺ žádná buňka na zpětné cestě nemá remízu obou voleb; remíza = větvení = více optimálních množin. Zkouška se ptá pravidelně („Is this solution unique and why?“).</li>
+      <li>Kapacitní tabulka vyžaduje celočíselné váhy (ceny smí být necelé); duální varianta indexovaná cenou ($O(nC)$, slidy 8–9) je [L7.2].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-knapsackdp">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Knapsack — DP tabulka + backtracking</strong>
+      <span class="task-src">zdroj: zkouška 2023 (str. 4, úloha 6b) = zkouška 09.07.2021 = task bank #27, zadání 1:1</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Using dynamic programming, solve the following instance of Knapsack Problem:</p>
+        <ul>
+          <li>number of items: $n = 7$</li>
+          <li>knapsack capacity: $W = 5$</li>
+          <li>costs $\mathbf{c} = (2, 2, 2, 2, 4, 3, 1)$</li>
+          <li>weights $\mathbf{w} = (1, 1, 2, 2, 3, 4, 1)$</li>
+        </ul>
+        <p>a) Compute the optimal solution (objective value and items in knapsack) of this instance of Knapsack Problem. Write down all iterations of the algorithm. Is this solution unique and why?</p>
+        <p>b) What can you say about the computational complexity of the algorithm for instances where $W \le 10n$?”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Konkrétní instance 0/1 batohu: 7 položek, kapacita 5, ceny a váhy dané vektory. Chce se: vyřešit <em>dynamickým programováním</em>, <strong>vypsat všechny iterace</strong> (= celou tabulku), uvést optimální cenu a vybrané položky, rozhodnout unikátnost se zdůvodněním; v části b) složitost na třídě instancí s $W \le 10n$.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — rekurence, vyplnění tabulky, backtracking, unikátnost, složitost.</li>
+        <li><a href="../k3/l3-5.html#takeaways">[L3.5] Silná NP-těžkost a pseudopolynomialita</a> — zařazení $O(nW)$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Tabulka 8 řádků ($j = 0..7$) × 6 sloupců ($W' = 0..5$), vyplňuj po řádcích rekurencí; všimni si, že položky $I_1, I_2$ jsou identické ($c=2$, $w=1$) a stejně tak $I_3, I_4$ ($c=2$, $w=2$). Pak backtracking z $(7, 5)$: u každé buňky rozhodni vzít/nevzít a hlídej remízy (kvůli otázce unikátnosti). Pro b) dosaď omezení $W \le 10n$ do $O(nW)$. Nejdřív celé na papír, pak teprve krokuj řešení níže.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>a) Všechny iterace</strong> (krokuj — vyplnění řádků $I_1..I_7$ = iterace algoritmu, pak zpětný průchod):</p>
+          <div class="viz" id="viz-t01"></div>
+          <p>Optimální cena $F(7,5) = \mathbf{8}$. Backtracking (kroky 9–14 výše): $I_7$ ne, $I_6$ ne, $\mathbf{I_5}$ ano (skok na $W'=2$), $I_4$ ne, $I_3$ ne, $\mathbf{I_2}$ ano (skok na $W'=1$), $\mathbf{I_1}$ ano (skok na $W'=0$, konec). Tedy</p>
+          <p>$$S = \{I_1, I_2, I_5\}, \qquad w_1+w_2+w_5 = 1+1+3 = 5 \le 5, \qquad c_1+c_2+c_5 = 2+2+4 = \mathbf{8}.$$</p>
+          <p><strong>Unikátnost: ANO.</strong> V žádné buňce zpětné cesty nenastala remíza — např. v $(7,5)$ dává „vzít $I_7$“ jen $F(6,4)+1 = 7 \ne 8$, v $(6,5)$ dává „vzít $I_6$“ jen $F(5,1)+3 = 5$, v $(5,5)$ dává „nevzít“ jen $6$ — takže tabulkou vede <em>jediná</em> optimální cesta (přesně argument ručního zkouškového řešení: „existuje jen jedna cesta … do optima“). Kombinatorická kontrola: hodnoty 8 lze složit jen jako $2+2+4$ ($\{I_1,I_2,I_5\}$, váha 5 ✓), $2+2+2+2$ ($\{I_1..I_4\}$, váha 6 ✗) nebo $4+3+1$ ($\{I_5,I_6,I_7\}$, váha 8 ✗) — projde jediná množina. (Identické dvojice $I_1{=}I_2$ a $I_3{=}I_4$ tu alternativu nevyrobí: obě položky první dvojice v řešení jsou, druhá dvojice v něm není celá.)</p>
+          <p><strong>b)</strong> Tabulka má $(n+1)(W+1)$ buněk, konstantní práce na buňku: čas i paměť $O(nW)$, paměť lze srazit na $O(W)$. Obecně je to <em>pseudopolynomiální</em> algoritmus <a href="../k3/l3-5.html#takeaways">[L3.5]</a>; na instancích s $W \le 10n$ ale $O(nW) \le O(n \cdot 10n) = O(n^2)$ — algoritmus je na této třídě <strong>polynomiální v počtu položek $n$</strong>.</p>
+          <p style="color:var(--ink-soft);font-size:14.5px"><strong>Poznámky ke zdrojům (přiznáno):</strong> ① Ruční tabulka zkoušky 2023 je s naší identická (řádky $I_1..I_7$, poslední řádek $0,2,4,5,6,8$, hodnota 8 zakroužkovaná jako „maximální cena“) a množina $\{I_1, I_2, I_5\}$ souhlasí; přepis ale u závěru uvádí „$c_{opt} = 6$“ — to odporuje vlastní tabulce i součtu $2+2+4=8$ a řešení banky #27 (= 8), počítáme tedy 8. ② Červená poznámka hodnotitele u unikátnosti (přepis, přibližně): „Když zde nepíšete kombinatorické řešení, je možné uvést, že opt. řešení nemusí být v pravém dolním rohu.“ — u <em>kapacitní</em> tabulky v rohu optimum vždy je (monotonie po řádcích i sloupcích); výhrada míří na obecné DP z přednášky indexované cenou [L7.2], kde optimum = nejvyšší dosažitelná cena $k$ s $x_k^n \le W$, nikoli roh. ③ Drill z poznámky banky: v <em>unbounded</em> variantě (větev „vzít“ čte řádek $j$) by optimum bylo $5 \cdot 2 = 10$ — pětkrát položka $I_1$ — a unikátní by nebylo ($I_2$ je identická).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-multiopt">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Více optimálních řešení — remíza v tabulce</strong>
+      <span class="task-src">vlastní drill (přiznáno) po vzoru otázky „Is this solution unique?“ / souhrnu „existuje více optimálních řešení?“</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (vlastní, EN ve stylu zkoušky)</span>
+        <p>“Using dynamic programming, solve the following instance of Knapsack Problem: $n = 3$, $W = 2$, costs $\mathbf{c} = (3, 2, 1)$, weights $\mathbf{w} = (2, 1, 1)$. Compute the optimal solution, write down all iterations, and decide: is the solution unique and why?”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Miniaturní instance (tabulka 4×3) zvolená tak, aby otázka unikátnosti dopadla <em>opačně</em> než v T01 — trénink na rozpoznání remízy.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — zejména kritérium unikátnosti (remíza na zpětné cestě).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Vyplň tři řádky tabulky a spusť backtracking z $(3, 2)$. V první buňce porovnej <em>obě</em> hodnoty z rekurence — nespokoj se s první volbou, která „sedí“.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <div class="viz" id="viz-t02"></div>
+          <p>Optimum $F(3,2) = 3$. Backtracking z $(3,2)$: <strong>remíza</strong> — „nevzít $I_3$“ dává $F(2,2) = 3$ a „vzít $I_3$“ dává $F(2,1) + 1 = 2 + 1 = 3$ též. Cesta se větví:</p>
+          <ul>
+            <li><strong>Větev „nevzít $I_3$“</strong> → $(2,2)$: $F(2,2) = 3 = F(1,2)$, vzít dává jen $0+2=2$ → $I_2$ ne → $(1,2)$: $3 \ne F(0,2) = 0$ → $I_1$ ano → $S_1 = \{I_1\}$, cena 3, váha 2.</li>
+            <li><strong>Větev „vzít $I_3$“</strong> → $(2,1)$: $F(2,1) = 2 \ne F(1,1) = 0$ → $I_2$ ano → $(1,0)$: konec → $S_2 = \{I_2, I_3\}$, cena $2+1 = 3$, váha 2.</li>
+          </ul>
+          <p><strong>Řešení NENÍ unikátní:</strong> existují dvě optimální množiny $\{I_1\}$ a $\{I_2, I_3\}$, obě s cenou 3 — přesně proto, že tabulkou vedou dvě zpětné cesty (remíza v buňce $(3,2)$). Tohle je odpověď, kterou zkouška u otázky „why?“ chce slyšet: unikátnost ⟺ jediná cesta bez remíz.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L7.1">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k6/l6-3.html"><span class="dir">← Předchozí</span> L6.3 · AC-3 algoritmus + oditerování [FOTO]</a>
+    <a class="next" href="../index.html#k7"><span class="dir">Další →</span> Pokračování se připravuje (L7.2 · Knapsack DP indexovaný cenou (cost-indexed) [NICE])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// pomocník: řádek hodnot + volitelné třídy buněk {sloupec: cls}
+function dpRow(vals, marks) {
+  return vals.map(function (v, i) { return marks && marks[i] ? { t: v, cls: marks[i] } : v; });
+}
+function dpEmpty(n) { return Array(n).fill(null); }
+
+/* ===== 1) Výklad: instance ze slidu 10 (blackboard example, integer weights)
+   n=4, w=(2,3,4,5), c=(3.1, 4.2, 5.1, 4.3), W=8 — vyplnění + backtracking ===== */
+var R0 = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+var R1 = [0, 0, 3.1, 3.1, 3.1, 3.1, 3.1, 3.1, 3.1];
+var R2 = [0, 0, 3.1, 4.2, 4.2, 7.3, 7.3, 7.3, 7.3];
+var R3 = [0, 0, 3.1, 4.2, 5.1, 7.3, 8.2, 9.3, 9.3];
+var R4 = [0, 0, 3.1, 4.2, 5.1, 7.3, 8.2, 9.3, 9.3];
+
+KOViz.dpTable(document.getElementById('viz-dp'), {
+  corner: 'j \\ W′',
+  cols: ['0', '1', '2', '3', '4', '5', '6', '7', '8'],
+  rows: ['∅ <small>(j=0)</small>',
+         'I₁ <small>c=3.1 w=2</small>',
+         'I₂ <small>c=4.2 w=3</small>',
+         'I₃ <small>c=5.1 w=4</small>',
+         'I₄ <small>c=4.3 w=5</small>'],
+  frames: [
+    {desc: 'Inicializace: bez položek (j = 0) je nejlepší cena 0 pro každou kapacitu — F(0, W′) = 0.',
+     cells: [dpRow(R0), dpEmpty(9), dpEmpty(9), dpEmpty(9), dpEmpty(9)]},
+    {desc: 'Řádek I₁ (c = 3.1, w = 2): pro W′ &lt; 2 se I₁ nevejde → opiš buňku nad sebou (0); pro W′ ≥ 2: max(F(0, W′), F(0, W′−2) + 3.1) = 3.1.',
+     cells: [dpRow(R0), dpRow(R1, {0:'hl',1:'hl',2:'hl',3:'hl',4:'hl',5:'hl',6:'hl',7:'hl',8:'hl'}), dpEmpty(9), dpEmpty(9), dpEmpty(9)],
+     rowCls: {1: 'hl'}},
+    {desc: 'Řádek I₂ (c = 4.2, w = 3), ukázka buňky W′ = 5: nevzít = F(1, 5) = 3.1 (čárkovaný zdroj nad); vzít = F(1, 5−3) + 4.2 = 3.1 + 4.2 = 7.3 (čárkovaný zdroj vlevo nahoře) → max = 7.3. Stejně zbytek řádku: 0, 0, 3.1, 4.2, 4.2, 7.3, 7.3, 7.3, 7.3.',
+     cells: [dpRow(R0), dpRow(R1, {2:'src', 5:'src'}), dpRow(R2, {5:'hl'}), dpEmpty(9), dpEmpty(9)],
+     rowCls: {2: 'hl'}},
+    {desc: 'Řádek I₃ (c = 5.1, w = 4), ukázka W′ = 7: max(F(2,7) = 7.3, F(2,3) + 5.1 = 4.2 + 5.1 = 9.3) = 9.3. Podobně W′ = 6: max(7.3, 3.1+5.1) = 8.2; W′ = 8: max(7.3, 4.2+5.1) = 9.3; W′ = 4: max(4.2, 0+5.1) = 5.1.',
+     cells: [dpRow(R0), dpRow(R1), dpRow(R2, {3:'src', 7:'src'}), dpRow(R3, {7:'hl'}), dpEmpty(9)],
+     rowCls: {3: 'hl'}},
+    {desc: 'Řádek I₄ (c = 4.3, w = 5): „vzít“ nikde nepomůže (např. W′ = 8: max(9.3, F(3,3) + 4.3 = 8.5) = 9.3) → celý řádek je kopie řádku I₃. Hotovo: optimum F(4, 8) = 9.3 v pravém dolním rohu.',
+     cells: [dpRow(R0), dpRow(R1), dpRow(R2), dpRow(R3), dpRow(R4, {8:'good'})],
+     rowCls: {4: 'hl'}},
+    {desc: 'BACKTRACKING, start (4, 8): F(4,8) = 9.3 = F(3,8) (buňka nad) → I₄ NEVZATA. Zůstaň ve sloupci 8, jdi o řádek výš.',
+     cells: [dpRow(R0), dpRow(R1), dpRow(R2), dpRow(R3, {8:'hl'}), dpRow(R4, {8:'good'})]},
+    {desc: '(3, 8): F(3,8) = 9.3 ≠ F(2,8) = 7.3 → I₃ VZATA: 9.3 = F(2, 8−4) + 5.1 = 4.2 + 5.1. Skoč na (2, 4).',
+     cells: [dpRow(R0), dpRow(R1), dpRow(R2, {4:'hl'}), dpRow(R3, {8:'good'}), dpRow(R4, {8:'good'})],
+     rowCls: {3: 'good'}},
+    {desc: '(2, 4): F(2,4) = 4.2 ≠ F(1,4) = 3.1 → I₂ VZATA: 4.2 = F(1, 4−3) + 4.2 = 0 + 4.2. Skoč na (1, 1).',
+     cells: [dpRow(R0), dpRow(R1, {1:'hl'}), dpRow(R2, {4:'good'}), dpRow(R3, {8:'good'}), dpRow(R4, {8:'good'})],
+     rowCls: {2: 'good', 3: 'good'}},
+    {desc: '(1, 1): F(1,1) = 0 = F(0,1) → I₁ nevzata; jsem v řádku 0 → KONEC. Výběr S = {I₂, I₃}, cena 4.2 + 5.1 = 9.3, váha 3 + 4 = 7 ≤ 8 ✓. Žádná buňka cesty neměla remízu → optimum unikátní.',
+     cells: [dpRow(R0, {1:'good'}), dpRow(R1, {1:'good'}), dpRow(R2, {4:'good'}), dpRow(R3, {8:'good'}), dpRow(R4, {8:'good'})],
+     rowCls: {2: 'good', 3: 'good'}},
+  ],
+  caption: 'Instance ze slidu 10 (blackboard example, integer weights): n = 4, w = (2,3,4,5), c = (3.1, 4.2, 5.1, 4.3), W = 8. Kroky 1–5 vyplnění po řádcích, kroky 6–9 backtracking (zelená cesta).',
+});
+
+/* ===== 2) T01: zkoušková instance 2023 / 09.07.2021 = bank #27
+   n=7, W=5, c=(2,2,2,2,4,3,1), w=(1,1,2,2,3,4,1) ===== */
+var E0 = [0, 0, 0, 0, 0, 0];
+var E1 = [0, 2, 2, 2, 2, 2];
+var E2 = [0, 2, 4, 4, 4, 4];
+var E3 = [0, 2, 4, 4, 6, 6];
+var E4 = [0, 2, 4, 4, 6, 6];
+var E5 = [0, 2, 4, 4, 6, 8];
+var E6 = [0, 2, 4, 4, 6, 8];
+var E7 = [0, 2, 4, 5, 6, 8];
+var EM = dpEmpty(6);
+
+KOViz.dpTable(document.getElementById('viz-t01'), {
+  corner: 'j \\ W′',
+  cols: ['0', '1', '2', '3', '4', '5'],
+  rows: ['∅ <small>(j=0)</small>',
+         'I₁ <small>c=2 w=1</small>',
+         'I₂ <small>c=2 w=1</small>',
+         'I₃ <small>c=2 w=2</small>',
+         'I₄ <small>c=2 w=2</small>',
+         'I₅ <small>c=4 w=3</small>',
+         'I₆ <small>c=3 w=4</small>',
+         'I₇ <small>c=1 w=1</small>'],
+  frames: [
+    {desc: 'Inicializace: F(0, W′) = 0.',
+     cells: [dpRow(E0), EM, EM, EM, EM, EM, EM, EM]},
+    {desc: 'Iterace I₁ (c=2, w=1): pro W′ ≥ 1 je max(0, 0+2) = 2.',
+     cells: [dpRow(E0), dpRow(E1, {1:'hl',2:'hl',3:'hl',4:'hl',5:'hl'}), EM, EM, EM, EM, EM, EM], rowCls: {1:'hl'}},
+    {desc: 'Iterace I₂ (c=2, w=1): W′=1: max(2, 0+2) = 2; W′ ≥ 2: max(2, 2+2) = 4 — obě jedničkové položky najednou.',
+     cells: [dpRow(E0), dpRow(E1), dpRow(E2, {2:'hl',3:'hl',4:'hl',5:'hl'}), EM, EM, EM, EM, EM], rowCls: {2:'hl'}},
+    {desc: 'Iterace I₃ (c=2, w=2): W′=2: max(4, F(2,0)+2 = 2) = 4; W′=3: max(4, F(2,1)+2 = 4) = 4 (remíza zde, ale mimo budoucí optimální cestu); W′=4: max(4, F(2,2)+2 = 6) = 6; W′=5: max(4, F(2,3)+2 = 6) = 6.',
+     cells: [dpRow(E0), dpRow(E1), dpRow(E2, {2:'src',3:'src'}), dpRow(E3, {4:'hl',5:'hl'}), EM, EM, EM, EM], rowCls: {3:'hl'}},
+    {desc: 'Iterace I₄ (c=2, w=2): vzít už nikde nezlepší (W′=5: max(6, F(3,3)+2 = 6) = 6) → kopie řádku I₃.',
+     cells: [dpRow(E0), dpRow(E1), dpRow(E2), dpRow(E3), dpRow(E4), EM, EM, EM], rowCls: {4:'hl'}},
+    {desc: 'Iterace I₅ (c=4, w=3): W′=3: max(4, 0+4) = 4; W′=4: max(6, F(4,1)+4 = 6) = 6; W′=5: max(6, F(4,2)+4 = 8) = 8 ← jediné zlepšení.',
+     cells: [dpRow(E0), dpRow(E1), dpRow(E2), dpRow(E3), dpRow(E4, {2:'src',5:'src'}), dpRow(E5, {5:'hl'}), EM, EM], rowCls: {5:'hl'}},
+    {desc: 'Iterace I₆ (c=3, w=4): W′=4: max(6, 0+3) = 6; W′=5: max(8, F(5,1)+3 = 5) = 8 → kopie řádku I₅.',
+     cells: [dpRow(E0), dpRow(E1), dpRow(E2), dpRow(E3), dpRow(E4), dpRow(E5), dpRow(E6), EM], rowCls: {6:'hl'}},
+    {desc: 'Iterace I₇ (c=1, w=1): W′=3: max(4, F(6,2)+1 = 5) = 5 ← zlepšení; W′=5: max(8, F(6,4)+1 = 7) = 8; jinde beze změny. Tabulka hotová — optimum F(7,5) = 8.',
+     cells: [dpRow(E0), dpRow(E1), dpRow(E2), dpRow(E3), dpRow(E4), dpRow(E5), dpRow(E6), dpRow(E7, {3:'hl', 5:'good'})], rowCls: {7:'hl'}},
+    {desc: 'BACKTRACKING, start (7,5): F(7,5) = 8 = F(6,5) → I₇ NEVZATA (vzít by dalo jen F(6,4)+1 = 7 — žádná remíza). Nahoru.',
+     cells: [dpRow(E0), dpRow(E1), dpRow(E2), dpRow(E3), dpRow(E4), dpRow(E5), dpRow(E6, {5:'hl'}), dpRow(E7, {5:'good'})]},
+    {desc: '(6,5): F(6,5) = 8 = F(5,5) → I₆ NEVZATA (vzít: F(5,1)+3 = 5). Nahoru.',
+     cells: [dpRow(E0), dpRow(E1), dpRow(E2), dpRow(E3), dpRow(E4), dpRow(E5, {5:'hl'}), dpRow(E6, {5:'good'}), dpRow(E7, {5:'good'})]},
+    {desc: '(5,5): F(5,5) = 8 ≠ F(4,5) = 6 → I₅ VZATA: 8 = F(4, 5−3) + 4 = 4 + 4. Skoč na (4, 2).',
+     cells: [dpRow(E0), dpRow(E1), dpRow(E2), dpRow(E3), dpRow(E4, {2:'hl'}), dpRow(E5, {5:'good'}), dpRow(E6, {5:'good'}), dpRow(E7, {5:'good'})], rowCls: {5:'good'}},
+    {desc: '(4,2): 4 = F(3,2) → I₄ NEVZATA (vzít: F(3,0)+2 = 2); (3,2): 4 = F(2,2) → I₃ NEVZATA (vzít: F(2,0)+2 = 2). Jsme na (2,2).',
+     cells: [dpRow(E0), dpRow(E1), dpRow(E2, {2:'hl'}), dpRow(E3, {2:'good'}), dpRow(E4, {2:'good'}), dpRow(E5, {5:'good'}), dpRow(E6, {5:'good'}), dpRow(E7, {5:'good'})], rowCls: {5:'good'}},
+    {desc: '(2,2): F(2,2) = 4 ≠ F(1,2) = 2 → I₂ VZATA: 4 = F(1, 2−1) + 2 = 2 + 2. Skoč na (1, 1).',
+     cells: [dpRow(E0), dpRow(E1, {1:'hl'}), dpRow(E2, {2:'good'}), dpRow(E3, {2:'good'}), dpRow(E4, {2:'good'}), dpRow(E5, {5:'good'}), dpRow(E6, {5:'good'}), dpRow(E7, {5:'good'})], rowCls: {2:'good', 5:'good'}},
+    {desc: '(1,1): F(1,1) = 2 ≠ F(0,1) = 0 → I₁ VZATA: 2 = F(0,0) + 2. Skok na (0,0) → KONEC. S = {I₁, I₂, I₅}, cena 2+2+4 = 8, váha 1+1+3 = 5 ≤ 5 ✓. Jediná cesta bez remíz → optimum unikátní.',
+     cells: [dpRow(E0, {0:'good'}), dpRow(E1, {1:'good'}), dpRow(E2, {2:'good'}), dpRow(E3, {2:'good'}), dpRow(E4, {2:'good'}), dpRow(E5, {5:'good'}), dpRow(E6, {5:'good'}), dpRow(E7, {5:'good'})], rowCls: {1:'good', 2:'good', 5:'good'}},
+  ],
+  caption: 'T01: všechny iterace DP (kroky 1–8) a backtracking (kroky 9–14). Shoduje se s ruční tabulkou zkoušky 2023 (řádky I₁..I₇, poslední řádek 0, 2, 4, 5, 6, 8) i s řešením banky #27.',
+});
+
+/* ===== 3) T02: vlastní mini-instance s remízou — n=3, W=2, c=(3,2,1), w=(2,1,1) ===== */
+KOViz.dpTable(document.getElementById('viz-t02'), {
+  corner: 'j \\ W′',
+  cols: ['0', '1', '2'],
+  rows: ['∅ <small>(j=0)</small>',
+         'I₁ <small>c=3 w=2</small>',
+         'I₂ <small>c=2 w=1</small>',
+         'I₃ <small>c=1 w=1</small>'],
+  cells: [
+    dpRow([0, 0, 0]),
+    dpRow([0, 0, 3], {2:'good'}),
+    dpRow([0, 2, 3], {1:'good', 2:'good'}),
+    dpRow([0, 2, 3], {2:'bad'}),
+  ],
+  caption: 'T02: hotová tabulka. Červená buňka (3, 2) má REMÍZU: nevzít = F(2,2) = 3 i vzít = F(2,1) + 1 = 3 → dvě zpětné cesty (přes zelené buňky), dvě optimální množiny {I₁} a {I₂, I₃}.',
+});
+</script>
+</body>
+</html>
