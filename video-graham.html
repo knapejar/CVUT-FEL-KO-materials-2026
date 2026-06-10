@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alfa | Beta | Gama (Graham) — immersive video · KO Hitovky</title>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #11141d;
+    --text: #e8eaf0;
+    --muted: #8b93a7;
+    --accent: #ffb000;
+    --border: #232a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; overflow: hidden;
+  }
+  #topbar {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; font-size: 13px; color: var(--muted);
+  }
+  #topbar a { color: var(--muted); text-decoration: none; }
+  #topbar a:hover { color: var(--accent); }
+  #topbar .title { color: var(--text); font-weight: 700; }
+  #topbar .badge {
+    font-size: 11px; color: var(--bg); background: var(--accent);
+    border-radius: 10px; padding: 2px 9px; font-weight: 700;
+  }
+  #stagewrap {
+    flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
+    min-height: 0; padding: 0 16px;
+  }
+  #stage {
+    position: relative;
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #0b0e16; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+  }
+  #stage canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  #subtitle {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 26px 4% 16px;
+    background: linear-gradient(to top, rgba(5,7,12,0.88) 0%, rgba(5,7,12,0.55) 65%, transparent 100%);
+    text-align: center; pointer-events: none;
+    font-size: clamp(14px, 2.4vw, 28px); font-weight: 700; line-height: 1.4;
+    color: #fff;
+  }
+  #subtitle .m {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    color: #7dd3fc;
+  }
+  #subtitle .hl {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    padding: 0 4px; border-radius: 5px;
+  }
+  #subtitle .c1 { background: rgba(125,211,252,0.15); color: #7dd3fc; }
+  #subtitle .c2 { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+  #subtitle .c3 { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+  #subtitle .c4 { background: rgba(52,211,153,0.15);  color: #4ade80; }
+  #subtitle .c5 { background: rgba(244,114,182,0.16); color: #f9a8d4; }
+  #subtitle .c6 { background: rgba(251,146,60,0.17);  color: #fdba74; }
+  .kw { position: relative; display: inline-block; white-space: nowrap; }
+  .kw .wb { opacity: 0.42; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+  .kw .wf {
+    position: absolute; left: 0; top: 0; width: 0%;
+    overflow: hidden; white-space: nowrap;
+    text-shadow: 0 0 16px rgba(255,176,0,0.85), 0 2px 10px rgba(0,0,0,0.95);
+  }
+  .kw .wf, .kw .wf * { color: #ffd34d !important; }
+  #bigplay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(5,7,12,0.55); cursor: pointer; z-index: 5;
+    flex-direction: column; gap: 18px;
+  }
+  #bigplay.hidden { display: none; }
+  #bigplay .pbtn {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--accent); color: #1a1200;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; box-shadow: 0 0 60px rgba(255,176,0,0.45);
+    transition: transform .15s;
+  }
+  #bigplay:hover .pbtn { transform: scale(1.08); }
+  #bigplay .hint { color: var(--text); font-size: 15px; font-weight: 600; text-shadow: 0 2px 8px #000; }
+  #bigplay .hint small { display: block; color: var(--muted); font-weight: 400; margin-top: 6px; }
+  #controls {
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 4px 16px;
+  }
+  #controls button {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    width: 42px; height: 42px; border-radius: 50%; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: border-color .15s, color .15s;
+  }
+  #controls button:hover { border-color: var(--accent); color: var(--accent); }
+  #seek {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 6px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--p, 0%), #2a3040 var(--p, 0%));
+    border-radius: 3px; outline: none; cursor: pointer;
+  }
+  #seek::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px rgba(255,176,0,0.6); cursor: pointer;
+  }
+  #seek::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; border: none;
+    background: var(--accent); cursor: pointer;
+  }
+  .time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 44px; text-align: center; }
+  @media (max-height: 560px) { #topbar { display: none; } }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="pisnicky.html">← Zpěvník</a>
+  <span class="title">Alfa | Beta | Gama (Graham)</span>
+  <span class="badge">IMMERSIVE VIDEO 🪩</span>
+  <span style="margin-left:auto">mezerník = play/pauza · ←/→ = ±5 s · R = od začátku</span>
+</div>
+
+<div id="stagewrap">
+  <div id="stage">
+    <div id="subtitle"></div>
+    <div id="bigplay">
+      <div class="pbtn">▶</div>
+      <div class="hint">GRAHAM SONG CONTEST — α | β | γ na velkém pódiu 🪩<small>2 min 58 s · zpívaná videolekce</small></div>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btnPlay" title="Play / pauza">▶</button>
+  <button id="btnRestart" title="Od začátku">⟲</button>
+  <span class="time" id="tCur">0:00</span>
+  <input type="range" id="seek" min="0" max="178.4" step="0.01" value="0">
+  <span class="time" id="tDur">2:58</span>
+</div>
+
+<audio id="player" src="audio/alfa-beta-gama.mp3" preload="auto"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
+<script>
+(async function () {
+'use strict';
+
+// ════════════════════════════════════════════════════════════════════
+// 0) helpers
+// ════════════════════════════════════════════════════════════════════
+const C = {
+  gold: 0xffb000, goldHi: 0xffd34d, green: 0x4ade80, red: 0xef4444,
+  cyan: 0x7dd3fc, violet: 0xa78bfa, pink: 0xf472b6, white: 0xffffff,
+  stageF: 0x16101f, beam: 0xfff3c0, muted: 0x8b93a7,
+};
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - clamp01(t), 3);
+const ph = (t, a, b) => clamp01((t - a) / (b - a));
+const BEAT = t => Math.max(0, Math.sin(t * 13.3)); // ~127 BPM europop
+
+// ════════════════════════════════════════════════════════════════════
+// 1) DATA — soutěžící, kotvy (word-level whisper)
+// ════════════════════════════════════════════════════════════════════
+const CONTEST = [
+  { at: 18.35, sym: '1', sash: 'jeden stroj', col: 0x7dd3fc },
+  { at: 21.78, sym: 'P', sash: 'paralelní stejné', col: 0x4ade80 },
+  { at: 24.54, sym: 'Q', sash: 'uniformní · ×rychlost', col: 0xfbbf24 },
+  { at: 31.20, sym: 'R', sash: 'unrelated · tabulka pᵢⱼ', col: 0xf472b6 },
+  { at: 37.70, sym: 'O F J', sash: 'open · flow · job shop', col: 0xa78bfa },
+  { at: 42.08, sym: 'PS', sash: 'projekty', col: 0xff8a5c },
+];
+const ANCH = [
+  { alfa: 43.58, beta: 46.14, gama: 46.56, krit: 49.60, vln: 50.92, dl: 53.03, zed: 53.96, bez: 55.67, late: 56.88, np: 58.14, cmax: 59.40, lmax: 60.60, suma: 61.61, schema: 65.99 },
+  { alfa: 98.66, beta: 99.59, gama: 100.53, krit: 103.61, vln: 104.74, dl: 106.45, zed: 107.76, bez: 109.48, late: 110.90, np: 111.87, cmax: 113.17, lmax: 114.45, suma: 115.34, schema: 119.74 },
+  { alfa: 148.18, beta: 149.24, gama: 150.30, krit: 154.18, vln: 155.90, dl: 157.33, zed: 158.64, bez: 160.20, late: 161.30, np: 162.30, cmax: 163.52, lmax: 165.00, suma: 166.20, schema: 169.50 },
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 2) PIXI + particles + GLITTER WORD BUS
+// ════════════════════════════════════════════════════════════════════
+const app = new PIXI.Application({ width: 1280, height: 720, antialias: true, background: 0x0b0712 });
+document.getElementById('stage').appendChild(app.view);
+const sceneLayer = new PIXI.Container();
+const fxLayer = new PIXI.Container();
+app.stage.addChild(sceneLayer, fxLayer);
+let SHAKE = 0;
+const dotG = new PIXI.Graphics();
+dotG.beginFill(0xffffff, 1).drawCircle(0, 0, 32).endFill();
+const dotTex = app.renderer.generateTexture(dotG);
+const parts = [];
+function burst(x, y, tint, count = 18, speed = 220, size = 0.1) {
+  for (let i = 0; i < count; i++) {
+    const p = new PIXI.Sprite(dotTex);
+    p.anchor.set(0.5); p.x = x; p.y = y; p.tint = tint;
+    p.blendMode = PIXI.BLEND_MODES.ADD;
+    const a = Math.random() * 6.283, v = speed * (0.3 + Math.random() * 0.8);
+    p._vx = Math.cos(a) * v; p._vy = Math.sin(a) * v;
+    p._life = 0.6 + Math.random() * 0.7; p._t = 0;
+    p.scale.set(size * (0.5 + Math.random()));
+    fxLayer.addChild(p); parts.push(p);
+  }
+}
+// GLITTER WORD BUS — slova jako třpytky na každé zazpívané slovo
+const glits = [];
+let glitSlot = 0;
+function spawnGlit(word, caps) {
+  const plain = word.replace(/<[^>]*>/g, '').replace(/[„“…—]/g, '').trim();
+  if (!plain) return;
+  const big = caps || /!$/.test(plain);
+  const t = new PIXI.Text(plain.toUpperCase(), {
+    fontFamily: "'Segoe UI', system-ui, sans-serif",
+    fontSize: big ? 46 : 25, fontWeight: '900',
+    fill: big ? ['#ffffff', '#f472b6', '#ffd34d'] : ['#fff7d6', '#ffd34d'],
+    stroke: 0x1f0a28, strokeThickness: big ? 7 : 4,
+    dropShadow: true, dropShadowColor: big ? 0xf472b6 : 0xffd34d,
+    dropShadowBlur: 14, dropShadowDistance: 0,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  glitSlot = (glitSlot + 1) % 6;
+  t.x = big ? 640 : 165 + glitSlot * 190 + (Math.random() - 0.5) * 44;
+  t.y = big ? 540 : 660;
+  t._vy = big ? -100 : -68 - Math.random() * 28;
+  t._life = big ? 1.5 : 1.15; t._t = 0; t._big = big;
+  t.rotation = (Math.random() - 0.5) * 0.14;
+  fxLayer.addChild(t); glits.push(t);
+  burst(t.x, t.y, [0xffd34d, 0xf472b6, 0x7dd3fc][glitSlot % 3], big ? 20 : 7, big ? 230 : 100, big ? 0.1 : 0.05);
+  if (big) SHAKE = Math.max(SHAKE, 8);
+}
+app.ticker.add(() => {
+  const dt = app.ticker.deltaMS / 1000;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p._t += dt; p.x += p._vx * dt; p.y += p._vy * dt;
+    p._vy += 180 * dt; p.alpha = clamp01(1 - p._t / p._life);
+    if (p._t > p._life) { fxLayer.removeChild(p); p.destroy(); parts.splice(i, 1); }
+  }
+  for (let i = glits.length - 1; i >= 0; i--) {
+    const g2 = glits[i];
+    g2._t += dt; g2.y += g2._vy * dt; g2._vy *= 0.985;
+    const k = g2._t / g2._life;
+    g2.alpha = k < 0.15 ? k / 0.15 : 1 - ph(k, 0.5, 1);
+    if (g2._t > g2._life) { fxLayer.removeChild(g2); g2.destroy(); glits.splice(i, 1); }
+  }
+  if (SHAKE > 0.1) {
+    sceneLayer.x = (Math.random() - 0.5) * SHAKE;
+    sceneLayer.y = (Math.random() - 0.5) * SHAKE;
+    SHAKE *= Math.pow(0.0018, dt);
+  } else { sceneLayer.x = 0; sceneLayer.y = 0; }
+});
+function txt(str, size, color, weight = '800', family = "'Segoe UI', system-ui, sans-serif") {
+  const t = new PIXI.Text(str, {
+    fontFamily: family, fontSize: size, fill: color, fontWeight: weight,
+    align: 'center', dropShadow: true, dropShadowColor: 0x000000,
+    dropShadowBlur: 8, dropShadowAlpha: 0.6, dropShadowDistance: 2,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  return t;
+}
+const MATH = "'Cambria Math', Cambria, Georgia, serif";
+
+// PD obrázek divadla (intro kulisa) — assets/img/western/CREDITS.txt
+let theatreTex = null;
+try { theatreTex = await PIXI.Assets.load('assets/img/western/theatre.jpg'); } catch (e) {}
+
+// ════════════════════════════════════════════════════════════════════
+// 3) PÓDIUM — reflektory, disco koule, dav
+// ════════════════════════════════════════════════════════════════════
+function buildStage(c) {
+  const g = new PIXI.Graphics(); c.addChildAt(g, 0);
+  function render(t, o = {}) {
+    g.clear();
+    // sál
+    g.beginFill(0x0b0712, 1).drawRect(0, 0, 1280, 720).endFill();
+    g.beginFill(0x1a0f26, 1).drawRect(0, 0, 1280, 150).endFill();
+    // reflektory (3 kužely α β γ) — houpou se
+    const cols = o.beams || [C.gold, C.cyan, C.pink];
+    [320, 640, 960].forEach((bx, i) => {
+      const sway = Math.sin(t * 1.1 + i * 2.1) * 110;
+      const on = !o.beamOn || o.beamOn[i];
+      if (!on) return;
+      g.lineStyle(0);
+      g.beginFill(cols[i], 0.10 + 0.05 * BEAT(t));
+      g.drawPolygon([bx, 60, bx + sway - 130, 600, bx + sway + 130, 600]);
+      g.endFill();
+      g.beginFill(0x2a2438, 1).drawRoundedRect(bx - 22, 42, 44, 26, 6).endFill();
+    });
+    // disco koule
+    const dy = o.ballY != null ? o.ballY : 120;
+    g.lineStyle(2, 0x444c66, 1);
+    g.moveTo(640, 0); g.lineTo(640, dy - 36);
+    g.lineStyle(0);
+    g.beginFill(0xb9c2d4, 1).drawCircle(640, dy, 36).endFill();
+    g.lineStyle(1.5, 0x6a7488, 0.8);
+    for (let i = -2; i <= 2; i++) g.moveTo(640 - 34, dy + i * 13), g.lineTo(640 + 34, dy + i * 13);
+    for (let i = -2; i <= 2; i++) { g.moveTo(640 + i * 15, dy - 33); g.quadraticCurveTo(640 + i * 21, dy, 640 + i * 15, dy + 33); }
+    // odlesky koule
+    for (let i = 0; i < 5; i++) {
+      const a = t * 1.8 + i * 1.26;
+      g.lineStyle(0);
+      g.beginFill(0xffffff, 0.5 + 0.3 * Math.sin(t * 5 + i));
+      g.drawCircle(640 + Math.cos(a) * 30, dy + Math.sin(a) * 22, 2.5);
+      g.endFill();
+    }
+    // podlaha pódia s leskem
+    g.beginFill(C.stageF, 1).drawRect(0, 600, 1280, 120).endFill();
+    g.lineStyle(0);
+    for (let i = 0; i < 12; i++) {
+      g.beginFill(0x2a2040, 0.5).drawRect(i * 110 + ((t * 30) % 110), 600, 4, 120).endFill();
+    }
+    // dav (pohupující se hlavy)
+    for (let i = 0; i < 16; i++) {
+      const hx = 40 + i * 80, hy = 690 - 10 * BEAT(t + i * 0.4);
+      g.beginFill(0x070510, 1).drawCircle(hx, hy, 22).endFill();
+      // ručky nahoře na beat
+      if (BEAT(t + i * 0.4) > 0.8) {
+        g.lineStyle(4, 0x070510, 1);
+        g.moveTo(hx - 14, hy - 8); g.lineTo(hx - 26, hy - 34);
+        g.moveTo(hx + 14, hy - 8); g.lineTo(hx + 26, hy - 34);
+        g.lineStyle(0);
+      }
+    }
+  }
+  return { render };
+}
+// tři podia α | β | γ
+function buildPodia(c) {
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const labs = [
+    txt('α', 64, 0x1a1200, '900', MATH), txt('β', 64, 0x06121f, '900', MATH), txt('γ', 64, 0x1f0612, '900', MATH),
+  ];
+  const subs = [
+    txt('STROJE', 19, C.gold, '900'), txt('ÚLOHY · vlastnosti', 19, C.cyan, '900'), txt('KRITÉRIUM', 19, C.pink, '900'),
+  ];
+  labs.forEach((l, i) => { l.x = 320 + i * 320; l.y = 430; l.alpha = 0; c.addChild(l); });
+  subs.forEach((l, i) => { l.x = 320 + i * 320; l.y = 568; l.alpha = 0; c.addChild(l); });
+  function render(t, at) {
+    g.clear();
+    const cols = [C.gold, C.cyan, C.pink];
+    [0, 1, 2].forEach(i => {
+      const on = t > at[i];
+      const p = easeOut(ph(t, at[i], at[i] + 0.5));
+      if (p <= 0) { labs[i].alpha = 0; subs[i].alpha = 0; return; }
+      const h = 110 * p + 8 * BEAT(t + i);
+      g.lineStyle(3, 0x0b0712, 1);
+      g.beginFill(cols[i], 0.95);
+      g.drawRoundedRect(320 + i * 320 - 95, 600 - h, 190, h + 20, 10);
+      g.endFill();
+      labs[i].alpha = p; labs[i].y = 600 - h - 46;
+      labs[i].scale.set(1 + 0.08 * BEAT(t + i));
+      subs[i].alpha = p; subs[i].y = 600 - h / 2;
+    });
+  }
+  return { render };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 4) SCÉNY
+// ════════════════════════════════════════════════════════════════════
+const scenes = [];
+function scene(t0, t1, build) {
+  const s = { t0, t1, st: null };
+  s.init = () => { s.st = build(); sceneLayer.addChild(s.st.c); };
+  s.update = (lt) => s.st && s.st.update(lt);
+  s.destroy = () => { if (s.st) { sceneLayer.removeChild(s.st.c); s.st.c.destroy({ children: true }); s.st = null; } };
+  scenes.push(s);
+  return s;
+}
+function caption(c, str, color = C.goldHi, y = 44, size = 25) {
+  const t = txt(str, size, color, '800');
+  t.x = 640; t.y = y; c.addChild(t);
+  return t;
+}
+
+// ── INTRO [0 – 16.43]: opona + titul ──
+scene(0, 16.43, () => {
+  const c = new PIXI.Container();
+  const stage = buildStage(c);
+  let th = null;
+  if (theatreTex) {
+    th = new PIXI.Sprite(theatreTex); th.anchor.set(0.5);
+    th.width = 300; th.height = 300 * theatreTex.height / theatreTex.width;
+    th.x = 1080; th.y = 480; th.alpha = 0; c.addChild(th);
+    const fg = new PIXI.Graphics();
+    fg.lineStyle(8, 0x6b4a26, 1); fg.drawRect(1080 - 156, 480 - th.height / 2 - 6, 312, th.height + 12);
+    fg.alpha = 0; c.addChild(fg); th._frame = fg;
+  }
+  const t1 = txt('GRAHAM', 110, 0xffffff, '900'); t1.x = 560; t1.y = 220; t1.alpha = 0;
+  const t2 = txt('SONG CONTEST', 56, C.pink, '900'); t2.x = 560; t2.y = 310; t2.alpha = 0;
+  const t3 = txt('α | β | γ — klasifikace rozvrhování 🪩', 28, C.goldHi, '800', MATH); t3.x = 560; t3.y = 380; t3.alpha = 0;
+  c.addChild(t1, t2, t3);
+  const fired = new Set();
+  return { c, update(lt) {
+    stage.render(lt, { ballY: lerp(-50, 120, easeOut(ph(lt, 2.0, 4.5))) });
+    t1.alpha = easeOut(ph(lt, 0.33, 1.2));
+    t1.scale.set(lerp(1.5, 1, easeOut(ph(lt, 0.33, 1.4))) * (1 + 0.02 * BEAT(lt)));
+    t2.alpha = easeOut(ph(lt, 4.0, 5.0));
+    t3.alpha = easeOut(ph(lt, 7.0, 8.0));
+    if (th) { th.alpha = easeOut(ph(lt, 9.5, 10.5)) * 0.9; th._frame.alpha = th.alpha; }
+    if (lt > 0.4 && !fired.has('a')) { fired.add('a'); SHAKE = 10; burst(560, 220, C.pink, 32, 320, 0.14); }
+  } };
+});
+
+// ── VERSE 1 [16.43 – 43.58]: α přehlídka strojů ──
+scene(16.43, 43.58, () => {
+  const c = new PIXI.Container();
+  const stage = buildStage(c);
+  const cap = caption(c, 'α — KATEGORIE STROJŮ: soutěžící na molo!');
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const cards = CONTEST.map((co, i) => {
+    const wrap = new PIXI.Container(); wrap.alpha = 0; c.addChild(wrap);
+    const s = txt(co.sym, 54, 0x0b0712, '900', MATH); wrap.addChild(s);
+    const sash = txt(co.sash, 16, 0xffffff, '800'); sash.y = 64; wrap.addChild(sash);
+    return { wrap, co };
+  });
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 16.43;
+    stage.render(lt, {});
+    g.clear();
+    // molo
+    g.beginFill(0x241a36, 1).drawPolygon([480, 600, 800, 600, 740, 380, 540, 380]).endFill();
+    g.lineStyle(3, C.pink, 0.5); g.moveTo(540, 380); g.lineTo(480, 600); g.moveTo(740, 380); g.lineTo(800, 600);
+    cards.forEach((cd, i) => {
+      const at = cd.co.at;
+      if (lt < at) { cd.wrap.alpha = 0; return; }
+      const k = lt - at;
+      cd.wrap.alpha = Math.min(1, k * 3) * (k > 9 ? Math.max(0, 1 - (k - 9) / 1.5) : 1);
+      // nástup ze zadu mola dopředu, pak úkrok do řady
+      const slot = 110 + i * 185;
+      if (k < 1.6) { cd.wrap.x = 640; cd.wrap.y = lerp(400, 520, easeOut(k / 1.6)); cd.wrap.scale.set(lerp(0.6, 1.15, easeOut(k / 1.6))); }
+      else { const p = easeOut(ph(k, 1.6, 2.6)); cd.wrap.x = lerp(640, slot, p); cd.wrap.y = lerp(520, 220, p); cd.wrap.scale.set(lerp(1.15, 0.85, p)); }
+      cd.wrap.rotation = 0.04 * Math.sin(lt * 3 + i);
+      // kartička pozadí
+      const w2 = cd.wrap;
+      g.lineStyle(3, 0x0b0712, w2.alpha);
+      g.beginFill(cd.co.col, 0.95 * w2.alpha);
+      g.drawRoundedRect(w2.x - 70 * w2.scale.x, w2.y - 45 * w2.scale.y, 140 * w2.scale.x, 105 * w2.scale.y, 12);
+      g.endFill();
+      if (!fired.has(i)) { fired.add(i); SHAKE = Math.max(SHAKE, 5); burst(640, 430, cd.co.col, 20, 230, 0.1); }
+    });
+    if (lt < 21.16) { cap.text = 'α — STROJE: „1“ = jediný stroj na pódiu'; cap.style.fill = C.cyan; }
+    else if (lt < 30.18) { cap.text = 'P = stejné paralelní · Q = uniformní (každý svou RYCHLOST)'; cap.style.fill = 0x4ade80; }
+    else if (lt < 36.54) { cap.text = 'R = unrelated: tabulka pᵢⱼ — každý stroj svůj svět'; cap.style.fill = C.pink; }
+    else { cap.text = 'shopy O/F/J a PS = projektové rozvrhování'; cap.style.fill = C.violet; }
+  } };
+});
+
+// ── CHORUS factory: podia + vyhazovač + tabule ──
+function chorusScene(t0, t1, an) {
+  scene(t0, t1, () => {
+    const c = new PIXI.Container();
+    const stage = buildStage(c);
+    const podia = buildPodia(c);
+    const cap = caption(c, '');
+    const g = new PIXI.Graphics(); c.addChild(g);
+    // vyhazovač u VIP
+    const dTil = txt('d̃ⱼ', 38, 0xffffff, '900', MATH); dTil.x = 1115; dTil.y = 250; dTil.alpha = 0; c.addChild(dTil);
+    const wall = txt('TVRDÁ ZEĎ ✋', 24, C.red, '900'); wall.x = 1115; wall.y = 300; wall.alpha = 0; c.addChild(wall);
+    const dSoft = txt('dⱼ', 38, 0xffffff, '900', MATH); dSoft.x = 1115; dSoft.y = 250; dSoft.alpha = 0; c.addChild(dSoft);
+    const fine = txt('jen pokuta: lateness 💸', 22, C.green, '900'); fine.x = 1115; fine.y = 300; fine.alpha = 0; c.addChild(fine);
+    // bodovací tabule
+    const score = txt('', 30, 0xffffff, '900', MATH); score.x = 165; score.y = 270; score.alpha = 0; c.addChild(score);
+    const fin = txt('', 32, C.goldHi, '900'); fin.x = 640; fin.y = 120; fin.alpha = 0; c.addChild(fin);
+    const fired = new Set();
+    return { c, update(lt0) {
+      const lt = lt0 + t0;
+      stage.render(lt, {});
+      podia.render(lt, [an.alfa, an.beta, an.gama]);
+      g.clear();
+      // VIP zóna vpravo
+      if (lt > an.vln) {
+        g.lineStyle(4, 0x6a7488, 1);
+        g.beginFill(0x141021, 0.9);
+        g.drawRoundedRect(1020, 200, 190, 150, 12);
+        g.endFill();
+        // vyhazovač silueta
+        g.lineStyle(0);
+        g.beginFill(0x070510, 1);
+        g.drawCircle(990, 250, 16);
+        g.drawRoundedRect(972, 268, 36, 60, 10);
+        g.endFill();
+      }
+      const hardPhase = lt > an.vln && lt < an.bez;
+      dTil.alpha = hardPhase ? 1 : 0;
+      wall.alpha = lt > an.zed && lt < an.bez ? (0.6 + 0.4 * Math.sin(lt * 8)) : 0;
+      dSoft.alpha = lt >= an.bez ? 1 : 0;
+      fine.alpha = lt > an.late ? 1 : 0;
+      if (lt > an.zed && !fired.has('z')) { fired.add('z'); SHAKE = 8; burst(1115, 300, C.red, 22, 240, 0.11); }
+      if (lt > an.late && !fired.has('f')) { fired.add('f'); burst(1115, 300, C.green, 18, 210, 0.1); }
+      // skóre γ
+      score.alpha = lt > an.cmax ? 1 : 0;
+      score.text = lt > an.suma ? 'C·max · L·max · ΣCⱼ' : (lt > an.lmax ? 'C·max · L·max' : 'C·max');
+      if (lt > an.cmax && !fired.has('s1')) { fired.add('s1'); burst(165, 270, C.gold, 14, 190, 0.09); }
+      if (lt > an.lmax && !fired.has('s2')) { fired.add('s2'); burst(165, 270, C.cyan, 14, 190, 0.09); }
+      if (lt > an.suma && !fired.has('s3')) { fired.add('s3'); burst(165, 270, C.pink, 14, 190, 0.09); }
+      // finále
+      fin.alpha = lt > an.schema ? 1 : 0;
+      fin.text = '⭐ α | β | γ — CELÉ SCHÉMA ZNEJ! ⭐';
+      fin.scale.set(lt > an.schema ? lerp(1.5, 1, easeOut(ph(lt, an.schema, an.schema + 0.5))) : 1);
+      if (lt > an.schema && !fired.has('fin')) { fired.add('fin'); SHAKE = 10; burst(640, 120, C.goldHi, 36, 320, 0.14); }
+      if (lt < an.vln) { cap.text = 'tři kategorie soutěže: α stroje · β úlohy · γ kritérium'; cap.style.fill = 0xffffff; }
+      else if (lt < an.bez) { cap.text = 'd̃ⱼ S VLNKOU = deadline — vyhazovač tě NEPUSTÍ'; cap.style.fill = C.red; }
+      else if (lt < an.cmax) { cap.text = 'dⱼ bez vlnky = due date — projdeš, jen zaplatíš lateness'; cap.style.fill = C.green; }
+      else { cap.text = 'γ na tabuli: C·max, L·max, ΣCⱼ'; cap.style.fill = C.goldHi; }
+    } };
+  });
+}
+chorusScene(43.58, 67.78, ANCH[0]);
+
+// ── VERSE 2 [67.78 – 98.66]: β šatna vlastností ──
+scene(67.78, 98.66, () => {
+  const c = new PIXI.Container();
+  const stage = buildStage(c);
+  const cap = caption(c, 'β — ŠATNA VLASTNOSTÍ ÚLOH');
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const tags = [
+    { at: 71.5, lbl: 'pmtn', sub: 'smíš přerušit ✂', col: C.cyan },
+    { at: 76.14, lbl: 'prec', sub: 'předchůdci (DAG)', col: C.violet },
+    { at: 78.13, lbl: 'temp', sub: 'sᵢ + lᵢⱼ ≤ sⱼ', col: C.pink },
+    { at: 84.22, lbl: 'rⱼ', sub: 'release — dřív nezačneš ⏰', col: C.green },
+    { at: 91.08, lbl: 'pⱼ = konst', sub: 'všechny stejně dlouhé', col: C.gold },
+  ];
+  const tagT = tags.map((tg, i) => {
+    const l = txt(tg.lbl, 30, 0x0b0712, '900', MATH); l.alpha = 0; c.addChild(l);
+    const s = txt(tg.sub, 15, 0xffffff, '700'); s.alpha = 0; c.addChild(s);
+    return { l, s };
+  });
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 67.78;
+    stage.render(lt, {});
+    g.clear();
+    // šatní tyč
+    g.lineStyle(8, 0x6a7488, 1);
+    g.moveTo(140, 180); g.lineTo(1140, 180);
+    g.lineStyle(5, 0x444c66, 1);
+    g.moveTo(140, 180); g.lineTo(140, 600); g.moveTo(1140, 180); g.lineTo(1140, 600);
+    tags.forEach((tg, i) => {
+      const on = lt > tg.at;
+      const p = easeOut(ph(lt, tg.at, tg.at + 0.5));
+      if (p <= 0) { tagT[i].l.alpha = 0; tagT[i].s.alpha = 0; return; }
+      const x = 230 + i * 205, y = 320 + 6 * Math.sin(lt * 2 + i);
+      // ramínko
+      g.lineStyle(3, 0x9fb0c8, p);
+      g.moveTo(x, 184); g.lineTo(x - 24, 218); g.moveTo(x, 184); g.lineTo(x + 24, 218);
+      g.drawCircle(x, 184, 5);
+      // visačka
+      g.lineStyle(3, 0x0b0712, p);
+      g.beginFill(tg.col, 0.95 * p);
+      g.drawRoundedRect(x - 88, 218, 176, lerp(0, 150, p), 12);
+      g.endFill();
+      tagT[i].l.alpha = p; tagT[i].l.x = x; tagT[i].l.y = y - 30;
+      tagT[i].s.alpha = p; tagT[i].s.x = x; tagT[i].s.y = y + 16;
+      if (on && !fired.has(i)) { fired.add(i); SHAKE = Math.max(SHAKE, 5); burst(x, 290, tg.col, 18, 210, 0.1); }
+    });
+    // pmtn gag: úloha rozstřižená vejpůl (od 73.96 „přerušit“)
+    if (lt > 73.96) {
+      const p = easeOut(ph(lt, 73.96, 74.6));
+      g.lineStyle(2, 0x0b0712, 1);
+      g.beginFill(C.cyan, 0.9);
+      g.drawRoundedRect(255 - 60 - p * 16, 470, 56, 26, 6);
+      g.drawRoundedRect(255 + 4 + p * 16, 470, 56, 26, 6);
+      g.endFill();
+      if (!fired.has('cut')) { fired.add('cut'); burst(255, 483, C.cyan, 16, 200, 0.09); }
+    }
+    // r_j gag: úloha čeká před čárou (od 88.1 „nezačne“)
+    if (lt > 88.10) {
+      g.lineStyle(4, C.green, 0.9);
+      g.moveTo(1045, 455); g.lineTo(1045, 510);
+      g.lineStyle(2, 0x0b0712, 1);
+      const wob = Math.min(0, -8 + 8 * Math.sin(lt * 6));
+      g.beginFill(C.green, 0.9).drawRoundedRect(960 + wob, 470, 56, 26, 6).endFill();
+    }
+    if (lt < 76.14) { cap.text = 'pmtn: práci smíš STŘIHNOUT a dokončit později'; cap.style.fill = C.cyan; }
+    else if (lt < 83.68) { cap.text = 'prec = pořadí předchůdců · temp = časové vazby sᵢ+lᵢⱼ≤sⱼ'; cap.style.fill = C.pink; }
+    else if (lt < 89.4) { cap.text = 'rⱼ = release time: před ním se prostě NEZAČNE'; cap.style.fill = C.green; }
+    else { cap.text = 'pⱼ = konst — všechno stejně dlouhé, hned je to snazší'; cap.style.fill = C.gold; }
+  } };
+});
+
+chorusScene(98.66, 121.62, ANCH[1]);
+
+// ── BRIDGE [121.62 – 148.18]: γ porota — kritéria ──
+scene(121.62, 148.18, () => {
+  const c = new PIXI.Container();
+  const stage = buildStage(c);
+  const cap = caption(c, 'γ — POROTA: co vlastně minimalizuješ?');
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const rows = [
+    { at: 123.5, lbl: 'C·max', sub: 'konec POSLEDNÍHO z nás (makespan)', col: C.gold },
+    { at: 128.85, lbl: 'L·max = max (Cⱼ − dⱼ)', sub: 'největší zpoždění dostane hlas', col: C.cyan },
+    { at: 135.90, lbl: 'Σ Cⱼ', sub: 'součet konců — průtok', col: C.green },
+    { at: 139.23, lbl: 'Σ wⱼ·Cⱼ', sub: 's vahami — VIP úlohy víc bolí', col: C.pink },
+    { at: 143.00, lbl: 'γ = ∅', sub: 'jen rozhodni: JDE / NEJDE', col: C.violet },
+  ];
+  const rowT = rows.map((r, i) => {
+    const l = txt(r.lbl, 28, 0xffffff, '900', MATH); l.alpha = 0; c.addChild(l);
+    const s = txt(r.sub, 16, 0xb9c2d4, '700'); s.alpha = 0; c.addChild(s);
+    return { l, s };
+  });
+  const ok = txt('OK ✓', 44, C.green, '900'); ok.x = 1090; ok.y = 560; ok.alpha = 0; c.addChild(ok);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 121.62;
+    stage.render(lt, { beams: [C.pink, C.pink, C.pink] });
+    g.clear();
+    rows.forEach((r, i) => {
+      const p = easeOut(ph(lt, r.at, r.at + 0.5));
+      if (p <= 0) { rowT[i].l.alpha = 0; rowT[i].s.alpha = 0; return; }
+      const y = 160 + i * 88;
+      g.lineStyle(3, 0x0b0712, p);
+      g.beginFill(0x141021, 0.93 * p);
+      g.drawRoundedRect(240, y - 32, 800, 70, 12);
+      g.endFill();
+      g.lineStyle(0);
+      g.beginFill(r.col, p).drawRoundedRect(240, y - 32, 14, 70, 6).endFill();
+      rowT[i].l.alpha = p; rowT[i].l.x = 520; rowT[i].l.y = y - 8;
+      rowT[i].s.alpha = p; rowT[i].s.x = 800; rowT[i].s.y = y + 18;
+      if (lt > r.at && !fired.has(i)) { fired.add(i); SHAKE = Math.max(SHAKE, 5); burst(640, y, r.col, 16, 200, 0.09); }
+    });
+    ok.alpha = lt > 147.57 ? 1 : 0;
+    ok.scale.set(lt > 147.57 ? lerp(1.7, 1, easeOut(ph(lt, 147.57, 147.95))) : 1);
+    if (lt > 147.6 && !fired.has('ok')) { fired.add('ok'); SHAKE = 8; burst(1090, 560, C.green, 24, 250, 0.11); }
+    if (lt < 128.66) { cap.text = 'C·max = makespan: kdy dorazí poslední úloha do cíle'; cap.style.fill = C.gold; }
+    else if (lt < 135.9) { cap.text = 'L·max: jak moc nejhorší opozdilec přetáhl due date'; cap.style.fill = C.cyan; }
+    else if (lt < 143.0) { cap.text = 'ΣCⱼ a Σwⱼ·Cⱼ — součty konců (s vahami i bez)'; cap.style.fill = C.green; }
+    else { cap.text = 'prázdné γ = rozhodovací problém — stačí ANO/NE'; cap.style.fill = C.violet; }
+  } };
+});
+
+chorusScene(148.18, 171.46, ANCH[2]);
+
+// ── OUTRO [171.46 – 179]: konfety ──
+scene(171.46, 179, () => {
+  const c = new PIXI.Container();
+  const stage = buildStage(c);
+  const podia = buildPodia(c);
+  const f1 = txt('α | β | γ — CELÉ SCHÉMA ZNÁŠ ⭐', 40, C.goldHi, '900', MATH); f1.x = 640; f1.y = 150; f1.alpha = 0; c.addChild(f1);
+  const f2 = txt('Graham notace: L5.1 · Hotovo — album komplet!', 20, C.muted, '700'); f2.x = 640; f2.y = 210; f2.alpha = 0; c.addChild(f2);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 171.46;
+    stage.render(lt, {});
+    podia.render(lt, [0, 0, 0]);
+    f1.alpha = easeOut(ph(lt, 172.0, 173.0));
+    f2.alpha = easeOut(ph(lt, 174.0, 175.0));
+    if (Math.random() < 0.3) burst(100 + Math.random() * 1080, -10, [C.gold, C.cyan, C.pink][Math.floor(Math.random() * 3)], 1, 30, 0.07);
+    if (lt > 172.1 && !fired.has('a')) { fired.add('a'); SHAKE = 8; burst(640, 150, C.goldHi, 36, 320, 0.14); }
+  } };
+});
+
+// ════════════════════════════════════════════════════════════════════
+// 5) TITULKY — řádky 1:1 jako sekce „Zpívej“ ve zpěvníku
+// ════════════════════════════════════════════════════════════════════
+const SUNG = [[0.33,2],[16.43,16.84],[16.84,17.05],[17.05,17.46],[17.46,18.35],[18.35,19.39],[19.39,19.62],[19.62,20.2],[20.2,21.16],[21.16,21.28],[21.28,21.78],[21.78,23.29],[23.29,24.42],[24.42,24.54],[24.54,26.07],[26.07,27.07],[27.07,27.69],[27.69,28.19],[28.19,29.2],[30.2,30.76],[30.76,31.2],[31.2,32.24],[32.24,33.32],[33.32,34.26],[34.26,34.96],[34.96,35.47],[35.47,35.97],[35.97,36.54],[36.54,37.7],[37.7,38.24],[38.24,38.97],[38.97,39.36],[39.36,39.94],[39.94,40.23],[40.23,40.66],[40.66,42.08],[42.08,43.06],[43.06,43.58],[43.58,46.14],[46.14,46.56],[46.56,47.46],[47.46,48.75],[48.75,49.6],[49.6,50.92],[50.92,51.84],[51.84,52.38],[52.38,52.8],[52.8,53.03],[53.03,53.96],[53.96,54.77],[54.77,55.36],[55.36,55.67],[55.67,56.18],[56.18,56.39],[56.39,56.49],[56.49,56.88],[56.88,57.84],[57.84,58.14],[58.14,59.2],[59.2,59.4],[59.4,60.42],[60.42,60.6],[60.6,61.61],[61.61,62.4],[62.4,62.6],[62.6,63.2],[63.2,63.74],[63.74,64.29],[64.29,65.07],[65.07,65.99],[65.99,67.28],[67.28,67.78],[67.78,68.41],[68.41,68.72],[68.72,69.34],[69.34,71.19],[71.19,71.69],[71.69,72.11],[72.11,72.57],[72.57,73.03],[73.03,73.96],[73.96,76.14],[76.14,76.77],[76.77,77.4],[77.4,78.13],[78.13,78.77],[78.77,79.08],[79.08,79.39],[79.39,80.03],[80.03,80.34],[80.34,80.65],[80.65,80.96],[80.96,81.28],[81.28,81.59],[81.59,81.9],[81.9,82.64],[82.64,83.68],[83.68,83.86],[83.86,84.22],[84.22,85.48],[85.48,86.22],[86.22,86.96],[86.96,87.21],[87.21,88.1],[88.1,89.4],[89.4,89.61],[89.61,90.07],[90.07,91.08],[91.08,92.98],[92.98,93.86],[93.86,94.63],[94.63,95.46],[95.46,96.64],[96.64,97.04],[97.04,97.3],[97.3,97.69],[97.69,98.66],[98.66,99.59],[99.59,100.53],[100.53,101.34],[101.34,102.61],[102.61,103.61],[103.61,104.74],[104.74,105.51],[105.51,105.98],[105.98,106.14],[106.14,106.45],[106.45,107.76],[107.76,108.6],[108.6,109.18],[109.18,109.48],[109.48,109.98],[109.98,110.18],[110.18,110.28],[110.28,110.64],[110.64,111.11],[111.11,111.58],[111.58,111.87],[111.87,112.9],[112.9,113.17],[113.17,114.29],[114.29,114.45],[114.45,115.34],[115.34,116.15],[116.15,116.35],[116.35,116.78],[116.78,117.29],[117.29,117.81],[117.81,118.71],[118.71,119.74],[119.74,121.18],[121.18,121.62],[121.62,123.44],[123.44,123.7],[123.7,125],[125,126.04],[126.04,126.65],[126.65,128],[128,128.12],[128.12,128.66],[128.66,128.85],[128.85,129.79],[129.79,131.11],[131.11,131.3],[131.3,132.05],[132.05,132.99],[132.99,133.18],[133.18,133.6],[133.6,134.66],[134.66,135.9],[135.9,137.5],[137.5,137.9],[137.9,138.72],[138.72,139.13],[139.13,139.23],[139.23,140.32],[140.32,141.01],[141.01,141.18],[141.18,141.56],[141.56,142],[142,142.88],[142.88,143],[143,144.13],[144.13,144.85],[144.85,145.13],[145.13,146.11],[146.11,146.42],[146.42,146.84],[146.84,147.57],[147.57,148.18],[148.18,149.24],[149.24,150.3],[150.3,151.36],[151.36,152.77],[152.77,154.18],[154.18,155.9],[155.9,156.55],[156.55,156.94],[156.94,157.07],[157.07,157.33],[157.33,158.64],[158.64,159.42],[159.42,160.26],[160.26,160.53],[160.53,160.98],[160.98,161.16],[161.16,161.25],[161.25,161.8],[161.8,162.57],[162.57,162.72],[162.72,163.52],[163.52,164.84],[164.84,166.16],[166.16,167.04],[167.04,167.26],[167.26,167.94],[167.94,168.54],[168.54,169.14],[169.14,169.74],[169.74,170.24],[170.24,170.94],[170.94,171.46],[171.46,173.18],[173.18,175.38],[175.38,176.6],[176.6,178.36]];
+const H = (cls, s) => `<span class="hl ${cls}">${s}</span>`;
+const CH1L = `Alfa, beta, gama! Stroje, úlohy, kritérium!`;
+const CH2L = `Vlnka nad ${H('c2', 'd')} je DEADLINE — tvrdá zeď!`;
+const CH3L = `Bez vlnky due date — lateness, no problem!`;
+const CH4L = `${H('c1', 'C<sub>max</sub>')}, ${H('c1', 'L<sub>max</sub>')}, suma ${H('c1', 'C<sub>j</sub>')} — alfa, beta, gama: celé schéma znej!`;
+const LINES = [
+  [0.33, 2.2, `Alfa!`],
+  [16.43, 21.16, `Alfa — to jsou stroje: jednička je jeden stroj,`],
+  [21.16, 30.18, `${H('c4', 'P')} jsou paralelní stejné, ${H('c2', 'Q')} uniformní — rychlost hraje roli svou.`],
+  [30.18, 36.54, `${H('c5', 'R')} jsou unrelated — tabulka časů, každý stroj svůj svět,`],
+  [36.54, 43.58, `${H('c3', 'O, F, J')} — open shop, flow shop, job shop — a ${H('c6', 'PS')}: projekty hned!`],
+  [43.58, 50.92, CH1L], [50.92, 55.36, CH2L], [55.36, 59.2, CH3L], [59.2, 67.78, CH4L],
+  [67.78, 76.14, `Beta — to jsou vlastnosti: ${H('c1', 'pmtn')} — smíš přerušit,`],
+  [76.14, 83.68, `${H('c3', 'prec')} — předchůdci, ${H('c5', 'temp')} — ${H('c5', 's<sub>i</sub> + l<sub>ij</sub> ≤ s<sub>j</sub>')} musíš ctít.`],
+  [83.68, 89.4, `${H('c4', 'r<sub>j</sub>')} je release time — dřív se prostě nezačne,`],
+  [89.4, 98.66, `${H('c2', 'p<sub>j</sub> = konst')} — všechno stejně dlouhé — vidíš, jak to jde snadně!`],
+  [98.66, 104.74, CH1L], [104.74, 109.18, CH2L], [109.18, 113.17, CH3L], [113.17, 121.62, CH4L],
+  [121.62, 128.66, `Gama: ${H('c1', 'C<sub>max</sub>')} — konec posledního z nás,`],
+  [128.66, 135.9, `${H('c1', 'L<sub>max</sub>')}: maximum ${H('c1', 'C<sub>j</sub> − d<sub>j</sub>')} — zpoždění hlas!`],
+  [135.9, 143.0, `Suma ${H('c4', 'C<sub>j</sub>')} — nebo s vahami suma ${H('c5', 'w<sub>j</sub>·C<sub>j</sub>')},`],
+  [143.0, 148.18, `a prázdné gama? Jen rozhodni: jde to / nejde — OK!`],
+  [148.18, 155.9, CH1L], [155.9, 159.9, CH2L], [159.9, 163.52, CH3L], [163.52, 171.46, CH4L],
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 6) PLAYER / KARAOKE + WORD BUS / CONTROLS
+// ════════════════════════════════════════════════════════════════════
+const player = document.getElementById('player');
+const subEl = document.getElementById('subtitle');
+const bigplay = document.getElementById('bigplay');
+const btnPlay = document.getElementById('btnPlay');
+const btnRestart = document.getElementById('btnRestart');
+const seek = document.getElementById('seek');
+const tCur = document.getElementById('tCur');
+const tDur = document.getElementById('tDur');
+
+let curScene = null, lastLocal = -1, curLine = -1, lastT = 0;
+let lineWords = [];
+function tokenize(html) {
+  const out = []; let cur = ''; let inTag = false;
+  for (const ch of html) {
+    if (ch === '<') inTag = true;
+    else if (ch === '>') inTag = false;
+    if (ch === ' ' && !inTag) { if (cur) out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+function isCapsToken(tok) {
+  const plain = tok.replace(/<[^>]*>/g, '');
+  const letters = plain.replace(/[^a-zA-ZáčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]/g, '');
+  return letters.length >= 2 && letters === letters.toUpperCase();
+}
+function buildKaraokeLine(li) {
+  const [a, b, html] = LINES[li];
+  const tokens = tokenize(html);
+  const ww = SUNG.filter(w => w[0] >= a - 0.06 && w[0] < b && w[1] > w[0]);
+  const pick = (i) => {
+    if (!ww.length) {
+      const step = (b - a) / tokens.length;
+      return [a + step * i, a + step * (i + 1)];
+    }
+    const wi = tokens.length === 1 ? 0 : Math.round(i * (ww.length - 1) / (tokens.length - 1));
+    return ww[wi];
+  };
+  subEl.innerHTML = tokens.map(tok =>
+    `<span class="kw"><span class="wb">${tok}</span><span class="wf">${tok}</span></span>`).join(' ');
+  const els = [...subEl.querySelectorAll('.kw')];
+  lineWords = tokens.map((tok, i) => {
+    const [t0, t1] = pick(i);
+    return { t0, t1: Math.max(t1, t0 + 0.12), wf: els[i] ? els[i].querySelector('.wf') : null, tok, caps: isCapsToken(tok) };
+  });
+}
+function tick() {
+  const t = player.currentTime;
+  const s = scenes.find(sc => t >= sc.t0 && t < sc.t1) || scenes[scenes.length - 1];
+  if (s !== curScene) { curScene && curScene.destroy(); curScene = s; s.init(); lastLocal = -1; }
+  const localT = t - s.t0;
+  if (localT < lastLocal - 0.05) { s.destroy(); s.init(); }
+  s.update(localT);
+  lastLocal = localT;
+  const li = LINES.findIndex(([a, b]) => t >= a && t < b);
+  if (li !== curLine) {
+    curLine = li;
+    if (li >= 0) buildKaraokeLine(li);
+    else { subEl.innerHTML = ''; lineWords = []; }
+    subEl.style.opacity = li >= 0 ? 1 : 0;
+  }
+  if (!player.paused && t > lastT && t - lastT < 0.5) {
+    for (const w of lineWords) {
+      if (w.t0 > lastT && w.t0 <= t) spawnGlit(w.tok, w.caps);
+    }
+  }
+  lastT = t;
+  for (let i = 0; i < lineWords.length; i++) {
+    const w = lineWords[i];
+    if (!w.wf) continue;
+    const nextStart = i + 1 < lineWords.length ? lineWords[i + 1].t0 : w.t1;
+    let p;
+    if (t >= Math.max(w.t1, nextStart)) p = 1;
+    else p = clamp01((t - w.t0) / (w.t1 - w.t0));
+    w.wf.style.width = (p * 100).toFixed(1) + '%';
+  }
+  if (!seekDragging) {
+    seek.value = t;
+    seek.style.setProperty('--p', (t / (player.duration || 178.4) * 100) + '%');
+  }
+  tCur.textContent = fmtTime(t);
+  requestAnimationFrame(tick);
+}
+function fmtTime(t) { t = Math.max(0, t || 0); return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`; }
+
+let seekDragging = false;
+seek.addEventListener('input', () => {
+  seekDragging = true;
+  player.currentTime = +seek.value;
+  seek.style.setProperty('--p', (+seek.value / (player.duration || 178.4) * 100) + '%');
+});
+seek.addEventListener('change', () => { seekDragging = false; });
+function togglePlay() { if (player.paused) player.play(); else player.pause(); }
+player.addEventListener('play', () => { btnPlay.textContent = '⏸'; bigplay.classList.add('hidden'); });
+player.addEventListener('pause', () => { btnPlay.textContent = '▶'; if (player.currentTime < 0.05 || player.ended) bigplay.classList.remove('hidden'); });
+player.addEventListener('ended', () => { bigplay.classList.remove('hidden'); bigplay.querySelector('.hint').innerHTML = 'Ještě jednou?<small>R = od začátku</small>'; });
+player.addEventListener('loadedmetadata', () => {
+  seek.max = player.duration;
+  tDur.textContent = fmtTime(player.duration);
+});
+btnPlay.addEventListener('click', togglePlay);
+btnRestart.addEventListener('click', () => { player.currentTime = 0; player.play(); });
+bigplay.addEventListener('click', () => { player.play(); });
+document.getElementById('stage').addEventListener('click', (e) => {
+  if (e.target.closest('#bigplay')) return;
+  togglePlay();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  else if (e.code === 'ArrowRight') player.currentTime = Math.min(player.duration || 178, player.currentTime + 5);
+  else if (e.code === 'ArrowLeft') player.currentTime = Math.max(0, player.currentTime - 5);
+  else if (e.key === 'r' || e.key === 'R' || e.code === 'Home') { player.currentTime = 0; player.play(); }
+});
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
