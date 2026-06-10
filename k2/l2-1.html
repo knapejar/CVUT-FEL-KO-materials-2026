@@ -92,7 +92,7 @@
     </ul>
   </div>
 
-  <p>Tohle je celá pointa názvu lekce: <strong>záporné váhy ano</strong> — dokud nevytvoří záporný cyklus, smí algoritmus klidně počítat se sledy a výsledek bude nejkratší cesta. <strong>Záporné cykly ne</strong> — s nimi se úloha mění z polynomiální na NP-těžkou. (Které algoritmy zvládnou záporné hrany a které ne, rozebereme u Dijkstry [L2.4] a Bellman-Forda <a href="l2-12.html">[L2.12]</a>; Bellman-Ford navíc umí záporný cyklus aspoň <em>detekovat</em>.)</p>
+  <p>Tohle je celá pointa názvu lekce: <strong>záporné váhy ano</strong> — dokud nevytvoří záporný cyklus, smí algoritmus klidně počítat se sledy a výsledek bude nejkratší cesta. <strong>Záporné cykly ne</strong> — s nimi se úloha mění z polynomiální na NP-těžkou. (Které algoritmy zvládnou záporné hrany a které ne, rozebereme u Dijkstry <a href="l2-4.html">[L2.4]</a> a Bellman-Forda <a href="l2-12.html">[L2.12]</a>; Bellman-Ford navíc umí záporný cyklus aspoň <em>detekovat</em>.)</p>
 
   <details class="try">
     <summary>Zkus sám (otázka přímo ze slidu 11): co naopak nesmí obsahovat graf, když nás zajímá <em>nejdelší</em> cesta?</summary>
@@ -136,7 +136,7 @@
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nezaměňuj „záporná hrana“ a „záporný cyklus“</div>
     <ul>
-      <li>V <strong>orientovaném</strong> grafu záporná hrana sama o sobě <em>nevadí</em> — úloha je v pořádku, dokud žádný cyklus nemá záporný součet. (Jen ne každý algoritmus ji zvládne — to rozlišíme u Dijkstry [L2.4] vs. Bellman-Forda <a href="l2-12.html">[L2.12]</a>.)</li>
+      <li>V <strong>orientovaném</strong> grafu záporná hrana sama o sobě <em>nevadí</em> — úloha je v pořádku, dokud žádný cyklus nemá záporný součet. (Jen ne každý algoritmus ji zvládne — to rozlišíme u Dijkstry <a href="l2-4.html">[L2.4]</a> vs. Bellman-Forda <a href="l2-12.html">[L2.12]</a>.)</li>
       <li>V <strong>neorientovaném</strong> grafu je každá záporná hrana po převodu rovnou záporný 2-cyklus — tam je „záporná hrana“ a „záporný cyklus“ totéž.</li>
       <li>„Nejkratší cesta neexistuje“ je u záporného cyklu <em>nepřesné</em>: neexistuje nejkratší <strong>sled</strong> ($\to -\infty$); nejkratší <strong>cesta</strong> existuje, ale je NP-těžké ji najít.</li>
     </ul>
