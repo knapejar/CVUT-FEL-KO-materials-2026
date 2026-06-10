@@ -302,6 +302,24 @@ summary::-webkit-details-marker { display: none; }
 [data-theme="dark"] img.ico { filter: invert(0.85); }
 .foto-badge img.ico { filter: invert(1); } /* bílá na fialovém badge v obou tématech */
 
+/* Gantt (KOViz.gantt) — bloky úloh a svislé značky */
+.viz svg .gblock rect { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.6; }
+.viz svg .gblock text { fill: var(--ink); font-size: 13px; font-weight: 600; }
+.viz svg .gblock.hl rect { fill: var(--accent); fill-opacity: .42; stroke: var(--accent); stroke-width: 2.4; }
+.viz svg .gblock.good rect { fill: var(--good-soft); stroke: var(--good); }
+.viz svg .gblock.bad rect { fill: var(--bad-soft); stroke: var(--bad); }
+.viz svg .gblock.p rect { fill: var(--purple-soft); stroke: var(--purple); }
+.viz svg .gblock.dim rect { fill: var(--bg-soft); stroke: var(--line); }
+.viz svg .gblock.dim text { fill: var(--ink-soft); }
+.viz svg .gblock.idle rect { fill: none; stroke: var(--line); stroke-dasharray: 4 4; }
+.viz svg .gblock.idle text { fill: var(--ink-soft); font-weight: 400; }
+.viz svg .gmark line { stroke: var(--bad); stroke-width: 1.6; }
+.viz svg .gmark text { fill: var(--bad); font-size: 12px; font-weight: 600; }
+.viz svg .gmark.soft line { stroke: var(--ink-soft); }
+.viz svg .gmark.soft text { fill: var(--ink-soft); }
+.viz svg .gmark.good line { stroke: var(--good); }
+.viz svg .gmark.good text { fill: var(--good); }
+
 /* mřížka LP regionu */
 .viz svg .grid line { stroke: var(--line); stroke-width: 1; }
 .viz svg .axis line, .viz svg .axis path { stroke: var(--ink-soft); stroke-width: 1.6; }

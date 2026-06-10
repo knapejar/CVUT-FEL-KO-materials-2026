@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L5.1 · Grahamova notace α|β|γ — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k5">K5 · Rozvrhování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L5.1</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L5.1</span> Kapitola K5 — Rozvrhování (Slot 5) · <strong>[MUST]</strong>
+  </p>
+  <h1>Grahamova notace α|β|γ</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Jak číst tři pole klasifikace rozvrhovacího problému $\alpha\,|\,\beta\,|\,\gamma$: <em>co mám</em> (prostředky) | <em>jaká platí pravidla</em> (vlastnosti úloh) | <em>co minimalizuji</em> (kritérium).
+  </div>
+
+  <p>Vstupujeme do kapitoly <strong>rozvrhování</strong> (scheduling) — slot 5 písemky, padá v každém termínu. Každé zkouškové zadání z rozvrhování začíná zápisem typu $P2 \,|\, \mathrm{pmtn}, \mathrm{prec} \,|\, C_{max}$ a po tobě se často výslovně chce <em>„Meaning of the notation“</em>. Tahle lekce nemá žádné prerekvizity a celá kapitola na ní stojí — proto jde první.</p>
+
+  <!-- ===== SEKCE 1: CO JE ROZVRHOVÁNÍ ===== -->
+  <h2>Co je rozvrhování (a jak vypadá výsledek)</h2>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Terminologie (slide 6, EN 1:1)</div>
+    <ul>
+      <li>set of $n$ tasks $\mathcal{T} = \{T_1, T_2, \ldots, T_n\}$</li>
+      <li>set of $m$ types of resources (processors, machines, employees,…) with capacities $R_k$</li>
+      <li><strong>“Scheduling is an assignment of a task to resources in time.”</strong></li>
+      <li>Each task must be <strong>completed</strong> (tím se rozvrhování liší od plánování, které teprve rozhoduje, <em>co</em> se vůbec zpracuje).</li>
+      <li>Množina úloh je známa předem — <strong>off-line scheduling</strong>.</li>
+      <li>“A result is a schedule which determines which task is run on which resource and when. Often depicted as a <strong>Gantt chart</strong>.”</li>
+    </ul>
+  </div>
+
+  <p>K tomu dvě <strong>obecná omezení</strong> (general constraints, slide 7), která platí vždy: každá úloha běží v daném okamžiku <strong>nejvýš na jednom prostředku</strong> (úloha je sekvenční) a každý prostředek zpracovává v daném okamžiku <strong>nejvýš jednu úlohu</strong>. Výsledný rozvrh (schedule) se kreslí jako <strong>Gantt chart</strong> (Ganttův diagram): řádek = prostředek, blok = běh úlohy v čase.</p>
+
+  <div class="viz" id="viz-gantt-first"></div>
+
+  <details class="try">
+    <summary>Zkus sám: přečti z diagramu — kdy a kde běží $T_3$? A v jakém čase je hotová <em>poslední</em> úloha?</summary>
+    <div class="inner">
+      <p>$T_3$ běží na procesoru $P^1$ v intervalu $[2,5]$. Poslední úlohy ($T_4$ na $P^1$ a $T_5$ na $P^2$) končí v čase $6$ — téhle hodnotě se říká <strong>makespan</strong> $C_{max}$, délka rozvrhu, a bude to nejčastější optimalizační kritérium celé kapitoly. Všimni si, že diagram dodržuje obě obecná omezení: v žádném sloupci (okamžiku) neběží na jednom řádku dvě úlohy a žádná úloha není na dvou řádcích zároveň.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: PARAMETRY A PROMĚNNÉ ===== -->
+  <h2>Slovník jedné úlohy: parametry vs. proměnné</h2>
+
+  <p>Než začneme problémy klasifikovat, potřebujeme slovník pro jednu úlohu $T_j$. Pozor na zásadní dělení (slide 8): <strong>parametry</strong> jsou dané vstupem, <strong>proměnné</strong> vznikají až rozvrhem (rozhodne o nich algoritmus).</p>
+
+  <table>
+    <tr><th></th><th>Symbol</th><th>EN název</th><th>Význam</th></tr>
+    <tr><td rowspan="4"><strong>parametry</strong><br>(vstup)</td><td>$r_j$</td><td><strong>release time</strong></td><td>okamžik uvolnění — dřív úloha začít nesmí</td></tr>
+    <tr><td>$p_j$</td><td><strong>processing time</strong></td><td>doba zpracování</td></tr>
+    <tr><td>$d_j$</td><td><strong>due date</strong></td><td>“time in which task $T_j$ <strong>should</strong> be completed” — <em>měla by</em> stihnout</td></tr>
+    <tr><td>$\tilde{d}_j$</td><td><strong>deadline</strong></td><td>“time in which task $T_j$ <strong>has to</strong> be completed” — <em>musí</em> stihnout</td></tr>
+    <tr><td rowspan="5"><strong>proměnné</strong><br>(výstup rozvrhu)</td><td>$s_j$</td><td><strong>start time</strong></td><td>kdy úloha začne</td></tr>
+    <tr><td>$C_j$</td><td><strong>completion time</strong></td><td>kdy úloha skončí</td></tr>
+    <tr><td>$F_j$</td><td><strong>flow (lead) time</strong></td><td>$F_j = C_j - r_j$ — jak dlouho je úloha „v systému“</td></tr>
+    <tr><td>$L_j$</td><td><strong>lateness</strong></td><td>$L_j = C_j - d_j$ — zpoždění vůči due date</td></tr>
+    <tr><td>$T_j$</td><td><strong>tardiness</strong></td><td>$T_j = \max\{C_j - d_j,\, 0\}$ — jen kladná část zpoždění</td></tr>
+  </table>
+
+  <div class="viz" id="viz-params"></div>
+
+  <details class="try">
+    <summary>Zkus sám: v diagramu výše je $r_j = 1$, $s_j = 2$, $p_j = 3$, $d_j = 6$, $\tilde{d}_j = 7$. Spočítej $C_j$, $F_j$, $L_j$ a $T_j$. Co je na výsledku $L_j$ zvláštního?</summary>
+    <div class="inner">
+      <p>$C_j = s_j + p_j = 5$ (úloha tu běží vcelku); $F_j = C_j - r_j = 4$; $L_j = C_j - d_j = 5 - 6 = \mathbf{-1}$; $T_j = \max\{-1, 0\} = 0$. <strong>Lateness může být záporná</strong> — úloha skončila dřív, než měla (earliness). Tardiness záporná být nemůže, zápornou část uřízne $\max$. Přesně to říká i poznámka ke slidu 27: <em>“$L_{\max}$ may have negative value. In such case, minimization of lateness $L_{\max}$ may be interpreted as maximization of <strong>earliness</strong>.”</em></p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „due date a deadline je totéž“</div>
+    <p>Není! <strong>Due date $d_j$</strong> = úloha by <em>měla</em> skončit do $d_j$ — překročení je povolené a trestá ho až kritérium ($L_{max}$, $\sum w_j T_j$…). <strong>Deadline $\tilde{d}_j$</strong> = úloha <em>musí</em> skončit do $\tilde{d}_j$ — překročení znamená nepřípustný rozvrh. Vlnka nad písmenem rozhoduje, jestli jde o měkké přání, nebo tvrdé omezení. Na písemce se obě značky potkávají vedle sebe (např. $1 \,|\, \mathrm{pmtn}, r_j, d_j = \tilde{d}_j \,|\, L_{\max}$ — due dates rovnou v roli deadlinů).</p>
+  </div>
+
+  <!-- ===== SEKCE 3: TŘI POLE ===== -->
+  <h2>Tři pole: $\alpha \,|\, \beta \,|\, \gamma$</h2>
+
+  <p>Rozvrhovacích problémů jsou stovky — liší se prostředky, pravidly i cílem. Graham pro ně zavedl třípolní klasifikaci (slide 9, EN 1:1): <em>“Classify scheduling problems by <strong>resources | tasks | criterion</strong>.”</em> Tedy:</p>
+
+  <p style="text-align:center; font-size: 19px;">$\underbrace{\alpha}_{\text{prostředky — co mám}} \;\Big|\; \underbrace{\beta}_{\text{vlastnosti úloh — jaká pravidla}} \;\Big|\; \underbrace{\gamma}_{\text{kritérium — co minimalizuji}}$</p>
+
+  <details class="try">
+    <summary>Zkus sám: rozlušti $P2 \,|\, \mathrm{pmtn} \,|\, C_{max}$ — dvě paralelní identická „pécéčka“, něco se smí přerušovat a $C_{max}$ už znáš z Ganttova diagramu. Co celý zápis říká?</summary>
+    <div class="inner">
+      <p>Slide 9 doslova: <em>“$P2 \,|\, \mathrm{pmtn} \,|\, C_{\max}$ represents scheduling on two parallel identical resources, and preemption is allowed. The optimization criterion is the completion time of the last task.”</em> Tedy: dva identické paralelní procesory ($\alpha$), preempce povolena ($\beta$), minimalizuj makespan ($\gamma$). Čte se to vždy zleva: <strong>co mám / jaká pravidla / co minimalizuji</strong>.</p>
+    </div>
+  </details>
+
+  <p>Teď jednotlivá pole podrobně — tabulky odpovídají slidům 10–12 a budou ti sloužit jako tahák po celou kapitolu.</p>
+
+  <h2>$\alpha$ — prostředky (resources)</h2>
+
+  <p>Pole $\alpha$ má dvě části: $\alpha_1$ = <em>typ</em> prostředků, $\alpha_2$ = <em>počet</em>. Typy se dělí do tří rodin (slide 9): <strong>parallel resources</strong> (úloha může běžet na kterémkoli prostředku — existuje jediný typ s kapacitou $R$), <strong>dedicated resources</strong> (úloha smí běžet jen na svém prostředku — $m$ typů s jednotkovou kapacitou) a <strong>Project Scheduling</strong> ($m$ typů, každý s kapacitou $R_k$ — nejobecnější).</p>
+
+  <table>
+    <tr><th>$\alpha_1$</th><th>Description (slide 10, EN 1:1)</th><th>česky</th></tr>
+    <tr><td>$1$</td><td>single resource</td><td>jediný prostředek</td></tr>
+    <tr><td>$P$</td><td><strong>parallel identical</strong> resources</td><td>paralelní identické</td></tr>
+    <tr><td>$Q$</td><td><strong>parallel uniform</strong> resources, computation time is inversely related to resource speed</td><td>paralelní uniformní (různě rychlé)</td></tr>
+    <tr><td>$R$</td><td><strong>parallel unrelated</strong> resources, computation times are given as a matrix (resources × tasks)</td><td>paralelní nezávislé (matice časů)</td></tr>
+    <tr><td>$O$</td><td>dedicated resources — <strong>open-shop</strong> — tasks are independent</td><td>dedikované, pořadí volné</td></tr>
+    <tr><td>$F$</td><td>dedicated resources — <strong>flow-shop</strong> — tasks are grouped in the sequences (jobs) in the same order, each job visits each machine once</td><td>dedikované, všechny joby stejné pořadí strojů</td></tr>
+    <tr><td>$J$</td><td>dedicated resources — <strong>job-shop</strong> — order of tasks in jobs is arbitrary, resource can be used several times in a job</td><td>dedikované, pořadí per job</td></tr>
+    <tr><td>$PS$</td><td><strong>Project Scheduling</strong> — most general (several resource types with capacities, general precedence constraints)</td><td>projektové rozvrhování</td></tr>
+  </table>
+
+  <p>$\alpha_2$: prázdné $\emptyset$ = <em>“arbitrary <strong>number</strong> of resources”</em> (počet je součástí instance), číslo = konkrétní počet (např. $2$), u Project Schedulingu $m, R$ = $m$ typů s kapacitami $R$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: jaký je rozdíl mezi $P$, $P2$ — a co znamená $PS1$, které potkáš na písemce v $PS1 \,|\, temp \,|\, C_{max}$?</summary>
+    <div class="inner">
+      <p>$P$ = identické paralelní procesory, jejichž <em>počet je libovolný / součást instance</em>; $P2$ = právě dva. A $PS1$? Theory appendix banky úloh doslova: <em>“project scheduling with one renewable resource of capacity one. In practice for these tasks, this means one resource plus temporal constraints.”</em> Tedy projektové rozvrhování s jediným zdrojem kapacity 1 — v daný okamžik běží nejvýš jedna úloha, ale navíc jsou ve hře temporální vazby (o nich [L5.2]).</p>
+    </div>
+  </details>
+
+  <h2>$\beta$ — vlastnosti úloh (tasks)</h2>
+
+  <p>Prostřední pole je seznam vlastností/omezení; slide 11 je čísluje $\beta_1, \ldots, \beta_8$. Nejdůležitější pro zkoušku:</p>
+
+  <table>
+    <tr><th>$\beta_i$</th><th>Value</th><th>Meaning (slide 11, EN 1:1)</th></tr>
+    <tr><td>$\beta_1$</td><td>$\mathrm{pmtn}$ / $\emptyset$</td><td><strong>preemption is allowed</strong> / preemption is not allowed</td></tr>
+    <tr><td>$\beta_2$</td><td>$\mathrm{prec}$; in-tree, out-tree; chain; tmpn; $\emptyset$</td><td><strong>precedence</strong> constraints; tree constraints; chain constraints; <strong>temporal</strong> constraints (for Project Sched.); independent tasks</td></tr>
+    <tr><td>$\beta_3$</td><td>$r_j$</td><td>release time</td></tr>
+    <tr><td>$\beta_4$</td><td>$p_j = k$; $p_L \le p_j \le p_U$; $\emptyset$</td><td>uniform processing time; restricted processing time; <strong>arbitrary processing time</strong></td></tr>
+    <tr><td>$\beta_5$</td><td>$\tilde{d}_j$, $d_j$</td><td>deadline, due-date</td></tr>
+    <tr><td>$\beta_6$–$\beta_8$</td><td>$n_j \le k$; no-wait; set-up</td><td>maximal number of tasks in a job; buffers of zero capacity; time for resource <strong>reconfiguration</strong></td></tr>
+  </table>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Dvojí pravopis temporálních omezení</div>
+    <p>Tabulka na slidu 11 píše <em>tmpn</em>, ale konkrétní problémy se v týchž slidech i na písemkách zapisují s <em>temp</em> — např. $PS1 \,|\, temp \,|\, C_{max}$ nebo lakovna $PSm,1 \,|\, \mathrm{temp}, o_{ij}, t_g \,|\, \sum w_j T_j$ ze slidu 4. Je to totéž: <strong>temporal constraints</strong> mezi starty úloh, $s_i + l_{ij} \le s_j$ (detailně v [L5.2]).</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám (klíčová otázka): co znamená, když je pole $\beta$ úplně <em>prázdné</em> — třeba v $P \,||\, C_{max}$?</summary>
+    <div class="inner">
+      <p>Prázdné $\beta$ <strong>není</strong> „žádná informace“ — každá vynechaná položka má svou výchozí hodnotu: preempce <em>zakázána</em> ($\beta_1 = \emptyset$), úlohy <em>nezávislé</em> (žádné precedence), všechny $r_j = 0$ (úlohy jsou v systému od začátku), doby zpracování <em>libovolné</em>, žádné deadliny ani due daty. Dvě svislítka $\|$ v $P \,||\, C_{max}$ tedy nejsou žádný speciální operátor „paralelně“ — jen prázdné prostřední pole.</p>
+    </div>
+  </details>
+
+  <p>Vlastnost $\mathrm{pmtn}$ (<strong>preemption</strong>, preempce = přerušitelnost) si zaslouží obrázek, protože mění i dosažitelné optimum. Slide 7: u nepreemptivního rozvrhování úloha nesmí být pozastavena a dokončena později; u preemptivního smí (počet přerušení musí být konečný). Mini-instance: $R = 2$ procesory, tři úlohy s $p_1 = p_2 = p_3 = 2$ <em>(vlastní ilustrační příklad)</em>:</p>
+
+  <div class="viz" id="viz-pmtn"></div>
+
+  <details class="try">
+    <summary>Zkus sám: proč bez preempce nejde na 2 procesorech stihnout tři dvojkové úlohy do času 3?</summary>
+    <div class="inner">
+      <p>Práce je celkem $2+2+2 = 6$ jednotek na 2 procesorech, takže $C_{max} \ge 6/2 = 3$. Jenže bez preempce běží každá úloha vcelku: do okna $[0,3]$ se na jeden procesor vejde jen jedna celá dvojková úloha a zbylá jednotka okna propadne — někdo musí mít dvě úlohy za sebou, tj. $C_{max} = 4$. S preempcí rozdělíš $T_3$ na dva jednotkové kusy a dolní mez $3$ se dosáhne. Systematicky tohle „nalévání“ úloh dělá McNaughtonův algoritmus — lekce [L5.4].</p>
+    </div>
+  </details>
+
+  <h2>$\gamma$ — kritérium (criterion)</h2>
+
+  <table>
+    <tr><th>$\gamma$</th><th>Description (slide 12, EN 1:1)</th></tr>
+    <tr><td>$C_{max}$</td><td>minimize schedule length $C_{max} = \max\{C_j\}$ (makespan, i.e. completion time of the last task)</td></tr>
+    <tr><td>$\sum C_j$</td><td>minimize the sum of completion times</td></tr>
+    <tr><td>$\sum w_j C_j$</td><td>minimize weighted completion time</td></tr>
+    <tr><td>$L_{max}$</td><td>minimize max. lateness $L_{max} = \max\{C_j - d_j\}$</td></tr>
+    <tr><td>$\emptyset$</td><td>decision problem</td></tr>
+  </table>
+
+  <details class="try">
+    <summary>Zkus sám: na zkoušce (2023) padl problém $P \,|\, \mathrm{pmtn}, r_j, \tilde{d}_j \,|$ — třetí pole úplně chybí. Co to znamená?</summary>
+    <div class="inner">
+      <p>Prázdné $\gamma$ = <strong>rozhodovací problém</strong> (decision problem): nic se neminimalizuje, ptáme se jen „<em>existuje</em> přípustný rozvrh?“ — tady: lze úlohy s release times a deadliny preemptivně stihnout na $R$ identických procesorech? Přesně tenhle feasibility problém budeme hned v příští lekci [L5.0] řešit převodem na maximální tok.</p>
+    </div>
+  </details>
+
+  <p>A kontrolní čtení celého zápisu — slide 12 doslova (EN 1:1):</p>
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">An Example (slide 12)</div>
+    <p>“$P \,||\, C_{\max}$ means: Scheduling on an arbitrary number of parallel identical resources, no preemption, independent tasks (no precedence), tasks arrive to the system at time 0, processing times are arbitrary, objective is to minimize the schedule length.”</p>
+    <p>Mimochodem — s $P2 \,||\, C_{max}$ ses už potkal: dělení bankovek na dvě hromádky v <a href="../k1/l1-1.html">[L1.1] Cílová funkce a základní omezení</a> je přesně tento problém.</p>
+  </div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: $L_{max}$ v $\gamma$ implikuje due daty, i když v $\beta$ nejsou</div>
+    <p>Poznámka ke slidu 27 (EN 1:1): <em>“minimization of $L_{\max}$ implies existence of due-date $d_j$ (even if it is not in $\beta$ notation)”</em>. Takže třeba $1 \,||\, L_{\max}$ <strong>má</strong> due daty na vstupu — schované v kritériu. Neexistující $d_j$ by dělalo $L_j = C_j - d_j$ nedefinované. Obecně: parametr může do hry vstoupit i přes $\gamma$, nejen přes $\beta$.</p>
+  </div>
+
+  <h2>Čtecí rutina na písemku</h2>
+
+  <p>U každého rozvrhovacího zadání proveď stejné tři kroky — nahlas, do řešení se to píše jako „meaning of the notation“:</p>
+  <ol>
+    <li><strong>$\alpha$ — co mám:</strong> kolik a jakých prostředků (1 stroj? $R$ identických? projektový zdroj s kapacitou?).</li>
+    <li><strong>$\beta$ — jaká pravidla:</strong> smím přerušovat? jsou precedence/temporální vazby? kdy úlohy přicházejí ($r_j$)? do kdy musí/měly by skončit ($\tilde{d}_j$/$d_j$)? Prázdné = defaulty.</li>
+    <li><strong>$\gamma$ — co minimalizuji:</strong> makespan, (vážené) součty dokončení, max. lateness… Prázdné = jen rozhodnutí o existenci rozvrhu.</li>
+  </ol>
+  <p>Kterým <em>algoritmem</em> se který problém řeší, je druhá půlka příběhu — tu poskládáme postupně a shrneme v referenční tabulce [L5.14]; v zadání zkoušky bývá metoda obvykle předepsaná.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.1</div>
+    <ul>
+      <li><strong>$\alpha\,|\,\beta\,|\,\gamma$ = resources | tasks | criterion.</strong> Čteš zleva: co mám / jaká pravidla / co minimalizuji.</li>
+      <li><strong>$\alpha$:</strong> $1$, $P$ (identické), $Q$ (uniformní), $R$ (unrelated), $O$/$F$/$J$ (dedikované shopy), $PS$ (project scheduling); číslo za písmenem = počet prostředků ($P2$, $PS1$ = 1 zdroj kapacity 1).</li>
+      <li><strong>$\beta$:</strong> $\mathrm{pmtn}$, $\mathrm{prec}$/in-tree/chain/$temp$ (≡ tmpn), $r_j$, $p_j = k$, $\tilde{d}_j$/$d_j$, no-wait, set-up. <strong>Prázdné $\beta$ = defaulty</strong>: bez preempce, nezávislé úlohy, $r_j = 0$, libovolná $p_j$.</li>
+      <li><strong>$\gamma$:</strong> $C_{max}$, $\sum C_j$, $\sum w_j C_j$, $L_{max}$; <strong>prázdné $\gamma$ = rozhodovací problém</strong> (feasibilita). $L_{max}$ implikuje existenci $d_j$, i když v $\beta$ nejsou.</li>
+      <li><strong>Parametry vs. proměnné:</strong> vstup $r_j$, $p_j$, $d_j$ (should), $\tilde{d}_j$ (has to); výstup rozvrhu $s_j$, $C_j$, $F_j = C_j - r_j$, $L_j = C_j - d_j$ (může být záporná), $T_j = \max\{L_j, 0\}$.</li>
+      <li><strong>Gantt chart</strong> = standardní zápis rozvrhu: řádek = prostředek, blok = úloha; u preemptivního rozvrhu se táž úloha smí objevit ve více blocích.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-meaning">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Meaning of the notation — zkouškové notace</strong>
+      <span class="task-src">zdroj: task bank #35 (zkouška 02.06.2021) a #40 (zkouška 02.06.2021 / 1.6.2026); notace P|pmtn,rj,d̃j| ze zkoušky 2023</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; instrukce vlastní — notace 1:1 ze zkouškových zadání)</span>
+        <p>Explain the meaning of the notation of the following scheduling problems (one short paragraph each):</p>
+        <p>(i) $PS1 \mid temp \mid C_{\max}$ &nbsp;&nbsp; (ii) $P2 \mid pmtn, prec \mid C_{\max}$ &nbsp;&nbsp; (iii) $P \mid pmtn, r_j, \tilde{d}_j \mid$</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Tři reálné zkouškové notace (první dvě jsou přesně problémy z písemek 2.6.2021 — Muntz&amp;Coffman byl znovu doložen 1.6.2026; třetí je feasibility problém ze zkoušky 2023, který řeší příští lekce). U rozvrhovacích úloh banka řešení vždy začíná odstavcem „Meaning of the notation“ — tohle je trénink přesně toho odstavce.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — tabulky $\alpha$/$\beta$/$\gamma$ a čtecí rutina.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Jdi pole po poli zleva: identifikuj prostředky (vč. počtu a kapacity), vyjmenuj <em>všechny</em> vlastnosti z $\beta$ (a u prázdných polí řekni defaulty — hlavně preempci!), nakonec kritérium. U (iii) si všimni, že třetí pole je prázdné. U (i) nezapomeň, že ve slovníku této lekce $PS1$ implikuje i nepreemptivnost (v $\beta$ není $\mathrm{pmtn}$) a kapacitu 1.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> — odstavec banky úloh (EN 1:1): “The notation $PS1 \mid temp \mid C_{\max}$ denotes a project-scheduling problem on one resource. The tasks are non-preemptive, so once a task starts, it runs continuously for its processing time. The resource has capacity one, so at most one task can be processed at any time. The symbol $temp$ means temporal constraints between task start times. The objective $C_{\max}$ is the makespan, i.e. the completion time of the last task.”</p>
+          <p><strong>(ii)</strong> — odstavec banky úloh (EN 1:1): “The notation $P2 \mid pmtn, prec \mid C_{\max}$ describes scheduling on two identical parallel processors. The abbreviation $pmtn$ means that preemption is allowed, so a task may be interrupted and later resumed. The abbreviation $prec$ means that the precedence constraints in the graph must be respected. The objective $C_{\max}$ is the makespan, i.e. the completion time of the last task.”</p>
+          <p><strong>(iii)</strong> <em>(řešení vlastní podle tabulek této lekce)</em>: $P$ = identické paralelní procesory, počet $R$ je součástí instance; $pmtn$ = preempce povolena; $r_j$ = úlohy mají release times (úloha $T_j$ nesmí začít před $r_j$); $\tilde{d}_j$ = úlohy mají tvrdé deadliny (musí skončit nejpozději v $\tilde{d}_j$). Třetí pole je prázdné — jde o <strong>rozhodovací problém</strong>: existuje přípustný preemptivní rozvrh, který všechna časová okna $\langle r_j, \tilde{d}_j\rangle$ stihne? (Řeší se převodem na max flow — příští lekce [L5.0].)</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-zapis">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Od slovního popisu k notaci (a zpět)</strong>
+      <span class="task-src">zdroj: slide 9 + slide 12 (07_Sched) a theory appendix banky úloh — popisy EN 1:1; obrácené zadání vlastní</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; popisy 1:1 ze zdrojů, pokyn vlastní)</span>
+        <p>Write down the Graham notation $\alpha \mid \beta \mid \gamma$ of each problem described below:</p>
+        <p>(i) “Scheduling on an arbitrary number of parallel identical resources, no preemption, independent tasks (no precedence), tasks arrive to the system at time 0, processing times are arbitrary, objective is to minimize the schedule length.”</p>
+        <p>(ii) “scheduling on two parallel identical resources, and preemption is allowed. The optimization criterion is the completion time of the last task.”</p>
+        <p>(iii) “one machine, release times and deadlines, minimize makespan”</p>
+        <p>(iv) “one machine, preemption, release times, deadlines/due dates, minimize maximum lateness”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Obrácený směr než T01: ze slovního popisu sestavit zápis. Popisy (i)–(ii) jsou doslovné věty ze slidů 12 a 9; (iii)–(iv) jsou doslovné položky „What it means“ z tabulky volby metody v theory appendixu banky — všechny čtyři problémy v kapitole K5 potkáš jako samostatné lekce.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — tabulky $\alpha$/$\beta$/$\gamma$, defaulty prázdných polí a rozdíl $d_j$ vs. $\tilde{d}_j$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Z popisu vytahej postupně: typ + počet prostředků → $\alpha$; každou zmíněnou vlastnost (preempce? release times? deadliny — tvrdé, nebo měkké?) → $\beta$; cíl → $\gamma$. Vlastnosti, o kterých popis říká, že jsou „výchozí“ (no preemption, arrive at time 0…), do $\beta$ <em>nepiš</em> — právě tím vznikne prázdné pole.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> $P \,||\, C_{max}$ — vše v popisu kromě „parallel identical“ a „minimize schedule length“ jsou defaulty, takže $\beta$ zůstane prázdné (slide 12).</p>
+          <p><strong>(ii)</strong> $P2 \,|\, \mathrm{pmtn} \,|\, C_{max}$ — dva procesory → $P2$; „completion time of the last task“ = $C_{max}$ (slide 9).</p>
+          <p><strong>(iii)</strong> $1 \,|\, r_j, \tilde{d}_j \,|\, C_{max}$ — „deadlines“ jsou tvrdé → vlnka $\tilde{d}_j$; jeden stroj → $1$. (V K5 ho řeší Bratleyho B&amp;B / position-based ILP — [L5.9].)</p>
+          <p><strong>(iv)</strong> $1 \,|\, \mathrm{pmtn}, r_j, d_j = \tilde{d}_j \,|\, L_{\max}$ — „deadlines/due dates“ v jedné roli zapisuje appendix i slide 27 jako $d_j = \tilde{d}_j$; kritérium max. lateness. (Hornův algoritmus / EDF — [L5.7].) Uznatelná je i volnější odpověď $1 \,|\, \mathrm{pmtn}, r_j \,|\, L_{\max}$, pokud due daty bereš jen přes kritérium — vzpomeň: $L_{max}$ existenci $d_j$ implikuje.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L5.1">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k4/l4-15.html"><span class="dir">← Předchozí</span> L4.15 · Multikomoditní tok (ILP) [NICE]</a>
+    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.0 · Rozvrhování přes toky (P|pmtn,rj,dj|) [FOTO])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — První Gantt chart: dvouprocesorový příklad z theory appendixu banky úloh (EN bloky 1:1)
+KOViz.gantt(document.getElementById('viz-gantt-first'), {
+  tmax: 7, tstep: 1,
+  rows: [{id:'P1', label:'P¹'}, {id:'P2', label:'P²'}],
+  blocks: [
+    {row:'P1', from:0, to:2, label:'T₁'},
+    {row:'P1', from:2, to:5, label:'T₃', cls:'good'},
+    {row:'P1', from:5, to:6, label:'T₄', cls:'p'},
+    {row:'P2', from:0, to:3, label:'T₂', cls:'hl'},
+    {row:'P2', from:3, to:6, label:'T₅', cls:'bad'},
+  ],
+  marks: [{t:6, label:'Cmax = 6'}],
+  caption: 'Gantt chart rozvrhu z theory appendixu banky úloh: P¹ běží [0,2]:T₁, [2,5]:T₃, [5,6]:T₄; P² běží [0,3]:T₂, [3,6]:T₅. Řádek = procesor, blok = úloha v čase.',
+});
+
+// 2 — Parametry a proměnné jedné úlohy T_j na časové ose (hodnoty dle slidu 8, čísla ilustrační)
+KOViz.gantt(document.getElementById('viz-params'), {
+  tmax: 8, tstep: 1,
+  rows: [{id:'P1', label:'P¹'}],
+  blocks: [
+    {row:'P1', from:2, to:5, label:'Tⱼ (pⱼ = 3)'},
+  ],
+  marks: [
+    {t:1, label:'rⱼ', cls:'soft'},
+    {t:2, label:'sⱼ', cls:'good'},
+    {t:5, label:'Cⱼ', cls:'good'},
+    {t:6, label:'dⱼ', cls:'soft'},
+    {t:7, label:'d̃ⱼ'},
+  ],
+  caption: 'Časová osa úlohy Tⱼ (slide 8): parametry rⱼ (release), dⱼ (due date — „should“), d̃ⱼ (deadline — „has to“); proměnné sⱼ (start) a Cⱼ (completion). Tady Fⱼ = Cⱼ − rⱼ = 4 a Lⱼ = Cⱼ − dⱼ = −1 (záporná = earliness).',
+});
+
+// 3 — Co dělá pmtn s optimem: 3 úlohy p=2 na 2 procesorech (vlastní mini-instance)
+KOViz.gantt(document.getElementById('viz-pmtn'), {
+  tmax: 4, tstep: 1,
+  rows: [{id:'P1', label:'P¹'}, {id:'P2', label:'P²'}],
+  blocks: [],
+  frames: [
+    {desc:'β = ∅ (bez preempce): každá úloha běží vcelku. Nejlépe Cmax = 4 — na P² zbude díra, kterou nemá kdo zaplnit.',
+     blocks: [
+       {row:'P1', from:0, to:2, label:'T₁'},
+       {row:'P1', from:2, to:4, label:'T₃', cls:'p'},
+       {row:'P2', from:0, to:2, label:'T₂', cls:'good'},
+       {row:'P2', from:2, to:4, label:'idle', cls:'idle'},
+     ],
+     marks: [{t:4, label:'Cmax = 4'}]},
+    {desc:'β = pmtn: T₃ smíme přerušit a dokončit jinde/později — dva bloky [0,1] na P² a [2,3] na P¹ se nepřekrývají (úloha běží vždy nejvýš na jednom prostředku). Cmax = 3 = (2+2+2)/2 — dolní mez dosažena.',
+     blocks: [
+       {row:'P1', from:0, to:2, label:'T₁'},
+       {row:'P1', from:2, to:3, label:'T₃', cls:'p'},
+       {row:'P2', from:0, to:1, label:'T₃', cls:'p'},
+       {row:'P2', from:1, to:3, label:'T₂', cls:'good'},
+     ],
+     marks: [{t:3, label:'Cmax = 3', cls:'good'}]},
+  ],
+  caption: 'Tatáž instance (3 úlohy s pⱼ = 2, R = 2 — vlastní ilustrační příklad), jediný rozdíl v poli β: preempce zlepší makespan ze 4 na 3.',
+});
+</script>
+</body>
+</html>

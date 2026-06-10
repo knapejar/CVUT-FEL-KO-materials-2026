@@ -5,6 +5,7 @@
      KOViz.lpRegion(el, spec)  — 2D přípustná oblast LP/ILP s mřížkou celočíselných bodů
      KOViz.fnPlot(el, spec)    — graf funkce po úsecích (nespojité / po částech lineární fce)
      KOViz.stepper(el, spec)   — krokovaná vizualizace (frames přepínají stavy grafu)
+     KOViz.gantt(el, spec)     — Ganttův diagram rozvrhu (řádek = procesor, blok = úloha)
      KOViz.icon(name)          — vrátí <img> ikonu z assets/icons
    Všechny barvy jdou přes CSS třídy (viz style.css), takže fungují v obou tématech.
    ============================================================ */
@@ -467,5 +468,138 @@
     return b;
   }
 
-  window.KOViz = { graph, lpRegion, fnPlot, stepper, icon };
+  /* ---------- GANTT ----------
+     Ganttův diagram rozvrhu (řádek = procesor/zdroj, blok = běh úlohy v čase).
+     spec = {
+       w               : šířka viewBoxu (default 640); výška se dopočítá z počtu řádků
+       t0, tmax        : rozsah časové osy (t0 default 0)
+       tstep           : krok mřížky a popisků osy (default 1)
+       rows: [{id, label?}]                       — řádky shora dolů (např. P¹, P²)
+       blocks: [{row, from, to, label?, cls?}]    — bloky úloh; cls: hl/good/bad/dim/p/idle
+       marks: [{t, label?, cls?}]                 — svislé čárkované značky (r_j, d_j, C_max…);
+                                                    cls "soft" = nenápadná šedá
+       rowH            : výška řádku (default 48)
+       frames: [{desc, blocks?, marks?}]          — volitelné krokování; každý frame je
+                         ABSOLUTNÍ stav (kompletní seznam bloků/značek, ne diff);
+                         bez frames se kreslí staticky spec.blocks/spec.marks
+       caption
+     }
+     Vrací {svg, setState(blocks, marks), goto(n)}  */
+  function gantt(el, spec) {
+    const W = spec.w || 640;
+    const rows = spec.rows || [];
+    const rowH = spec.rowH || 48;
+    const padL = 58, padR = 20, padT = 26, padB = 36;
+    const H = padT + rows.length * rowH + padB;
+    const t0 = spec.t0 || 0, tmax = spec.tmax;
+    const tstep = spec.tstep || 1;
+    const X = t => padL + (t - t0) * (W - padL - padR) / (tmax - t0);
+    const rowIdx = {};
+    rows.forEach((r, i) => (rowIdx[r.id] = i));
+
+    el.classList.add("viz");
+    const svg = svgEl("svg", { viewBox: `0 0 ${W} ${H}`, class: "viz-canvas", role: "img" });
+
+    // mřížka časové osy + vodorovné oddělovače řádků
+    const grid = svgEl("g", { class: "grid" });
+    for (let t = t0; t <= tmax + 1e-9; t += tstep)
+      grid.appendChild(svgEl("line", { x1: X(t), y1: padT, x2: X(t), y2: padT + rows.length * rowH }));
+    for (let i = 0; i <= rows.length; i++)
+      grid.appendChild(svgEl("line", { x1: X(t0), y1: padT + i * rowH, x2: X(tmax), y2: padT + i * rowH }));
+    svg.appendChild(grid);
+
+    // popisky řádků + časová osa
+    const gAx = svgEl("g", { class: "axis" });
+    rows.forEach((r, i) => {
+      const t = svgEl("text", { x: padL - 9, y: padT + i * rowH + rowH / 2 + 4, "text-anchor": "end", "font-size": "13.5" });
+      t.textContent = r.label !== undefined ? r.label : r.id;
+      gAx.appendChild(t);
+    });
+    gAx.appendChild(svgEl("line", { x1: X(t0), y1: padT + rows.length * rowH, x2: X(tmax) + 7, y2: padT + rows.length * rowH }));
+    for (let t = t0; t <= tmax + 1e-9; t += tstep) {
+      const tt = svgEl("text", { x: X(t), y: padT + rows.length * rowH + 17, "text-anchor": "middle" });
+      tt.textContent = Math.round(t * 1e6) / 1e6;
+      gAx.appendChild(tt);
+    }
+    const xl = svgEl("text", { x: X(tmax) + 10, y: padT + rows.length * rowH + 17 });
+    xl.textContent = spec.tlabel || "t";
+    gAx.appendChild(xl);
+    svg.appendChild(gAx);
+
+    const gBlocks = svgEl("g", {}), gMarks = svgEl("g", {});
+    svg.appendChild(gBlocks); svg.appendChild(gMarks);
+
+    function setState(blocks, marks) {
+      while (gBlocks.firstChild) gBlocks.removeChild(gBlocks.firstChild);
+      while (gMarks.firstChild) gMarks.removeChild(gMarks.firstChild);
+      (blocks || []).forEach(b => {
+        const i = rowIdx[b.row];
+        if (i === undefined) { console.warn("KOViz.gantt: neznámý řádek bloku", b); return; }
+        const g = svgEl("g", { class: "gblock" + (b.cls ? " " + b.cls : "") });
+        const x = X(b.from), wdt = X(b.to) - X(b.from);
+        g.appendChild(svgEl("rect", { x: x, y: padT + i * rowH + 8, width: wdt, height: rowH - 16, rx: 6 }));
+        if (b.label) {
+          const t = svgEl("text", { x: x + wdt / 2, y: padT + i * rowH + rowH / 2 + 4.5, "text-anchor": "middle" });
+          t.textContent = b.label;
+          g.appendChild(t);
+        }
+        gBlocks.appendChild(g);
+      });
+      (marks || []).forEach(m => {
+        const g = svgEl("g", { class: "gmark" + (m.cls ? " " + m.cls : "") });
+        const ln = svgEl("line", { x1: X(m.t), y1: padT - 4, x2: X(m.t), y2: padT + rows.length * rowH + 4 });
+        ln.setAttribute("stroke-dasharray", "4 4");
+        g.appendChild(ln);
+        if (m.label) {
+          const t = svgEl("text", { x: X(m.t), y: padT - 9, "text-anchor": "middle" });
+          t.textContent = m.label;
+          g.appendChild(t);
+        }
+        gMarks.appendChild(g);
+      });
+    }
+    setState(spec.blocks, spec.marks);
+    el.appendChild(svg);
+
+    // volitelné krokování (stejné ovládání jako stepper; frames = ABSOLUTNÍ stavy)
+    let gotoFn = null;
+    if (spec.frames && spec.frames.length) {
+      const ctrls = document.createElement("div");
+      ctrls.className = "viz-controls";
+      const btnReset = vbtn("rotate-ccw", "Začátek");
+      const btnPrev = vbtn("skip-back", "Krok zpět");
+      const btnNext = vbtn("skip-forward", "Další krok");
+      const state = document.createElement("span");
+      state.className = "vstate";
+      ctrls.appendChild(btnReset); ctrls.appendChild(btnPrev); ctrls.appendChild(btnNext); ctrls.appendChild(state);
+      el.appendChild(ctrls);
+      const desc = document.createElement("div");
+      desc.className = "viz-caption";
+      el.appendChild(desc);
+      const frames = spec.frames;
+      let i = 0;
+      const apply = () => {
+        const f = frames[i] || {};
+        setState(f.blocks !== undefined ? f.blocks : spec.blocks,
+                 f.marks !== undefined ? f.marks : spec.marks);
+        desc.innerHTML = "<strong>Krok " + (i + 1) + "/" + frames.length + ":</strong> " + (f.desc || "");
+        state.textContent = (i + 1) + " / " + frames.length;
+        btnPrev.disabled = i === 0; btnNext.disabled = i === frames.length - 1;
+      };
+      btnNext.onclick = () => { if (i < frames.length - 1) { i++; apply(); } };
+      btnPrev.onclick = () => { if (i > 0) { i--; apply(); } };
+      btnReset.onclick = () => { i = 0; apply(); };
+      apply();
+      gotoFn = n => { i = Math.max(0, Math.min(frames.length - 1, n)); apply(); };
+    }
+
+    if (spec.caption) {
+      const c = document.createElement("div");
+      c.className = "viz-caption"; c.innerHTML = spec.caption;
+      el.appendChild(c);
+    }
+    return { svg, setState, goto: gotoFn };
+  }
+
+  window.KOViz = { graph, lpRegion, fnPlot, stepper, gantt, icon };
 })();

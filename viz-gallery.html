@@ -46,6 +46,12 @@
   <h2>5 · Stepper (krokování algoritmu)</h2>
   <div class="viz" id="g5"></div>
 
+  <h2>5b · Gantt (statický rozvrh, KOViz.gantt)</h2>
+  <div class="viz" id="g5b"></div>
+
+  <h2>5c · Gantt s krokováním (frames = absolutní stavy) a značkami</h2>
+  <div class="viz" id="g5c"></div>
+
   <h2>6 · Matematika + boxy</h2>
   <p>Inline $\sum_{i=1}^n c_i x_i \le B$ a display:</p>
   $$\min \; C_{max} \quad \text{s.t.} \quad s_i + p_i \le s_j \;\; \forall (i,j) \in E$$
@@ -199,6 +205,48 @@ KOViz.stepper(document.getElementById('g5'), {
     {desc:'Uzavřu <b>a</b> (3), relaxace zlepší t: 3+1=4 &lt; 7.', nodes:{s:'good', b:'good', a:'good'}, edges:{'a->t':'good'}, subs:{s:'l=0', a:'l=3', b:'l=1', t:'l=4'}},
     {desc:'Uzavřu <b>t</b> — hotovo. Nejkratší cesta s→b→a→t, délka 4.', nodes:{s:'good', b:'good', a:'good', t:'good'}, edges:{'s->b':'good','b->a':'good','a->t':'good'}, subs:{s:'l=0', a:'l=3', b:'l=1', t:'l=4'}},
   ],
+});
+
+// 5b — statický Gantt (příklad z theory appendixu banky úloh: 2 procesory, 5 úloh)
+KOViz.gantt(document.getElementById('g5b'), {
+  tmax: 7, tstep: 1,
+  rows: [{id:'P1', label:'P¹'}, {id:'P2', label:'P²'}],
+  blocks: [
+    {row:'P1', from:0, to:2, label:'T₁'},
+    {row:'P1', from:2, to:5, label:'T₃', cls:'good'},
+    {row:'P1', from:5, to:6, label:'T₄', cls:'p'},
+    {row:'P2', from:0, to:3, label:'T₂', cls:'hl'},
+    {row:'P2', from:3, to:6, label:'T₅', cls:'bad'},
+    {row:'P2', from:6, to:7, label:'idle', cls:'idle'},
+  ],
+  marks: [{t:6, label:'Cmax = 6'}],
+  caption: 'Ukázka 5b: KOViz.gantt — řádek = procesor, blok = běh úlohy; třídy (default)/hl/good/bad/p/dim/idle, svislá značka přes marks.',
+});
+
+// 5c — Gantt s frames (krokování) — preempce: stejná úloha ve více blocích
+KOViz.gantt(document.getElementById('g5c'), {
+  tmax: 4, tstep: 1,
+  rows: [{id:'P1', label:'P¹'}, {id:'P2', label:'P²'}],
+  blocks: [],
+  frames: [
+    {desc:'Bez preempce: T₃ musí běžet vcelku → Cmax = 4.',
+     blocks: [
+       {row:'P1', from:0, to:2, label:'T₁'},
+       {row:'P1', from:2, to:4, label:'T₃', cls:'p'},
+       {row:'P2', from:0, to:2, label:'T₂', cls:'good'},
+       {row:'P2', from:2, to:4, label:'idle', cls:'idle'},
+     ],
+     marks: [{t:4, label:'Cmax = 4'}]},
+    {desc:'S preempcí (pmtn): T₃ rozdělena na dva bloky → Cmax = 3.',
+     blocks: [
+       {row:'P1', from:0, to:2, label:'T₁'},
+       {row:'P1', from:2, to:3, label:'T₃', cls:'p'},
+       {row:'P2', from:0, to:1, label:'T₃', cls:'p'},
+       {row:'P2', from:1, to:3, label:'T₂', cls:'good'},
+     ],
+     marks: [{t:3, label:'Cmax = 3', cls:'good'}]},
+  ],
+  caption: 'Ukázka 5c: KOViz.gantt s frames — každý frame je ABSOLUTNÍ stav (kompletní blocks/marks), ovládání jako u stepperu.',
 });
 </script>
 </body>
