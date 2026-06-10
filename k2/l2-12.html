@@ -52,7 +52,7 @@
     <summary>Zkus sám: kolikrát stačí všechny hrany projít? Nápověda: vzpomeň na řetízek z úlohy <a href="l2-3.html#t-order">[L2.3] T01</a> — informace teče od startu po hranách.</summary>
     <div class="inner">
       <p>V řetízku $1 \to 2 \to 3 \to 4$ s nejhorším pořadím hran posunul každý průchod „frontu poznání“ o jedinou hranu. To je obecný princip: po $k$-tém průchodu jsou určitě správně značky všech vrcholů, do nichž vede nejkratší cesta s <strong>nejvýše $k$ hranami</strong> (každý průchod prodlouží zvládnutý úsek každé nejkratší cesty aspoň o jednu hranu — může i o víc, podle pořadí).</p>
-      <p>A protože cesta v grafu s $n$ vrcholy má nejvýše $n-1$ hran <a href="l2-2.html#takeaways">[L2.2]</a>, stačí <strong>$n-1$ průchodů</strong>. <em>(Tohle je intuice; poctivý indukční důkaz — „věta o $k$-té iteraci“ — patří do kapitoly K3. Je to téma ústní zkoušky, žebříček důkazů #4.)</em></p>
+      <p>A protože cesta v grafu s $n$ vrcholy má nejvýše $n-1$ hran <a href="l2-2.html#takeaways">[L2.2]</a>, stačí <strong>$n-1$ průchodů</strong>. <em>(Tohle je intuice; poctivý indukční důkaz — „věta o $k$-té iteraci“ — patří do <a href="../k3/l3-7.html">[L3.7] Korektnost Bellman-Forda</a>. Je to téma ústní zkoušky, žebříček důkazů #4.)</em></p>
     </div>
   </details>
 
@@ -139,7 +139,7 @@ end</code></pre>
     </tbody>
   </table>
 
-  <p>Důkaz korektnosti (věta o $k$-té iteraci a její indukce, slidy 31–33) do téhle lekce schválně nepatří — probereme ho v kapitole K3; u ústní zkoušky je to častý „dokažte“ kandidát (žebříček důkazů #4).</p>
+  <p>Důkaz korektnosti (věta o $k$-té iteraci a její indukce, slidy 31–33) do téhle lekce schválně nepatří — probereme ho v <a href="../k3/l3-7.html">[L3.7] Korektnost Bellman-Forda</a>; u ústní zkoušky je to častý „dokažte“ kandidát (žebříček důkazů #4).</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: čtyři polopravdy kolem Bellman-Forda</div>
@@ -158,7 +158,7 @@ end</code></pre>
       <li><strong>Bellman-Ford = relaxuj <a href="l2-3.html#takeaways">[L2.3]</a> všechny hrany $(n-1)$-krát.</strong> Žádné uzavírání → zvládá záporné hrany (záporný cyklus zůstává zakázán <a href="l2-1.html#takeaways">[L2.1]</a>). Po $k$ průchodech jsou správně nejkratší cesty s $\le k$ hranami; průchod beze změny = fixpoint, lze skončit dřív.</li>
       <li><strong>Detekce záporného cyklu:</strong> pokud v $n$-tém (kontrolním) průchodu jde ještě nějaká hrana relaxovat, graf obsahuje záporný cyklus dosažitelný z $s$. Cykly nedosažitelné z $s$: přidej $s'$ s hranami $c(s',v) = 0$ do všech vrcholů.</li>
       <li><strong>Label-correcting</strong> (všechny značky dočasné až do konce), složitost $\mathcal{O}(nm)$ — nejlepší známý algoritmus pro SPT se zápornými hranami; lepší metody existují jen pro samotnou detekci cyklů [Cherkassky&amp;Goldberg 1999].</li>
-      <li>Důkaz korektnosti (věta o $k$-té iteraci) → kapitola K3. <em>Téma ústní; žebříček důkazů #4.</em></li>
+      <li>Důkaz korektnosti (věta o $k$-té iteraci) → <a href="../k3/l3-7.html">[L3.7]</a>. <em>Téma ústní; žebříček důkazů #4.</em></li>
     </ul>
   </div>
 

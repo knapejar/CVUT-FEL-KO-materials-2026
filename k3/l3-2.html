@@ -145,7 +145,7 @@
     <ul>
       <li><strong>„Nezápornost se použije všude, tak ji stačí někde zmínit.“</strong> NE — v důkazu má přesně dvě adresy: $\mathrm{dist}(s)=0$ v bázi a hlavně $|P[s,y]| \le |P|$ (zbytek cesty neumí délku snížit). U zkoušky ji VYZNAČ přesně tam; bez ní celý spor nefunguje a existuje protipříklad výše.</li>
       <li><strong>„Invariant platí pro všechny značky.“</strong> NE — jen pro vrcholy <em>v $R$</em>. Značky na hranici jsou pracovní odhady a smí ještě klesat <a href="../k2/l2-4.html#takeaways">[L2.4]</a>; důkaz s tím počítá (nerovnost $D(y) \le \dots$ klesáním jen zesílí).</li>
-      <li><strong>„Záporná hrana vadí relaxaci.“</strong> NE — samotná relaxace záporné váhy nevadí <a href="../k2/l2-3.html#takeaways">[L2.3]</a>; padá <em>strategie pořadí</em> „nejmenší značka = hotovo“. Proto se zápornými hranami (bez záporných cyklů) funguje label-correcting Bellman-Ford <a href="../k2/l2-12.html#takeaways">[L2.12]</a>, jehož důkaz korektnosti čeká v [L3.7].</li>
+      <li><strong>„Záporná hrana vadí relaxaci.“</strong> NE — samotná relaxace záporné váhy nevadí <a href="../k2/l2-3.html#takeaways">[L2.3]</a>; padá <em>strategie pořadí</em> „nejmenší značka = hotovo“. Proto se zápornými hranami (bez záporných cyklů) funguje label-correcting Bellman-Ford <a href="../k2/l2-12.html#takeaways">[L2.12]</a>, jehož důkaz korektnosti čeká v <a href="l3-7.html">[L3.7]</a>.</li>
     </ul>
   </div>
 
@@ -165,7 +165,7 @@
     </div>
   </details>
 
-  <p>Indukční kostru „invariant + rostoucí množina / počet iterací“ si zapamatuj — stejné schéma použijeme u korektnosti Bellman-Forda [L3.7], jen invariant poběží přes počet průchodů („po $k$ průchodech je $l(w)$ nejvýš délka nejkratšího sledu o $\le k$ hranách“).</p>
+  <p>Indukční kostru „invariant + rostoucí množina / počet iterací“ si zapamatuj — stejné schéma použijeme u korektnosti Bellman-Forda <a href="l3-7.html">[L3.7]</a>, jen invariant poběží přes počet průchodů („po $k$ průchodech je $l(w)$ nejvýš délka nejkratšího sledu o $\le k$ hranách“).</p>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
   <div class="box takeaways" id="takeaways">
@@ -175,7 +175,7 @@
       <li><strong>Krok sporem:</strong> kratší cesta $P$ do uzavíraného $v$ by musela poprvé opustit $R$ ve vrcholu $y$; relaxace hrany $(x,y)$ při uzavírání $x \in R$ dává $D(y) \le |P[s,y]| \le |P| &lt; D(v)$ — spor s volbou $v$ jako minima mimo $R$.</li>
       <li><strong>Nezápornost hran</strong> je potřeba přesně v $|P[s,y]| \le |P|$ (zbytek cesty nemůže délku snížit). Záporná hrana argument zboří — protipříklad $s,a,b$ s hranou $-2$ <a href="../k2/l2-4.html#takeaways">[L2.4]</a>.</li>
       <li>Ekvivalentní podání ze slidů: pro $v$ platí Bellmanova rovnice <a href="../k2/l2-2.html#takeaways">[L2.2]</a> — předchůdci $k \in R$ pokryti relaxacemi $E^+(R)$, předchůdci $k \notin R$ nepomohou ($l(v) \le l(k)$, $c \ge 0$).</li>
-      <li>Stejné indukční schéma (invariant přes rostoucí množinu / počet iterací) znovu použijeme u Bellman-Forda [L3.7].</li>
+      <li>Stejné indukční schéma (invariant přes rostoucí množinu / počet iterací) znovu použijeme u Bellman-Forda <a href="l3-7.html">[L3.7]</a>.</li>
     </ul>
   </div>
 

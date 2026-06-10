@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L3.7 · Korektnost Bellman-Forda — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k3">K3 · Důkaz / teorie</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L3.7</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L3.7</span> Kapitola K3 — Důkaz / teorie (Slot 3) · <strong>[MUST]</strong> · ŽEBŘÍČEK #4 · téma ústní
+  </p>
+  <h1>Korektnost Bellman-Forda</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Věta o $k$-té iteraci</strong>: po $k$ průchodech vnější smyčky platí $l^k(w) \le c(E(P^k))$, kde $P^k$ je nejkratší $s$–$w$ cesta s <em>nejvýše $k$ hranami</em> — indukcí přes $k$. Z ní pak plyne korektnost po $n-1$ iteracích i detekce záporného cyklu.
+  </div>
+
+  <p><strong>Běh</strong> Bellman-Forda i mechaniku detekce záporného cyklu už umíš z <a href="../k2/l2-12.html#takeaways">[L2.12] Bellman-Fordův algoritmus + detekce záporného cyklu (běh)</a> a nebudeme je vykládat znovu: relaxuj <a href="../k2/l2-3.html#takeaways">[L2.3]</a> všechny hrany $(n-1)$-krát, žádné uzavírání. Dnes splatíme dluh, který tam zůstal viset jako „intuice“: <strong>PROČ</strong> stačí $n-1$ průchodů a proč relaxovatelná hrana v $n$-tém průchodu dokazuje záporný cyklus. Je to žebříček důkazů #4 a explicitní téma ústní zkoušky („Bellman-Ford + záporný cyklus“).</p>
+
+  <!-- ===== SEKCE 1: JAKÝ INVARIANT ===== -->
+  <h2>Jaký invariant zvolit</h2>
+
+  <p>U Dijkstry <a href="l3-2.html#takeaways">[L3.2]</a> jsme korektnost dokázali invariantem přes rostoucí množinu uzavřených vrcholů $R$: „kdo je v $R$, má značku správně“.</p>
+
+  <details class="try">
+    <summary>Zkus sám: Bellman-Ford žádnou množinu $R$ nemá — nic neuzavírá, všechny značky jsou dočasné až do konce. Přes co tedy povedeme indukci a jak by mohl znít invariant?</summary>
+    <div class="inner">
+      <p>Jediné, co u Bellman-Forda monotónně roste, je <strong>počet dokončených průchodů</strong> (iterací vnější smyčky). Indukce tedy poběží <strong>přes počet iterací $k$</strong> — stejná kostra „invariant přes něco rostoucího“ jako u Dijkstry, jen místo množiny $R$ čítač průchodů.</p>
+      <p>A invariant? V <a href="../k2/l2-12.html#takeaways">[L2.12]</a> jsme si intuici už řekli: po $k$ průchodech jsou „zvládnuté“ nejkratší cesty s nejvýše $k$ hranami — každý průchod prodlouží zvládnutý úsek každé nejkratší cesty aspoň o jednu hranu. Dnes to zpřesníme na větu, která se dá poctivě dokázat.</p>
+    </div>
+  </details>
+
+  <p>Domluvme značení přesně podle slidu 31 (EN 1:1):</p>
+
+  <div class="box">
+    <div class="box-title">Theorem: $k$-th iteration of Bellman-Ford algorithm (slide 31, 1:1)</div>
+    <p>Let</p>
+    <ul>
+      <li>$l^k(w)$ is the $l(w)$ label after $k$ iterations of the external loop</li>
+      <li>$P^k$ is the shortest $s$-$w$-path with at most $k$ edges and let $e = (v, w)$ be the last edge of this path</li>
+      <li>$c(E(P^k))$ is the length of path $P^k$</li>
+    </ul>
+    <p>Then $l^k(w) \le c(E(P^k))$.</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: proč věta tvrdí jen nerovnost $\le$, a ne rovnost? (Vzpomeň na řetízek z úlohy <a href="../k2/l2-3.html#t-order">[L2.3] T01</a> — co udělá <em>šťastné</em> pořadí hran v jediném průchodu?)</summary>
+    <div class="inner">
+      <p>Protože značka může být „napřed“. Slide 31 to říká přímo (EN 1:1): <em>„the $l^k(w) \le c(E(P^k))$ is inequality, since the $l^k(w)$ is the length of the path which might go over more than $k$ edges (see example with four nodes in the chain), but the $P^k$ path is defined to have at most $k$ edges.“</em></p>
+      <p>Konkrétně: v řetízku $1 \to 2 \to 3 \to 4$ s nejlepším pořadím hran (zleva doprava) doteče informace už v <strong>prvním</strong> průchodu až do vrcholu $4$ — značka $l^1(4)$ pak odpovídá cestě se <em>třemi</em> hranami, zatímco $P^1$ smí mít hranu jedinou (a tady ani neexistuje, takže $c(E(P^1)) = \infty$). Uvidíš to na stepperu níže.</p>
+      <p><em>(Poznámka navíc, slidy ji nechávají mlčky: pokud žádná $s$–$w$ cesta s $\le k$ hranami neexistuje, čteme $c(E(P^k)) = \infty$ a nerovnost platí triviálně.)</em></p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: DŮKAZ INDUKCÍ ===== -->
+  <h2>Důkaz věty indukcí přes $k$</h2>
+
+  <details class="try">
+    <summary>Zkus sám: báze $k = 1$. Co víš o značce $l^1(w)$ po prvním průchodu — a co je vlastně $P^1$?</summary>
+    <div class="inner">
+      <p>$P^1$ je nejkratší $s$–$w$ cesta s nejvýše jednou hranou, tedy samotná hrana $(s,w)$ (existuje-li). V prvním průchodu vnitřní smyčka otestuje <em>každou</em> hranu grafu, tedy i $(s,w)$ — a protože $l(s) = 0$ od inicializace (a bez záporného cyklu už se nezlepší), po testu platí $l^1(w) \le l(s) + c(s,w) = c(s,w)$. Slide 32: <em>„For $k = 1$ it holds, because $l^1(w) \le c(s,w)$.“</em> Báze hotova.</p>
+    </div>
+  </details>
+
+  <p><strong>Indukční krok.</strong> Nechť věta platí po $k-1$ iteracích a vezmi libovolný vrchol $w$ s cestou $P^k$; označ $e = (v,w)$ její poslední hranu. Rozlož si tvrzení na tři stavební kameny — každý si zkus nejdřív sám:</p>
+
+  <details class="try">
+    <summary>Zkus sám (kámen 1 — BPO): co víš o úseku cesty $P^k$ od $s$ do $v$? Kolik má hran a může existovat lepší?</summary>
+    <div class="inner">
+      <p>Prefix $P^k[s,v]$ má <strong>nejvýše $k-1$ hran</strong> (poslední hranu $(v,w)$ jsme odřízli). A podle <strong>Bellmanova principu optimality</strong> <a href="../k2/l2-2.html#takeaways">[L2.2]</a> je to <em>nejkratší</em> taková cesta: kdyby existovala kratší $s$–$v$ cesta s $\le k-1$ hranami, vyměníme ji za prefix a dostaneme kratší $s$–$w$ cestu s $\le k$ hranami — spor s optimalitou $P^k$. Prefix je tedy přesně cesta $P^{k-1}[s,v]$ ze značení věty a platí</p>
+      $$c(E(P^{k-1}[s,v])) + c(v,w) = c(E(P^k)).$$
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám (kámen 2 — IH): co o vrcholu $v$ říká indukční předpoklad?</summary>
+    <div class="inner">
+      <p>Indukční předpoklad aplikovaný na $v$ (a jeho nejkratší cestu s $\le k-1$ hranami): po $k-1$ iteracích</p>
+      $$l^{k-1}(v) \le c(E(P^{k-1}[s,v])).$$
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám (kámen 3 — ALG): proč po $k$-té iteraci platí $l^k(w) \le l^{k-1}(v) + c(v,w)$? (Co přesně udělá vnitřní smyčka s hranou $(v,w)$ — a nevadí, že se $l(v)$ může během průchodu změnit?)</summary>
+    <div class="inner">
+      <p>V $k$-té iteraci vnější smyčky projde vnitřní smyčka <em>všechny</em> hrany, tedy v nějakém okamžiku otestuje i $(v,w)$. V tom okamžiku je značka $v$ nejvýše $l^{k-1}(v)$ — značky <strong>nikdy nerostou</strong> <a href="../k2/l2-3.html#takeaways">[L2.3]</a>, jen klesají. Po testu (ať relaxace proběhla, nebo už platilo lepší) je $l(w) \le l(v) + c(v,w) \le l^{k-1}(v) + c(v,w)$ — a do konce průchodu může $l(w)$ už jen dál klesnout. Čerstvější (menší) hodnota $l(v)$ z téhož průchodu nerovnost jedině zesílí.</p>
+    </div>
+  </details>
+
+  <p>Složením tří kamenů vznikne řetízek ze slidu 32 (1:1):</p>
+  $$l^k(w) \overset{ALG}{\le} l^{k-1}(v) + c(v,w) \overset{IH}{\le} c(E(P^{k-1}[s,v])) + c(v,w) \overset{BPO}{=} c(E(P^k)). \qquad \blacksquare$$
+
+  <p>Celý indukční krok si přehraj na schématu (podle obrázku slidu 32):</p>
+
+  <div class="viz" id="viz-proof"></div>
+
+  <div class="box">
+    <div class="box-title">Tentýž důkaz jednou větou (re-worded proof, slide 33, 1:1)</div>
+    <p><em>„While assuming $^{IH}$ that we had $l^k(v)$ better than or equal to the shortest $s$-$v$-path with at most $k - 1$ edges in iteration $k - 1$, in iteration $k$ of the algorithm $^{ALG}$ we will create $l^k(w)$ better than or equal to the shortest $s$-$w$-path with at most $k$ edges since the shortest path consists of the shortest paths $^{BPO}$.“</em></p>
+  </div>
+
+  <!-- ===== SEKCE 3: Z VĚTY KE KOREKTNOSTI ===== -->
+  <h2>Z věty ke korektnosti: $k = n-1$</h2>
+
+  <p>Věta dává jen horní odhad $\le$. Korektnost ale chce <em>rovnost</em>: po skončení má být $l(w)$ přesně délka nejkratší cesty.</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč po $k = n-1$ iteracích platí i obrácená nerovnost $l^k(w) \ge c(E(P^k))$? (Dvě otázky: čím je hodnota $l(w)$ v každém okamžiku běhu? A co je $P^{n-1}$ zač?)</summary>
+    <div class="inner">
+      <p><strong>① Co je $P^{n-1}$:</strong> každá cesta v grafu s $n$ vrcholy má nejvýše $n-1$ hran <a href="../k2/l2-2.html#takeaways">[L2.2]</a>, takže omezení „nejvýše $n-1$ hran“ už nic neomezuje — $P^{n-1}$ je <strong>nejkratší $s$–$w$ cesta vůbec</strong>, $c(E(P^{n-1})) = \mathrm{dist}(w)$.</p>
+      <p><strong>② Čím je $l(w)$:</strong> každá konečná značka vznikla řetězem relaxací, takže $l(w)$ je v každém okamžiku délka <strong>skutečného existujícího sledu</strong> $s \to \cdots \to w$ (rekonstruuješ ho couváním po vektoru $p$ <a href="../k2/l2-3.html#takeaways">[L2.3]</a>). A protože graf <strong>nemá záporný cyklus</strong>, žádný sled není kratší než nejkratší cesta <a href="../k2/l2-1.html#takeaways">[L2.1]</a>. Tedy $l^{n-1}(w) \ge \mathrm{dist}(w) = c(E(P^{n-1}))$.</p>
+      <p>Slide 33 totéž říká úsporně (EN 1:1): <em>„because no path has more than $n - 1$ edges and no path is shorter than the shortest one.“</em></p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Correctness of the Bellman-Ford algorithm (slide 33, 1:1)</div>
+    <p>In iteration $k = n - 1$ we will obtain $l^k(w) = c(E(P^k))$</p>
+    <ul>
+      <li>because the above theorem implies $l^k(w) \le c(E(P^k))$</li>
+      <li>and $l^k(w) \ge c(E(P^k))$ because no path has more than $n - 1$ edges and no path is shorter than the shortest one.</li>
+    </ul>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: u Dijkstry měla nezápornost hran v důkazu „dvě přesné adresy“ <a href="l3-2.html#takeaways">[L3.2]</a>. Kde přesně v dnešním důkazu pracuje předpoklad „graf bez záporného cyklu“?</summary>
+    <div class="inner">
+      <p>Také na dvou adresách:</p>
+      <ul>
+        <li><strong>V BPO</strong> — výměnný argument Bellmanova principu potřebuje, aby šlo podcesty vyměňovat bez zacyklení do $-\infty$; přesně tam jsme předpoklad potřebovali už při jeho důkazu (<a href="../k2/l2-2.html#t-principle-proof">[L2.2] T01</a>, případ 2).</li>
+        <li><strong>V závěrečném $\ge$</strong> — „žádný sled není kratší než nejkratší cesta“ <a href="../k2/l2-1.html#takeaways">[L2.1]</a>. Se záporným cyklem by sled mohl obíhat a podlézt jakoukoli cestu; rovnost při $k = n-1$ by padla (a právě toho si všimne detekce níže).</li>
+      </ul>
+      <p>Naopak <strong>nezápornost jednotlivých hran nikde potřeba není</strong> — proto Bellman-Ford záporné hrany zvládá, zatímco Dijkstra ne.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 4: INVARIANT V AKCI ===== -->
+  <h2>Invariant v akci: řetízek ze slidu 30</h2>
+
+  <p>Propočítej si větu na nejmenší rozumné instanci — řetízku $1 \to 2 \to 3 \to 4$ s váhami $-2, 1, 2$ ze slidu 30 (znáš ho z <a href="../k2/l2-3.html#t-order">[L2.3] T01</a>). V každém framu porovnej značky $l^k$ s hodnotami $c(E(P^k))$:</p>
+
+  <div class="viz" id="viz-chain"></div>
+
+  <!-- ===== SEKCE 5: DETEKCE JAKO DŮSLEDEK ===== -->
+  <h2>Detekce záporného cyklu jako důsledek věty</h2>
+
+  <p>Mechaniku detekce znáš z <a href="../k2/l2-12.html#takeaways">[L2.12]</a>: po $n-1$ průchodech přidej $n$-tý kontrolní a pokud nějaká hrana ještě relaxuje, ohlaš záporný cyklus. Teď to umíme <em>zdůvodnit</em> — a to je přesně část, na kterou se ptá ústní.</p>
+
+  <details class="try">
+    <summary>Zkus sám: předpokládej, že graf záporný cyklus NEMÁ. Proč pak v $n$-tém průchodu nemůže relaxovat žádná hrana? (Použij právě dokázanou korektnost.)</summary>
+    <div class="inner">
+      <p>Bez záporného cyklu je po $n-1$ průchodech $l(w) = \mathrm{dist}(w)$ pro všechny vrcholy (právě dokázáno). Skutečné nejkratší vzdálenosti ale splňují <strong>trojúhelníkovou nerovnost</strong>: pro každou hranu $(v,t)$ je</p>
+      $$\mathrm{dist}(t) \le \mathrm{dist}(v) + c(v,t),$$
+      <p>protože nejkratší cesta do $v$ prodloužená o hranu $(v,t)$ je sled do $t$ — a žádný sled není pod $\mathrm{dist}(t)$ <a href="../k2/l2-1.html#takeaways">[L2.1]</a>. Test $l(t) &gt; l(v) + c(v,t)$ tedy nikde nevystřelí.</p>
+      <p><strong>Kontrapozice:</strong> vystřelí-li test na nějaké hraně, korektnost neplatí — a jediný předpoklad, který jsme mohli porušit, je „graph without a negative cycle“. Graf tedy záporný cyklus obsahuje (dosažitelný z $s$). Slide 34 (1:1): <em>„The Bellman-Ford algorithm can detect negative cycle that is reachable from vertex $s$ while checking triangular inequality for resulting $l$.“</em> Pro cykly nedosažitelné z $s$ přidej $s'$ s hranami $c(s',v) = 0$ — proč to žádný nový cyklus nevytvoří, sis rozmyslel v <a href="../k2/l2-12.html#takeaways">[L2.12]</a>.</p>
+    </div>
+  </details>
+
+  <p>Tahle detekce není jen zkouškové cvičení: v kapitole K4 na ní stojí cycle canceling pro minimum cost flow [L4.11] — záporný cyklus v reziduálním grafu se hledá právě Bellman-Fordem (cvičení cv09).</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy u tohoto důkazu</div>
+    <ul>
+      <li><strong>„Věta o $k$-té iteraci dává rovnost.“</strong> NE — jen $\le$. Při šťastném pořadí hran je značka „napřed“ (odpovídá cestě s více než $k$ hranami) a nerovnost je ostrá; rovnost nastává až při $k = n-1$, a to díky <em>druhé</em>, samostatně dokazované nerovnosti $\ge$.</li>
+      <li><strong>„$P^k$ je cesta s přesně $k$ hranami.“</strong> NE — s <em>nejvýše</em> $k$ hranami. S „přesně“ by indukční krok nefungoval (nejkratší cesta do $w$ může mít hran méně) a $c(E(P^k))$ by ani nemuselo klesat s $k$.</li>
+      <li><strong>„Bellman-Ford potřebuje nezáporné hrany jako Dijkstra.“</strong> NE — důkaz nezápornost hran nikde nepoužil; potřebuje jen <em>absenci záporného cyklu</em>, a to na dvou přesných adresách: BPO <a href="../k2/l2-2.html#takeaways">[L2.2]</a> a „sled $\ge$ nejkratší cesta“ <a href="../k2/l2-1.html#takeaways">[L2.1]</a>.</li>
+      <li><strong>„Hrana, na které detekce vystřelí, leží na záporném cyklu.“</strong> NE — kontrapozice dokazuje jen <em>existenci</em> cyklu, nelokalizuje ho <a href="../k2/l2-12.html#takeaways">[L2.12]</a>.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.7</div>
+    <ul>
+      <li><strong>Věta o $k$-té iteraci:</strong> $l^k(w) \le c(E(P^k))$, kde $P^k$ je nejkratší $s$–$w$ cesta s <em>nejvýše</em> $k$ hranami. Důkaz indukcí přes $k$; řetízek $l^k(w) \overset{ALG}{\le} l^{k-1}(v) + c(v,w) \overset{IH}{\le} c(E(P^{k-1}[s,v])) + c(v,w) \overset{BPO}{=} c(E(P^k))$.</li>
+      <li><strong>Korektnost:</strong> při $k = n-1$ rovnost — $\le$ z věty, $\ge$ protože žádná cesta nemá víc než $n-1$ hran a $l(w)$ je vždy délka skutečného sledu, který bez záporného cyklu nepodleze nejkratší cestu <a href="../k2/l2-1.html#takeaways">[L2.1]</a>.</li>
+      <li><strong>Detekce záporného cyklu:</strong> korektní $l$ splňuje trojúhelníkovou nerovnost na každé hraně → $n$-tý průchod mlčí; relaxovatelná hrana v $n$-tém průchodu = kontrapozicí záporný cyklus (dosažitelný z $s$; jinak $s'$-trik) <a href="../k2/l2-12.html#takeaways">[L2.12]</a>.</li>
+      <li>Předpoklad „bez záporného cyklu“ má <strong>dvě přesné adresy</strong>: BPO a závěrečné $\ge$; nezápornost hran není potřeba nikde. Stejná indukční kostra jako u Dijkstry <a href="l3-2.html#takeaways">[L3.2]</a> — invariant přes počet iterací místo množiny $R$.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-bfproof">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Correctness of the Bellman-Ford algorithm + negative cycle detection</strong>
+      <span class="task-src">zdroj: banka #19 = slide 29 (Input/Output/pseudokód EN 1:1); banka obsahuje jen běhovou studijní úlohu — otázka „prove the correctness“ je vlastní formulace dle tématu ústní zkoušky (přiznáno); řešení dle slidů 31–34</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; algorithm 1:1 = bank #19 / slide 29, question own)</span>
+        <p><strong>Input:</strong> directed graph $G$ without a negative cycle, weights $c : E(G) \to \mathbb{R}$ and node $s \in V(G)$.</p>
+        <p><strong>Output:</strong> vectors $l$ and $p$. For all $v \in V(G)$, $l(v)$ is the length of the shortest path from $s$ and $p(v)$ is the last but one node. If $v$ is not reachable from $s$, then $l(v) = \infty$ and $p(v)$ is undefined.</p>
+<pre><code>l(s) := 0; l(v) := ∞ for v ≠ s;
+for i := 1 to n − 1 do
+    for every edge of graph (v, w) ∈ E(G) do
+        if l(w) &gt; l(v) + c(v, w) then
+            l(w) := l(v) + c(v, w); p(w) := v;
+        end
+    end
+end</code></pre>
+        <p><em>(a) Prove the correctness of the algorithm, i.e., that after $n-1$ iterations of the external loop $l(w)$ equals the length of the shortest $s$-$w$-path for every $w \in V(G)$. (b) Explain how the algorithm can be extended to detect a negative cycle and prove that the detection is correct.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Čistě důkazová úloha (formát ústní zkoušky): je dán pseudokód Bellman-Forda — tentýž, který umíš oditerovat z <a href="../k2/l2-12.html#takeaways">[L2.12]</a> — a chce se důkaz korektnosti plus zdůvodnění detekce záporného cyklu. Žádný konkrétní graf; odevzdává se text důkazu.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — věta o $k$-té iteraci, řetízek ALG/IH/BPO, krok $k = n-1$, kontrapozice detekce.</li>
+        <li><a href="../k2/l2-12.html#takeaways">[L2.12] Bellman-Ford (běh)</a> — vnější/vnitřní smyčka, $n$-tý kontrolní průchod, $s'$-trik.</li>
+        <li><a href="../k2/l2-2.html#takeaways">[L2.2] Bellmanův princip optimality</a> — výměnný argument pro BPO krok.</li>
+        <li><a href="../k2/l2-1.html#takeaways">[L2.1] Záporné váhy ano, záporné cykly ne</a> — „žádný sled není kratší než nejkratší cesta“.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Začni strukturou, ne nerovnostmi: ① zaveď značení $l^k(w)$, $P^k$, $c(E(P^k))$; ② vyslov větu o $k$-té iteraci (pozor: <em>nejvýše</em> $k$ hran a jen $\le$); ③ indukce — báze $k=1$, krok = řetízek tří kroků, každý se svým zdůvodněním (ALG = hrana $(v,w)$ se v $k$-tém průchodu testuje a značky nerostou; IH = předpoklad pro $v$; BPO = prefix je optimální); ④ při $k=n-1$ doplň obrácenou nerovnost; ⑤ detekce kontrapozicí přes trojúhelníkovou nerovnost. U tabule se nejčastěji ptají: <em>proč je ve větě nerovnost</em> a <em>kde se použil zákaz záporného cyklu</em>.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle slidů 31–34)</summary>
+        <div class="inner">
+          <p><strong>(a) Značení.</strong> $l^k(w)$ = značka $l(w)$ po $k$ iteracích vnější smyčky; $P^k$ = nejkratší $s$–$w$ cesta s nejvýše $k$ hranami, $e = (v,w)$ její poslední hrana; $c(E(P^k))$ = délka $P^k$.</p>
+
+          <p><strong>Věta ($k$-tá iterace).</strong> $l^k(w) \le c(E(P^k))$. (Jen nerovnost: $l^k(w)$ může být délka cesty s více než $k$ hranami, došla-li informace při šťastném pořadí hran dál; $P^k$ má z definice nejvýše $k$ hran.)</p>
+
+          <p><strong>Důkaz indukcí přes $k$.</strong></p>
+          <ul>
+            <li><em>Báze $k=1$:</em> v prvním průchodu se testuje i hrana $(s,w)$ při $l(s)=0$, takže $l^1(w) \le c(s,w) = c(E(P^1))$.</li>
+            <li><em>Indukční předpoklad (IH):</em> po $k-1$ iteracích $l^{k-1}(v) \le c(E(P^{k-1}[s,v]))$.</li>
+            <li><em>Algoritmus (ALG):</em> v $k$-té iteraci vnitřní smyčka otestuje hranu $(v,w)$; značky nikdy nerostou, takže po $k$-té iteraci $l^k(w) \le l^{k-1}(v) + c(v,w)$.</li>
+            <li><em>Bellmanův princip (BPO):</em> prefix $P^k[s,v]$ má nejvýše $k-1$ hran a je nejkratší takový (jinak výměnou zkrátíme $P^k$ — spor), tedy $c(E(P^{k-1}[s,v])) + c(v,w) = c(E(P^k))$.</li>
+          </ul>
+          <p>Složením:</p>
+          $$l^k(w) \overset{ALG}{\le} l^{k-1}(v) + c(v,w) \overset{IH}{\le} c(E(P^{k-1}[s,v])) + c(v,w) \overset{BPO}{=} c(E(P^k)).$$
+
+          <p><strong>Korektnost.</strong> V iteraci $k = n-1$ platí $l^k(w) = c(E(P^k))$:</p>
+          <ul>
+            <li>$l^k(w) \le c(E(P^k))$ z věty;</li>
+            <li>$l^k(w) \ge c(E(P^k))$, protože žádná cesta nemá víc než $n-1$ hran (takže $P^{n-1}$ je nejkratší $s$–$w$ cesta vůbec) a žádná cesta není kratší než nejkratší — $l(w)$ je vždy délka skutečného sledu vzniklého relaxacemi a bez záporného cyklu žádný sled nejkratší cestu nepodleze.</li>
+          </ul>
+          <p>Po $n-1$ iteracích je tedy $l(w) = \mathrm{dist}(w)$ pro všechny vrcholy ($\infty$ pro nedosažitelné — konečnou značku nemá z čeho vzniknout relaxace). $\blacksquare$</p>
+
+          <p><strong>(b) Detekce záporného cyklu.</strong> Po hlavní smyčce přidej $n$-tý kontrolní průchod (slide 34, 1:1):</p>
+<pre><code>for every edge of graph (v, t) ∈ E(G) do
+    if l(t) &gt; l(v) + c(v, t) then
+        error "Graph contains a negative-weight cycle"
+    end
+end</code></pre>
+          <p><em>Korektnost detekce:</em> nemá-li graf záporný cyklus, je po $n-1$ průchodech $l = \mathrm{dist}$ (část (a)) a skutečné vzdálenosti splňují trojúhelníkovou nerovnost $\mathrm{dist}(t) \le \mathrm{dist}(v) + c(v,t)$ pro každou hranu (nejkratší cesta do $v$ + hrana $(v,t)$ je sled do $t$) — test tedy nikde nevystřelí. <em>Kontrapozicí:</em> vystřelí-li test, předpoklad „bez záporného cyklu“ neplatí — graf obsahuje záporný cyklus dosažitelný z $s$. Cykly nedosažitelné z $s$: přidej vrchol $s'$ a hrany $c(s',v) = 0$ do všech vrcholů — do $s'$ žádná hrana nevede, takže žádný nový cyklus nevznikne, a z $s'$ je dosažitelný celý graf <a href="../k2/l2-12.html#takeaways">[L2.12]</a>.</p>
+
+          <p><strong>Krátká zkoušková odpověď (kostra, kterou rozepíšeš):</strong> ① značení $l^k$, $P^k$ (nejvýše $k$ hran!); ② věta $l^k(w) \le c(E(P^k))$; ③ indukce: báze $l^1(w) \le c(s,w)$, krok $l^k(w) \overset{ALG}{\le} l^{k-1}(v)+c(v,w) \overset{IH}{\le} c(E(P^{k-1}[s,v]))+c(v,w) \overset{BPO}{=} c(E(P^k))$; ④ $k=n-1$: rovnost ($\le$ věta; $\ge$ sled vs. cesta + každá cesta $\le n-1$ hran); ⑤ detekce: korektní $l$ ⇒ trojúhelníková nerovnost ⇒ $n$-tý průchod mlčí; relaxace v $n$-tém průchodu ⇒ kontrapozicí záporný cyklus; $s'$-trik pro nedosažitelné. Zákaz záporného cyklu <u>výslovně</u> vyznač v BPO a v kroku ④.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-invariant">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Bellman-Ford example — invariant $l^k$ po iteracích (řetízek ze slidu 30)</strong>
+      <span class="task-src">zdroj: instance a citace = slide 30 (03_SPT_KO) 1:1; studijní otázky vlastní (přiznáno), řešení vlastní</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN 1:1 = slide 30; study questions own)</span>
+        <p>This example illustrates iterations of the Bellman-Ford algorithm finding shortest paths tree from node 1. <em>(Chain of four nodes $1 \to 2 \to 3 \to 4$ with edge weights $-2$, $1$, $2$; initial labels $[0, \infty, \infty, \infty]$.)</em></p>
+        <p>Assuming the edges to be processed in the internal loop:</p>
+        <ul>
+          <li><strong>in the worst order, from right to left</strong> when only step a) is executed in the first iteration of the external loop, it requires 3 iterations of the external loop to obtain SPT</li>
+          <li><strong>in the best order, from left to right</strong> when steps a) b) c) are executed in the first iteration of the external loop, it requires only 1 iteration of the external loop to obtain SPT</li>
+        </ul>
+        <p><em>Study questions (own): (i) For the worst order, write the vector $l^k$ after each iteration $k = 1, 2, 3$ together with $c(E(P^k))$ for every node, and verify the theorem $l^k(w) \le c(E(P^k))$. (ii) For the best order, find a node and an iteration where the inequality is strict. (iii) Run the $n$-th (checking) pass — what does it report and why?</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Miniinstance ze slidu 30: řetízek $1 \to 2 \to 3 \to 4$, váhy $-2, 1, 2$, start ve vrcholu 1. Úkol není jen oditerovat běh (to umíš z <a href="../k2/l2-12.html#takeaways">[L2.12]</a> a <a href="../k2/l2-3.html#t-order">[L2.3] T01</a>) — máš u toho <em>sledovat invariant</em>: po každém průchodu porovnat značky s délkami nejkratších cest omezených počtem hran.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice $P^k$ a $c(E(P^k))$, věta o $k$-té iteraci, detekce.</li>
+        <li><a href="../k2/l2-3.html#t-order">[L2.3] T01</a> — tentýž řetízek, počet průchodů podle pořadí hran.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Pro každý vrchol $w$ a každé $k$ si zvlášť polož dvě otázky: „co říká <em>algoritmus</em>“ ($l^k(w)$ — odsimuluj průchod v daném pořadí hran, s čerstvými hodnotami) a „co říká <em>definice</em>“ ($c(E(P^k))$ — existuje vůbec $s$–$w$ cesta s nejvýše $k$ hranami? V řetízku je to snadné: do vrcholu $j$ vede jediná cesta a má $j-1$ hran). Ostrou nerovnost hledej tam, kde značka „předběhla“ definici.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní)</summary>
+        <div class="inner">
+          <p><strong>(i) Nejhorší pořadí</strong> — hrany zpracovávané zprava doleva: $(3,4), (2,3), (1,2)$ v každém průchodu. Do vrcholu $j$ vede jediná cesta $1 \to \cdots \to j$ s $j-1$ hranami, takže $c(E(P^k))$ je její délka pro $k \ge j-1$ a $\infty$ jinak:</p>
+          <table>
+            <thead><tr><th>po iteraci $k$</th><th>$l^k(2)$</th><th>$c(E(P^k))$ pro 2</th><th>$l^k(3)$</th><th>$c(E(P^k))$ pro 3</th><th>$l^k(4)$</th><th>$c(E(P^k))$ pro 4</th></tr></thead>
+            <tbody>
+              <tr><td>$k=1$</td><td>$-2$</td><td>$-2$</td><td>$\infty$</td><td>$\infty$</td><td>$\infty$</td><td>$\infty$</td></tr>
+              <tr><td>$k=2$</td><td>$-2$</td><td>$-2$</td><td>$-1$</td><td>$-1$</td><td>$\infty$</td><td>$\infty$</td></tr>
+              <tr><td>$k=3$</td><td>$-2$</td><td>$-2$</td><td>$-1$</td><td>$-1$</td><td>$1$</td><td>$1$</td></tr>
+            </tbody>
+          </table>
+          <p>(Průchod 1: $(3,4)$ i $(2,3)$ nic — $l = \infty$; $(1,2)$: $l(2) := -2$. Průchod 2: $(3,4)$ nic, $(2,3)$: $l(3) := -2+1 = -1$, $(1,2)$ nic. Průchod 3: $(3,4)$: $l(4) := -1+2 = 1$.) Věta platí všude — dokonce s rovností: nejhorší pořadí posune „frontu poznání“ přesně o jednu hranu za průchod, značky jsou přesně na hraně toho, co věta zaručuje. Potřeba $n-1 = 3$ iterací.</p>
+
+          <p><strong>(ii) Nejlepší pořadí</strong> — hrany $(1,2), (2,3), (3,4)$: už v prvním průchodu proběhnou kroky a) b) c) s čerstvými hodnotami a $l^1 = [0, -2, -1, 1]$. Ale $c(E(P^1))$ je $-2$ pro vrchol 2 a $\infty$ pro vrcholy 3 a 4 (žádná cesta s $\le 1$ hranou tam nevede). Tedy např. pro vrchol 3:</p>
+          $$l^1(3) = -1 &lt; \infty = c(E(P^1)) \quad \text{— ostrá nerovnost (a pro vrchol 4 stejně: } 1 &lt; \infty\text{).}$$
+          <p>Přesně případ z poznámky slidu 31: značka odpovídá cestě s více než $k$ hranami. SPT je hotové po 1 iteraci; druhý průchod nic nezmění (fixpoint → předčasné ukončení <a href="../k2/l2-12.html#takeaways">[L2.12]</a>).</p>
+
+          <p><strong>(iii) Kontrolní ($n$-tý) průchod:</strong> žádná hrana nerelaxuje — $l = (0, -2, -1, 1)$ splňuje na všech třech hranách trojúhelníkovou nerovnost s rovností ($-2 = 0 + (-2)$, $-1 = -2 + 1$, $1 = -1 + 2$; rovnost ostrý test nehlásí). Hlášení „bez záporného cyklu“ je správně: řetízek je DAG, žádný cyklus v něm není.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L3.7">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k3/l3-6.html"><span class="dir">← Předchozí</span> L3.6 · Neexistence r-aproximace pro obecný TSP [FOTO]</a>
+    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.8a · Metrický TSP + trojúhelníková nerovnost + shortcutting)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// 1 — Stepper: indukční krok věty o k-té iteraci (schéma dle obrázku slidu 32)
+KOViz.stepper(document.getElementById('viz-proof'), {
+  graph: {
+    directed: true,
+    nodes: [
+      {id:'s',  x:70,  y:180},
+      {id:'u1', x:190, y:90,  label:'u₁'},
+      {id:'u2', x:310, y:255, label:'u₂'},
+      {id:'v',  x:430, y:120},
+      {id:'w',  x:570, y:215},
+    ],
+    edges: [
+      {from:'s',  to:'u1'},
+      {from:'u1', to:'u2'},
+      {from:'u2', to:'v'},
+      {from:'v',  to:'w', label:'c(v,w)'},
+    ],
+    caption: 'Schéma indukčního kroku (dle slidu 32): P^k = nejkratší s–w cesta s nejvýše k hranami, e = (v,w) její poslední hrana; mezivrcholy u₁, u₂ zastupují libovolně dlouhý prefix.',
+  },
+  frames: [
+    {desc:'Vezmi vrchol w a JEHO cestu Pᵏ — nejkratší s–w cestu s nejvýše k hranami (celá modře). Poslední hrana je e = (v,w). Cíl: ukázat lᵏ(w) ≤ c(E(Pᵏ)).',
+     nodes:{w:'hl'},
+     edges:{'s->u1':'hl', 'u1->u2':'hl', 'u2->v':'hl', 'v->w':'hl'},
+     subs:{s:'l=0', w:'lᵏ(w) ≤ ?'}},
+    {desc:'KÁMEN 1 (BPO): odřízni poslední hranu. Prefix Pᵏ[s,v] má nejvýše k−1 hran a podle Bellmanova principu optimality je to NEJKRATŠÍ taková cesta (jinak by výměna zkrátila Pᵏ — spor). Tedy c(E(Pᵏ⁻¹[s,v])) + c(v,w) = c(E(Pᵏ)).',
+     nodes:{v:'hl'},
+     edges:{'s->u1':'good', 'u1->u2':'good', 'u2->v':'good', 'v->w':'dim'},
+     subs:{s:'l=0', v:'prefix ≤ k−1 hran', w:'lᵏ(w) ≤ ?'}},
+    {desc:'KÁMEN 2 (IH): indukční předpoklad pro v — po k−1 iteracích platí lᵏ⁻¹(v) ≤ c(E(Pᵏ⁻¹[s,v])).',
+     nodes:{v:'good'},
+     edges:{'s->u1':'good', 'u1->u2':'good', 'u2->v':'good', 'v->w':'dim'},
+     subs:{s:'l=0', v:'lᵏ⁻¹(v) ≤ c(prefix)', w:'lᵏ(w) ≤ ?'}},
+    {desc:'KÁMEN 3 (ALG): v k-té iteraci vnitřní smyčka otestuje hranu (v,w). Značky nikdy nerostou, takže po k-té iteraci lᵏ(w) ≤ lᵏ⁻¹(v) + c(v,w). (Čerstvější, menší l(v) z téhož průchodu nerovnost jen zesílí.)',
+     nodes:{v:'good', w:'hl'},
+     edges:{'s->u1':'good', 'u1->u2':'good', 'u2->v':'good', 'v->w':'hl'},
+     subs:{s:'l=0', v:'lᵏ⁻¹(v) ≤ c(prefix)', w:'lᵏ(w) ≤ lᵏ⁻¹(v)+c(v,w)'}},
+    {desc:'SLOŽENÍ: lᵏ(w) ≤ lᵏ⁻¹(v) + c(v,w) ≤ c(E(Pᵏ⁻¹[s,v])) + c(v,w) = c(E(Pᵏ)). Indukční krok hotov — věta platí pro každé k.',
+     nodes:{v:'good', w:'good'},
+     edges:{'s->u1':'good', 'u1->u2':'good', 'u2->v':'good', 'v->w':'good'},
+     subs:{s:'l=0', v:'lᵏ⁻¹(v) ✓', w:'lᵏ(w) ≤ c(E(Pᵏ)) ✓'}},
+  ],
+});
+
+// 2 — Stepper: invariant lᵏ vs. c(E(Pᵏ)) na řetízku ze slidu 30 (váhy −2, 1, 2)
+const CHAIN = () => ({
+  directed: true,
+  nodes: [
+    {id:'1', x:90,  y:180},
+    {id:'2', x:245, y:180},
+    {id:'3', x:400, y:180},
+    {id:'4', x:555, y:180},
+  ],
+  edges: [
+    {from:'1', to:'2', label:'−2'},
+    {from:'2', to:'3', label:'1'},
+    {from:'3', to:'4', label:'2'},
+  ],
+});
+KOViz.stepper(document.getElementById('viz-chain'), {
+  graph: Object.assign(CHAIN(), {
+    caption: 'Řetízek ze slidu 30 (váhy −2, 1, 2), start ve vrcholu 1. Nejhorší pořadí hran (zprava doleva): (3,4), (2,3), (1,2) v každém průchodu.',
+  }),
+  frames: [
+    {desc:'Inicializace: l = [0, ∞, ∞, ∞]. Věta slibuje: po k iteracích lᵏ(w) ≤ c(E(Pᵏ)) — délka nejkratší cesty s nejvýše k hranami. V řetízku vede do vrcholu j jediná cesta a má j−1 hran.',
+     nodes:{'1':'hl'},
+     subs:{'1':'l=0', '2':'l=∞', '3':'l=∞', '4':'l=∞'}},
+    {desc:'Po iteraci 1 (hrany (3,4), (2,3) nic — l=∞; (1,2): l(2) ← −2): l¹ = [0, −2, ∞, ∞]. Kontrola věty: vrchol 2: −2 ≤ c(E(P¹)) = −2 (rovnost); vrcholy 3, 4: žádná cesta s ≤ 1 hranou → c(E(P¹)) = ∞, platí ∞ ≤ ∞.',
+     nodes:{'1':'hl', '2':'hl'},
+     edges:{'1->2':'hl'},
+     subs:{'1':'l=0', '2':'l=−2 = c(E(P¹))', '3':'l=∞', '4':'l=∞'}},
+    {desc:'Po iteraci 2 ((3,4) nic; (2,3): l(3) ← −2+1 = −1; (1,2) nic): l² = [0, −2, −1, ∞]. Vrchol 3: −1 ≤ c(E(P²)) = −1 (rovnost); vrchol 4: c(E(P²)) = ∞ (cesta do 4 má 3 hrany), ∞ ≤ ∞.',
+     nodes:{'1':'hl', '2':'hl', '3':'hl'},
+     edges:{'1->2':'hl', '2->3':'hl'},
+     subs:{'1':'l=0', '2':'l=−2', '3':'l=−1 = c(E(P²))', '4':'l=∞'}},
+    {desc:'Po iteraci 3 ((3,4): l(4) ← −1+2 = 1): l³ = [0, −2, −1, 1] = hotové SPT. Vrchol 4: 1 ≤ c(E(P³)) = 1. Nejhorší pořadí potřebovalo přesně n−1 = 3 iterace — fronta poznání se posouvala o jedinou hranu za průchod a značky byly přesně na hraně záruky věty.',
+     nodes:{'1':'good', '2':'good', '3':'good', '4':'good'},
+     edges:{'1->2':'good', '2->3':'good', '3->4':'good'},
+     subs:{'1':'l=0', '2':'l=−2', '3':'l=−1', '4':'l=1 = c(E(P³))'}},
+    {desc:'A teď NEJLEPŠÍ pořadí (1,2), (2,3), (3,4): všechno doteče už v PRVNÍ iteraci, l¹ = [0, −2, −1, 1]. Ale c(E(P¹)) je pro vrcholy 3 a 4 ∞ (žádná cesta s ≤ 1 hranou)! Tedy l¹(3) = −1 < ∞ a l¹(4) = 1 < ∞ — nerovnost je OSTRÁ. Přesně proto věta říká ≤, ne rovnost (poznámka slidu 31).',
+     nodes:{'1':'good', '2':'good', '3':'hl', '4':'hl'},
+     edges:{'1->2':'good', '2->3':'good', '3->4':'good'},
+     subs:{'1':'l=0', '2':'l=−2', '3':'l=−1 < ∞', '4':'l=1 < ∞'}},
+  ],
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
