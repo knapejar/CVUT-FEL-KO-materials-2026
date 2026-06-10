@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.8 · VYVRCHOLENÍ: Dangerous adventure [FOTO] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.8</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.8</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>VYVRCHOLENÍ: Dangerous adventure [FOTO]</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Zkoušková úloha <em>Dangerous adventure</em> kombinuje <strong>oba</strong> triky z minulých lekcí v jednom řetězu: pravděpodobnosti smrti na hranách <em>i</em> vrcholech → přepiš na pravděpodobnosti přežití → dostaň je všechny na hrany (split <a href="l2-6.html#takeaways">[L2.6]</a>, nebo složení do vstupních hran) → $-\log$ <a href="l2-7.html#takeaways">[L2.7]</a> → Dijkstra → zpětný převod na pravděpodobnost.
+  </div>
+
+  <p>Prerekvizity: <a href="l2-6.html#takeaways">[L2.6] Split vrcholu</a> a <a href="l2-7.html#takeaways">[L2.7] Transformace −log</a>. Obě minulé lekce na tuhle úlohu mířily — dnes je čas oba triky zřetězit a celé to <strong>spočítat na papír</strong>: jde o druhý FOTO checkpoint kapitoly (zadáno na zkoušce 25. 5. 2026 v obou termínech, dříve i 2023).</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Mapa ostrova</h2>
+  <p>Dobrodruh má mapu ostrova: start $s$, poklad $t$ a křižovatky $V$, mezi nimi jednosměrné spoje $E$ — orientovaný souvislý graf. Na každé <em>křižovatce</em> $i \in V$ (kromě $s$ a $t$) ho s pravděpodobností $b_i$ zabijí <strong>bandité</strong>; na každém <em>spoji</em> $j \in E$ ho s pravděpodobností $l_j$ sežere <strong>lev</strong>. Všechny události jsou navzájem nezávislé (unrelated) a v čase se nemění. Cíl: dostat se z $s$ do $t$ a <strong>minimalizovat pravděpodobnost smrti</strong>.</p>
+
+  <div class="viz" id="viz-orig"></div>
+
+  <details class="try">
+    <summary>Zkus sám: zadání chce minimalizovat pravděpodobnost smrti. Spočítej pravděpodobnost, že dobrodruh <em>přežije</em> cestu $s \to a \to t$ v mapě výše. Co všechno musí přežít?</summary>
+    <div class="inner">
+      <p>Musí přežít lva na spoji $s \to a$ (pravděpodobnost $1 - 0{,}5 = 0{,}5$), <em>a</em> bandity na křižovatce $a$ ($1 - 0{,}875 = 0{,}125$), <em>a</em> lva na spoji $a \to t$ ($0{,}5$). Díky nezávislosti se pravděpodobnosti přežití <strong>násobí</strong>:</p>
+      <p>$$P(\text{přežije } s \to a \to t) = 0{,}5 \cdot 0{,}125 \cdot 0{,}5 = 0{,}03125.$$</p>
+      <p>A protože $P(\text{smrt}) = 1 - P(\text{přežití})$, je minimalizace pravděpodobnosti smrti totéž co <strong>maximalizace pravděpodobnosti přežití</strong> — se součinem se pracuje líp, takže od teď maximalizujeme přežití. Obecně: cesta přežije s pravděpodobností $\prod_{j \in \text{spoje}} (1 - l_j) \cdot \prod_{i \in \text{křižovatky}} (1 - b_i)$.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: spočítej i přežití cesty $s \to c \to t$. A porovnej s rozhodnutím, kdyby na ostrově byli jen lvi (bez banditů) — mění bandité vítěze?</summary>
+    <div class="inner">
+      <p>Přes $c$: $0{,}25 \cdot 1 \cdot 0{,}5 = 0{,}125$ (na $c$ bandité nejsou, $b_c = 0$). Srovnání:</p>
+      <ul>
+        <li><strong>Jen lvi:</strong> přes $a$: $0{,}5 \cdot 0{,}5 = 0{,}25$; přes $c$: $0{,}25 \cdot 0{,}5 = 0{,}125$ → vyhrává $a$.</li>
+        <li><strong>Lvi + bandité:</strong> přes $a$: $0{,}03125$; přes $c$: $0{,}125$ → vyhrává $c$.</li>
+      </ul>
+      <p>Bandité rozhodnutí <strong>převrátí</strong> — stejný jev jako u cen vrcholů v <a href="l2-6.html#takeaways">[L2.6]</a>, jen v pravděpodobnostním kabátě. Ignorovat je nelze.</p>
+    </div>
+  </details>
+
+  <h2>Dva triky, jedna úloha</h2>
+
+  <details class="try">
+    <summary>Zkus sám: proti obyčejnému shortest path z <a href="l2-4.html#takeaways">[L2.4]</a> tu stojí hned tři překážky. Najdeš je? A které lekce je řeší?</summary>
+    <div class="inner">
+      <ol>
+        <li>Hodnota cesty je <strong>součin</strong> a <strong>maximalizujeme</strong> → transformace $-\log$ z <a href="l2-7.html#takeaways">[L2.7]</a> (součin → součet, max → min).</li>
+        <li>Pravděpodobnosti sedí i <strong>na vrcholech</strong> (bandité na křižovatkách) → split vrcholu z <a href="l2-6.html#takeaways">[L2.6]</a>, který dostane hodnotu vrcholu na vlastní hranu.</li>
+        <li>Dijkstra chce <strong>nezáporné váhy</strong> → zadarmo: všechna přežití jsou pravděpodobnosti $\in (0,1]$, takže $-\log p \ge 0$ <a href="l2-7.html#takeaways">[L2.7]</a>.</li>
+      </ol>
+      <p>Nic nového se učit nemusíš — celá úloha je <em>zřetězení</em> dvou hotových triků.</p>
+    </div>
+  </details>
+
+  <p>Recept tedy je:</p>
+  <ol>
+    <li><strong>Smrt → přežití:</strong> na spoji $j$ přežiješ s pravděpodobností $1 - l_j$, na křižovatce $i$ s pravděpodobností $1 - b_i$; pro start a poklad polož $b_s = b_t = 0$ (tam podle zadání bandité nečíhají).</li>
+    <li><strong>Split křižovatek</strong> <a href="l2-6.html#takeaways">[L2.6]</a>: $v \to v_1, v_2$; nová hrana $v_1 \to v_2$ nese přežití banditů $1 - b_v$; vstupy do $v_1$, výstupy z $v_2$. Teď sedí všechny pravděpodobnosti na hranách.</li>
+    <li><strong>Transformace</strong> <a href="l2-7.html#takeaways">[L2.7]</a>: každé hraně dej váhu $c(e) := -\log p(e)$, kde $p(e)$ je její pravděpodobnost přežití — váhy jsou nezáporné.</li>
+    <li><strong>Dijkstra</strong> <a href="l2-4.html#takeaways">[L2.4]</a> z $s$ do $t$ (proč tentokrát $s$ a $t$ nesplitujeme — viz try níže).</li>
+    <li><strong>Zpětný převod:</strong> přežití optimální cesty $S = b^{-l(t)}$ (základ $b$ = ten, kterým jsi logaritmoval) a odpověď na otázku zadání $P(\text{smrt}) = 1 - S$.</li>
+  </ol>
+
+  <details class="try">
+    <summary>Zkus sám: v <a href="l2-6.html#takeaways">[L2.6]</a> jsme splitovali <em>všechny</em> vrcholy včetně $s$ a $t$ a hledali cestu $s_1 \to t_2$. Proč tady $s$ a $t$ splitovat nemusíme?</summary>
+    <div class="inner">
+      <p>Zadání říká, že bandité jsou na každé křižovatce <em>„except for $s$ and $t$“</em> — start a poklad žádné riziko nenesou, tedy $b_s = b_t = 0$ a přežití $1 - b_s = 1 - b_t = 1$. Split by jim přidal hranu s vahou $-\log 1 = 0$: není to chyba, jen zbytečnost. Hledá se obyčejná cesta $s \to t$.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: záleží na pořadí kroků ② (split) a ③ ($-\log$)?</summary>
+    <div class="inner">
+      <p>Ne. Split jen přemístí pravděpodobnost vrcholu na vlastní hranu a $-\log$ se pak aplikuje na každou hranu zvlášť; díky $-\log(xy) = -\log x - \log y$ vyjde součet vah každé cesty stejně, ať transformuješ před splitem (váhy vrcholů $-\log(1-b_i)$ a pak je splituješ jako „ceny vrcholů“ z <a href="l2-6.html#takeaways">[L2.6]</a>), nebo po něm.</p>
+    </div>
+  </details>
+
+  <h2>Celý postup na příkladu</h2>
+  <p>Mapa z úvodu po krocích ① a ②: smrt přepsaná na přežití a křižovatky $a, c$ splitnuté — všechny pravděpodobnosti teď sedí na hranách.</p>
+
+  <div class="viz" id="viz-split"></div>
+
+  <p>Krok ③, váhy $c(e) = -\log_2 p(e)$ (přežití jsou mocniny $\tfrac12$, takže základ 2 dá hezká celá čísla: $0{,}5 \to 1$, $0{,}25 \to 2$, $0{,}125 \to 3$, $1 \to 0$):</p>
+
+  <div class="viz" id="viz-trans"></div>
+
+  <details class="try">
+    <summary>Zkus sám: jakou délku mají obě $s$–$t$ cesty v transformovaném grafu a čemu odpovídají v pravděpodobnostech?</summary>
+    <div class="inner">
+      <p>Přes $a$: $1 + 3 + 1 = 5 = -\log_2 0{,}03125$; přes $c$: $2 + 0 + 1 = \mathbf{3} = -\log_2 0{,}125$. Délka každé cesty je přesně $-\log_2$ jejího přežití — transformace zachovává hodnoty, takže nejkratší cesta = nejbezpečnější trasa.</p>
+    </div>
+  </details>
+
+  <p>Krok ④, běh Dijkstry <a href="l2-4.html#takeaways">[L2.4]</a> na transformovaném grafu, a krok ⑤, zpětný převod:</p>
+
+  <div class="viz" id="viz-run"></div>
+
+  <p>Odpověď pro dobrodruha: jdi $s \to c \to t$; přežiješ s pravděpodobností $S = 2^{-l(t)} = 2^{-3} = 0{,}125$ a zemřeš s pravděpodobností $1 - 0{,}125 = 0{,}875$. (Ano, i optimální trasa je dost vražedná — ale pořád 4× lepší než přes $a$.)</p>
+
+  <h2>Elegantnější zápis: složit bandity do vstupních hran</h2>
+  <p>Vzorové řešení z banky úloh split vůbec nekreslí — využije poznámku z <a href="l2-6.html#takeaways">[L2.6]</a>, že cenu vrcholu lze <strong>složit do jeho vstupních hran</strong>, když $s$ a $t$ žádnou cenu nenesou. Jeden krok $u \to v$ znamená přežít spoj <em>a</em> bandity v cílovém vrcholu, takže s $b_s = b_t = 0$ stačí každé <em>původní</em> hraně dát rovnou váhu</p>
+  <p>$$c'(u,v) := -\log\bigl((1 - l_{uv})(1 - b_v)\bigr) = -\log(1 - l_{uv}) - \log(1 - b_v).$$</p>
+  <p>Funguje to, protože každá $s$–$t$ cesta vstoupí do každé navštívené křižovatky právě jednou (právě jednou tedy zaplatí její bandity), do $s$ nevstupuje nikdy a vstup do $t$ je s $b_t = 0$ zadarmo. Graf se nezvětší — žádné nové vrcholy ani hrany.</p>
+
+  <div class="viz" id="viz-fold"></div>
+
+  <details class="try">
+    <summary>Zkus sám: spočítej $c'(u,v)$ pro všechny čtyři hrany našeho příkladu (základ 2) a ověř, že délky obou cest vyjdou stejně jako po splitu.</summary>
+    <div class="inner">
+      <p>$c'(s,a) = -\log_2(0{,}5 \cdot 0{,}125) = -\log_2 0{,}0625 = 4$ (spoj i bandité v $a$); $c'(a,t) = -\log_2(0{,}5 \cdot 1) = 1$; $c'(s,c) = -\log_2(0{,}25 \cdot 1) = 2$; $c'(c,t) = -\log_2(0{,}5 \cdot 1) = 1$. Délky: přes $a$: $4 + 1 = 5$ ✓, přes $c$: $2 + 1 = 3$ ✓ — přesně jako v grafu po splitu. Obě cesty k cíli (split i složení) jsou u zkoušky plnohodnotné; split je mechaničtější (funguje vždy, i kdyby $s$ a $t$ cenu nesly), složení je rychlejší na zápis.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Složitost na míru zadání: $O(|E| \log |V|)$</div>
+    <p>Zadání výslovně chce složitost $O(|E| \times \log |V|)$. To je Dijkstra s <strong>prioritní frontou implementovanou binární haldou</strong> (binary heap): každá z $O(|E|)$ relaxací stojí $O(\log |V|)$ operaci v haldě. (V <a href="l2-4.html#takeaways">[L2.4]</a> jsme uváděli $O(n^2)$ a $O(m + n\log n)$ — binární halda je třetí, na zkoušce nejcitovanější varianta.) Split graf nezkazí: má nejvýš $2|V| + 2$ vrcholů a $|E| + |V|$ hran, asymptotika se nemění; složení do vstupních hran graf nemění vůbec. Důkaz, proč Dijkstra na nezáporných vahách funguje, patří do kapitoly K3 — tady stačí, že náš převod jeho předpoklad splňuje.</p>
+  </div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: tři klasické chyby v Dangerous adventure</div>
+    <ul>
+      <li><strong>Transformuj přežití, ne smrt.</strong> Váha hrany je $-\log(1 - l_j)$, resp. $-\log(1 - b_i)$ — <em>ne</em> $-\log l_j$! Po cestě se násobí pravděpodobnosti <em>přežití</em>; součin pravděpodobností smrti nic užitečného neznamená a $-\log l_j$ by navíc dal bezpečné hraně (malé $l_j$) <em>velkou</em> váhu a nebezpečné malou — přesně obráceně.</li>
+      <li><strong>Pravděpodobnosti smrti se nesčítají.</strong> Smrt v jednom kroku $u \to v$ má pravděpodobnost $q_{uv} = l_{uv} + b_v - l_{uv} b_v$, ne $l_{uv} + b_v$ — sčítat (natož po celé cestě) je špatně. Správně se násobí doplňky: $1 - q_{uv} = (1 - l_{uv})(1 - b_v)$.</li>
+      <li><strong>Dokonči odpověď.</strong> Dijkstra vrátí $l(t) = -\log_b S$; zadání chce <em>survival probability</em> $S = b^{-l(t)}$ (a pravděpodobnost smrti $1 - S$). Hrany s přežitím $0$ (jistá smrt, $l_j = 1$) odstraň, případně jim dej váhu $+\infty$ <a href="l2-7.html#takeaways">[L2.7]</a>.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.8</div>
+    <ul>
+      <li><strong>Dangerous adventure = řetěz dvou triků:</strong> smrt → přežití ($1 - l_j$, $1 - b_i$, $b_s = b_t = 0$) → pravděpodobnosti na hrany (split <a href="l2-6.html#takeaways">[L2.6]</a>, nebo složení do vstupních hran) → $-\log$ <a href="l2-7.html#takeaways">[L2.7]</a> → Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> → zpětný převod.</li>
+      <li><strong>Kompaktní zápis</strong> (bez splitu, díky $b_s = b_t = 0$): $c'(u,v) = -\log\bigl((1 - l_{uv})(1 - b_v)\bigr)$; váhy nezáporné, protože $(1-l_{uv})(1-b_v) \in (0,1]$.</li>
+      <li><strong>Zpětný převod:</strong> přežití $S = b^{-l(t)}$, odpověď zadání $P(\text{smrt}) = 1 - S$; přežití $0$ → hranu odstranit / $+\infty$.</li>
+      <li>Dijkstra s binární haldou běží v $O(|E| \log |V|)$ — přesně mez ze zadání; split graf ($\le 2|V|+2$ vrcholů, $|E|+|V|$ hran) ji nezhorší.</li>
+      <li>Nikdy nesčítej pravděpodobnosti smrti ($q_{uv} = l_{uv} + b_v - l_{uv} b_v$) a nikdy nelogaritmuj smrt místo přežití.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 [FOTO] ===== -->
+  <div class="task" id="t-adventure">
+    <div class="task-head foto">
+      <span class="task-id">T01</span>
+      <strong>Dangerous adventure</strong>
+      <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
+      <span class="task-src">zdroj: zkouška KO 25.05.2026 (oba termíny) = task bank #16; dříve zkoušky 2023</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“An adventurer has a map of the island with a starting point $s$, treasure location $t$ and set of crossroads $V$. There is a set of one-way connections $E$, each connection connecting either two crossroads, starting point and crossroad or crossroad and treasure location. (<em>Think of a directed connected graph with a starting point, treasure location and crossroads as vertices and connections between them as edges.</em>) The adventurer knows that at each crossroad $i \in V$ (except for $s$ and $t$), there is a probability $b_i$ that he will be killed by bandits. He also knows that at each existing connection $j \in E$, there is a probability $l_j$ that he will be eaten by a lion. All probabilities are unrelated to each other, and they don't change with time. The adventurer wants to get from the starting point to the treasure location while minimizing the probability of dying.</p>
+        <p>Help the adventurer to formulate this as a Shortest Path Problem. Describe how he can calculate his survival probability using the optimal route in $O(|E| \times \log |V|)$ time complexity ($|E|$ represents the number of edges and $|V|$ the number of vertices in the graph).”</p>
+      </div>
+
+      <div class="box foto">
+        <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+        <p>Tuhle úlohu vyřeš celou <strong>NA PAPÍR</strong> — od prázdného listu, bez koukání do lekce ani do řešení, ideálně na čas (na zkoušce na ni budeš mít zhruba 15–20 minut). Napiš převod (vzorce + zdůvodnění nezápornosti), algoritmus se složitostí a zpětný výpočet pravděpodobnosti přežití. Pak mi pošli fotku — zkontroluju ti ji a vytknu chyby přesně jako hodnotitel.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Orientovaný souvislý graf: start $s$, poklad $t$, křižovatky $V$, jednosměrné spoje $E$. Pravděpodobnost smrti banditou $b_i$ na každé křižovatce (na $s$ a $t$ ne), pravděpodobnost sežrání lvem $l_j$ na každém spoji; vše nezávislé a neměnné v čase. Úkol má dvě části: ① <em>formulovat</em> hledání trasy minimalizující pravděpodobnost smrti jako Shortest Path Problem (tj. popsat převod — konkrétní čísla v zadání nejsou) a ② popsat, jak z optimální trasy spočítat pravděpodobnost přežití, to vše v čase $O(|E| \log |V|)$.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — celý recept a kompaktní vzorec $c'(u,v)$.</li>
+        <li><a href="l2-7.html#takeaways">[L2.7] Transformace −log</a> — součin → součet, nezápornost, zpětný převod.</li>
+        <li><a href="l2-6.html#takeaways">[L2.6] Split vrcholu</a> — pravděpodobnosti na křižovatkách (varianta přes split).</li>
+        <li><a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a> — algoritmus a jeho předpoklad nezáporných vah.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Projdi recept z výkladu otázkami: Co přesně se po cestě násobí a proč (nezávislost)? Jak se zbavíš banditů na vrcholech — split, nebo složení do vstupních hran (a co k tomu druhému potřebuješ vědět o $s$ a $t$)? Proč jsou váhy po $-\log$ nezáporné a proč na tom Dijkstrovi záleží? Která implementace Dijkstry dá přesně $O(|E| \log |V|)$? A nakonec: zadání se ptá na <em>survival probability</em> — jakým vzorcem ji z výsledku $l(t)$ (nebo z hran optimální trasy) dostaneš?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Převod na Shortest Path.</strong> Minimalizovat pravděpodobnost smrti = maximalizovat pravděpodobnost přežití. Polož $b_s = b_t = 0$ (start ani poklad bandity nepřidávají). Jeden krok $u \to v$ dobrodruh přežije, právě když přežije spoj <em>i</em> příchod do $v$; díky nezávislosti s pravděpodobností $(1 - l_{uv})(1 - b_v)$. (Doplněk jednokrokové pravděpodobnosti smrti $q_{uv} = l_{uv} + b_v - l_{uv} b_v$.) Pro cestu $P = (s = v_0, v_1, \ldots, v_k = t)$ tedy</p>
+          <p>$$S(P) = \prod_{r=0}^{k-1} (1 - l_{v_r v_{r+1}})(1 - b_{v_{r+1}}),$$</p>
+          <p>a hledáme $\arg\max_P S(P)$. Logaritmus je rostoucí (zachová vítěze) a mění součin na součet; minus otáčí max na min <a href="l2-7.html#takeaways">[L2.7]</a>. Definuj proto novou délku hrany</p>
+          <p>$$c'(u,v) := -\log\bigl((1 - l_{uv})(1 - b_v)\bigr) = -\log(1 - l_{uv}) - \log(1 - b_v).$$</p>
+          <p>Pak pro každou cestu $\sum_{(u,v) \in P} c'(u,v) = -\log S(P)$, takže nejbezpečnější trasa = nejkratší $s$–$t$ cesta podle $c'$. Váhy jsou <strong>nezáporné</strong>: $(1 - l_{uv})(1 - b_v) \in (0,1] \Rightarrow c'(u,v) \ge 0$; je-li některé přežití $0$ (tj. $l_{uv} = 1$ nebo $b_v = 1$), hranu odstraň, případně jí dej délku $+\infty$.</p>
+          <p><em>Ekvivalentní varianta přes split <a href="l2-6.html#takeaways">[L2.6]</a> (takhle to řešil i dochovaný písemkový zápis):</em> každou křižovatku $v$ rozděl na $v_1, v_2$ s hranou $v_1 \to v_2$ délky $-\log(1 - b_v)$, vstupy do $v_1$, výstupy z $v_2$, původní spoje s délkou $-\log(1 - l_j)$; hledej cestu $s \to t$. Graf má $\le 2|V| + 2$ vrcholů a $|E| + |V|$ hran, asymptotika se nezmění.</p>
+          <p><strong>Algoritmus a složitost.</strong> Váhy jsou nezáporné, takže pusť <strong>Dijkstru</strong> <a href="l2-4.html#takeaways">[L2.4]</a> z $s$ do $t$ s prioritní frontou (binární haldou): $O(|E| \log |V|)$, přesně jak chce zadání.</p>
+          <p><strong>Výpočet pravděpodobnosti přežití.</strong> Pro vrácenou optimální trasu $P^*$ je</p>
+          <p>$$S(P^*) = \prod_{(u,v) \in P^*} (1 - l_{uv})(1 - b_v) = b^{-l(t)} \quad (\text{základ } b \text{ logaritmu}),$$</p>
+          <p>tj. buď vynásob přežití podél trasy v původním grafu, nebo umocni výsledek Dijkstry. Pravděpodobnost smrti na optimální trase je $1 - S(P^*)$.</p>
+          <p><strong>Krátká zkoušková odpověď</strong> (takto stačí): polož $b_s = b_t = 0$ a $c'(u,v) = -\log((1-l_{uv})(1-b_v))$; pak $\sum_{(u,v) \in P} c'(u,v) = -\log S(P)$, takže minimalizace transformované délky = maximalizace přežití, váhy jsou nezáporné díky $(1-l_{uv})(1-b_v) \in (0,1]$. Pusť Dijkstru s binární haldou — $O(|E| \log |V|)$ — a vrať $S(P^*) = \prod_{(u,v)\in P^*}(1-l_{uv})(1-b_v)$, smrt $= 1 - S(P^*)$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L2.8">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l2-7.html"><span class="dir">← Předchozí</span> L2.7 · Transformace součinu na součet: −log</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.9 · Modelování reálné úlohy jako SP (DAG / stavový prostor))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Mapa ostrova: pravděpodobnosti smrti — lvi na spojích, bandité na křižovatkách
+KOViz.graph(document.getElementById('viz-orig'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s', x:80,  y:180},
+    {id:'a', x:320, y:65,  sub:'b(a) = 0.875'},
+    {id:'c', x:320, y:295, sub:'b(c) = 0'},
+    {id:'t', x:560, y:180},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'0.5'},
+    {from:'a', to:'t', label:'0.5'},
+    {from:'s', to:'c', label:'0.75'},
+    {from:'c', to:'t', label:'0.5'},
+  ],
+  caption: 'Mapa ostrova: na hranách pravděpodobnost sežrání lvem l(j), pod křižovatkami pravděpodobnost zabití bandity b(i). Na s a t bandité nejsou.',
+});
+
+// 2 — Po krocích ① a ②: přežití místo smrti, křižovatky splitnuté
+KOViz.graph(document.getElementById('viz-split'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s',  x:60,  y:180},
+    {id:'a1', x:230, y:65,  label:'a₁'},
+    {id:'a2', x:410, y:65,  label:'a₂'},
+    {id:'c1', x:230, y:295, label:'c₁'},
+    {id:'c2', x:410, y:295, label:'c₂'},
+    {id:'t',  x:580, y:180},
+  ],
+  edges: [
+    {from:'s',  to:'a1', label:'0.5'},
+    {from:'a1', to:'a2', label:'0.125', cls:'hl'},
+    {from:'a2', to:'t',  label:'0.5'},
+    {from:'s',  to:'c1', label:'0.25'},
+    {from:'c1', to:'c2', label:'1', cls:'hl'},
+    {from:'c2', to:'t',  label:'0.5'},
+  ],
+  caption: 'Po splitu: všechna čísla jsou pravděpodobnosti PŘEŽITÍ (1 − l, 1 − b) a všechna sedí na hranách. Modré hrany nesou přežití banditů; s a t se nesplitují (b = 0).',
+});
+
+// 3 — Po kroku ③: váhy c(e) = −log₂ p(e)
+KOViz.graph(document.getElementById('viz-trans'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s',  x:60,  y:180},
+    {id:'a1', x:230, y:65,  label:'a₁'},
+    {id:'a2', x:410, y:65,  label:'a₂'},
+    {id:'c1', x:230, y:295, label:'c₁'},
+    {id:'c2', x:410, y:295, label:'c₂'},
+    {id:'t',  x:580, y:180},
+  ],
+  edges: [
+    {from:'s',  to:'a1', label:'1'},
+    {from:'a1', to:'a2', label:'3', cls:'hl'},
+    {from:'a2', to:'t',  label:'1'},
+    {from:'s',  to:'c1', label:'2'},
+    {from:'c1', to:'c2', label:'0', cls:'hl'},
+    {from:'c2', to:'t',  label:'1'},
+  ],
+  caption: 'Po transformaci c(e) = −log₂ p(e): 0.5 → 1, 0.25 → 2, 0.125 → 3, 1 → 0. Nezáporné váhy — obyčejný shortest path pro Dijkstru.',
+});
+
+// 4 — Běh Dijkstry na transformovaném grafu + zpětný převod
+KOViz.stepper(document.getElementById('viz-run'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'s',  x:60,  y:180},
+      {id:'a1', x:230, y:65,  label:'a₁'},
+      {id:'a2', x:410, y:65,  label:'a₂'},
+      {id:'c1', x:230, y:295, label:'c₁'},
+      {id:'c2', x:410, y:295, label:'c₂'},
+      {id:'t',  x:580, y:180},
+    ],
+    edges: [
+      {from:'s',  to:'a1', label:'1'},
+      {from:'a1', to:'a2', label:'3'},
+      {from:'a2', to:'t',  label:'1'},
+      {from:'s',  to:'c1', label:'2'},
+      {from:'c1', to:'c2', label:'0'},
+      {from:'c2', to:'t',  label:'1'},
+    ],
+  },
+  frames: [
+    {desc:'Init: l(s)=0, ostatní ∞. Zelená = uzavřeno, modrá = právě expandovaný vrchol.',
+     nodes:{},
+     edges:{},
+     subs:{s:'l=0', a1:'l=∞', a2:'l=∞', c1:'l=∞', c2:'l=∞', t:'l=∞'}},
+    {desc:'It 1: uzavři s (0). Relaxace: l(a₁):=1, l(c₁):=2 (obojí p=s).',
+     nodes:{s:'hl'},
+     edges:{'s->a1':'hl', 's->c1':'hl'},
+     subs:{s:'l=0', a1:'l=1, p=s', a2:'l=∞', c1:'l=2, p=s', c2:'l=∞', t:'l=∞'}},
+    {desc:'It 2: min mezi neuzavřenými je a₁ (1) → uzavři. Relaxace (a₁,a₂): l(a₂):=1+3=4 — drahá hrana banditů u a (přežití jen 0.125).',
+     nodes:{s:'good', a1:'hl'},
+     edges:{'s->a1':'good', 'a1->a2':'hl'},
+     subs:{s:'l=0', a1:'l=1, p=s', a2:'l=4, p=a₁', c1:'l=2, p=s', c2:'l=∞', t:'l=∞'}},
+    {desc:'It 3: min je c₁ (2 < 4) → uzavři. Relaxace (c₁,c₂): l(c₂):=2+0=2 — bandité u c nejsou, hrana zadarmo.',
+     nodes:{s:'good', a1:'good', c1:'hl'},
+     edges:{'s->a1':'good', 's->c1':'good', 'c1->c2':'hl'},
+     subs:{s:'l=0', a1:'l=1, p=s', a2:'l=4, p=a₁', c1:'l=2, p=s', c2:'l=2, p=c₁', t:'l=∞'}},
+    {desc:'It 4: min je c₂ (2 < 4) → uzavři. Relaxace (c₂,t): l(t):=2+1=3, p(t):=c₂.',
+     nodes:{s:'good', a1:'good', c1:'good', c2:'hl'},
+     edges:{'s->a1':'good', 's->c1':'good', 'c1->c2':'good', 'c2->t':'hl'},
+     subs:{s:'l=0', a1:'l=1, p=s', a2:'l=4, p=a₁', c1:'l=2, p=s', c2:'l=2, p=c₁', t:'l=3, p=c₂'}},
+    {desc:'It 5: min je t (3 < 4) → uzavři t. Cíl je v R → konec (viz L2.4: při jediném cíli t lze běh ukončit jeho zařazením do R); a₂ zůstane neuzavřený. Couváním po p: t ← c₂ ← c₁ ← s, tj. trasa s → c → t, l(t)=3.',
+     nodes:{s:'good', a1:'good', c1:'good', c2:'good', t:'hl'},
+     edges:{'s->c1':'good', 'c1->c2':'good', 'c2->t':'good', 's->a1':'dim', 'a1->a2':'dim'},
+     subs:{s:'l=0', a1:'l=1, p=s', a2:'l=4, p=a₁', c1:'l=2, p=s', c2:'l=2, p=c₁', t:'l=3, p=c₂'}},
+    {desc:'Zpětný převod: přežití S = 2^(−l(t)) = 2^(−3) = 0.125, pravděpodobnost smrti 1 − 0.125 = 0.875. Kontrola v původní mapě: 0.25 · 1 · 0.5 = 0.125 ✓.',
+     nodes:{s:'good', c1:'good', c2:'good', t:'good'},
+     edges:{'s->c1':'good', 'c1->c2':'good', 'c2->t':'good', 's->a1':'dim', 'a1->a2':'dim'},
+     subs:{s:'l=0', a1:'l=1, p=s', a2:'l=4, p=a₁', c1:'l=2, p=s', c2:'l=2, p=c₁', t:'2^(−3)=0.125'}},
+  ],
+  caption: 'Kroky ④ a ⑤: Dijkstra na vahách −log₂ p a převod výsledku zpět na pravděpodobnost přežití (+ doplněk = pravděpodobnost smrti).',
+});
+
+// 5 — Alternativa bez splitu: bandité složení do vstupních hran, c'(u,v)
+KOViz.graph(document.getElementById('viz-fold'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s', x:80,  y:180},
+    {id:'a', x:320, y:65},
+    {id:'c', x:320, y:295},
+    {id:'t', x:560, y:180},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'4', cls:'hl'},
+    {from:'a', to:'t', label:'1'},
+    {from:'s', to:'c', label:'2'},
+    {from:'c', to:'t', label:'1'},
+  ],
+  caption: 'Bez splitu: c′(u,v) = −log₂((1 − l(u,v))(1 − b(v))) složí bandity do vstupních hran (modrá hrana s→a platí spoj 1 + bandity 3). Délky cest: 5 a 3 — stejně jako po splitu.',
+});
+</script>
+</body>
+</html>
