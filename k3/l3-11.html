@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L3.11 · Knapsack: fractional greedy + 2-aproximace — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k3">K3 · Důkaz / teorie</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L3.11</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L3.11</span> Kapitola K3 — Důkaz / teorie (Slot 3) · <strong>[MUST]</strong>
+  </p>
+  <h1>Knapsack: fractional greedy + 2-aproximace</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Greedy podle poměru $c_j/w_j$</strong> řeší <em>frakční</em> batoh optimálně — a součet cen $\sum_{i=1}^{h} c_i$ až po první nevejdoucí položku $h$ je <strong>horní mez celočíselného optima</strong>, ze které lepší z $\{1,\dots,h-1\}$ a $\{h\}$ vytěží faktor 2.
+  </div>
+
+  <p>Po čtyřech TSP lekcích střih: dnešní důkaz je <strong>maximalizační</strong> — jediný v kapitole. V <a href="l3-1.html#takeaways">[L3.1]</a> jsme definici r-aproximace pro maximalizaci citovali přesně z dnešního slidu 6 a slíbili, že vzor „<em>horní mez $B \ge J^*$ a $J^A \ge B/2$</em>“ uvidíš v akci. Je to krátký důkaz za jisté body: u zkoušky doložen 24. 5. 2011 („2-aproximační algoritmus pro Knapsack“) a v testech z přednášky 2014/2015 chodil v jedné sadě s Bratleym a Christofidesem <a href="l3-10.html#takeaways">[L3.10]</a>.</p>
+
+  <!-- ===== SEKCE 1: BATOH A RELAXACE ===== -->
+  <h2>Batoh a jeho frakční relaxace</h2>
+
+  <p><strong>Knapsack problem</strong> (problém batohu) znáš modelově: binární rozhodnutí „vzít / nevzít“ <a href="../k0/l0-8.html#takeaways">[L0.8]</a>. Slide 3 (EN 1:1):</p>
+
+  <div class="box">
+    <div class="box-title">Slide 3 — Knapsack problem (1:1)</div>
+    <p><strong>Instance:</strong> <em>Nonnegative integers $n, c_1, \ldots, c_n, w_1, \ldots, w_n, W$, where $n$ represents the number of items, $c_1, \ldots, c_n$ represents the cost of each item, $w_1, \ldots, w_n$ represents the weight of each item and $W$ is the maximum weight to be carried in the knapsack.</em></p>
+    <p><strong>Goal:</strong> <em>Find a subset $S \subseteq \{1, \ldots, n\}$ such that $\sum_{j \in S} w_j \le W$ and $\sum_{j \in S} c_j$ is the maximum.</em></p>
+    <p><em>It is one of the “easiest” NP-hard problems. Sometimes it is called <strong>0/1 Knapsack problem</strong>.</em></p>
+  </div>
+
+  <p>„Easiest NP-hard“ není básnická licence: batoh <strong>není silně NP-těžký</strong> <a href="l3-5.html#takeaways">[L3.5]</a> — má pseudopolynomiální DP (propočítáš v [L7.1]) a dokonce aproximační schéma. Dnešní 2-aproximace je nejhrubší a nejrychlejší stupeň té škály.</p>
+
+  <details class="try">
+    <summary>Zkus sám: představ si, že položky smíš <em>řezat</em> — vzít 80 % položky za 80 % ceny. Kterou položkou je nejvýhodnější začít plnit?</summary>
+    <div class="inner">
+      <p>Tou s největším poměrem $c_j/w_j$ — <strong>cenou za kilogram</strong>. Když se dá řezat, nezáleží na tom, jak se položky „skládají“ do zbylé kapacity (žádné kombinatorické přemýšlení o dírách): každé kilo kapacity prostě obsadíš nejdražším dostupným kilem. Přesně tahle relaxace dělá z NP-těžkého problému snadný.</p>
+    </div>
+  </details>
+
+  <p>Formálně povolíme zlomky — z binární proměnné <a href="../k0/l0-8.html#takeaways">[L0.8]</a> se stane spojitá. Slide 4 (EN 1:1):</p>
+
+  <div class="box">
+    <div class="box-title">Slide 4 — Fractional Knapsack problem (1:1)</div>
+    <p><em>While relaxing on the indivisibility of each item, we formulate a new problem:</em></p>
+    <p><strong>Instance:</strong> <em>stejná jako výše.</em></p>
+    <p><strong>Goal:</strong> <em>Find the rational numbers $x_1, \ldots, x_j, \ldots, x_n$ such that $0 \le x_j \le 1$ and $\sum_{j=1}^{n} x_j \cdot w_j \le W$ and $\sum_{j=1}^{n} x_j \cdot c_j$ is the maximum.</em></p>
+    <p><em>Since the items can be divided (continuous variable $x_j$), we can solve this problem in polynomial time.</em></p>
+  </div>
+
+  <p>Jednu drobnost si podtrhni hned: každé 0/1 řešení je přípustné i frakčně (jedničky a nuly splňují $0 \le x_j \le 1$). Označíme-li $J^*_F$ optimum frakčního batohu (vlastní značení, slidy ho nepojmenovávají), platí $J^*_F \ge J^*$. Za chvíli z toho bude horní mez.</p>
+
+  <!-- ===== SEKCE 2: DANTZIG ===== -->
+  <h2>Dantzig [1957]: greedy podle $c/w$</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 5 — Solution of Fractional Knapsack Problem - Dantzing [1957] (1:1)</div>
+    <ul>
+      <li><em>if $\sum_{j=1}^{n} w_j &gt; W$ (otherwise it has a trivial solution)</em></li>
+      <li><em>order and re-index the items by their relative cost:</em>
+      $$\frac{c_1}{w_1} \ge \frac{c_2}{w_2} \ge \ldots \ge \frac{c_n}{w_n}$$</li>
+      <li><em>in the ordered sequence find the first item which does not fit in the knapsack ($h := \min \{ j \in \{1, \ldots, n\} : \sum_{i=1}^{j} w_i &gt; W \}$)</em></li>
+      <li><em>in order to find the optimal solution, we cut off a part of $h$-th item, so that this part fits in the knapsack:</em>
+        <ul>
+          <li>$x_j := 1$ <em>for</em> $j = 1, \ldots, h-1$</li>
+          <li>$x_h := \frac{W - \sum_{i=1}^{h-1} w_i}{w_h}$</li>
+          <li>$x_j := 0$ <em>for</em> $j = h+1, \ldots, n$</li>
+        </ul>
+      </li>
+      <li><em>sorting of the items takes $\mathcal{O}(n \log n)$, computing $h$ can be done in $\mathcal{O}(n)$ by simple linear scanning, so this algorithm solves the <strong>Fractional Knapsack problem</strong> in $\mathcal{O}(n \log n)$</em></li>
+      <li><em>there is an even faster algorithm ([1] page 440) which can solve this problem in $\mathcal{O}(n)$ by reduction to the <strong>Weighted Median problem</strong></em></li>
+    </ul>
+  </div>
+
+  <p>Položka $h$ — <strong>první, která se celá nevejde</strong> — je hlavní postava celé lekce. Zapamatuj si ji.</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč greedy podle $c/w$ frakční batoh opravdu <em>optimálně</em> vyřeší? (Slidy to konstatují; zkus výměnný argument.)</summary>
+    <div class="inner">
+      <p>Vezmi libovolné přípustné frakční řešení $x$, které se od greedy řešení liší. Protože $\sum w_j &gt; W$, můžeme předpokládat, že $x$ využívá celou kapacitu $W$ (doplnění nikdy neuškodí, ceny jsou nezáporné). Pak ale existuje dvojice indexů $i &lt; j$ (tedy $c_i/w_i \ge c_j/w_j$), kde $x_i &lt; 1$ a $x_j &gt; 0$: lepší položka není plná, a přesto vezeme kus horší. <strong>Výměna:</strong> přesuň malé množství váhy $\varepsilon &gt; 0$ z položky $j$ na položku $i$ — přípustnost se nezmění (celková váha zůstává) a cena se změní o $\varepsilon\,(c_i/w_i - c_j/w_j) \ge 0$, takže se <strong>nezhorší</strong>. Opakováním výměn převedeš $x$ na greedy tvar (plný prefix + jeden řez + nuly) beze ztráty ceny ⇒ greedy řešení je optimální. <em>(Vlastní rozepsání — slide optimalitu jen konstatuje.)</em></p>
+    </div>
+  </details>
+
+  <p>Celý běh na příkladu ze slidu 6 — $c = (6, 20, 2)$, $w = (2, 10, 8)$, $W = 10$:</p>
+
+  <div class="viz" id="viz-dantzig"></div>
+
+  <!-- ===== SEKCE 3: HORNÍ MEZ ===== -->
+  <h2>Most k 0/1: horní mez $\sum_{i=1}^{h} c_i$</h2>
+
+  <p>Teď zpátky k nedělitelnému batohu. Z <a href="l3-1.html#takeaways">[L3.1]</a> víš, jak se dokazuje faktor u <strong>maximalizace</strong>: potřebuješ <em>vypočitatelnou horní mez</em> $B \ge J^*$ a pak ukázat $J^A \ge B/r$. Otázka za celou lekci: kde vzít $B$?</p>
+
+  <details class="try">
+    <summary>Zkus sám: vyrob horní mez celočíselného optima $J^*$ z toho, co už máš — z Dantzigova frakčního řešení. (Dva kroky, oba už znáš.)</summary>
+    <div class="inner">
+      <p><strong>Krok 1 (relaxace):</strong> každé 0/1 řešení je přípustné i frakčně, takže $J^* \le J^*_F$. <strong>Krok 2 (tvar frakčního optima):</strong> Dantzig říká přesně, kolik $J^*_F$ je — plný prefix plus kus položky $h$: $J^*_F = \sum_{i=1}^{h-1} c_i + x_h c_h$. A protože $x_h \le 1$, je to nanejvýš $\sum_{i=1}^{h} c_i$. Dohromady:</p>
+      $$J^* \;\le\; J^*_F \;=\; \sum_{i=1}^{h-1} c_i + x_h c_h \;\le\; \sum_{i=1}^{h} c_i.$$
+      <p>Tohle je mez $B = \sum_{i=1}^{h} c_i$ — spočítáš ji v $\mathcal{O}(n)$, optimum znát nemusíš. <em>Proto</em> jsme se učili frakční batoh: je to stroj na horní mez. Na příkladu: $J^* = 20 \le J^*_F = 22 \le B = 26$.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 4: 2-APROXIMACE ===== -->
+  <h2>2-aproximace: lepší z prefixu a $\{h\}$</h2>
+
+  <p>Mez máme. Zbývá najít <em>přípustné</em> 0/1 řešení, které z ní vytěží aspoň polovinu. První nápad zní: „vezmi všechno, co se vešlo celé“, tedy prefix $\{1, \dots, h-1\}$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: najdi instanci, kde je samotný prefix $\{1,\dots,h-1\}$ <em>libovolně</em> špatný.</summary>
+    <div class="inner">
+      <p>$c = (2, 100)$, $w = (1, 100)$, $W = 100$. Poměry $2 \ge 1$ — seřazeno. Kumulativní váhy $1$, $101 &gt; 100$ ⇒ $h = 2$. Prefix $\{1\}$ má cenu <strong>2</strong>, ale $J^* = 100$ (vzít položku 2). Nafouknutím (100 → libovolné $W$) je poměr $J^A/J^*$ libovolně blízko nule — prefix sám <strong>není</strong> aproximační algoritmus, stejná diagnóza jako u nearest neighbor v <a href="l3-1.html#t-nn">[L3.1] T02</a>. Všimni si, kdo za to může: skoro celá hodnota meze $B$ sedí v ceně $c_h$ uříznuté položky.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: tak tedy obráceně — stačí brát vždy samotnou položku $\{h\}$?</summary>
+    <div class="inner">
+      <p>Ne. Deset položek s $c_j = 1$, $w_j = 1$, plus jedenáctá s $c_{11} = 2$, $w_{11} = 10$; $W = 10$. Poměry $1 \ge \dots \ge 1 \ge 0{,}2$. Prvních deset váží přesně $10 = W$ (to ještě není „přes“), takže $h = 11$. Kandidát $\{h\}$ má cenu <strong>2</strong>, ale prefix $\{1,\dots,10\}$ má cenu $10 = J^*$. Tentokrát hodnota meze sedí v prefixu. <strong>Pointa:</strong> každý kandidát sám o sobě selhává — ale ceny obou v součtu dají $\sum_{i=1}^{h-1} c_i + c_h = B \ge J^*$. Dvě čísla se součtem $\ge J^*$ nemohou být <em>obě</em> menší než $J^*/2$…</p>
+    </div>
+  </details>
+
+  <p>A to je celý algoritmus. Slide 6 (EN 1:1) — definici r-aproximace pro maximalizaci už znáš z <a href="l3-1.html#takeaways">[L3.1]</a>, slide ji opakuje:</p>
+
+  <div class="box">
+    <div class="box-title">Slide 6 — 2-Approximation Algorithm for Knapsack (1:1)</div>
+    <p><strong>r-approximation algorithm for maximization:</strong> <em>Algorithm $A$ for objective function $J$ maximization is called $r$-approximation if there exists a number $r \ge 1$ such that $J^A(I) \ge \frac{1}{r} J^*(I)$ for all instances $I$ of this problem.</em></p>
+    <p><strong>Theorem.</strong> <em>Let $n, c_1, \ldots, c_n, w_1, \ldots, w_n, W, h$ are nonnegative integers that satisfy:</em></p>
+    <ul>
+      <li>$w_j \le W$ <em>pro</em> $j = 1, \ldots, n$</li>
+      <li>$\sum_{i=1}^{n} w_i &gt; W$</li>
+      <li>$\frac{c_1}{w_1} \ge \frac{c_2}{w_2} \ge \ldots \ge \frac{c_n}{w_n}$</li>
+      <li>$h = \min \{ j \in \{1, \ldots, n\} : \sum_{i=1}^{j} w_i &gt; W \}$</li>
+    </ul>
+    <p><em>Then choosing the better of the two solutions $\{1, \ldots, h-1\}$ or $\{h\}$ is <strong>2-approximation alg. for the Knapsack</strong> with the time complexity $\mathcal{O}(n)$.</em></p>
+    <p><em>Example: $c = (6, 20, 2)$, $w = (2, 10, 8)$, $W = 10$.</em></p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám (finále): slož důkaz faktoru 2 ze dvou věcí, které už máš — meze $B = \sum_{i=1}^{h} c_i \ge J^*$ a pozorování o dvou kandidátech.</summary>
+    <div class="inner">
+      <p>Pro libovolná čísla $a, b \ge 0$ platí $\max\{a, b\} \ge \frac{a+b}{2}$ (větší z dvojice je aspoň průměr). Dosaď $a = \sum_{i=1}^{h-1} c_i$ (cena prefixu) a $b = c_h$:</p>
+      $$J^A(I) \;=\; \max\Big\{ \sum_{i=1}^{h-1} c_i,\; c_h \Big\} \;\ge\; \frac{\sum_{i=1}^{h-1} c_i + c_h}{2} \;=\; \frac{\sum_{i=1}^{h} c_i}{2} \;\ge\; \frac{J^*(I)}{2}.$$
+      <p>To je přesně $J^A \ge \frac{1}{r} J^*$ s $r = 2$ — podle definice z <a href="l3-1.html#takeaways">[L3.1]</a> je výběr lepšího z obou kandidátů 2-aproximační algoritmus. Oba kandidáti jsou přípustní: prefix váží $\sum_{i=1}^{h-1} w_i \le W$ (z definice $h$) a $\{h\}$ váží $w_h \le W$ (první předpoklad věty!).</p>
+    </div>
+  </details>
+
+  <p>Slide 7 (EN 1:1) říká totéž — všimni si, jak první dvě odrážky „splácejí“ předpoklady věty:</p>
+
+  <div class="box">
+    <div class="box-title">Slide 7 — Proof (1:1)</div>
+    <ul>
+      <li><em>Given any instance of the <strong>Knapsack problem</strong>, we can omit all items whose weight is bigger than the knapsack maximum load.</em></li>
+      <li><em>If $\sum_{i=1}^{n} w_i \le W$ then the whole set of items is an optimal solution.</em></li>
+      <li><em>Since $\sum_{i=1}^{h} c_i$ is an upper bound on the optimum value, the better of two solutions $\{1, \ldots, h-1\}$ and $\{h\}$ achieves at least half of the optimum value, e.i.,</em>
+      $$J^A(I) = \max\Big\{ \sum_{i=1}^{h-1} c_i,\, c_h \Big\} \ge \frac{\sum_{i=1}^{h} c_i}{2} &gt; \frac{1}{2} J^*(I)$$</li>
+    </ul>
+  </div>
+
+  <p>Drobnost k poctivosti (vlastní komentář): ostrá nerovnost na konci platí, když $c_h &gt; 0$ (pak $J^*_F = \sum_{i=1}^{h-1} c_i + x_h c_h$ je díky $x_h &lt; 1$ ostře pod mezí $B$); pro faktor 2 každopádně stačí neostré $\ge \tfrac12 J^*$. A k složitosti: $\mathcal{O}(n)$ ve větě je za <em>seřazené</em> položky (řazení je v předpokladech) — kompletní postup od syrového vstupu stojí $\mathcal{O}(n \log n)$ za sort, jako Dantzig.</p>
+
+  <p>Běh na příkladu ze slidu 6 (pokračování frakčního stepperu):</p>
+
+  <div class="viz" id="viz-2aprox"></div>
+
+  <details class="try">
+    <summary>Zkus sám (inventura předpokladů — kapitolní rituál): k čemu přesně důkaz potřebuje $w_j \le W$, $\sum_i w_i &gt; W$, seřazení podle $c/w$ a nezápornost?</summary>
+    <div class="inner">
+      <p><strong>$w_j \le W$:</strong> přípustnost kandidáta $\{h\}$ — bez ní by $\max$ porovnával s nepřípustným řešením a celý důkaz padá; proto proof začíná vyhozením těžkých položek (těch se nedotkne ani optimum, vyhodit je smíme). <strong>$\sum_i w_i &gt; W$:</strong> existence $h$ — jinak se vejde všechno a vracíš celou množinu, což je optimum (druhá odrážka proofu). <strong>Seřazení:</strong> bez něj „prefix“ a $h$ nic neznamenají — horní mez $B \ge J^*$ stojí na Dantzigově optimalitě, a ta na pořadí podle $c/w$. <strong>Nezápornost:</strong> ve výměnném argumentu (doplňování kapacity neuškodí) a v $\max\{a,b\} \ge \frac{a+b}{2}$ pro $a, b \ge 0$. Srovnej s TSP důkazy <a href="l3-9.html#takeaways">[L3.9]</a>/<a href="l3-10.html#takeaways">[L3.10]</a>: tam inventura hlídala metriku, tady hlídá přípustnost kandidátů.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 5: CO DÁL ===== -->
+  <h2>Kam to vede</h2>
+
+  <p>2-aproximace není u batohu konec, ale začátek: slide 12 ji používá jako <strong>krok 1 aproximačního schématu</strong> (FPTAS) — její výstup $c(S_1)$ kalibruje zaokrouhlení cen a horní mez DP tabulky, výsledkem je $(1+\epsilon)$-aproximace v $\mathcal{O}(n^2 \cdot \frac{1}{\epsilon})$ pro libovolně malé $\epsilon$. Detaily ve volitelné [L7.2]; samotnou DP tabulku (přesné řešení, pseudopolynomiálně) propočítáš v [L7.1]. Pro 15. 6. je jádro dnešek: mez + dva kandidáti + $\max$.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
+    <ul>
+      <li><strong>„Greedy podle $c/w$ (ber, dokud se vejde) je dobrý i pro 0/1 batoh.“</strong> NE — bez kandidáta $\{h\}$ je libovolně špatný: $c = (2, 100)$, $w = (1, 100)$, $W = 100$ dá 2 místo 100. Optimalita greedy platí jen pro <em>frakční</em> variantu.</li>
+      <li><strong>„$\sum_{i=1}^{h-1} c_i$ je horní mez optima.“</strong> NE — prefix je <em>přípustné řešení</em>, tedy DOLNÍ mez. Horní mez vznikne až přidáním $c_h$: $\sum_{i=1}^{h} c_i \ge J^*_F \ge J^*$ (množina $\{1,\dots,h\}$ sama je nepřípustná!).</li>
+      <li><strong>„Faktor 2 platí jen vůči frakčnímu optimu.“</strong> NE — řetízek končí u celočíselného $J^*$: $J^A \ge B/2 \ge J^*/2$; frakční optimum je jen mezistanice při výrobě meze.</li>
+      <li><strong>„Předpoklad $w_j \le W$ je kosmetika.“</strong> NE — bez něj nemusí být $\{h\}$ přípustné a věta padá. Proto důkaz začíná vyhozením položek těžších než $W$.</li>
+      <li><strong>„Batoh je silně NP-těžký, aproximace je to nejlepší, co jde.“</strong> NE — silně NP-těžký není <a href="l3-5.html#takeaways">[L3.5]</a>: má pseudopolynomiální DP [L7.1] a FPTAS [L7.2]. (Kontrast: TSP nemá bez metriky vůbec žádnou r-aproximaci <a href="l3-6.html#takeaways">[L3.6]</a>.)</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.11</div>
+    <ul>
+      <li><strong>Fractional knapsack</strong> (slide 4): relaxace nedělitelnosti, $0 \le x_j \le 1$. <strong>Dantzig</strong> (slide 5): seřaď $\frac{c_1}{w_1} \ge \dots \ge \frac{c_n}{w_n}$, $h = \min\{j : \sum_{i \le j} w_i &gt; W\}$, $x_j = 1$ pro $j &lt; h$, $x_h = \frac{W - \sum_{i&lt;h} w_i}{w_h}$, dál nuly — <strong>optimální</strong> (výměnný argument), $\mathcal{O}(n \log n)$.</li>
+      <li><strong>Horní mez:</strong> $J^* \le J^*_F = \sum_{i=1}^{h-1} c_i + x_h c_h \le \sum_{i=1}^{h} c_i = B$ — frakční batoh je stroj na mez $B$ pro maximalizační vzor z <a href="l3-1.html#takeaways">[L3.1]</a>.</li>
+      <li><strong>2-aproximace</strong> (slidy 6–7): vezmi lepší z $\{1,\dots,h-1\}$ a $\{h\}$; $J^A = \max \ge \frac{B}{2} \ge \frac{J^*}{2}$, složitost $\mathcal{O}(n)$. Předpoklady: $w_j \le W$ (přípustnost $\{h\}$), $\sum_i w_i &gt; W$ (existence $h$), seřazené poměry (platnost meze).</li>
+      <li>Prefix sám i $\{h\}$ sám jsou <strong>libovolně špatné</strong> — faktor 2 vyrábí teprve $\max$ (dvě čísla se součtem $\ge J^*$ nemohou být obě pod $J^*/2$).</li>
+      <li>Batoh není silně NP-těžký <a href="l3-5.html#takeaways">[L3.5]</a>: 2-aproximace → DP [L7.1] → FPTAS [L7.2] (2-aproximace je jeho krok 1).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-fractional">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Solution of Fractional Knapsack Problem — Dantzing [1957]</strong>
+      <span class="task-src">zdroj: banka #29 EN 1:1 (study task ze slidů 4–5; „Dantzing“ ponecháno dle tisku); důkaz optimality = vlastní rozepsání (přiznáno — slide konstatuje)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN 1:1, banka #29)</span>
+        <p><em>State the greedy algorithm for the fractional knapsack problem, explain why sorting by $c_j/w_j$ is optimal, and give the time complexity.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Tři podúkoly: (1) vyslovit Dantzigův algoritmus (seřazení, $h$, řez), (2) zdůvodnit optimalitu greedy pořadí — to je jediná „důkazová“ část, slidy ji nerozepisují, (3) složitost. Typická ústní opora ke 2-aproximaci: kdo neumí frakční batoh, nemá z čeho vyrobit horní mez.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — slide 5 (algoritmus) + try s výměnným argumentem.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a> — co přesně relaxujeme.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Algoritmus odvyprávěj přes tři role: <em>seřazení</em> (cena za kilogram), <em>plný prefix</em>, <em>řez položky $h$</em>. U optimality nehledej indukci — hledej <strong>výměnu</strong>: „kdyby optimum vezlo kus horší položky, zatímco lepší není plná…“. U složitosti rozliš sort a lineární průchod.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (algoritmus dle slidu 5; optimalita vlastní)</summary>
+        <div class="inner">
+          <p><strong>Algoritmus.</strong> Pokud $\sum_{j=1}^n w_j \le W$, vrať $x_j = 1$ pro všechna $j$ (triviální případ). Jinak seřaď a přeindexuj položky podle relativní ceny $\frac{c_1}{w_1} \ge \frac{c_2}{w_2} \ge \dots \ge \frac{c_n}{w_n}$, najdi první nevejdoucí položku $h := \min\{ j : \sum_{i=1}^{j} w_i &gt; W \}$ a polož $x_j := 1$ pro $j = 1, \dots, h-1$; $x_h := \frac{W - \sum_{i=1}^{h-1} w_i}{w_h}$; $x_j := 0$ pro $j &gt; h$.</p>
+          <p><strong>Proč je seřazení podle $c_j/w_j$ optimální (výměnný argument, vlastní).</strong> Poměr $c_j/w_j$ je cena za jednotku váhy. Vezmi optimální frakční řešení $x^*$; protože $\sum w_j &gt; W$ a ceny jsou nezáporné, lze předpokládat $\sum_j x^*_j w_j = W$. Kdyby $x^*$ nemělo greedy tvar, existují $i &lt; j$ s $x^*_i &lt; 1$ a $x^*_j &gt; 0$. Přesun váhy $\varepsilon &gt; 0$ z $j$ na $i$ zachová přípustnost a změní cenu o $\varepsilon(c_i/w_i - c_j/w_j) \ge 0$ — nezhorší ji. Konečně mnoha výměnami dostaneme greedy řešení se stejnou nebo vyšší cenou ⇒ greedy je optimální. (Intuice: každé kilo kapacity má nést co nejdražší kilo nákladu; řezání to dovolí bez kombinatorických ohledů.)</p>
+          <p><strong>Složitost.</strong> Sort $\mathcal{O}(n \log n)$; nalezení $h$ a dopočet $x$ lineární skenování $\mathcal{O}(n)$ — celkem $\mathcal{O}(n \log n)$. Slide dodává: redukcí na <strong>Weighted Median problem</strong> to jde i v $\mathcal{O}(n)$ ([1] str. 440).</p>
+          <p><strong>Ilustrace</strong> (instance ze slidu 6): $c = (6,20,2)$, $w = (2,10,8)$, $W = 10$; poměry $3 \ge 2 \ge 0{,}25$, $h = 2$, $x = (1;\, 0{,}8;\, 0)$, $J^*_F = 6 + 0{,}8 \cdot 20 = 22$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-2aprox">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>2-Approximation Algorithm for Knapsack — prove the theorem</strong>
+      <span class="task-src">zdroj: banka #30 EN 1:1 (věta = slide 6, úkol = study task); u zkoušky doloženo 24. 5. 2011 (dochovány jen fotky zadání); řešení dle slidu 7, krok s horní mezí rozepsán vlastně (přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN 1:1, banka #30)</span>
+        <p><em>The source theorem assumes nonnegative integers $n, c_1, \ldots, c_n, w_1, \ldots, w_n, W, h$ satisfying</em></p>
+        $$w_j \le W \quad j = 1, \ldots, n,$$
+        $$\sum_{i=1}^{n} w_i &gt; W,$$
+        $$\frac{c_1}{w_1} \ge \frac{c_2}{w_2} \ge \cdots \ge \frac{c_n}{w_n},$$
+        $$h = \min \left\{ j \in \{1, \ldots, n\} : \sum_{i=1}^{j} w_i &gt; W \right\}.$$
+        <p><em>Then choosing the better of the two solutions $\{1, \ldots, h-1\}$ and $\{h\}$ is a 2-approximation algorithm for the knapsack problem with time complexity $\mathcal{O}(n)$.</em></p>
+        <p><em><strong>Study task:</strong> Prove the theorem. In particular, show why $\sum_{i=1}^{h} c_i$ is an upper bound on the optimum value and why the better of the two candidate solutions achieves at least half of this upper bound.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Hlavní úloha lekce — maximalizační obdoba TSP důkazů: věta je darovaná, tvoje práce je důkaz se dvěma jádry, která zadání výslovně jmenuje: (1) <strong>proč je $\sum_{i=1}^{h} c_i$ horní mez</strong> $J^*$ (přes frakční relaxaci) a (2) <strong>proč lepší z kandidátů dosáhne aspoň poloviny</strong> ($\max \ge$ průměr). K tomu patří přípustnost obou kandidátů a role předpokladů.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — mez $B$, oba protipříklady, finále důkazu.</li>
+        <li><a href="l3-1.html#takeaways">[L3.1] Aproximační algoritmus a faktor r</a> — definice pro maximalizaci ($J^A \ge \frac1r J^*$) a vzor „mez $B$“.</li>
+        <li>T01 výše — Dantzigova optimalita (na ní stojí horní mez).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Piš ve třech blocích. <em>Blok 0 — předpoklady:</em> proč smíme předpokládat $w_j \le W$ a $\sum w_i &gt; W$ (první dvě odrážky slidu 7: těžké položky vyhoď, jinak vrať vše). <em>Blok 1 — mez:</em> řetízek $J^* \le J^*_F \le \sum_{i=1}^{h} c_i$; nezapomeň říct, odkud znáš $J^*_F$ (Dantzig). <em>Blok 2 — polovina:</em> přípustnost obou kandidátů (tady se použije $w_h \le W$!) a $\max\{a,b\} \ge \frac{a+b}{2}$. Nakonec jedna věta o složitosti.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle slidu 7; mez rozepsána)</summary>
+        <div class="inner">
+          <p><strong>0) Příprava instance.</strong> Položky s $w_j &gt; W$ nemohou být v žádném přípustném řešení (ani v optimu) — vyhodíme je, tím zajistíme první předpoklad. Pokud po vyčištění $\sum_{i=1}^{n} w_i \le W$, je celá množina položek přípustná, a protože ceny jsou nezáporné, je optimální — vrátíme ji a jsme hotovi. Jinak platí $\sum_i w_i &gt; W$, položky seřadíme podle $c_j/w_j$ a index $h$ (první nevejdoucí položka) existuje.</p>
+          <p><strong>1) $\sum_{i=1}^{h} c_i$ je horní mez optima.</strong> Každé přípustné 0/1 řešení je přípustné i pro frakční batoh ($x_j \in \{0,1\}$ splňuje $0 \le x_j \le 1$), takže $J^* \le J^*_F$. Frakční optimum známe přesně z Dantzigova algoritmu (T01): $J^*_F = \sum_{i=1}^{h-1} c_i + x_h c_h$ s $x_h = \frac{W - \sum_{i&lt;h} w_i}{w_h} \in [0, 1)$. Tedy</p>
+          $$J^* \;\le\; J^*_F \;=\; \sum_{i=1}^{h-1} c_i + x_h c_h \;\le\; \sum_{i=1}^{h-1} c_i + c_h \;=\; \sum_{i=1}^{h} c_i.$$
+          <p><strong>2) Lepší kandidát dosáhne aspoň poloviny meze.</strong> Oba kandidáti jsou přípustní: prefix $\{1, \dots, h-1\}$ váží $\sum_{i=1}^{h-1} w_i \le W$ (z definice $h$ jako <em>prvního</em> nevejdoucího indexu) a $\{h\}$ váží $w_h \le W$ (předpoklad věty — proto se těžké položky vyhazovaly). Pro nezáporná čísla platí $\max\{a, b\} \ge \frac{a+b}{2}$, tedy</p>
+          $$J^A(I) = \max\Big\{ \sum_{i=1}^{h-1} c_i,\; c_h \Big\} \;\ge\; \frac{\sum_{i=1}^{h} c_i}{2} \;\ge\; \frac{1}{2} J^*(I).$$
+          <p>(Slide píše na konci ostrou nerovnost — platí pro $c_h &gt; 0$, kdy $x_h c_h &lt; c_h$; pro faktor stačí $\ge$.) Podle definice r-aproximace pro maximalizaci je algoritmus 2-aproximační.</p>
+          <p><strong>3) Složitost.</strong> Nad seřazenými položkami jeden lineární průchod (nalezení $h$, dva součty, $\max$): $\mathcal{O}(n)$, jak tvrdí věta; od syrového vstupu $\mathcal{O}(n \log n)$ kvůli řazení. $\blacksquare$</p>
+          <p><strong>Kontrola na příkladu slidu 6:</strong> $c=(6,20,2)$, $w=(2,10,8)$, $W=10$: $h=2$, kandidáti $\{1\}$ za 6 a $\{2\}$ za 20 → $J^A = 20$; mez $B = 26$, $20 \ge 13 = B/2$; enumerací $J^* = 20$ — zde dokonce optimum.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L3.11">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k3/l3-10.html"><span class="dir">← Předchozí</span> L3.10 · VYVRCHOLENÍ: Christofides 3/2 [FOTO]</a>
+    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.12 · Teorie ILP/TUM (ústní opora))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// Stepper 1: Dantzigův greedy pro frakční batoh na instanci ze slidu 6:
+// c = (6, 20, 2), w = (2, 10, 8), W = 10 — položky už seřazené podle c/w (3 ≥ 2 ≥ 0,25).
+// Vlastní kopie uzlů (uzly nesdílet mezi KOViz voláními!).
+KOViz.stepper(document.getElementById('viz-dantzig'), {
+  graph: {
+    directed: true,
+    nodes: [
+      {id:'i1', x:120, y:75,  label:'1'},
+      {id:'i2', x:120, y:180, label:'2'},
+      {id:'i3', x:120, y:285, label:'3'},
+      {id:'K',  x:480, y:180, label:'B'},
+    ],
+    edges: [
+      {from:'i1', to:'K', label:'x₁ = ?', cls:'dim'},
+      {from:'i2', to:'K', label:'x₂ = ?', cls:'dim'},
+      {from:'i3', to:'K', label:'x₃ = ?', cls:'dim'},
+    ],
+    caption: 'Dantzig na instanci ze slidu 6: c = (6, 20, 2), w = (2, 10, 8), W = 10. Položky 1–3 (poměry c/w u uzlů), B = batoh; šipka říká, jaký díl položky jde dovnitř.',
+  },
+  frames: [
+    {desc:'Vstup: n = 3, c = (6, 20, 2), w = (2, 10, 8), W = 10. Poměry c/w: 6/2 = 3 ≥ 20/10 = 2 ≥ 2/8 = 0,25 — už seřazeno a přeindexováno. Netriviálnost: Σwⱼ = 20 > 10 = W, takže se všechno nevejde.',
+     subs:{i1:'c/w = 3', i2:'c/w = 2', i3:'c/w = 0,25', K:'0/10 kg · cena 0'}},
+    {desc:'Položka 1 (nejlepší poměr): vejde se celá (2 ≤ 10) → x₁ := 1. Batoh: 2/10 kg, cena 6.',
+     nodes:{i1:'good'},
+     edges:{'i1->K':'good'},
+     labels:{'i1->K':'x₁ = 1'},
+     subs:{i1:'c/w = 3', i2:'c/w = 2', i3:'c/w = 0,25', K:'2/10 kg · cena 6'}},
+    {desc:'Položka 2: celá se nevejde (2 + 10 = 12 > 10) — je to PRVNÍ nevejdoucí položka, tedy h = 2. Hlavní postava lekce. Frakční batoh si poradí: uřízne přesně tolik, kolik zbývá místa.',
+     nodes:{i1:'good', i2:'bad'},
+     edges:{'i1->K':'good', 'i2->K':'bad'},
+     labels:{'i2->K':'x₂ = ?'},
+     subs:{i1:'x₁ = 1', i2:'h = 2', i3:'c/w = 0,25', K:'2/10 kg · cena 6'}},
+    {desc:'Řez: x₂ := (W − w₁)/w₂ = (10 − 2)/10 = 0,8 → dovnitř jde 8 kg a 0,8 · 20 = 16 ceny. Batoh: 10/10 kg, cena 22.',
+     nodes:{i1:'good', i2:'hl'},
+     edges:{'i1->K':'good', 'i2->K':'hl'},
+     labels:{'i2->K':'x₂ = 0,8'},
+     subs:{i1:'x₁ = 1', i2:'h = 2', i3:'c/w = 0,25', K:'10/10 kg · cena 22'}},
+    {desc:'Položka 3 (a všechny za h): batoh plný → x₃ := 0. Výstup x = (1; 0,8; 0), cena 22 = frakční optimum. Lepší to nejde — každé kilo kapacity nese aspoň tak dobrý poměr jako kterékoli vynechané kilo (výměnný argument v try).',
+     nodes:{i1:'good', i2:'hl', i3:''},
+     edges:{'i1->K':'good', 'i2->K':'hl', 'i3->K':'dim'},
+     labels:{'i3->K':'x₃ = 0'},
+     subs:{i1:'x₁ = 1', i2:'x₂ = 0,8', i3:'x₃ = 0', K:'10/10 kg · cena 22'}},
+  ],
+});
+
+// Stepper 2: 2-aproximace na téže instanci — dva kandidáti a bilance s mezí B = 26.
+// J* = 20 enumerací: {2} = 20, {1,3} = 8 (w = 10), {1,2} a {2,3} nepřípustné (w = 12, 18).
+KOViz.stepper(document.getElementById('viz-2aprox'), {
+  graph: {
+    directed: true,
+    nodes: [
+      {id:'i1', x:120, y:75,  label:'1'},
+      {id:'i2', x:120, y:180, label:'2'},
+      {id:'i3', x:120, y:285, label:'3'},
+      {id:'K',  x:480, y:180, label:'B'},
+    ],
+    edges: [
+      {from:'i1', to:'K', label:' ', cls:'dim'},
+      {from:'i2', to:'K', label:' ', cls:'dim'},
+      {from:'i3', to:'K', label:' ', cls:'dim'},
+    ],
+    caption: '2-aproximace na téže instanci: kandidát prefix {1,…,h−1} vs. kandidát {h}, h = 2. Mez B = c₁ + c₂ = 26.',
+  },
+  frames: [
+    {desc:'Zpátky k 0/1: řezání zakázáno, xⱼ ∈ {0, 1}. Z frakčního běhu si neseme h = 2 a horní mez: J* ≤ frakční optimum 22 ≤ c₁ + c₂ = 26 = B (součet cen do h VČETNĚ).',
+     subs:{i1:'c=6, w=2', i2:'c=20, w=10', i3:'c=2, w=8', K:'B = 26'}},
+    {desc:'Kandidát PREFIX = {1, …, h−1} = {1}: všechno, co se před h vešlo celé. Váha 2 ≤ 10 → přípustný z definice h. Cena 6.',
+     nodes:{i1:'good'},
+     edges:{'i1->K':'good'},
+     labels:{'i1->K':'vzít'},
+     subs:{i1:'c=6, w=2', i2:'c=20, w=10', i3:'c=2, w=8', K:'prefix: cena 6'}},
+    {desc:'Kandidát {h} = {2}: samotná první nevejdoucí položka. Přípustný jen díky předpokladu wₕ ≤ W (10 ≤ 10 — těsně!). Cena 20.',
+     nodes:{i2:'hl'},
+     edges:{'i2->K':'hl'},
+     labels:{'i2->K':'vzít'},
+     subs:{i1:'c=6, w=2', i2:'c=20, w=10', i3:'c=2, w=8', K:'{h}: cena 20'}},
+    {desc:'Výstup: lepší z obou = max{6, 20} = 20 ≥ 26/2 = 13 ≥ J*/2. Enumerací J* = 20 ({2}; {1,3} dá 8; {1,2} a {2,3} se nevejdou) — tady algoritmus trefil optimum, zaručená je ale jen polovina meze [L3.1].',
+     nodes:{i2:'good'},
+     edges:{'i2->K':'good'},
+     labels:{'i2->K':'Jᴬ = 20'},
+     subs:{i1:'c=6, w=2', i2:'c=20, w=10', i3:'c=2, w=8', K:'Jᴬ = 20 ≥ 13 = B/2'}},
+  ],
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
