@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L4.2 · Reziduální graf a augmentující cesta — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k4">K4 · Toky a řezy</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L4.2</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L4.2</span> Kapitola K4 — Toky a řezy (Slot 4) · <strong>[MUST]</strong>
+  </p>
+  <h1>Reziduální graf a augmentující cesta</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Kde v síti zbývá <strong>volná kapacita — vpřed i vzad</strong>: dopředu lze tok přidat, dokud $f(e) &lt; u(e)$, dozadu lze tok ubrat, dokud $f(e) &gt; l(e)$. Zabalené do jednoho objektu je to <strong>reziduální graf</strong> $G_f$ a cesta $s \to t$ v něm je <strong>augmentující cesta</strong>.
+  </div>
+
+  <p>V <a href="l4-1.html#takeaways">[L4.1] Síť, tok, Kirchhoffův zákon</a> jsme na zkouškové síti z 25. 5. 2026 ověřili, že zadané $f$ je přípustný tok s hodnotou $|f| = 9$, a bez počítání odvodili mez $|f| \le 16$. Mezi 9 a 16 je propast — dnes si postavíme nástroj, kterým se tok <em>vylepšuje</em>. Ford-Fulkersonův algoritmus, který ho v [L4.3] bude opakovat v cyklu, pak už bude jen jednověté „opakuj, dokud to jde“.</p>
+
+  <!-- ===== SEKCE 1: DOPŘEDNÝ NÁPAD ===== -->
+  <h2>První nápad: protlačit víc po cestě s rezervou</h2>
+
+  <details class="try">
+    <summary>Zkus sám: najdi na zkouškové síti (obrázek v <a href="l4-1.html">[L4.1]</a>, popisek hrany $= l_e, f_e, u_e$) orientovanou cestu z $T_1$ do $T_8$, na které má <em>každá</em> hrana rezervu $f(e) &lt; u(e)$. O kolik můžeš tok podél ní zvýšit, aby zůstal přípustný? A nerozbije se Kirchhoffův zákon?</summary>
+    <div class="inner">
+      <p>Z $T_1$ mají rezervu jen hrany do $T_4$ ($0 &lt; 7$): cesta $T_1 \to T_4 \to T_5 \to T_8$ má rezervy $7 - 0 = 7$, $8 - 0 = 8$ a $8 - 4 = 4$. Zvýšit můžeš o minimum rezerv, tedy o $4$: nový tok $f_{14} = 4$, $f_{45} = 4$, $f_{58} = 8$ a $|f| = 9 + 4 = 13$. Kirchhoff přežije: každý vnitřní vrchol cesty ($T_4$, $T_5$) dostal $+4$ na vstupu i $+4$ na výstupu.</p>
+    </div>
+  </details>
+
+  <p>Nápad funguje: orientovaná cesta $s \to t$, kde všude $f(e) &lt; u(e)$, snese zvýšení o minimum rezerv a tok zůstane tokem. Kdyby tohle stačilo vždycky, byli bychom hotovi. Jenže…</p>
+
+  <!-- ===== SEKCE 2: ZASEKNUTÍ ===== -->
+  <h2>Kde se dopředný nápad zasekne</h2>
+
+  <p>Podívej se na následující síť s tokem (vlastní minimální příklad; popisek hrany $= l_e, f_e, u_e$):</p>
+
+  <div class="viz" id="viz-stuck"></div>
+
+  <details class="try">
+    <summary>Zkus sám: najdi v téhle síti orientovanou cestu $s \to t$, kde má každá hrana $f &lt; u$.</summary>
+    <div class="inner">
+      <p>Žádná není. Kandidáti jsou tři: $s \to a \to t$ (hrana $s \to a$ je nasycená, $1 = u$), $s \to b \to t$ (hrana $b \to t$ je nasycená) a $s \to a \to b \to t$ (nasycená už $s \to a$). Dopředný nápad je v koncích.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: znamená to, že tok $|f| = 1$ je maximální? (Zkus tok navrhnout úplně od nuly.)</summary>
+    <div class="inner">
+      <p>Neznamená! Tok $f(s,a) = f(a,t) = 1$, $f(s,b) = f(b,t) = 1$, $f(a,b) = 0$ je přípustný a má hodnotu $2$. Porovnej ho s tím zaseknutým: liší se právě tím, že po hraně $a \to b$ teče <strong>míň</strong>. Vylepšovací krok tedy musí umět tok nejen přidávat, ale i <strong>ubírat — poslat zpět</strong>. Jednotka, která z $a$ odtékala do $b$, se „přesměruje“ do $t$, a uvolněné místo v $b \to t$ zaplní nová jednotka po $s \to b$.</p>
+    </div>
+  </details>
+
+  <p>Přesně tohle „ubírání po cestě“ formalizují slidy: cesta z $s$ do $t$ <em>nemusí respektovat orientaci hran</em> — některé hrany projde po směru, jiné proti směru.</p>
+
+  <!-- ===== SEKCE 3: FORWARD/BACKWARD + AUGMENTUJÍCÍ CESTA ===== -->
+  <h2>Forward a backward hrana, augmentující cesta (slide 10)</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 10 — Ford-Fulkerson Algorithm, 1:1</div>
+    <p><em>It is based on <strong>incremental augmentation</strong> of the flow along an <strong>oriented path</strong> while maintaining the flow's feasibility. The <strong>path</strong> from source $s$ to sink $t$ <strong>does not respect orientation of arcs</strong>.</em></p>
+    <p><em><strong>Forward arc and backward arc:</strong> An arc is called a forward arc if it is oriented in the same direction as the path from $s$ to $t$ and a backward arc otherwise.</em></p>
+    <p><em><strong>Augmenting path:</strong> An augmenting path for flow $f$ is a path from $s$ to $t$ with:</em></p>
+    <ul>
+      <li><em>$f(e) &lt; u(e)$ for all forward arcs on the path … $f(e)$ can be increased</em></li>
+      <li><em>$f(e) &gt; l(e)$ for all backward arcs on the path … $f(e)$ can be decreased</em></li>
+    </ul>
+    <p><em><strong>Capacity of an augmenting path:</strong> Capacity $\gamma = \min\{\min_{e \text{ is forward}} u(e) - f(e),\ \min_{e \text{ is backward}} f(e) - l(e)\}$ is the biggest possible increase of the flow on the augmenting path.</em></p>
+  </div>
+
+  <p>Česky: <strong>augmenting path</strong> (augmentující cesta) pro tok $f$ je posloupnost hran vedoucí z $s$ do $t$, kde hrany procházené <em>po směru</em> (<strong>forward</strong>, dopředné) mají rezervu $f &lt; u$ a hrany procházené <em>proti směru</em> (<strong>backward</strong>, zpětné) mají co vracet: $f &gt; l$. Kapacita cesty $\gamma$ = nejmenší z rezerv $u - f$ (dopředné) a $f - l$ (zpětné) — o tolik nejvýš lze tok podél cesty zvednout.</p>
+
+  <details class="try">
+    <summary>Zkus sám: v zaseknuté síti vezmi posloupnost $s \to b$, pak hranu $a \to b$ proti směru, pak $a \to t$. Které hrany jsou forward, které backward, je to augmentující cesta a jaké má $\gamma$?</summary>
+    <div class="inner">
+      <p>$s \to b$ a $a \to t$ jdou po směru — <strong>forward</strong>; $a \to b$ procházíme z $b$ do $a$, tedy proti směru — <strong>backward</strong>. Podmínky: $f(s,b) = 0 &lt; 1 = u$ ✓, $f(a,b) = 1 &gt; 0 = l$ ✓, $f(a,t) = 0 &lt; 1 = u$ ✓ — je to augmentující cesta. Kapacita $\gamma = \min\{1 - 0,\ 1 - 0,\ 1 - 0\} = 1$.</p>
+    </div>
+  </details>
+
+  <p>A co se po nalezení cesty stane? Slide 11 (zbytek slidu — celý algoritmus — si necháme do [L4.3]):</p>
+
+  <div class="box">
+    <div class="box-title">Slide 11 — augmentační krok, 1:1</div>
+    <p><em>Increase of the flow by $\gamma$ on forward arcs and decrease of the flow by $\gamma$ on backward arcs - this preserves feasibility of the flow and Kirchhof's law moreover the flow is augmented by $\gamma$. This augmenting path can't be used again since the flow along this path is the highest possible.</em></p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: proč augmentace nerozbije Kirchhoffův zákon? Cesta může vnitřním vrcholem $v$ projít čtyřmi způsoby (vejít dopřednou/zpětnou hranou × odejít dopřednou/zpětnou). Projdi všechny čtyři případy.</summary>
+    <div class="inner">
+      <p>Sleduj bilanci vrcholu $v$ (vstup minus výstup):</p>
+      <ul>
+        <li><strong>forward dovnitř + forward ven:</strong> vstup $+\gamma$, výstup $+\gamma$ — bilance beze změny. ✓</li>
+        <li><strong>forward dovnitř + backward ven:</strong> „odchozí“ zpětná hrana je ve skutečnosti orientovaná <em>do</em> $v$ a tok na ní klesá; vstup se změní o $+\gamma - \gamma = 0$. ✓</li>
+        <li><strong>backward dovnitř + forward ven:</strong> „příchozí“ zpětná hrana je orientovaná <em>z</em> $v$ a klesá; výstup se změní o $-\gamma + \gamma = 0$. ✓</li>
+        <li><strong>backward dovnitř + backward ven:</strong> vstup $-\gamma$, výstup $-\gamma$. ✓</li>
+      </ul>
+      <p>Meze hlídá přímo volba $\gamma$ (nikde nepřeteče přes $u$ ani neklesne pod $l$) a hodnota $|f|$ vzroste o $\gamma$, protože první hrana cesty vychází z $s$ (dopředná zvyšuje odtok z $s$; zpětná první hrana by snižovala přítok do $s$ — obojí zvedne čistý odtok).</p>
+    </div>
+  </details>
+
+  <p>Celá záchranná akce na zaseknuté síti, krok za krokem:</p>
+
+  <div class="viz" id="viz-aug"></div>
+
+  <!-- ===== SEKCE 4: REZIDUÁLNÍ GRAF ===== -->
+  <h2>Reziduální graf: obě rezervy jako jeden graf (slide 32)</h2>
+
+  <p>„Cesta, která nerespektuje orientaci hran“ se nepohodlně hledá i zapisuje. Slidy proto zavádějí elegantní převlek: místo abychom chodili proti šipkám, <strong>nakreslíme rezervy jako nové šipky</strong>. Definice na slidu 32 sedí v přednášce až u minimum cost flow, proto obsahuje i ceny $c_f$ — ty využije až [L4.10], my dnes potřebujeme kapacitní část (a balance $b$ dnes nemáme žádné):</p>
+
+  <div class="box">
+    <div class="box-title">Slide 32 — Residual Graph, 1:1</div>
+    <p><em>The <strong>residual graph</strong> shows where an extra capacity might be found. The residual graph $G_f$ is constructed from network $(G, l, u, b, c)$ and specific feasible flow $f$ as follows:</em></p>
+    <p>$$
+    \begin{aligned}
+    G_f &= (V, E_f, u_f, c_f) \\
+    \bar{E} &= E \cup \{(j, i) : (i, j) \in E\} \\
+    u_f(i, j) &= u(i, j) - f(i, j) & \forall (i, j) \in E \\
+    u_f(j, i) &= f(i, j) - l(i, j) & \forall (i, j) \in E \\
+    E_f &= \{(i, j) \in \bar{E} : u_f(i, j) &gt; 0\} \\
+    c_f(i, j) &= c(i, j) & \forall (i, j) \in E \\
+    c_f(j, i) &= -c(i, j) & \forall (i, j) \in E
+    \end{aligned}
+    $$</p>
+  </div>
+
+  <p>Česky: každá hrana $(i,j)$ původní sítě vyrobí v $G_f$ <strong>až dvě</strong> hrany — dopřednou $(i,j)$ s <strong>reziduální kapacitou</strong> $u_f = u - f$ (kolik lze ještě přidat) a zpětnou $(j,i)$ s $u_f = f - l$ (kolik lze vrátit). Hrany s nulovou reziduální kapacitou se <strong>vynechají</strong>. První věta slidu je celá pointa: <em>reziduální graf ukazuje, kde se dá najít extra kapacita</em> — vpřed i vzad.</p>
+
+  <details class="try">
+    <summary>Zkus sám: přečti teď definici augmentující cesty znovu, ale v řeči $G_f$. Čím je augmentující cesta v reziduálním grafu? A čím je $\gamma$?</summary>
+    <div class="inner">
+      <p><strong>Augmentující cesta = obyčejná orientovaná cesta $s \to t$ v $G_f$.</strong> Podmínka $f &lt; u$ na dopředné hraně říká přesně „dopředná reziduální hrana existuje“, podmínka $f &gt; l$ na zpětné říká „zpětná reziduální hrana existuje“. Všechno nepohodlí s „cestou proti šipkám“ zmizelo — v $G_f$ se jde normálně po šipkách. A $\gamma$ je prostě <strong>minimum reziduálních kapacit $u_f$ podél cesty</strong>.</p>
+    </div>
+  </details>
+
+  <p>Reziduální graf zaseknuté sítě (popisek hrany $= u_f$). Srovnej s obrázkem výše — augmentující cesta, kterou jsme pracně skládali z dopředných a zpětných hran, je tady obyčejná orientovaná cesta:</p>
+
+  <div class="viz" id="viz-resid"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „zpětná hrana má kapacitu $f(e)$“</div>
+    <p>Zpětná reziduální kapacita je $f(e) - l(e)$, <strong>ne</strong> $f(e)$ — vrátit smíš jen to, co je nad dolní mezí. Při $l \equiv 0$ obojí splývá, ale zkoušková síť z 25. 5. 2026 má tři hrany s $l &gt; 0$ a na jedné z nich to bolí: hrana $T_7 \to T_8$ nese $(l, f, u) = (1, 1, 4)$, tok $f = 1$ je kladný, a přesto zpětná hrana $T_8 \to T_7$ v $G_f$ <strong>neexistuje</strong>, protože $u_f = f - l = 0$. Podobně zpětná hrana $T_3 \to T_1$ má kapacitu $5 - 2 = 3$, ne $5$.</p>
+  </div>
+
+  <!-- ===== SEKCE 5: REZIDUÁLNÍ GRAF ZKOUŠKOVÉ SÍTĚ ===== -->
+  <h2>Reziduální graf zkouškové sítě</h2>
+
+  <p>Tady je $G_f$ pro zkouškovou síť a její startovní tok $|f| = 9$ z <a href="l4-1.html">[L4.1]</a> (popisek hrany $= u_f$; zvýrazněná je augmentující cesta ze začátku lekce):</p>
+
+  <div class="viz" id="viz-examresid"></div>
+
+  <details class="try">
+    <summary>Zkus sám: kudy všudy vedou augmentující cesty? Čím musí každá začínat a jaká je $\gamma$ té zvýrazněné?</summary>
+    <div class="inner">
+      <p>Z $T_1$ vede v $G_f$ <strong>jediná</strong> hrana, $T_1 \to T_4$ s $u_f = 7$ (hrany do $T_2$ a $T_3$ jsou nasycené, takže dopředné reziduální hrany nemají) — každá augmentující cesta začíná $T_1 \to T_4$. Zvýrazněná cesta $T_1 \to T_4 \to T_5 \to T_8$ má $\gamma = \min\{7, 8, 4\} = 4$. Další možnosti: $T_1 \to T_4 \to T_7 \to T_8$ s $\gamma = \min\{7, 1, 3\} = 1$, nebo přes zpětnou hranu $T_5 \to T_3$: $T_1 \to T_4 \to T_5 \to T_3 \to T_6 \to T_8$ s $\gamma = \min\{7, 8, 3, 6, 3\} = 3$. Kterou pořadí vybrat a jak iterovat až k maximu — to je [L4.3].</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 6: LABELING ===== -->
+  <h2>Jak cestu najít: značkování (slide 12)</h2>
+
+  <p>Na malé síti cestu uvidíš okem. Slidy ale dávají i mechanický postup — <strong>labeling procedure</strong> (značkovací proceduru), která je přesně prohledáváním dosažitelnosti v $G_f$, jen zapsaným na původní síti:</p>
+
+  <div class="box">
+    <div class="box-title">Slide 12 — Finding the Augmenting Path (Labeling Procedure), 1:1</div>
+    <p><em><strong>Input:</strong> Network $(G, l, u, s, t)$, feasible flow $f$. <strong>Output:</strong> Augmenting path $P$ or decide it does not exist.</em></p>
+    <ol>
+      <li><em>Label $m_s = TRUE$, $m_v = FALSE\ \forall v \in V(G) \setminus s$.</em></li>
+      <li><em><strong>If</strong> there exists $e \in E(G)$ (where $e$ is the edge from $v_i$ to $v_j$) that satisfies $m_i = TRUE$, $m_j = FALSE$ and $f(e) &lt; u(e)$ <strong>Then</strong> $m_j = TRUE$.</em></li>
+      <li><em><strong>If</strong> there exists $e \in E(G)$ (where $e$ is the edge from $v_i$ to $v_j$) that satisfies $m_i = FALSE$, $m_j = TRUE$ and $f(e) &gt; l(e)$ <strong>Then</strong> $m_i = TRUE$.</em></li>
+      <li><em>If $t$ is reached, then the search stops as we have found the augmenting path $P$. If it is not possible to mark another node, then $P$ does not exists. In other cases go to step 2.</em></li>
+    </ol>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: krok 3 vypadá zvláštně — hrana vede z $v_i$ do $v_j$, ale značku dostává $v_i$. Který pojem z téhle lekce krok 3 realizuje?</summary>
+    <div class="inner">
+      <p><strong>Zpětnou hranu.</strong> Krok 2 šíří značku po dopředné reziduální hraně ($f &lt; u$, jdu po směru), krok 3 po zpětné ($f &gt; l$, jdu proti směru hrany — z jejího konce $v_j$ na začátek $v_i$). Dohromady je to obyčejné šíření „vlny“ dosažitelnosti z $s$ v reziduálním grafu $G_f$ — stejná vlna jako BFS v <a href="../k2/l2-10.html">[L2.10]</a>, jen nad $G_f$.</p>
+    </div>
+  </details>
+
+  <p>Běh značkování na zkouškové síti (popisek hrany $= l, f, u$; pod označeným vrcholem svítí TRUE):</p>
+
+  <div class="viz" id="viz-label"></div>
+
+  <p>Co když se vlna zastaví a $t$ značku nedostane? Pak augmentující cesta neexistuje — a slide 11 k tomu říká větu, která je srdcem celé kapitoly:</p>
+
+  <div class="box">
+    <div class="box-title">Slide 11 — kritérium maximality, 1:1</div>
+    <p><em>The flow from $s$ to $t$ is the <strong>maximum</strong> if and only if there is no augmenting path.</em></p>
+  </div>
+
+  <p>Směr „maximální ⇒ žádná cesta“ je snadný (cesta by tok zvedla o $\gamma &gt; 0$). Opačný směr dokáže až řez: množina označených vrcholů v posledním, neúspěšném značkování vytvoří minimální řez — to je obsah [L4.4]. V [L4.3] zatím kritérium použijeme jako zastavovací podmínku Ford-Fulkersona.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.2</div>
+    <ul>
+      <li><strong>Forward hrana</strong> (po směru cesty): tok lze přidat, pokud $f(e) &lt; u(e)$; <strong>backward hrana</strong> (proti směru): tok lze ubrat (poslat zpět), pokud $f(e) &gt; l(e)$.</li>
+      <li><strong>Augmentující cesta</strong> pro $f$ = cesta $s \to t$ nerespektující orientaci, kde dopředné hrany mají $f &lt; u$ a zpětné $f &gt; l$; její kapacita $\gamma = \min\{\min_{\text{fwd}} u(e) - f(e),\ \min_{\text{bwd}} f(e) - l(e)\}$.</li>
+      <li><strong>Reziduální graf</strong> $G_f$: dopředná hrana s $u_f = u - f$, zpětná s $u_f = f - l$, nulové se vynechají. Augmentující cesta = <strong>obyčejná orientovaná cesta $s \to t$ v $G_f$</strong>, $\gamma$ = minimum $u_f$ podél ní.</li>
+      <li><strong>Augmentace</strong>: $+\gamma$ na dopředných, $-\gamma$ na zpětných hranách — zachová přípustnost i Kirchhoffa a zvedne $|f|$ o $\gamma$.</li>
+      <li>Pozor: zpětná kapacita je $f - l$, <strong>ne</strong> $f$ — při $l &gt; 0$ může zpětná hrana chybět i při kladném toku (na zkouškové síti $T_8 \to T_7$).</li>
+      <li>Hledání cesty = <strong>značkování</strong> (vlna dosažitelnosti z $s$ v $G_f$; krok 2 = dopředné, krok 3 = zpětné hrany). Tok je maximální ⟺ augmentující cesta neexistuje — zastavovací podmínka [L4.3], důkaz řezem [L4.4].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-resid">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Reziduální graf zkouškové sítě</strong>
+      <span class="task-src">zdroj: síť = zkouška KO 25.05.2026 = task bank #21 (1:1, viz [L4.1]); otázky (i)–(iii) pro tuto lekci vlastní</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; síť 1:1 dle zkoušky, otázky vlastní)</span>
+        <p>Consider the flow network from the exam of May 25, 2026 (see the figure in [L4.1]; arc label is $l_e, f_e, u_e$, the source is $T_1$, the sink is $T_8$) together with the prescribed feasible flow $f$, $|f| = 9$.</p>
+        <ol>
+          <li>Construct the residual graph $G_f$ (list all residual arcs with their residual capacities $u_f$).</li>
+          <li>Find an arc of $G$ carrying positive flow $f(e) &gt; 0$ whose backward residual arc is missing in $G_f$. Explain.</li>
+          <li>Find an augmenting path and its capacity $\gamma$.</li>
+        </ol>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Zkoušková síť s 12 hranami a startovním tokem $|f| = 9$ (přípustnost jsme ověřili v [L4.1] T01). Máme mechanicky postavit $G_f$ — pro každou hranu spočíst obě reziduální kapacity a nulové vyhodit — a pak v něm najít orientovanou cestu $T_1 \to T_8$. Přesně tohle je přípravný krok každé iterace Ford-Fulkersona, takže si tu předpočítáváme první iteraci pro [L4.3].</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice $G_f$, augmentující cesta, $\gamma$ (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-1.html#takeaways">[L4.1]</a> — čtení popisku $(l_e, f_e, u_e)$ a samotná síť.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(i) Jdi hranu po hraně: dopředná kapacita $u - f$, zpětná $f - l$, nuly škrtej. (ii) Kdy je $f &gt; 0$, ale $f - l = 0$? Které hrany sítě mají $l &gt; 0$? (iii) Kolik hran vychází v $G_f$ z $T_1$? To ti řekne, kudy každá augmentující cesta musí začít.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Dopředné reziduální hrany ($u_f = u - f &gt; 0$):</p>
+          <p>$T_1{\to}T_4$: $7$; $T_2{\to}T_6$: $3$; $T_3{\to}T_6$: $6$; $T_4{\to}T_5$: $8$; $T_4{\to}T_7$: $1$; $T_5{\to}T_8$: $4$; $T_6{\to}T_8$: $3$; $T_7{\to}T_8$: $3$.</p>
+          <p>Zpětné reziduální hrany ($u_f = f - l &gt; 0$):</p>
+          <p>$T_2{\to}T_1$: $4$; $T_3{\to}T_1$: $5 - 2 = 3$; $T_6{\to}T_2$: $4$; $T_5{\to}T_3$: $4 - 1 = 3$; $T_7{\to}T_3$: $1$; $T_8{\to}T_5$: $4$; $T_8{\to}T_6$: $4$.</p>
+          <p>Vynechané dopředné (nasycené hrany, $f = u$): $T_1{\to}T_2$, $T_1{\to}T_3$, $T_3{\to}T_5$, $T_3{\to}T_7$. Vynechané zpětné ($f = l$): $T_1{\to}T_4$, $T_3{\to}T_6$, $T_4{\to}T_5$, $T_4{\to}T_7$ (vše $f = 0$) a $T_7{\to}T_8$ ($f = l = 1$). Celkem má $G_f$ 15 hran — nakreslený je ve výkladu výše.</p>
+          <p><strong>(ii)</strong> Hrana $T_7 \to T_8$: nese kladný tok $f = 1$, ale $u_f(T_8, T_7) = f - l = 1 - 1 = 0$, takže zpětná hrana $T_8 \to T_7$ v $G_f$ <strong>není</strong>. Vrátit jde jen tok nad dolní mezí — a tady je celý tok „přibitý“ povinným minimem $l = 1$. (To je přesně polopravda z danger boxu: kapacita zpětné hrany není $f$, ale $f - l$.)</p>
+          <p><strong>(iii)</strong> Z $T_1$ vede v $G_f$ jediná hrana $T_1 \to T_4$, takže každá augmentující cesta začíná $T_1 \to T_4$. Například
+          $$T_1 \to T_4 \to T_5 \to T_8, \qquad \gamma = \min\{7,\ 8,\ 4\} = 4.$$
+          Augmentací vznikne tok $|f| = 13$ ($f_{14} = 4$, $f_{45} = 4$, $f_{58} = 8$) — to bude 1. iterace vzorového běhu Ford-Fulkersona v [L4.3]. (Jiné správné odpovědi: $T_1 \to T_4 \to T_7 \to T_8$ s $\gamma = 1$, nebo $T_1 \to T_4 \to T_5 \to T_3 \to T_6 \to T_8$ s $\gamma = 3$ přes zpětnou hranu $T_5 \to T_3$.)</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-residlb">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Residual graph with a lower bound</strong>
+      <span class="task-src">zdroj: VLASTNÍ drill na síti z [L4.1] (drilluje zpětnou kapacitu f − l a kritérium maximality)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (vlastní, EN)</span>
+        <p>Consider the small network from [L4.1] with the feasible flow shown below (arc label is $l_e, f_e, u_e$), $|f| = 4$.</p>
+        <ol>
+          <li>Construct the residual graph $G_f$.</li>
+          <li>Explain why the sequence $s \to b$, then arc $a \to b$ traversed backwards, then $a \to t$ is <strong>not</strong> an augmenting path.</li>
+          <li>Find an augmenting path, compute $\gamma$, augment the flow and argue that the resulting flow is maximum.</li>
+        </ol>
+      </div>
+
+      <div class="viz" id="viz-t02net"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Známá síť z [L4.1] — čtyři vrcholy, pět hran, jedna hrana s dolní mezí $l(a,b) = 1$. Tok $|f| = 4$ je přípustný (ověřeno v [L4.1]). Máme postavit reziduální graf, vysvětlit jednu past se zpětnou hranou a tok doaugmentovat na maximum.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — $G_f$, augmentující cesta, $\gamma$, kritérium maximality (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-1.html#takeaways">[L4.1]</a> — hodnota toku a horní mez přes hrany ze zdroje.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(i) Pět hran × dvě reziduální kapacity, škrtni nuly. (ii) U hrany $a \to b$ spočti $f - l$; a i kdyby zpětná hrana existovala, prošla by cesta dál přes $a \to t$? (iii) Po augmentaci se podívej na hrany vycházející z $s$ — co říká mez z [L4.1] T01 (iii)?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Po hranách ($u_f$ dopředná / zpětná, nuly škrtáme):</p>
+          <ul>
+            <li>$s \to a$ $(0,3,3)$: dopředná $0$ — není; zpětná $a \to s$: $3$.</li>
+            <li>$s \to b$ $(0,1,2)$: dopředná $1$; zpětná $b \to s$: $1$.</li>
+            <li>$a \to b$ $(1,1,2)$: dopředná $1$; zpětná $b \to a$: $f - l = 0$ — <strong>není</strong>.</li>
+            <li>$a \to t$ $(0,2,2)$: dopředná $0$ — není; zpětná $t \to a$: $2$.</li>
+            <li>$b \to t$ $(0,2,3)$: dopředná $1$; zpětná $t \to b$: $2$.</li>
+          </ul>
+          <p>$G_f$ má tedy hrany: $s{\to}b\,(1)$, $a{\to}b\,(1)$, $b{\to}t\,(1)$, $a{\to}s\,(3)$, $b{\to}s\,(1)$, $t{\to}a\,(2)$, $t{\to}b\,(2)$.</p>
+          <p><strong>(ii)</strong> Hned ze dvou důvodů. Zpětný průchod hranou $a \to b$ vyžaduje $f &gt; l$, ale $f(a,b) = 1 = l(a,b)$ — tok je na dolní mezi a nic vracet nesmí (v $G_f$: hrana $b \to a$ chybí). A nezávisle na tom je hrana $a \to t$ nasycená ($f = u = 2$), takže by cesta neprošla ani posledním krokem. <em>(Pozor: kdyby ses řídil polopravdou „zpětná kapacita $= f$“, první důvod bys přehlédl.)</em></p>
+          <p><strong>(iii)</strong> V $G_f$ vede z $s$ jediná hrana $s \to b$ a z $b$ dál do $t$ hrana $b \to t$:
+          $$s \to b \to t, \qquad \gamma = \min\{1,\ 1\} = 1.$$
+          (Obě hrany jsou dopředné — augmentující cesta zpětnou hranu mít <em>může</em>, ne <em>musí</em>.) Augmentace: $f(s,b) = 2$, $f(b,t) = 3$, ostatní beze změny; $|f| = 5$. Teď jsou obě hrany ze zdroje nasycené ($f_{sa} = 3 = u$, $f_{sb} = 2 = u$), takže z $s$ v novém $G_f$ nevede žádná hrana — augmentující cesta neexistuje a podle kritéria maximality (slide 11) je tok maximální. Sedí to i s mezí z [L4.1]: $|f| \le u(s,a) + u(s,b) = 5$ a hodnoty $5$ jsme dosáhli. $\blacksquare$</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L4.2">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k4/l4-1.html"><span class="dir">← Předchozí</span> L4.1 · Síť, tok, Kirchhoffův zákon</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.3 · Ford-Fulkerson: iterativní augmentace (běh))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Zaseknutá síť (vlastní minimální příklad); popisek = l, f, u
+KOViz.graph(document.getElementById('viz-stuck'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s', x:90,  y:180, sub:'zdroj'},
+    {id:'a', x:300, y:70},
+    {id:'b', x:300, y:290},
+    {id:'t', x:520, y:180, sub:'stok'},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'0,1,1', cls:'hl'},
+    {from:'a', to:'b', label:'0,1,1', cls:'hl'},
+    {from:'b', to:'t', label:'0,1,1', cls:'hl'},
+    {from:'s', to:'b', label:'0,0,1'},
+    {from:'a', to:'t', label:'0,0,1'},
+  ],
+  caption: 'Zaseknutý tok |f| = 1 (teče po zvýrazněné cestě s→a→b→t). Žádná dopředná cesta s rezervou neexistuje — a přesto tok není maximální. (Vlastní ilustrační instance.)',
+});
+
+// 2 — Stepper: augmentace přes zpětnou hranu na zaseknuté síti
+KOViz.stepper(document.getElementById('viz-aug'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'s', x:90,  y:180},
+      {id:'a', x:300, y:70},
+      {id:'b', x:300, y:290},
+      {id:'t', x:520, y:180},
+    ],
+    edges: [
+      {from:'s', to:'a', label:'0,1,1'},
+      {from:'a', to:'b', label:'0,1,1'},
+      {from:'b', to:'t', label:'0,1,1'},
+      {from:'s', to:'b', label:'0,0,1'},
+      {from:'a', to:'t', label:'0,0,1'},
+    ],
+  },
+  frames: [
+    {desc:'Výchozí stav: tok |f| = 1 teče po s→a→b→t. Popisek hrany = l, f, u.',
+     nodes:{}, edges:{'s->a':'hl','a->b':'hl','b->t':'hl'}, subs:{}},
+    {desc:'Dopředné cesty nejsou: s→a je nasycená (f = u = 1) a b→t taky — všechny tři kandidátské cesty přes ně vedou.',
+     nodes:{}, edges:{'s->a':'bad','b->t':'bad'}, subs:{}},
+    {desc:'Augmentující cesta: s→b (forward, rezerva 1 − 0), hrana a→b PROTI směru (backward, f − l = 1 − 0) a a→t (forward, 1 − 0). γ = min{1, 1, 1} = 1.',
+     nodes:{s:'hl', b:'hl', a:'hl', t:'hl'},
+     edges:{'s->b':'hl','a->b':'hl','a->t':'hl'},
+     subs:{b:'fwd → bwd', a:'bwd → fwd'}},
+    {desc:'Augmentace: +1 na dopředných (s→b, a→t), −1 na zpětné (a→b). Kirchhoff drží, |f| = 2. Obě hrany ze zdroje jsou nasycené → žádná další augmentující cesta, tok je maximální.',
+     nodes:{s:'good', a:'good', b:'good', t:'good'},
+     edges:{'s->a':'good','a->t':'good','s->b':'good','b->t':'good'},
+     labels:{'s->b':'0,1,1','a->b':'0,0,1','a->t':'0,1,1'},
+     subs:{s:'|f| = 2'}},
+  ],
+  caption: 'Jedna augmentace přes zpětnou hranu: tok na a→b klesne na 0, jednotka z a se přesměruje do t a uvolněné místo v b→t zaplní nová jednotka po s→b.',
+});
+
+// 3 — Reziduální graf zaseknuté sítě (popisek = u_f)
+KOViz.graph(document.getElementById('viz-resid'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s', x:90,  y:180},
+    {id:'a', x:300, y:70},
+    {id:'b', x:300, y:290},
+    {id:'t', x:520, y:180},
+  ],
+  edges: [
+    {from:'a', to:'s', label:'1'},
+    {from:'b', to:'a', label:'1', cls:'hl'},
+    {from:'t', to:'b', label:'1'},
+    {from:'s', to:'b', label:'1', cls:'hl'},
+    {from:'a', to:'t', label:'1', cls:'hl'},
+  ],
+  caption: 'Reziduální graf G_f zaseknuté sítě (popisek = u_f; nulové reziduální hrany vynechány). Augmentující cesta s→b→a→t (zvýrazněná) je tu obyčejná orientovaná cesta — hrana b→a je zpětná hrana původní a→b.',
+});
+
+// 4 — Reziduální graf zkouškové sítě 25. 5. 2026 (startovní tok |f| = 9)
+KOViz.graph(document.getElementById('viz-examresid'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'T1', x:60,  y:180, label:'T₁', sub:'zdroj'},
+    {id:'T2', x:220, y:55,  label:'T₂'},
+    {id:'T3', x:220, y:180, label:'T₃'},
+    {id:'T4', x:220, y:305, label:'T₄'},
+    {id:'T6', x:420, y:55,  label:'T₆'},
+    {id:'T5', x:420, y:180, label:'T₅'},
+    {id:'T7', x:420, y:305, label:'T₇'},
+    {id:'T8', x:580, y:180, label:'T₈', sub:'stok'},
+  ],
+  edges: [
+    // dopředné reziduální hrany (u_f = u − f)
+    {from:'T1', to:'T4', label:'7', cls:'hl'},
+    {from:'T2', to:'T6', label:'3', curve:0.18},
+    {from:'T3', to:'T6', label:'6'},
+    {from:'T4', to:'T5', label:'8', curve:-0.35, cls:'hl'},
+    {from:'T4', to:'T7', label:'1'},
+    {from:'T5', to:'T8', label:'4', curve:0.18, cls:'hl'},
+    {from:'T6', to:'T8', label:'3', curve:0.18},
+    {from:'T7', to:'T8', label:'3'},
+    // zpětné reziduální hrany (u_f = f − l)
+    {from:'T2', to:'T1', label:'4', dashed:true},
+    {from:'T3', to:'T1', label:'3', dashed:true},
+    {from:'T6', to:'T2', label:'4', curve:0.18, dashed:true},
+    {from:'T5', to:'T3', label:'3', dashed:true},
+    {from:'T7', to:'T3', label:'1', curve:-0.35, dashed:true},
+    {from:'T8', to:'T5', label:'4', curve:0.18, dashed:true},
+    {from:'T8', to:'T6', label:'4', curve:0.18, dashed:true},
+  ],
+  caption: 'Reziduální graf G_f zkouškové sítě pro startovní tok |f| = 9: plné šipky = dopředné reziduální hrany (u − f), čárkované = zpětné (f − l); popisek = u_f. Zvýrazněná augmentující cesta T₁→T₄→T₅→T₈ má γ = 4. Všimni si: T₈→T₇ chybí (f − l = 0) a z T₁ vede jediná hrana.',
+});
+
+// 5 — Stepper: značkovací procedura (labeling) na zkouškové síti
+KOViz.stepper(document.getElementById('viz-label'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'T1', x:60,  y:180, label:'T₁'},
+      {id:'T2', x:220, y:55,  label:'T₂'},
+      {id:'T3', x:220, y:180, label:'T₃'},
+      {id:'T4', x:220, y:305, label:'T₄'},
+      {id:'T6', x:420, y:55,  label:'T₆'},
+      {id:'T5', x:420, y:180, label:'T₅'},
+      {id:'T7', x:420, y:305, label:'T₇'},
+      {id:'T8', x:580, y:180, label:'T₈'},
+    ],
+    edges: [
+      {from:'T1', to:'T2', label:'0,4,4'},
+      {from:'T1', to:'T3', label:'2,5,5'},
+      {from:'T1', to:'T4', label:'0,0,7'},
+      {from:'T2', to:'T6', label:'0,4,7'},
+      {from:'T3', to:'T6', label:'0,0,6'},
+      {from:'T3', to:'T5', label:'1,4,4'},
+      {from:'T3', to:'T7', label:'0,1,1', curve:0.35},
+      {from:'T4', to:'T5', label:'0,0,8', curve:-0.35},
+      {from:'T4', to:'T7', label:'0,0,1'},
+      {from:'T6', to:'T8', label:'0,4,7'},
+      {from:'T5', to:'T8', label:'0,4,8'},
+      {from:'T7', to:'T8', label:'1,1,4'},
+    ],
+  },
+  frames: [
+    {desc:'Krok 1: m(T₁) = TRUE, všechny ostatní FALSE. Popisek hrany = l, f, u.',
+     nodes:{T1:'hl'}, edges:{}, subs:{T1:'TRUE'}},
+    {desc:'Krok 2 z T₁: T₁→T₂ má f = u = 4 ✗, T₁→T₃ má f = u = 5 ✗, T₁→T₄ má 0 < 7 ✓ → m(T₄) = TRUE.',
+     nodes:{T1:'good', T4:'hl'},
+     edges:{'T1->T4':'hl'},
+     subs:{T1:'TRUE', T4:'TRUE'}},
+    {desc:'Krok 2 z T₄: T₄→T₅ má 0 < 8 ✓ → m(T₅) = TRUE; T₄→T₇ má 0 < 1 ✓ → m(T₇) = TRUE.',
+     nodes:{T1:'good', T4:'good', T5:'hl', T7:'hl'},
+     edges:{'T1->T4':'good','T4->T5':'hl','T4->T7':'hl'},
+     subs:{T1:'TRUE', T4:'TRUE', T5:'TRUE', T7:'TRUE'}},
+    {desc:'Krok 3 (zpětná hrana): T₃→T₅ má m(T₃) = FALSE, m(T₅) = TRUE a f = 4 > 1 = l ✓ → m(T₃) = TRUE. (Vlna umí jít i proti šipce — v G_f je to hrana T₅→T₃.)',
+     nodes:{T1:'good', T4:'good', T5:'good', T7:'good', T3:'hl'},
+     edges:{'T1->T4':'good','T4->T5':'good','T4->T7':'good','T3->T5':'hl'},
+     subs:{T1:'TRUE', T4:'TRUE', T5:'TRUE', T7:'TRUE', T3:'TRUE'}},
+    {desc:'Krok 2 z T₅: T₅→T₈ má 4 < 8 ✓ → m(T₈) = TRUE. Stok je označen → stop, cestu zrekonstruujeme zpětně: T₁→T₄→T₅→T₈ (samé dopředné hrany).',
+     nodes:{T1:'good', T4:'good', T5:'good', T7:'good', T3:'good', T8:'hl'},
+     edges:{'T1->T4':'hl','T4->T5':'hl','T5->T8':'hl'},
+     subs:{T1:'TRUE', T4:'TRUE', T5:'TRUE', T7:'TRUE', T3:'TRUE', T8:'TRUE ✓'}},
+    {desc:'γ = min{7 − 0, 8 − 0, 8 − 4} = 4 → po augmentaci f₁₄ = 4, f₄₅ = 4, f₅₈ = 8 a |f| = 9 + 4 = 13. Tohle je 1. iterace Ford-Fulkersona — celý běh až k maximu 16 v L4.3.',
+     nodes:{T1:'hl', T4:'good', T5:'good', T8:'hl'},
+     edges:{'T1->T4':'hl','T4->T5':'hl','T5->T8':'hl'},
+     labels:{'T1->T4':'0,4,7','T4->T5':'0,4,8','T5->T8':'0,8,8'},
+     subs:{T1:'|f| = 13'}},
+  ],
+  caption: 'Značkovací procedura (slide 12) na zkouškové síti: krok 2 šíří značku po hranách s f < u, krok 3 proti hranám s f > l. Stok označen → augmentující cesta T₁→T₄→T₅→T₈, γ = 4.',
+});
+
+// 6 — T02: síť z L4.1 s tokem (popisek = l, f, u)
+KOViz.graph(document.getElementById('viz-t02net'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s', x:80,  y:180},
+    {id:'a', x:300, y:70},
+    {id:'b', x:300, y:290},
+    {id:'t', x:540, y:180},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'0, 3, 3'},
+    {from:'s', to:'b', label:'0, 1, 2'},
+    {from:'a', to:'b', label:'1, 1, 2', cls:'hl'},
+    {from:'a', to:'t', label:'0, 2, 2'},
+    {from:'b', to:'t', label:'0, 2, 3'},
+  ],
+  caption: 'Úloha T02: síť z [L4.1] s přípustným tokem |f| = 4; popisek = l(e), f(e), u(e). Zvýrazněná hrana a→b má dolní mez l = 1 — a tok přesně na ní.',
+});
+</script>
+</body>
+</html>
