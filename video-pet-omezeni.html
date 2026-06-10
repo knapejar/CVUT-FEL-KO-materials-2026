@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pět omezení (PS1 | temp | Cmax) — immersive video · KO Hitovky</title>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #11141d;
+    --text: #e8eaf0;
+    --muted: #8b93a7;
+    --accent: #ffb000;
+    --border: #232a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; overflow: hidden;
+  }
+  #topbar {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; font-size: 13px; color: var(--muted);
+  }
+  #topbar a { color: var(--muted); text-decoration: none; }
+  #topbar a:hover { color: var(--accent); }
+  #topbar .title { color: var(--text); font-weight: 700; }
+  #topbar .badge {
+    font-size: 11px; color: var(--bg); background: var(--accent);
+    border-radius: 10px; padding: 2px 9px; font-weight: 700;
+  }
+  #stagewrap {
+    flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
+    min-height: 0; padding: 0 16px;
+  }
+  #stage {
+    position: relative;
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #0b0e16; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+  }
+  #stage canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  #subtitle {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 26px 4% 16px;
+    background: linear-gradient(to top, rgba(5,7,12,0.88) 0%, rgba(5,7,12,0.55) 65%, transparent 100%);
+    text-align: center; pointer-events: none;
+    font-size: clamp(14px, 2.4vw, 28px); font-weight: 700; line-height: 1.4;
+    color: #fff;
+  }
+  #subtitle .m {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    color: #7dd3fc;
+  }
+  #subtitle .hl {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    padding: 0 4px; border-radius: 5px;
+  }
+  #subtitle .c1 { background: rgba(125,211,252,0.15); color: #7dd3fc; }
+  #subtitle .c2 { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+  #subtitle .c3 { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+  #subtitle .c4 { background: rgba(52,211,153,0.15);  color: #4ade80; }
+  #subtitle .c5 { background: rgba(244,114,182,0.16); color: #f9a8d4; }
+  #subtitle .c6 { background: rgba(251,146,60,0.17);  color: #fdba74; }
+  #subtitle .c7 { background: rgba(147,197,253,0.16); color: #93c5fd; }
+  #subtitle .c8 { background: rgba(253,224,71,0.14);  color: #fde047; }
+  .kw { position: relative; display: inline-block; white-space: nowrap; }
+  .kw .wb { opacity: 0.42; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+  .kw .wf {
+    position: absolute; left: 0; top: 0; width: 0%;
+    overflow: hidden; white-space: nowrap;
+    text-shadow: 0 0 16px rgba(255,176,0,0.85), 0 2px 10px rgba(0,0,0,0.95);
+  }
+  .kw .wf, .kw .wf * { color: #ffd34d !important; }
+  #bigplay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(5,7,12,0.55); cursor: pointer; z-index: 5;
+    flex-direction: column; gap: 18px;
+  }
+  #bigplay.hidden { display: none; }
+  #bigplay .pbtn {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--accent); color: #1a1200;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; box-shadow: 0 0 60px rgba(255,176,0,0.45);
+    transition: transform .15s;
+  }
+  #bigplay:hover .pbtn { transform: scale(1.08); }
+  #bigplay .hint { color: var(--text); font-size: 15px; font-weight: 600; text-shadow: 0 2px 8px #000; }
+  #bigplay .hint small { display: block; color: var(--muted); font-weight: 400; margin-top: 6px; }
+  #controls {
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 4px 16px;
+  }
+  #controls button {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    width: 42px; height: 42px; border-radius: 50%; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: border-color .15s, color .15s;
+  }
+  #controls button:hover { border-color: var(--accent); color: var(--accent); }
+  #seek {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 6px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--p, 0%), #2a3040 var(--p, 0%));
+    border-radius: 3px; outline: none; cursor: pointer;
+  }
+  #seek::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px rgba(255,176,0,0.6); cursor: pointer;
+  }
+  #seek::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; border: none;
+    background: var(--accent); cursor: pointer;
+  }
+  .time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 44px; text-align: center; }
+  @media (max-height: 560px) { #topbar { display: none; } }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="pisnicky.html">← Zpěvník</a>
+  <span class="title">Pět omezení (PS1 | temp | C<sub>max</sub>)</span>
+  <span class="badge">IMMERSIVE VIDEO 🏗</span>
+  <span style="margin-left:auto">mezerník = play/pauza · ←/→ = ±5 s · R = od začátku</span>
+</div>
+
+<div id="stagewrap">
+  <div id="stage">
+    <div id="subtitle"></div>
+    <div id="bigplay">
+      <div class="pbtn">▶</div>
+      <div class="hint">Time-indexed ILP — pět bloků staví model 🏗<small>2 min 1 s · zpívaná videolekce</small></div>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btnPlay" title="Play / pauza">▶</button>
+  <button id="btnRestart" title="Od začátku">⟲</button>
+  <span class="time" id="tCur">0:00</span>
+  <input type="range" id="seek" min="0" max="121.1" step="0.01" value="0">
+  <span class="time" id="tDur">2:01</span>
+</div>
+
+<audio id="player" src="audio/pet-omezeni.mp3" preload="auto"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
+<script>
+(async function () {
+'use strict';
+
+// ════════════════════════════════════════════════════════════════════
+// 0) helpers
+// ════════════════════════════════════════════════════════════════════
+const C = {
+  gold: 0xffb000, goldHi: 0xffd34d, green: 0x4ade80, pink: 0xf472b6,
+  cyan: 0x7dd3fc, violet: 0xa78bfa, white: 0xffffff, red: 0xef4444,
+  dim: 0x37415a, muted: 0x8b93a7, brick: 0x3a2a28, brickLine: 0x4d3835,
+  steel: 0xb9c2d4, dust: 0xcbb89a,
+};
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - clamp01(t), 3);
+const easeIn = t => Math.pow(clamp01(t), 3);
+const ph = (t, a, b) => clamp01((t - a) / (b - a));
+
+// ════════════════════════════════════════════════════════════════════
+// 1) DATA — bloky, kotvy slamů (word-level whisper), mini-instance
+// ════════════════════════════════════════════════════════════════════
+const BLOCKS = [
+  { num: '1', f: 'Σₜ aᵢₜ = 1', lbl: 'start právě jednou', col: 0x7dd3fc },
+  { num: '2', f: 'sᵢ = Σₜ t·aᵢₜ', lbl: 'startovní čas', col: 0xfbbf24 },
+  { num: '3', f: 'sᵢ + lᵢⱼ ≤ sⱼ', lbl: 'temporální vazba', col: 0xa78bfa },
+  { num: '4', f: 'v čase τ ≤ 1 úloha', lbl: 'zdroj', col: 0x4ade80 },
+  { num: '5', f: 'sᵢ + pᵢ ≤ C·max', lbl: 'minimalizuj C·max', col: 0xf472b6 },
+];
+// slam časy bloků 1–5 + stlačení střechy (minimalizuj) pro 3 refrény
+const SLAMS = [
+  [21.54, 27.0, 32.0, 36.8, 41.1, 43.81],
+  [59.60, 64.0, 68.5, 73.3, 77.7, 80.36],
+  [94.98, 100.3, 104.5, 109.9, 114.0, 116.9],
+];
+// mini rozvrh pro blueprint (3 úlohy, 1 zdroj, temp vazby) — s=(0,2,5), p=(2,3,2), Cmax=7
+const PLAN = [{ s: 0, p: 2, col: 0x7dd3fc }, { s: 2, p: 3, col: 0xfbbf24 }, { s: 5, p: 2, col: 0xf472b6 }];
+
+// ════════════════════════════════════════════════════════════════════
+// 2) PIXI + particles
+// ════════════════════════════════════════════════════════════════════
+const app = new PIXI.Application({ width: 1280, height: 720, antialias: true, background: 0x0b0e16 });
+document.getElementById('stage').appendChild(app.view);
+const sceneLayer = new PIXI.Container();
+const fxLayer = new PIXI.Container();
+app.stage.addChild(sceneLayer, fxLayer);
+const dotG = new PIXI.Graphics();
+dotG.beginFill(0xffffff, 1).drawCircle(0, 0, 32).endFill();
+const dotTex = app.renderer.generateTexture(dotG);
+const parts = [];
+function burst(x, y, tint, count = 18, speed = 220, size = 0.1, gravity = 240) {
+  for (let i = 0; i < count; i++) {
+    const p = new PIXI.Sprite(dotTex);
+    p.anchor.set(0.5); p.x = x; p.y = y; p.tint = tint;
+    p.blendMode = PIXI.BLEND_MODES.ADD;
+    const a = Math.random() * 6.283, v = speed * (0.3 + Math.random() * 0.8);
+    p._vx = Math.cos(a) * v; p._vy = Math.sin(a) * v;
+    p._life = 0.6 + Math.random() * 0.7; p._t = 0; p._g = gravity;
+    p.scale.set(size * (0.5 + Math.random()));
+    fxLayer.addChild(p); parts.push(p);
+  }
+}
+app.ticker.add(() => {
+  const dt = app.ticker.deltaMS / 1000;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p._t += dt; p.x += p._vx * dt; p.y += p._vy * dt;
+    p._vy += p._g * dt; p.alpha = clamp01(1 - p._t / p._life);
+    if (p._t > p._life) { fxLayer.removeChild(p); p.destroy(); parts.splice(i, 1); }
+  }
+});
+function txt(str, size, color, weight = '800', family = "'Segoe UI', system-ui, sans-serif") {
+  const t = new PIXI.Text(str, {
+    fontFamily: family, fontSize: size, fill: color, fontWeight: weight,
+    align: 'center', dropShadow: true, dropShadowColor: 0x000000,
+    dropShadowBlur: 8, dropShadowAlpha: 0.6, dropShadowDistance: 2,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  return t;
+}
+const MATH = "'Cambria Math', Cambria, Georgia, serif";
+
+// ════════════════════════════════════════════════════════════════════
+// 3) KULISA: cihlová zeď, plot, lampa, graffiti, boombox, holub, louže
+// ════════════════════════════════════════════════════════════════════
+function buildSite(c) {
+  const g = new PIXI.Graphics(); c.addChild(g);
+  // graffiti easter-egg tagy (crossovery alba)
+  const tags = [
+    ['3/2 · OPT', 95, 240, 0x4ade80, -0.07, 20],
+    ['∀a ∃b', 235, 300, 0x7dd3fc, 0.05, 18],
+    ['ℓ se nezmění 🔒', 130, 360, 0xfbbf24, -0.04, 15],
+    ['n−1 kol 🌊', 300, 215, 0xa78bfa, 0.08, 15],
+    ['JohnyX was here', 365, 395, 0x5a6478, 0.02, 10],
+  ];
+  tags.forEach(([s, x, y, col, rot, size]) => {
+    const t = txt(s, size, col, '900', MATH);
+    t.x = x; t.y = y; t.rotation = rot; t.alpha = 0.55;
+    c.addChild(t);
+  });
+  // BOZP cedule — zdrojové omezení jako bezpečnostní značka
+  const sign = new PIXI.Container(); sign.x = 165; sign.y = 520; c.addChild(sign);
+  const sg = new PIXI.Graphics();
+  sg.lineStyle(4, 0xffcf3d, 1);
+  sg.beginFill(0x161409, 0.95);
+  sg.drawRoundedRect(-130, -46, 260, 92, 10);
+  sg.endFill();
+  sign.addChild(sg);
+  const st1 = txt('⚠ NA STAVBĚ:', 19, 0xffcf3d, '900'); st1.y = -20; sign.addChild(st1);
+  const st2 = txt('v každém čase τ', 17, 0xffffff, '700', MATH); st2.y = 4; sign.addChild(st2);
+  const st3 = txt('NEJVÝŠ 1 ÚLOHA', 19, 0xffcf3d, '900'); st3.y = 27; sign.addChild(st3);
+  const fired = new Set();
+  function render(t, o = {}) {
+    g.clear();
+    // zeď
+    g.beginFill(C.brick, 1).drawRect(0, 0, 1280, 640).endFill();
+    g.lineStyle(2, C.brickLine, 0.5);
+    for (let y = 0; y < 640; y += 38) { g.moveTo(0, y); g.lineTo(1280, y); }
+    for (let y = 0; y < 640; y += 38) for (let x = (y / 38) % 2 ? 0 : 45; x < 1280; x += 90) { g.moveTo(x, y); g.lineTo(x, y + 38); }
+    // tma po krajích + sodíková lampa vlevo nahoře
+    g.lineStyle(0);
+    g.beginFill(0x05070c, 0.55).drawRect(0, 0, 1280, 90).endFill();
+    g.beginFill(0xffb759, 0.07).drawCircle(190, 40, 320).endFill();
+    g.beginFill(0xffb759, 0.9).drawCircle(190, 36, 13).endFill();
+    g.lineStyle(5, 0x222a38, 1); g.moveTo(190, 0); g.lineTo(190, 30);
+    // chodník + louže (s ploutví!)
+    g.lineStyle(0);
+    g.beginFill(0x171c28, 1).drawRect(0, 640, 1280, 80).endFill();
+    g.beginFill(0x0e2a3e, 0.85).drawEllipse(330, 678, 120, 17).endFill();
+    const finP = ((t * 0.06) % 1);
+    if (finP > 0.15 && finP < 0.5) {
+      const fx = lerp(240, 420, ph(finP, 0.15, 0.5));
+      g.beginFill(0x222c3e, 1);
+      g.moveTo(fx - 10, 678); g.quadraticCurveTo(fx, 660, fx + 7, 663); g.lineTo(fx + 11, 678);
+      g.closePath().endFill();
+    }
+    // drátěný plot dole
+    g.lineStyle(2, 0x47536b, 0.8);
+    for (let x = 0; x < 1280; x += 26) { g.moveTo(x, 596); g.lineTo(x + 22, 640); g.moveTo(x + 22, 596); g.lineTo(x, 640); }
+    g.lineStyle(4, 0x5a677f, 1); g.moveTo(0, 594); g.lineTo(1280, 594);
+    // boombox (pumpuje na beat ~93 bpm boom bap)
+    const beat = Math.max(0, Math.sin(t * 9.74));
+    const bx = 520, by = 660;
+    g.lineStyle(3, 0x0b0e16, 1);
+    g.beginFill(0x2a3346, 1).drawRoundedRect(bx - 80, by - 38, 160, 62, 10).endFill();
+    g.beginFill(0x11141d, 1).drawCircle(bx - 44, by - 7, 20 + 3 * beat).endFill();
+    g.beginFill(0x11141d, 1).drawCircle(bx + 44, by - 7, 20 + 3 * beat).endFill();
+    g.beginFill(C.gold, 0.9).drawCircle(bx - 44, by - 7, 7 + 2 * beat).endFill();
+    g.beginFill(C.gold, 0.9).drawCircle(bx + 44, by - 7, 7 + 2 * beat).endFill();
+    g.beginFill(0x47536b, 1).drawRect(bx - 26, by - 32, 52, 14).endFill();
+    g.lineStyle(3, 0x5a677f, 1); g.moveTo(bx - 60, by - 38); g.quadraticCurveTo(bx, by - 64, bx + 60, by - 38);
+    sign.rotation = 0.015 * Math.sin(t * 0.9);
+    return { beat };
+  }
+  return { render };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 4) VĚŽ — 5 bloků + jeřáb + střecha C_max
+// ════════════════════════════════════════════════════════════════════
+const TW = 320, TH = 66, TXC = 855, TBOT = 592;
+const blockY = i => TBOT - (i + 1) * TH;
+function buildTower(c) {
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const fT = BLOCKS.map((b, i) => {
+    const t = txt(`${b.num} │ ${b.f}`, 21, 0x0b0e16, '900', MATH);
+    c.addChild(t); t.alpha = 0; return t;
+  });
+  const lT = BLOCKS.map((b, i) => {
+    const t = txt(b.lbl, 13, 0x0b0e16, '700');
+    c.addChild(t); t.alpha = 0; return t;
+  });
+  const cmaxT = txt('C·max', 24, C.goldHi, '900', MATH); cmaxT.alpha = 0; c.addChild(cmaxT);
+  const addr = txt('7b', 22, C.gold, '900'); addr.alpha = 0; c.addChild(addr); // číslo popisné = 7 bodů slotu 1
+  const cabT = txt('aᵢₜ∈{0,1}', 14, 0x0b0e16, '900', MATH); c.addChild(cabT);
+  const fired = new Set();
+  // render: slams = pole 6 časů (b1..b5, roof); ghost = jen obrysy; collapseT = čas zřícení
+  function render(t, slams, o = {}) {
+    g.clear();
+    // jeřáb
+    const mastX = 1180;
+    g.lineStyle(5, C.steel, 1);
+    g.moveTo(mastX, 640); g.lineTo(mastX, 96);
+    g.moveTo(mastX - 14, 640); g.lineTo(mastX - 14, 96);
+    for (let y = 110; y < 640; y += 42) { g.moveTo(mastX - 14, y); g.lineTo(mastX, y + 42); g.moveTo(mastX, y); g.lineTo(mastX - 14, y + 42); }
+    g.moveTo(mastX + 30, 96); g.lineTo(640, 96); // rameno
+    g.moveTo(mastX - 14, 96); g.lineTo(mastX + 30, 96);
+    g.lineStyle(3, C.steel, 0.8);
+    g.moveTo(mastX - 7, 60); g.lineTo(700, 96); g.moveTo(mastX - 7, 60); g.lineTo(mastX + 28, 96);
+    // kabina s SPZ binárky
+    g.lineStyle(2, 0x0b0e16, 1);
+    g.beginFill(C.gold, 1).drawRoundedRect(mastX - 40, 100, 54, 36, 6).endFill();
+    cabT.x = mastX - 13; cabT.y = 118;
+    // holub na rameni (kývá hlavou do beatu)
+    const beat = Math.max(0, Math.sin(t * 9.74));
+    const px2 = 760, py2 = 88;
+    g.beginFill(0x9aa6bd, 1).drawEllipse(px2, py2, 11, 8).endFill();
+    g.beginFill(0x7e8aa3, 1).drawCircle(px2 + 9, py2 - 7 + 2.5 * beat, 5).endFill();
+    g.beginFill(0xffb000, 1).drawPolygon([px2 + 13, py2 - 7 + 2.5 * beat, px2 + 19, py2 - 5 + 2.5 * beat, px2 + 13, py2 - 4 + 2.5 * beat]).endFill();
+    // bloky
+    let topY = TBOT;
+    for (let i = 0; i < 5; i++) {
+      const slam = slams ? slams[i] : -1;
+      const B = BLOCKS[i];
+      let y = blockY(i), x = TXC, rot = 0, a = 1, settled = false;
+      if (o.ghost) {
+        // duch (V1): obrysy; blok 4 mizí na „zapomene“; kolaps na „spát“
+        const gone = o.forgot && i === 3 && t > o.forgot;
+        if (o.collapseT && t > o.collapseT) {
+          const p = ph(t, o.collapseT, o.collapseT + 1.4);
+          y += easeIn(p) * (520 - i * 60);
+          rot = (i % 2 ? 1 : -1) * p * (0.6 + i * 0.18);
+          x += (i % 2 ? 1 : -1) * p * (40 + i * 26);
+          a = 1 - p * 0.7;
+        }
+        if (gone) {
+          const bp = 0.5 + 0.5 * Math.sin(t * 10);
+          g.lineStyle(3, C.red, (o.collapseT && t > o.collapseT) ? 0 : 0.4 + 0.4 * bp);
+          g.drawRoundedRect(x - TW / 2, y + 4, TW, TH - 8, 8);
+          continue;
+        }
+        g.lineStyle(3, B.col, 0.5 * a);
+        g.beginFill(B.col, 0.08 * a);
+        g.drawRoundedRect(x - TW / 2, y + 4, TW, TH - 8, 8);
+        g.endFill();
+        continue;
+      }
+      if (slam < 0 || t < slam - 1.1) { fT[i].alpha = 0; lT[i].alpha = 0; continue; }
+      if (t < slam) {
+        // visí na háku, klesá s kyvadlem
+        const p = ph(t, slam - 1.1, slam);
+        const sway = Math.sin(t * 5.5) * 26 * (1 - p);
+        x = TXC + sway;
+        y = lerp(-90, blockY(i), easeIn(p));
+        // lano
+        g.lineStyle(3, 0x222a38, 1);
+        g.moveTo(x, y + 6); g.lineTo(x, 96);
+        g.beginFill(0x222a38, 1).drawPolygon([x - 7, y + 2, x + 7, y + 2, x, y + 14]).endFill();
+      } else {
+        settled = true;
+        const k = Math.exp(-(t - slam) * 6) * Math.sin((t - slam) * 24) * 6;
+        y += Math.max(0, k);
+        if (!fired.has('s' + i + slam)) {
+          fired.add('s' + i + slam);
+          burst(TXC, blockY(i) + TH, C.dust, 26, 230, 0.12, 60);
+          burst(TXC, blockY(i) + TH / 2, B.col, 14, 200, 0.1);
+        }
+      }
+      // stlačení střechy → celá věž mírně sedne (minimalizuj!)
+      const roofT = slams ? slams[5] : -1;
+      const squash = roofT > 0 ? easeOut(ph(t, roofT, roofT + 0.8)) * 10 : 0;
+      y += squash * (i + 1) / 5;
+      g.lineStyle(3, 0x0b0e16, a);
+      g.beginFill(B.col, 0.95 * a);
+      g.drawRoundedRect(x - TW / 2, y + 4, TW, TH - 8, 8);
+      g.endFill();
+      fT[i].x = x; fT[i].y = y + TH / 2 - 7; fT[i].alpha = a; fT[i].rotation = rot;
+      lT[i].x = x; lT[i].y = y + TH / 2 + 16; lT[i].alpha = 0.85 * a; lT[i].rotation = rot;
+      if (settled) topY = y + 4;
+    }
+    // střecha + C_max šipka + řetěz (po slamu bloku 5)
+    const roofT = slams ? slams[5] : -1;
+    if (roofT > 0 && t > slams[4]) {
+      const squash = easeOut(ph(t, roofT, roofT + 0.8)) * 10;
+      const ry = blockY(4) + squash - 6;
+      g.lineStyle(3, 0x0b0e16, 1);
+      g.beginFill(0x5a677f, 1);
+      g.drawPolygon([TXC - TW / 2 - 14, ry + 8, TXC + TW / 2 + 14, ry + 8, TXC, ry - 30]);
+      g.endFill();
+      // C_max kóta vlevo od věže
+      const gx = TXC - TW / 2 - 44;
+      g.lineStyle(3, C.goldHi, 0.95);
+      g.moveTo(gx, TBOT); g.lineTo(gx, ry - 8);
+      g.moveTo(gx - 9, TBOT); g.lineTo(gx + 9, TBOT);
+      g.moveTo(gx - 9, ry - 8); g.lineTo(gx + 9, ry - 8);
+      cmaxT.x = gx - 36; cmaxT.y = (TBOT + ry) / 2; cmaxT.alpha = 1;
+      // zlatý řetěz tahá střechu dolů při minimalizaci
+      if (t > roofT && t < roofT + 2.2) {
+        g.lineStyle(0);
+        for (let yy = ry - 26; yy < ry + 60; yy += 16) {
+          g.lineStyle(4, C.gold, 0.9);
+          g.drawCircle(TXC, yy, 6);
+        }
+        if (!fired.has('roof' + roofT)) { fired.add('roof' + roofT); burst(TXC, ry, C.gold, 24, 260, 0.12); }
+      }
+      // kšiltovka na střeše (outro easter egg)
+      if (o.cap) {
+        const cp = easeOut(ph(t, o.cap, o.cap + 0.7));
+        const cy = lerp(-60, ry - 44, cp);
+        g.lineStyle(2, 0x0b0e16, 1);
+        g.beginFill(C.red, 1).drawEllipse(TXC, cy, 26, 13).endFill();
+        g.beginFill(C.red, 1).drawRect(TXC - 2, cy - 4, 38, 7).endFill();
+      }
+      addr.x = TXC + TW / 2 - 26; addr.y = TBOT - 18; addr.alpha = 1;
+    } else { cmaxT.alpha = 0; addr.alpha = 0; }
+  }
+  return { render };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 5) SCÉNY
+// ════════════════════════════════════════════════════════════════════
+const scenes = [];
+function scene(t0, t1, build) {
+  const s = { t0, t1, st: null };
+  s.init = () => { s.st = build(); sceneLayer.addChild(s.st.c); };
+  s.update = (lt) => s.st && s.st.update(lt);
+  s.destroy = () => { if (s.st) { sceneLayer.removeChild(s.st.c); s.st.c.destroy({ children: true }); s.st = null; } };
+  scenes.push(s);
+  return s;
+}
+function caption(c, str, color = C.gold, y = 42, size = 25) {
+  const t = txt(str, size, color, '800');
+  t.x = 640; t.y = y; c.addChild(t);
+  return t;
+}
+
+// ── INTRO [0 – 10.48]: spray tag titulu ──
+scene(0, 10.48, () => {
+  const c = new PIXI.Container();
+  const site = buildSite(c);
+  const t1 = txt('PS1 | temp | C·max', 64, C.gold, '900', MATH); t1.x = 640; t1.y = 200; t1.alpha = 0;
+  const t2 = txt('TIME-INDEXED ILP', 44, 0xffffff, '900'); t2.x = 640; t2.y = 286; t2.alpha = 0;
+  const t3 = txt('PĚT OMEZENÍ — jedem! 🏗', 34, C.pink, '900'); t3.x = 640; t3.y = 360; t3.alpha = 0;
+  const wet = txt('— ČERSTVĚ NASTŘÍKÁNO —', 16, C.muted, '700'); wet.x = 640; wet.y = 412; wet.alpha = 0;
+  c.addChild(t1, t2, t3, wet);
+  const fired = new Set();
+  return { c, update(lt) {
+    site.render(lt);
+    // spray reveal: částice mlhy + postupné objevení (na intro slova)
+    const reveals = [[1.0, t1], [3.3, t2], [6.0, t3], [8.8, wet]];
+    reveals.forEach(([at, el], i) => {
+      el.alpha = easeOut(ph(lt, at, at + 0.9));
+      if (lt > at && lt < at + 0.9 && Math.random() < 0.45) {
+        burst(el.x + (Math.random() - 0.5) * 360, el.y, [C.gold, 0xffffff, C.pink, C.muted][i], 2, 60, 0.07, 8);
+      }
+    });
+  } };
+});
+
+// ── VERSE 1 [10.48 – 21.18]: blueprint a_it + duch věže + KOLAPS gag ──
+scene(10.48, 21.18, () => {
+  const c = new PIXI.Container();
+  const site = buildSite(c);
+  const tower = buildTower(c);
+  const cap = caption(c, '');
+  const g = new PIXI.Graphics(); c.addChild(g);
+  // blueprint mřížka a_it: řádky = úlohy, sloupce = čas 0..7
+  const BX = 120, BY = 130, CW2 = 56, RH2 = 52;
+  const headT = [];
+  for (let tt = 0; tt <= 7; tt++) { const h = txt('t=' + tt, 14, C.cyan, '700', MATH); h.x = BX + tt * CW2 + CW2 / 2; h.y = BY - 16; h.alpha = 0; c.addChild(h); headT.push(h); }
+  const rowT = [];
+  for (let i = 0; i < 3; i++) { const h = txt('úloha ' + (i + 1), 15, 0xffffff, '700'); h.x = BX - 44; h.y = BY + i * RH2 + RH2 / 2; h.alpha = 0; c.addChild(h); rowT.push(h); }
+  const zzz = txt('od zkoušky SPÁT 😴 Zzz…', 36, C.red, '900'); zzz.x = 640; zzz.y = 420; zzz.alpha = 0; zzz.rotation = -0.05; c.addChild(zzz);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 10.48;
+    site.render(lt);
+    g.clear();
+    const gridIn = easeOut(ph(lt, 10.6, 11.6));
+    headT.forEach(h => h.alpha = gridIn); rowT.forEach(h => h.alpha = gridIn);
+    // mřížka + binárka: právě jedna 1 v řádku (starty 0,2,5)
+    for (let i = 0; i < 3; i++) for (let tt = 0; tt <= 7; tt++) {
+      const on = PLAN[i].s === tt;
+      const onT = 11.0 + i * 0.55; // „a_it je jedna, když úloha i startuje v t“
+      const lit = on && lt > onT;
+      g.lineStyle(2, lit ? PLAN[i].col : 0x2a3346, gridIn);
+      g.beginFill(lit ? PLAN[i].col : 0x10141f, (lit ? 0.85 : 0.8) * gridIn);
+      g.drawRect(BX + tt * CW2 + 2, BY + i * RH2 + 2, CW2 - 4, RH2 - 4);
+      g.endFill();
+      if (lit && !fired.has('c' + i)) { fired.add('c' + i); burst(BX + tt * CW2 + CW2 / 2, BY + i * RH2 + RH2 / 2, PLAN[i].col, 12, 160, 0.08); }
+    }
+    // horizont sweep na „binárka přes celý horizont“ (12.88–14.5)
+    if (lt > 12.88 && lt < 15.2) {
+      const sx = BX + ph(lt, 12.88, 14.53) * 8 * CW2;
+      g.lineStyle(4, C.cyan, 0.8);
+      g.moveTo(sx, BY - 6); g.lineTo(sx, BY + 3 * RH2 + 6);
+    }
+    // „horní mez je strop“ (15.2) — závorka na konci horizontu
+    if (lt > 15.2) {
+      g.lineStyle(5, C.gold, 0.95);
+      g.moveTo(BX + 8 * CW2 + 6, BY - 10); g.lineTo(BX + 8 * CW2 + 6, BY + 3 * RH2 + 10);
+      g.moveTo(BX + 8 * CW2 + 6, BY - 10); g.lineTo(BX + 8 * CW2 - 8, BY - 10);
+      g.moveTo(BX + 8 * CW2 + 6, BY + 3 * RH2 + 10); g.lineTo(BX + 8 * CW2 - 8, BY + 3 * RH2 + 10);
+      if (!fired.has('strop')) { fired.add('strop'); burst(BX + 8 * CW2, BY - 10, C.gold, 12, 160, 0.08); }
+    }
+    // duch věže od „pět bloků staví model“ (16.48); blok 4 zmizí (18.8); kolaps na „spát“ (20.33)
+    tower.render(lt, null, { ghost: lt > 16.48, forgot: 18.8, collapseT: 20.33 });
+    if (lt > 20.33) {
+      zzz.alpha = 1; zzz.scale.set(lerp(1.7, 1, easeOut(ph(lt, 20.33, 20.8))));
+      if (!fired.has('boom')) { fired.add('boom'); burst(TXC, 480, C.dust, 50, 320, 0.15, 80); burst(TXC, 380, C.red, 24, 260, 0.12); }
+    }
+    if (lt < 12.88) { cap.text = 'aᵢₜ = 1 ⟺ úloha i startuje v čase t (binárka)'; cap.style.fill = C.cyan; }
+    else if (lt < 16.34) { cap.text = 'binárka přes CELÝ horizont — horní mez = strop'; cap.style.fill = C.gold; }
+    else if (lt < 18.8) { cap.text = 'pět bloků staví model — žádný nesmíš vynechat!'; cap.style.fill = 0xffffff; }
+    else { cap.text = 'zapomněl jsi blok 4 (ZDROJE)? …stavba spadne 💥'; cap.style.fill = C.red; }
+  } };
+});
+
+// ── CHORUS factory: jeřáb skládá 5 bloků na slova JEDNA…PĚT ──
+function chorusScene(t0, t1, slams) {
+  scene(t0, t1, () => {
+    const c = new PIXI.Container();
+    const site = buildSite(c);
+    const tower = buildTower(c);
+    const cap = caption(c, '');
+    return { c, update(lt0) {
+      const lt = lt0 + t0;
+      site.render(lt);
+      tower.render(lt, slams);
+      const names = ['① start právě jednou', '② definice startu sᵢ', '③ temporální vazby', '④ zdroj: v τ max 1', '⑤ konec pod C·max → MINIMALIZUJ'];
+      let idx = 0;
+      for (let i = 0; i < 5; i++) if (lt > slams[i] - 1.0) idx = i;
+      cap.text = names[idx];
+      cap.style.fill = BLOCKS[idx].col;
+      if (lt > slams[5]) { cap.text = '⑤ … a střechu tlač DOLŮ: min C·max!'; cap.style.fill = C.goldHi; }
+    } };
+  });
+}
+chorusScene(21.18, 45.38, SLAMS[0]);
+
+// ── VERSE 2 [45.38 – 59.32]: OKNO čtvrtého patra — t ≤ τ < t+pᵢ ──
+scene(45.38, 59.32, () => {
+  const c = new PIXI.Container();
+  const site = buildSite(c);
+  const cap = caption(c, 'finta bloku ④: OKNO');
+  const g = new PIXI.Graphics(); c.addChild(g);
+  // velké okno (zoom 4. patra)
+  const WX = 640, WY = 330, WW = 760, WH = 320;
+  const fInfo = txt('t ≤ τ < t + pᵢ', 52, 0xffffff, '900', MATH); fInfo.x = WX; fInfo.y = WY - 90; fInfo.alpha = 0; c.addChild(fInfo);
+  const lBr = txt('≤  NEOSTRÁ zleva', 30, C.green, '900', MATH); lBr.x = WX - 220; lBr.y = WY + 116; lBr.alpha = 0; c.addChild(lBr);
+  const rBr = txt('<  OSTRÁ zprava!', 30, C.red, '900', MATH); rBr.x = WX + 220; rBr.y = WY + 116; rBr.alpha = 0; c.addChild(rBr);
+  const tauT = txt('τ', 26, C.goldHi, '900', MATH); tauT.alpha = 0; c.addChild(tauT);
+  const note = txt('úloha startující v t PRÁVĚ BĚŽÍ v čase τ', 22, C.muted, '700'); note.x = WX; note.y = WY + 158; note.alpha = 0; c.addChild(note);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 45.38;
+    site.render(lt);
+    g.clear();
+    // rám okna + výstražná páska
+    const win = easeOut(ph(lt, 45.7, 46.6)); // „okno“
+    if (win > 0) {
+      g.lineStyle(8, 0x8a5a2b, win);
+      g.drawRoundedRect(WX - WW / 2, WY - 110, WW, 250, 14);
+      g.lineStyle(3, 0x8a5a2b, win);
+      g.moveTo(WX, WY - 110); g.lineTo(WX, WY + 140);
+      // úloha = bar od t do t+p
+      const bx0 = WX - 240, bx1 = WX + 240;
+      g.lineStyle(2, 0x0b0e16, win);
+      g.beginFill(0x7dd3fc, 0.9 * win);
+      g.drawRoundedRect(bx0, WY - 20, bx1 - bx0, 56, 10);
+      g.endFill();
+      // závorky
+      if (lt > 47.75) { // „t menší rovno tau“
+        g.lineStyle(7, C.green, 1);
+        g.moveTo(bx0, WY - 44); g.lineTo(bx0, WY + 58);
+        g.moveTo(bx0, WY - 44); g.lineTo(bx0 + 18, WY - 44);
+        g.moveTo(bx0, WY + 58); g.lineTo(bx0 + 18, WY + 58);
+      }
+      if (lt > 49.22) { // „OSTŘE“ → pravá ostrá
+        const blink = 0.6 + 0.4 * Math.sin(lt * 9);
+        g.lineStyle(7, C.red, blink);
+        g.moveTo(bx1, WY - 44); g.lineTo(bx1, WY + 58);
+        g.moveTo(bx1, WY - 44); g.lineTo(bx1 - 18, WY - 44);
+        g.moveTo(bx1, WY + 58); g.lineTo(bx1 - 18, WY + 58);
+        if (!fired.has('ostre')) { fired.add('ostre'); burst(bx1, WY, C.red, 20, 240, 0.11); }
+      }
+      // τ kurzor jede oknem při „úloha běží v čase tau“ (52–55.5)
+      if (lt > 52.0) {
+        const tp = (Math.sin((lt - 52) * 1.4) * 0.5 + 0.5);
+        const tx = lerp(bx0 + 8, bx1 - 8, tp);
+        g.lineStyle(4, C.goldHi, 1);
+        g.moveTo(tx, WY - 36); g.lineTo(tx, WY + 50);
+        tauT.alpha = 1; tauT.x = tx; tauT.y = WY - 52;
+      }
+    }
+    fInfo.alpha = easeOut(ph(lt, 47.5, 48.3));
+    fInfo.scale.set(1 + 0.03 * Math.sin(lt * 5) * fInfo.alpha);
+    lBr.alpha = lt > 55.48 ? 1 : 0;   // „neostrá zleva“
+    rBr.alpha = lt > 56.59 ? 1 : 0;   // „ostrá zprava“
+    note.alpha = easeOut(ph(lt, 52.2, 53.0));
+    if (lt > 55.5 && !fired.has('l')) { fired.add('l'); burst(WX - 220, WY + 116, C.green, 18, 220, 0.1); }
+    if (lt > 56.65 && !fired.has('r')) { fired.add('r'); burst(WX + 220, WY + 116, C.red, 18, 220, 0.1); }
+    if (lt < 51.8) { cap.text = 'finta bloku ④: OKNO — kdy úloha běží?'; cap.style.fill = C.gold; }
+    else { cap.text = 'zapiš si to: ≤ zleva, < zprava — jinak ztrácíš body'; cap.style.fill = 0xffffff; }
+  } };
+});
+
+chorusScene(59.32, 81.94, SLAMS[1]);
+
+// ── BRIDGE [81.94 – 92.72]: kolaudace checklist + řetěz ──
+scene(81.94, 92.72, () => {
+  const c = new PIXI.Container();
+  const site = buildSite(c);
+  const tower = buildTower(c);
+  const cap = caption(c, 'KOLAUDACE — projdi bloky odspodu');
+  const checks = ['✓ jednou startuješ', '✓ startem počítáš', '✓ vazby ctíš', '✓ zdroj nepřetížíš', '✓ C·max tlačíš NÍŽ'];
+  const at = [82.2, 83.73, 85.45, 86.55, 89.26];
+  const ck = checks.map((s, i) => {
+    const t = txt(s, 26, BLOCKS[i].col, '900'); t.x = 300; t.y = 540 - i * 56; t.alpha = 0; c.addChild(t); return t;
+  });
+  // stavbyvedoucí s deskami (easter egg)
+  const insp = new PIXI.Graphics(); c.addChild(insp);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 81.94;
+    site.render(lt);
+    // věž stojí celá (slamy z CH2), řetěz potáhne na „tlačíš níž“ (90.82)
+    tower.render(lt, [0, 0, 0, 0, 0, 90.82].map((v, i) => i < 5 ? -10 + i : v).map((v, i) => i < 5 ? SLAMS[1][i] - 100 : v));
+    ck.forEach((t, i) => {
+      t.alpha = lt > at[i] ? 1 : 0;
+      t.scale.set(lerp(1.4, 1, easeOut(ph(lt, at[i], at[i] + 0.4))));
+      if (lt > at[i] && !fired.has(i)) { fired.add(i); burst(300, 540 - i * 56, BLOCKS[i].col, 14, 180, 0.09); }
+    });
+    // stavbyvedoucí: helma + clipboard, kývá při každém checku
+    insp.clear();
+    const ix = 545, iy = 560;
+    const nod = fired.size * 0.06 + 0.04 * Math.sin(lt * 3);
+    insp.lineStyle(0);
+    insp.beginFill(0xf2c89b, 1).drawCircle(ix, iy - 64, 13).endFill();          // hlava
+    insp.beginFill(0xffcf3d, 1).drawEllipse(ix, iy - 73, 15, 7).endFill();      // helma
+    insp.beginFill(0x2a3346, 1).drawRoundedRect(ix - 13, iy - 50, 26, 44, 8).endFill(); // tělo
+    insp.lineStyle(4, 0x2a3346, 1);
+    insp.moveTo(ix - 11, iy - 40); insp.lineTo(ix - 30, iy - 22 - nod * 40);    // ruka s deskami
+    insp.lineStyle(2, 0x0b0e16, 1);
+    insp.beginFill(0xe8e2d0, 1).drawRect(ix - 44, iy - 34 - nod * 40, 22, 28).endFill();
+    if (lt > 90.82) { cap.text = 'min C·max — střechu DOLŮ! (zlatý řetěz v akci)'; cap.style.fill = C.goldHi; }
+  } };
+});
+
+chorusScene(92.72, 118.64, SLAMS[2]);
+
+// ── OUTRO [118.64 – 122]: hotová stavba, kšiltovka, zvonky ──
+scene(118.64, 122, () => {
+  const c = new PIXI.Container();
+  const site = buildSite(c);
+  const tower = buildTower(c);
+  const bell = txt('🔔 nájemníci: ×1 start · sᵢ · temp · zdroj · C·max', 21, 0xffffff, '800', MATH);
+  bell.x = 400; bell.y = 200; bell.alpha = 0; c.addChild(bell);
+  const fin = txt('Zkolaudováno ✓ — postav model na papír: L5.3', 19, C.muted, '700'); fin.x = 400; fin.y = 246; fin.alpha = 0; c.addChild(fin);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 118.64;
+    site.render(lt);
+    tower.render(lt, SLAMS[2].map((v, i) => i < 5 ? v - 100 : v - 100), { cap: 119.0 });
+    bell.alpha = easeOut(ph(lt, 119.3, 120.2));
+    fin.alpha = easeOut(ph(lt, 120.4, 121.2));
+    if (lt > 119.6 && !fired.has('cap')) { fired.add('cap'); burst(TXC, 200, C.red, 18, 220, 0.1); }
+  } };
+});
+
+// ════════════════════════════════════════════════════════════════════
+// 6) TITULKY — řádky 1:1 jako sekce „Zpívej“ ve zpěvníku
+// ════════════════════════════════════════════════════════════════════
+const SUNG = [[0,0.01],[0.01,0.35],[0.35,1.02],[1.02,2.75],[2.75,3.32],[3.32,3.98],[3.98,4.27],[4.27,4.65],[4.65,5.14],[5.14,6],[6,7.47],[7.47,8.77],[8.77,9.9],[9.9,10.33],[10.33,10.48],[10.48,10.66],[10.66,10.9],[10.9,10.96],[10.96,11.38],[11.38,11.68],[11.68,12.04],[12.04,12.1],[12.1,12.59],[12.59,12.65],[12.65,12.88],[12.88,13.31],[13.31,13.61],[13.61,13.91],[13.91,14.53],[14.53,14.9],[14.9,15.08],[15.08,15.2],[15.2,15.62],[15.62,16.16],[16.16,16.34],[16.34,16.48],[16.48,16.9],[16.9,17.17],[17.17,17.5],[17.5,17.86],[17.86,18.21],[18.21,18.7],[18.7,18.8],[18.8,19.17],[19.17,19.26],[19.26,19.62],[19.62,19.76],[19.76,19.89],[19.89,20],[20,20.33],[20.33,20.7],[20.7,21.18],[21.18,21.54],[21.54,22.14],[22.14,22.63],[22.63,23.1],[23.1,23.58],[23.58,24.3],[24.3,24.91],[24.91,25.76],[25.76,26.84],[26.84,27.2],[27.2,27.68],[27.68,27.8],[27.8,28.4],[28.4,29.12],[29.12,29.66],[29.66,29.66],[29.66,29.95],[29.95,31.01],[31.01,31.49],[31.49,31.68],[31.68,32.07],[32.07,32.16],[32.16,32.54],[32.54,33.22],[33.22,33.69],[33.69,33.78],[33.78,34.16],[34.16,35.32],[35.32,36.09],[36.09,36.52],[36.52,36.7],[36.7,36.76],[36.76,37.24],[37.24,37.54],[37.54,37.72],[37.72,38.14],[38.14,38.68],[38.68,38.98],[38.98,39.28],[39.28,39.52],[39.52,39.94],[39.94,40.3],[40.3,40.58],[40.58,40.84],[40.84,41.01],[41.01,41.35],[41.35,41.6],[41.6,42.2],[42.2,42.62],[42.62,42.7],[42.7,42.87],[42.87,43.42],[43.42,43.47],[43.47,43.57],[43.57,43.81],[43.81,45.02],[45.02,45.38],[45.38,45.57],[45.57,45.7],[45.7,46.02],[46.02,46.03],[46.03,46.34],[46.34,46.66],[46.66,46.83],[46.83,46.92],[46.92,47.24],[47.24,47.69],[47.69,47.75],[47.75,48.2],[48.2,48.52],[48.52,48.84],[48.84,49.22],[49.22,49.6],[49.6,49.8],[49.8,49.85],[49.85,50.11],[50.11,50.3],[50.3,50.36],[50.36,50.55],[50.55,50.68],[50.68,50.81],[50.81,51.38],[51.38,51.8],[51.8,52.02],[52.02,52.65],[52.65,52.76],[52.76,53.35],[53.35,53.41],[53.41,53.64],[53.64,54.08],[54.08,54.6],[54.6,54.67],[54.67,55.05],[55.05,55.48],[55.48,56.07],[56.07,56.59],[56.59,57.03],[57.03,57.63],[57.63,58.07],[58.07,58.22],[58.22,58.37],[58.37,58.89],[58.89,59.32],[59.32,59.32],[59.32,59.6],[59.6,60.07],[60.07,60.44],[60.44,60.72],[60.72,61.19],[61.19,61.75],[61.75,62.23],[62.23,62.98],[62.98,63.73],[63.73,64.01],[64.01,64.38],[64.38,64.47],[64.47,64.94],[64.94,65.5],[65.5,65.98],[65.98,66.27],[66.27,67.24],[67.24,67.81],[67.81,68],[68,68.39],[68.39,68.48],[68.48,68.86],[68.86,69.54],[69.54,70.01],[70.01,70.1],[70.1,70.48],[70.48,71.65],[71.65,72.42],[72.42,72.9],[72.9,73.08],[73.08,73.21],[73.21,73.62],[73.62,73.92],[73.92,74.1],[74.1,74.52],[74.52,75.06],[75.06,75.36],[75.36,75.66],[75.66,75.9],[75.9,76.32],[76.32,76.68],[76.68,76.94],[76.94,77.21],[77.21,77.39],[77.39,77.75],[77.75,78.02],[78.02,78.65],[78.65,79.1],[79.1,79.19],[79.19,79.37],[79.37,79.91],[79.91,80.06],[80.06,80.09],[80.09,80.36],[80.36,81.62],[81.62,81.94],[81.94,82.2],[82.2,82.71],[82.71,83.73],[83.73,84.34],[84.34,85.45],[85.45,85.88],[85.88,86.55],[86.55,86.97],[86.97,88.6],[88.6,88.98],[88.98,88.98],[88.98,89.26],[89.26,89.71],[89.71,89.99],[89.99,90.08],[90.08,90.36],[90.36,90.45],[90.45,90.54],[90.54,90.82],[90.82,91.65],[91.65,92.35],[92.35,92.72],[92.72,94.98],[94.98,95.56],[95.56,96.02],[96.02,96.36],[96.36,96.95],[96.95,97.63],[97.63,98.21],[98.21,99.01],[99.01,100.05],[100.05,100.39],[100.39,100.85],[100.85,100.96],[100.96,101.54],[101.54,102.23],[102.23,102.72],[102.72,103.02],[103.02,104],[104,104.58],[104.58,104.86],[104.86,105.18],[105.18,105.28],[105.28,105.67],[105.67,106.36],[106.36,106.84],[106.84,106.94],[106.94,107.34],[107.34,108.5],[108.5,109.28],[109.28,109.72],[109.72,109.9],[109.9,109.96],[109.96,110.46],[110.46,110.74],[110.74,110.92],[110.92,111.34],[111.34,111.88],[111.88,112.18],[112.18,112.48],[112.48,112.72],[112.72,113.14],[113.14,113.5],[113.5,113.72],[113.72,113.99],[113.99,114.17],[114.17,114.54],[114.54,114.81],[114.81,115.45],[115.45,115.9],[115.9,115.99],[115.99,116.53],[116.53,116.62],[116.62,116.7],[116.7,116.98],[116.98,118.25],[118.25,118.64],[118.64,118.64],[118.64,119.02],[119.02,119.02],[119.02,120.06],[120.06,121.07],[121.07,121.07],[121.07,123.24]];
+const H = (cls, s) => `<span class="hl ${cls}">${s}</span>`;
+const CH1L = `JEDNA: ${H('c1', 'Σ<sub>t</sub> a<sub>it</sub> = 1')} — start právě jednou!`;
+const CH2L = `DVA: ${H('c2', 's<sub>i</sub> = Σ<sub>t</sub> t·a<sub>it</sub>')} — startovní čas!`;
+const CH3L = `TŘI: ${H('c3', 's<sub>i</sub> + l<sub>ij</sub> ≤ s<sub>j</sub>')} — temporální vazba!`;
+const CH4L = `ČTYŘI: v každém čase ${H('c4', 'τ')} běží nejvýš jedna — zdroj nás hlídá zas!`;
+const CH5L = `PĚT: ${H('c5', 's<sub>i</sub> + p<sub>i</sub> ≤ C<sub>max</sub>')} — a ${H('c5', 'C<sub>max</sub>')} minimalizuj!`;
+const LINES = [
+  [0.9, 10.3, `${H('c1', 'PS1')}. temp. ${H('c5', 'C<sub>max</sub>')}. Time-indexed. Pět omezení. Jedem!`],
+  [10.48, 12.88, `${H('c1', 'a<sub>it</sub>')} je jedna, když úloha ${H('c1', 'i')} startuje v ${H('c1', 't')},`],
+  [12.88, 16.34, `binárka přes celý horizont, horní mez je strop, oukej.`],
+  [16.34, 18.75, `Pět bloků staví model, žádný nesmíš vynechat —`],
+  [18.75, 21.18, `kdo zapomene na zdroje, ten jde od zkoušky spát!`],
+  [21.18, 26.9, CH1L], [26.9, 31.5, CH2L], [31.5, 36.5, CH3L], [36.5, 40.6, CH4L], [40.6, 45.38, CH5L],
+  [45.38, 47.5, `To okno v bloku čtyři, to je finta celá:`],
+  [47.5, 51.8, `${H('c8', 't ≤ τ, τ &lt; t + p<sub>i</sub>')} — tak se to dělá.`],
+  [51.8, 55.48, `Úloha, co startuje v ${H('c1', 't')}, zrovna běží v čase ${H('c4', 'τ')} —`],
+  [55.48, 59.32, `neostrá zleva, ostrá zprava — zapiš si to, čau!`],
+  [59.32, 63.9, CH1L], [63.9, 68.0, CH2L], [68.0, 72.6, CH3L], [72.6, 77.0, CH4L], [77.0, 81.94, CH5L],
+  [81.94, 85.45, `Jednou startuješ, startem počítáš,`],
+  [85.45, 88.98, `vazby ctíš, zdroj nepřetížíš,`],
+  [88.98, 92.72, `konec pod ${H('c5', 'C<sub>max</sub>')} — a ${H('c5', 'C<sub>max</sub>')} tlačíš níž!`],
+  [92.72, 100.2, CH1L], [100.2, 104.3, CH2L], [104.3, 109.72, CH3L], [109.72, 113.72, CH4L], [113.72, 118.64, CH5L],
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 7) PLAYER / KARAOKE / CONTROLS
+// ════════════════════════════════════════════════════════════════════
+const player = document.getElementById('player');
+const subEl = document.getElementById('subtitle');
+const bigplay = document.getElementById('bigplay');
+const btnPlay = document.getElementById('btnPlay');
+const btnRestart = document.getElementById('btnRestart');
+const seek = document.getElementById('seek');
+const tCur = document.getElementById('tCur');
+const tDur = document.getElementById('tDur');
+
+let curScene = null, lastLocal = -1, curLine = -1;
+let lineWords = [];
+function tokenize(html) {
+  const out = []; let cur = ''; let inTag = false;
+  for (const ch of html) {
+    if (ch === '<') inTag = true;
+    else if (ch === '>') inTag = false;
+    if (ch === ' ' && !inTag) { if (cur) out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+function buildKaraokeLine(li) {
+  const [a, b, html] = LINES[li];
+  const tokens = tokenize(html);
+  const ww = SUNG.filter(w => w[0] >= a - 0.06 && w[0] < b && w[1] > w[0]);
+  const pick = (i) => {
+    if (!ww.length) {
+      const step = (b - a) / tokens.length;
+      return [a + step * i, a + step * (i + 1)];
+    }
+    const wi = tokens.length === 1 ? 0 : Math.round(i * (ww.length - 1) / (tokens.length - 1));
+    return ww[wi];
+  };
+  subEl.innerHTML = tokens.map(tok =>
+    `<span class="kw"><span class="wb">${tok}</span><span class="wf">${tok}</span></span>`).join(' ');
+  const els = [...subEl.querySelectorAll('.kw')];
+  lineWords = tokens.map((tok, i) => {
+    const [t0, t1] = pick(i);
+    return { t0, t1: Math.max(t1, t0 + 0.12), wf: els[i] ? els[i].querySelector('.wf') : null };
+  });
+}
+function tick() {
+  const t = player.currentTime;
+  const s = scenes.find(sc => t >= sc.t0 && t < sc.t1) || scenes[scenes.length - 1];
+  if (s !== curScene) { curScene && curScene.destroy(); curScene = s; s.init(); lastLocal = -1; }
+  const localT = t - s.t0;
+  if (localT < lastLocal - 0.05) { s.destroy(); s.init(); }
+  s.update(localT);
+  lastLocal = localT;
+  const li = LINES.findIndex(([a, b]) => t >= a && t < b);
+  if (li !== curLine) {
+    curLine = li;
+    if (li >= 0) buildKaraokeLine(li);
+    else { subEl.innerHTML = ''; lineWords = []; }
+    subEl.style.opacity = li >= 0 ? 1 : 0;
+  }
+  for (let i = 0; i < lineWords.length; i++) {
+    const w = lineWords[i];
+    if (!w.wf) continue;
+    const nextStart = i + 1 < lineWords.length ? lineWords[i + 1].t0 : w.t1;
+    let p;
+    if (t >= Math.max(w.t1, nextStart)) p = 1;
+    else p = clamp01((t - w.t0) / (w.t1 - w.t0));
+    w.wf.style.width = (p * 100).toFixed(1) + '%';
+  }
+  if (!seekDragging) {
+    seek.value = t;
+    seek.style.setProperty('--p', (t / (player.duration || 121.1) * 100) + '%');
+  }
+  tCur.textContent = fmtTime(t);
+  requestAnimationFrame(tick);
+}
+function fmtTime(t) { t = Math.max(0, t || 0); return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`; }
+
+let seekDragging = false;
+seek.addEventListener('input', () => {
+  seekDragging = true;
+  player.currentTime = +seek.value;
+  seek.style.setProperty('--p', (+seek.value / (player.duration || 121.1) * 100) + '%');
+});
+seek.addEventListener('change', () => { seekDragging = false; });
+function togglePlay() { if (player.paused) player.play(); else player.pause(); }
+player.addEventListener('play', () => { btnPlay.textContent = '⏸'; bigplay.classList.add('hidden'); });
+player.addEventListener('pause', () => { btnPlay.textContent = '▶'; if (player.currentTime < 0.05 || player.ended) bigplay.classList.remove('hidden'); });
+player.addEventListener('ended', () => { bigplay.classList.remove('hidden'); bigplay.querySelector('.hint').innerHTML = 'Ještě jednou?<small>R = od začátku</small>'; });
+player.addEventListener('loadedmetadata', () => {
+  seek.max = player.duration;
+  tDur.textContent = fmtTime(player.duration);
+});
+btnPlay.addEventListener('click', togglePlay);
+btnRestart.addEventListener('click', () => { player.currentTime = 0; player.play(); });
+bigplay.addEventListener('click', () => { player.play(); });
+document.getElementById('stage').addEventListener('click', (e) => {
+  if (e.target.closest('#bigplay')) return;
+  togglePlay();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  else if (e.code === 'ArrowRight') player.currentTime = Math.min(player.duration || 121, player.currentTime + 5);
+  else if (e.code === 'ArrowLeft') player.currentTime = Math.max(0, player.currentTime - 5);
+  else if (e.key === 'r' || e.key === 'R' || e.code === 'Home') { player.currentTime = 0; player.play(); }
+});
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
