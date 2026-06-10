@@ -97,20 +97,20 @@
   <details class="try">
     <summary>Zkus sám: proč nejde napsat prostě $z_d \le p_m$ pro všechna $m \in M$, jako v <a href="l1-8.html#takeaways">[L1.8]</a>?</summary>
     <div class="inner">
-      <p>Protože by $z_d$ srazilo minimum <strong>přes všech 100 jídel v $M$</strong> — i přes ta, která ten den na menu vůbec nejsou! Jediné nízkoproteinové jídlo v katalogu (klidně nikdy nevařené) by stáhlo všechna $z_d$ dolů a podmínka $\sum_d z_d \ge p^{\min}$ by se stala nesplnitelnou, přestože reálné menu je v pořádku — model by se nesmyslně <strong>zpřísnil</strong>. Nerovnost $z_d \le p_m$ smí „platit“ jen pro jídla s $x_{m,d} = 1$ — a podmíněné omezení = big-M <a href="l1-4.html#takeaways">[L1.4]</a>:</p>
-      $$z_d \;\le\; p_m + M\,(1 - x_{m,d}) \qquad \forall m \in M,\; \forall d \in D.$$
-      <p>Pro $x_{m,d} = 1$ je to ostré $z_d \le p_m$; pro $x_{m,d} = 0$ se pravá strana zvedne o $M$ a omezení nic neřeže.</p>
+      <p>Protože by $z_d$ srazilo minimum <strong>přes všech 100 jídel v $M$</strong> — i přes ta, která ten den na menu vůbec nejsou! Jediné nízkoproteinové jídlo v katalogu (klidně nikdy nevařené) by stáhlo všechna $z_d$ dolů a podmínka $\sum_d z_d \ge p^{\min}$ by se stala nesplnitelnou, přestože reálné menu je v pořádku — model by se nesmyslně <strong>zpřísnil</strong>. Nerovnost $z_d \le p_m$ smí „platit“ jen pro jídla s $x_{m,d} = 1$ — a podmíněné omezení = big-M <a href="l1-4.html#takeaways">[L1.4]</a>. Pozor na notaci: symbol $M$ je v tomhle zadání <strong>obsazený množinou jídel</strong>, big-M konstantu proto výjimečně značíme $K$:</p>
+      $$z_d \;\le\; p_m + K\,(1 - x_{m,d}) \qquad \forall m \in M,\; \forall d \in D.$$
+      <p>Pro $x_{m,d} = 1$ je to ostré $z_d \le p_m$; pro $x_{m,d} = 0$ se pravá strana zvedne o $K$ a omezení nic neřeže.</p>
     </div>
   </details>
 
   <div class="viz" id="viz-gate"></div>
 
   <details class="try">
-    <summary>Zkus sám: jak velké musí být $M$?</summary>
+    <summary>Zkus sám: jak velké musí být $K$?</summary>
     <div class="inner">
-      <p>Vypnutá nerovnost ($x_{m,d}=0$) nesmí řezat žádnou dosažitelnou hodnotu $z_d$. Smysluplné $z_d$ je nejvýš minimum vybraných proteinů, tedy nejvýš $\max_{m} p_m$. Stačí proto</p>
-      $$M = \max_{m \in M} p_m$$
-      <p>(těsnější, taky korektní: $M = \max_m p_m - \min_m p_m$, protože vypnutá pravá strana je pak $p_m + M \ge \min_m p_m + M = \max_m p_m$). Jako vždy u big-M <a href="l1-4.html#takeaways">[L1.4]</a>: dost velké, aby vypnuté omezení neřezalo, ne nesmyslně obří.</p>
+      <p>Vypnutá nerovnost ($x_{m,d}=0$) nesmí řezat žádnou dosažitelnou hodnotu $z_d$. Smysluplné $z_d$ je nejvýš minimum vybraných proteinů, tedy nejvýš $\max_{m} p_m$. Protože proteiny jsou nezáporné ($p_m \ge 0$), je vypnutá pravá strana $p_m + K \ge K$, takže stačí</p>
+      $$K = \max_{m \in M} p_m$$
+      <p>(těsnější — a platné i bez předpokladu $p_m \ge 0$: $K = \max_m p_m - \min_m p_m$, protože vypnutá pravá strana je pak $p_m + K \ge \min_m p_m + K = \max_m p_m$). Jako vždy u big-M <a href="l1-4.html#takeaways">[L1.4]</a>: velikost vždy zdůvodni — dost velké, aby vypnuté omezení neřezalo, ne nesmyslně obří.</p>
     </div>
   </details>
 
@@ -118,7 +118,7 @@
     <summary>Zkus sám: nerovnosti tlačí $z_d$ jen shora. Nepotřebuješ ještě vazbu, že $z_d$ to minimum opravdu <em>je</em> (zespodu)?</summary>
     <div class="inner">
       <p><strong>Nepotřebuješ</strong> — stejná jednostranná logika jako v <a href="l1-8.html#takeaways">[L1.8]</a>. Celá konstrukce je:</p>
-      $$z_d \le p_m + M(1 - x_{m,d}) \;\;\forall m, d, \qquad\qquad \sum_{d \in D} z_d \ge p^{\min}.$$
+      $$z_d \le p_m + K(1 - x_{m,d}) \;\;\forall m, d, \qquad\qquad \sum_{d \in D} z_d \ge p^{\min}.$$
       <p>Rozmysli oba směry: (⇒) je-li model přípustný, pak pro každý den $z_d \le \min$ vybraných proteinů, takže nejhorší student dostane $\sum_d \min_{m \in \text{menu}_d} p_m \ge \sum_d z_d \ge p^{\min}$ — podmínka 4 platí. (⇐) splňuje-li menu podmínku 4, polož $z_d := \min_{m \in \text{menu}_d} p_m$ a všechna omezení sedí — žádné dobré menu jsme neuřízli. Solver si $z_d$ „nafoukne“ k dennímu minimu sám, protože potřebuje projít součtovým omezením.</p>
       <p>Spočítej si i cenu: $|M| \cdot |D| = 500$ nerovností + 1 součtová — místo $4^5$ kombinací. Polynomiální zápis exponenciálního požadavku.</p>
     </div>
@@ -130,8 +130,8 @@
     <ul>
       <li><strong>POZOR: tohle NENÍ max/min jedné množiny z <a href="l1-8.html#takeaways">[L1.8]</a>.</strong> Tam počítáš min/max přes jednu pevnou množinu hodnot; tady musí nerovnost platit <em>pro každou možnou kombinaci voleb</em> (1 jídlo na den) — kombinatoricky jiná konstrukce.</li>
       <li><strong>Klíčová myšlenka:</strong> má-li omezení platit pro <em>libovolnou</em> volbu, stačí ho zaručit pro <strong>nejhorší dosažitelnou kombinaci</strong> — uhlídáš-li worst case, ostatní kombinace jsou v pořádku zadarmo. Díky nezávislosti voleb po dnech je nejhorší kombinace = <strong>součet denních minim</strong>.</li>
-      <li><strong>Minimum přes <em>vybrané</em> položky</strong> (množinu volí model): $z_d \le p_m + M(1 - x_{m,d})$ $\forall m, d$ — big-M <a href="l1-4.html#takeaways">[L1.4]</a> vypne nerovnost pro nevybraná jídla. Holé $z_d \le p_m$ $\forall m$ (à la <a href="l1-8.html#takeaways">[L1.8]</a>) by model zpřísnilo o minimum přes celý katalog.</li>
-      <li><strong>Worst-case podmínka pak jednou nerovností:</strong> $\sum_d z_d \ge p^{\min}$; $M = \max_m p_m$. Vazba stačí jednostranná — solver $z_d$ dotlačí k dennímu minimu sám. Exponenciálně mnoho kombinací ⟶ $|M|\cdot|D|$ lineárních omezení.</li>
+      <li><strong>Minimum přes <em>vybrané</em> položky</strong> (množinu volí model): $z_d \le p_m + K(1 - x_{m,d})$ $\forall m, d$ — big-M <a href="l1-4.html#takeaways">[L1.4]</a> vypne nerovnost pro nevybraná jídla. Holé $z_d \le p_m$ $\forall m$ (à la <a href="l1-8.html#takeaways">[L1.8]</a>) by model zpřísnilo o minimum přes celý katalog.</li>
+      <li><strong>Worst-case podmínka pak jednou nerovností:</strong> $\sum_d z_d \ge p^{\min}$; big-M konstanta $K = \max_m p_m$ (díky $p_m \ge 0$; symbol $M$ je obsazený množinou jídel, proto $K$). Vazba stačí jednostranná — solver $z_d$ dotlačí k dennímu minimu sám. Exponenciálně mnoho kombinací ⟶ $|M|\cdot|D|$ lineárních omezení.</li>
     </ul>
   </div>
 
@@ -167,7 +167,7 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Rozsekej zadání po podmínkách. Elementární rozhodnutí: jídlo × den → binárka (jaké součty přes řádky/sloupce podmínky 1 a 3 chtějí — rovnost, nebo nerovnost?). U kritéria nezapomeň na 120 porcí. Celý vtip je podmínka 4: nejdřív si ujasni, <em>čí</em> proteiny počítáš (jednoho studenta a jeho pět voleb, ne součet menu!), pak najdi nejhorší kombinaci (nezávislost po dnech) a postav denní minima přes $z_d$ — pozor, minimum jen přes <em>vybraná</em> jídla, tedy big-M, ne holé nerovnosti z [L1.8]. Nakonec zkontroluj velikost $M$.</p>
+      <p>Rozsekej zadání po podmínkách. Elementární rozhodnutí: jídlo × den → binárka (jaké součty přes řádky/sloupce podmínky 1 a 3 chtějí — rovnost, nebo nerovnost?). U kritéria nezapomeň na 120 porcí. Celý vtip je podmínka 4: nejdřív si ujasni, <em>čí</em> proteiny počítáš (jednoho studenta a jeho pět voleb, ne součet menu!), pak najdi nejhorší kombinaci (nezávislost po dnech) a postav denní minima přes $z_d$ — pozor, minimum jen přes <em>vybraná</em> jídla, tedy big-M, ne holé nerovnosti z [L1.8]. Nakonec zkontroluj velikost big-M konstanty (a její značení — $M$ je obsazené).</p>
 
       <details class="solution">
         <summary>d) Úplné řešení</summary>
@@ -179,8 +179,8 @@
           <p>(Různost je automatická — jedna binárka na typ jídla; $v_m$ je konstanta, součin je lineární.)</p>
           <p><strong>(3) Každé jídlo nejvýš jednou za týden:</strong></p>
           $$\sum_{d \in D} x_{m,d} \le 1 \quad \forall m \in M.$$
-          <p><strong>(4) Worst-case proteinová podmínka</strong> — denní minimum $z_d$ jen přes vybraná jídla (big-M deaktivace) a součet minim přes týden:</p>
-          $$z_d \le p_m + M\,(1 - x_{m,d}) \quad \forall m \in M,\, \forall d \in D, \qquad\qquad \sum_{d \in D} z_d \ge p^{\min}, \qquad M = \max_{m \in M} p_m.$$
+          <p><strong>(4) Worst-case proteinová podmínka</strong> — denní minimum $z_d$ jen přes vybraná jídla (big-M deaktivace; konstantu značíme $K$, protože $M$ je v zadání obsazené množinou jídel) a součet minim přes týden:</p>
+          $$z_d \le p_m + K\,(1 - x_{m,d}) \quad \forall m \in M,\, \forall d \in D, \qquad\qquad \sum_{d \in D} z_d \ge p^{\min}, \qquad K = \max_{m \in M} p_m \;(\ge 0).$$
           <p><em>Proč to stačí:</em> pro $x_{m,d}=1$ je $z_d \le p_m$, takže $z_d \le \min_{m \in \text{menu}_d} p_m$; součet $\sum_d z_d \ge p^{\min}$ tedy zaručuje, že i student volící každý den nejslabší jídlo nasbírá $\ge p^{\min}$ — a každá jiná kombinace je po dnech aspoň tak dobrá. Obráceně každé vyhovující menu lze doplnit $z_d := \min_{m \in \text{menu}_d} p_m$, takže model žádné dobré menu nezakazuje.</p>
           <p><strong>(2) Kritérium</strong> — 120 porcí od každého jídla na menu:</p>
           $$\min\; 120 \sum_{d \in D} \sum_{m \in M} c_m\, x_{m,d}.$$
@@ -246,10 +246,10 @@ KOViz.graph(document.getElementById('viz-gate'), {
     {from: 'z', to: 'm12', cls: 'good', label: 'z₁ ≤ 18'},
     {from: 'z', to: 'm23', cls: 'good', label: 'z₁ ≤ 44'},
     {from: 'z', to: 'm68', cls: 'good', label: 'z₁ ≤ 26'},
-    {from: 'z', to: 'm9',  cls: 'dim', dashed: true, label: 'z₁ ≤ 12 + M'},
-    {from: 'z', to: 'm81', cls: 'dim', dashed: true, label: 'z₁ ≤ 55 + M'},
+    {from: 'z', to: 'm9',  cls: 'dim', dashed: true, label: 'z₁ ≤ 12 + K'},
+    {from: 'z', to: 'm81', cls: 'dim', dashed: true, label: 'z₁ ≤ 55 + K'},
   ],
-  caption: 'Den 1: zeleně jídla na menu (x<sub>m,1</sub> = 1) — jejich nerovnosti jsou ostré a srazí z₁ ≤ min{31, 18, 44, 26} = 18. Šedě čárkovaně jídla mimo menu (x<sub>m,1</sub> = 0) — big-M jejich nerovnosti vypne. Bez deaktivace by katalogové m₉ (p = 12, ten den se vůbec nevaří!) stáhlo z₁ na 12 a model nesmyslně zpřísnilo.'
+  caption: 'Den 1: zeleně jídla na menu (x<sub>m,1</sub> = 1) — jejich nerovnosti jsou ostré a srazí z₁ ≤ min{31, 18, 44, 26} = 18. Šedě čárkovaně jídla mimo menu (x<sub>m,1</sub> = 0) — big-M konstanta K jejich nerovnosti vypne. Bez deaktivace by katalogové m₉ (p = 12, ten den se vůbec nevaří!) stáhlo z₁ na 12 a model nesmyslně zpřísnilo.'
 });
 </script>
 </body>
