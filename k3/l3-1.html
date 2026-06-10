@@ -36,7 +36,7 @@
     Definice <strong>r-aproximačního algoritmu</strong>: algoritmus, který pro <em>každou</em> instanci vrátí řešení nejvýš $r$-krát horší než optimum — u minimalizace $J^A(I) \le r \cdot J^*(I)$, u maximalizace $J^A(I) \ge \tfrac{1}{r} \cdot J^*(I)$, vždy $r \ge 1$.
   </div>
 
-  <p>Vítej v kapitole důkazů. Slot 3 písemky padá v ~95 % termínů a žebříček nejpravděpodobnějších důkazů pro 15. 6. zní: <em>Christofides 3/2</em> [L3.10], <em>korektnost Dijkstry</em> <a href="l3-2.html">[L3.2]</a>, <em>neexistence r-aproximace TSP</em> [L3.6], <em>korektnost Bellman-Forda</em> [L3.7]. Tři ze čtyř položek mluví o „aproximaci“ a „faktoru“ — a všechny důkazy faktorů v této kapitole jsou jen řetízky nerovností kolem jedné definice. Tu definici si dnes postavíme; je to jediná nová věc téhle lekce a společný jazyk celé K3.</p>
+  <p>Vítej v kapitole důkazů. Slot 3 písemky padá v ~95 % termínů a žebříček nejpravděpodobnějších důkazů pro 15. 6. zní: <em>Christofides 3/2</em> [L3.10], <em>korektnost Dijkstry</em> <a href="l3-2.html">[L3.2]</a>, <em>neexistence r-aproximace TSP</em> <a href="l3-6.html">[L3.6]</a>, <em>korektnost Bellman-Forda</em> [L3.7]. Tři ze čtyř položek mluví o „aproximaci“ a „faktoru“ — a všechny důkazy faktorů v této kapitole jsou jen řetízky nerovností kolem jedné definice. Tu definici si dnes postavíme; je to jediná nová věc téhle lekce a společný jazyk celé K3.</p>
 
   <!-- ===== SEKCE 1: KDYŽ JE OPTIMUM MIMO DOSAH ===== -->
   <h2>Když je optimum mimo dosah</h2>
@@ -121,7 +121,7 @@
       <li><strong>„Vrací skoro optimální řešení, takže je to aproximační algoritmus.“</strong> NE — aproximační algoritmus je jen ten s <em>dokázanou</em> worst-case zárukou $r$ pro všechny instance. Heuristika (nearest neighbor, k-OPT) žádnou záruku nemá, ať se v experimentech chová sebelíp.</li>
       <li><strong>„Faktor 2 znamená, že výsledky bývají zhruba dvakrát horší.“</strong> NE — $r$ je strop pro nejhorší případ; o četnosti špatných případů ani o průměru neříká nic. Typicky bývá výsledek mnohem blíž optimu.</li>
       <li><strong>„U maximalizace: $J^A \le r \cdot J^*$.“</strong> NE — to platí zadarmo (nad optimum se dostat nejde) a nezaručuje nic. Správně zdola: $J^A \ge \frac{1}{r} J^*$. Směr nerovnosti si vždy zkontroluj proti tomu, kterým směrem může algoritmus „kazit“.</li>
-      <li><strong>„Když má problém aproximaci v jedné variantě, má ji i obecně.“</strong> NE — faktor je vlastnost dvojice (algoritmus, problém). Metrický TSP má 2-aproximaci [L3.9] i 3/2-aproximaci [L3.10], ale obecný TSP nemá žádnou r-aproximaci, pokud $P \ne NP$ [L3.6].</li>
+      <li><strong>„Když má problém aproximaci v jedné variantě, má ji i obecně.“</strong> NE — faktor je vlastnost dvojice (algoritmus, problém). Metrický TSP má 2-aproximaci [L3.9] i 3/2-aproximaci [L3.10], ale obecný TSP nemá žádnou r-aproximaci, pokud $P \ne NP$ <a href="l3-6.html">[L3.6]</a>.</li>
     </ul>
   </div>
 
@@ -144,7 +144,7 @@
     <li><strong>Christofides</strong> [L3.10]: stejná kostra + chytřejší druhá mez $c(M) \le \mathrm{OPT}/2$ pro párování — dohromady faktor $\tfrac{3}{2}$.</li>
     <li><strong>Knapsack 2-aproximace</strong> [L3.11] (maximalizace): horní mez optima ze zlomkového batohu, $\sum_{i=1}^{h} c_i \ge J^*$.</li>
   </ul>
-  <p>Až tedy v dalších lekcích uvidíš nerovnost typu $c(\mathrm{MST}) \le \mathrm{OPT}$, věz, že to není ornament — je to nosný trám, bez kterého se faktor s neznámým optimem vůbec nedá svázat. A ještě jedna výstraha dopředu: existence aproximace není samozřejmost. Pro <em>obecný</em> (nemetrický) TSP dokážeme [L3.6], že žádný polynomiální r-aproximační algoritmus neexistuje (pokud $P \ne NP$) — i „vzdát se optimality“ je někdy příliš ambiciózní plán.</p>
+  <p>Až tedy v dalších lekcích uvidíš nerovnost typu $c(\mathrm{MST}) \le \mathrm{OPT}$, věz, že to není ornament — je to nosný trám, bez kterého se faktor s neznámým optimem vůbec nedá svázat. A ještě jedna výstraha dopředu: existence aproximace není samozřejmost. Pro <em>obecný</em> (nemetrický) TSP dokážeme <a href="l3-6.html">[L3.6]</a>, že žádný polynomiální r-aproximační algoritmus neexistuje (pokud $P \ne NP$) — i „vzdát se optimality“ je někdy příliš ambiciózní plán.</p>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
   <div class="box takeaways" id="takeaways">
@@ -154,7 +154,7 @@
       <li>$r = 1$ je exaktní algoritmus; $r = 2$ znamená „nejvýš dvakrát horší než optimum“ (resp. „aspoň polovina optima“). Alternativní zápis: relativní odchylka $\epsilon$, $r = 1 + \epsilon$.</li>
       <li><strong>$r$ je worst-case záruka:</strong> o průměrném chování neříká nic; jeden běh faktor nedokáže (kvantifikátor ∀), ale jediný protipříklad ho vyvrátí.</li>
       <li><strong>Dokázat faktor = ohraničit $J^A$ vůči $J^*$ přes vypočitatelnou mez:</strong> u minimalizace dolní mez $B \le J^*$ a $J^A \le r \cdot B$ (TSP: $c(\mathrm{MST}) \le \mathrm{OPT}$ [L3.8b]), u maximalizace horní mez $B \ge J^*$ a $J^A \ge B/r$ (knapsack [L3.11]).</li>
-      <li><strong>Heuristika bez dokázané záruky není aproximační algoritmus</strong> — nearest neighbor pro TSP není r-aproximace pro žádné $r$; a obecný TSP dokonce žádnou r-aproximaci nepřipouští, pokud $P \ne NP$ [L3.6].</li>
+      <li><strong>Heuristika bez dokázané záruky není aproximační algoritmus</strong> — nearest neighbor pro TSP není r-aproximace pro žádné $r$; a obecný TSP dokonce žádnou r-aproximaci nepřipouští, pokud $P \ne NP$ <a href="l3-6.html">[L3.6]</a>.</li>
     </ul>
   </div>
 
@@ -249,7 +249,7 @@ Hamiltonian circuit H is defined by the sequence {v_[1], ..., v_[n], v_[1]};</pr
           $$\forall\, r \ge 1 \;\; \exists\, I_r:\quad J^{NN}(I_r) &gt; r \cdot J^*(I_r).$$
           <p>Slovy: <strong>ať zvolíš jakkoli velký faktor $r$, existuje instance, na které ho nearest neighbor poruší</strong> — poměr $J^{NN}/J^*$ není shora omezen žádnou konstantou.</p>
           <p><strong>Co musí důkaz ukázat.</strong> Jedna konkrétní instance nestačí — ta by vyvrátila jen jedno konkrétní $r$ (např. poměr $3$ na jedné instanci vylučuje $r = 2$, ale ne $r = 5$). Důkaz musí dodat <strong>rodinu instancí</strong> $\{I_r\}$ parametrizovanou tak, aby poměr $J^{NN}(I_r)/J^*(I_r)$ rostl nade všechny meze (typicky posloupnost instancí rostoucí velikosti, na nichž poměr roste např. logaritmicky s $n$ — konstrukce takové rodiny je nad rámec slidů, slide 23 výrok jen konstatuje). U hladového pravidla je zdroj potíží intuitivně vidět: lokálně nejlevnější krok může algoritmus zavléct do kouta, odkud se vrací přes velmi drahé hrany, a tenhle efekt lze konstrukcí instance stupňovat.</p>
-          <p><strong>Pozor na rozdíl rolí:</strong> dokázat, že algoritmus aproximační <em>je</em>, znamená zvládnout $\forall I$ (řetízek nerovností přes mez — uvidíš u double-tree [L3.9] a Christofidese [L3.10]); dokázat, že <em>není</em>, znamená vyrábět protipříklady, pro každé $r$ jeden. Srovnej s neexistencí r-aproximace pro obecný TSP [L3.6] — tam je tvrzení ještě silnější: žádný <em>polynomiální</em> algoritmus (nejen NN) nemůže být r-aproximační pro žádné $r$, pokud $P \ne NP$.</p>
+          <p><strong>Pozor na rozdíl rolí:</strong> dokázat, že algoritmus aproximační <em>je</em>, znamená zvládnout $\forall I$ (řetízek nerovností přes mez — uvidíš u double-tree [L3.9] a Christofidese [L3.10]); dokázat, že <em>není</em>, znamená vyrábět protipříklady, pro každé $r$ jeden. Srovnej s neexistencí r-aproximace pro obecný TSP <a href="l3-6.html">[L3.6]</a> — tam je tvrzení ještě silnější: žádný <em>polynomiální</em> algoritmus (nejen NN) nemůže být r-aproximační pro žádné $r$, pokud $P \ne NP$.</p>
         </div>
       </details>
     </div>

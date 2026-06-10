@@ -36,7 +36,7 @@
     <strong>Konstrukce TSP instance z grafu pro HC</strong>: zúplni graf a dej hranám ceny 1 (hrana byla v $G$), resp. 2 (nebyla) — pak HC v $G$ existuje ⟺ optimum TSP $= n$. A protože váhy jsou jen $\{1,2\}$, je TSP NP-těžký dokonce <em>silně</em>: žádný pseudopolynomiální algoritmus (pokud $P \ne NP$).
   </div>
 
-  <p>V <a href="l3-3.html#takeaways">[L3.3] Hamiltonovská kružnice a NP-úplnost</a> jsme si připravili zdroj těžkosti (HC je NP-úplný) a v „předkrmu“ sis dokonce zkusil(a) vymyslet převod na TSP. V <a href="l3-4.html#takeaways">[L3.4]</a> už TSP umíme formálně i jako ILP. Dnes ten převod proměníme v <strong>úplný důkaz</strong> — první hotovou redukci téhle kapitoly. Stejná konstrukce se zostřenými vahami pak v [L3.6] zabije i všechny r-aproximace (žebříčkový důkaz #3) — dnešek je její „tréninková verze“, na které pochopíš každý krok.</p>
+  <p>V <a href="l3-3.html#takeaways">[L3.3] Hamiltonovská kružnice a NP-úplnost</a> jsme si připravili zdroj těžkosti (HC je NP-úplný) a v „předkrmu“ sis dokonce zkusil(a) vymyslet převod na TSP. V <a href="l3-4.html#takeaways">[L3.4]</a> už TSP umíme formálně i jako ILP. Dnes ten převod proměníme v <strong>úplný důkaz</strong> — první hotovou redukci téhle kapitoly. Stejná konstrukce se zostřenými vahami pak v <a href="l3-6.html">[L3.6]</a> zabije i všechny r-aproximace (žebříčkový důkaz #3) — dnešek je její „tréninková verze“, na které pochopíš každý krok.</p>
 
   <!-- ===== SEKCE 1: CÍL A KONSTRUKCE ===== -->
   <h2>Co dokazujeme a jak na to půjdeme</h2>
@@ -118,7 +118,7 @@
     </div>
   </details>
 
-  <p>Tohle schéma — <em>převod ze známého těžkého problému + ekvivalence hodnot + „kdybys uměl nový, umíš starý“</em> — je šablona všech redukcí. V [L3.6] do ní jen dosadíme jiné ceny.</p>
+  <p>Tohle schéma — <em>převod ze známého těžkého problému + ekvivalence hodnot + „kdybys uměl nový, umíš starý“</em> — je šablona všech redukcí. V <a href="l3-6.html">[L3.6]</a> do ní jen dosadíme jiné ceny.</p>
 
   <!-- ===== SEKCE 4: SILNĚ ===== -->
   <h2>A teď to „silně“: malá čísla, žádný pseudopolynomiální únik</h2>
@@ -172,7 +172,7 @@
       <li><strong>Konstrukce (slide 18):</strong> z grafu $G$ pro HC vyrob úplný graf $K_n$; $c(\{i,j\}) = 1$ pokud $\{i,j\} \in E(G)$, jinak $2$. Převod je $O(n^2)$, nic neřeší, jen přepisuje.</li>
       <li><strong>Ekvivalence:</strong> HC v $G$ existuje ⟺ optimum TSP $= n$. (⇒: HC = okruh ze samých jedniček; ⇐: okruh má $n$ hran ceny $\ge 1$, jediná dvojka by dala $\ge n+1$.) Bez HC je $\mathrm{OPT} \ge n+1$ — mezi ANO a NE je mezera.</li>
       <li><strong>Silně NP-těžký (slide 17):</strong> restrikce $L_p$ na instance s $largest(I) \le p(size(I))$ je NP-těžká. U TSP: ceny $\in \{1,2\}$, $largest(I) = 2 \le n$ → TSP je silně NP-těžký → <strong>žádný pseudopolynomiální algoritmus, pokud $P \ne NP$</strong>. Kontrast: knapsack silně NP-těžký není (DP $O(nC)$, [L7.1]).</li>
-      <li><strong>Stejná šablona, jiné ceny:</strong> nahradíš-li 2 hodnotou $2 + (r-1)n$, mezera se roztáhne tak, že ji rozezná i r-aproximace — to je důkaz neexistence r-aproximace v [L3.6].</li>
+      <li><strong>Stejná šablona, jiné ceny:</strong> nahradíš-li 2 hodnotou $2 + (r-1)n$, mezera se roztáhne tak, že ji rozezná i r-aproximace — to je důkaz neexistence r-aproximace v <a href="l3-6.html">[L3.6]</a>.</li>
     </ul>
   </div>
 
@@ -227,7 +227,7 @@
 
   <div class="pager">
     <a href="../k3/l3-4.html"><span class="dir">← Předchozí</span> L3.4 · TSP jako ILP s eliminací podtras (MTZ)</a>
-    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.6 · Neexistence r-aproximace pro obecný TSP [FOTO])</a>
+    <a class="next" href="../k3/l3-6.html"><span class="dir">Další →</span> L3.6 · Neexistence r-aproximace pro obecný TSP [FOTO]</a>
   </div>
 
 </div>

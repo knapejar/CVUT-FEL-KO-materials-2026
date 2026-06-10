@@ -33,10 +33,10 @@
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
-    <strong>Rozhodovací problém HC</strong>: existuje v grafu kružnice procházející <em>všemi</em> vrcholy (každým právě jednou)? Je NP-úplný — ANO-odpověď se dá certifikátem ověřit polynomiálně — a bude výchozím bodem redukcí, kterými v <a href="l3-5.html">[L3.5]</a> a [L3.6] dokážeme těžkost TSP.
+    <strong>Rozhodovací problém HC</strong>: existuje v grafu kružnice procházející <em>všemi</em> vrcholy (každým právě jednou)? Je NP-úplný — ANO-odpověď se dá certifikátem ověřit polynomiálně — a bude výchozím bodem redukcí, kterými v <a href="l3-5.html">[L3.5]</a> a <a href="l3-6.html">[L3.6]</a> dokážeme těžkost TSP.
   </div>
 
-  <p>Velké důkazy téhle kapitoly o TSP — neexistence r-aproximace [L3.6] i faktory double-tree [L3.9] a Christofidese [L3.10] — stojí na jednom základním kameni: na problému <strong>Hamiltonovské kružnice</strong>. Dnes ten kámen položíme: přesná definice (EN 1:1 ze slidů, u zkoušky ji budeš citovat), co znamená „rozhodovací problém“ a „NP-úplný“, a proč nám právě HC poslouží jako zdroj těžkosti pro TSP. Žádný velký důkaz dnes — jen přesné pojmy, bez kterých by ses v důkazech <a href="l3-5.html">[L3.5]</a>/[L3.6] ztratil(a).</p>
+  <p>Velké důkazy téhle kapitoly o TSP — neexistence r-aproximace <a href="l3-6.html">[L3.6]</a> i faktory double-tree [L3.9] a Christofidese [L3.10] — stojí na jednom základním kameni: na problému <strong>Hamiltonovské kružnice</strong>. Dnes ten kámen položíme: přesná definice (EN 1:1 ze slidů, u zkoušky ji budeš citovat), co znamená „rozhodovací problém“ a „NP-úplný“, a proč nám právě HC poslouží jako zdroj těžkosti pro TSP. Žádný velký důkaz dnes — jen přesné pojmy, bez kterých by ses v důkazech <a href="l3-5.html">[L3.5]</a>/<a href="l3-6.html">[L3.6]</a> ztratil(a).</p>
 
   <!-- ===== SEKCE 1: DEFINICE HC ===== -->
   <h2>Okruh přes všechna města — formálně</h2>
@@ -78,7 +78,7 @@
 
   <h2>Rozhodovací problém: odpověď je jen ANO/NE</h2>
 
-  <p>HC se ptá <em>„existuje?“</em> — odpověď je jediný bit, žádná cílová funkce. S rozhodovacími úlohami ses už potkal(a) u 2-Partition: rozhodovací ILP s cílem $\min 0$ <a href="../k0/l0-8.html#takeaways">[L0.8]</a>, <a href="../k1/l1-1.html#takeaways">[L1.1]</a>. Slide 13 uvádí HC pod titulkem <em>„Related Decision Problem“</em> — je to rozhodovací příbuzný <strong>optimalizačního</strong> TSP („najdi <em>nejlevnější</em> Hamiltonovskou kružnici v úplném grafu $K_n$“), který formálně zavedeme v <a href="l3-4.html">[L3.4]</a>. Tahle dvojice (rozhodovací HC ↔ optimalizační TSP) je přesně to, co budou důkazy <a href="l3-5.html">[L3.5]</a>/[L3.6] spřahovat.</p>
+  <p>HC se ptá <em>„existuje?“</em> — odpověď je jediný bit, žádná cílová funkce. S rozhodovacími úlohami ses už potkal(a) u 2-Partition: rozhodovací ILP s cílem $\min 0$ <a href="../k0/l0-8.html#takeaways">[L0.8]</a>, <a href="../k1/l1-1.html#takeaways">[L1.1]</a>. Slide 13 uvádí HC pod titulkem <em>„Related Decision Problem“</em> — je to rozhodovací příbuzný <strong>optimalizačního</strong> TSP („najdi <em>nejlevnější</em> Hamiltonovskou kružnici v úplném grafu $K_n$“), který formálně zavedeme v <a href="l3-4.html">[L3.4]</a>. Tahle dvojice (rozhodovací HC ↔ optimalizační TSP) je přesně to, co budou důkazy <a href="l3-5.html">[L3.5]</a>/<a href="l3-6.html">[L3.6]</a> spřahovat.</p>
 
   <!-- ===== SEKCE 2: CO DĚLÁ PROBLÉM TĚŽKÝM ===== -->
   <h2>Co vlastně dělá TSP (a HC) těžkým?</h2>
@@ -141,7 +141,7 @@
   <details class="try">
     <summary>Zkus sám (předkrm na <a href="l3-5.html">[L3.5]</a>): graf $G$ má $n$ vrcholů a chceš rozhodnout HC. Umíš z $G$ vyrobit instanci TSP — úplný graf $K_n$ s cenami hran — tak, aby <em>hodnota optima</em> prozradila, jestli HC v $G$ existuje?</summary>
     <div class="inner">
-      <p>Nápad ze slidu 18: vrcholy nech, graf zúplni a hrany oceň <strong>1</strong> (hrana byla v $G$), resp. <strong>2</strong> (hrana v $G$ nebyla). Okruh přes všechna města má $n$ hran, takže stojí $n$ právě tehdy, když použil samé jedničky — tedy samé hrany původního grafu — tedy právě tehdy, když $G$ má Hamiltonovskou kružnici. Optimum $= n$ ⟺ HC existuje. Celý důkaz (včetně toho, proč z vah $\{1,2\}$ plyne <em>silná</em> NP-těžkost) provedeme v <a href="l3-5.html">[L3.5]</a>; zostřená varianta s vahami $2 + (r-1)n$ pak v [L3.6] zabije i r-aproximace.</p>
+      <p>Nápad ze slidu 18: vrcholy nech, graf zúplni a hrany oceň <strong>1</strong> (hrana byla v $G$), resp. <strong>2</strong> (hrana v $G$ nebyla). Okruh přes všechna města má $n$ hran, takže stojí $n$ právě tehdy, když použil samé jedničky — tedy samé hrany původního grafu — tedy právě tehdy, když $G$ má Hamiltonovskou kružnici. Optimum $= n$ ⟺ HC existuje. Celý důkaz (včetně toho, proč z vah $\{1,2\}$ plyne <em>silná</em> NP-těžkost) provedeme v <a href="l3-5.html">[L3.5]</a>; zostřená varianta s vahami $2 + (r-1)n$ pak v <a href="l3-6.html">[L3.6]</a> zabije i r-aproximace.</p>
     </div>
   </details>
 
@@ -164,7 +164,7 @@
       <li><strong>HC (Existence of Hamiltonian Circuit):</strong> Instance = undirected graph $G$; Goal = decide if Hamiltonian circuit (circuit visiting every node exactly once) exists. Orientovaná verze se jmenuje Hamiltonian cycle. HC je <strong>NP-úplný</strong>.</li>
       <li><strong>HC ∈ NP přes certifikát:</strong> u ANO-instance předlož kružnici (pořadí vrcholů) — kontrola „každý vrchol právě jednou + po sobě jdoucí dvojice jsou hrany + uzavření“ je polynomiální. Pro NE-odpověď krátký certifikát obecně neznáme.</li>
       <li><strong>Počet kandidátů těžkost nevysvětluje:</strong> $\tfrac{1}{2}(n-1)!$ kružnic vs. $n^{n-2}$ koster (na 4 městech 3 vs. 16) — koster je víc, a MST je přesto polynomiální <a href="../k0/l0-5.html#takeaways">[L0.5]</a>.</li>
-      <li><strong>Z HC budeme redukovat na TSP:</strong> ceny 1/2 dají silnou NP-těžkost <a href="l3-5.html">[L3.5]</a>, ceny $2+(r-1)n$ neexistenci r-aproximace [L3.6]. Redukce vede vždy <em>ze známého těžkého problému na nový</em>.</li>
+      <li><strong>Z HC budeme redukovat na TSP:</strong> ceny 1/2 dají silnou NP-těžkost <a href="l3-5.html">[L3.5]</a>, ceny $2+(r-1)n$ neexistenci r-aproximace <a href="l3-6.html">[L3.6]</a>. Redukce vede vždy <em>ze známého těžkého problému na nový</em>.</li>
     </ul>
   </div>
 
@@ -204,7 +204,7 @@
             <li>pro každé $i = 1, \ldots, n-1$ je $\{v_i, v_{i+1}\} \in E(G)$ a navíc $\{v_n, v_1\} \in E(G)$ — uzavření kružnice ($n$ dotazů na hranu; s maticí sousednosti $O(1)$ na dotaz, tedy $O(n)$, se seznamy sousedů $O(n + m)$ celkem).</li>
           </ol>
           <p>Projde-li obojí, předložená posloupnost je kružnice procházející každým vrcholem právě jednou — Hamiltonovská kružnice, a odpověď ANO je doložena. Kontrola běží v čase $O(n + m)$, tj. polynomiálně ve velikosti vstupu. Certifikát má velikost $O(n)$, tedy také polynomiální. Proto <strong>HC ∈ NP</strong>. $\blacksquare$</p>
-          <p><em>Pozn.:</em> tím je hotová „snadná půlka“ NP-úplnosti. Druhá půlka (každý problém z NP se na HC polynomiálně převede) se v kurzu nedokazuje — bereme ji jako známý fakt (slide 13: „NP-complete problem“) a stavíme na ní redukce v <a href="l3-5.html">[L3.5]</a>/[L3.6].</p>
+          <p><em>Pozn.:</em> tím je hotová „snadná půlka“ NP-úplnosti. Druhá půlka (každý problém z NP se na HC polynomiálně převede) se v kurzu nedokazuje — bereme ji jako známý fakt (slide 13: „NP-complete problem“) a stavíme na ní redukce v <a href="l3-5.html">[L3.5]</a>/<a href="l3-6.html">[L3.6]</a>.</p>
         </div>
       </details>
     </div>
