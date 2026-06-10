@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L4.9 · Bipartitní matching přes max flow — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k4">K4 · Toky a řezy</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L4.9</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L4.9</span> Kapitola K4 — Toky a řezy (Slot 4) · <strong>[MUST]</strong>
+  </p>
+  <h1>Bipartitní matching přes max flow</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Maximální párování v bipartitním grafu = maximální tok v síti $s \to X \to Y \to t$ se všemi kapacitami $1$.</strong> Velikost max toku je velikost maximálního párování — a augmentující cesta v reziduálním grafu je přesně <em>M-augmenting path</em>, která párování přepojí a zvětší o 1.
+  </div>
+
+  <p>Pojem <strong>matching (párování)</strong> znáš z <a href="../k0/l0-6.html#takeaways">[L0.6] Párování a perfektní párování</a> — množina hran, žádné dvě nesdílejí vrchol. Tehdy jsme slíbili, že <em>výpočet</em> přijde v K4. Dnes ten slib plníme pro <strong>maximum cardinality matching (párování s největším počtem hran)</strong> v bipartitním grafu: stačí síť postavit z vrstev jako v <a href="l4-5.html#takeaways">[L4.5]</a> a pustit Ford-Fulkersona <a href="l4-3.html#takeaways">[L4.3]</a>. Cestou potřebuješ reziduální graf <a href="l4-2.html#takeaways">[L4.2]</a> a na závěr řez jako certifikát <a href="l4-4.html#takeaways">[L4.4]</a>.</p>
+
+  <!-- ===== SEKCE 1: ČTYŘI PROBLÉMY ===== -->
+  <h2>Kam dnešní lekce patří: čtyři párovací problémy (slide 38)</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 38 — Matching: Introduction, 1:1</div>
+    <p><em><strong>Matching</strong> is the set of arcs $P \subseteq E(G)$ in undirected graph $G$, such that the endpoints are all different (no arcs from $P$ are incident with the same node). When all nodes of $G$ are incident with some arc in $P$, we call $P$ a <strong>perfect matching</strong>.</em></p>
+    <p><em>Problems:</em></p>
+    <ul>
+      <li><em><strong>a) Maximum Cardinality Matching Problem</strong> — we are looking for matching with the maximum number of edges.</em></li>
+      <li><em><strong>b) Maximum Cardinality Matching in Bipartite Graphs</strong> — special case of problem a.</em></li>
+      <li><em><strong>c) Minimum Weight Matching</strong> in a weighted graph — the cheapest matching from the set of all Maximum Cardinality Matchings.</em></li>
+      <li><em><strong>d) Minimum Weight Perfect Matching</strong> in a complete bipartite graph whose parts have the same number of nodes. This problem is also called an <strong>Assignment Problem</strong> and it is a special case of problem c) and also a special case of the <strong>minimum cost flow problem</strong>.</em></li>
+    </ul>
+    <p><em>These problems can be solved in polynomial time.</em></p>
+  </div>
+
+  <p>Dnes řešíme <strong>b)</strong> — kardinalitu v bipartitním grafu, přes max flow. Problémy c) a d) (váhy, assignment) počkají na minimum cost flow: nejdřív si ho postavíme v [L4.10], pak jím v [L4.12] vyřešíme assignment. <em>Maďarský (Hungarian) algoritmus je ze zkoušky vyloučen — assignment se u zkoušky řeší výhradně přes MCF.</em></p>
+
+  <p>Celou lekci odpracujeme na jednom bipartitním grafu (vlastní instance — přiznáno): $X = \{x_1, x_2, x_3, x_4\}$, $Y = \{y_1, y_2, y_3\}$, hrany podle obrázku.</p>
+
+  <div class="viz" id="viz-bip"></div>
+
+  <details class="try">
+    <summary>Zkus sám: najdi v grafu co největší párování ručně. A teď zkus „hladově“: vezmi hranu $x_1$–$y_1$, pak přidávej, co jde. Kde uvázneš?</summary>
+    <div class="inner">
+      <p>Největší párování má <strong>3 hrany</strong>, např. $M = \{x_1\text{–}y_2,\ x_2\text{–}y_1,\ x_4\text{–}y_3\}$. Hladový postup ale snadno uvázne na dvou: vezmeš $x_1$–$y_1$, pak třeba $x_4$–$y_2$ — a konec. $x_2$ umí jen $y_1$ (obsazeno), $x_3$ jen $y_2$ (obsazeno), $y_3$ by chtělo jen $x_4$ (obsazeno). Žádnou hranu už <em>přidat</em> nejde, a přesto párování není největší — muselo by se <strong>přepojit</strong>. Tomuhle rozdílu se říká <em>maximal</em> (nerozšiřitelné) vs. <em>maximum</em> (největší) — a přesně na přepojování máme v téhle kapitole nástroj: zpětné hrany reziduálního grafu <a href="l4-2.html#takeaways">[L4.2]</a>.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: M-AUGMENTING PATH ===== -->
+  <h2>Jazyk párování: M-alternating a M-augmenting path (slide 39)</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 39 — a) Maximum Cardinality Matching Problem: Solution Using M-alternating Path, 1:1</div>
+    <p><em><strong>Defs:</strong> Let $G$ be an undirected graph (bipartite or not), and let $M$ be a matching. A path $P$ is an <strong>M-alternating path</strong> if $E(P) \setminus M$ is a matching. An $M$-alternating path is <strong>M-augmenting</strong> if its endpoints are not in $M$.</em></p>
+    <p><em><strong>Theorem:</strong> Let $G$ be an undirected graph (bipartite or not) with some matching $M$. Then $M$ is maximum if and only if there is no $M$-augmenting path.</em></p>
+    <p><em><strong>Algorithm:</strong> Find the arbitrary matching. Find the $M$-augmenting path (i.e., $M$-alternating path with uncovered endpoints). Exchange (i.e. augment) the matching along the path. Repeat as long as such a path does exist.</em></p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: v uváznutém párování $M = \{x_1\text{–}y_1\}$ najdi M-augmentující cestu z $x_2$. Co se stane, když podél ní párování „přehodíš“?</summary>
+    <div class="inner">
+      <p>Cesta $x_2 - y_1 - x_1 - y_2$: hrany střídavě <em>mimo $M$</em> ($x_2$–$y_1$), <em>v $M$</em> ($y_1$–$x_1$), <em>mimo $M$</em> ($x_1$–$y_2$) — to je M-alternating — a oba konce $x_2$, $y_2$ jsou nepokryté → <strong>M-augmenting</strong>. Přehození = hrany mimo $M$ do párování <em>přidej</em>, hrany v $M$ <em>vyhoď</em>: nové $M = \{x_2\text{–}y_1,\ x_1\text{–}y_2\}$. Cesta má lichý počet hran, krajních „mimo $M$“ je o jednu víc než vnitřních „v $M$“ — párování se zvětší přesně o 1. A věta ze slidu říká, že tohle je <em>jediné</em>, co kdy potřebuješ: když M-augmentující cesta neexistuje, $M$ už je maximum.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: „najdi cestu, podél ní prohoď, opakuj, dokud cesta existuje“… kde jsi tenhle algoritmus v K4 už viděl?</summary>
+    <div class="inner">
+      <p>Je to slovo od slova <strong>Ford-Fulkerson</strong> <a href="l4-3.html#takeaways">[L4.3]</a>: augmentující cesta v reziduálním grafu, augmentace, opakuj, dokud cesta existuje — a kritérium maximality „žádná augmentující cesta“ je totéž tvrzení jako věta ze slidu 39. To není náhoda: za chvíli uvidíš, že po převodu na tok <em>M-augmentující cesta = augmentující cesta v $G_f$</em>, včetně přehazování přes zpětné hrany. Stačí tedy umět ten převod.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 3: KONSTRUKCE ===== -->
+  <h2>Konstrukce sítě (slide 40)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: párování zakazuje, aby se dvě vybrané hrany potkaly ve vrcholu. Jak tohle omezení říct jazykem toků — co a kde omezíš kapacitou?</summary>
+    <div class="inner">
+      <p>„Vrchol $x_i$ smí být nejvýš v jedné hraně párování“ = „do $x_i$ smí přitéct nejvýš jednotka“. Tak mu ji přiveď <strong>jedinou hranou $s \to x_i$ s kapacitou 1</strong> — Kirchhoff <a href="l4-1.html#takeaways">[L4.1]</a> pak zaručí, že z $x_i$ odteče nejvýš 1, tedy nejvýš jedna hrana z $x_i$ ponese tok. Symetricky vpravo: hrana $y_j \to t$ s kapacitou 1 hlídá, že do $y_j$ vstoupí nejvýš jedna párovací hrana. Hrany grafu zorientuješ $X \to Y$. Žádné dolní meze nepotřebuješ — $l \equiv 0$.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 40 — b) Maximum Cardinality Matching in Bipartite Graphs: Solution by Maximum Flow, 1:1</div>
+    <p><em>Can be transformed to the <strong>maximum flow</strong> problem:</em></p>
+    <ul>
+      <li><em>Add source $s$ and edge $(s, i)$ for all $i \in X$</em></li>
+      <li><em>Add sink $t$ and edge $(j, t)$ for all $j \in Y$</em></li>
+      <li><em>Add edge orientation from $s$ to $X$, from $X$ to $Y$ and from $Y$ to $t$</em></li>
+      <li><em>The upper bound of all edges is equal to 1 and the lower bound is equal to 0</em></li>
+      <li><em>By solving the maximum flow from $s$ to $t$ we obtain maximum cardinality matching</em></li>
+    </ul>
+  </div>
+
+  <div class="viz" id="viz-net"></div>
+
+  <details class="try">
+    <summary>Zkus sám: tok je obecně reálný — co kdyby vyšlo $f(x_1 \to y_1) = 0.5$? Je to párování? A proč se toho nemusíš bát?</summary>
+    <div class="inner">
+      <p>Půlka hrany v párování nedává smysl — frakční tok párování <strong>není</strong>. Zachraňuje nás <strong>Integral Flow Theorem</strong> (Dantzig-Fulkerson, slide 17 — citovaný v <a href="l4-5.html#takeaways">[L4.5]</a>): kapacity jsou celé (samé jedničky), takže existuje celočíselný maximální tok, a Ford-Fulkerson ho rovnou najde (startuje z $f \equiv 0$ a každé $\gamma$ je celé, tady vždy $\gamma = 1$). Celočíselný tok s kapacitami 1 je <strong>0/1 tok</strong> — každá hrana buď nese jednotku, nebo nic. U zkoušky tuhle větu vždy zmiň: bez ní jsi vyřešil jen LP relaxaci.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: vezmi celočíselný přípustný tok a polož $M = \{(i, j) \in E:\ f(x_i \to y_j) = 1\}$. Proč je $M$ párování a proč $|M| = |f|$?</summary>
+    <div class="inner">
+      <p>Kdyby dvě hrany $M$ sdílely vrchol $x_i$, odtékaly by z $x_i$ aspoň 2 jednotky — ale přitéct může jen 1 (jediná hrana $s \to x_i$, kapacita 1), spor s Kirchhoffem. Symetricky pro $y_j$ přes hranu $y_j \to t$. Takže $M$ je párování. A velikost: $|f| = \sum_i f(s \to x_i)$ = počet vrcholů $X$ s protékající jednotkou = počet hran s $f = 1$ = $|M|$. Funguje to i obráceně — každé párování $M$ vyrobí přípustný 0/1 tok s $|f| = |M|$ (pusť jednotku po $s \to x_i \to y_j \to t$ pro každou hranu $M$). Tudíž <strong>max tok = max párování</strong>, ne jen nerovnost.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 4: BĚH ===== -->
+  <h2>Běh Ford-Fulkersona = hledání M-augmentujících cest</h2>
+
+  <p>Dolní meze jsou nulové, takže — na rozdíl od <a href="l4-7.html#takeaways">[L4.7]</a> a <a href="l4-8.html#takeaways">[L4.8]</a> — je start zadarmo: $f \equiv 0$ je přípustný. Sleduj v běhu iteraci ②: cesta projde <strong>zpětnou hranou</strong> $y_1 \to x_1$ (existuje, protože $f(x_1 \to y_1) = 1 &gt; 0$, <a href="l4-2.html#takeaways">[L4.2]</a>) — to je přesně přehození párovací hrany $x_1$–$y_1$ z M-augmentující cesty: tok po ní klesne na 0, hrana z párování vypadne a oba její konce se přepojí jinam.</p>
+
+  <div class="viz" id="viz-ffrun"></div>
+
+  <details class="try">
+    <summary>Zkus sám: max tok vyšel $|f| = 3 &lt; 4 = |X|$. Co to říká o perfektním párování — a čím to doložíš?</summary>
+    <div class="inner">
+      <p>Vrcholy $X$ nelze spárovat všechny, takže párování pokrývající všechny vrcholy ($X$ i $Y$) — <strong>perfect matching</strong> <a href="../k0/l0-6.html#takeaways">[L0.6]</a> — neexistuje (tady ostatně ani nemůže: $|X| \ne |Y|$; ale nejde spárovat ani celé $X$). Certifikátem je minimální řez <a href="l4-4.html#takeaways">[L4.4]</a>: $A = \{s, x_1, x_2, x_3, y_1, y_2\}$ má kapacitu $C(A) = u(s \to x_4) + u(y_1 \to t) + u(y_2 \to t) = 3 = |f|$, takže víc než 3 párovací hrany být nemohou. Řez má i čitelnou interpretaci: $x_1, x_2, x_3$ se umí napojit jen na $\{y_1, y_2\}$ — tři vrcholy se „mačkají“ o dva sousedy, jeden z nich zůstane vždy nespárovaný.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
+    <p><strong>1) „Nerozšiřitelné párování = největší párování.“</strong> Ne — <em>maximal</em> (nejde přidat hrana) není <em>maximum</em> (největší počet hran); hladové přidávání uvázne (viz první try). Zvětšit párování často znamená <strong>přepojit</strong> ho M-augmentující cestou — v toku to obstará zpětná hrana.
+    <strong>2) Frakční tok není párování.</strong> Odpověď „pustím max flow“ je úplná až s větou o celočíselnosti (Integral Flow Theorem — kapacity jsou celé, tedy existuje celočíselný max tok a F-F ho najde). U zkoušky nevynechávej.
+    <strong>3) M-augmentující cesta musí mít OBA konce nepokryté.</strong> Střídavá cesta končící v pokrytém vrcholu párování nezvětší — přehozením velikost zachováš, nebo dokonce porušíš párovost.
+    <strong>4) Hrany se orientují, kapacita 1 všude, $l = 0$.</strong> Neorientovaný graf nech za sebou: v síti vede vše $s \to X \to Y \to t$. A žádné dolní meze — nepleť s [L4.8], tady start $f \equiv 0$ funguje.
+    <strong>5) Maďarský algoritmus u zkoušky nepoužívej</strong> — je vyloučen; vážené verze (assignment) se řeší přes minimum cost flow ([L4.10] → [L4.12]).</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.9</div>
+    <ul>
+      <li><strong>Konstrukce (slide 40):</strong> přidej zdroj $s$ s hranami $s \to x_i$ pro všechna $x_i \in X$ a stok $t$ s hranami $y_j \to t$; hrany grafu zorientuj $X \to Y$; všude horní mez $1$, dolní $0$.</li>
+      <li><strong>Velikost max toku = velikost maximálního párování.</strong> Kapacity 1 na hranách u $s$/$t$ + Kirchhoff = každý vrchol nejvýš v jedné hraně; párování čteš z vnitřních hran s $f = 1$.</li>
+      <li><strong>Celočíselnost říct nahlas:</strong> kapacity jsou celé → existuje celočíselný (0/1) max tok (Integral Flow Theorem <a href="l4-5.html#takeaways">[L4.5]</a>); frakční tok párování není.</li>
+      <li><strong>M-augmenting path (slide 39):</strong> střídavá cesta s oběma konci nepokrytými; $M$ je maximum $\iff$ žádná neexistuje. V síti je to augmentující cesta v $G_f$ <a href="l4-2.html#takeaways">[L4.2]</a> — zpětná hrana = vyhození hrany z $M$ (přepojení).</li>
+      <li><strong>Když max tok $&lt; |X|$:</strong> perfektní párování neexistuje; certifikátem je min řez z posledního značkování <a href="l4-4.html#takeaways">[L4.4]</a>. Vážené párování (assignment) → MCF ([L4.10], [L4.12]); Hungarian je ze zkoušky vyloučen.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-bipmatch">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Maximum Cardinality Matching in Bipartite Graphs — Solution by Maximum Flow</strong>
+      <span class="task-src">zdroj: banka úloh #8 (study task, EN 1:1; v bance „Unsolved“ — řešení sepsáno vlastní dle slidu 40, přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN 1:1)</span>
+        <p><em>Given a bipartite graph $G = (X \cup Y, E)$, formulate the maximum-cardinality matching problem as a maximum-flow problem. Define the source, sink, arc orientations, capacities, and explain how to read the matching from an integral maximum flow.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Formulační úloha — přesně obsah téhle lekce. Chtějí po tobě konstrukci sítě (zdroj, stok, orientace, kapacity) a <em>čtení výsledku</em> z celočíselného max toku. Slovo „integral“ v zadání je nápověda, že k plné odpovědi patří i zdůvodnění celočíselnosti.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — konstrukce + čtení párování (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k0/l0-6.html#takeaways">[L0.6]</a> — definice párování.</li>
+        <li><a href="l4-5.html#takeaways">[L4.5]</a> — Integral Flow Theorem.</li>
+        <li><a href="l4-1.html#takeaways">[L4.1]</a> — Kirchhoff a přípustnost.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Odevzdej čtyři věci jako u každé tokové formulace: uzly, hrany s orientací, kapacity, čtení výsledku — a navíc dvě zdůvodňovací věty: (i) proč kapacita 1 u $s$/$t$ vynutí párovost (Kirchhoff), (ii) proč se smíš spolehnout na celočíselný tok. Bonusová věta o rovnosti $|f_{max}| = |M_{max}|$ (oba směry převodu) z odpovědi dělá důkaz, ne jen recept.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní dle slidu 40 — přiznáno)</summary>
+        <div class="inner">
+          <p><strong>Konstrukce.</strong> K bipartitnímu grafu $G = (X \cup Y, E)$ přidej zdroj $s$ a hranu $(s, i)$ pro všechna $i \in X$, stok $t$ a hranu $(j, t)$ pro všechna $j \in Y$. Hrany zorientuj od $s$ do $X$, z $X$ do $Y$ a z $Y$ do $t$. Horní mez všech hran je $u = 1$, dolní $l = 0$. Řeš maximální tok z $s$ do $t$.</p>
+          <p><strong>Proč tok kóduje párování.</strong> Do $x_i$ vede jediná hrana s kapacitou 1, takže (Kirchhoff) z $x_i$ odteče nejvýš jednotka — nejvýš jedna hrana z $x_i$ nese tok; symetricky $y_j \to t$ hlídá vrcholy $Y$. Naopak každé párování $M$ definuje přípustný tok: jednotka po $s \to x_i \to y_j \to t$ pro každou $(i, j) \in M$, tedy $|f| = |M|$. Hodnoty max toku a max párování se proto rovnají.</p>
+          <p><strong>Celočíselnost.</strong> Kapacity jsou celočíselné, takže existuje celočíselný maximální tok (Integral Flow Theorem, Dantzig-Fulkerson; F-F ho přímo najde, neboť startuje z $f \equiv 0$ a augmentuje o celá $\gamma$). Celočíselný tok s $u = 1$ je 0/1.</p>
+          <p><strong>Čtení párování.</strong> $M = \{(i, j) \in E:\ f(x_i \to y_j) = 1\}$ — vnitřní hrany nesoucí jednotku; $|M| = |f|$ je maximální kardinalita.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-chessboard">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Pruned Chessboard Problem</strong>
+      <span class="task-src">zdroj: zkouška KO 21.06.2021 (zadání EN 1:1); řešení ve zdroji není, sepsáno vlastní — přiznáno</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN 1:1)</span>
+        <p><em>A chessboard consists of $n^2$ squares arranged in $n$ rows and $n$ columns. A <strong>domino</strong> is a wooden or plastic piece consisting of two squares joined on a side. The goal is to fully cover (i.e., some domino covers each square) the chessboard with dominos (i.e., each domino covers two squares of the board, and no two dominos overlap). A <strong>pruned board</strong> is a chessboard with some squares removed.</em></p>
+        <p><em>Suppose that we want to know whether it is possible to fully cover a pruned board and if not, to find the maximum number of dominos we can place on the pruned board so that each domino covers two squares of the board and no two dominos overlap. Formulate this problem as an appropriate matching problem.</em></p>
+        <p><em>Figure: Pruned chessboard and a solution.</em> (Obrázek v originále nedochován v přepisu; níže vlastní malá instance — přiznáno.)</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Modelovací úloha: šachovnice s vynechanými políčky, dominová kostka kryje dvě <em>stranově sousedící</em> políčka. Otázky: jde pokrýt všechno? A když ne, kolik kostek se vejde maximálně? Máš to „formulate as an appropriate matching problem“ — tedy najít správný graf a říct, který párovací problém na něm řešíš (a ten už umíš spočítat přes max flow).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — max cardinality matching v bipartitním grafu přes max flow (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k0/l0-6.html#takeaways">[L0.6]</a> — párování a perfektní párování.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>① Co je „vrchol“ a co „hrana“? Kostka spojuje dvě sousední políčka — políčka budou vrcholy, možné pozice kostky hrany. ② Proč je graf bipartitní? Vybarvi šachovnici jako šachovnici: kostka kryje vždy jedno bílé a jedno černé políčko. ③ Přelož otázky ze zadání: „fully cover“ = jaké párování? „maximum number of dominos“ = jaký problém z této lekce?</p>
+
+      <div class="viz" id="viz-board"></div>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
+        <div class="inner">
+          <p><strong>Graf.</strong> Vrcholy = nevyřazená políčka prořezané šachovnice. Hrana spojuje dvě políčka, právě když spolu stranově sousedí (= sem lze položit domino). Políčka obarvi šachovnicově (políčko $(i, j)$ je bílé pro $i + j$ sudé, černé pro liché): každá hrana spojuje bílé s černým, takže graf je <strong>bipartitní</strong> s partitami $X$ = bílá políčka, $Y$ = černá políčka.</p>
+          <p><strong>Překlad otázek.</strong> Rozmístění kostek bez překryvu = množina hran, kde žádná dvě nesdílejí políčko = <strong>párování</strong>. Maximální počet kostek = <strong>maximum cardinality matching in a bipartite graph</strong> (problém b) ze slidu 38) — spočteš přes max flow konstrukcí z této lekce: $s \to$ bílá $\to$ černá $\to t$, všechny kapacity 1, $|f_{max}|$ = max počet kostek. Plné pokrytí existuje $\iff$ párování je <strong>perfektní</strong>, tj. $|f_{max}| = \tfrac{\#\text{políček}}{2}$ (nutně musí být počet políček sudý a #bílých = #černých — jinak rovnou NE).</p>
+          <p><strong>Instance z obrázku</strong> (šachovnice $3 \times 3$ bez prostředního políčka): bílá = 4 rohy, černá = 4 hranová políčka, sousedství tvoří kružnici o 8 vrcholech. Max flow v odpovídající síti má hodnotu 4 = perfektní párování, např. $\{11\text{–}12,\ 13\text{–}23,\ 33\text{–}32,\ 31\text{–}21\}$ — deska <strong>jde</strong> plně pokrýt 4 kostkami.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L4.9">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k4/l4-8.html"><span class="dir">← Předchozí</span> L4.8 · Matrix rounding přes toky</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.10 · Minimum Cost Flow + reziduální graf s cenami)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Layout bipartitního grafu / sítě (každé volání dostává vlastní kopie uzlů — pozn. z L2.17)
+function bipNodes(withST) {
+  var ns = [
+    {id:'x1', x:230, y:60,  label:'x₁'},
+    {id:'x2', x:230, y:160, label:'x₂'},
+    {id:'x3', x:230, y:260, label:'x₃'},
+    {id:'x4', x:230, y:360, label:'x₄'},
+    {id:'y1', x:430, y:110, label:'y₁'},
+    {id:'y2', x:430, y:210, label:'y₂'},
+    {id:'y3', x:430, y:310, label:'y₃'},
+  ];
+  if (withST) {
+    ns.unshift({id:'s', x:70, y:210, label:'s', sub:'zdroj'});
+    ns.push({id:'t', x:590, y:210, label:'t', sub:'stok'});
+  }
+  return ns;
+}
+// Vnitřní hrany X→Y (curve odděluje křížící se diagonály x1→y2 / x2→y1)
+function bipInnerEdges(lab) {
+  return [
+    {from:'x1', to:'y1', label:lab[0]},
+    {from:'x1', to:'y2', label:lab[1], curve:0.45},
+    {from:'x2', to:'y1', label:lab[2]},
+    {from:'x3', to:'y2', label:lab[3]},
+    {from:'x4', to:'y2', label:lab[4], curve:0.45},
+    {from:'x4', to:'y3', label:lab[5]},
+  ];
+}
+function bipNetEdges(lab) {
+  // lab = 13 popisků: 4× s→x, 6× vnitřní, 3× y→t
+  return [
+    {from:'s', to:'x1', label:lab[0]},
+    {from:'s', to:'x2', label:lab[1]},
+    {from:'s', to:'x3', label:lab[2]},
+    {from:'s', to:'x4', label:lab[3]},
+  ].concat(bipInnerEdges(lab.slice(4, 10))).concat([
+    {from:'y1', to:'t', label:lab[10]},
+    {from:'y2', to:'t', label:lab[11]},
+    {from:'y3', to:'t', label:lab[12]},
+  ]);
+}
+
+// 1 — Bipartitní graf G (neorientovaný, vlastní instance)
+KOViz.graph(document.getElementById('viz-bip'), {
+  directed: false,
+  w: 640, h: 420,
+  nodes: bipNodes(false),
+  edges: bipInnerEdges(['', '', '', '', '', '']),
+  caption: 'Bipartitní graf G (vlastní instance — přiznáno): X = {x₁, …, x₄} vlevo, Y = {y₁, y₂, y₃} vpravo, hrany jen mezi partitami. Hledáme párování s největším počtem hran.',
+});
+
+// 2 — Konstrukce sítě dle slidu 40: s → X → Y → t, popisek = l,−,u
+KOViz.graph(document.getElementById('viz-net'), {
+  directed: true,
+  w: 640, h: 420,
+  nodes: bipNodes(true),
+  edges: bipNetEdges([
+    '0,−,1','0,−,1','0,−,1','0,−,1',
+    '0,−,1','0,−,1','0,−,1','0,−,1','0,−,1','0,−,1',
+    '0,−,1','0,−,1','0,−,1',
+  ]),
+  caption: 'Síť pro max flow (popisek hrany = l,−,u): přidán zdroj s s hranami s → xᵢ a stok t s hranami yⱼ → t, hrany grafu zorientovány X → Y. Všechny kapacity 1, dolní meze 0.',
+});
+
+// 3 — Stepper: běh Ford-Fulkersona (frames = absolutní stavy). Popisek = l, f, u.
+KOViz.stepper(document.getElementById('viz-ffrun'), {
+  graph: {
+    directed: true,
+    w: 640, h: 420,
+    nodes: bipNodes(true),
+    edges: bipNetEdges([
+      '0,0,1','0,0,1','0,0,1','0,0,1',
+      '0,0,1','0,0,1','0,0,1','0,0,1','0,0,1','0,0,1',
+      '0,0,1','0,0,1','0,0,1',
+    ]),
+  },
+  frames: [
+    {desc:'Start: dolní meze jsou nulové, takže f ≡ 0 je přípustný počáteční tok (žádná transformace z [L4.7] není potřeba). |f| = 0, párování M = ∅.',
+     nodes:{}, edges:{}},
+    {desc:'Iterace ①: augmentující cesta s→x₁→y₁→t (samé dopředné hrany, f < u), γ = min(1, 1, 1) = 1. |f| = 1, M = {x₁–y₁}.',
+     nodes:{},
+     edges:{'s->x1':'hl', 'x1->y1':'hl', 'y1->t':'hl'},
+     labels:{'s->x1':'0,1,1', 'x1->y1':'0,1,1', 'y1->t':'0,1,1'}},
+    {desc:'Iterace ②: cesta s→x₂→y₁→x₁→y₂→t — úsek y₁→x₁ je ZPĚTNÁ hrana G_f (f(x₁→y₁) = 1 > 0), γ = 1. Tok na x₁→y₁ klesá na 0: hrana x₁–y₁ z párování vypadla a oba konce se přepojily — přesně M-augmenting path x₂–y₁–x₁–y₂. |f| = 2, M = {x₂–y₁, x₁–y₂}.',
+     nodes:{},
+     edges:{'s->x2':'hl', 'x2->y1':'hl', 'x1->y1':'hl', 'x1->y2':'hl', 'y2->t':'hl'},
+     labels:{'s->x1':'0,1,1', 'y1->t':'0,1,1',
+             's->x2':'0,1,1', 'x2->y1':'0,1,1', 'x1->y1':'0,0,1', 'x1->y2':'0,1,1', 'y2->t':'0,1,1'}},
+    {desc:'Iterace ③: cesta s→x₄→y₃→t (dopředné hrany), γ = 1. |f| = 3, M = {x₂–y₁, x₁–y₂, x₄–y₃}.',
+     nodes:{},
+     edges:{'s->x4':'hl', 'x4->y3':'hl', 'y3->t':'hl'},
+     labels:{'s->x1':'0,1,1', 'y1->t':'0,1,1',
+             's->x2':'0,1,1', 'x2->y1':'0,1,1', 'x1->y1':'0,0,1', 'x1->y2':'0,1,1', 'y2->t':'0,1,1',
+             's->x4':'0,1,1', 'x4->y3':'0,1,1', 'y3->t':'0,1,1'}},
+    {desc:'Iterace ④ — žádná cesta: značkování z s dosáhne A = {s, x₃, y₂, x₁, y₁, x₂} (s→x₃ fwd, x₃→y₂ fwd, zpětně y₂→x₁, x₁→y₁ fwd, zpětně y₁→x₂) a uvázne. Min řez δ⁺(A) = {s→x₄, y₁→t, y₂→t}, C(A) = 1 + 1 + 1 = 3 = |f| → tok je maximální [L4.4].',
+     nodes:{s:'hl', x1:'hl', x2:'hl', x3:'hl', y1:'hl', y2:'hl'},
+     edges:{'s->x4':'good', 'y1->t':'good', 'y2->t':'good'},
+     labels:{'s->x1':'0,1,1', 'y1->t':'0,1,1',
+             's->x2':'0,1,1', 'x2->y1':'0,1,1', 'x1->y1':'0,0,1', 'x1->y2':'0,1,1', 'y2->t':'0,1,1',
+             's->x4':'0,1,1', 'x4->y3':'0,1,1', 'y3->t':'0,1,1'}},
+    {desc:'Čtení výsledku: maximální párování = vnitřní hrany s f = 1: M = {x₁–y₂, x₂–y₁, x₄–y₃}, |M| = |f| = 3. Vrchol x₃ zůstává nespárovaný — perfektní párování neexistuje a řez z minulého kroku je certifikát.',
+     nodes:{x1:'good', x2:'good', x4:'good', y1:'good', y2:'good', y3:'good'},
+     edges:{'x1->y2':'good', 'x2->y1':'good', 'x4->y3':'good'},
+     labels:{'s->x1':'0,1,1', 'y1->t':'0,1,1',
+             's->x2':'0,1,1', 'x2->y1':'0,1,1', 'x1->y1':'0,0,1', 'x1->y2':'0,1,1', 'y2->t':'0,1,1',
+             's->x4':'0,1,1', 'x4->y3':'0,1,1', 'y3->t':'0,1,1'}},
+  ],
+  caption: 'Běh Ford-Fulkersona (popisek = l, f, u): start f ≡ 0, tři augmentace γ = 1 (iterace ② jde přes zpětnou hranu = přepojení párování), |f| = 3; maximalitu certifikuje řez A = {s, x₁, x₂, x₃, y₁, y₂} s C(A) = 3.',
+});
+
+// 4 — T02: prořezaná šachovnice 3×3 bez středu jako bipartitní graf (vlastní instance — přiznáno)
+KOViz.graph(document.getElementById('viz-board'), {
+  directed: false,
+  w: 640, h: 360,
+  nodes: [
+    {id:'p11', x:200, y:60,  label:'11', sub:'bílé'},
+    {id:'p12', x:320, y:60,  label:'12', sub:'černé'},
+    {id:'p13', x:440, y:60,  label:'13', sub:'bílé'},
+    {id:'p21', x:200, y:180, label:'21', sub:'černé'},
+    {id:'p23', x:440, y:180, label:'23', sub:'černé'},
+    {id:'p31', x:200, y:300, label:'31', sub:'bílé'},
+    {id:'p32', x:320, y:300, label:'32', sub:'černé'},
+    {id:'p33', x:440, y:300, label:'33', sub:'bílé'},
+  ],
+  edges: [
+    {from:'p11', to:'p12'},
+    {from:'p12', to:'p13'},
+    {from:'p11', to:'p21'},
+    {from:'p13', to:'p23'},
+    {from:'p21', to:'p31'},
+    {from:'p23', to:'p33'},
+    {from:'p31', to:'p32'},
+    {from:'p32', to:'p33'},
+  ],
+  caption: 'T02: šachovnice 3×3 bez prostředního políčka (vlastní instance — přiznáno), nakreslená jako graf v rozložení desky. Vrcholy = políčka (popisek = řádek/sloupec, sub = barva), hrany = stranová sousedství = možné pozice kostky. Každá hrana spojuje bílé s černým → graf je bipartitní (zde kružnice o 8 vrcholech).',
+});
+</script>
+</body>
+</html>
