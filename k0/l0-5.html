@@ -69,7 +69,7 @@
   </details>
 
   <h2>K čemu nám MST bude: dolní mez</h2>
-  <p>V tomhle kurzu MST skoro nikdy není finální odpověď — je to <strong>stavební kámen a dolní mez</strong> (lower bound). Klíčové pozorování (06_TSP, slide 25): když z libovolného okruhu procházejícího všemi vrcholy odebereš jednu hranu, zbyde <em>kostra</em>. Ta nemůže být levnější než MST. Takže žádný okruh přes všechny vrcholy nemůže být levnější než $c(\mathrm{MST})$ — to je srdce 2-aproximace TSP, kterou rozvineme v [L3.8b] (kapitola K3).</p>
+  <p>V tomhle kurzu MST skoro nikdy není finální odpověď — je to <strong>stavební kámen a dolní mez</strong> (lower bound). Klíčové pozorování (06_TSP, slide 25): když z libovolného okruhu procházejícího všemi vrcholy odebereš jednu hranu, zbyde <em>kostra</em>. Ta nemůže být levnější než MST. Takže žádný okruh přes všechny vrcholy nemůže být levnější než $c(\mathrm{MST})$ — to je srdce 2-aproximace TSP, kterou rozvineme v <a href="../k3/l3-8b.html">[L3.8b] MST jako dolní mez (OPT ≥ c(MST))</a>.</p>
 
   <details class="try">
     <summary>Zkus sám: proč po odebrání jedné hrany z okruhu přes všech $n$ vrcholů zbyde právě kostra?</summary>
@@ -85,7 +85,7 @@
       <li><strong>MST (minimum spanning tree)</strong> = kostra minimalizující $\sum_{e \in T} c(e)$; existuje, právě když je graf souvislý.</li>
       <li>Počítá se <strong>hladově</strong> a polynomiálně: Kruskal (hrany od nejlevnější, kružnice zahazuj) nebo Prim (rosti strom nejlevnější hranou ven).</li>
       <li>Cena $c(\mathrm{MST})$ je jednoznačná, i když minimálních koster může být při remízách vah víc.</li>
-      <li>MST je <strong>dolní mez</strong>: okruh přes všechny vrcholy minus jedna hrana = kostra, tedy $c(\mathrm{MST}) \le \mathrm{OPT}$ — rozvineme u TSP v [L3.8b].</li>
+      <li>MST je <strong>dolní mez</strong>: okruh přes všechny vrcholy minus jedna hrana = kostra, tedy $c(\mathrm{MST}) \le \mathrm{OPT}$ — rozvineme u TSP v <a href="../k3/l3-8b.html#takeaways">[L3.8b]</a>.</li>
     </ul>
   </div>
 
