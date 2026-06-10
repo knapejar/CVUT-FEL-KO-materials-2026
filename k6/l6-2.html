@@ -36,7 +36,7 @@
     Procedura <strong>REVISE</strong>: pro orientovanou hranu $(x_i, x_j)$ smaže z domény $D_i$ každou hodnotu, která nemá v $D_j$ podporu — a vrátí příznak <code>deleted</code>, jestli se vůbec něco mazalo.
   </div>
 
-  <p>V <a href="../k6/l6-1.html">[L6.1] CSP a arc consistency</a> umíš hranu <em>diagnostikovat</em>: $(x_i, x_j)$ je AC ⟺ každá hodnota $a \in D_i$ má v $D_j$ podporu. Zkouškové zadání ale neříká „rozhodni“, říká <em>„<strong>reduce</strong> the domains to be arc consistent“</em> — chce zákrok, ne diagnózu. Dnes se naučíš ten zákrok pro <strong>jednu hranu</strong>; jak hrany správně řadit do fronty (celý AC-3) přijde v [L6.3].</p>
+  <p>V <a href="../k6/l6-1.html">[L6.1] CSP a arc consistency</a> umíš hranu <em>diagnostikovat</em>: $(x_i, x_j)$ je AC ⟺ každá hodnota $a \in D_i$ má v $D_j$ podporu. Zkouškové zadání ale neříká „rozhodni“, říká <em>„<strong>reduce</strong> the domains to be arc consistent“</em> — chce zákrok, ne diagnózu. Dnes se naučíš ten zákrok pro <strong>jednu hranu</strong>; jak hrany správně řadit do fronty (celý AC-3) přijde v <a href="../k6/l6-3.html">[L6.3]</a>.</p>
 
   <!-- ===== OD DIAGNOZY K ZAKROKU ===== -->
   <h2>Od diagnózy k zákroku</h2>
@@ -121,14 +121,14 @@ end</code></pre>
     </div>
   </details>
 
-  <p>Jedna jemnost navíc (slide 28, EN 1:1): <em>“The revision of $(x_k, x_m)$ does not change the arc consistency of $(x_m, x_k)$.”</em> Proč? Hodnota $a$ smazaná z $D_k$ neměla v $D_m$ <em>žádného</em> partnera — takže nebyla podporou žádné hodnoty $b \in D_m$ a její zmizení hraně $(x_m, x_k)$ nic nevzalo. Protisměrnou hranu právě revidovaného omezení tedy znovu kontrolovat netřeba. Z těchhle dvou pozorování („po smazání z $D_i$ přezkoumej hrany do $x_i$“ + „protisměrku ne“) se v [L6.3] poskládá fronta algoritmu AC-3 — včetně přesného pravidla, které hrany do fronty vracet.</p>
+  <p>Jedna jemnost navíc (slide 28, EN 1:1): <em>“The revision of $(x_k, x_m)$ does not change the arc consistency of $(x_m, x_k)$.”</em> Proč? Hodnota $a$ smazaná z $D_k$ neměla v $D_m$ <em>žádného</em> partnera — takže nebyla podporou žádné hodnoty $b \in D_m$ a její zmizení hraně $(x_m, x_k)$ nic nevzalo. Protisměrnou hranu právě revidovaného omezení tedy znovu kontrolovat netřeba. Z těchhle dvou pozorování („po smazání z $D_i$ přezkoumej hrany do $x_i$“ + „protisměrku ne“) se v <a href="../k6/l6-3.html">[L6.3]</a> poskládá fronta algoritmu AC-3 — včetně přesného pravidla, které hrany do fronty vracet.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: tři klasické chyby u REVISE</div>
     <ul>
       <li><strong>REVISE mění JEN doménu ocasu $D_i$.</strong> Hlava $D_j$ jen dodává podpory a zůstane netknutá — i když je hrana $(x_j, x_i)$ sebevíc nekonzistentní. Na tu je potřeba samostatné volání REVISE$(D_j, D_i)$.</li>
       <li><strong>Podpora musí splnit VŠECHNA omezení dvojice najednou.</strong> U dvojice $\{x_2, x_3\}$ s omezeními $x_2 \ne x_3$ a $x_2 + x_3 &gt; 4$ nestačí partner pro každé omezení zvlášť — musí to být tentýž $b$.</li>
-      <li><strong>Jeden průchod hranami nestačí.</strong> Každá jednotlivá hrana je po své revizi AC, ale pozdější zmenšení domény ji může rozbít zpětně. Reviduj, dokud existuje nekonzistentní hrana — u zkoušky tohle hlídá fronta AC-3 ([L6.3]).</li>
+      <li><strong>Jeden průchod hranami nestačí.</strong> Každá jednotlivá hrana je po své revizi AC, ale pozdější zmenšení domény ji může rozbít zpětně. Reviduj, dokud existuje nekonzistentní hrana — u zkoušky tohle hlídá fronta AC-3 (<a href="../k6/l6-3.html">[L6.3]</a>).</li>
     </ul>
   </div>
 
@@ -139,7 +139,7 @@ end</code></pre>
       <li><strong>REVISE$(D_i, D_j, C)$</strong> smaže z $D_i$ každou hodnotu $a$ bez podpory v $D_j$ (podpora musí splnit <em>všechna</em> omezení dvojice najednou) a vrátí příznak <code>deleted</code> + zmenšenou $D_i$. Po volání je hrana $(x_i, x_j)$ AC; mění se <strong>jen doména ocasu</strong>.</li>
       <li><strong>Mazání je bezpečné:</strong> hodnota bez podpory nemůže být v žádném řešení — množina řešení CSP se redukcí domén nemění.</li>
       <li><strong>Zmenšení $D_i$ může rozbít jen hrany $(x_k, x_i)$ směřující do $x_i$</strong> ($D_i$ je jejich zásobárna podpor). Hrany z $x_i$ ven ne — a protisměrka právě revidovaného omezení také ne (slide 28).</li>
-      <li><strong>Jeden průchod všemi hranami nestačí</strong> — opravená hrana se může pozdějšími škrty rozbít zpětně. Revidovat se musí, dokud nejsou všechny hrany AC; systematicky (bez „perpetual checking“) to dělá fronta AC-3 v [L6.3].</li>
+      <li><strong>Jeden průchod všemi hranami nestačí</strong> — opravená hrana se může pozdějšími škrty rozbít zpětně. Revidovat se musí, dokud nejsou všechny hrany AC; systematicky (bez „perpetual checking“) to dělá fronta AC-3 v <a href="../k6/l6-3.html">[L6.3]</a>.</li>
     </ul>
   </div>
 
@@ -162,7 +162,7 @@ end</code></pre>
         <p>Reduce the domains to be arc consistent. Record the steps of the algorithm (the queue content prior to the revision of each arc).”</p>
       </div>
 
-      <p><em>Dnešní (vlastní) instrukce — záznam fronty si necháme do [L6.3], dnes proveď redukci ve stylu slidu 27:</em> apply REVISE to the arcs in the order $(x_1, x_2), (x_2, x_1), (x_2, x_3), (x_3, x_2)$; for each call record the deleted value(s) and the revised domain. Then decide which arcs may have become inconsistent again, finish the revision, and state the final arc-consistent domains.</p>
+      <p><em>Dnešní (vlastní) instrukce — záznam fronty si necháme do <a href="../k6/l6-3.html">[L6.3]</a>, dnes proveď redukci ve stylu slidu 27:</em> apply REVISE to the arcs in the order $(x_1, x_2), (x_2, x_1), (x_2, x_3), (x_3, x_2)$; for each call record the deleted value(s) and the revised domain. Then decide which arcs may have become inconsistent again, finish the revision, and state the final arc-consistent domains.</p>
 
       <h4>a) Co je v zadání?</h4>
       <p>Zkoušková instance Slotu 6 (v <a href="../k6/l6-1.html#t-examcheck">[L6.1] T02</a> už máš její graf a diagnózu: non-AC jsou $(x_2, x_3)$ a $(x_3, x_2)$). Dnes domény skutečně zredukovat: čtyři volání REVISE v pevném pořadí + dokončení druhým kolem tam, kde se něco rozbilo.</p>
@@ -191,7 +191,7 @@ end</code></pre>
           <ol start="5">
             <li><strong>REVISE$(D_1, D_2)$ podruhé</strong> ($D_2 = \{2\}$): $a{=}1$ bez podpory ✗ smazat; $a{=}2 \to b{=}2$ ✓ → $D_1 = \{2\}$, <code>deleted</code> $= 1$. Teď jsou všechny čtyři hrany AC.</li>
           </ol>
-          <p><strong>Výsledek:</strong> $D_1 = \{2\}$, $D_2 = \{2\}$, $D_3 = \{1\}$ — odpovídá jedinému přiřazení $x_1 = 2$, $x_2 = 2$, $x_3 = 1$ (kontrola: $2 = 2$ ✓, $2 = 1 + 1$ ✓). Stejné domény dává i vzorový průběh AC-3 v bance #41 — v [L6.3] tenhle běh zopakuješ i se záznamem fronty před každou revizí, přesně jak chce zadání.</p>
+          <p><strong>Výsledek:</strong> $D_1 = \{2\}$, $D_2 = \{2\}$, $D_3 = \{1\}$ — odpovídá jedinému přiřazení $x_1 = 2$, $x_2 = 2$, $x_3 = 1$ (kontrola: $2 = 2$ ✓, $2 = 1 + 1$ ✓). Stejné domény dává i vzorový průběh AC-3 v bance #41 — v <a href="../k6/l6-3.html">[L6.3]</a> tenhle běh zopakuješ i se záznamem fronty před každou revizí, přesně jak chce zadání.</p>
           <p><em>Poznámka:</em> dochované ruční řešení zkoušky škrtá zrcadlové hodnoty (čte $x_3 = x_2 + 1$) — rozpor je rozebraný v <a href="../k6/l6-1.html#t-examcheck">[L6.1] T02</a>; tady počítáme doslovně dle tištěného $x_2 = x_3 + 1$.</p>
         </div>
       </details>
@@ -249,7 +249,7 @@ end</code></pre>
 
   <div class="pager">
     <a href="../k6/l6-1.html"><span class="dir">← Předchozí</span> L6.1 · CSP a arc consistency</a>
-    <a class="next" href="../index.html#k6"><span class="dir">Další →</span> Pokračování se připravuje (L6.3 · AC-3 algoritmus + oditerování [FOTO])</a>
+    <a class="next" href="../k6/l6-3.html"><span class="dir">Další →</span> L6.3 · AC-3 algoritmus + oditerování [FOTO]</a>
   </div>
 
 </div>

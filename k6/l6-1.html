@@ -43,7 +43,7 @@
     <p>“Reduce the domains to be arc consistent. Record the steps of the algorithm (the queue content prior to the revision of each arc).”</p>
   </div>
 
-  <p>Je to nejmechaničtější úloha celé zkoušky — žádný důkaz, žádný nápad, jen pečlivé oditerování algoritmu AC-3. Kapitola K6 ji rozkládá na tři kroky: dnes <strong>pojmy</strong> (co je CSP a kdy je hrana konzistentní), v <a href="../k6/l6-2.html">[L6.2]</a> <strong>procedura REVISE</strong> (jak nekonzistenci opravit škrtáním hodnot) a v [L6.3] <strong>algoritmus AC-3</strong> s frontou hran — tam si přesně tohle zadání celé propočítáš.</p>
+  <p>Je to nejmechaničtější úloha celé zkoušky — žádný důkaz, žádný nápad, jen pečlivé oditerování algoritmu AC-3. Kapitola K6 ji rozkládá na tři kroky: dnes <strong>pojmy</strong> (co je CSP a kdy je hrana konzistentní), v <a href="../k6/l6-2.html">[L6.2]</a> <strong>procedura REVISE</strong> (jak nekonzistenci opravit škrtáním hodnot) a v <a href="../k6/l6-3.html">[L6.3]</a> <strong>algoritmus AC-3</strong> s frontou hran — tam si přesně tohle zadání celé propočítáš.</p>
 
   <!-- ===== CO JE CSP ===== -->
   <h2>Co je CSP</h2>
@@ -126,7 +126,7 @@
     </div>
   </details>
 
-  <p>Celý <strong>CSP je arc consistent</strong>, právě když jsou AC <em>všechny</em> hrany jeho grafu — v příkladu výše tedy jen instance ③. Zkouškové zadání „reduce the domains to be arc consistent“ chce přesně tohle: škrtat hodnoty bez podpory tak dlouho, až jsou všechny hrany AC. Jak škrtat systematicky (procedura REVISE) se naučíš v <a href="../k6/l6-2.html">[L6.2]</a> a jak u toho nezešílet z opakovaných kontrol (fronta algoritmu AC-3) v [L6.3].</p>
+  <p>Celý <strong>CSP je arc consistent</strong>, právě když jsou AC <em>všechny</em> hrany jeho grafu — v příkladu výše tedy jen instance ③. Zkouškové zadání „reduce the domains to be arc consistent“ chce přesně tohle: škrtat hodnoty bez podpory tak dlouho, až jsou všechny hrany AC. Jak škrtat systematicky (procedura REVISE) se naučíš v <a href="../k6/l6-2.html">[L6.2]</a> a jak u toho nezešílet z opakovaných kontrol (fronta algoritmu AC-3) v <a href="../k6/l6-3.html">[L6.3]</a>.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: dvě klasické chyby u hranové konzistence</div>
@@ -211,10 +211,10 @@
         <p>Record the steps of the algorithm (the queue content prior to the revision of each arc).”</p>
       </div>
 
-      <p><em>Dnešní (vlastní) instrukce — plné zkouškové řešení s frontou tě čeká v [L6.3]; tady udělej první krok:</em> (i) nakresli graf omezení, (ii) u každé hrany rozhodni, zda je vůči počátečním doménám AC, (iii) u nekonzistentních hran vypiš hodnoty bez podpory.</p>
+      <p><em>Dnešní (vlastní) instrukce — plné zkouškové řešení s frontou tě čeká v <a href="../k6/l6-3.html">[L6.3]</a>; tady udělej první krok:</em> (i) nakresli graf omezení, (ii) u každé hrany rozhodni, zda je vůči počátečním doménám AC, (iii) u nekonzistentních hran vypiš hodnoty bez podpory.</p>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Zkoušková instance Slotu 6: tři proměnné, všechny domény $\{1,2\}$, omezení $x_1 = x_2$ a $x_2 = x_3 + 1$. Originál chce celý běh AC-3 se záznamem fronty; dnes děláme jen diagnózu konzistence — přesně tu, kterou AC-3 v [L6.3] zmechanizuje.</p>
+      <p>Zkoušková instance Slotu 6: tři proměnné, všechny domény $\{1,2\}$, omezení $x_1 = x_2$ a $x_2 = x_3 + 1$. Originál chce celý běh AC-3 se záznamem fronty; dnes děláme jen diagnózu konzistence — přesně tu, kterou AC-3 v <a href="../k6/l6-3.html">[L6.3]</a> zmechanizuje.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -225,7 +225,7 @@
       <p>Dvě omezení → kolik hran? U rovnosti $x_1 = x_2$ je podpora hodnoty $a$ prostě $b = a$. U $x_2 = x_3 + 1$ si <em>pro každý směr</em> hrany nejdřív napiš vzorec podpory ($b$ jako funkci $a$) — a teprve pak dosazuj; tady se nejsnáz chybuje (viz danger box výše).</p>
 
       <details class="solution">
-        <summary>d) Úplné řešení (vlastní — originál řeší celý běh AC-3, viz [L6.3])</summary>
+        <summary>d) Úplné řešení (vlastní — originál řeší celý běh AC-3, viz <a href="../k6/l6-3.html">[L6.3]</a>)</summary>
         <div class="inner">
           <p><strong>(i) Graf:</strong> hrany $(x_1, x_2), (x_2, x_1)$ pro $x_1 = x_2$ a $(x_2, x_3), (x_3, x_2)$ pro $x_2 = x_3 + 1$ — celkem 4.</p>
           <div class="viz" id="viz-t02"></div>
@@ -236,7 +236,7 @@
             <li>$(x_2, x_3)$: podpora hodnoty $a \in D_2$ je $b = a - 1$; $a{=}1$ potřebuje $b = 0 \notin D_3$ ✗, $a{=}2 \to b = 1$ ✓ → <strong>není AC</strong>, bez podpory $1 \in D_2$.</li>
             <li>$(x_3, x_2)$: podpora hodnoty $a \in D_3$ je $b = a + 1$; $a{=}1 \to b = 2$ ✓, $a{=}2$ potřebuje $b = 3 \notin D_2$ ✗ → <strong>není AC</strong>, bez podpory $2 \in D_3$.</li>
           </ul>
-          <p>CSP tedy AC není; škrtat se budou hodnoty $1$ z $D_2$ a $2$ z $D_3$ (a rovnost $x_1 = x_2$ pak strhne i doménu $D_1$ — jak přesně a v jakém pořadí, to je běh AC-3 v [L6.3]).</p>
+          <p>CSP tedy AC není; škrtat se budou hodnoty $1$ z $D_2$ a $2$ z $D_3$ (a rovnost $x_1 = x_2$ pak strhne i doménu $D_1$ — jak přesně a v jakém pořadí, to je běh AC-3 v <a href="../k6/l6-3.html">[L6.3]</a>).</p>
           <p><em>Poznámka k dochovanému ručnímu řešení:</em> sken zkoušky škrtá zrcadlové hodnoty ($x_2 = 2$, $x_3 = 1$, $x_1 = 2$; zůstane $x_1 = x_2 = 1$, $x_3 = 2$) — to odpovídá čtení $x_3 = x_2 + 1$, zatímco tištěné zadání říká $x_2 = x_3 + 1$. Na metodě se nemění nic, jen se role hodnot $1$ a $2$ prohodí. U zkoušky čti směr rovnice dvakrát — a klidně si k hraně rovnou napiš vzorec podpory.</p>
         </div>
       </details>
