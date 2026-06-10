@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L4.8 · Matrix rounding přes toky — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k4">K4 · Toky a řezy</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L4.8</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L4.8</span> Kapitola K4 — Toky a řezy (Slot 4) · <strong>[MUST]</strong>
+  </p>
+  <h1>Matrix rounding přes toky</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Konzistentní zaokrouhlení matice = celočíselný tok v síti $s \to$ řádky $\to$ sloupce $\to t$, kde každá zaokrouhlovaná hodnota $a$ je hrana s mezemi $[\lfloor a \rfloor, \lceil a \rceil]$.</strong> Celočíselnost toku (Dantzig-Fulkerson / TUM) pak zaručí, že tok <em>je</em> zaokrouhlení — a protože matice sama je přípustný frakční tok, řešení existuje pro libovolný vstup.
+  </div>
+
+  <p>V <a href="l4-5.html#takeaways">[L4.5]</a> jsi viděl, že vrstvená síť umí kódovat přiřazení („kdo koho nominuje“). Dnes stejný trik použijeme na úlohu, která na první pohled s toky nemá nic společného: <strong>zaokrouhlování matice</strong>. Je to druhý příklad ze série „Integrality and Existence of Lower Bound“ (slide 20, [AMO93]) — a zkoušková klasika: chodila v testu 2 (2013/14) i v teoretickém testu, kde po tobě chtějí formulaci, zdůvodnění celočíselnosti <em>a</em> feasibility (úloha T01 dole). Hodí se ti přitom skoro celá kapitola: dolní meze a přípustnost <a href="l4-1.html#takeaways">[L4.1]</a>, běh Ford-Fulkersona <a href="l4-3.html#takeaways">[L4.3]</a>, řez jako certifikát <a href="l4-4.html#takeaways">[L4.4]</a> a počáteční tok při $l &gt; 0$ <a href="l4-7.html#takeaways">[L4.7]</a>.</p>
+
+  <!-- ===== SEKCE 1: ÚLOHA ===== -->
+  <h2>Úloha: konzistentní zaokrouhlení (slide 20)</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 20 — Example Flow.lower.rounding: Matrix Rounding Problem [AMO93], 1:1</div>
+    <p><em>This application is concerned with <strong>consistent rounding of the elements, row sums, and column sums</strong> of a matrix. We are given a $3 \times 3$ matrix of real numbers $x_{ij}$ with row sums vector $r$ and column sums vector $c$. We can round any real number $a \in \{x_{11} \ldots x_{33}, r_1 \ldots r_3, c_1 \ldots c_3\}$ to the next smaller integer $\lfloor a \rfloor$ or to the next larger integer $\lceil a \rceil$, and the decision is completely up to us. The problem requires that we round all matrix elements and the following constraints hold:</em></p>
+    <ul>
+      <li><em>the sum of the rounded elements in each row is equal to the rounded row sum $r_i$</em></li>
+      <li><em>the sum of the rounded elements in each column is equal to the rounded column sum $c_i$</em></li>
+    </ul>
+    <p><em>We refer to such rounding as a <strong>consistent rounding</strong>. The objective is to maximize the sum of matrix entries (due to the constraint it is equal to the sum of the row sums and at the same time to the sum of the column sums).</em></p>
+  </div>
+
+  <p>Celou lekci odpracujeme na konkrétní matici z [AMO93] (Figure 6.2; tatáž čísla má i studentský souhrn, str. 8–9):</p>
+
+  $$\begin{array}{ccc|c}
+  x_{ij} & & & r_i \\ \hline
+  3.1 & 6.8 & 7.3 & 17.2 \\
+  9.6 & 2.4 & 0.7 & 12.7 \\
+  3.6 & 1.2 & 6.5 & 11.3 \\ \hline
+  c_j:\ 16.3 & 10.4 & 14.5 &
+  \end{array}$$
+
+  <p>Každé z 15 čísel (9 prvků + 3 řádkové součty + 3 sloupcové součty) smíš nahradit dolní nebo horní celou částí — ale tak, aby zaokrouhlené řádky a sloupce pořád „seděly“ se zaokrouhlenými součty.</p>
+
+  <details class="try">
+    <summary>Zkus sám: kolik je kandidátních zaokrouhlení? A proč nepomůže „zaokrouhli každé číslo k nejbližšímu celému“?</summary>
+    <div class="inner">
+      <p>Každé z 15 čísel má 2 možnosti → $2^{15} = 32\,768$ kandidátů (a pro matici $m \times n$ obecně $2^{mn + m + n}$ — exponenciálně). A běžné „k nejbližšímu“ konzistenci snadno rozbije: první řádek by dal $3 + 7 + 7 = 17$, ale $r_1 = 17.2$ se zaokrouhlí na $17$ — náhodou OK; jenže třetí sloupec: $7 + 1 + 7 = 15$, zatímco $c_3 = 14.5 \to 14$ nebo $15$… a druhý řádek $10 + 2 + 1 = 13$ vs. třetí prvek $0.7 \to 1$ — podmínky se navzájem svazují přes <em>celou</em> matici. Potřebujeme nástroj, který umí všechna lokální rozhodnutí provázat globální podmínkou „součty sedí“. V téhle kapitole takový nástroj máme: Kirchhoffův zákon.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: každý prvek $x_{ij}$ figuruje přesně v jedné řádkové a přesně v jedné sloupcové podmínce. Když uděláš z řádků a sloupců uzly — co bude $x_{ij}$?</summary>
+    <div class="inner">
+      <p><strong>Hrana $R_i \to C_j$.</strong> Prvek „spojuje“ svůj řádek se svým sloupcem — a hrana v grafu spojuje přesně dva uzly. Řádková podmínka pak bude Kirchhoffova rovnice v uzlu $R_i$ (vše, co do řádku přiteče, se rozdělí mezi jeho prvky), sloupcová v uzlu $C_j$. Zbývá dodat, odkud řádkové součty přitékají a kam sloupcové odtékají: zdroj $s$ a stok $t$. Vyšla nám přesně vrstvená síť z <a href="l4-5.html#takeaways">[L4.5]</a> — tentokrát ale omezení nekódují kapacity, nýbrž <em>dvojice mezí</em>.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: KONSTRUKCE ===== -->
+  <h2>Konstrukce sítě: meze $[\lfloor a \rfloor, \lceil a \rceil]$</h2>
+
+  <details class="try">
+    <summary>Zkus sám: jak jazykem toků říct „tahle hodnota musí být $\lfloor a \rfloor$, nebo $\lceil a \rceil$ — nic jiného“?</summary>
+    <div class="inner">
+      <p>Dej hraně dolní mez $l(e) = \lfloor a \rfloor$ a horní mez $u(e) = \lceil a \rceil$. Pro neceločíselné $a$ je v intervalu $[\lfloor a \rfloor, \lceil a \rceil]$ <em>právě dvojice</em> celých čísel $\lfloor a \rfloor$ a $\lceil a \rceil$ — takže <strong>celočíselný</strong> tok na té hraně nemá jinou možnost než být zaokrouhlením $a$. (Pro celé $a$ je $\lfloor a \rfloor = \lceil a \rceil = a$ a hrana je fixovaná — i to je správně, celé číslo se „zaokrouhlí“ samo na sebe.) Slovo „celočíselný“ tu nese celou váhu — vrátíme se k němu za chvíli.</p>
+    </div>
+  </details>
+
+  <p>Konstrukce pro matici $m \times n$ (u nás $3 \times 3$):</p>
+  <ul>
+    <li>uzly: zdroj $s$, řádkové uzly $R_1, \ldots, R_m$, sloupcové uzly $C_1, \ldots, C_n$, stok $t$;</li>
+    <li>hrany $s \to R_i$ s mezemi $[\lfloor r_i \rfloor, \lceil r_i \rceil]$ — zaokrouhlený <strong>řádkový součet</strong>;</li>
+    <li>hrany $R_i \to C_j$ s mezemi $[\lfloor x_{ij} \rfloor, \lceil x_{ij} \rceil]$ — zaokrouhlený <strong>prvek</strong>;</li>
+    <li>hrany $C_j \to t$ s mezemi $[\lfloor c_j \rfloor, \lceil c_j \rceil]$ — zaokrouhlený <strong>sloupcový součet</strong>.</li>
+  </ul>
+
+  <div class="box">
+    <div class="box-title">Tatáž konstrukce ve vzpomínce na test 2 (2013/14), přepis wiki CZ 1:1</div>
+    <p><em>„Zaokrouhlování prvků matice 3×3 (nahoru dolu), aby se řádková resp. sloupcová suma (pro všechny ř/s) rovnaly — probráno na přednáškách — zdroj toku → řádky → sloupce → sink — hrany maji omezení součet zaokrouhleni nahoru nebo dolu dle významu.“</em></p>
+  </div>
+
+  <div class="viz" id="viz-net"></div>
+
+  <details class="try">
+    <summary>Zkus sám: napiš Kirchhoffovu rovnici pro uzel $R_2$. Co přesně říká?</summary>
+    <div class="inner">
+      <p>$f(s \to R_2) = f(R_2 \to C_1) + f(R_2 \to C_2) + f(R_2 \to C_3)$ — tedy <em>zaokrouhlený řádkový součet $=$ součet zaokrouhlených prvků druhého řádku</em>. To je doslova první podmínka konzistence ze zadání! A symetricky v $C_j$: vše, co do sloupcového uzlu přiteče (zaokrouhlené prvky sloupce), odteče hranou $C_j \to t$ (zaokrouhlený sloupcový součet) — druhá podmínka. Konzistence není nic, co bychom museli „hlídat“: <strong>vynucuje ji Kirchhoffův zákon</strong> <a href="l4-1.html#takeaways">[L4.1]</a> sám od sebe. Přípustný celočíselný tok $\iff$ konzistentní zaokrouhlení.</p>
+    </div>
+  </details>
+
+  <p>A účelová funkce? Hodnota toku $|f| = \sum_i f(s \to R_i)$ je součet zaokrouhlených řádkových součtů = celkový součet zaokrouhlené matice. <strong>Maximalizovat součet prvků = najít maximální tok.</strong></p>
+
+  <!-- ===== SEKCE 3: CELOČÍSELNOST ===== -->
+  <h2>Proč z toho vypadne zaokrouhlení: celočíselnost</h2>
+
+  <details class="try">
+    <summary>Zkus sám: tok je obecně reálné číslo — klidně $f(R_1 \to C_1) = 3.5 \in [3, 4]$. Proč se na výstupu přesto můžeme spolehnout na celá čísla?</summary>
+    <div class="inner">
+      <p>Všechny meze $\lfloor a \rfloor, \lceil a \rceil$ jsou celé. Podle <strong>Integral Flow Theorem</strong> (Dantzig-Fulkerson, slide 17 — citovaný v <a href="l4-5.html#takeaways">[L4.5]</a>) pak existuje celočíselný maximální tok; Ford-Fulkerson ho navíc rovnou najde, protože startuje z celočíselného toku a každé $\gamma$ vyjde celé <a href="l4-3.html#takeaways">[L4.3]</a>. Hlubší důvod znáš z <a href="../k3/l3-12.html#takeaways">[L3.12]</a>: incidenční matice digrafu je <strong>totálně unimodulární</strong>, takže polyedr toků má celočíselné vrcholy a LP = ILP. Celočíselný tok v mezích $[\lfloor a \rfloor, \lceil a \rceil]$ už <em>nemá jinou možnost</em> než být zaokrouhlením — přesně jak jsme si připravili v konstrukci.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 17 — Integrality, 1:1 (věta + zdůvodnění přes TUM)</div>
+    <p><em>If the capacities of the network are integers, and there exists a feasible flow, then there exists <strong>an integer-valued maximum flow</strong>. This follows from total unimodularity of the incidence matrix of a digraph $G$, which is matrix $\mathbf{A}$ in LP formulation $\mathbf{A} \cdot x \le b$.</em></p>
+  </div>
+
+  <!-- ===== SEKCE 4: FEASIBILITA ===== -->
+  <h2>Feasibilita pro libovolný vstup: certifikát zadarmo</h2>
+
+  <p>Věta nahoře má předpoklad: <em>„and there exists a feasible flow“</em>. U sítí s $l &gt; 0$ přípustný tok existovat nemusí (drill <a href="l4-1.html#t-nofeasible">[L4.1] T02</a>) — tady ale ano, a to vždy:</p>
+
+  <details class="try">
+    <summary>Zkus sám: najdi přípustný (klidně neceločíselný) tok v naší síti — bez jediného výpočtu. Nápověda: máš ho celou dobu před očima.</summary>
+    <div class="inner">
+      <p><strong>Matice sama.</strong> Polož $f(R_i \to C_j) = x_{ij}$, $f(s \to R_i) = r_i$, $f(C_j \to t) = c_j$. Meze platí triviálně ($\lfloor a \rfloor \le a \le \lceil a \rceil$) a Kirchhoff je <em>definice</em> řádkových a sloupcových součtů: $r_i = \sum_j x_{ij}$, $c_j = \sum_i x_{ij}$. Přípustný frakční tok tedy existuje pro <em>každý</em> přípustný vstup — a Integral Flow Theorem z něj vyrobí existenci celočíselného: <strong>konzistentní zaokrouhlení existuje vždy.</strong> To je celá odpověď na otázku c) zkouškové úlohy.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-frac"></div>
+
+  <!-- ===== SEKCE 5: BĚH ===== -->
+  <h2>Běh: od počátečního toku k maximálnímu součtu</h2>
+
+  <p>Síť má nenulové dolní meze, takže $f \equiv 0$ není přípustný start — Ford-Fulkerson potřebuje počáteční přípustný celočíselný tok. Ten dodá transformace z <a href="l4-7.html#takeaways">[L4.7]</a> (cirkulační hrana $t \to s$, substituce $f = f' + l$, bilance, max flow na redukci); její provedení tu přeskočíme a rovnou použijeme výsledek (konkrétní počáteční tok je vlastní dopočet — přiznáno). Pak už běží klasická smyčka augmentací <a href="l4-3.html#takeaways">[L4.3]</a>:</p>
+
+  <div class="viz" id="viz-ffrun"></div>
+
+  <p>Z posledního framu čteš zaokrouhlenou matici přímo z toků na vnitřních hranách:</p>
+
+  $$\begin{array}{ccc|c}
+  \hat{x}_{ij} & & & \hat{r}_i \\ \hline
+  4 & 6 & 8 & 18 \\
+  10 & 3 & 0 & 13 \\
+  3 & 2 & 7 & 12 \\ \hline
+  \hat{c}_j:\ 17 & 11 & 15 &
+  \end{array}$$
+
+  <p>Každá hodnota je $\lfloor a \rfloor$ nebo $\lceil a \rceil$ svého originálu, řádky i sloupce sedí a celkový součet $43 = |f|$ je maximální možný — certifikátem je řez $A = \{s\}$ s kapacitou $18 + 13 + 12 = 43$ <a href="l4-4.html#takeaways">[L4.4]</a>.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
+    <p><strong>1) „Tok vyjde celočíselný vždycky.“</strong> Ne — celočíselnost máš zaručenou jen pro <em>celočíselné meze</em> (Dantzig-Fulkerson; pro neceločíselné kapacity nemusí F-F ani skončit, slide 18). Tady meze celé jsou, protože jsme je tak <em>postavili</em> — to je potřeba u zkoušky říct, ne mlčky předpokládat.
+    <strong>2) Feasibilita má dva kroky.</strong> „Je to vždy řešitelné“ zdůvodníš (i) frakčním certifikátem = matice sama a (ii) Integral Flow Theorem, který z frakčního udělá celočíselný. Bez kroku (ii) jsi dokázal jen existenci neceločíselného toku — a ten zaokrouhlením není.
+    <strong>3) Dolní meze nejsou nula.</strong> $l(e) = \lfloor a \rfloor &gt; 0$ skoro všude → start F-F není zadarmo, potřebuješ konstrukci z <a href="l4-7.html#takeaways">[L4.7]</a>. Věta „begin with zero flow“ je tu chyba.
+    <strong>4) Celočíselný prvek = fixovaná hrana.</strong> Pro celé $a$ je $\lfloor a \rfloor = \lceil a \rceil = a$, tedy $l = u = a$ — žádné $[a, a+1]$. Zaokrouhlení nesmí celé číslo změnit.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.8</div>
+    <ul>
+      <li><strong>Vzor sítě (slide 20, test 2 2013/14):</strong> $s \to$ řádkové uzly $R_i \to$ sloupcové uzly $C_j \to t$; každá zaokrouhlovaná hodnota $a$ (prvek, řádkový i sloupcový součet) = jedna hrana s mezemi $l = \lfloor a \rfloor$, $u = \lceil a \rceil$.</li>
+      <li><strong>Konzistenci vynucuje Kirchhoff:</strong> rovnice v $R_i$ = „součet zaokrouhlených prvků řádku = zaokrouhlený řádkový součet“, v $C_j$ totéž pro sloupce. Přípustný celočíselný tok $\iff$ konzistentní zaokrouhlení; max součet = max $|f| = \sum_i f(s \to R_i)$.</li>
+      <li><strong>Celočíselnost:</strong> meze jsou celé → existuje celočíselný max tok (Integral Flow Theorem <a href="l4-5.html#takeaways">[L4.5]</a>, plyne z TUM incidenční matice <a href="../k3/l3-12.html#takeaways">[L3.12]</a>; F-F ho najde, $\gamma$ celé) — a celé číslo v $[\lfloor a \rfloor, \lceil a \rceil]$ je nutně $\lfloor a \rfloor$ nebo $\lceil a \rceil$.</li>
+      <li><strong>Feasibilní pro libovolný vstup:</strong> matice sama je přípustný frakční tok ($f = x_{ij}, r_i, c_j$; Kirchhoff = definice součtů) → dle věty existuje i celočíselný. Konzistentní zaokrouhlení existuje vždy.</li>
+      <li><strong>Běh:</strong> kvůli $l &gt; 0$ start přes <a href="l4-7.html#takeaways">[L4.7]</a>, pak augmentace <a href="l4-3.html#takeaways">[L4.3]</a>; maximalitu certifikuj řezem <a href="l4-4.html#takeaways">[L4.4]</a>. U zkoušky odevzdej: uzly, hrany s mezemi, Kirchhoff = konzistence, zdůvodnění celočíselnosti i feasibility.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-rounding">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Matrix Rounding Problem</strong>
+      <span class="task-src">zdroj: teoretický test (final), str. 1 — zadání EN 1:1; řešení ve zdroji není, sepsáno vlastní dle slidů 17 a 20 — přiznáno</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN 1:1)</span>
+        <p><em>This application is concerned with consistent rounding of the elements, row sums, and column sums of a matrix. We are given a $3 \times 3$ matrix of real numbers $x_{ij}$ with row sums vector $r$ and column sums vector $c$. We can round any real number $a \in \{x_{11} \ldots x_{33}, r_1 \ldots r_3, c_1 \ldots c_3\}$ to the next smaller integer $\lfloor a \rfloor$ or to the next larger integer $\lceil a \rceil$, and the decision is completely up to us. The problem requires that we round all matrix elements and the following constraints hold:</em></p>
+        <ul>
+          <li><em>the sum of the rounded elements in each row is equal to the rounded row sum $r_i$</em></li>
+          <li><em>the sum of the rounded elements in each column is equal to the rounded column sum $c_i$</em></li>
+        </ul>
+        <p><em>The objective is to maximize the sum of rounded matrix entries.</em></p>
+        <p><em>a) Formulate as the maximum flow problem.</em><br>
+        <em>b) Are the resulting flows integers? Why yes/no?</em><br>
+        <em>c) Is the problem feasible for any admissible input?</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Teoretická formulační úloha — přesně obsah téhle lekce. Tři podotázky odpovídají třem sekcím: konstrukce sítě (formulace), celočíselnost (proč tok = zaokrouhlení) a feasibilita (proč existuje řešení pro každý vstup). Žádné konkrétní počítání; hodnotí se úplnost zdůvodnění.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — vzor sítě, meze $[\lfloor a \rfloor, \lceil a \rceil]$, oba argumenty (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-5.html#takeaways">[L4.5]</a> — Integral Flow Theorem (Dantzig-Fulkerson).</li>
+        <li><a href="../k3/l3-12.html#takeaways">[L3.12]</a> — totální unimodularita incidenční matice (alternativa pro b)).</li>
+        <li><a href="l4-1.html#takeaways">[L4.1]</a> — přípustnost $l \le f \le u$ a Kirchhoff.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>U a) odevzdej čtyři věci jako vždy u tokových formulací: uzly, hrany, meze, čtení výsledku — a navíc větu „Kirchhoff v $R_i$/$C_j$ = podmínky konzistence, $|f|$ = celkový součet, tedy max flow“. U b) nestačí „ano“: musíš říct <em>proč</em> (celočíselné meze + věta / TUM / celočíselné $\gamma$ ve F-F). U c) hledej přípustný tok, který nemusíš počítat — a nezapomeň, že frakční certifikát sám o sobě nestačí (polopravda 2).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní dle slidů 17 + 20 — přiznáno)</summary>
+        <div class="inner">
+          <p><strong>a) Formulace.</strong> Uzly: $s$, $R_1, R_2, R_3$ (řádky), $C_1, C_2, C_3$ (sloupce), $t$. Hrany a meze $[l, u]$:</p>
+          <ul>
+            <li>$s \to R_i$: $[\lfloor r_i \rfloor, \lceil r_i \rceil]$ pro $i = 1, 2, 3$,</li>
+            <li>$R_i \to C_j$: $[\lfloor x_{ij} \rfloor, \lceil x_{ij} \rceil]$ pro všech 9 dvojic $(i, j)$,</li>
+            <li>$C_j \to t$: $[\lfloor c_j \rfloor, \lceil c_j \rceil]$ pro $j = 1, 2, 3$.</li>
+          </ul>
+          <p>Celočíselný přípustný tok odpovídá konzistentnímu zaokrouhlení: hodnota na hraně je zaokrouhlení příslušného čísla (celé číslo v $[\lfloor a \rfloor, \lceil a \rceil]$) a Kirchhoffův zákon v $R_i$ resp. $C_j$ říká přesně „součet zaokrouhlených prvků řádku/sloupce = zaokrouhlený řádkový/sloupcový součet“. Hodnota toku $|f| = \sum_i f(s \to R_i)$ je celkový součet zaokrouhlené matice → <strong>maximalizace součtu = maximum flow problem</strong>. (Kvůli $l &gt; 0$ se počáteční přípustný tok najde transformací z <a href="l4-7.html#takeaways">[L4.7]</a>.)</p>
+          <p><strong>b) Ano, jsou celočíselné.</strong> Všechny meze jsou celá čísla. Podle Integral Flow Theorem (Dantzig and Fulkerson [1956], slide 17) existuje celočíselný maximální tok; důvodem je totální unimodularita incidenční matice digrafu (<a href="../k3/l3-12.html#takeaways">[L3.12]</a>) — polyedr má celočíselné vrcholy. Algoritmicky: Ford-Fulkerson startuje z celočíselného toku a augmentuje vždy o celé $\gamma$, takže celočíselný max tok přímo vrátí. Celé číslo v $[\lfloor a \rfloor, \lceil a \rceil]$ je nutně $\lfloor a \rfloor$ nebo $\lceil a \rceil$ — tok je tedy přímo zaokrouhlení.</p>
+          <p><strong>c) Ano, pro libovolný vstup.</strong> Původní (nezaokrouhlená) matice definuje přípustný frakční tok: $f(R_i \to C_j) = x_{ij}$, $f(s \to R_i) = r_i$, $f(C_j \to t) = c_j$. Meze platí triviálně ($\lfloor a \rfloor \le a \le \lceil a \rceil$) a Kirchhoffovy rovnice jsou přesně definice řádkových a sloupcových součtů. Existuje tedy přípustný tok — a protože meze jsou celočíselné, existuje dle věty z b) i celočíselný (maximální) tok, tj. konzistentní zaokrouhlení vždy existuje.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-rounddrill">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Matrix rounding — celá konstrukce a běh na matici 2×2</strong>
+      <span class="task-src">zdroj: VLASTNÍ drill (instance, otázky i řešení vlastní — přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN — vlastní drill, přiznáno)</span>
+        <p>Consider the $2 \times 2$ matrix with row sums $r$ and column sums $c$:
+        $$\begin{array}{cc|c} 1.4 & 2.7 & 4.1 \\ 3.3 & 0.6 & 3.9 \\ \hline 4.7 & 3.3 & \end{array}$$
+        (i) Formulate the consistent rounding problem as a maximum flow problem: draw the network and label every edge with its bounds $[l, u]$. (ii) Starting from the initial feasible integer flow $f$ given by $\hat{x} = \begin{pmatrix}1 &amp; 3\\ 3 &amp; 1\end{pmatrix}$, $\hat{r} = (4, 4)$, $\hat{c} = (4, 4)$, verify its feasibility and run the Ford-Fulkerson algorithm to maximize the sum of the rounded entries. (iii) Give the resulting consistent rounding, its total sum, and a minimum cut certifying optimality.</p>
+      </div>
+
+      <div class="viz" id="viz-t02net"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejná konstrukce jako v lekci, ale v nejmenším netriviálním formátu $2 \times 2$ — 4 prvky + 2 řádkové + 2 sloupcové součty = 8 hran. Počáteční přípustný tok je darovaný (v plné zkouškové verzi by ses k němu dostal přes <a href="l4-7.html#takeaways">[L4.7]</a>), tvoje práce je formulace, kontrola přípustnosti, augmentace a certifikát řezem.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — vzor sítě a meze (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-3.html#takeaways">[L4.3]</a> — smyčka Ford-Fulkersona (každou iteraci vypsat).</li>
+        <li><a href="l4-4.html#takeaways">[L4.4]</a> — min řez z posledního značkování + kontrola $C(A) = |f|$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>① Meze: $\lfloor a \rfloor$ a $\lceil a \rceil$ všech osmi čísel. ② Přípustnost startu: meze na všech hranách + Kirchhoff v $A_1, A_2, B_1, B_2$. ③ Augmentuj, dokud v reziduálním grafu vede cesta $s \to t$ (pozor, zpětné hrany existují jen při $f &gt; l$ — tady je $l$ vysoko!). ④ Když cesta není, vypiš označkované uzly = $A$ a spočti $C(A) = \sum u(\delta^+(A)) - \sum l(\delta^-(A))$.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
+        <div class="inner">
+          <p><strong>(i) Síť.</strong> $s \to A_1\ [4, 5]$, $s \to A_2\ [3, 4]$ (řádkové součty $4.1, 3.9$); $A_1 \to B_1\ [1, 2]$, $A_1 \to B_2\ [2, 3]$, $A_2 \to B_1\ [3, 4]$, $A_2 \to B_2\ [0, 1]$ (prvky); $B_1 \to t\ [4, 5]$, $B_2 \to t\ [3, 4]$ (sloupcové součty $4.7, 3.3$) — viz obrázek u zadání.</p>
+          <p><strong>(ii) Start a běh.</strong> Kontrola startu: meze $1 \in [1,2]$, $3 \in [2,3]$, $3 \in [3,4]$, $1 \in [0,1]$, $4 \in [4,5]$ (2×), $4 \in [4,5]$, $4 \in [3,4]$ ✓; Kirchhoff: $A_1$: $4 = 1 + 3$ ✓, $A_2$: $4 = 3 + 1$ ✓, $B_1$: $1 + 3 = 4$ ✓, $B_2$: $3 + 1 = 4$ ✓. $|f| = 8$. Běh:</p>
+          <div class="viz" id="viz-t02run"></div>
+          <p><strong>(iii) Výsledek.</strong> Zaokrouhlení $\hat{x} = \begin{pmatrix}2 &amp; 3\\ 3 &amp; 1\end{pmatrix}$, $\hat{r} = (5, 4)$, $\hat{c} = (5, 4)$, celkový součet $|f| = 9$. Minimální řez z posledního značkování: obě hrany ze $s$ jsou nasycené, takže $A = \{s\}$ a $C(A) = u(s \to A_1) + u(s \to A_2) = 5 + 4 = 9 = |f|$ → tok je maximální <a href="l4-4.html#takeaways">[L4.4]</a>. Kontrola konzistence: řádek 1: $2 + 3 = 5$ ✓, řádek 2: $3 + 1 = 4$ ✓, sloupec 1: $2 + 3 = 5$ ✓, sloupec 2: $3 + 1 = 4$ ✓ — a každá hodnota je $\lfloor a \rfloor$ nebo $\lceil a \rceil$ svého originálu ✓.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L4.8">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k4/l4-7.html"><span class="dir">← Předchozí</span> L4.7 · Počáteční přípustný tok při nenulových dolních mezích</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.9 · Bipartitní matching přes max flow)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Sdílený layout sítě 3×3 (každé volání dostává vlastní kopie uzlů — viz pozn. z L2.17)
+function net38nodes() {
+  return [
+    {id:'s',  x:70,  y:210, label:'s',  sub:'zdroj'},
+    {id:'R1', x:230, y:70,  label:'R₁'},
+    {id:'R2', x:230, y:210, label:'R₂'},
+    {id:'R3', x:230, y:350, label:'R₃'},
+    {id:'C1', x:430, y:70,  label:'C₁'},
+    {id:'C2', x:430, y:210, label:'C₂'},
+    {id:'C3', x:430, y:350, label:'C₃'},
+    {id:'t',  x:590, y:210, label:'t',  sub:'stok'},
+  ];
+}
+// Hrany s volitelnými popisky (lab = pole 16 stringů ve fixním pořadí)
+function net38edges(lab) {
+  return [
+    {from:'s',  to:'R1', label:lab[0]},
+    {from:'s',  to:'R2', label:lab[1]},
+    {from:'s',  to:'R3', label:lab[2]},
+    {from:'R1', to:'C1', label:lab[3]},
+    {from:'R1', to:'C2', label:lab[4]},
+    {from:'R1', to:'C3', label:lab[5],  curve:0.9},
+    {from:'R2', to:'C1', label:lab[6],  curve:0.5},
+    {from:'R2', to:'C2', label:lab[7]},
+    {from:'R2', to:'C3', label:lab[8]},
+    {from:'R3', to:'C1', label:lab[9],  curve:0.9},
+    {from:'R3', to:'C2', label:lab[10], curve:0.5},
+    {from:'R3', to:'C3', label:lab[11]},
+    {from:'C1', to:'t',  label:lab[12]},
+    {from:'C2', to:'t',  label:lab[13]},
+    {from:'C3', to:'t',  label:lab[14]},
+  ];
+}
+
+// 1 — Konstrukce sítě: meze [⌊a⌋, ⌈a⌉], popisek = l,−,u
+KOViz.graph(document.getElementById('viz-net'), {
+  directed: true,
+  w: 640, h: 420,
+  nodes: net38nodes(),
+  edges: net38edges([
+    '17,−,18','12,−,13','11,−,12',
+    '3,−,4','6,−,7','7,−,8',
+    '9,−,10','2,−,3','0,−,1',
+    '3,−,4','1,−,2','6,−,7',
+    '16,−,17','10,−,11','14,−,15',
+  ]),
+  caption: 'Síť pro matrix rounding (matice Figure 6.2, popisek hrany = l,−,u): s → řádky → sloupce → t. Hrany ze s nesou řádkové součty (17.2 → [17, 18], 12.7 → [12, 13], 11.3 → [11, 12]), vnitřní hrany prvky x_ij, hrany do t sloupcové součty. Skoro všechny dolní meze jsou nenulové.',
+});
+
+// 2 — Feasibilita: matice sama jako přípustný frakční tok, popisek = l, f, u
+KOViz.graph(document.getElementById('viz-frac'), {
+  directed: true,
+  w: 640, h: 420,
+  nodes: net38nodes(),
+  edges: net38edges([
+    '17,17.2,18','12,12.7,13','11,11.3,12',
+    '3,3.1,4','6,6.8,7','7,7.3,8',
+    '9,9.6,10','2,2.4,3','0,0.7,1',
+    '3,3.6,4','1,1.2,2','6,6.5,7',
+    '16,16.3,17','10,10.4,11','14,14.5,15',
+  ]),
+  caption: 'Certifikát feasibility (popisek = l, f, u): tok = původní matice. Meze platí triviálně (⌊a⌋ ≤ a ≤ ⌈a⌉) a Kirchhoff je definice součtů — např. R₁: 17.2 = 3.1 + 6.8 + 7.3. Přípustný frakční tok existuje pro každý vstup; Integral Flow Theorem z něj udělá existenci celočíselného.',
+});
+
+// 3 — Stepper: běh F-F od počátečního toku |f| = 41 k maximu 43 (počáteční tok = vlastní dopočet přes [L4.7] — přiznáno). Popisek = l, f, u.
+KOViz.stepper(document.getElementById('viz-ffrun'), {
+  graph: {
+    directed: true,
+    w: 640, h: 420,
+    nodes: net38nodes(),
+    edges: net38edges([
+      '17,17,18','12,12,13','11,12,12',
+      '3,3,4','6,6,7','7,8,8',
+      '9,10,10','2,2,3','0,0,1',
+      '3,3,4','1,2,2','6,7,7',
+      '16,16,17','10,10,11','14,15,15',
+    ]),
+  },
+  frames: [
+    {desc:'Start: počáteční přípustný celočíselný tok (z transformace [L4.7]; dopočet vlastní — přiznáno). Všude l ≤ f ≤ u, Kirchhoff platí (R₁: 17 = 3 + 6 + 8, C₁: 3 + 10 + 3 = 16, …). |f| = 17 + 12 + 12 = 41.',
+     nodes:{}, edges:{}},
+    {desc:'Iterace ①: augmentující cesta s→R₁→C₁→t (samé dopředné hrany, f < u), γ = min(18−17, 4−3, 17−16) = 1. Nově x̂₁₁ = 4, r̂₁ = 18, ĉ₁ = 17. |f| = 42.',
+     nodes:{},
+     edges:{'s->R1':'hl', 'R1->C1':'hl', 'C1->t':'hl'},
+     labels:{'s->R1':'17,18,18', 'R1->C1':'3,4,4', 'C1->t':'16,17,17'}},
+    {desc:'Iterace ②: cesta s→R₂→C₂→t, γ = min(13−12, 3−2, 11−10) = 1. Nově x̂₂₂ = 3, r̂₂ = 13, ĉ₂ = 11. |f| = 43.',
+     nodes:{},
+     edges:{'s->R2':'hl', 'R2->C2':'hl', 'C2->t':'hl'},
+     labels:{'s->R1':'17,18,18', 'R1->C1':'3,4,4', 'C1->t':'16,17,17',
+             's->R2':'12,13,13', 'R2->C2':'2,3,3', 'C2->t':'10,11,11'}},
+    {desc:'Konec: všechny tři hrany ze s jsou nasycené (18 = 18, 13 = 13, 12 = 12), značkování z s nikam nedosáhne. Min řez A = {s} s C(A) = 18 + 13 + 12 = 43 = |f| → tok je maximální [L4.4].',
+     nodes:{s:'good'},
+     edges:{'s->R1':'good', 's->R2':'good', 's->R3':'good'},
+     labels:{'s->R1':'17,18,18', 'R1->C1':'3,4,4', 'C1->t':'16,17,17',
+             's->R2':'12,13,13', 'R2->C2':'2,3,3', 'C2->t':'10,11,11'}},
+    {desc:'Čtení výsledku: vnitřní hrany = zaokrouhlená matice (4, 6, 8 / 10, 3, 0 / 3, 2, 7), hrany ze s = řádkové součty (18, 13, 12), hrany do t = sloupcové (17, 11, 15). Celkový součet 43 je maximální možný.',
+     nodes:{R1:'good', R2:'good', R3:'good', C1:'good', C2:'good', C3:'good'},
+     edges:{'R1->C1':'good', 'R1->C2':'good', 'R1->C3':'good', 'R2->C1':'good', 'R2->C2':'good', 'R2->C3':'good', 'R3->C1':'good', 'R3->C2':'good', 'R3->C3':'good'},
+     labels:{'s->R1':'17,18,18', 'R1->C1':'3,4,4', 'C1->t':'16,17,17',
+             's->R2':'12,13,13', 'R2->C2':'2,3,3', 'C2->t':'10,11,11'}},
+  ],
+  caption: 'Běh Ford-Fulkersona (popisek = l, f, u): start |f| = 41 z [L4.7], dvě augmentace γ = 1, 1 → |f| = 43; maximalitu certifikuje řez A = {s} s kapacitou 43.',
+});
+
+// 4 — T02: statická síť drillu 2×2, popisek = l,−,u
+KOViz.graph(document.getElementById('viz-t02net'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s',  x:90,  y:180, label:'s',  sub:'zdroj'},
+    {id:'A1', x:250, y:90,  label:'A₁', sub:'řádek 1'},
+    {id:'A2', x:250, y:270, label:'A₂', sub:'řádek 2'},
+    {id:'B1', x:410, y:90,  label:'B₁', sub:'sloupec 1'},
+    {id:'B2', x:410, y:270, label:'B₂', sub:'sloupec 2'},
+    {id:'t',  x:570, y:180, label:'t',  sub:'stok'},
+  ],
+  edges: [
+    {from:'s',  to:'A1', label:'4,−,5'},
+    {from:'s',  to:'A2', label:'3,−,4'},
+    {from:'A1', to:'B1', label:'1,−,2'},
+    {from:'A1', to:'B2', label:'2,−,3', curve:0.8},
+    {from:'A2', to:'B1', label:'3,−,4', curve:0.8},
+    {from:'A2', to:'B2', label:'0,−,1'},
+    {from:'B1', to:'t',  label:'4,−,5'},
+    {from:'B2', to:'t',  label:'3,−,4'},
+  ],
+  caption: 'T02: síť pro zaokrouhlení matice 2×2 (popisek = l,−,u). Řádkové součty 4.1 → [4, 5] a 3.9 → [3, 4] na hranách ze s, prvky na hranách A_i → B_j, sloupcové součty 4.7 → [4, 5] a 3.3 → [3, 4] do t.',
+});
+
+// 5 — T02: stepper běhu F-F (uvnitř details — řešení). Popisek = l, f, u.
+KOViz.stepper(document.getElementById('viz-t02run'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'s',  x:90,  y:180, label:'s',  sub:'zdroj'},
+      {id:'A1', x:250, y:90,  label:'A₁'},
+      {id:'A2', x:250, y:270, label:'A₂'},
+      {id:'B1', x:410, y:90,  label:'B₁'},
+      {id:'B2', x:410, y:270, label:'B₂'},
+      {id:'t',  x:570, y:180, label:'t',  sub:'stok'},
+    ],
+    edges: [
+      {from:'s',  to:'A1', label:'4,4,5'},
+      {from:'s',  to:'A2', label:'3,4,4'},
+      {from:'A1', to:'B1', label:'1,1,2'},
+      {from:'A1', to:'B2', label:'2,3,3', curve:0.8},
+      {from:'A2', to:'B1', label:'3,3,4', curve:0.8},
+      {from:'A2', to:'B2', label:'0,1,1'},
+      {from:'B1', to:'t',  label:'4,4,5'},
+      {from:'B2', to:'t',  label:'3,4,4'},
+    ],
+  },
+  frames: [
+    {desc:'Start: darovaný přípustný tok (x̂ = 1, 3 / 3, 1; r̂ = 4, 4; ĉ = 4, 4), meze i Kirchhoff ověřeny v textu. |f| = 4 + 4 = 8.',
+     nodes:{}, edges:{}},
+    {desc:'Iterace ①: augmentující cesta s→A₁→B₁→t (dopředné hrany, f < u), γ = min(5−4, 2−1, 5−4) = 1. Nově x̂₁₁ = 2, r̂₁ = 5, ĉ₁ = 5. |f| = 9.',
+     nodes:{},
+     edges:{'s->A1':'hl', 'A1->B1':'hl', 'B1->t':'hl'},
+     labels:{'s->A1':'4,5,5', 'A1->B1':'1,2,2', 'B1->t':'4,5,5'}},
+    {desc:'Konec: obě hrany ze s jsou nasycené (5 = 5, 4 = 4) a do s žádná hrana nevede, takže značkování zůstane na A = {s}. Min řez C(A) = 5 + 4 = 9 = |f| → tok je maximální [L4.4].',
+     nodes:{s:'good'},
+     edges:{'s->A1':'good', 's->A2':'good'},
+     labels:{'s->A1':'4,5,5', 'A1->B1':'1,2,2', 'B1->t':'4,5,5'}},
+    {desc:'Čtení výsledku: vnitřní hrany = zaokrouhlená matice x̂ = 2, 3 / 3, 1; hrany ze s = řádkové součty 5, 4; hrany do t = sloupcové 5, 4. Celkový součet 9 je maximální možný.',
+     nodes:{A1:'good', A2:'good', B1:'good', B2:'good'},
+     edges:{'A1->B1':'good', 'A1->B2':'good', 'A2->B1':'good', 'A2->B2':'good'},
+     labels:{'s->A1':'4,5,5', 'A1->B1':'1,2,2', 'B1->t':'4,5,5'}},
+  ],
+  caption: 'T02: běh F-F (popisek = l, f, u). Jediná augmentace γ = 1 → |f| = 9; řez A = {s} má kapacitu 9 = |f|.',
+});
+</script>
+</body>
+</html>
