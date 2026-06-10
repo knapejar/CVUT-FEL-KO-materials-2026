@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Augmentační (Ford–Fulkerson) — immersive video · KO Hitovky</title>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #11141d;
+    --text: #e8eaf0;
+    --muted: #8b93a7;
+    --accent: #ffb000;
+    --border: #232a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; overflow: hidden;
+  }
+  #topbar {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; font-size: 13px; color: var(--muted);
+  }
+  #topbar a { color: var(--muted); text-decoration: none; }
+  #topbar a:hover { color: var(--accent); }
+  #topbar .title { color: var(--text); font-weight: 700; }
+  #topbar .badge {
+    font-size: 11px; color: var(--bg); background: var(--accent);
+    border-radius: 10px; padding: 2px 9px; font-weight: 700;
+  }
+  #stagewrap {
+    flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
+    min-height: 0; padding: 0 16px;
+  }
+  #stage {
+    position: relative;
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #0b0e16; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+  }
+  #stage canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  #subtitle {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 26px 4% 16px;
+    background: linear-gradient(to top, rgba(5,7,12,0.88) 0%, rgba(5,7,12,0.55) 65%, transparent 100%);
+    text-align: center; pointer-events: none;
+    font-size: clamp(14px, 2.4vw, 28px); font-weight: 700; line-height: 1.4;
+    color: #fff;
+  }
+  #subtitle .m {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    color: #7dd3fc;
+  }
+  #subtitle .hl {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    padding: 0 4px; border-radius: 5px;
+  }
+  #subtitle .c1 { background: rgba(125,211,252,0.15); color: #7dd3fc; }
+  #subtitle .c2 { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+  #subtitle .c3 { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+  #subtitle .c4 { background: rgba(52,211,153,0.15);  color: #4ade80; }
+  #subtitle .c5 { background: rgba(244,114,182,0.16); color: #f9a8d4; }
+  #subtitle .c6 { background: rgba(251,146,60,0.17);  color: #fdba74; }
+  .kw { position: relative; display: inline-block; white-space: nowrap; }
+  .kw .wb { opacity: 0.42; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+  .kw .wf {
+    position: absolute; left: 0; top: 0; width: 0%;
+    overflow: hidden; white-space: nowrap;
+    text-shadow: 0 0 16px rgba(255,176,0,0.85), 0 2px 10px rgba(0,0,0,0.95);
+  }
+  .kw .wf, .kw .wf * { color: #ffd34d !important; }
+  #bigplay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(5,7,12,0.55); cursor: pointer; z-index: 5;
+    flex-direction: column; gap: 18px;
+  }
+  #bigplay.hidden { display: none; }
+  #bigplay .pbtn {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--accent); color: #1a1200;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; box-shadow: 0 0 60px rgba(255,176,0,0.45);
+    transition: transform .15s;
+  }
+  #bigplay:hover .pbtn { transform: scale(1.08); }
+  #bigplay .hint { color: var(--text); font-size: 15px; font-weight: 600; text-shadow: 0 2px 8px #000; }
+  #bigplay .hint small { display: block; color: var(--muted); font-weight: 400; margin-top: 6px; }
+  #controls {
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 4px 16px;
+  }
+  #controls button {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    width: 42px; height: 42px; border-radius: 50%; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: border-color .15s, color .15s;
+  }
+  #controls button:hover { border-color: var(--accent); color: var(--accent); }
+  #seek {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 6px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--p, 0%), #2a3040 var(--p, 0%));
+    border-radius: 3px; outline: none; cursor: pointer;
+  }
+  #seek::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px rgba(255,176,0,0.6); cursor: pointer;
+  }
+  #seek::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; border: none;
+    background: var(--accent); cursor: pointer;
+  }
+  .time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 44px; text-align: center; }
+  @media (max-height: 560px) { #topbar { display: none; } }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="pisnicky.html">← Zpěvník</a>
+  <span class="title">Augmentační (Ford–Fulkerson)</span>
+  <span class="badge">IMMERSIVE VIDEO 🏴‍☠️</span>
+  <span style="margin-left:auto">mezerník = play/pauza · ←/→ = ±5 s · R = od začátku</span>
+</div>
+
+<div id="stagewrap">
+  <div id="stage">
+    <div id="subtitle"></div>
+    <div id="bigplay">
+      <div class="pbtn">▶</div>
+      <div class="hint">Plavby za pokladem — augmentující cesty &amp; Bludný Holanďan 🏴‍☠️<small>2 min 1 s · zpívaná videolekce · příběh o 4 plavbách</small></div>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btnPlay" title="Play / pauza">▶</button>
+  <button id="btnRestart" title="Od začátku">⟲</button>
+  <span class="time" id="tCur">0:00</span>
+  <input type="range" id="seek" min="0" max="121.5" step="0.01" value="0">
+  <span class="time" id="tDur">2:01</span>
+</div>
+
+<audio id="player" src="audio/oznackuj-rezerva.mp3" preload="auto"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
+<script>
+(async function () {
+'use strict';
+
+// ════════════════════════════════════════════════════════════════════
+// 0) helpers
+// ════════════════════════════════════════════════════════════════════
+const C = {
+  gold: 0xffb000, goldHi: 0xffd34d, green: 0x4ade80, red: 0xef4444,
+  cyan: 0x7dd3fc, violet: 0xa78bfa, white: 0xffffff,
+  sea: 0x0d2b45, seaDeep: 0x081b2e, parch: 0xcdb285, parchDark: 0x9a7f55,
+  ink: 0x3a2c14, wood: 0x6b4a26, muted: 0x8b93a7, ghost: 0x7affc4,
+};
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - clamp01(t), 3);
+const easeIO = t => { t = clamp01(t); return t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; };
+const ph = (t, a, b) => clamp01((t - a) / (b - a));
+
+// ════════════════════════════════════════════════════════════════════
+// 1) MAPA + 4 PLAVBY (ručně ověřený běh FF) + kotvy
+//    s→a 3 · s→b 2 · a→b 2 · b→t 3 · a→t 2  →  max tok 5 = min řez {s}
+// ════════════════════════════════════════════════════════════════════
+const N = {
+  s: { x: 195, y: 420 }, a: { x: 520, y: 240 },
+  b: { x: 575, y: 520 }, t: { x: 1010, y: 395 },
+};
+const E = [ // [from, to, u]
+  ['s', 'a', 3], ['s', 'b', 2], ['a', 'b', 2], ['b', 't', 3], ['a', 't', 2],
+];
+// stav toku po jednotlivých plavbách (aplikuje se v čase apply)
+const FLOW_STAGES = [
+  { apply: -1,     f: [0, 0, 0, 0, 0], tok: 0 },
+  { apply: 44.26,  f: [2, 0, 2, 2, 0], tok: 2 },  // P1: s→a→b→t, γ=2
+  { apply: 69.9,   f: [3, 0, 2, 2, 1], tok: 3 },  // P2: s→a→t, γ=1
+  { apply: 76.5,   f: [3, 1, 2, 3, 1], tok: 4 },  // P3: s→b→t, γ=1
+  { apply: 112.5,  f: [3, 2, 1, 3, 2], tok: 5 },  // P4: s→b⇠a→t (zpětná!), γ=1
+];
+function flowAt(t) {
+  let st = FLOW_STAGES[0];
+  for (const s2 of FLOW_STAGES) if (t >= s2.apply) st = s2;
+  return st;
+}
+// plavby lodi: okno, posloupnost uzlů, zpětný segment (index v path)
+const VOY = [
+  { win: [33.4, 43.4], path: ['s', 'a', 'b', 't'], g: 2, back: -1 },
+  { win: [63.8, 69.6], path: ['s', 'a', 't'], g: 1, back: -1 },
+  { win: [70.1, 76.2], path: ['s', 'b', 't'], g: 1, back: -1 },
+  { win: [101.2, 111.8], path: ['s', 'b', 'a', 't'], g: 1, back: 1 }, // b→a PROTI PROUDU
+];
+const ANCH = [
+  { po: 33.10, kap: 35.56, proti: 36.78, mez: 39.42, gama: 39.78, rez: 41.54, prik: 44.26, ode: 45.52, bez: 46.58 },
+  { po: 63.54, kap: 66.00, proti: 67.20, mez: 69.77, gama: 70.14, rez: 71.90, prik: 74.82, ode: 76.47, bez: 77.35 },
+  { po: 100.92, kap: 102.80, proti: 103.68, mez: 106.30, gama: 106.68, rez: 108.30, prik: 111.30, ode: 112.50, bez: 113.40 },
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 2) PIXI + particles + PARCHMENT WORD BUS
+// ════════════════════════════════════════════════════════════════════
+const app = new PIXI.Application({ width: 1280, height: 720, antialias: true, background: 0x081b2e });
+document.getElementById('stage').appendChild(app.view);
+const sceneLayer = new PIXI.Container();
+const fxLayer = new PIXI.Container();
+app.stage.addChild(sceneLayer, fxLayer);
+let SHAKE = 0;
+const dotG = new PIXI.Graphics();
+dotG.beginFill(0xffffff, 1).drawCircle(0, 0, 32).endFill();
+const dotTex = app.renderer.generateTexture(dotG);
+const parts = [];
+function burst(x, y, tint, count = 18, speed = 220, size = 0.1) {
+  for (let i = 0; i < count; i++) {
+    const p = new PIXI.Sprite(dotTex);
+    p.anchor.set(0.5); p.x = x; p.y = y; p.tint = tint;
+    p.blendMode = PIXI.BLEND_MODES.ADD;
+    const a = Math.random() * 6.283, v = speed * (0.3 + Math.random() * 0.8);
+    p._vx = Math.cos(a) * v; p._vy = Math.sin(a) * v;
+    p._life = 0.6 + Math.random() * 0.7; p._t = 0;
+    p.scale.set(size * (0.5 + Math.random()));
+    fxLayer.addChild(p); parts.push(p);
+  }
+}
+// WORD BUS — slova plují přes scénu jako vzkazy na pergamenech / vlajkách
+const scraps = [];
+let scrapSlot = 0;
+function spawnScrap(word, caps) {
+  const plain = word.replace(/<[^>]*>/g, '').replace(/[„“…—]/g, '').trim();
+  if (!plain) return;
+  const big = caps || /!$/.test(plain);
+  const wrap = new PIXI.Container();
+  const t = new PIXI.Text(plain.toUpperCase(), {
+    fontFamily: "Georgia, 'Times New Roman', serif",
+    fontSize: big ? 40 : 22, fontWeight: '900',
+    fill: big ? 0x3a2c14 : 0x4a3a1c,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  const g = new PIXI.Graphics();
+  const w2 = t.width + 26, h2 = t.height + 12;
+  g.lineStyle(2, C.parchDark, 1);
+  g.beginFill(C.parch, 0.96);
+  g.drawRoundedRect(-w2 / 2, -h2 / 2, w2, h2, 5);
+  g.endFill();
+  wrap.addChild(g, t);
+  scrapSlot = (scrapSlot + 1) % 6;
+  wrap.x = big ? 640 : 160 + scrapSlot * 192 + (Math.random() - 0.5) * 40;
+  wrap.y = big ? 530 : 655;
+  wrap._vy = big ? -85 : -56 - Math.random() * 26;
+  wrap._life = big ? 1.5 : 1.15; wrap._t = 0;
+  wrap._rot = (Math.random() - 0.5) * 0.5;
+  fxLayer.addChild(wrap); scraps.push(wrap);
+  if (big) { SHAKE = Math.max(SHAKE, 7); burst(wrap.x, wrap.y, C.goldHi, 18, 220, 0.1); }
+}
+app.ticker.add(() => {
+  const dt = app.ticker.deltaMS / 1000;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p._t += dt; p.x += p._vx * dt; p.y += p._vy * dt;
+    p._vy += 200 * dt; p.alpha = clamp01(1 - p._t / p._life);
+    if (p._t > p._life) { fxLayer.removeChild(p); p.destroy(); parts.splice(i, 1); }
+  }
+  for (let i = scraps.length - 1; i >= 0; i--) {
+    const s2 = scraps[i];
+    s2._t += dt; s2.y += s2._vy * dt; s2._vy *= 0.985;
+    s2.rotation = s2._rot * Math.sin(s2._t * 3);
+    const k = s2._t / s2._life;
+    s2.alpha = k < 0.12 ? k / 0.12 : 1 - ph(k, 0.5, 1);
+    if (s2._t > s2._life) { fxLayer.removeChild(s2); s2.destroy(); scraps.splice(i, 1); }
+  }
+  if (SHAKE > 0.1) {
+    sceneLayer.x = (Math.random() - 0.5) * SHAKE;
+    sceneLayer.y = (Math.random() - 0.5) * SHAKE;
+    SHAKE *= Math.pow(0.0018, dt);
+  } else { sceneLayer.x = 0; sceneLayer.y = 0; }
+});
+function txt(str, size, color, weight = '800', family = "'Segoe UI', system-ui, sans-serif") {
+  const t = new PIXI.Text(str, {
+    fontFamily: family, fontSize: size, fill: color, fontWeight: weight,
+    align: 'center', dropShadow: true, dropShadowColor: 0x000000,
+    dropShadowBlur: 8, dropShadowAlpha: 0.6, dropShadowDistance: 2,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  return t;
+}
+const MATH = "'Cambria Math', Cambria, Georgia, serif";
+const SERIF = "Georgia, 'Times New Roman', serif";
+
+// PD obrázky (Wikimedia Commons, licence ověřeny — assets/img/pirates/CREDITS.txt)
+async function tryLoad(slug) {
+  for (const ext of ['jpg', 'png', 'svg']) {
+    try { return await PIXI.Assets.load(`assets/img/pirates/${slug}.${ext}`); } catch (e) {}
+  }
+  return null;
+}
+const IMG = {};
+for (const slug of ['great-wave', 'kraken', 'sea-monster', 'walking-plank', 'pyle-treasure', 'marooned', 'ninth-wave', 'treasure-map', 'jolly-roger', 'ship-storm', 'galleon', 'wyeth-pirate', 'compass-rose', 'rum-barrel']) {
+  IMG[slug] = await tryLoad(slug);
+}
+// zarámovaný obraz (lodní galerie)
+function makeProp(c, slug, w, label, x, y) {
+  const tex = IMG[slug];
+  if (!tex) return { wrap: null, render() {} };
+  const wrap = new PIXI.Container(); wrap.x = x; wrap.y = y; wrap.alpha = 0; c.addChild(wrap);
+  const spr = new PIXI.Sprite(tex); spr.anchor.set(0.5);
+  const h = w * tex.height / tex.width;
+  spr.width = w; spr.height = h;
+  const g = new PIXI.Graphics();
+  g.lineStyle(8, C.wood, 1);
+  g.beginFill(0x0b0e16, 0.5);
+  g.drawRect(-w / 2 - 6, -h / 2 - 6, w + 12, h + 12);
+  g.endFill();
+  wrap.addChild(g, spr);
+  if (label) { const lt = txt(label, 15, C.parch, '700', SERIF); lt.y = h / 2 + 18; wrap.addChild(lt); }
+  return { wrap, render(t, show, hide) {
+    wrap.alpha = show != null && t > show ? (hide && t > hide ? Math.max(0, 1 - ph(t, hide, hide + 0.5)) : easeOut(ph(t, show, show + 0.6))) : 0;
+    wrap.rotation = 0.02 * Math.sin(t * 1.5 + x);
+  } };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 3) NÁMOŘNÍ MAPA + LOĎ + POČÍTADLO SOUDKŮ
+// ════════════════════════════════════════════════════════════════════
+function buildMap(c) {
+  const g = new PIXI.Graphics(); c.addChild(g);
+  // dekorace mapy: mořská obluda + kompas (PD obrázky, jemně)
+  if (IMG['sea-monster']) {
+    const m = new PIXI.Sprite(IMG['sea-monster']); m.anchor.set(0.5);
+    m.width = 170; m.height = 170 * IMG['sea-monster'].height / IMG['sea-monster'].width;
+    m.x = 870; m.y = 175; m.alpha = 0.18; c.addChild(m);
+  }
+  if (IMG['compass-rose']) {
+    const m = new PIXI.Sprite(IMG['compass-rose']); m.anchor.set(0.5);
+    m.width = 110; m.height = 110 * IMG['compass-rose'].height / IMG['compass-rose'].width;
+    m.x = 1115; m.y = 580; m.alpha = 0.35; c.addChild(m); c._compass = m;
+  }
+  const nameT = {};
+  const names = { s: '⚓ PŘÍSTAV s', a: 'ostrov a', b: 'ostrov b', t: '✕ POKLAD t' };
+  for (const [id, P] of Object.entries(N)) {
+    nameT[id] = txt(names[id], id === 's' || id === 't' ? 19 : 17, C.ink, '900', SERIF);
+    nameT[id].x = P.x; nameT[id].y = P.y + 44; c.addChild(nameT[id]);
+  }
+  const eT = E.map(([a, b, u], i) => {
+    const A = N[a], B = N[b];
+    const tt = txt('', 19, C.ink, '900', MATH);
+    const dx = B.x - A.x, dy = B.y - A.y, l = Math.hypot(dx, dy);
+    tt.x = (A.x + B.x) / 2 - dy / l * 24; tt.y = (A.y + B.y) / 2 + dx / l * 24;
+    c.addChild(tt); return tt;
+  });
+  function render(t, o = {}) {
+    g.clear();
+    // pergamenová mapa
+    g.lineStyle(5, C.parchDark, 1);
+    g.beginFill(C.parch, 0.94);
+    g.drawRoundedRect(80, 105, 1120, 500, 18);
+    g.endFill();
+    // ohnuté rohy
+    g.lineStyle(0);
+    g.beginFill(C.parchDark, 0.5);
+    g.drawPolygon([80, 105, 130, 105, 80, 155]);
+    g.drawPolygon([1200, 605, 1150, 605, 1200, 555]);
+    g.endFill();
+    const fl = flowAt(t);
+    // trasy (hrany) — tečkované námořní linky
+    E.forEach(([a, b, u], i) => {
+      const A = N[a], B = N[b];
+      const hot = o.hotPath && o.hotPath.some(([p, q]) => p === a && q === b);
+      const backHot = o.backEdge === i;
+      const col = backHot ? C.red : (hot ? C.gold : 0x6a5a38);
+      const dx = B.x - A.x, dy = B.y - A.y, L = Math.hypot(dx, dy);
+      const steps = Math.floor(L / 22);
+      g.lineStyle(0);
+      for (let k2 = 1; k2 < steps; k2++) {
+        const p = k2 / steps;
+        g.beginFill(col, hot || backHot ? 0.95 : 0.6);
+        g.drawCircle(A.x + dx * p, A.y + dy * p, hot || backHot ? 4.5 : 3);
+        g.endFill();
+      }
+      eT[i].text = `${fl.f[i]}/${u}`;
+      eT[i].style.fill = fl.f[i] >= u ? 0x8a1f1f : C.ink;
+    });
+    // ostrovy
+    for (const [id, P] of Object.entries(N)) {
+      const marked = o.marks && o.marks[id] != null && t > o.marks[id];
+      g.lineStyle(3, C.ink, 0.8);
+      g.beginFill(id === 't' ? 0xd9b75e : 0xbfa371, 1);
+      g.drawEllipse(P.x, P.y, 42, 26);
+      g.endFill();
+      // palmička
+      g.lineStyle(3, 0x4a6b2a, 1);
+      g.moveTo(P.x + 12, P.y - 4); g.quadraticCurveTo(P.x + 16, P.y - 22, P.x + 26, P.y - 26);
+      if (marked) {
+        // vlaječka labelingu
+        g.lineStyle(3, 0x8a1f1f, 1);
+        g.moveTo(P.x - 18, P.y - 8); g.lineTo(P.x - 18, P.y - 42);
+        g.lineStyle(0);
+        g.beginFill(0xc62828, 1);
+        g.drawPolygon([P.x - 18, P.y - 42, P.x + 6, P.y - 35, P.x - 18, P.y - 28]);
+        g.endFill();
+      }
+      if (id === 't') {
+        g.lineStyle(5, 0x8a1f1f, 0.9);
+        g.moveTo(P.x - 10, P.y - 9); g.lineTo(P.x + 10, P.y + 9);
+        g.moveTo(P.x + 10, P.y - 9); g.lineTo(P.x - 10, P.y + 9);
+      }
+    }
+    // počítadlo soudků (tok)
+    g.lineStyle(3, C.parchDark, 1);
+    g.beginFill(0x1a2436, 0.92);
+    g.drawRoundedRect(990, 118, 196, 64, 12);
+    g.endFill();
+    for (let k2 = 0; k2 < fl.tok; k2++) {
+      g.lineStyle(2, 0x3a2c14, 1);
+      g.beginFill(0x8a6a3a, 1);
+      g.drawRoundedRect(1002 + k2 * 26, 146, 20, 26, 5);
+      g.endFill();
+      g.lineStyle(2, 0x3a2c14, 0.8);
+      g.moveTo(1002 + k2 * 26, 154); g.lineTo(1022 + k2 * 26, 154);
+    }
+    return fl;
+  }
+  return { render, tokLabel: (() => { const tt = txt('TOK (soudky):', 15, C.parch, '800', SERIF); tt.x = 1046; tt.y = 131; c.addChild(tt); return tt; })() };
+}
+// loď (galeona) plující po trase
+function buildShip(c) {
+  const wrap = new PIXI.Container(); wrap.alpha = 0; c.addChild(wrap);
+  const g = new PIXI.Graphics(); wrap.addChild(g);
+  g.lineStyle(2, 0x1a0e04, 1);
+  g.beginFill(0x5a3a1c, 1);
+  g.moveTo(-34, 0); g.quadraticCurveTo(0, 18, 34, 0); g.lineTo(26, -8); g.lineTo(-28, -8);
+  g.closePath().endFill();
+  g.lineStyle(3, 0x2a1a0a, 1);
+  g.moveTo(0, -8); g.lineTo(0, -42);
+  g.beginFill(0xe8dcc0, 1).drawPolygon([0, -40, 24, -26, 0, -14]).endFill();
+  g.moveTo(-14, -8); g.lineTo(-14, -30);
+  g.beginFill(0xe8dcc0, 1).drawPolygon([-14, -30, -30, -19, -14, -10]).endFill();
+  if (IMG['jolly-roger']) {
+    const f = new PIXI.Sprite(IMG['jolly-roger']); f.anchor.set(0, 1);
+    f.width = 20; f.height = 14; f.x = 1; f.y = -42; wrap.addChild(f);
+  }
+  function render(t, o = {}) {
+    // o.voy = aktivní plavba; pozice po polyline
+    let active = null;
+    for (const v of VOY) if (t >= v.win[0] && t <= v.win[1] + 0.8) active = v;
+    if (!active || o.hide) { wrap.alpha = Math.max(0, wrap.alpha - 0.06); return null; }
+    wrap.alpha = Math.min(1, wrap.alpha + 0.1);
+    const p = easeIO(ph(t, active.win[0], active.win[1]));
+    const pts = active.path.map(id => N[id]);
+    const lens = []; let total = 0;
+    for (let i2 = 0; i2 < pts.length - 1; i2++) { const l = Math.hypot(pts[i2+1].x - pts[i2].x, pts[i2+1].y - pts[i2].y); lens.push(l); total += l; }
+    let d = p * total, seg = 0;
+    while (seg < lens.length - 1 && d > lens[seg]) { d -= lens[seg]; seg++; }
+    const f2 = lens[seg] ? d / lens[seg] : 0;
+    const x = lerp(pts[seg].x, pts[seg + 1].x, f2), y = lerp(pts[seg].y, pts[seg + 1].y, f2);
+    wrap.x = x; wrap.y = y - 18 + 3 * Math.sin(t * 4);
+    wrap.scale.x = pts[seg + 1].x >= pts[seg].x ? 1 : -1;
+    wrap.rotation = 0.05 * Math.sin(t * 3);
+    // vlnka za lodí
+    if (Math.random() < 0.4) burst(x, y + 4, 0x9fd9ff, 1, 35, 0.045);
+    return { seg, active };
+  }
+  return { render };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 4) SCÉNY
+// ════════════════════════════════════════════════════════════════════
+const scenes = [];
+function scene(t0, t1, build) {
+  const s = { t0, t1, st: null };
+  s.init = () => { s.st = build(); sceneLayer.addChild(s.st.c); };
+  s.update = (lt) => s.st && s.st.update(lt);
+  s.destroy = () => { if (s.st) { sceneLayer.removeChild(s.st.c); s.st.c.destroy({ children: true }); s.st = null; } };
+  scenes.push(s);
+  return s;
+}
+function caption(c, str, color = C.goldHi, y = 44, size = 25) {
+  const t = txt(str, size, color, '800');
+  t.x = 640; t.y = y; c.addChild(t);
+  return t;
+}
+function seaBG(g, t) {
+  g.clear();
+  g.beginFill(0x081b2e, 1).drawRect(0, 0, 1280, 720).endFill();
+  g.beginFill(0x0d2b45, 1).drawRect(0, 620, 1280, 100).endFill();
+  g.lineStyle(3, 0x1c5d8f, 0.7);
+  g.moveTo(0, 622);
+  for (let x = 0; x <= 1280; x += 36) g.lineTo(x, 622 + Math.sin(x * 0.05 + t * 1.8) * 5);
+}
+
+// ── INTRO [0 – 19.8]: krčma / lodní galerie ──
+scene(0, 19.8, () => {
+  const c = new PIXI.Container();
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const t1 = txt('AUGMENTAČNÍ', 86, C.goldHi, '900', SERIF); t1.x = 640; t1.y = 170; t1.alpha = 0;
+  const t2 = txt('🏴‍☠️ plavby za pokladem — Ford & Fulkerson 🏴‍☠️', 30, 0xffffff, '800'); t2.x = 640; t2.y = 256; t2.alpha = 0;
+  const t3 = txt('příběh o 4 plavbách, hlídce v koši a Bludném Holanďanovi', 21, C.muted, '700'); t3.x = 640; t3.y = 308; t3.alpha = 0;
+  c.addChild(t1, t2, t3);
+  const p1 = makeProp(c, 'galleon', 230, 'náš koráb', 240, 480);
+  const p2 = makeProp(c, 'pyle-treasure', 220, 'cíl: poklad', 640, 500);
+  const p3 = makeProp(c, 'great-wave', 250, 'moře = síť', 1035, 485);
+  const fired = new Set();
+  return { c, update(lt) {
+    seaBG(g, lt);
+    t1.alpha = easeOut(ph(lt, 0.8, 2.0));
+    t1.scale.set(lerp(1.3, 1, easeOut(ph(lt, 0.8, 2.2))));
+    t2.alpha = easeOut(ph(lt, 3.5, 4.5));
+    t3.alpha = easeOut(ph(lt, 6.5, 7.5));
+    p1.render(lt, 9.0); p2.render(lt, 10.5); p3.render(lt, 12.0);
+    if (lt > 1.0 && !fired.has('a')) { fired.add('a'); burst(640, 170, C.goldHi, 30, 300, 0.13); }
+  } };
+});
+
+// ── VERSE 1 [19.8 – 33.1]: pravidla plavby ──
+scene(19.8, 33.1, () => {
+  const c = new PIXI.Container();
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const map = buildMap(c);
+  const cap = caption(c, 'námořní mapa: z přístavu s k pokladu t');
+  const r1 = txt('PO PROUDU: kapacita ještě zbývá (f < u) ✓', 24, C.green, '900', MATH); r1.x = 640; r1.y = 648; r1.alpha = 0; c.addChild(r1);
+  const r2 = txt('PROTI PROUDU: jen kde už tok teče (f > l) ↩', 24, C.red, '900', MATH); r2.x = 640; r2.y = 688; r2.alpha = 0; c.addChild(r2);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 19.8;
+    seaBG(g, lt); // pod mapou
+    map.render(lt, {});
+    r1.alpha = lt > 23.66 ? 1 : 0;
+    r2.alpha = lt > 26.74 ? 1 : 0;
+    if (lt > 23.7 && !fired.has('1')) { fired.add('1'); burst(640, 648, C.green, 16, 200, 0.09); }
+    if (lt > 26.8 && !fired.has('2')) { fired.add('2'); burst(640, 688, C.red, 16, 200, 0.09); }
+    if (lt < 23.66) { cap.text = 'hledej cestu z s do t — SMĚR HRAN TĚ NETRÁPÍ'; cap.style.fill = C.goldHi; }
+    else if (lt < 29.88) { cap.text = 'dvě pravidla námořní cesty'; cap.style.fill = 0xffffff; }
+    else { cap.text = 'AUGMENTUJÍCÍ CESTA — jiná pravda není!'; cap.style.fill = C.gold; }
+  } };
+});
+
+// ── CHORUS factory: plavba na mapě ──
+function chorusScene(t0, t1, an, voyIdx, label) {
+  scene(t0, t1, () => {
+    const c = new PIXI.Container();
+    const g = new PIXI.Graphics(); c.addChild(g);
+    const map = buildMap(c);
+    const ship = buildShip(c);
+    const cap = caption(c, '');
+    const gamaT = txt('', 34, C.gold, '900', MATH); gamaT.x = 640; gamaT.y = 660; gamaT.alpha = 0; c.addChild(gamaT);
+    const wave = IMG['great-wave'] ? new PIXI.Sprite(IMG['great-wave']) : null;
+    if (wave) { wave.anchor.set(0.5); wave.width = 240; wave.height = 240 * IMG['great-wave'].height / IMG['great-wave'].width; wave.x = 150; wave.y = 200; wave.alpha = 0; c.addChildAt(wave, 1); }
+    const fired = new Set();
+    return { c, update(lt0) {
+      const lt = lt0 + t0;
+      seaBG(g, lt);
+      const voys = Array.isArray(voyIdx) ? voyIdx : [voyIdx];
+      let hotPath = [], backEdge = -1;
+      for (const vi of voys) {
+        const v = VOY[vi];
+        if (lt >= v.win[0] - 0.3 && lt <= v.win[1] + 1.5) {
+          hotPath = v.path.slice(0, -1).map((p, i2) => v.back === i2 ? [v.path[i2 + 1], p] : [p, v.path[i2 + 1]]);
+          if (v.back >= 0) backEdge = E.findIndex(([a2, b2]) => a2 === v.path[v.back + 1] && b2 === v.path[v.back]);
+        }
+      }
+      map.render(lt, { hotPath, backEdge: lt > an.proti ? backEdge : -1 });
+      ship.render(lt, {});
+      if (wave) wave.alpha = lt > an.po && lt < an.prik ? 0.5 + 0.1 * Math.sin(lt * 2) : Math.max(0, (wave.alpha || 0) - 0.02);
+      gamaT.alpha = lt > an.gama ? 1 : 0;
+      gamaT.text = `γ = nejmenší rezerva na trase = ${VOY[voys[voys.length - 1]].g}`;
+      if (lt > an.gama && !fired.has('g')) { fired.add('g'); burst(640, 660, C.gold, 20, 230, 0.1); }
+      if (lt > an.prik && !fired.has('p')) { fired.add('p'); SHAKE = 6; burst(1090, 150, 0xc9a35a, 22, 240, 0.11); }
+      if (lt < an.proti) { cap.text = label + ' — po proudu, kde f < u'; cap.style.fill = C.green; }
+      else if (lt < an.gama) { cap.text = backEdge >= 0 ? '⚠ PROTI PROUDU po hraně a→b — vracíme zlato!' : 'proti proudu jen kde tok > dolní mez'; cap.style.fill = C.red; }
+      else if (lt < an.prik) { cap.text = 'γ = minimum rezerv přes celou trasu'; cap.style.fill = C.gold; }
+      else { cap.text = 'po směru +γ, proti směru −γ … a znova! ⛵'; cap.style.fill = C.goldHi; }
+    } };
+  });
+}
+chorusScene(33.1, 47.42, ANCH[0], 0, '⛵ PLAVBA 1: s→a→b→t');
+
+// ── VERSE 2 [47.42 – 63.54]: LABELING — hlídka v koši ──
+scene(47.42, 63.54, () => {
+  const c = new PIXI.Container();
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const map = buildMap(c);
+  const cap = caption(c, '');
+  const landho = txt('🗺 LAND HO! Cesta nalezena, námořníku!', 36, C.gold, '900', SERIF); landho.x = 640; landho.y = 665; landho.alpha = 0; c.addChild(landho);
+  const fired = new Set();
+  // labeling na stavu po plavbě 1: s→a (2/3, volno) ✓, s→b (0/2) ✓, a→t (0/2) ✓ → t!
+  const marks = { s: 48.0, a: 53.64, b: 55.9, t: 59.9 };
+  return { c, update(lt0) {
+    const lt = lt0 + 47.42;
+    seaBG(g, lt);
+    map.render(lt, { marks });
+    for (const [id, at] of Object.entries(marks)) {
+      if (lt > at && !fired.has(id)) { fired.add(id); burst(N[id].x, N[id].y - 30, 0xc62828, 12, 170, 0.08); }
+    }
+    landho.alpha = lt > 61.4 ? 1 : 0;
+    landho.scale.set(lerp(1.5, 1, easeOut(ph(lt, 61.4, 61.9))));
+    if (lt > 61.5 && !fired.has('lh')) { fired.add('lh'); SHAKE = 8; burst(640, 665, C.gold, 26, 280, 0.12); }
+    if (lt < 52.52) { cap.text = '🔭 hlídka v koši: označkuj PŘÍSTAV s a šiř zprávu'; cap.style.fill = 0xffffff; }
+    else if (lt < 55.7) { cap.text = 'po proudu značkuj souseda, když f < u (je rezerva)'; cap.style.fill = C.green; }
+    else if (lt < 59.76) { cap.text = 'proti proudu značkuj, když f > l (jde vracet)'; cap.style.fill = C.red; }
+    else { cap.text = 'označkoval jsi t? CESTA EXISTUJE!'; cap.style.fill = C.gold; }
+  } };
+});
+
+chorusScene(63.54, 77.92, ANCH[1], [1, 2], '⛵ PLAVBY 2+3: s→a→t a s→b→t');
+
+// ── BRIDGE [77.92 – 100.92]: argument → protiargument → rozuzlení ──
+scene(77.92, 100.92, () => {
+  const c = new PIXI.Container();
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const map = buildMap(c);
+  const cap = caption(c, '');
+  const fog = new PIXI.Graphics(); c.addChild(fog);
+  // ARGUMENT: kotva + maximální
+  const maxT = txt('TOK JE MAXIMÁLNÍ ⚓', 40, C.goldHi, '900', SERIF); maxT.x = 640; maxT.y = 660; maxT.alpha = 0; c.addChild(maxT);
+  const cplx = txt('složitost: O(m · |f*|) — pseudopolynom', 24, C.cyan, '800', MATH); cplx.x = 640; cplx.y = 660; cplx.alpha = 0; c.addChild(cplx);
+  // PROTIARGUMENT: duch
+  const ghost = new PIXI.Container(); ghost.alpha = 0; c.addChild(ghost);
+  const gg = new PIXI.Graphics(); ghost.addChild(gg);
+  gg.lineStyle(2, C.ghost, 0.9);
+  gg.beginFill(0x0d3328, 0.7);
+  gg.moveTo(-40, 0); gg.quadraticCurveTo(0, 20, 40, 0); gg.lineTo(30, -10); gg.lineTo(-34, -10);
+  gg.closePath().endFill();
+  gg.moveTo(0, -10); gg.lineTo(0, -50);
+  gg.beginFill(0x16453a, 0.7).drawPolygon([0, -48, 30, -30, 0, -16]).endFill();
+  const ghostT = txt('⛵👻 Bludný Holanďan — NIKDY nedopluje', 26, C.ghost, '900'); ghostT.x = 640; ghostT.y = 660; ghostT.alpha = 0; c.addChild(ghostT);
+  // ROZUZLENÍ: kompas
+  const ekT = txt('EDMONDS–KARP: BFS = nejkratší cesta → VŽDY skončí 🧭', 26, C.gold, '900'); ekT.x = 640; ekT.y = 660; ekT.alpha = 0; c.addChild(ekT);
+  const plank = makeProp(c, 'walking-plank', 190, 'došly cesty…', 220, 290);
+  const storm = makeProp(c, 'ninth-wave', 260, '', 640, 270);
+  const compass = makeProp(c, 'compass-rose', 180, 'BFS kompas', 1040, 280);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 77.92;
+    seaBG(g, lt);
+    const dim = lt > 78.5 && lt < 95.5 ? 0.45 : 0;
+    map.render(lt, {});
+    // ARGUMENT [82–85.5]
+    maxT.alpha = lt > 83.75 && lt < 88 ? 1 : Math.max(0, maxT.alpha - 0.05);
+    if (lt > 82.0 && !fired.has('stop')) { fired.add('stop'); SHAKE = 9; burst(640, 400, C.goldHi, 26, 280, 0.12); }
+    plank.render(lt, 82.4, 91.0);
+    cplx.alpha = lt > 86.5 && lt < 91.2 ? 1 : Math.max(0, cplx.alpha - 0.05);
+    // PROTIARGUMENT [91.5–95.4]: mlha + duch krouží
+    const fogA = lt > 91.0 && lt < 96.5 ? easeOut(ph(lt, 91.0, 92.2)) : Math.max(0, lt >= 96.5 ? 1 - ph(lt, 96.5, 97.8) : 0);
+    fog.clear();
+    if (fogA > 0) {
+      fog.beginFill(0x0d2620, 0.55 * fogA).drawRect(0, 0, 1280, 720).endFill();
+      for (let i = 0; i < 4; i++) {
+        fog.beginFill(0x1a4035, 0.18 * fogA);
+        fog.drawEllipse(200 + i * 300 + 40 * Math.sin(lt + i), 540 + 20 * Math.sin(lt * 0.7 + i * 2), 260, 60);
+        fog.endFill();
+      }
+    }
+    storm.render(lt, 91.2, 96.8);
+    if (fogA > 0.2) {
+      ghost.alpha = fogA;
+      const ang = lt * 1.1;
+      ghost.x = 640 + 240 * Math.cos(ang); ghost.y = 420 + 90 * Math.sin(ang);
+      ghost.scale.x = Math.cos(ang) > 0 ? -1 : 1;
+      ghostT.alpha = lt > 93.4 ? fogA : 0;
+    } else ghost.alpha = Math.max(0, ghost.alpha - 0.05);
+    if (lt > 91.5 && !fired.has('gh')) { fired.add('gh'); burst(640, 420, C.ghost, 24, 240, 0.11); }
+    // ROZUZLENÍ [95.5+]
+    compass.render(lt, 95.6);
+    ekT.alpha = lt > 97.4 ? 1 : 0;
+    if (lt > 95.7 && !fired.has('ek')) { fired.add('ek'); SHAKE = 7; burst(1040, 280, C.gold, 26, 280, 0.12); }
+    if (lt < 82.0) { cap.text = 'ARGUMENT: na mapě už nesvítí žádná trasa…'; cap.style.fill = 0xffffff; }
+    else if (lt < 85.56) { cap.text = 'když už cesta není → STŮJ — tok je MAXIMÁLNÍ'; cap.style.fill = C.goldHi; }
+    else if (lt < 91.48) { cap.text = 'běhů může být až |f*| — hodnota toku škáluje'; cap.style.fill = C.cyan; }
+    else if (lt < 95.48) { cap.text = 'PROTIARGUMENT: iracionální kapacity ⇒ FF nemusí NIKDY skončit'; cap.style.fill = C.ghost; }
+    else { cap.text = 'ROZUZLENÍ: BFS vybírá nejkratší cesty → O(n·m²), konec jistý'; cap.style.fill = C.gold; }
+  } };
+});
+
+chorusScene(100.92, 113.92, ANCH[2], 3, '⛵ PLAVBA 4: s→b ⇠a →t');
+
+// ── OUTRO [113.92 – 122]: smyčka algoritmu + lodní galerie ──
+scene(113.92, 122, () => {
+  const c = new PIXI.Container();
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const map = buildMap(c);
+  const loop = txt('najdi cestu → spočti γ → pošli tok → ZNOVA ⟳', 30, C.goldHi, '900'); loop.x = 640; loop.y = 660; loop.alpha = 0; c.addChild(loop);
+  const fin = txt('max tok 5 = min řez {s} (3+2) · Hotovo — L4.2 / L4.3', 20, C.muted, '700', MATH); fin.x = 640; fin.y = 695; fin.alpha = 0; c.addChild(fin);
+  const marooned = makeProp(c, 'marooned', 170, 'ty po zkoušce (v klidu)', 200, 280);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 113.92;
+    seaBG(g, lt);
+    map.render(lt, {});
+    loop.alpha = easeOut(ph(lt, 114.2, 115.2));
+    loop.scale.set(1 + 0.03 * Math.sin(lt * 4));
+    fin.alpha = easeOut(ph(lt, 117.5, 118.5));
+    marooned.render(lt, 116.5);
+    if (lt > 114.3 && !fired.has('l')) { fired.add('l'); burst(640, 660, C.goldHi, 24, 260, 0.11); }
+  } };
+});
+
+// ════════════════════════════════════════════════════════════════════
+// 5) TITULKY — řádky 1:1 jako sekce „Zpívej“ ve zpěvníku
+// ════════════════════════════════════════════════════════════════════
+const SUNG = [[0,0.05],[0.05,6.93],[6.93,12.7],[12.7,15.02],[15.02,22.15],[22.15,22.49],[22.49,22.77],[22.77,22.98],[22.98,23.66],[23.66,23.81],[23.81,24.26],[24.26,24.49],[24.49,25.01],[25.01,25.38],[25.38,25.53],[25.53,25.76],[25.76,26.02],[26.02,26.74],[26.74,27.14],[27.14,27.56],[27.56,28.09],[28.09,28.46],[28.46,28.62],[28.62,28.84],[28.84,28.99],[28.99,29.44],[29.44,29.88],[29.88,29.88],[29.88,31.07],[31.07,31.66],[31.66,32.08],[32.08,32.6],[32.6,33.1],[33.1,33.39],[33.39,34.26],[34.26,34.98],[34.98,35.56],[35.56,36.78],[36.78,37.31],[37.31,37.94],[37.94,38.36],[38.36,38.78],[38.78,39.42],[39.42,39.78],[39.78,40.22],[40.22,40.44],[40.44,41.54],[41.54,42.31],[42.31,42.49],[42.49,42.96],[42.96,43.58],[43.58,43.75],[43.75,44.26],[44.26,45.1],[45.1,45.52],[45.52,46.16],[46.16,46.58],[46.58,47.42],[47.42,49.63],[49.63,50.86],[50.86,51.16],[51.16,51.23],[51.23,51.58],[51.58,51.72],[51.72,52.21],[52.21,52.52],[52.52,52.66],[52.66,53.07],[53.07,53.64],[53.64,54.27],[54.27,54.62],[54.62,54.69],[54.69,54.83],[54.83,55.32],[55.32,55.6],[55.6,55.7],[55.7,56.1],[56.1,56.58],[56.58,57.38],[57.38,57.78],[57.78,57.86],[57.86,58.02],[58.02,58.66],[58.66,58.98],[58.98,59.08],[59.76,59.76],[59.76,60.28],[60.28,60.76],[60.76,61.28],[61.28,61.44],[61.44,62.06],[62.06,62.32],[62.32,63.54],[63.54,63.83],[63.83,64.7],[64.7,65.41],[65.41,66],[66,67.2],[67.2,67.72],[67.72,68.33],[68.33,68.74],[68.74,69.15],[69.15,69.77],[69.77,70.14],[70.14,70.58],[70.58,70.8],[70.8,71.9],[71.9,72.67],[72.67,72.78],[72.78,73.33],[73.33,73.94],[73.94,74.16],[74.16,74.82],[74.82,75.92],[75.92,76.47],[76.47,77.24],[77.24,77.35],[77.35,77.92],[77.92,78.94],[78.94,79.56],[79.56,80.58],[80.58,82],[82,82.94],[82.94,83.43],[83.43,83.75],[83.75,85.56],[85.56,86.46],[86.46,86.91],[86.91,87.36],[87.36,87.99],[87.99,88.42],[88.42,88.57],[88.57,88.87],[88.87,89.64],[89.64,89.64],[89.64,90.24],[90.24,91.48],[91.48,92.74],[92.74,93.48],[93.48,94.08],[94.08,94.25],[94.25,94.93],[94.93,95.48],[95.48,96.05],[96.05,96.22],[96.22,96.56],[96.56,97.48],[97.48,99.13],[99.13,99.46],[99.46,100.12],[100.12,100.92],[100.92,101.14],[101.14,101.8],[101.8,102.35],[102.35,102.79],[102.79,103.68],[103.68,104.17],[104.17,104.56],[104.56,105.05],[105.05,105.54],[105.54,106.28],[106.28,106.68],[106.68,107.13],[107.13,107.35],[107.35,108.47],[108.47,109.26],[109.26,109.37],[109.37,109.93],[109.93,110.56],[110.56,110.72],[110.72,111.18],[111.18,111.94],[111.94,112.33],[112.33,112.97],[112.97,113.12],[113.12,113.92],[113.92,114.41],[114.41,114.9],[114.9,115.39],[115.39,115.92],[115.92,117.18],[117.18,117.92],[117.92,118.18],[118.18,119.52],[119.52,119.52],[119.52,120.12],[120.12,120.87],[120.87,121.44]];
+const H = (cls, s) => `<span class="hl ${cls}">${s}</span>`;
+const CH1L = `Po směru: míň než kapacita!`;
+const CH2L = `Proti směru: víc než dolní mez!`;
+const CH3L = `${H('c3', 'γ')} je nejmenší rezerva z celé cesty —`;
+const CH4L = `po směru přičti, proti odečti — a běž!`;
+const LINES = [
+  [19.8, 23.66, `Hledej cestu z ${H('c6', 's')} do ${H('c6', 't')}, směr hran tě netrápí,`],
+  [23.66, 26.74, `po směru ber hranu, když je tok pod kapacitou,`],
+  [26.74, 29.88, `proti směru tehdy, když je tok nad dolní mezí —`],
+  [29.88, 33.1, `augmentující cesta! Jiná pravda není!`],
+  [33.1, 36.78, CH1L], [36.78, 39.78, CH2L], [39.78, 43.58, CH3L], [43.58, 47.42, CH4L],
+  [47.42, 52.52, `Označkuj zdroj ${H('c6', 's')} a šiř tu zprávu dál:`],
+  [52.52, 55.7, `po směru značkuj souseda, když ${H('c1', 'f &lt; u')},`],
+  [55.7, 59.76, `proti směru značkuj, když ${H('c2', 'f &gt; l')},`],
+  [59.76, 63.54, `a když označkuješ ${H('c6', 't')} — cestu jsi našel, námořníku!`],
+  [63.54, 67.2, CH1L], [67.2, 70.14, CH2L], [70.14, 73.94, CH3L], [73.94, 77.92, CH4L],
+  [77.92, 85.56, `Když už cesta není — stůj! Tok je maximální!`],
+  [85.56, 91.48, `Složitost: hrany krát hodnota toku — ${H('c1', 'f')} to škálu dální.`],
+  [91.48, 95.48, `Iracionální kapacity? Nemusí to skončit, brachu —`],
+  [95.48, 100.92, `Edmonds a Karp s BFS tě zbaví strachu!`],
+  [100.92, 103.68, CH1L], [103.68, 106.68, CH2L], [106.68, 110.56, CH3L], [110.56, 113.92, CH4L],
+  [113.92, 119.52, `Najdi tok, najdi cestu, spočti ${H('c3', 'γ')} — a znova!`],
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 6) PLAYER / KARAOKE + WORD BUS / CONTROLS
+// ════════════════════════════════════════════════════════════════════
+const player = document.getElementById('player');
+const subEl = document.getElementById('subtitle');
+const bigplay = document.getElementById('bigplay');
+const btnPlay = document.getElementById('btnPlay');
+const btnRestart = document.getElementById('btnRestart');
+const seek = document.getElementById('seek');
+const tCur = document.getElementById('tCur');
+const tDur = document.getElementById('tDur');
+
+let curScene = null, lastLocal = -1, curLine = -1, lastT = 0;
+let lineWords = [];
+function tokenize(html) {
+  const out = []; let cur = ''; let inTag = false;
+  for (const ch of html) {
+    if (ch === '<') inTag = true;
+    else if (ch === '>') inTag = false;
+    if (ch === ' ' && !inTag) { if (cur) out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+function isCapsToken(tok) {
+  const plain = tok.replace(/<[^>]*>/g, '');
+  const letters = plain.replace(/[^a-zA-ZáčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]/g, '');
+  return letters.length >= 2 && letters === letters.toUpperCase();
+}
+function buildKaraokeLine(li) {
+  const [a, b, html] = LINES[li];
+  const tokens = tokenize(html);
+  const ww = SUNG.filter(w => w[0] >= a - 0.06 && w[0] < b && w[1] > w[0]);
+  const pick = (i) => {
+    if (!ww.length) {
+      const step = (b - a) / tokens.length;
+      return [a + step * i, a + step * (i + 1)];
+    }
+    const wi = tokens.length === 1 ? 0 : Math.round(i * (ww.length - 1) / (tokens.length - 1));
+    return ww[wi];
+  };
+  subEl.innerHTML = tokens.map(tok =>
+    `<span class="kw"><span class="wb">${tok}</span><span class="wf">${tok}</span></span>`).join(' ');
+  const els = [...subEl.querySelectorAll('.kw')];
+  lineWords = tokens.map((tok, i) => {
+    const [t0, t1] = pick(i);
+    return { t0, t1: Math.max(t1, t0 + 0.12), wf: els[i] ? els[i].querySelector('.wf') : null, tok, caps: isCapsToken(tok) };
+  });
+}
+function tick() {
+  const t = player.currentTime;
+  const s = scenes.find(sc => t >= sc.t0 && t < sc.t1) || scenes[scenes.length - 1];
+  if (s !== curScene) { curScene && curScene.destroy(); curScene = s; s.init(); lastLocal = -1; }
+  const localT = t - s.t0;
+  if (localT < lastLocal - 0.05) { s.destroy(); s.init(); }
+  s.update(localT);
+  lastLocal = localT;
+  const li = LINES.findIndex(([a, b]) => t >= a && t < b);
+  if (li !== curLine) {
+    curLine = li;
+    if (li >= 0) buildKaraokeLine(li);
+    else { subEl.innerHTML = ''; lineWords = []; }
+    subEl.style.opacity = li >= 0 ? 1 : 0;
+  }
+  // WORD BUS — pergamenové vzkazy přesně na slovo
+  if (!player.paused && t > lastT && t - lastT < 0.5) {
+    for (const w of lineWords) {
+      if (w.t0 > lastT && w.t0 <= t) spawnScrap(w.tok, w.caps);
+    }
+  }
+  lastT = t;
+  for (let i = 0; i < lineWords.length; i++) {
+    const w = lineWords[i];
+    if (!w.wf) continue;
+    const nextStart = i + 1 < lineWords.length ? lineWords[i + 1].t0 : w.t1;
+    let p;
+    if (t >= Math.max(w.t1, nextStart)) p = 1;
+    else p = clamp01((t - w.t0) / (w.t1 - w.t0));
+    w.wf.style.width = (p * 100).toFixed(1) + '%';
+  }
+  if (!seekDragging) {
+    seek.value = t;
+    seek.style.setProperty('--p', (t / (player.duration || 121.5) * 100) + '%');
+  }
+  tCur.textContent = fmtTime(t);
+  requestAnimationFrame(tick);
+}
+function fmtTime(t) { t = Math.max(0, t || 0); return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`; }
+
+let seekDragging = false;
+seek.addEventListener('input', () => {
+  seekDragging = true;
+  player.currentTime = +seek.value;
+  seek.style.setProperty('--p', (+seek.value / (player.duration || 121.5) * 100) + '%');
+});
+seek.addEventListener('change', () => { seekDragging = false; });
+function togglePlay() { if (player.paused) player.play(); else player.pause(); }
+player.addEventListener('play', () => { btnPlay.textContent = '⏸'; bigplay.classList.add('hidden'); });
+player.addEventListener('pause', () => { btnPlay.textContent = '▶'; if (player.currentTime < 0.05 || player.ended) bigplay.classList.remove('hidden'); });
+player.addEventListener('ended', () => { bigplay.classList.remove('hidden'); bigplay.querySelector('.hint').innerHTML = 'Ještě jednou?<small>R = od začátku</small>'; });
+player.addEventListener('loadedmetadata', () => {
+  seek.max = player.duration;
+  tDur.textContent = fmtTime(player.duration);
+});
+btnPlay.addEventListener('click', togglePlay);
+btnRestart.addEventListener('click', () => { player.currentTime = 0; player.play(); });
+bigplay.addEventListener('click', () => { player.play(); });
+document.getElementById('stage').addEventListener('click', (e) => {
+  if (e.target.closest('#bigplay')) return;
+  togglePlay();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  else if (e.code === 'ArrowRight') player.currentTime = Math.min(player.duration || 121, player.currentTime + 5);
+  else if (e.code === 'ArrowLeft') player.currentTime = Math.max(0, player.currentTime - 5);
+  else if (e.key === 'r' || e.key === 'R' || e.code === 'Home') { player.currentTime = 0; player.play(); }
+});
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
