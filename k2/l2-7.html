@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.7 · Transformace součinu na součet: −log — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.7</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.7</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>Transformace součinu na součet: −log</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Maximalizaci <em>součinu</em> pravděpodobností převedeme na minimalizaci <em>součtu</em> vah $-\log p$: logaritmus mění součin na součet, znaménko minus otáčí maximalizaci na minimalizaci a pro $p \in (0,1]$ vyjdou váhy nezáporné — takže může nastoupit Dijkstra.
+  </div>
+
+  <p>Prerekvizity: <a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a>. Minulá lekce <a href="l2-6.html#takeaways">[L2.6]</a> učila Dijkstru pracovat s cenami na vrcholech; dnes ho naučíme pracovat s úlohou, kde se po cestě vůbec nesčítá, ale <em>násobí</em>.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Když se po cestě násobí</h2>
+  <p>Slide 28 přednášky zavádí <strong>Maximum Reliability Path Problem</strong> (úloha nejspolehlivější cesty): v komunikační síti má každá hrana $(i,j)$ <strong>spolehlivost</strong> (reliability) $p(i,j)$ — pravděpodobnost, že spoj neselže. Výpadky spojů jsou na sobě <strong>nezávislé</strong> (unrelated), takže spolehlivost orientované cesty $Q$ z $s$ do $t$ je <em>součin</em> spolehlivostí jejích hran:</p>
+  <p>$$p(Q) = \prod_{(i,j) \in Q} p(i,j).$$</p>
+  <p>Najdi nejspolehlivější spojení z $s$ do $t$, tj. cestu maximalizující $p(Q)$.</p>
+
+  <div class="viz" id="viz-rel"></div>
+
+  <details class="try">
+    <summary>Zkus sám: najdi v síti výše nejspolehlivější spojení $s \to t$. Vyhraje cesta s nejméně hranami?</summary>
+    <div class="inner">
+      <p>Tři kandidáti: přímý spoj $s \to t$ má $p = 0{,}125$; cesta přes $a$ má $0{,}5 \cdot 0{,}5 = \mathbf{0{,}25}$; cesta přes $b$ má $0{,}125 \cdot 0{,}5 = 0{,}0625$. Vítězí cesta přes $a$ — <strong>dvě hrany porazí jednu</strong>, protože dvě docela spolehlivé hrany dají větší součin než jedna nespolehlivá. Počet hran o ničem nerozhoduje.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: proč na to nemůžeme rovnou pustit Dijkstru z <a href="l2-4.html#takeaways">[L2.4]</a>? Najdi v zadání <em>dva</em> rozdíly proti shortest path.</summary>
+    <div class="inner">
+      <p>Shortest path <em>minimalizuje</em> <em>součet</em> vah hran. Tady ale:</p>
+      <ol>
+        <li>hodnota cesty je <strong>součin</strong>, ne součet,</li>
+        <li><strong>maximalizujeme</strong>, neminimalizujeme.</li>
+      </ol>
+      <p>A až oba rozdíly odstraníme, číhá ještě třetí podmínka: Dijkstra vyžaduje <strong>nezáporné váhy</strong> <a href="l2-4.html#takeaways">[L2.4]</a>. Potřebujeme tedy převod, který vyřeší všechny tři věci najednou.</p>
+    </div>
+  </details>
+
+  <h2>Funkce, která mění násobení na sčítání</h2>
+
+  <details class="try">
+    <summary>Zkus sám: znáš (ze střední školy) funkci $f$ s vlastností $f(x \cdot y) = f(x) + f(y)$?</summary>
+    <div class="inner">
+      <p><strong>Logaritmus:</strong> $\log(ab) = \log a + \log b$. Na základu nezáleží — vlastnost má každý logaritmus se základem $b &gt; 1$. Aplikujeme-li ho na spolehlivost cesty:</p>
+      <p>$$\log p(Q) = \log \prod_{(i,j) \in Q} p(i,j) = \sum_{(i,j) \in Q} \log p(i,j)$$</p>
+      <p>— ze součinu přes hrany je rázem <em>součet přes hrany</em>, přesně tvar, kterému rozumí algoritmy na nejkratší cesty.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: nezmění logaritmování <em>vítěze</em>? Která vlastnost logaritmu zaručuje, že nejlepší cesta zůstane nejlepší?</summary>
+    <div class="inner">
+      <p>Logaritmus je <strong>rostoucí funkce</strong>: $x &gt; y \iff \log x &gt; \log y$. Pořadí cest podle $p(Q)$ a podle $\log p(Q)$ je tedy stejné, speciálně</p>
+      <p>$$\arg\max_Q\, p(Q) = \arg\max_Q\, \log p(Q).$$</p>
+      <p>Zbývá rozdíl max vs. min: vynásobíme $-1$ — maximalizace výrazu je minimalizace jeho minus-verze:</p>
+      <p>$$\max_Q\, \prod_{(i,j)\in Q} p(i,j) \iff \min_Q\, \sum_{(i,j)\in Q} \bigl(-\log p(i,j)\bigr).$$</p>
+      <p>Stačí tedy položit váhu hrany $c(i,j) := -\log p(i,j)$ a hledat obyčejnou nejkratší cestu.</p>
+    </div>
+  </details>
+
+  <h2>Nezápornost zadarmo</h2>
+  <p>Zbývá třetí podmínka z úvodu: smí na nové váhy $c(i,j) = -\log p(i,j)$ Dijkstra? Podívej se na průběh funkce:</p>
+
+  <div class="viz" id="viz-log"></div>
+
+  <details class="try">
+    <summary>Zkus sám: pro která $p$ je váha $-\log p$ nezáporná? A co dají krajní hodnoty $p = 1$ a $p \to 0$?</summary>
+    <div class="inner">
+      <p>$-\log p \ge 0 \iff \log p \le 0 \iff p \le 1$. Pravděpodobnosti splňují $p \in (0,1]$ vždy, takže <strong>všechny nové váhy jsou nezáporné</strong> — třetí podmínku dostáváme zadarmo a Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> smí nastoupit.</p>
+      <p>Krajní případy dávají smysl i „fyzikálně“: dokonale spolehlivá hrana $p = 1$ má váhu $-\log 1 = 0$ (projdeš zdarma, spolehlivost nezhorší); čím nespolehlivější hrana, tím větší váha, a pro $p \to 0$ váha roste nade všechny meze. Hranu s $p = 0$ (jistý výpadek) z grafu rovnou odstraň, případně jí dej váhu $+\infty$.</p>
+    </div>
+  </details>
+
+  <p>Na <strong>základu logaritmu nezáleží</strong>: $\log_b x = \ln x / \ln b$, takže změna základu jen přenásobí <em>všechny</em> váhy stejnou kladnou konstantou — a to pořadí cest podle délky nezmění (k škálování vah se vrátíme v lekci [L2.15]). V ručních příkladech se hodí základ 2, když jsou spolehlivosti mocniny $\tfrac12$; obecně se píše $\ln$ nebo prostě $\log$.</p>
+
+  <h2>Celý převod na příkladu</h2>
+  <p>Síť z úvodu po transformaci $c(i,j) = -\log_2 p(i,j)$ (např. $-\log_2 0{,}5 = 1$, $-\log_2 0{,}125 = 3$):</p>
+
+  <div class="viz" id="viz-trans"></div>
+
+  <details class="try">
+    <summary>Zkus sám: spočítej délky všech tří $s$–$t$ cest v transformovaném grafu. Souhlasí pořadí se spolehlivostmi z první try-otázky?</summary>
+    <div class="inner">
+      <p>Přímo: $3$; přes $a$: $1 + 1 = \mathbf{2}$; přes $b$: $3 + 1 = 4$. Pořadí $a \prec$ přímo $\prec b$ přesně odpovídá spolehlivostem $0{,}25 &gt; 0{,}125 &gt; 0{,}0625$ — a nejde o náhodu: délka každé cesty je $-\log_2$ její spolehlivosti ($-\log_2 0{,}25 = 2$, $-\log_2 0{,}125 = 3$, $-\log_2 0{,}0625 = 4$). Transformace zachovává hodnotu, ne jen vítěze.</p>
+    </div>
+  </details>
+
+  <p>Běh Dijkstry <a href="l2-4.html#takeaways">[L2.4]</a> na transformovaném grafu (včetně závěrečného převodu výsledku zpět):</p>
+
+  <div class="viz" id="viz-run"></div>
+
+  <p>Poslední krok nezapomenout: zkoušková otázka většinou chce <em>spolehlivost</em> (pravděpodobnost), ne záhadné číslo $l(t)$. Převod zpět je</p>
+  <p>$$p(Q^*) = b^{-l(t)} \qquad (\text{základ } b \text{ = ten, kterým jsi logaritmoval}),$$</p>
+  <p>tady $p(Q^*) = 2^{-2} = 0{,}25$ — souhlasí s ručním výpočtem z úvodu.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: −log není kouzlo pro každý součin</div>
+    <ul>
+      <li>Nezápornost vah platí <strong>jen pro koeficienty $p \in (0,1]$</strong>. Jakmile zadání připustí koeficienty $p &gt; 1$ (zesílení, kurzy, násobky), je $-\log p &lt; 0$ — vznikne graf se <strong>zápornými vahami</strong> a Dijkstra negarantuje nic (protipříklad v <a href="l2-4.html#takeaways">[L2.4]</a>). Cyklus se součinem koeficientů $&gt; 1$ se navíc transformuje na <strong>záporný cyklus</strong> se všemi důsledky z <a href="l2-1.html#takeaways">[L2.1]</a>.</li>
+      <li>Výsledek běhu je $l(t) = -\log_b p(Q^*)$, <strong>ne</strong> pravděpodobnost. Bez zpětného převodu $p(Q^*) = b^{-l(t)}$ je odpověď nedokončená.</li>
+    </ul>
+  </div>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">K čemu to bude</div>
+    <p>Tohle je druhá půlka výzbroje na zkouškovou úlohu <em>Dangerous adventure</em> [L2.8]: tam sedí pravděpodobnosti (přežití) na hranách <em>i</em> vrcholech, takže se $-\log$ z téhle lekce kombinuje se split trikem z <a href="l2-6.html#takeaways">[L2.6]</a> (nebo se složením ceny vrcholu do vstupních hran). Důkaz, <em>proč</em> Dijkstra na nezáporných vahách opravdu funguje, patří do kapitoly K3 — tady stačí, že transformace jeho předpoklad splní.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.7</div>
+    <ul>
+      <li><strong>Spolehlivost cesty = součin:</strong> $p(Q) = \prod p(i,j)$; transformace $c(i,j) := -\log p(i,j)$ dává $\max \prod p \iff \min \sum (-\log p)$ — logaritmus mění součin na součet a jako rostoucí funkce zachová vítěze, minus otáčí max na min.</li>
+      <li>Pro $p \in (0,1]$ je $-\log p \ge 0$ → nezáporné váhy → Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> funguje; $p = 1$ dává váhu $0$, $p = 0$ znamená hranu odstranit ($+\infty$).</li>
+      <li><strong>Zpětný převod nezapomenout:</strong> spolehlivost optimální cesty je $b^{-l(t)}$; na základu $b &gt; 1$ nezáleží (společná kladná konstanta).</li>
+      <li>Koeficienty $p &gt; 1$ transformaci rozbijí: záporné váhy, případně záporné cykly <a href="l2-1.html#takeaways">[L2.1]</a> — Dijkstra ani jeho „max-součinová“ modifikace pak nefungují.</li>
+      <li>V Dangerous adventure [L2.8] se $-\log$ kombinuje s cenami na vrcholech (split <a href="l2-6.html#takeaways">[L2.6]</a>, nebo složení do vstupních hran).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-reliability">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Maximum Reliability Path Problem</strong>
+      <span class="task-src">zdroj: task bank #17 = slide 28, 3_SPT_KO.pdf</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>In the communication network we associate a reliability $p(i, j)$ with every arc from $i$ to $j$. We assume the failures of links to be unrelated. The reliability of a directed path $Q$ from $s$ to $t$ is the product of the reliability of the arcs in the path. Find the most reliable connection from $s$ to $t$.</p>
+        <p>(a) Show that we can reduce the maximum reliability path problem to a shortest path problem.</p>
+        <p>(b) Suppose you are not allowed to make reduction. Specify $O(n^2)$ algorithm for solving the maximum reliability path problem.</p>
+        <p>(c) Will your algorithms in parts a) and b) work if some of the $p(i, j)$ coefficients are strictly greater than 1?</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Přesně úloha z výkladu: maximalizace součinu spolehlivostí hran po cestě. Tři podotázky: <em>(a)</em> redukce na shortest path (= obsah této lekce), <em>(b)</em> přímý algoritmus v $O(n^2)$ <strong>bez</strong> redukce — tj. úprava Dijkstry, aby pracoval rovnou se součiny a maximalizací, <em>(c)</em> rozbor, co se stane, když některé koeficienty přerostou 1 (a přestanou tak být pravděpodobnostmi).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — transformace $-\log$, nezápornost, zpětný převod.</li>
+        <li><a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a> — pseudokód (co přesně v něm změnit), složitost $O(n^2)$, protipříklad se zápornou hranou.</li>
+        <li><a href="l2-1.html#takeaways">[L2.1] Záporné váhy ano, záporné cykly ne</a> — co způsobí záporný cyklus.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Část (a) je doslova výklad — předveď převod včetně tří bodů: součin→součet (log), max→min (minus), nezápornost ($p \le 1$). Pro (b) si vezmi pseudokód Dijkstry z <a href="l2-4.html#takeaways">[L2.4]</a> a projdi ho řádek po řádku s otázkou „co tu dělá sčítání/minimum a čím to nahradím, když chci přímo maximalizovat součin?“ — změní se inicializace, výběr vrcholu i relaxační podmínka, struktura (a tedy složitost) zůstane. Pro (c) projdi předpoklady obou variant: kde přesně jsme použili $p \le 1$? Zkus malý protipříklad se třemi vrcholy a jednou hranou s $p &gt; 1$.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(a) Redukce.</strong> Polož $c(i,j) := -\log p(i,j)$. Pro každou cestu $Q$ platí</p>
+          <p>$$\sum_{(i,j) \in Q} c(i,j) = -\log \prod_{(i,j) \in Q} p(i,j) = -\log p(Q),$$</p>
+          <p>a protože $-\log$ je klesající funkce, je cesta s minimálním součtem $c$ přesně cesta s maximální spolehlivostí $p(Q)$. Z $p(i,j) \in (0,1]$ plyne $c(i,j) \ge 0$ (hrany s $p = 0$ odstraníme), takže výslednou instanci shortest path vyřeší Dijkstra; spolehlivost optimální cesty $Q^*$ získáme zpětně jako $p(Q^*) = b^{-l(t)}$.</p>
+          <p><strong>(b) Přímá modifikace Dijkstry</strong> (bez redukce). Značka $l(v)$ = spolehlivost zatím nejlepší nalezené $s$–$v$ cesty:</p>
+          <ul>
+            <li><em>Inicializace:</em> $l(s) := 1$ (prázdná cesta má spolehlivost 1), $l(v) := 0$ pro $v \ne s$.</li>
+            <li><em>Výběr:</em> mezi neuzavřenými vyber vrchol s <strong>maximální</strong> $l(v)$ a uzavři ho.</li>
+            <li><em>Relaxace:</em> $\textbf{if } l(w) &lt; l(v) \cdot p(v,w) \textbf{ then } l(w) := l(v) \cdot p(v,w);\; p(w) := v$.</li>
+          </ul>
+          <p>Struktura algoritmu je shodná s Dijkstrou: $n$ iterací, v každé výběr extrému přes $O(n)$ vrcholů a relaxace $O(n)$ hran — celkem $O(n^2)$. Funguje ze stejného důvodu jako Dijkstra: násobení koeficientem $p \in (0,1]$ značku <strong>nikdy nezvětší</strong> (zrcadlo přičítání nezáporné váhy), takže vrchol s maximální značkou už si nemůže polepšit přes jiný neuzavřený vrchol a jeho uzavření je definitivní. (Formální důkaz = zrcadlový důkaz korektnosti Dijkstry, patří do kapitoly K3.)</p>
+          <p><strong>(c) Obecně NE.</strong> Oba algoritmy se opírají o $p(i,j) \le 1$:</p>
+          <ul>
+            <li>V (a) dá hrana s $p &gt; 1$ váhu $-\log p &lt; 0$ — graf má záporné hrany a Dijkstrův label-setting argument padá (protipříklad v <a href="l2-4.html#takeaways">[L2.4]</a>). Cyklus se součinem koeficientů $&gt; 1$ se navíc zobrazí na <strong>záporný cyklus</strong>, se kterým je shortest path dokonce NP-těžký <a href="l2-1.html#takeaways">[L2.1]</a>.</li>
+            <li>V (b) ekvivalentně: hrana s $p &gt; 1$ může značku <em>zvětšit</em>, takže uzavřený vrchol by si později polepšil — hladový výběr maxima přestane být korektní.</li>
+          </ul>
+          <p>Společný protipříklad je na grafu pod úlohou: nejspolehlivější je cesta $s \to a \to t$ s $0{,}1 \cdot 10 = 1$, ale obě varianty uzavřou $t$ hned po $s$ (transformovaná váha $-\log_2 0{,}9 \approx 0{,}152$ je menší než $-\log_2 0{,}1 \approx 3{,}32$, resp. značka $0{,}9 &gt; 0{,}1$) a vrátí přímou hranu s $p = 0{,}9$. Odpověď: ne — s koeficienty $&gt; 1$ není korektnost zaručena.</p>
+        </div>
+      </details>
+
+      <div class="viz" id="viz-counter"></div>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-reliability-exam">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Nejspolehlivější spojení (zkoušková reportáž)</strong>
+      <span class="task-src">zdroj: studentský souhrn ko_souhrn.md (přepis úlohy ze zkoušky)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (přepis ze studentského souhrnu, 1:1 CZ)</span>
+        <p>Nejspolehlivejsi spojeni, vektor spolehlivosti $p$ rozsah $(0,1)$, vysledne spojeni je produkt vsech spolehlivosti po ceste a) prevod ulohy nejspolehlivejsiho spojeni, aby sel resit Dijkstrou b) Modifikace Dijkstry aby resil tuhle ulohu c) bude a) a b) fungovat, kdyz bude $p$ v rozsahu $(0, \infty)$</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Tatáž úloha jako T01, jak ji po zkoušce zapsal student (proto česky a telegraficky — u písemky čekej anglické znění ve stylu T01). Drobné rozdíly v parametrech: spolehlivosti jsou z <em>otevřeného</em> intervalu $(0,1)$ a část (c) se ptá na rozsah $(0,\infty)$ místo „some coefficients $&gt; 1$“.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Úloha <a href="#t-reliability">T01</a> této lekce — všechny tři části jsou tam vyřešené.</li>
+        <li><a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a>.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Ujasni si, co změna rozsahů mění a co ne: ovlivní $p \in (0,1)$ místo $(0,1]$ nezápornost vah? A je rozsah $(0,\infty)$ něco jiného než „některé koeficienty $&gt; 1$“ z T01(c)?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(a), (b)</strong> beze změny jako v T01: převod $c(i,j) = -\log p(i,j)$ + Dijkstra + zpětný převod $b^{-l(t)}$; modifikovaný Dijkstra s $l(s)=1$, výběrem maxima a relaxací $l(w) &lt; l(v)\cdot p(v,w)$. Otevřený interval $(0,1)$ situaci jen zpříjemní: $p &lt; 1$ dává váhy <em>ostře kladné</em> (žádné nulové hrany), nezápornost tím spíš platí.</p>
+          <p><strong>(c)</strong> Rozsah $(0,\infty)$ připouští koeficienty $&gt; 1$, takže odpověď je tatáž jako v T01(c): obecně <strong>ne</strong> — transformace vyrobí záporné váhy (a z cyklů se součinem $&gt; 1$ záporné cykly <a href="l2-1.html#takeaways">[L2.1]</a>), modifikovaná Dijkstra ztratí korektnost hladového výběru; protipříklad u T01 funguje beze změny. Za zmínku u zkoušky stojí, že pro $p \in (0,1]$ — tedy dokud váhy po transformaci zůstávají nezáporné — funguje obojí.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L2.7">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l2-6.html"><span class="dir">← Předchozí</span> L2.6 · Split vrcholu (cena na vrcholu → na hraně)</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.8 · VYVRCHOLENÍ: Dangerous adventure [FOTO])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Motivační síť: spolehlivosti na hranách (součin po cestě)
+KOViz.graph(document.getElementById('viz-rel'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s', x:80,  y:180},
+    {id:'a', x:320, y:65},
+    {id:'b', x:320, y:295},
+    {id:'t', x:560, y:180},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'0.5'},
+    {from:'a', to:'t', label:'0.5'},
+    {from:'s', to:'b', label:'0.125'},
+    {from:'b', to:'t', label:'0.5'},
+    {from:'s', to:'t', label:'0.125'},
+  ],
+  caption: 'Komunikační síť: čísla na hranách jsou spolehlivosti p(i,j); spolehlivost cesty = jejich součin.',
+});
+
+// 2 — Průběh funkce −log₂ p na (0,1] (křivka aproximovaná úsečkami)
+(function () {
+  const f = p => -Math.log2(p);
+  const segments = [];
+  let prev = 0.07;
+  for (let p = 0.08; p <= 1.0001; p += 0.01) {
+    const q = Math.min(p, 1);
+    segments.push({ x1: prev, y1: f(prev), x2: q, y2: f(q) });
+    prev = q;
+  }
+  KOViz.fnPlot(document.getElementById('viz-log'), {
+    xmin: 0, xmax: 1, xstep: 0.25,
+    ymax: 4, ystep: 1,
+    xlabel: 'p', ylabel: '−log₂ p',
+    segments: segments,
+    points: [
+      {x: 1,     y: 0, label: 'p = 1 → váha 0', dx: -135, dy: -62},
+      {x: 0.5,   y: 1, label: '0.5 → 1'},
+      {x: 0.25,  y: 2, label: '0.25 → 2'},
+      {x: 0.125, y: 3, label: '0.125 → 3'},
+    ],
+    caption: 'Váha −log₂ p: na celém (0,1] nezáporná, v p = 1 nulová, pro p → 0 roste nade všechny meze.',
+  });
+})();
+
+// 3 — Síť z úvodu po transformaci c = −log₂ p
+KOViz.graph(document.getElementById('viz-trans'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s', x:80,  y:180},
+    {id:'a', x:320, y:65},
+    {id:'b', x:320, y:295},
+    {id:'t', x:560, y:180},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'1', cls:'hl'},
+    {from:'a', to:'t', label:'1', cls:'hl'},
+    {from:'s', to:'b', label:'3', cls:'hl'},
+    {from:'b', to:'t', label:'1', cls:'hl'},
+    {from:'s', to:'t', label:'3', cls:'hl'},
+  ],
+  caption: 'Stejná síť s vahami c(i,j) = −log₂ p(i,j) (modře): 0.5 → 1, 0.125 → 3. Teď je to obyčejný shortest path.',
+});
+
+// 4 — Běh Dijkstry na transformovaném grafu + zpětný převod
+KOViz.stepper(document.getElementById('viz-run'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'s', x:80,  y:180},
+      {id:'a', x:320, y:65},
+      {id:'b', x:320, y:295},
+      {id:'t', x:560, y:180},
+    ],
+    edges: [
+      {from:'s', to:'a', label:'1'},
+      {from:'a', to:'t', label:'1'},
+      {from:'s', to:'b', label:'3'},
+      {from:'b', to:'t', label:'1'},
+      {from:'s', to:'t', label:'3'},
+    ],
+  },
+  frames: [
+    {desc:'Init: l(s)=0, ostatní ∞. Zelená = uzavřeno, modrá = právě expandovaný vrchol.',
+     nodes:{},
+     edges:{},
+     subs:{s:'l=0', a:'l=∞', b:'l=∞', t:'l=∞'}},
+    {desc:'It 1: uzavři s (0). Relaxace: l(a):=1, l(b):=3, l(t):=3 (vše p=s).',
+     nodes:{s:'hl'},
+     edges:{'s->a':'hl', 's->b':'hl', 's->t':'hl'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=3, p=s', t:'l=3, p=s'}},
+    {desc:'It 2: min mezi neuzavřenými je a (1) → uzavři a. Relaxace (a,t): 3 &gt; 1+1 → l(t):=2, p(t):=a — přímá hrana s→t prohrála s dvojicí spolehlivějších hran.',
+     nodes:{s:'good', a:'hl'},
+     edges:{'s->a':'good', 'a->t':'hl', 's->t':'dim'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=3, p=s', t:'l=2, p=a'}},
+    {desc:'It 3: min je t (2 &lt; 3) → uzavři t. Cíl je v R → můžeme skončit (early stop z L2.4); b zůstane neuzavřené. Nejkratší cesta: s → a → t, l(t)=2.',
+     nodes:{s:'good', a:'good', t:'hl'},
+     edges:{'s->a':'good', 'a->t':'good', 's->t':'dim'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=3, p=s', t:'l=2, p=a'}},
+    {desc:'Zpětný převod: spolehlivost = 2^(−l(t)) = 2^(−2) = 0.25. Kontrola: 0.5 · 0.5 = 0.25 ✓ — nejspolehlivější spojení s → a → t.',
+     nodes:{s:'good', a:'good', t:'good'},
+     edges:{'s->a':'good', 'a->t':'good', 's->t':'dim'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=3, p=s', t:'2^(−2)=0.25'}},
+  ],
+  caption: 'Dijkstra na vahách −log₂ p; poslední krok je převod l(t) zpět na pravděpodobnost.',
+});
+
+// 5 — Protipříklad k T01(c): koeficient p &gt; 1 (graf pod řešením — pozor, spoiler)
+KOViz.graph(document.getElementById('viz-counter'), {
+  directed: true,
+  w: 640, h: 280,
+  nodes: [
+    {id:'s', x:110, y:190},
+    {id:'a', x:320, y:65},
+    {id:'t', x:530, y:190},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'0.1'},
+    {from:'a', to:'t', label:'10', cls:'bad'},
+    {from:'s', to:'t', label:'0.9'},
+  ],
+  caption: 'Protipříklad k (c) — spoiler k řešení T01: s koeficientem 10 &gt; 1 je nejlepší cesta s→a→t (0.1 · 10 = 1 &gt; 0.9), ale obě varianty algoritmu uzavřou t hned po s a vrátí přímou hranu.',
+});
+</script>
+</body>
+</html>
