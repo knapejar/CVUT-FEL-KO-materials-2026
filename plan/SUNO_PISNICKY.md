@@ -695,7 +695,7 @@ Na konci vem největší ká s váhou nejvýš dvojité vé —
 
 ---
 
-## 13. AC-3 PODRUHÉ — „Pomaličku" (reggaeton à la Despacito)
+## 13. AC-3 PODRUHÉ — „Á cé tři" (reggaeton à la Despacito)
 
 **Téma:** AC-3 ještě jednou, tentokrát jako letní latino hit (duet k písni 7 — kdo si nepamatuje
 synth-pop, zapamatuje si reggaeton). Fakta 1:1 ze slidů 08_CP (slide 25–30): definice AC,
@@ -710,15 +710,16 @@ AC je neúplná: pomaličku ti zúží svět, ale dořešit to musíš sám (sea
 dvě věci: mantru „pro každé á existuje bé" a varování „konzistence ≠ řešení".
 
 **Frázování (proč to sedne do rytmu Despacita):**
-- „Po-ma-lič-ku" = 4 slabiky, přízvuk na začátku taktu — sedí 1:1 na hlavní hook
-  (a navíc je to doslovný překlad názvu — „pomalu, pomaličku").
+- Hlavní hook je „á cé tři" = 3 slabiky na 4 noty originálu — poslední slabiku Suno
+  přirozeně podrží přes dvě noty („á-cé-tří-í"). Kdyby ji ve vygenerované verzi
+  odsekávalo krátce, přepiš hook v textu na „á cé tří-í".
 - Refrén = 4 + 12 + 12 + 12 slabik, dvakrát za sebou; všechny řádky rýmované na „-ičku"
   (stejná role jako průběžný rým „-ito" v originále).
 - Pre-chorus = 13 + 9 + 13 + 9 slabik (dlouhý řádek → krátká odpověď, stoupavá melodie).
 - Rapová sloka zrcadlí slavné dvojité zdrobněliny: „krůček po krůčku… kousek po kousíčku".
 - Tempo ~89 bpm, dembow beat, akustická kytara v intru.
 
-**Title:** `Pomaličku (AC-3)`
+**Title:** `Á cé tři (AC-3)`
 
 **Styles:**
 ```
@@ -730,7 +731,7 @@ latin pop, reggaeton, 89 bpm, dembow rhythm, acoustic spanish guitar intro, smoo
 [Intro]
 [Acoustic guitar, slow latin riff]
 [Spoken Word]
-Á cé tři… pomaličku…
+Á cé tři… á cé tři…
 (iks í… iks jé… ej)
 
 [Verse 1]
@@ -753,15 +754,15 @@ kdo svoje bé nenajde, ten z domény letí,
 vyber si ká em, rivajz to teď!
 
 [Chorus]
-Pomaličku,
-mažu ti hodnoty z domén pomaličku,
+Á cé tři,
+mažu ti hodnoty z domén, á cé tři,
 kdo nemá svoje bé, zmizí za chviličku,
 doména se tenčí, kousek po kousíčku.
 
-Pomaličku,
-vracím hrany do ká zpátky, pomaličku,
+Á cé tři,
+vracím hrany do ká zpátky, á cé tři,
 jen tu od em ne — tu nechám na poličku,
-fronta zas naskočí — jedem pomaličku.
+fronta zas naskočí — jedem, á cé tři.
 
 [Post-Chorus]
 (Škrtej! Škrtej!)
@@ -772,7 +773,7 @@ Revize ká em hraně em ká neublíží (e-oh),
 ta zůstává konzistentní, klidně si spí (e-oh).
 
 [Rap Verse]
-Krůček po krůčku, mažu si pomaličku,
+Krůček po krůčku, škrtá si á cé tři,
 hodnotu za hodnotou, kousek po kousíčku,
 fronta na startu: všechny hrany z grafu gé,
 vyberu ká em, reviduju dé ká, jé!
@@ -788,15 +789,15 @@ když nic nemažu, nic nevracím do fronty,
 domény jsou konzistentní, jé!
 
 [Chorus]
-Pomaličku,
-mažu ti hodnoty z domén pomaličku,
+Á cé tři,
+mažu ti hodnoty z domén, á cé tři,
 kdo nemá svoje bé, zmizí za chviličku,
 doména se tenčí, kousek po kousíčku.
 
-Pomaličku,
-vracím hrany do ká zpátky, pomaličku,
+Á cé tři,
+vracím hrany do ká zpátky, á cé tři,
 jen tu od em ne — tu nechám na poličku,
-fronta zas naskočí — jedem pomaličku.
+fronta zas naskočí — jedem, á cé tři.
 
 [Bridge]
 [Slow, intimate]
@@ -804,18 +805,18 @@ Tři v trojúhelníku, jedna dvě v doméně,
 každý s každým nerovná se — zní to nadějně…
 všechno konzistentní — a řešení žádné!
 Konzistence hran ti štěstí nezaručí,
-pomaličku zúžím svět — dohledat musíš sám.
+á cé tři zúží svět — dohledat musíš sám.
 
 [Chorus]
-Pomaličku,
-mažu ti hodnoty z domén pomaličku,
+Á cé tři,
+mažu ti hodnoty z domén, á cé tři,
 kdo nemá svoje bé, zmizí za chviličku,
 doména se tenčí, kousek po kousíčku.
 
 [Outro]
-Pomaličku…
+Á cé tři…
 (každé á si hledá svoje bé)
-Pomaličku…
+Á cé tři…
 (kdo nemá svoje bé, ten z domény jde)
 [End]
 ```
