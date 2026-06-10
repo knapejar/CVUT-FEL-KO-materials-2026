@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L3.14 · k-OPT local search [NICE] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k3">K3 · Důkaz / teorie</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L3.14</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L3.14</span> Kapitola K3 — Důkaz / teorie (Slot 3) · <strong>[NICE]</strong> · mikro-lekce (odložitelná)
+  </p>
+  <h1>k-OPT local search [NICE]</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Lokální vylepšování okruhu výměnou $k$ hran</strong> (slidy 28–31): vyhoď $k$ hran Hamiltonovského okruhu, zkus všechny rekonstrukce, přijmi zlepšení a opakuj — heuristika <em>bez</em> záruky faktoru.
+  </div>
+
+  <p>Poslední lekce K3 — a tečka za TSP. Z <a href="l3-1.html#takeaways">[L3.1]</a> víš, že <strong>nearest neighbor</strong> okruh sice vyrobí, ale nic neslibuje (heuristika). Z <a href="l3-9.html#takeaways">[L3.9]</a> a <a href="l3-10.html#takeaways">[L3.10]</a> máš aproximace s faktory 2 a 3/2 pro metrický TSP <a href="l3-8a.html#takeaways">[L3.8a]</a>. Dnešní otázka je jiná: <em>okruh už nějaký mám — jde levně vylepšit?</em> Slide 28 odpovídá principem, kterému se říká <strong>local search</strong> (lokální prohledávání), a jeho TSP instancí je algoritmus <strong>$k$-OPT</strong> — podle slidu „one of the most successful techniques for TSP instances in practice“.</p>
+
+  <!-- ===== SEKCE 1: PRINCIP ===== -->
+  <h2>Local search: dvě rozhodnutí (slide 28)</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 28 — Tour Improvement Heuristics, 1:1</div>
+    <p><em>A simple idea which can be used to solve other optimization problems as well:</em></p>
+    <ul>
+      <li><em>Find any Hamiltonian circuit by some heuristic</em></li>
+      <li><em>Improve it by "local modifications" (for example: delete 2 edges and reconstruct the circuit by some other edges).</em></li>
+    </ul>
+    <p><em>Local search is an algorithmic principle based on two decisions:</em></p>
+    <ul>
+      <li><em>Which modifications are allowed</em></li>
+      <li><em>When to modify the solution (one possibility is, to allow improvements only)</em></li>
+    </ul>
+  </div>
+
+  <p>Tedy: startovní řešení dodá libovolná heuristika (klidně nearest neighbor) a pak se řešení opakovaně „pošťuchuje“ malými úpravami. Návrh konkrétního local search algoritmu = zodpovědět <strong>dvě rozhodnutí</strong>: (1) jaké úpravy jsou povolené (to definuje „okolí“ řešení), (2) kdy úpravu přijmout ($k$-OPT přijímá jen zlepšení — <em>improvements only</em>).</p>
+
+  <!-- ===== SEKCE 2: ALGORITMUS ===== -->
+  <h2>Algoritmus $k$-OPT (slide 29)</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 29 — $k$-OPT algorithm for TSP, 1:1</div>
+    <p><em>Input: An instance $(K_n, c)$ of TSP, number $k \ge 2$. Output: Hamiltonian circuit $H$.</em></p>
+<pre>1. Let H be any Hamiltonian circuit;
+2. Let S be the family of k-element subsets S of E(H);
+   for all S ∈ S do            // outer loop deals with removed edges
+       for all Ham. circuits H' ≠ H such that E(H') ⊇ E(H) \ S do
+                                // inner loop deals with inserted edges
+           if c(E(H')) &lt; c(E(H)) then H := H' a go to 2.;
+       end
+   end</pre>
+    <p><em>Note: $H'$ is constructed, so that it is Hamiltonian circuit as well. When $k=2$, the inner loop, which creates the Hamiltonian circuits $H'$ from the remaining edges of $H$, executes only once, since there is just one way to construct the new Hamiltonian circuit $H'$.</em></p>
+  </div>
+
+  <p>Vnější smyčka vybírá, <strong>kterých $k$ hran okruhu se zbavit</strong>; vnitřní smyčka zkouší <strong>všechny okruhy $H' \ne H$, které zbylé hrany $E(H)\setminus S$ obsahují</strong> (tj. doplňují je nějakými novými hranami). Jakmile nějaký $H'$ vyjde ostře levněji, stane se novým $H$ a vše začíná znovu od kroku 2 — s novou rodinou $\mathcal{S}$, protože okruh (a tedy jeho hrany) se změnil.</p>
+
+  <details class="try">
+    <summary>Zkus sám: vezmi Hamiltonovský okruh a vyhoď z něj 2 hrany, které spolu nesousedí (nesdílí vrchol). Co zbyde? A kolika způsoby to jde spojit zpátky do <em>jiného</em> Hamiltonovského okruhu?</summary>
+    <div class="inner">
+      <p>Zbydou <strong>dvě cesty</strong> (okruh je kružnice — dva řezy ji rozpadnou na dva oblouky). Každá cesta má dva konce; nový okruh musí konce pospojovat dvěma hranami „křížem“. Možnosti jsou jen dvě: buď vrátíš původní dvě hrany (to je zase $H$ — zakázáno podmínkou $H' \ne H$), nebo je zapojíš <strong>jediným zbývajícím způsobem</strong>. Přesně to říká poznámka slidu 29: pro $k = 2$ proběhne vnitřní smyčka jen jednou.</p>
+      <p>(A když vyhodíš dvě hrany, které <em>sousedí</em>? Zbyde osamocený vrchol + jedna cesta — osamocený vrchol jde zapojit jen tak, jak byl, takže jediná rekonstrukce je $H$ samo a vnitřní smyčka neproběhne ani jednou. Vlastní pozorování — slide tenhle případ nerozepisuje.)</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-2opt-abs"></div>
+
+  <!-- ===== SEKCE 3: ZISK ===== -->
+  <h2>2-opt: zisk výměny (slide 30)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: při 2-opt výměně se z celého okruhu změní jen 4 hrany — dvě odstraněné $(a,b), (c,d)$ a dvě vložené $(a,d), (b,c)$. Napiš, o kolik se změní cena okruhu.</summary>
+    <div class="inner">
+      <p>Všechny ostatní hrany zůstávají, takže rozdíl je jen
+      $$c(E(H')) - c(E(H)) = c(a,d) + c(b,c) - c(c,d) - c(a,b).$$
+      Je-li záporný, výměna se vyplatí. Vyhodnocení jedné výměny je tedy $\mathcal{O}(1)$ — proto je 2-opt v praxi tak laciný.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 30 — Examples of 2-opt and 3-opt, 1:1</div>
+    <p><strong>2-opt</strong>: <em>just one way to construct the new Hamiltonian circuit: the gain if the improvement is $c(E(H')) - c(E(H)) = (a,d) + (b,c) - (c,d) - (a,b)$ and path $(b, \ldots, d)$ has changed orientation.</em></p>
+    <p><strong>3-opt</strong>: <em>at least two ways to construct the new Hamiltonian circuit:</em></p>
+    <ul>
+      <li><em>$c(E(H')) - c(E(H)) = (a,d) + (e,b) + (c,f) - (a,b) - (c,d) - (e,f)$ — no path has changed orientation</em></li>
+      <li><em>$c(E(H'')) - c(E(H)) = (a,d) + (e,c) + (b,f) - (a,b) - (c,d) - (e,f)$ — path $(c, \ldots, b)$ has changed orientation</em></li>
+    </ul>
+  </div>
+
+  <p>Drobnost, která u písemky dělá dobrý dojem: po 2-opt výměně se jeden z oblouků projíždí <strong>v opačném směru</strong> („path $(b,\ldots,d)$ has changed orientation“). U symetrického TSP je to jedno ($c$ nezávisí na směru), u asymetrického by se cena oblouku přepočítávala celá — proto se 2-opt v této podobě používá pro symetrické instance.</p>
+
+  <!-- ===== SEKCE 4: BĚH ===== -->
+  <h2>Běh 2-OPT na známé instanci</h2>
+
+  <p>Vezmi metrickou $K_5$ z <a href="l3-8a.html#takeaways">[L3.8a]</a> (tabulka cen tam; $c(A,B){=}2$, $c(B,C){=}1$, $c(C,D){=}2$, $c(D,E){=}5$, $c(E,A){=}2$, $c(A,D){=}3$, $c(B,E){=}3$, …) a jako startovní okruh výstup double-tree algoritmu z <a href="l3-9.html#takeaways">[L3.9]</a>: $H = A,B,C,D,E,A$ s cenou $12$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: na okruhu $H = A,B,C,D,E,A$ existuje 5 dvojic nesousedních hran. Spočítej zisk všech pěti 2-opt výměn (vzorec výše) a najdi tu, která se vyplatí. Ceny: $c(A,C){=}3$, $c(B,D){=}2$, $c(C,E){=}4$, zbytek viz výše.</summary>
+    <div class="inner">
+      <p>Po dvojicích odstraněných hran (vložené hrany jsou vždy ty jediné možné):</p>
+      <ul>
+        <li>$\{A{,}B\},\{C{,}D\} \to \{A{,}C\},\{B{,}D\}$: $3+2-2-2 = +1$,</li>
+        <li>$\{A{,}B\},\{D{,}E\} \to \{A{,}D\},\{B{,}E\}$: $3+3-2-5 = \mathbf{-1}$ ✓,</li>
+        <li>$\{B{,}C\},\{D{,}E\} \to \{B{,}D\},\{C{,}E\}$: $2+4-1-5 = 0$ (není <em>ostré</em> zlepšení — algoritmus chce $c(E(H')) &lt; c(E(H))$),</li>
+        <li>$\{B{,}C\},\{E{,}A\} \to \{B{,}E\},\{C{,}A\}$: $3+3-1-2 = +3$,</li>
+        <li>$\{C{,}D\},\{E{,}A\} \to \{C{,}E\},\{D{,}A\}$: $4+3-2-2 = +3$.</li>
+      </ul>
+      <p>Jediná výhodná výměna: vyhodit $\{A,B\}$ a $\{D,E\}$, vložit $\{A,D\}$ a $\{B,E\}$ — nový okruh $A,D,C,B,E,A$ za $11$.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-run"></div>
+
+  <p>Po výměně algoritmus skočí na krok 2 a prověří novou rodinu $\mathcal{S}$ — a žádná z pěti výměn už nepomůže (zisky $+1, +1, +1, +4, +3$, propočet v T02). Algoritmus končí: $H' = A,D,C,B,E,A$ je <strong>2-OPT lokální optimum</strong>. Na téhle malé instanci je to shodou okolností i globální optimum ($\mathrm{OPT} = 11$ enumerací, <a href="l3-8b.html#takeaways">[L3.8b]</a>) — ale to je výjimka malé instance, ne pravidlo.</p>
+
+  <!-- ===== SEKCE 5: 3-OPT, 4-OPT ===== -->
+  <h2>3-opt a 4-opt „double bridge“ (slidy 30–31)</h2>
+
+  <p>Pro $k = 3$ už vnitřní smyčka jednou neproběhne: po vyhození tří navzájem nesousedních hran zbydou <em>tři</em> oblouky a slide 30 ukazuje <em>at least two ways</em>, jak je pospojovat do nového okruhu (jeden bez otáčení oblouků, druhý s otočením oblouku $(c,\ldots,b)$).</p>
+
+  <div class="viz" id="viz-3opt"></div>
+
+  <p>A pro $k = 4$ slide 31 ukazuje slavnou rekonstrukci: <em>One possible solution called the "double bridge" - no path has changed orientation</em> (1:1). Čtyři oblouky se přeskládají do jiného pořadí, aniž by se kterýkoli z nich otáčel — proto je double bridge oblíbený i pro asymetrický TSP a jako „rozkopávací“ tah, který 2-opt neumí napodobit.</p>
+
+  <div class="viz" id="viz-dbridge"></div>
+
+  <!-- ===== SEKCE 6: HEURISTIKA ===== -->
+  <h2>Heuristika, ne aproximace</h2>
+
+  <details class="try">
+    <summary>Zkus sám: $k$-OPT vždy skončí (rozmysli proč!) a vrátí okruh, ze kterého žádná výměna $k$ hran nevede na levnější okruh. Je to aproximační algoritmus podle definice z [L3.1]?</summary>
+    <div class="inner">
+      <p><strong>Konečnost:</strong> každé přijetí ostře zmenší $c(E(H))$, a Hamiltonovských okruhů je konečně mnoho — žádný se tedy nemůže opakovat a algoritmus skončí (vlastní pozorování; slidy konečnost nerozebírají).</p>
+      <p><strong>Aproximace? NE.</strong> Aproximační algoritmus podle <a href="l3-1.html#takeaways">[L3.1]</a> potřebuje <em>dokázanou</em> worst-case záruku $c(E(H)) \le r \cdot \mathrm{OPT}$ pro <em>všechny</em> instance. $k$-OPT vrací jen <strong>lokální optimum</strong> — okruh neporazitelný výměnou $k$ hran — a to může být od globálního optima libovolně daleko. Slidy taky žádný faktor nedokazují a celou techniku nadepisují „Tour Improvement <em>Heuristics</em>“. Pro obecný (nemetrický) TSP by polynomiální algoritmus se zárukou $r$ ani existovat nemohl, pokud $P \ne NP$ <a href="l3-6.html#takeaways">[L3.6]</a>.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda</div>
+    <p>„2-OPT našel na naší instanci optimum, takže je to aproximační algoritmus.“ — <strong>NE.</strong> Lokální optimum ($k$ hran nepomůže vyměnit) obecně <strong>není</strong> globální optimum a žádný faktor $r$ pro $k$-OPT dokázán není: je to <strong>heuristika</strong>, stejně jako nearest neighbor <a href="l3-1.html#takeaways">[L3.1]</a>. Záruky mají až aproximace pro <em>metrický</em> TSP: double-tree (faktor 2) <a href="l3-9.html#takeaways">[L3.9]</a> a Christofides (faktor 3/2) <a href="l3-10.html#takeaways">[L3.10]</a>. V praxi se obojí kombinuje: aproximace dodá startovní okruh se zárukou, $k$-OPT ho dál vylepšuje.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.14</div>
+    <ul>
+      <li><strong>Local search</strong> = princip daný dvěma rozhodnutími (slide 28): <em>which modifications are allowed</em> + <em>when to modify the solution</em> ($k$-OPT: výměna $k$ hran okruhu; jen ostrá zlepšení).</li>
+      <li><strong>$k$-OPT</strong> (slide 29): vyhoď $k$-prvkovou podmnožinu $S \subseteq E(H)$, projdi všechny okruhy $H' \ne H$ s $E(H') \supseteq E(H)\setminus S$; je-li $c(E(H')) &lt; c(E(H))$, přijmi a začni znovu.</li>
+      <li><strong>2-opt</strong>: po vyhození 2 nesousedních hran existuje právě <em>jedna</em> nová rekonstrukce; zisk $= c(a,d) + c(b,c) - c(c,d) - c(a,b)$, oblouk $(b,\ldots,d)$ otočí orientaci (slide 30).</li>
+      <li><strong>3-opt</strong> má aspoň 2 rekonstrukce; <strong>4-opt „double bridge“</strong> přeskládá 4 oblouky bez otáčení (slide 31).</li>
+      <li>$k$-OPT skončí v <strong>lokálním optimu</strong> — heuristika <strong>bez záruky faktoru</strong>; doplněk k aproximacím <a href="l3-9.html#takeaways">[L3.9]</a>, <a href="l3-10.html#takeaways">[L3.10]</a>, ne jejich náhrada.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-kopt">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Tour Improvement Heuristics — Local Search k-OPT</strong>
+      <span class="task-src">zdroj: banka #34 = slidy 28–29 (otázky i–iii vlastní)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN 1:1 dle banky #34; pokyny i–iii vlastní doplněk — banka otázku neformuluje)</span>
+        <p><em>One of the most successful techniques for TSP instances in practice is local search. The simple idea is: find any Hamiltonian circuit by some heuristic; improve it by local modifications, for example delete two edges and reconstruct the circuit by some other edges. Local search is an algorithmic principle based on two decisions: which modifications are allowed; when to modify the solution, e.g. allow improvements only. Example of local search is the k-OPT algorithm for TSP.</em></p>
+        <p><em>k-OPT algorithm for TSP. Input: An instance $(K_n, c)$ of TSP, number $k \ge 2$. Output: Hamiltonian circuit $H$. 1. Let $H$ be any Hamiltonian circuit. 2. Let $\mathcal{S}$ be the family of $k$-element subsets $S$ of $E(H)$. For all $S \in \mathcal{S}$ do: for all Hamiltonian circuits $H' \ne H$ such that $E(H') \supseteq E(H) \setminus S$ do: if $c(E(H')) &lt; c(E(H))$, then set $H := H'$ and go to step 2.</em></p>
+        <p>(i) Explain the two decisions that define a local search algorithm and how $k$-OPT answers them. (ii) Explain why for $k = 2$ the inner loop executes only once. (iii) Is $k$-OPT an approximation algorithm? Justify.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Reprodukce a vysvětlení $k$-OPT — popsat princip local search, algoritmus a jeho vlastnosti. Typická „describe + explain“ otázka (v bance vedená jako potenciální úloha ze slidů, nízká pravděpodobnost na písemce).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — slidy 28–30 (princip, algoritmus, jediná rekonstrukce u $k=2$).</li>
+        <li><a href="l3-3.html#takeaways">[L3.3] Hamiltonovská kružnice</a> — co je $H$.</li>
+        <li><a href="l3-1.html#takeaways">[L3.1] Aproximační algoritmus a faktor r</a> — pro (iii) heuristika vs. aproximace.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(i) Najdi obě rozhodnutí přímo ve slidu 28 a u každého řekni, jak ho $k$-OPT konkretizuje. (ii) Geometrická úvaha: co zbyde z kružnice po odebrání dvou nesousedních hran a kolik je způsobů, jak čtyři konce pospojovat? (iii) Vrať se k definici aproximačního algoritmu — co přesně by se muselo dokázat a co $k$-OPT skutečně garantuje?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Local search je dán dvěma rozhodnutími (slide 28): <em>which modifications are allowed</em> — u $k$-OPT je povolenou modifikací odebrání $k$-prvkové podmnožiny $S$ hran okruhu a doplnění zbytku $E(H)\setminus S$ na jiný Hamiltonovský okruh $H' \ne H$; <em>when to modify the solution</em> — $k$-OPT přijímá pouze ostrá zlepšení, $c(E(H')) &lt; c(E(H))$, a po přijetí se vrací na krok 2 (okolí se počítá z nového okruhu).</p>
+          <p><strong>(ii)</strong> Odeberu-li z kružnice dvě nesousední hrany $(a,b)$ a $(c,d)$, rozpadne se na dvě cesty se čtyřmi konci $a, b, c, d$. Nový okruh musí oba oblouky spojit dvěma hranami; možnosti jsou jen dvě — původní dvojice (dá $H' = H$, vyloučeno podmínkou $H' \ne H$) a jediná zbývající dvojice $(a,d), (b,c)$, při níž jeden oblouk změní orientaci (slide 30). Vnitřní smyčka tedy vygeneruje právě jednoho kandidáta. (Při odebrání dvou sousedních hran zbyde izolovaný vrchol + cesta a jediná rekonstrukce je $H$ samo — kandidát žádný; tento případ slide explicitně nerozepisuje.)</p>
+          <p><strong>(iii)</strong> Ne. Aproximační algoritmus vyžaduje dokázanou worst-case záruku $c(E(H)) \le r \cdot \mathrm{OPT}$ pro všechny instance <a href="l3-1.html#takeaways">[L3.1]</a>. $k$-OPT vrací jen lokální optimum vzhledem k výměnám $k$ hran, které může být od $\mathrm{OPT}$ libovolně daleko; slidy žádný faktor nedokazují a řadí $k$-OPT mezi <em>tour improvement heuristics</em>. Pro obecný TSP navíc žádný polynomiální $r$-aproximační algoritmus neexistuje, pokud $P \ne NP$ <a href="l3-6.html#takeaways">[L3.6]</a>.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-2optrun">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Run 2-OPT by hand</strong>
+      <span class="task-src">zdroj: VLASTNÍ drill na instanci z [L3.8a] (přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; vlastní zadání — drill na ověřené instanci lekcí L3.8a–L3.10)</span>
+        <p><em>Consider the metric TSP instance $(K_5, c)$ with costs $c(A,B)=2$, $c(A,C)=3$, $c(A,D)=3$, $c(A,E)=2$, $c(B,C)=1$, $c(B,D)=2$, $c(B,E)=3$, $c(C,D)=2$, $c(C,E)=4$, $c(D,E)=5$. Run the 2-OPT algorithm starting from the Hamiltonian circuit $H = A,B,C,D,E,A$. (a) List all candidate 2-OPT exchanges on $H$ with their gains. (b) Perform the improving exchange and state the new circuit and its cost. (c) Show that the new circuit is 2-OPT optimal (no exchange improves it) and compare it with the global optimum.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Ruční odsimulování 2-OPT: na okruhu za 12 (výstup double-tree z <a href="l3-9.html#takeaways">[L3.9]</a>) spočítat zisky všech výměn, provést tu výhodnou a ověřit zastavení.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — vzorec zisku $c(a,d)+c(b,c)-c(c,d)-c(a,b)$ a pravidlo „jen ostrá zlepšení“.</li>
+        <li><a href="l3-8a.html#takeaways">[L3.8a]</a> — instance (tabulka cen).</li>
+        <li><a href="l3-8b.html#takeaways">[L3.8b]</a> — globální optimum $\mathrm{OPT} = 11$ (enumerací) pro porovnání v (c).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Okruh na 5 vrcholech má 5 hran; dvojic nesousedních hran je 5 (sousední dvojice kandidáta nedají). U každé dvojice je vložená dvojice hran určena jednoznačně — stačí 5× dosadit do vzorce zisku. Po výměně totéž zopakuj na novém okruhu.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní)</summary>
+        <div class="inner">
+          <p><strong>(a)</strong> $c(E(H)) = 2+1+2+5+2 = 12$. Kandidáti (odstranit → vložit, zisk):</p>
+          <ul>
+            <li>$\{A{,}B\},\{C{,}D\} \to \{A{,}C\},\{B{,}D\}$: $3+2-2-2 = +1$;</li>
+            <li>$\{A{,}B\},\{D{,}E\} \to \{A{,}D\},\{B{,}E\}$: $3+3-2-5 = -1$ ✓;</li>
+            <li>$\{B{,}C\},\{D{,}E\} \to \{B{,}D\},\{C{,}E\}$: $2+4-1-5 = 0$ (není ostré zlepšení);</li>
+            <li>$\{B{,}C\},\{E{,}A\} \to \{B{,}E\},\{C{,}A\}$: $3+3-1-2 = +3$;</li>
+            <li>$\{C{,}D\},\{E{,}A\} \to \{C{,}E\},\{D{,}A\}$: $4+3-2-2 = +3$.</li>
+          </ul>
+          <p><strong>(b)</strong> Provedu výměnu s ziskem $-1$: vyhodím $\{A,B\}, \{D,E\}$, vložím $\{A,D\}, \{B,E\}$; oblouk $B,C,D$ se projede pozpátku. Nový okruh $H' = A,D,C,B,E,A$ s cenou $3+2+1+3+2 = 11$.</p>
+          <p><strong>(c)</strong> Na $H'$ znovu všech 5 kandidátů:
+          $\{A{,}D\},\{C{,}B\} \to \{A{,}C\},\{D{,}B\}$: $3+2-3-1 = +1$;
+          $\{A{,}D\},\{B{,}E\} \to \{A{,}B\},\{D{,}E\}$: $2+5-3-3 = +1$;
+          $\{D{,}C\},\{B{,}E\} \to \{D{,}B\},\{C{,}E\}$: $2+4-2-3 = +1$;
+          $\{D{,}C\},\{E{,}A\} \to \{D{,}E\},\{C{,}A\}$: $5+3-2-2 = +4$;
+          $\{C{,}B\},\{E{,}A\} \to \{C{,}E\},\{B{,}A\}$: $4+2-1-2 = +3$.
+          Žádný zisk není záporný → $H'$ je 2-OPT lokální optimum a algoritmus končí. Z <a href="l3-8b.html#takeaways">[L3.8b]</a> víme, že $\mathrm{OPT} = 11$ — zde se lokální optimum trefilo do globálního (malá instance; obecně to neplatí, viz box „Nebezpečná polopravda“).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L3.14">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k3/l3-13.html"><span class="dir">← Předchozí</span> L3.13 · Ekvivalence definic stromu [NICE]</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.1 · Síť, tok, Kirchhoffův zákon)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// Pozn.: uzly NEsdílet mezi KOViz voláními (každé volání má vlastní pole).
+
+// ===== Viz 1: abstraktní 2-opt (slide 30 vlevo) =====
+KOViz.stepper(document.getElementById('viz-2opt-abs'), {
+  graph: {
+    nodes: [
+      {id:'a', x:320, y:55},
+      {id:'b', x:433, y:120},
+      {id:'p', x:433, y:250, label:'…'},
+      {id:'d', x:320, y:315},
+      {id:'c', x:207, y:250},
+      {id:'q', x:207, y:120, label:'…'},
+    ],
+    edges: [
+      {from:'a', to:'b'}, {from:'b', to:'p'}, {from:'p', to:'d'},
+      {from:'d', to:'c'}, {from:'c', to:'q'}, {from:'q', to:'a'},
+      {from:'a', to:'d', cls:'dim'}, {from:'b', to:'c', cls:'dim'},
+    ],
+    caption: 'Schéma 2-opt výměny dle slidu 30: okruh a→b→…→d→c→…→a; „…“ zastupují zbytek okruhu, který se nemění.',
+  },
+  frames: [
+    {desc:'Výchozí okruh H = a → b → … → d → c → … → a. Vybraná podmnožina S = {(a,b), (c,d)} — dvě nesousední hrany okruhu.',
+     edges:{'a->b':'hl', 'b->p':'hl', 'p->d':'hl', 'd->c':'hl', 'c->q':'hl', 'q->a':'hl'}},
+    {desc:'Krok „vyhoď S“: bez hran (a,b) a (c,d) se okruh rozpadne na DVĚ cesty — oblouk (b,…,d) a oblouk (c,…,a). Čtyři volné konce: a, b, c, d.',
+     edges:{'a->b':'bad', 'd->c':'bad', 'b->p':'hl', 'p->d':'hl', 'c->q':'good', 'q->a':'good'},
+     nodes:{a:'hl', b:'hl', c:'hl', d:'hl'}},
+    {desc:'Jediná nová rekonstrukce (slide 29: inner loop „executes only once“): vlož (a,d) a (b,c). Nový okruh a → d → … → b → c → … → a; oblouk (b,…,d) se nyní projíždí OPAČNĚ. Zisk = (a,d) + (b,c) − (c,d) − (a,b); je-li záporný, H′ se přijme.',
+     edges:{'a->d':'good', 'b->c':'good', 'b->p':'hl', 'p->d':'hl', 'c->q':'hl', 'q->a':'hl'},
+     nodes:{a:'good', b:'good', c:'good', d:'good'}},
+  ],
+});
+
+// ===== Viz 2: běh 2-OPT na metrické K5 z L3.8a =====
+KOViz.stepper(document.getElementById('viz-run'), {
+  graph: {
+    nodes: [
+      {id:'A', x:150, y:210},
+      {id:'B', x:300, y:150},
+      {id:'C', x:470, y:80},
+      {id:'D', x:480, y:300},
+      {id:'E', x:110, y:70},
+    ],
+    edges: [
+      {from:'A', to:'B', label:'2'},
+      {from:'B', to:'C', label:'1'},
+      {from:'C', to:'D', label:'2'},
+      {from:'D', to:'E', label:'5', curve:-0.3},
+      {from:'E', to:'A', label:'2'},
+      {from:'A', to:'D', label:'3', cls:'dim'},
+      {from:'B', to:'E', label:'3', cls:'dim'},
+    ],
+    caption: 'Metrická K₅ z [L3.8a] (nakresleno 7 hran, které běh potřebuje; úplná tabulka cen v L3.8a). Start: okruh A,B,C,D,E,A za 12 = výstup double-tree z [L3.9].',
+  },
+  frames: [
+    {desc:'Start (krok 1): H = A→B→C→D→E→A, c(E(H)) = 2+1+2+5+2 = 12. Krok 2: rodina S = všechny 2-prvkové podmnožiny E(H); kandidáty dávají jen nesousední dvojice (je jich 5).',
+     edges:{'A->B':'hl', 'B->C':'hl', 'C->D':'hl', 'D->E':'hl', 'E->A':'hl'}},
+    {desc:'Vnější smyčka došla k S = {{A,B}, {D,E}} (zisky ostatních dvojic: +1, 0, +3, +3 — viz try-otázka). Vyhozením S zbydou oblouky B–C–D a E–A.',
+     edges:{'A->B':'bad', 'D->E':'bad', 'B->C':'hl', 'C->D':'hl', 'E->A':'good'},
+     nodes:{A:'hl', B:'hl', D:'hl', E:'hl'}},
+    {desc:'Jediná rekonstrukce: vlož {A,D} a {B,E}. Zisk = c(A,D) + c(B,E) − c(A,B) − c(D,E) = 3 + 3 − 2 − 5 = −1 < 0 → přijmout! Oblouk B,C,D se otočí.',
+     edges:{'A->D':'good', 'B->E':'good', 'B->C':'hl', 'C->D':'hl', 'E->A':'hl'},
+     nodes:{A:'good', B:'good', D:'good', E:'good'}},
+    {desc:'Nový okruh (a skok na krok 2): H′ = A→D→C→B→E→A, c(E(H′)) = 3+2+1+3+2 = 11. Hrany {A,B} a {D,E} už v okruhu nejsou.',
+     edges:{'A->D':'hl', 'C->D':'hl', 'B->C':'hl', 'B->E':'hl', 'E->A':'hl'}},
+    {desc:'Nová rodina S na H′: všech 5 nesousedních dvojic dává zisky +1, +1, +1, +4, +3 (propočet v T02) — žádné ostré zlepšení. STOP: H′ je 2-OPT lokální optimum; zde dokonce globální (OPT = 11 dle [L3.8b]).',
+     edges:{'A->D':'good', 'C->D':'good', 'B->C':'good', 'B->E':'good', 'E->A':'good'},
+     nodes:{A:'good', B:'good', C:'good', D:'good', E:'good'}},
+  ],
+});
+
+// ===== Viz 3: abstraktní 3-opt (slide 30 vpravo) =====
+KOViz.stepper(document.getElementById('viz-3opt'), {
+  graph: {
+    nodes: [
+      {id:'a', x:320, y:50},
+      {id:'b', x:407, y:82},
+      {id:'x', x:453, y:162, label:'…'},
+      {id:'c', x:437, y:253},
+      {id:'d', x:366, y:312},
+      {id:'y', x:274, y:312, label:'…'},
+      {id:'e', x:203, y:253},
+      {id:'f', x:187, y:162},
+      {id:'z', x:233, y:82, label:'…'},
+    ],
+    edges: [
+      {from:'a', to:'b'}, {from:'b', to:'x'}, {from:'x', to:'c'},
+      {from:'c', to:'d'}, {from:'d', to:'y'}, {from:'y', to:'e'},
+      {from:'e', to:'f'}, {from:'f', to:'z'}, {from:'z', to:'a'},
+      {from:'a', to:'d', cls:'dim'}, {from:'e', to:'b', cls:'dim'},
+      {from:'c', to:'f', cls:'dim'}, {from:'e', to:'c', cls:'dim', curve:0.25},
+      {from:'b', to:'f', cls:'dim', curve:0.25},
+    ],
+    caption: 'Schéma 3-opt dle slidu 30: okruh a→b→…→c→d→…→e→f→…→a, vyhozeny hrany (a,b), (c,d), (e,f).',
+  },
+  frames: [
+    {desc:'Výchozí okruh H = a→b→…→c→d→…→e→f→…→a. Vybraná podmnožina S = {(a,b), (c,d), (e,f)} — tři navzájem nesousední hrany.',
+     edges:{'a->b':'hl', 'b->x':'hl', 'x->c':'hl', 'c->d':'hl', 'd->y':'hl', 'y->e':'hl', 'e->f':'hl', 'f->z':'hl', 'z->a':'hl'}},
+    {desc:'Po vyhození S zbydou TŘI oblouky: (b,…,c), (d,…,e), (f,…,a) — šest volných konců. Rekonstrukcí je teď víc než jedna (slide 30: „at least two ways“).',
+     edges:{'a->b':'bad', 'c->d':'bad', 'e->f':'bad', 'b->x':'hl', 'x->c':'hl', 'd->y':'good', 'y->e':'good', 'f->z':'hl', 'z->a':'hl'},
+     nodes:{a:'hl', b:'hl', c:'hl', d:'hl', e:'hl', f:'hl'}},
+    {desc:'Rekonstrukce H′: vlož (a,d), (e,b), (c,f) → okruh a→d→…→e→b→…→c→f→…→a. Zisk = (a,d)+(e,b)+(c,f) − (a,b)−(c,d)−(e,f); ŽÁDNÝ oblouk nemění orientaci.',
+     edges:{'a->d':'good', 'e->b':'good', 'c->f':'good', 'b->x':'hl', 'x->c':'hl', 'd->y':'hl', 'y->e':'hl', 'f->z':'hl', 'z->a':'hl'}},
+    {desc:'Rekonstrukce H″: vlož (a,d), (e,c), (b,f) → okruh a→d→…→e→c→…→b→f→…→a. Zisk = (a,d)+(e,c)+(b,f) − (a,b)−(c,d)−(e,f); oblouk (c,…,b) ZMĚNIL orientaci. Vnitřní smyčka projde obě rekonstrukce a přijme první, která je ostře levnější.',
+     edges:{'a->d':'good', 'e->c':'good', 'b->f':'good', 'b->x':'hl', 'x->c':'hl', 'd->y':'hl', 'y->e':'hl', 'f->z':'hl', 'z->a':'hl'}},
+  ],
+});
+
+// ===== Viz 4: 4-opt double bridge (slide 31) =====
+KOViz.stepper(document.getElementById('viz-dbridge'), {
+  graph: {
+    nodes: [
+      {id:'a', x:320, y:50},
+      {id:'b', x:415, y:90},
+      {id:'c', x:455, y:185},
+      {id:'d', x:415, y:280},
+      {id:'e', x:320, y:320},
+      {id:'f', x:225, y:280},
+      {id:'g', x:185, y:185},
+      {id:'h', x:225, y:90},
+    ],
+    edges: [
+      {from:'a', to:'b'}, {from:'b', to:'c'}, {from:'c', to:'d'},
+      {from:'d', to:'e'}, {from:'e', to:'f'}, {from:'f', to:'g'},
+      {from:'g', to:'h'}, {from:'h', to:'a'},
+      {from:'a', to:'f', cls:'dim'}, {from:'g', to:'d', cls:'dim'},
+      {from:'e', to:'b', cls:'dim'}, {from:'c', to:'h', cls:'dim'},
+    ],
+    caption: 'Schéma 4-opt „double bridge“ dle slidu 31 (vrcholy a–h, oblouky mezi nimi zkráceny na hrany).',
+  },
+  frames: [
+    {desc:'Výchozí okruh H = a→b→c→d→e→f→g→h→a. Vybraná S = {(a,b), (c,d), (e,f), (g,h)} — čtyři hrany, zbydou čtyři oblouky (b,c), (d,e), (f,g), (h,a).',
+     edges:{'a->b':'hl', 'b->c':'hl', 'c->d':'hl', 'd->e':'hl', 'e->f':'hl', 'f->g':'hl', 'g->h':'hl', 'h->a':'hl'}},
+    {desc:'Po vyhození S: čtyři oblouky s osmi volnými konci. Rekonstrukcí je řada — slide 31 ukazuje jednu z nich.',
+     edges:{'a->b':'bad', 'c->d':'bad', 'e->f':'bad', 'g->h':'bad', 'b->c':'hl', 'd->e':'good', 'f->g':'hl', 'h->a':'good'}},
+    {desc:'„Double bridge“: vlož (a,f), (g,d), (e,b), (c,h) → okruh a→f…g→d…e→b…c→h…a. Oblouky se PŘESKLÁDAJÍ (prohodí se pořadí), ale žádný nemění orientaci — nové hrany tvoří dva křížící se „mosty“. Tah, který 2-opt ani 3-opt nenapodobí jedním krokem.',
+     edges:{'a->f':'good', 'g->d':'good', 'e->b':'good', 'c->h':'good', 'b->c':'hl', 'd->e':'hl', 'f->g':'hl', 'h->a':'hl'}},
+  ],
+});
+</script>
+</body>
+</html>
