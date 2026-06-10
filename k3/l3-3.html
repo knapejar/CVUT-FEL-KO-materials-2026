@@ -57,7 +57,7 @@
       <li><strong>Instance:</strong> Undirected graph $G$.</li>
       <li><strong>Goal:</strong> Decide if Hamiltonian circuit (circuit visiting every node exactly once) exists in graph $G$.</li>
     </ul>
-    <p>Slide dodává: <em>„The directed version of this problem is (<strong>Hamiltonian cycle</strong>) for a directed graph“</em> — terminologie kurzu: circuit neorientovaně, cycle orientovaně <a href="../k0/l0-3.html#takeaways">[L0.3]</a>.</p>
+    <p>Slide dodává: <em>„The directed version of this problem is: (<strong>Hamiltonian cycle</strong>) for a directed graph“</em> — terminologie kurzu: circuit neorientovaně, cycle orientovaně <a href="../k0/l0-3.html#takeaways">[L0.3]</a>.</p>
   </div>
 
   <p>Jméno nese po Williamu Rowanu Hamiltonovi: jeho <strong>Icosian game</strong> (Hamilton's puzzle) byla hra „najdi okružní cestu po hranách dvanáctistěnu“ — slide 14 ji ukazuje jako rovinný graf (pohled dovnitř dvanáctistěnu jednou z jeho dvanácti stěn). Jako všechna platónská tělesa dvanáctistěn Hamiltonovskou kružnici má. Vyzkoušej si hledání na menším grafu:</p>
@@ -295,7 +295,7 @@ KOViz.stepper(document.getElementById('viz-find'), {
   },
   frames: [
     {desc:'Zkus na papíře najít Hamiltonovskou kružnici: uzavřený okruh přes všech 6 vrcholů, každý právě jednou. (Pak teprve klikni na další krok.)'},
-    {desc:'Jedno z řešení: a–b–e–d–f–c–a. Každý vrchol právě jednou, 6 hran, uzavřeno. Odpověď rozhodovacího problému: ANO. Všimni si, že tři hrany (b–c, d–e, a–d) zůstaly nepoužité — kružnice nemusí použít všechny hrany.',
+    {desc:'Jedno z řešení: a–b–e–d–f–c–a. Každý vrchol právě jednou, 6 hran, uzavřeno. Odpověď rozhodovacího problému: ANO. Všimni si, že tři hrany (b–c, e–f, a–d) zůstaly nepoužité — kružnice nemusí použít všechny hrany.',
      nodes:{a:'good', b:'good', c:'good', d:'good', e:'good', f:'good'},
      edges:{'a->b':'good', 'b->e':'good', 'd->e':'good', 'f->d':'good', 'c->f':'good', 'c->a':'good'}},
   ],
@@ -369,7 +369,7 @@ KOViz.stepper(document.getElementById('viz-cert'), {
      nodes:{a:'good', b:'good'},
      edges:{'a->b':'good'},
      subs:{a:'1.', b:'2.', e:'3.', d:'4.', f:'5.', c:'6.'}},
-    {desc:'…a stejně dalších 4 dvojic: {b,e}, {e,d}, {d,f}, {f,c} — všechny jsou hrany grafu. Každý dotaz „je to hrana?“ je O(1) s maticí sousednosti. ✓',
+    {desc:'…a stejně tak u dalších 4 dvojic: {b,e}, {e,d}, {d,f}, {f,c} — všechny jsou hrany grafu. Každý dotaz „je to hrana?“ je O(1) s maticí sousednosti. ✓',
      nodes:{a:'good', b:'good', c:'good', d:'good', e:'good', f:'good'},
      edges:{'a->b':'good', 'b->e':'good', 'd->e':'good', 'f->d':'good', 'c->f':'good'},
      subs:{a:'1.', b:'2.', e:'3.', d:'4.', f:'5.', c:'6.'}},
