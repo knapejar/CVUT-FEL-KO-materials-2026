@@ -127,7 +127,7 @@
     </ul>
   </div>
 
-  <p>Čti ty pětice jako „rukopisy“: <strong>nejkratší cesta</strong> = pošli jedinou jednotku z $s$ ($b(s) = 1$) do $t$ ($b(t) = -1$) a plať za vzdálenost — nejlevnější doprava jednotky teče po nejkratší cestě (LP tu má celočíselné optimum díky TUM matici, viz <a href="../k3/l3-12.html#takeaways">[L3.12]</a>). <strong>Listonoš (Chinese postman)</strong> = cirkulace ($b \equiv 0$), ale dolní mez $l(e) = 1$ vynutí projet každou ulici aspoň jednou; z výsledného toku se pak skládá Eulerovský tah <a href="../k3/l3-8c.html#takeaways">[L3.8c]</a> — celou úlohu rozebereme v [L4.13].</p>
+  <p>Čti ty pětice jako „rukopisy“: <strong>nejkratší cesta</strong> = pošli jedinou jednotku z $s$ ($b(s) = 1$) do $t$ ($b(t) = -1$) a plať za vzdálenost — nejlevnější doprava jednotky teče po nejkratší cestě (LP tu má celočíselné optimum díky TUM matici, viz <a href="../k3/l3-12.html#takeaways">[L3.12]</a>). <strong>Listonoš (Chinese postman)</strong> = cirkulace ($b \equiv 0$), ale dolní mez $l(e) = 1$ vynutí projet každou ulici aspoň jednou; z výsledného toku se pak skládá Eulerovský tah <a href="../k3/l3-8c.html#takeaways">[L3.8c]</a> — celou úlohu rozebereme v <a href="../k4/l4-13.html">[L4.13]</a>.</p>
 
   <!-- ===== SEKCE 5: REZIDUÁLNÍ GRAF S CENAMI ===== -->
   <h2>Reziduální graf dostává ceny (slide 32)</h2>
@@ -232,7 +232,7 @@
           $$</p>
           <p><strong>(ii) Max flow → MCF.</strong> Add an edge from $t$ to $s$ with upper bound $\infty$ and cost $-1$; set the cost of every other edge to 0; set $b(v) = 0$ for all nodes including $s$ and $t$. The minimum cost circulation (its cost will be negative) maximizes the flow on the added edge — optimální cena je $-|f_{max}|$ a max flow přečteš jako tok na hraně $t \to s$.</p>
           <p><strong>(iii) Shortest path → MCF.</strong> Set $b(s) = 1$, $b(t) = -1$, $b(v) = 0$ for all $v \in V \setminus \{s, t\}$; set $l(e) = 0$, $u(e) = \infty$ and $c(e)$ equal to the edge weight for all $e \in E$. Vznikne (primární) LP formulace nejkratší cesty — jediná jednotka teče z $s$ do $t$ nejlevněji, tedy po nejkratší cestě; celočíselnost optima zaručuje totální unimodularita matice (<a href="../k3/l3-12.html#takeaways">[L3.12]</a>).</p>
-          <p><strong>Chinese postman → MCF.</strong> Set $b(v) = 0$ for all $v \in V$; set $l(e) = 1$, $u(e) = \infty$ and $c(e)$ equal to the edge weight for all $e \in E$. Cirkulace s $l = 1$ projede každou hranu aspoň jednou; $f(e)$ říká, kolikrát se hrana projede, a trasa se z toku složí jako Eulerovský tah v multigrafu s $f(e)$ kopiemi hran (<a href="../k3/l3-8c.html#takeaways">[L3.8c]</a>; detailně [L4.13]).</p>
+          <p><strong>Chinese postman → MCF.</strong> Set $b(v) = 0$ for all $v \in V$; set $l(e) = 1$, $u(e) = \infty$ and $c(e)$ equal to the edge weight for all $e \in E$. Cirkulace s $l = 1$ projede každou hranu aspoň jednou; $f(e)$ říká, kolikrát se hrana projede, a trasa se z toku složí jako Eulerovský tah v multigrafu s $f(e)$ kopiemi hran (<a href="../k3/l3-8c.html#takeaways">[L3.8c]</a>; detailně <a href="../k4/l4-13.html">[L4.13]</a>).</p>
         </div>
       </details>
     </div>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L4.13 · Directed Chinese Postman jako MCF [NICE] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k4">K4 · Toky a řezy</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L4.13</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L4.13</span> Kapitola K4 — Toky a řezy (Slot 4) · <strong>[NICE]</strong>
+  </p>
+  <h1>Directed Chinese Postman jako MCF</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Directed Chinese postman problem</strong> (směrovaný problém čínského pošťáka) — projet každou orientovanou hranu aspoň jednou a vrátit se na start — je <strong>minimum cost flow</strong> <a href="l4-10.html#takeaways">[L4.10]</a>: cirkulace s $b \equiv 0$ a dolními mezemi $l(e) = 1$. Nevyvážené vrcholy ($\delta^+ \ne \delta^-$) říkají, <em>kde</em> se hrany musí duplikovat, a z optimálního toku se trasa složí jako Eulerovský tah <a href="../k3/l3-8c.html#takeaways">[L3.8c]</a>.
+  </div>
+
+  <p>V <a href="l4-10.html#takeaways">[L4.10]</a> jsme listonoše slíbili jako třetí „rukopis“ MCF (po max flow a nejkratší cestě) — dnes ten slib splníme. Je to <em>formulační</em> úloha: u zkoušky se nechce běh algoritmu, ale přesný převod na MCF a věta o tom, jak se z toku poskládá trasa. Obě ingredience už znáš: pětici $(G, l, u, c, b)$ z <a href="l4-10.html#takeaways">[L4.10]</a> a Eulerovský tah z <a href="../k3/l3-8c.html#takeaways">[L3.8c]</a>.</p>
+
+  <!-- ===== SEKCE 1: ÚLOHA ===== -->
+  <h2>Úloha: projet každou ulici (zadání 1:1)</h2>
+
+  <div class="box">
+    <div class="box-title">Zkouška KO_09_07_2021 — Directed Chinese Postman Problem, 1:1</div>
+    <p><em>Leaving from their post office, a postal carrier needs to pass every street in the given direction, delivering and collecting letters, and then returning to the post office. The carrier would like to cover this route by traveling the minimum possible distance.</em></p>
+    <p><em>Formally, given a directed graph $G = (V, E)$, where each edge $(i, j)$ has an associated nonnegative length $c_{ij}$, we wish to find an edge progression of minimum length that starts at some node (the post office), visits each arc of the graph at least once, and returns to the starting node.</em></p>
+  </div>
+
+  <p>Klíčové slovo je <strong>edge progression</strong> (sled hran): hledáme <em>uzavřený sled</em> — posloupnost na sebe navazujících orientovaných hran, která se vrátí do startu. Vrcholy i hrany se ve sledu <em>smějí opakovat</em> (na rozdíl od cesty) — pošťák klidně projde křižovatkou pětkrát, jen ho každý metr navíc stojí čas.</p>
+
+  <details class="try">
+    <summary>Zkus sám: „projdi všechno a vrať se s minimální délkou“ — to zní skoro jako TSP <a href="../k3/l3-4.html#takeaways">[L3.4]</a>. V čem se pošťák od obchodního cestujícího liší a proč je ten rozdíl tak zásadní?</summary>
+    <div class="inner">
+      <p>TSP chce navštívit každý <em>vrchol</em> (právě jednou — Hamiltonovský okruh <a href="../k3/l3-3.html#takeaways">[L3.3]</a>), pošťák chce projet každou <em>hranu</em> (aspoň jednou — Eulerovský motiv <a href="../k3/l3-8c.html#takeaways">[L3.8c]</a>). A ten rozdíl je propastný: TSP je silně NP-těžký <a href="../k3/l3-5.html#takeaways">[L3.5]</a>, kdežto směrovaný pošťák se převede na MCF a vyřeší <strong>polynomiálně</strong>. Stejná rétorika zadání, opačný svět složitosti — pamatuj si: <em>vrcholy = Hamilton = těžké, hrany = Euler = lehké</em>.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: kdy má pošťák úplné štěstí — kdy existuje trasa, která projede každou ulici <em>právě</em> jednou (nic se neopakuje)?</summary>
+    <div class="inner">
+      <p>Přesně tehdy, když je graf <strong>eulerovský digraf</strong>: v každém vrcholu se počet výstupních hran rovná počtu vstupních, $|\delta^+(v)| = |\delta^-(v)|$. Je to směrovaná obdoba podmínky „všechny stupně sudé“ z <a href="../k3/l3-8c.html#takeaways">[L3.8c]</a>: kolikrát do křižovatky vjedeš, tolikrát z ní musíš vyjet — a každý vjezd i výjezd spotřebuje jednu dosud neprojetou hranu. Slide 30 to říká doslova (viz box níže). Jakmile je někde $\delta^+ \ne \delta^-$, některé ulice se <em>musí</em> jet vícekrát — a otázka zní, <em>které</em> a <em>kolikrát</em>, aby délka navíc byla minimální. Přesně tohle za nás rozhodne MCF.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: FORMULACE ===== -->
+  <h2>Formulace jako minimum cost flow</h2>
+
+  <details class="try">
+    <summary>Zkus sám: navrhni pětici $(G, l, u, c, b)$ z <a href="l4-10.html#takeaways">[L4.10]</a> sám. Nápověda: co znamená proměnná $f(e)$? Proč úloha nemá žádný zdroj ani spotřebič? A jak vynutíš „každou ulici aspoň jednou“?</summary>
+    <div class="inner">
+      <p>Nech graf $G$ i ceny tak, jak jsou, a čti $f(e)$ jako <strong>počet průjezdů hranou $e$</strong>. ① Trasa je <em>uzavřená</em> — do každé křižovatky pošťák tolikrát vjede, kolikrát vyjede — takže platí čistý Kirchhoff <a href="l4-1.html#takeaways">[L4.1]</a> bez bilancí: $b(v) = 0$ pro všechny vrcholy, je to <strong>cirkulace</strong>. ② „Každou ulici aspoň jednou“ = dolní mez $l(e) = 1$; shora nic neomezuje, $u(e) = \infty$. ③ Cena $c(e)$ = délka ulice, minimalizujeme $\sum_e c(e) f(e)$ = celkovou ujetou vzdálenost. Žádná konstrukce pomocných uzlů — síť je město samo.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 30 (04_Flows) — Chinese Postman → Min-Cost Flow, 1:1</div>
+    <p><em>The <strong>Chinese Postman Problem</strong> (A postman has to deliver the mail within his district given by strongly connected directed graph. To do this, he must start at the post office, go along each street at least once, and finally return to the post office. The problem is to find a postman's tour of minimum length.) can be reduced to the Min-Cost Flow:</em></p>
+    <ul>
+      <li><em>Set $b(v) = 0 \ \forall v \in V$.</em></li>
+      <li><em>Set $l(e) = 1$, $u(e) = \infty$ and $c(e)$ is weight of edge $\forall e \in E$.</em></li>
+    </ul>
+    <p><em>There is a closed postman's tour using each edge exactly once (i.e., <strong>Eulerian walk</strong> which is a closed walk containing every edge) iff every vertex has equal indegree and outdegree (i.e. <strong>Eulerian digraph</strong>).</em></p>
+  </div>
+
+  <p>Zapsáno jako model (vzorové řešení zkoušky používá $x_{ij}$ = <em>number of times arc $(i,j)$ is traversed</em>):</p>
+
+  <p>$$\min \sum_{(i,j) \in E} c_{ij} x_{ij} \quad \text{s.t.} \quad \sum_{(v,j) \in E} x_{vj} - \sum_{(i,v) \in E} x_{iv} = 0 \;\; \forall v \in V, \qquad 1 \le x_{ij} \le \infty, \;\; x_{ij} \in \mathbb{Z}.$$</p>
+
+  <p>Celočíselnost přitom dostaneš zadarmo: meze i bilance jsou celočíselné, takže existuje celočíselné optimum (Integral Flow Theorem, citovali jsme ho v <a href="l4-5.html#takeaways">[L4.5]</a>) — a cycle canceling <a href="l4-11.html#takeaways">[L4.11]</a> ho najde sám, protože startuje z celočíselného toku a augmentuje o celá $\gamma$. „Počet průjezdů“ tedy vyjde jako pořádné celé číslo, ne $1{,}5$ průjezdu.</p>
+
+  <!-- ===== SEKCE 3: KUDY TEČOU DUPLIKACE ===== -->
+  <h2>Kudy tečou duplikace: nevyvážené vrcholy</h2>
+
+  <details class="try">
+    <summary>Zkus sám: substituuj $y(e) = f(e) - 1 \ge 0$ („kolikrát <em>navíc</em> hranu jedu“) a dosaď do Kirchhoffa $\sum_{e \in \delta^+(v)} f(e) - \sum_{e \in \delta^-(v)} f(e) = 0$. Jaká bilanční rovnice vyjde pro $y$ — a co říká o vrcholech s $\delta^+ \ne \delta^-$?</summary>
+    <div class="inner">
+      <p>Dosazení $f = 1 + y$ dá $\sum_{\delta^+(v)} y - \sum_{\delta^-(v)} y = |\delta^-(v)| - |\delta^+(v)|$. Duplikační tok $y$ je tedy <em>obyčejný MCF s bilancemi</em> $b_y(v) = |\delta^-(v)| - |\delta^+(v)|$ (rozepsání je naše — slidy uvádějí jen cirkulační tvar, oba modely jsou ale ekvivalentní): vrchol s <strong>přebytkem vstupů</strong> ($\delta^- &gt; \delta^+$) je <strong>zdrojem duplikací</strong> — pošťák tam vjede vícekrát, než má kudy vyjet, takže nějaký výjezd musí zopakovat; vrchol s přebytkem výstupů je <strong>spotřebičem</strong> — musí se do něj vracet. Vyvážené vrcholy mají $b_y = 0$ a duplikace jimi jen protékají. MCF pak pošle duplikace z přebytkových do deficitních vrcholů <em>po nejlevnějších cestách</em> — to je celé kouzlo.</p>
+    </div>
+  </details>
+
+  <p>To je přesně intuice „vyvážení stupňů“: úloha se ptá, jak <em>nejlevněji dorovnat</em> $\delta^+ = \delta^-$ všude — a dorovnání se kupuje opakovanými průjezdy existujících ulic.</p>
+
+  <!-- ===== SEKCE 4: PŘÍKLAD ===== -->
+  <h2>Příklad od začátku do konce</h2>
+
+  <p>Zkouškové zadání žádný konkrétní graf nedává (je formulační) — následující čtyřvrcholová instance je naše vlastní, abychom celý řetěz <em>audit stupňů → MCF → Eulerovský tah</em> viděli na číslech:</p>
+
+  <div class="viz" id="viz-instance"></div>
+
+  <details class="try">
+    <summary>Zkus sám: udělej audit stupňů. Které vrcholy jsou nevyvážené, kdo je zdroj a kdo spotřebič duplikací — a kudy duplikace poteče?</summary>
+    <div class="inner">
+      <p>$P$: $\delta^+ = 1$, $\delta^- = 1$ ✓; $B$: $1 = 1$ ✓. <strong>$A$: $\delta^- = 2$ (z $P$ a z $C$), ale $\delta^+ = 1$</strong> → přebytek vstupů, $b_y(A) = +1$, zdroj duplikace. <strong>$C$: $\delta^+ = 2$, $\delta^- = 1$</strong> → $b_y(C) = -1$, spotřebič. Jedna jednotka duplikací musí téct z $A$ do $C$; jediná (a tedy nejlevnější) cesta je $A \to B \to C$ za $1 + 2 = 3$. Výsledek: $f(A{\to}B) = f(B{\to}C) = 2$, jinde $f = 1$, cena $\sum c \cdot f = 7 + 3 = 10$.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: z $C$ vede do $A$ hrana $C \to A$ za 1 — proč se pošťák nemůže z $C$ prostě „vrátit“ po hraně $B \to C$ zpátky do $B$, když už tam jednou jel?</summary>
+    <div class="inner">
+      <p>Protože hrana $B \to C$ je <strong>orientovaná</strong> — projet se dá jen po směru (zadání: <em>„pass every street in the given direction“</em>). V tom je celé „directed“: opakované průjezdy se smí kupovat jen u existujících šipek, couvat nelze. (A pozor na záměnu: hrana $C \to A$ pošťákovi s duplikací nepomůže — ta teče z $A$ <em>do</em> $C$, v protisměru k ní.) Proto duplikace musí objet $A \to B \to C$, i když „vzdušnou čarou“ proti šipce by to bylo kratší.</p>
+    </div>
+  </details>
+
+  <p>Celý řetěz krok za krokem:</p>
+
+  <div class="viz" id="viz-pipeline"></div>
+
+  <!-- ===== SEKCE 5: Z TOKU NA TRASU ===== -->
+  <h2>Z toku na trasu: Eulerovský tah v multigrafu</h2>
+
+  <p>Druhá půlka zkouškové otázky zní <em>„describe how to obtain the minimum-length edge progression from the minimum-cost flow“</em>. Vzorové řešení (banka #25, 1:1):</p>
+
+  <div class="box">
+    <div class="box-title">Banka #25 — Recovering the route, 1:1</div>
+    <p><em>After solving, construct a directed multigraph containing $x_{ij}$ copies of every arc $(i, j)$. Since flow conservation gives $\text{outdegree}(v) = \text{indegree}(v)$ for all $v$, the multigraph is balanced. If the original graph is strongly connected, the multigraph has an Eulerian closed walk. This Eulerian walk is the required postman route.</em></p>
+    <p><em>There is no source or sink, because the route must be closed.</em></p>
+  </div>
+
+  <p>Tah pak sestavíš Hierholzerovým skládáním okruhů, které znáš z <a href="../k3/l3-8c.html#takeaways">[L3.8c]</a> — jen místo „sudé stupně“ hlídáš $\delta^+ = \delta^-$ (což ti Kirchhoff zaručil za odměnu zadarmo). Délka tahu = projde každou kopii hrany právě jednou = $\sum_e c(e) f(e)$ = cena toku, takže trasa je opravdu minimální.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
+    <p><strong>1) Bez $l(e) = 1$ se to rozpadne:</strong> s $l = 0$ je nejlevnější cirkulace nulový tok za 0 — pošťák zůstane doma. „Aspoň jednou“ kóduje právě dolní mez.
+    <strong>2) Žádný zdroj a spotřebič:</strong> $b(v) = 0$ všude — trasa je uzavřená. Kdo přidá $s$ a $t$, modeluje jinou úlohu (otevřenou trasu).
+    <strong>3) $f(e)$ není 0/1:</strong> je to <em>počet průjezdů</em>, proto $u(e) = \infty$; duplikace = $f(e) - 1$. Neplést s párovacími sítěmi z <a href="l4-12.html#takeaways">[L4.12]</a>, kde kapacita 1 byla podstatná.
+    <strong>4) Potřebuješ silnou souvislost</strong> (slide ji předpokládá: <em>„district given by strongly connected directed graph“</em>) — jinak se z některé ulice nelze vrátit a přípustná cirkulace s $l = 1$ vůbec neexistuje.
+    <strong>5) Tohle je <em>směrovaná</em> verze.</strong> Neorientovaný čínský pošťák je jiná úloha (řeší se párováním vrcholů lichého stupně) a tahle redukce se na ni 1:1 použít nedá — u zkoušky si v zadání všimni <em>„in the given direction“</em>.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.13</div>
+    <ul>
+      <li><strong>Directed Chinese postman:</strong> uzavřený sled (edge progression) minimální délky, který projede každou orientovanou hranu ≥1×. Bez opakování to jde právě tehdy, když je graf eulerovský digraf: $|\delta^+(v)| = |\delta^-(v)|$ všude (směrovaná obdoba <a href="../k3/l3-8c.html#takeaways">[L3.8c]</a>).</li>
+      <li><strong>Redukce na MCF (slide 30):</strong> $b(v) = 0$ pro všechny vrcholy (cirkulace, žádný zdroj/spotřebič), $l(e) = 1$, $u(e) = \infty$, $c(e)$ = délka; $f(e)$ = počet průjezdů hranou. Celočíselnost zadarmo (Integral Flow Theorem <a href="l4-5.html#takeaways">[L4.5]</a>).</li>
+      <li><strong>Substituce $y = f - 1$:</strong> duplikace jsou MCF s bilancemi $b_y(v) = |\delta^-(v)| - |\delta^+(v)|$ — nevyvážené vrcholy jsou zdroje (přebytek vstupů) a spotřebiče (přebytek výstupů) duplikací; MCF je propojí nejlevnějšími cestami.</li>
+      <li><strong>Z toku na trasu:</strong> multigraf s $f(e)$ kopiemi hran je díky Kirchhoffovi vyvážený; je-li $G$ silně souvislý, existuje v něm uzavřený Eulerovský tah <a href="../k3/l3-8c.html#takeaways">[L3.8c]</a> = hledaná trasa o délce $\sum_e c(e) f(e)$.</li>
+      <li><strong>Hrany = Euler = polynomiální</strong> (MCF + cycle canceling <a href="l4-11.html#takeaways">[L4.11]</a>); vrcholy = Hamilton/TSP = NP-těžké <a href="../k3/l3-5.html#takeaways">[L3.5]</a>.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-postman">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Directed Chinese Postman Problem — formulace jako MCF</strong>
+      <span class="task-src">zdroj: zkouška KO_09_07_2021 (= banka #25), EN 1:1</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN 1:1)</span>
+        <p><em>Leaving from their post office, a postal carrier needs to pass every street in the given direction, delivering and collecting letters, and then returning to the post office. The carrier would like to cover this route by traveling the minimum possible distance.</em></p>
+        <p><em>Formally, given a directed graph $G = (V, E)$, where each edge $(i, j)$ has an associated nonnegative length $c_{ij}$, we wish to find an edge progression of minimum length that starts at some node (the post office), visits each arc of the graph at least once, and returns to the starting node. Formulate as a minimum cost flow problem and describe how to obtain the minimum-length edge progression from the minimum-cost flow.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Dvě explicitní odevzdávky: ① <strong>formulace</strong> — zapsat pošťáka jako MCF (proměnné, účelová funkce, Kirchhoff, meze, bilance); ② <strong>rekonstrukce</strong> — slovně popsat, jak se z optimálního toku dostane trasa. Žádný konkrétní graf, žádný výpočet — je to „papírová“ formulační úloha.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — celá (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-10.html#takeaways">[L4.10] Minimum Cost Flow + reziduální graf s cenami</a> — pětice $(G, l, u, c, b)$ a LP tvar.</li>
+        <li><a href="../k3/l3-8c.html#takeaways">[L3.8c] Eulerovský tah a zdvojení hran</a> — proč vyváženost ⟹ uzavřený tah.</li>
+        <li><a href="l4-11.html#takeaways">[L4.11] Cycle canceling</a> — kdyby padla doplňující otázka „a jak ten MCF vyřešíš?“.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Začni významem proměnné: $x_{ij}$ = kolikrát hranou projedu. Pak tři rozhodnutí, každé s jednou větou zdůvodnění: uzavřená trasa ⟹ čistý Kirchhoff a $b \equiv 0$ (žádný zdroj/spotřebič); „aspoň jednou“ ⟹ $l = 1$; nic neomezuje shora ⟹ $u = \infty$. U rekonstrukce nezapomeň na <em>obě</em> podmínky existence tahu: vyváženost (dá Kirchhoff) <em>a</em> silnou souvislost (předpoklad zadání) — a na větu, proč je délka tahu rovna ceně toku.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle vzorového řešení banky #25)</summary>
+        <div class="inner">
+          <p><strong>① Model (minimum-cost circulation).</strong> Proměnná $x_{ij} \in \mathbb{Z}$ = počet průjezdů hranou $(i,j)$:</p>
+          <p>$$\min \sum_{(i,j)\in E} c_{ij} x_{ij}$$</p>
+          <p>za podmínek zachování toku v každém vrcholu a dolních mezí:</p>
+          <p>$$\sum_{(v,j)\in E} x_{vj} - \sum_{(i,v)\in E} x_{iv} = 0 \quad \forall v \in V, \qquad 1 \le x_{ij} \le \infty.$$</p>
+          <p>Je to minimum cost flow (cirkulace) s $b(v) = 0$ pro všechna $v$, $l(e) = 1$, $u(e) = \infty$ a cenami $c$. Zdroj ani spotřebič neexistují, protože trasa musí být uzavřená. Meze a bilance jsou celočíselné ⟹ existuje celočíselné optimum (<a href="l4-5.html#takeaways">[L4.5]</a>).</p>
+          <p><strong>② Rekonstrukce trasy.</strong> Z optimálního toku postav orientovaný multigraf s $x_{ij}$ kopiemi každé hrany $(i, j)$. Kirchhoff dává $\text{outdegree}(v) = \text{indegree}(v)$ pro všechna $v$, multigraf je tedy vyvážený; je-li původní graf silně souvislý, má multigraf uzavřený Eulerovský tah (<a href="../k3/l3-8c.html#takeaways">[L3.8c]</a>, směrovaná verze). Tento Eulerovský tah je hledaná trasa pošťáka: projede každou kopii hrany právě jednou, tedy každou hranu $(i,j)$ právě $x_{ij} \ge 1$ krát, a jeho délka je $\sum c_{ij} x_{ij}$ = cena toku ⟹ minimální.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-postmandrill">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Postman drill — audit stupňů, MCF, trasa</strong>
+      <span class="task-src">zdroj: VLASTNÍ procvičovací instance (zkouškové zadání graf nedává)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, vlastní — přiznáno)</span>
+        <p><em>The figure shows the street network of a district as a directed graph $G$; the label of each arc is its length. The postman starts at node 1 (the post office), must traverse every arc at least once in its direction, and return to node 1.</em></p>
+        <p><em>(i) Decide whether the postman can cover the district without traversing any arc twice. (ii) Formulate the problem as a minimum cost flow problem. (iii) Find the optimal flow and the minimum route length. (iv) Write down one minimum-length postman route.</em></p>
+      </div>
+
+      <div class="viz" id="viz-drill"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Konkrétní město na 6 křižovatkách a 9 jednosměrkách. Postupně: rozhodnout existenci tahu bez opakování (i), zformulovat MCF (ii), najít optimum (iii) a vypsat trasu (iv) — přesně řetěz z lekce.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — audit stupňů, formulace, rekonstrukce (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-10.html#takeaways">[L4.10]</a> — pětice MCF.</li>
+        <li><a href="../k3/l3-8c.html#takeaways">[L3.8c]</a> — skládání Eulerovského tahu.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(i) je čistý audit: spočítej $\delta^+$ a $\delta^-$ každého vrcholu. (iii) nemusíš řešit cycle cancelingem od nuly — najdi nevyvážené vrcholy a uvědom si, že duplikace = jednotka toku ze zdroje duplikací do spotřebiče po <em>nejlevnější cestě</em>; tady se nabízejí dvě konkurenční cesty, porovnej je. (iv) slep tah Hierholzerem: jeď okruh, a kdykoli projíždíš vrcholem s nevyčerpanými kopiemi, vlož boční okruh.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
+        <div class="inner">
+          <p><strong>(i) Ne.</strong> Audit stupňů: vrchol 1 má $\delta^+ = 2$ (hrany do 2, 3), ale $\delta^- = 3$ (z 4, 5, 6); vrchol 4 má $\delta^+ = 3$ (do 1, 5, 6), ale $\delta^- = 2$ (z 2, 3). Vrcholy 2, 3, 5, 6 jsou vyvážené ($1 = 1$). Graf není eulerovský digraf ⟹ bez opakování to nejde.</p>
+          <p><strong>(ii)</strong> $f(e)$ = počet průjezdů hranou $e$; minimalizuj $\sum_e c(e) f(e)$ při Kirchhoffovi $\sum_{\delta^+(v)} f - \sum_{\delta^-(v)} f = 0$ $\forall v$ a mezích $1 \le f(e) \le \infty$, $f(e) \in \mathbb{Z}$ — tedy MCF s $b \equiv 0$, $l = 1$, $u = \infty$.</p>
+          <p><strong>(iii)</strong> Duplikace $y = f - 1$: bilance $b_y(v) = |\delta^-| - |\delta^+|$ dávají $b_y(1) = +1$ (zdroj), $b_y(4) = -1$ (spotřebič), jinde 0. Jedna jednotka z 1 do 4: cesta $1 \to 2 \to 4$ stojí $1 + 1 = 2$, cesta $1 \to 3 \to 4$ stojí $3 + 2 = 5$ ⟹ MCF vybere levnější. Optimum: $f(1{\to}2) = f(2{\to}4) = 2$, ostatních sedm hran $f = 1$. Délka $= \sum_e c(e) + 2 = 14 + 2 = \mathbf{16}$. (Kontrola optimality: v $G_f$ jsou zpětné hrany $2 \to 1$ za $-1$ a $4 \to 2$ za $-1$; každý cyklus s nimi má cenu $\ge 0$ — např. $1 \to 3 \to 4 \to 2 \to 1$ stojí $3 + 2 - 1 - 1 = +3$ — žádný záporný cyklus, tok je optimální <a href="l4-11.html#takeaways">[L4.11]</a>.)</p>
+          <p><strong>(iv)</strong> Multigraf = graf + druhé kopie hran $1 \to 2$ a $2 \to 4$; všechny vrcholy vyvážené (1 i 4 mají $\delta^+ = \delta^- = 3$). Jeden Eulerovský tah z pošty:</p>
+          <p>$$1 \to 2 \to 4 \to 5 \to 1 \to 3 \to 4 \to 6 \to 1 \to 2 \to 4 \to 1$$</p>
+          <p>s délkou $1 + 1 + 1 + 1 + 3 + 2 + 2 + 1 + 1 + 1 + 2 = 16$. Každá šipka projeta aspoň jednou ($1{\to}2$ a $2{\to}4$ přesně dvakrát), start i cíl v uzlu 1. ✓</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L4.13">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k4/l4-12.html"><span class="dir">← Předchozí</span> L4.12 · Assignment problem přes MCF + min-weight perfect matching</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.14 · Max flow s logickými omezeními (ILP))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// 1 — Statická instance (VLASTNÍ): město na 4 křižovatkách, popisek hrany = délka c(e)
+KOViz.graph(document.getElementById('viz-instance'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'P', x:80,  y:180, label:'P', sub:'pošta'},
+    {id:'A', x:320, y:60,  label:'A'},
+    {id:'B', x:560, y:180, label:'B'},
+    {id:'C', x:320, y:300, label:'C'},
+  ],
+  edges: [
+    {from:'P', to:'A', label:'c = 2'},
+    {from:'A', to:'B', label:'c = 1'},
+    {from:'B', to:'C', label:'c = 2'},
+    {from:'C', to:'P', label:'c = 1'},
+    {from:'C', to:'A', label:'c = 1'},
+  ],
+  caption: 'Vlastní instance: pošťák startuje na poště P, musí projet každou šipku aspoň jednou po směru a vrátit se do P. Popisek hrany = délka c(e). Součet všech délek je 7 — ale bez opakování se trasa složit nedá (zkus audit stupňů v try výše).',
+});
+
+// 2 — HLAVNÍ STEPPER: celý řetěz audit stupňů → MCF → optimální cirkulace → multigraf → Eulerovský tah
+// Frames = ABSOLUTNÍ stavy.
+KOViz.stepper(document.getElementById('viz-pipeline'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'P', x:80,  y:180, label:'P'},
+      {id:'A', x:320, y:60,  label:'A'},
+      {id:'B', x:560, y:180, label:'B'},
+      {id:'C', x:320, y:300, label:'C'},
+    ],
+    edges: [
+      {from:'P', to:'A', label:'c = 2'},
+      {from:'A', to:'B', label:'c = 1'},
+      {from:'B', to:'C', label:'c = 2'},
+      {from:'C', to:'P', label:'c = 1'},
+      {from:'C', to:'A', label:'c = 1'},
+    ],
+  },
+  frames: [
+    {desc:'Zadání: z pošty P projet každou šipku aspoň jednou v jejím směru a vrátit se do P, ujet co nejméně. Popisek hrany = délka c(e). Dá se to bez opakování?',
+     nodes:{'P':'hl'}, edges:{}, subs:{'P':'pošta'}},
+    {desc:'Audit stupňů: A má dva vstupy (z P a z C), ale jediný výstup — pošťák tam podruhé přijede a nemá kudy nově odjet. C má naopak dva výstupy a jediný vstup. Graf NENÍ eulerovský digraf → některé ulice se pojedou vícekrát. A je zdroj duplikací (b_y = +1), C spotřebič (b_y = −1).',
+     nodes:{'A':'bad', 'C':'bad'}, edges:{},
+     subs:{'P':'δ⁺=1, δ⁻=1 ✓', 'A':'δ⁺=1, δ⁻=2 ✗', 'B':'δ⁺=1, δ⁻=1 ✓', 'C':'δ⁺=2, δ⁻=1 ✗'}},
+    {desc:'Formulace MCF (slide 30): f(e) = počet průjezdů; b(v) = 0 všude (uzavřená trasa = cirkulace, žádný zdroj/spotřebič), dolní mez l(e) = 1 vynutí „aspoň jednou“, u(e) = ∞, cena = délka. Minimalizujeme Σ c(e)·f(e).',
+     nodes:{}, edges:{},
+     labels:{'P->A':'1 ≤ f ≤ ∞ | c=2', 'A->B':'1 ≤ f ≤ ∞ | c=1', 'B->C':'1 ≤ f ≤ ∞ | c=2', 'C->P':'1 ≤ f ≤ ∞ | c=1', 'C->A':'1 ≤ f ≤ ∞ | c=1'}},
+    {desc:'Optimální cirkulace (spočetl by ji cycle canceling [L4.11]): f(A→B) = f(B→C) = 2, jinde f = 1. Duplikace y = f − 1 teče z A do C po jediné cestě A→B→C za 1 + 2 = 3. Cena Σ c·f = 2 + 2 + 4 + 1 + 1 = 10. Certifikát optimality: v G_f není záporný cyklus (B→A: −1 plus A→B: +1 dává 0; C→B: −2 plus B→C: +2 dává 0).',
+     nodes:{}, edges:{'A->B':'good', 'B->C':'good'},
+     labels:{'P->A':'f = 1', 'A->B':'f = 2', 'B->C':'f = 2', 'C->P':'f = 1', 'C->A':'f = 1'}},
+    {desc:'Multigraf: f(e) kopií každé hrany (A→B a B→C dvojmo). Kirchhoff zaručuje δ⁺ = δ⁻ v každém vrcholu → vyvážený (eulerovský) digraf; původní graf je silně souvislý → uzavřený Eulerovský tah existuje [L3.8c].',
+     nodes:{'P':'good', 'A':'good', 'B':'good', 'C':'good'},
+     edges:{'A->B':'good', 'B->C':'good'},
+     labels:{'P->A':'f = 1', 'A->B':'f = 2', 'B->C':'f = 2', 'C->P':'f = 1', 'C->A':'f = 1'},
+     subs:{'P':'δ⁺=1=δ⁻ ✓', 'A':'δ⁺=2=δ⁻ ✓', 'B':'δ⁺=2=δ⁻ ✓', 'C':'δ⁺=2=δ⁻ ✓'}},
+    {desc:'Skládání tahu (Hierholzer [L3.8c]): z P jeď P→A→B→C→A (kroky ①–④). V A jsi zpět a zbývá nevyčerpaná druhá kopie A→B — tah pokračuje, nic se nezasekne, protože multigraf je vyvážený.',
+     nodes:{'A':'hl'}, edges:{'P->A':'hl', 'A->B':'hl', 'B->C':'hl', 'C->A':'hl'},
+     labels:{'P->A':'①', 'A->B':'②', 'B->C':'③', 'C->A':'④'}},
+    {desc:'Hotová trasa: P→A→B→C→A→B→C→P (druhé kopie A→B a B→C jako kroky ⑤ a ⑥). Délka 2+1+2+1+1+2+1 = 10 = cena toku — minimum. Každá šipka projeta aspoň jednou, A→B a B→C přesně dvakrát.',
+     nodes:{'P':'good'}, edges:{'P->A':'good', 'A->B':'good', 'B->C':'good', 'C->A':'good', 'C->P':'good'},
+     labels:{'P->A':'①', 'A->B':'② a ⑤', 'B->C':'③ a ⑥', 'C->A':'④', 'C->P':'⑦'}},
+  ],
+  caption: 'Celý řetěz na vlastní instanci: audit stupňů → MCF cirkulace s l = 1 → optimální f → multigraf s f(e) kopiemi → Eulerovský tah délky 10. Kroužkovaná čísla = pořadí hran v tahu (hrana s f = 2 má dvě pořadí).',
+});
+
+// 3 — T02: vlastní drill instance (6 křižovatek, 9 jednosměrek)
+KOViz.graph(document.getElementById('viz-drill'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'1', x:80,  y:180, label:'1', sub:'pošta'},
+    {id:'2', x:250, y:60,  label:'2'},
+    {id:'3', x:250, y:300, label:'3'},
+    {id:'4', x:420, y:180, label:'4'},
+    {id:'5', x:560, y:60,  label:'5'},
+    {id:'6', x:560, y:300, label:'6'},
+  ],
+  edges: [
+    {from:'1', to:'2', label:'1'},
+    {from:'2', to:'4', label:'1'},
+    {from:'1', to:'3', label:'3'},
+    {from:'3', to:'4', label:'2'},
+    {from:'4', to:'1', label:'2'},
+    {from:'4', to:'5', label:'1'},
+    {from:'5', to:'1', label:'1', curve:0.3},
+    {from:'4', to:'6', label:'2'},
+    {from:'6', to:'1', label:'1', curve:-0.3},
+  ],
+  caption: 'T02: jednosměrky města, popisek hrany = délka. Pošta = uzel 1. Dvě konkurenční cesty z 1 do 4: přes 2 (1+1 = 2) a přes 3 (3+2 = 5).',
+});
+</script>
+</body>
+</html>
