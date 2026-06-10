@@ -127,7 +127,7 @@
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: celý trik stojí a padá s pmtn</div>
-    <p>Tok rozhoduje feasibilitu <strong>preemptivní</strong> verze problému. Jakmile $\beta$ preempci nepovoluje, množstevní pohled se rozbije (úloha musí běžet vcelku — tok neumí říct „vcelku“) a problém tvrdne: už jednostrojové nepreemptivní $1 \mid r_j, \tilde{d}_j \mid C_{max}$ je silně NP-těžké a řeší se úplně jinak (Bratleyho branch &amp; bound — lekce [L5.9]). Než začneš kreslit síť, zkontroluj v notaci, že tam <em>pmtn</em> opravdu je.</p>
+    <p>Tok rozhoduje feasibilitu <strong>preemptivní</strong> verze problému. Jakmile $\beta$ preempci nepovoluje, množstevní pohled se rozbije (úloha musí běžet vcelku — tok neumí říct „vcelku“) a problém tvrdne: už jednostrojové nepreemptivní $1 \mid r_j, \tilde{d}_j \mid C_{max}$ je silně NP-těžké a řeší se úplně jinak (Bratleyho branch &amp; bound — lekce <a href="../k5/l5-9.html">[L5.9]</a>). Než začneš kreslit síť, zkontroluj v notaci, že tam <em>pmtn</em> opravdu je.</p>
   </div>
 
   <!-- ===== KROK 4 ===== -->
@@ -159,7 +159,7 @@
       <li><strong>Síť:</strong> $s \to$ úloha (kapacita $p_j$) $\to$ interval, kde úloha smí běžet, tj. $\langle x,y\rangle \subseteq \langle r_j,\tilde d_j\rangle$ (kapacita = délka $y-x$, úloha je sekvenční!) $\to t$ (kapacita délka $\cdot R$).</li>
       <li><strong>Feasibilita = nasycení všech hran ze zdroje:</strong> $|f| = \sum_j p_j$ (<a href="../k4/l4-4.html#takeaways">[L4.4]</a>, <a href="../k4/l4-5.html#takeaways">[L4.5]</a>); jinak rozvrh neexistuje a min řez je certifikát. Zlomkový tok nevadí — pmtn krájí úlohy libovolně.</li>
       <li><strong>Flow → schedule:</strong> $f(T_j \to I_{x,y})$ = kolik úlohy běží v intervalu; uvnitř intervalu kousky nalít na $R$ procesorů (à la McNaughton <a href="../k5/l5-4.html">[L5.4]</a>) a intervaly slepit. Bez tohoto kroku je odpověď neúplná („chybí flow → schedule“).</li>
-      <li><strong>Funguje jen s pmtn</strong> — nepreemptivní varianty (např. $1|r_j,\tilde d_j|C_{max}$) jsou NP-těžké a tok je nevyřeší [L5.9].</li>
+      <li><strong>Funguje jen s pmtn</strong> — nepreemptivní varianty (např. $1|r_j,\tilde d_j|C_{max}$) jsou NP-těžké a tok je nevyřeší <a href="../k5/l5-9.html">[L5.9]</a>.</li>
     </ul>
   </div>
 

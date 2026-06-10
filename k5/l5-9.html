@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L5.9 · Bratleyho algoritmus (1|r_j,d̃_j|Cmax, B&B) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k5">K5 · Rozvrhování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L5.9</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L5.9</span> Kapitola K5 — Rozvrhování (Slot 5) · <strong>[MUST]</strong>
+  </p>
+  <h1>Bratleyho algoritmus (1|r_j,d̃_j|Cmax, B&amp;B)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Branch &amp; bound nad pořadími úloh.</strong> Nepreemptivní $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ je NP-těžké — Bratleyho algoritmus prohledává strom částečných pořadí (uzel = <em>(pořadí úloh)/(čas dokončení poslední)</em>) a krotí ho třemi pravidly: <strong>(i)</strong> ořez při překročení deadlinu (včetně „bratrů“), <strong>(ii)</strong> dekompozice při prostoji a <strong>(iii)</strong> test optimality <strong>BRTP</strong>, který umí prohledávání rovnou ukončit.
+  </div>
+
+  <p>V <a href="../k5/l5-7.html">[L5.7]</a> a <a href="../k5/l5-8.html">[L5.8]</a> dělala preempce těžké problémy lehkými. Dnes preempci zakážeme: úloha, kterou jednou pustíš, musí doběhnout vcelku. Na jednom stroji s release times $r_j$ a tvrdými deadliny $\tilde{d}_j$ (vlnka = deadline, ne due date — <a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace</a>) minimalizujeme makespan $C_{max}$.</p>
+
+  <!-- ===== SEKCE 1: PROBLEM ===== -->
+  <h2>Problém: každý parametr zvlášť easy, dohromady NP-hard</h2>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 13 (EN 1:1) — Scheduling on One Resource — Minimizing Makespan</div>
+    <ul>
+      <li>“$1\,|\,r_j\,|\,C_{max}$ - <strong>easy</strong> — the tasks are processed in a non-descending order of $r_j$ ($T_j$ with the lowest $r_j$ first)</li>
+      <li>$1\,|\,\tilde{d}_j\,|\,C_{max}$ - <strong>easy</strong> — the tasks are processed in a non-descending order of $\tilde{d}_j$ — can be solved by EDF - <strong>Earliest Deadline First</strong> — the feasible schedule doesn't have to exist</li>
+      <li>$1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ - <strong>NP-hard</strong> — NP-hardness proved by the pol. reduction from 3-Partition problem — for $p_j = 1$ there exists a polynomial algorithm”</li>
+    </ul>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: samotná $r_j$ vyřeší třídění podle release, samotná $\tilde{d}_j$ třídění podle deadlinu (EDF). Proč se ta dvě pravidla nedají „spojit“ a kombinace je najednou těžká?</summary>
+    <div class="inner">
+      <p>Obě pravidla dávají <em>protichůdné</em> pokyny: release říká „vezmi, co už je k dispozici“, deadline říká „vezmi, co nejvíc spěchá“ — a bez preempce se špatná volba nedá opravit. Navíc se může vyplatit <strong>nechat stroj stát</strong> a počkat si na naléhavou úlohu (stejný jev jako u $1\,|\,r_j\,|\,L_{max}$ v <a href="../k5/l5-7.html">[L5.7]</a>). Formálně: silná NP-těžkost polynomiální redukcí z 3-Partition (slide 14; redukce a souvislost s $PS1|temp|C_{max}$ je téma lekce [L5.13]). Exaktně to tedy řešíme buď ILP — position-based model znáš z <a href="../k5/l5-6b.html#t-posilp">[L5.6b]</a> — nebo kombinatoricky: <strong>branch &amp; bound</strong>, jehož obecnou kostru (větvení, meze, incumbent) máš z <a href="../k5/l5-5.html#takeaways">[L5.5]</a>.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: VETVENI ===== -->
+  <h2>Větvení: strom pořadí úloh</h2>
+
+  <p>U ILP jsme v <a href="../k5/l5-5.html">[L5.5]</a> větvili na hodnotě proměnné. Tady je rozhodnutím <em>„která úloha pojede jako další“</em>: kořen = prázdné pořadí, syn = připoj jednu dosud nezařazenou úlohu. List v hloubce $n$ = kompletní permutace.</p>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 17 (EN 1:1) — Bratley's Algorithm for $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$</div>
+    <p>“A <strong>branch and bound</strong> (B&amp;B) algorithm.</p>
+    <p><strong>Branching</strong> - without bounding it is an <strong>enumerative method</strong> that creates a solution tree (some of the nodes are infeasible). Every node is labeled by: <strong>(the order of tasks)/(completion time of the last task)</strong>.”</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: uzel má pořadí $\sigma$ a čas dokončení poslední úlohy $c$. Připojím úlohu $T_j$ — jaký bude nový čas dokončení $c'$? Pozor na situaci, kdy $T_j$ ještě není uvolněná.</summary>
+    <div class="inner">
+      <p>$T_j$ může začít nejdřív v $\max\{r_j,\ c\}$ — buď hned po předchozí úloze, nebo (je-li $r_j &gt; c$) až po <strong>prostoji</strong> (idle waiting), kdy stroj čeká na její release. Takže $$c' = \max\{r_j,\ c\} + p_j.$$ To „$\max$“ je nejčastější početní chyba celé úlohy — kdo píše $c' = c + p_j$, rozbije si celý strom. Bez ořezávání má strom $n!$ listů; teď tři pravidla, která ho zmenší.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 3: PRAVIDLO (i) ===== -->
+  <h2>Pravidlo (i): ořez podle deadlinů — padají i „bratři“</h2>
+
+  <details class="try">
+    <summary>Zkus sám: stojíš v uzlu $\sigma/c$ a díváš se na <em>nezařazené</em> úlohy. Kdy můžeš celý podstrom zahodit, aniž bys cokoli prozkoumal?</summary>
+    <div class="inner">
+      <p>Když některá nezařazená $T_k$ nestihne deadline, <em>ani kdyby jela hned teď</em>: $\max\{c,\ r_k\} + p_k &gt; \tilde{d}_k$. Hlouběji v podstromu se čas $c$ už jen zvětšuje, takže $T_k$ to nikdy nedožene — všechny listy pod $\sigma$ jsou nepřípustné.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 18 (EN 1:1) — Reduction of the Tree - Bounding</div>
+    <p>“<strong>(i) eliminate the node exceeding the deadline (and all its "brothers")</strong></p>
+    <ul>
+      <li>If there is a node which exceeds any deadline, all its descendants should be eliminated</li>
+      <li>Critical task (here $T_3$) will have to be scheduled anyway - therefore, all of its "brothers" should be eliminated as well”</li>
+    </ul>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: slide škrtá i „bratry“ provinilého uzlu. Proč je to korektní — proč smí padnout celé patro, když deadline překročil jen jeden syn?</summary>
+    <div class="inner">
+      <p>Překročí-li syn $(\sigma, T_k)$ deadline $\tilde{d}_k$, znamená to $\max\{c, r_k\} + p_k &gt; \tilde{d}_k$ už v rodiči. Jenže <strong>kritická úloha $T_k$ musí být někdy zařazena i v podstromu každého bratra</strong> $(\sigma, T_{k'})$ — a tam přijde na řadu ještě později (čas jen roste). Takže je mrtvý nejen syn, ale celé patro = celý podstrom rodiče $\sigma$. Prakticky si v každém uzlu jen projdeš nezařazené úlohy testem z předchozí otázky.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 4: PRAVIDLO (ii) ===== -->
+  <h2>Pravidlo (ii): dekompozice při prostoji</h2>
+
+  <details class="try">
+    <summary>Zkus sám: poslední zařazená úloha skončila v čase $c$ a <em>všechny</em> nezařazené úlohy mají $r_k \ge c$ (stroj by stejně stál). Má smysl se někdy vracet a přeskládávat to, co už je zařazené?</summary>
+    <div class="inner">
+      <p>Ne. Zbylé úlohy nemohou začít dřív než ve svých release times — a ty nastanou až po $c$, takže <em>žádné</em> přeuspořádání už zařazených úloh by jim nepomohlo začít dřív. Dosavadní práce „byla optimální“ a uzel se může stát <strong>novým kořenem</strong>: nad něj se už nikdy nevracíme (odpadají i jeho bratři a všechny alternativy výš). Ze stromu s $n!$ listy zbude strom s $(n-k)!$ listy.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 19 (EN 1:1) — Tree Size Reduction - Decomposition</div>
+    <p>“<strong>(ii) problem decomposition due to idle waiting</strong> - e.g. when the employee waits for the material, his work was optimal</p>
+    <ul>
+      <li>Consider node $v$ on level $k$. If $C_i$ of the last scheduled task is less than or equal to $r_i$ of all unscheduled tasks, there is no need for backtrack above $v$</li>
+      <li>$v$ becomes a new root and there are $n - k$ levels ($n - k$ unscheduled tasks) to be scheduled”</li>
+    </ul>
+  </div>
+
+  <!-- ===== SEKCE 5: BRTP ===== -->
+  <h2>Test optimality: BRTP — kdy smíš rovnou skončit</h2>
+
+  <details class="try">
+    <summary>Zkus sám: dorazil jsi k přípustnému listu s hodnotou $C_{max}$. Za jakých okolností můžeš <em>okamžitě</em> prohlásit optimum a zbytek stromu vůbec neprohledávat? (Nápověda: najdi dolní mez — před jakým časem nemůže poslední „blok“ rozvrhu nikdy začít?)</summary>
+    <div class="inner">
+      <p>Podívej se na souvislý blok úloh na <em>konci</em> rozvrhu (od posledního prostoje do konce). Jestliže první úloha bloku startuje přesně ve svém release $r_{[1]}$ a $r_{[1]}$ je <strong>nejmenší release v celém bloku</strong>, pak žádná úloha bloku nemůže začít před $r_{[1]}$ — a protože blok běží bez mezer, jeho celková práce se před $r_{[1]} + \sum p_{[i]}$ nedá stihnout v žádném rozvrhu. Tvůj list téhle dolní meze přesně dosahuje → je optimální. To je <strong>BRTP</strong>.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 20 (EN 1:1) — Optimality Test - Termination of Bratley's Algorithm</div>
+    <p>“<strong>Definition: BRTP - Block with Release Time Property</strong></p>
+    <p>BRTP is a set of $k$ tasks that satisfy:</p>
+    <ul>
+      <li>first task $T_{[1]}$ starts at it's release time</li>
+      <li>all $k$ tasks till the end of the schedule run without "idle waiting"</li>
+      <li>$r_{[1]} \le r_{[i]}$ for all $i = 2 \ldots k$</li>
+    </ul>
+    <p><strong>Note:</strong> "till the end of the schedule" implies there is at most one BRTP</p>
+    <p><strong>Lemma: sufficient condition of optimality</strong> — If BRTP exists, the schedule is optimal (the search is finished).</p>
+    <p><strong>Proof:</strong> this schedule is optimal since the last task $T_{[k]}$ can not be completed earlier — order of prec. tasks is not important - see (ii) — no task from BRTP can be done before $r_{[1]}$ — there is no task after $C_{max}$”</p>
+  </div>
+
+  <p>Pozor na směr implikace — BRTP je podmínka <em>postačující</em>, ne nutná:</p>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 21 (EN 1:1) — BRTP is not Necessary Condition of Optimality</div>
+    <p>“In this particular case, the schedule is optimal, but it does not have BRTP.</p>
+    <p><strong>Tightening the bounds:</strong> In general, $C_{max}$ found without BRTP could be used for bounding further solutions while <strong>setting all deadlines</strong> to be at most $C_{max} - \epsilon$. This ensures that if other feasible schedules exist, only those that are <strong>better by $\epsilon$</strong> than the solution at hand, are generated.”</p>
+  </div>
+
+  <p>Konkrétní mini-instance k obrázku slidu 21 (čísla vlastní — přiznáno): $T_1 = (r_1 = 1, p_1 = 2, \tilde{d}_1 = 3)$, $T_2 = (r_2 = 0, p_2 = 3, \tilde{d}_2 = 6)$. Kvůli $\tilde{d}_1$ musí $T_1$ jet přesně v $\langle 1, 3)$, takže $T_2$ (vcelku, bez preempce!) se před ni nevejde a pojede $\langle 3, 6)$:</p>
+
+  <div class="viz" id="viz-nobrtp"></div>
+
+  <details class="try">
+    <summary>Zkus sám: ověř, že rozvrh nahoře je optimální, ale BRTP nemá. A co s tím — jak hledání korektně ukončíš?</summary>
+    <div class="inner">
+      <p>Koncový blok běží od $t = 1$ ($T_1$ startuje ve svém $r_1 = 1$, pak bez mezery $T_2$) — ale $r_2 = 0 &lt; r_{[1]} = 1$, třetí podmínka BRTP padá. Optimální to přitom je: $T_2$ potřebuje 3 souvislé jednotky mimo okno $\langle 1, 3)$, takže dřív než v 6 neskončí. Řešení: zapamatuj si $C_{max} = 6$ jako incumbent (přesně jako $z^b$ v <a href="../k5/l5-5.html#takeaways">[L5.5]</a>), <strong>utáhni všechny deadliny na $\min\{\tilde{d}_j,\ C_{max} - \epsilon\}$</strong> (u celočíselných dat $\epsilon = 1$) a prohledávej dál — projít teď můžou jen ostře lepší rozvrhy. Když už nic neprojde (strom se uzavře), je incumbent optimum.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 6: CELY BEH ===== -->
+  <h2>Celý běh: příklad ze slidu 22</h2>
+
+  <p>Instance (slide 22, EN 1:1): $$r = (4, 1, 1, 0), \qquad p = (2, 1, 2, 2), \qquad \tilde{d} = (8, 5, 6, 4).$$</p>
+
+  <details class="try">
+    <summary>Zkus sám: spočítej labely všech čtyř synů kořene $(T_j)/c$ a rozhodni, kteří přežijí pravidlo (i).</summary>
+    <div class="inner">
+      <p>$(T_1)/\max\{4, 0\} + 2 = 6$, $(T_2)/1 + 1 = 2$, $(T_3)/1 + 2 = 3$, $(T_4)/0 + 2 = 2$. Pravidlo (i): v uzlu $(T_1)/6$ by nezařazená $T_4$ končila nejdřív $\max\{6, 0\} + 2 = 8 &gt; \tilde{d}_4 = 4$ → celý podstrom ✗ (svědkem je i $T_2$: $7 &gt; 5$). V uzlu $(T_3)/3$: $T_4$ končí $\max\{3, 0\} + 2 = 5 &gt; 4$ → ✗. Přežívají jen $(T_2)/2$ a $(T_4)/2$.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-run"></div>
+
+  <p>První nalezené řešení $(T_2, T_4, T_3, T_1)/8$ — rozvrh s prostojem na startu (stroj čeká na $r_2 = 1$):</p>
+
+  <div class="viz" id="viz-g8"></div>
+
+  <p>Bez BRTP pokračujeme s utaženými deadliny $\tilde{d} \le 8 - 1 = 7$, tedy $\tilde{d} = (7, 5, 6, 4)$, a v podstromu $(T_4)$ najdeme $(T_4, T_2, T_3, T_1)/7$ — to už BRTP má:</p>
+
+  <div class="viz" id="viz-g7"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
+    <p><strong>① „$c' = c + p_j$.“</strong> Ne — $c' = \max\{r_j,\ c\} + p_j$: když úloha ještě není uvolněná, stroj <em>stojí</em> (idle waiting). Zapomenutý $\max$ = celý strom špatně. <strong>② Pravidlo (i) neškrtá jen jeden uzel.</strong> Kritická úloha musí být zařazena v každém bratrovi taky (a jen později) — padá celé patro / celý podstrom rodiče. <strong>③ „Bez BRTP ⇒ není to optimum.“</strong> Ne! BRTP je jen postačující podmínka (slide 21) — bez ní nesmíš nic uzavírat: utáhneš deadliny na $\le C_{max} - \epsilon$ a hledáš dál; optimum je potvrzené, až když se strom uzavře. <strong>④ BRTP blok = od posledního prostoje do konce rozvrhu.</strong> Prostoj <em>dříve</em> v rozvrhu BRTP nevylučuje (uvidíš v T02: optimum má uprostřed díru a BRTP přesto existuje). A nezapomeň na třetí podmínku $r_{[1]} \le r_{[i]}$ — právě ta v běhu výše shodila řešení /8. <strong>⑤ První přípustný list ≠ konec</strong> — stejné pravidlo jako u B&amp;B v <a href="../k5/l5-5.html#takeaways">[L5.5]</a>: incumbent jen inicializuje mez.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.9</div>
+    <ul>
+      <li><strong>Bratley = B&amp;B nad pořadími úloh</strong> pro silně NP-těžké $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$. Uzel značíme <em>(pořadí úloh)/(čas dokončení poslední)</em>; připojení $T_j$: $c' = \max\{r_j,\ c\} + p_j$ (nezapomeň $\max$ — idle waiting).</li>
+      <li><strong>(i) Ořez deadliny:</strong> existuje-li nezařazená $T_k$ s $\max\{c,\ r_k\} + p_k &gt; \tilde{d}_k$, je mrtvý celý podstrom — kritická úloha shazuje i všechny „bratry“.</li>
+      <li><strong>(ii) Dekompozice:</strong> je-li $c \le r_k$ všech nezařazených, uzel se stává novým kořenem — žádný backtrack nad něj.</li>
+      <li><strong>BRTP</strong> (blok od posledního prostoje do konce: $T_{[1]}$ startuje v $r_{[1]}$, žádné mezery, $r_{[1]} \le r_{[i]}$ v bloku) ⟹ rozvrh je <strong>optimální</strong>, hledání končí. Je to podmínka postačující, ne nutná — bez ní pokračuj s deadliny utaženými na $\le C_{max} - \epsilon$.</li>
+      <li><strong>U zkoušky odevzdej:</strong> strom s labely $(\sigma)/c$ a důvody ořezů, Gantt výsledného rozvrhu a zdůvodnění optimality (BRTP, nebo uzavřený strom). <em>(Téma ústní.)</em></li>
+    </ul>
+  </div>
+
+  <!-- ===== ULOHA T01 ===== -->
+  <div class="task" id="t-bratley">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Bratley's Algorithm - Example</strong>
+      <span class="task-src">zdroj: task bank #37 = příklad slidu 22 (EN 1:1); doložený typ úloh testů 3 (2010–2015)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Using Bratley's branch-and-bound algorithm for $1 \mid r_j, \widetilde{d}_j \mid C_{\max}$, solve the source example</p>
+        <p>$$r = (4, 1, 1, 0), \qquad p = (2, 1, 2, 2), \qquad \widetilde{d} = (8, 5, 6, 4).$$</p>
+        <p>Draw the search tree or list explored nodes. Label every node by $$\frac{\text{order of tasks}}{\text{completion time of the last task}}.$$</p>
+        <p>Use the bounding/decomposition/optimality rules from the Bratley slides.”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Čtyři nepreemptivní úlohy na jednom stroji, release times a tvrdé deadliny; máme odevzdat <em>celý strom</em> (nebo seznam navštívených uzlů) se správnými labely $(\sigma)/c$, důvody ořezů a zdůvodněnou optimalitou. Je to přesně instance rozebraná ve výkladu — tady si ji zapiš tak, jak ji budeš psát na papír u zkoušky.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — labely uzlů, pravidla (i)/(ii) a BRTP (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k5/l5-5.html#takeaways">[L5.5] Branch &amp; Bound pro ILP</a> — disciplína B&amp;B: incumbent, uzavírání větví.</li>
+        <li><a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace</a> — čtení $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$, kreslení Ganttova diagramu.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>DFS, syny ber v pořadí indexů. V každém uzlu: ① spočti label $c' = \max\{r_j, c\} + p_j$, ② projeď nezařazené úlohy testem $\max\{c', r_k\} + p_k \le \tilde{d}_k$ — při neúspěchu ✗ s uvedeným svědkem, ③ zkontroluj dekompozici ($c' \le$ všechna zbylá $r_k$), ④ u listu spočti $C_{max}$ a otestuj <em>všechny tři</em> podmínky BRTP. Bez BRTP nezapomeň utáhnout deadliny a pokračovat.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (strom = slide 22 1:1; běh rozebraný ve stepperu výše)</summary>
+        <div class="inner">
+          <p><strong>Navštívené uzly</strong> (✗ = ořez pravidlem (i) s uvedeným svědkem):</p>
+          <ul>
+            <li>$(T_1)/6$ ✗ — $T_4$: $\max\{6, 0\} + 2 = 8 &gt; 4$ (stačí jeden svědek; padl by i na $T_2$: $7 &gt; 5$).</li>
+            <li>$(T_2)/2$ → $(T_2, T_1)/6$ ✗ ($T_3$: $\max\{6,1\} + 2 = 8 &gt; 6$); $(T_2, T_3)/4$ ✗ ($T_4$: $6 &gt; 4$); $(T_2, T_4)/4$ → $(T_2, T_4, T_1)/6$ ✗ ($T_3$: $8 &gt; 6$); $(T_2, T_4, T_3)/6$ → <strong>$(T_2, T_4, T_3, T_1)/8$ přípustné</strong>, $C_{max} = 8$. Test optimality: koncový blok startuje s $T_2$ v $r_2 = 1$, ale $r_4 = 0 &lt; 1$ → <strong>BRTP NE</strong> („NO, $r_2 &gt; r_4$“ na slidu). Incumbent 8, deadliny utáhnout na $\tilde{d} := \min\{\tilde{d},\ 7\} = (7, 5, 6, 4)$.</li>
+            <li>$(T_3)/3$ ✗ — $T_4$: $\max\{3, 0\} + 2 = 5 &gt; 4$.</li>
+            <li>$(T_4)/2$ → $(T_4, T_1)/6$ ✗ ($T_2$: $\max\{6,1\} + 1 = 7 &gt; 5$); $(T_4, T_2)/3$ → $(T_4, T_2, T_1)/6$ ✗ ($T_3$: $8 &gt; 6$); $(T_4, T_2, T_3)/5$ → <strong>$(T_4, T_2, T_3, T_1)/7$ přípustné</strong> ($7 \le 8$, prošlo i utaženým $\tilde{d}_1 = 7$), $C_{max} = 7$. Test optimality: blok $T_4, T_2, T_3, T_1$ běží od $t = 0$ bez prostojů až do konce, $T_4$ startuje v $r_4 = 0$ a $r_4 = 0 \le r_1, r_2, r_3$ → <strong>BRTP ANO → optimum, stop</strong>. Uzel $(T_4, T_3)$ se už neprozkoumá.</li>
+          </ul>
+          <p><strong>Výsledek:</strong> pořadí $(T_4, T_2, T_3, T_1)$, rozvrh $T_4\,\langle 0,2)$, $T_2\,\langle 2,3)$, $T_3\,\langle 3,5)$, $T_1\,\langle 5,7)$, $$C_{max}^* = 7,$$ optimalita certifikována BRTP (Gantt viz obrázek „optimum /7“ ve výkladu). U zkoušky nakresli strom (stepper výše, poslední krok) + tento Gantt + větu o BRTP.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ULOHA T02 ===== -->
+  <div class="task" id="t-bratleytest">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Bratley's algorithm (tree) — test 3, 6. 5. 2014, varianta A</strong>
+      <span class="task-src">zdroj: test 6. 5. 2014 var. A (čísla 1:1, CZ přepis wiki) + vzorové řešení Master_Zkouska_KO (1:1)</span>
+      </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (originál CZ 1:1 + EN překlad vlastní — přiznáno)</span>
+        <p>„Bratley's algorithm (tree)</p>
+        <p>$$r = [5, 0, 4, 0], \qquad p = [3, 2, 2, 1], \qquad d = [10, 3, 10, 2]$$</p>
+        <p>a) nakreslit strom a Ganttuv diagram — b) je to optimalni reseni? Proc?“</p>
+        <p><em>(EN: Run Bratley's algorithm on the instance above. a) Draw the search tree and the Gantt chart. b) Is the solution optimal? Why?)</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejná disciplína jako T01, jiná čísla ($d$ zde čti jako tvrdé deadliny $\tilde{d}$). Bonus téhle instance: poprvé reálně vystřelí <strong>pravidlo (ii) — dekompozice</strong> a optimum má uprostřed <strong>prostoj</strong> — přesto BRTP existuje (pozor na polopravdu ④).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — pravidla (i)/(ii), BRTP a utahování deadlinů (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k5/l5-5.html#takeaways">[L5.5]</a> — incumbent a uzavírání větví.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Začni syny kořene: tři ze čtyř padnou na tutéž kritickou úlohu — kterou? Pak si u uzlu $(T_4, T_2)/3$ srovnej $c = 3$ s release times nezařazených úloh… a vzpomeň si, co to znamená pro backtracking. První nalezený list ti vyjde s $C_{max} = 10$ — nezapomeň BRTP test a co dělat, když selže.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (strom vlastní odvození — přiznáno; výsledný rozvrh a zdůvodnění = vzorové řešení 1:1)</summary>
+        <div class="inner">
+          <p>Krokovaný strom (DFS, syny v pořadí indexů):</p>
+          <div class="viz" id="viz-t02tree"></div>
+          <p><strong>Výsledný rozvrh</strong> — vzorové řešení (Master_Zkouska_KO, 1:1): „a) Schedule: $T_4 \mid T_2\, T_2 \mid - \mid T_3\, T_3 \mid T_1\, T_1\, T_1$ ($t = 0..9$), $C_{max} = 9$. b) This solution is optimal since there is BRTP which starts at $r_3 = 4$.“</p>
+          <div class="viz" id="viz-t02gantt"></div>
+          <p>Rozepsáno: $T_4\,\langle 0,1)$, $T_2\,\langle 1,3)$, <em>prostoj $\langle 3,4)$</em>, $T_3\,\langle 4,6)$, $T_1\,\langle 6,9)$. Koncový blok $\{T_3, T_1\}$ běží od posledního prostoje do konce: $T_3$ startuje ve svém $r_3 = 4$, bez mezer, a $r_3 = 4 \le r_1 = 5$ → <strong>BRTP ANO → optimum</strong>, $C_{max}^* = 9$. Prostoj $\langle 3, 4)$ BRTP nevadí — blok se počítá <em>od posledního prostoje</em> (na tohle se ptal i autor wiki přepisu: „v nejlepším řešení se musí čekat“ — ano, a BRTP přesto existuje).</p>
+          <p><em>Pozn. k běhu:</em> dekompozice v $(T_4, T_2)/3$ říká, že se nad tento uzel už nevracíme — větev $(T_4, T_3)$ ani alternativy u kořene netřeba zkoumat. První list $(T_4, T_2, T_1, T_3)/10$ BRTP neměl ($r_1 = 5 &gt; r_3 = 4$), takže se deadliny utáhly na $\min\{\tilde{d}, 9\} = (9, 3, 9, 2)$ a pokračovalo se — druhý list $/9$ už prošel i utaženými deadliny a BRTP měl.</p>
+          <p><strong>Drill navíc</strong> (test 6. 5. 2014, varianta B — čísla 1:1, řešení vlastní pro sebekontrolu): $r = (1, 8, 2, 0)$, $p = (2, 1, 2, 3)$, $\tilde{d} = (6, 9, 7, 6)$. Má vyjít: pořadí $(T_4, T_1, T_3, T_2)$, rozvrh $T_4\,\langle 0,3)$, $T_1\,\langle 3,5)$, $T_3\,\langle 5,7)$, prostoj, $T_2\,\langle 8,9)$, $C_{max}^* = 9$; dekompozice vystřelí v $(T_4, T_1, T_3)/7 \le r_2 = 8$ a optimalitu certifikuje <strong>jednoprvkový</strong> BRTP blok $\{T_2\}$ startující v $r_2 = 8$ ($k = 1$ stačí — podmínka $r_{[1]} \le r_{[i]}$ je prázdná).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L5.9">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k5/l5-8.html"><span class="dir">← Předchozí</span> L5.8 · Chetto-Silly-Bouchentouf (prec → nezávislé, pak EDF)</a>
+    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.10 · Muntz &amp; Coffman (P|pmtn,prec|Cmax) [FOTO])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// ============================================================
+// L5.9 Bratley — vizualizace. Vsechny behy overeny skriptem
+// (B&B + brute force): slide 22 -> optimum (T4,T2,T3,T1)/7;
+// test3 2014 A -> (T4,T2,T3,T1)/9 (= vzorove reseni, BRTP od r3=4);
+// test3 2014 B -> (T4,T1,T3,T2)/9 (BRTP blok {T2} od r2=8).
+// ============================================================
+
+// ===== Slide 21: optimum bez BRTP (cisla vlastni — priznano) =====
+// T1=(r1,p2,d~3), T2=(r0,p3,d~6); jedine pripustne poradi (T1,T2):
+// idle<0,1), T1<1,3), T2<3,6); koncovy blok od t=1, ale r2=0<r1=1 -> BRTP ne.
+KOViz.gantt(document.getElementById('viz-nobrtp'), {
+  tmax: 7, tstep: 1,
+  rows: [{ id: 'm', label: 'stroj' }],
+  blocks: [
+    { row: 'm', from: 0, to: 1, cls: 'idle' },
+    { row: 'm', from: 1, to: 3, label: 'T₁', cls: 'good' },
+    { row: 'm', from: 3, to: 6, label: 'T₂', cls: 'good' },
+  ],
+  marks: [
+    { t: 0, label: 'r₂', cls: 'soft' },
+    { t: 1, label: 'r₁', cls: 'soft' },
+    { t: 3, label: 'd̃₁' },
+    { t: 6, label: 'd̃₂ = Cmax' },
+  ],
+  caption: 'Schéma slidu 21 s vlastními čísly (přiznáno): rozvrh je optimální (T₂ se před okno T₁ nevejde vcelku), ale koncový blok startuje s T₁ v r₁ = 1, zatímco r₂ = 0 &lt; 1 — BRTP neexistuje. Optimalitu pak potvrdí až uzavření stromu s utaženými deadliny.',
+});
+
+// ===== Hlavni beh: strom slidu 22 (stepper) =====
+// r=(4,1,1,0), p=(2,1,2,2), d~=(8,5,6,4); DFS, syny v poradi indexu.
+(function () {
+  var NODES = [
+    { id: 'r',     x: 360, y: 40,  label: '∅' },
+    { id: 'a1',    x: 95,  y: 135, label: 'T₁' },
+    { id: 'a2',    x: 250, y: 135, label: 'T₂' },
+    { id: 'a3',    x: 420, y: 135, label: 'T₃' },
+    { id: 'a4',    x: 565, y: 135, label: 'T₄' },
+    { id: 'b21',   x: 140, y: 235, label: 'T₁' },
+    { id: 'b23',   x: 250, y: 235, label: 'T₃' },
+    { id: 'b24',   x: 355, y: 235, label: 'T₄' },
+    { id: 'c241',  x: 300, y: 335, label: 'T₁' },
+    { id: 'c243',  x: 400, y: 335, label: 'T₃' },
+    { id: 'd2431', x: 400, y: 435, label: 'T₁' },
+    { id: 'b41',   x: 480, y: 235, label: 'T₁' },
+    { id: 'b42',   x: 575, y: 235, label: 'T₂' },
+    { id: 'b43',   x: 665, y: 235, label: 'T₃' },
+    { id: 'c421',  x: 520, y: 335, label: 'T₁' },
+    { id: 'c423',  x: 625, y: 335, label: 'T₃' },
+    { id: 'd4231', x: 625, y: 435, label: 'T₁' },
+  ];
+  var EDGES = [
+    { from: 'r', to: 'a1' }, { from: 'r', to: 'a2' }, { from: 'r', to: 'a3' }, { from: 'r', to: 'a4' },
+    { from: 'a2', to: 'b21' }, { from: 'a2', to: 'b23' }, { from: 'a2', to: 'b24' },
+    { from: 'b24', to: 'c241' }, { from: 'b24', to: 'c243' },
+    { from: 'c243', to: 'd2431' },
+    { from: 'a4', to: 'b41' }, { from: 'a4', to: 'b42' }, { from: 'a4', to: 'b43' },
+    { from: 'b42', to: 'c421' }, { from: 'b42', to: 'c423' },
+    { from: 'c423', to: 'd4231' },
+  ];
+  var SUB = {
+    a1: '(T₁)/6', a2: '(T₂)/2', a3: '(T₃)/3', a4: '(T₄)/2',
+    b21: '(T₂,T₁)/6', b23: '(T₂,T₃)/4', b24: '(T₂,T₄)/4',
+    c241: '(T₂,T₄,T₁)/6', c243: '(T₂,T₄,T₃)/6', d2431: '(T₂,T₄,T₃,T₁)/8',
+    b41: '(T₄,T₁)/6', b42: '(T₄,T₂)/3', b43: '(T₄,T₃)',
+    c421: '(T₄,T₂,T₁)/6', c423: '(T₄,T₂,T₃)/5', d4231: '(T₄,T₂,T₃,T₁)/7',
+  };
+  var ALL = NODES.map(function (n) { return n.id; });
+  function subsOf(ids) {
+    var o = {}; ALL.forEach(function (id) { o[id] = ''; });
+    ids.forEach(function (id) { o[id] = SUB[id]; });
+    return o;
+  }
+  function clsOf(introduced, map) {
+    var o = {};
+    ALL.forEach(function (id) {
+      if (map && map[id] !== undefined) o[id] = map[id];
+      else o[id] = introduced.indexOf(id) === -1 ? 'dim' : '';
+    });
+    return o;
+  }
+  function edgesOf(introduced) {
+    var o = {};
+    EDGES.forEach(function (e) {
+      var k = e.from + '->' + e.to;
+      if (introduced.indexOf(k) === -1) o[k] = 'dim';
+    });
+    return o;
+  }
+  var N1 = ['r', 'a1', 'a2', 'a3', 'a4'];
+  var N3 = N1.concat(['b21', 'b23', 'b24']);
+  var N4 = N3.concat(['c241', 'c243']);
+  var N5 = N4.concat(['d2431']);
+  var N6 = N5.concat(['b41', 'b42', 'b43']);
+  var N7 = N6.concat(['c421', 'c423']);
+  var N8 = N7.concat(['d4231']);
+  var E1 = ['r->a1', 'r->a2', 'r->a3', 'r->a4'];
+  var E3 = E1.concat(['a2->b21', 'a2->b23', 'a2->b24']);
+  var E4 = E3.concat(['b24->c241', 'b24->c243']);
+  var E5 = E4.concat(['c243->d2431']);
+  var E6 = E5.concat(['a4->b41', 'a4->b42', 'a4->b43']);
+  var E7 = E6.concat(['b42->c421', 'b42->c423']);
+  var E8 = E7.concat(['c423->d4231']);
+  var S1 = ['a1', 'a2', 'a3', 'a4'];
+  var S3 = S1.concat(['b21', 'b23', 'b24']);
+  var S4 = S3.concat(['c241', 'c243']);
+  var S5 = S4.concat(['d2431']);
+  var S6 = S5.concat(['b41', 'b42', 'b43']);
+  var S7 = S6.concat(['c421', 'c423']);
+  var S8 = S7.concat(['d4231']);
+
+  KOViz.stepper(document.getElementById('viz-run'), {
+    graph: { w: 720, h: 490, nodes: NODES, edges: EDGES },
+    frames: [
+      { desc: 'Synové kořene: (T₁)/max{4,0}+2 = 6, (T₂)/1+1 = 2, (T₃)/1+2 = 3, (T₄)/0+2 = 2. (Uzel = poslední připojená úloha; celé pořadí čteš po cestě z kořene, label (σ)/c je pod uzlem.)',
+        nodes: clsOf(N1, { a1: 'hl', a2: 'hl', a3: 'hl', a4: 'hl' }),
+        edges: edgesOf(E1), subs: subsOf(S1) },
+      { desc: 'Pravidlo (i): v (T₁)/6 by nezařazená T₄ končila max{6,0}+2 = 8 &gt; d̃₄ = 4 → ✗ celý podstrom (svědkem i T₂: 7 &gt; 5). V (T₃)/3: T₄ končí max{3,0}+2 = 5 &gt; 4 → ✗. DFS jde do (T₂)/2.',
+        nodes: clsOf(N1, { a1: 'bad', a3: 'bad', a2: 'hl' }),
+        edges: edgesOf(E1), subs: subsOf(S1) },
+      { desc: 'Synové (T₂)/2: (T₂,T₁)/max{4,2}+2 = 6 → ✗ (T₃: max{6,1}+2 = 8 &gt; 6). (T₂,T₃)/max{1,2}+2 = 4 → ✗ (T₄: max{4,0}+2 = 6 &gt; 4). (T₂,T₄)/max{0,2}+2 = 4 — C₄ = 4 ≤ d̃₄ = 4, přežívá.',
+        nodes: clsOf(N3, { a1: 'bad', a3: 'bad', b21: 'bad', b23: 'bad', b24: 'hl' }),
+        edges: edgesOf(E3), subs: subsOf(S3) },
+      { desc: 'Synové (T₂,T₄)/4: (T₂,T₄,T₁)/max{4,4}+2 = 6 → ✗ (T₃: max{6,1}+2 = 8 &gt; 6). (T₂,T₄,T₃)/max{1,4}+2 = 6 ≤ d̃₃ = 6 — přežívá, zbývá jediná T₁.',
+        nodes: clsOf(N4, { a1: 'bad', a3: 'bad', b21: 'bad', b23: 'bad', c241: 'bad', c243: 'hl' }),
+        edges: edgesOf(E4), subs: subsOf(S4) },
+      { desc: 'List (T₂,T₄,T₃,T₁)/max{4,6}+2 = 8 ≤ d̃₁ = 8 → <strong>první přípustné řešení, Cmax = 8</strong>. Test optimality: koncový blok běží od t = 1 (T₂ startuje v r₂ = 1), ale r₄ = 0 &lt; 1 → <strong>BRTP NE</strong> („NO, r₂ &gt; r₄“). Incumbent 8; utáhni deadliny: d̃ := min{d̃, 8−1} = (7, 5, 6, 4) a pokračuj.',
+        nodes: clsOf(N5, { a1: 'bad', a3: 'bad', b21: 'bad', b23: 'bad', c241: 'bad', d2431: 'hl' }),
+        edges: edgesOf(E5), subs: subsOf(S5) },
+      { desc: 'Backtrack ke kořeni → podstrom (T₄)/2: (T₄,T₁)/max{4,2}+2 = 6 → ✗ (T₂: max{6,1}+1 = 7 &gt; 5). (T₄,T₂)/max{1,2}+1 = 3 ≤ 5 — přežívá. (T₄,T₃) zatím nevyhodnocen (DFS bere T₂ dřív).',
+        nodes: clsOf(N6, { a1: 'bad', a3: 'bad', b21: 'bad', b23: 'bad', c241: 'bad', b41: 'bad', b42: 'hl', b43: 'dim' }),
+        edges: edgesOf(E6), subs: subsOf(S6) },
+      { desc: 'Synové (T₄,T₂)/3: (T₄,T₂,T₁)/max{4,3}+2 = 6 → ✗ (T₃: max{6,1}+2 = 8 &gt; 6). (T₄,T₂,T₃)/max{1,3}+2 = 5 ≤ 6 — přežívá.',
+        nodes: clsOf(N7, { a1: 'bad', a3: 'bad', b21: 'bad', b23: 'bad', c241: 'bad', b41: 'bad', c421: 'bad', c423: 'hl', b43: 'dim' }),
+        edges: edgesOf(E7), subs: subsOf(S7) },
+      { desc: 'List (T₄,T₂,T₃,T₁)/max{4,5}+2 = 7 — prošel i utaženým d̃₁ = 7 → <strong>lepší řešení, Cmax = 7</strong>. Test optimality: blok T₄,T₂,T₃,T₁ jede od t = 0 bez prostojů až do konce, T₄ startuje v r₄ = 0 a r₄ = 0 ≤ r₁, r₂, r₃ → <strong>BRTP ANO</strong>.',
+        nodes: clsOf(N8, { a1: 'bad', a3: 'bad', b21: 'bad', b23: 'bad', c241: 'bad', b41: 'bad', c421: 'bad', b43: 'dim', d4231: 'hl' }),
+        edges: edgesOf(E8), subs: subsOf(S8) },
+      { desc: '<strong>Optimum: (T₄,T₂,T₃,T₁), C*max = 7</strong> — BRTP hledání rovnou ukončí, uzel (T₄,T₃) se už nikdy neprozkoumá. Srovnej se stromem slidu 22: „Test optimality - YES“.',
+        nodes: clsOf(N8, { a1: 'bad', a3: 'bad', b21: 'bad', b23: 'bad', c241: 'bad', b41: 'bad', c421: 'bad', b43: 'dim', a4: 'good', b42: 'good', c423: 'good', d4231: 'good' }),
+        edges: edgesOf(E8), subs: subsOf(S8) },
+    ],
+    caption: 'Bratleyho strom pro příklad slidu 22 (běh 1:1 dle slidu; uzly (T₄,T₁) a (T₄,T₃) v přepisu obrázku slidu nejsou explicitně vyjmenovány — doplněny dle pravidel, přiznáno). Label uzlu (σ)/c je pod kroužkem; ✗ červeně = ořez pravidlem (i), šedý uzel = nikdy nevyhodnocen.',
+  });
+})();
+
+// ===== Gantt prvniho reseni /8 =====
+// (T2,T4,T3,T1): idle<0,1), T2<1,2), T4<2,4), T3<4,6), T1<6,8)
+KOViz.gantt(document.getElementById('viz-g8'), {
+  tmax: 8, tstep: 1,
+  rows: [{ id: 'm', label: 'stroj' }],
+  blocks: [
+    { row: 'm', from: 0, to: 1, cls: 'idle' },
+    { row: 'm', from: 1, to: 2, label: 'T₂' },
+    { row: 'm', from: 2, to: 4, label: 'T₄' },
+    { row: 'm', from: 4, to: 6, label: 'T₃' },
+    { row: 'm', from: 6, to: 8, label: 'T₁' },
+  ],
+  marks: [
+    { t: 0, label: 'r₄', cls: 'soft' },
+    { t: 1, label: 'r₂ = r₃', cls: 'soft' },
+    { t: 4, label: 'r₁, d̃₄' },
+    { t: 5, label: 'd̃₂' },
+    { t: 6, label: 'd̃₃' },
+    { t: 8, label: 'd̃₁' },
+  ],
+  caption: 'První řešení (T₂,T₄,T₃,T₁)/8: koncový blok běží od t = 1 a startuje s T₂ v r₂ = 1 — jenže r₄ = 0 &lt; 1, takže BRTP není. Cmax = 8 je jen incumbent; deadliny se utáhnou na ≤ 7 a hledá se dál.',
+});
+
+// ===== Gantt optima /7 =====
+// (T4,T2,T3,T1): T4<0,2), T2<2,3), T3<3,5), T1<5,7)
+KOViz.gantt(document.getElementById('viz-g7'), {
+  tmax: 8, tstep: 1,
+  rows: [{ id: 'm', label: 'stroj' }],
+  blocks: [
+    { row: 'm', from: 0, to: 2, label: 'T₄', cls: 'good' },
+    { row: 'm', from: 2, to: 3, label: 'T₂', cls: 'good' },
+    { row: 'm', from: 3, to: 5, label: 'T₃', cls: 'good' },
+    { row: 'm', from: 5, to: 7, label: 'T₁', cls: 'good' },
+  ],
+  marks: [
+    { t: 0, label: 'r₄', cls: 'soft' },
+    { t: 1, label: 'r₂ = r₃', cls: 'soft' },
+    { t: 4, label: 'r₁, d̃₄' },
+    { t: 5, label: 'd̃₂' },
+    { t: 6, label: 'd̃₃' },
+    { t: 7, label: 'C*max = 7' },
+  ],
+  caption: 'Optimum (T₄,T₂,T₃,T₁)/7: celý rozvrh je jediný blok od t = 0, T₄ startuje v r₄ = 0 a r₄ je nejmenší release vůbec → BRTP → optimální, hledání končí. (d̃₁ = 8 leží až za okrajem bloku T₁ — vše stíháme.)',
+});
+
+// ===== T02: strom (stepper) — vlastni odvozeni, vysledek = vzorove reseni =====
+// r=(5,0,4,0), p=(3,2,2,1), d~=(10,3,10,2)
+(function () {
+  var NODES = [
+    { id: 'r',     x: 360, y: 40,  label: '∅' },
+    { id: 'a1',    x: 95,  y: 130, label: 'T₁' },
+    { id: 'a2',    x: 250, y: 130, label: 'T₂' },
+    { id: 'a3',    x: 415, y: 130, label: 'T₃' },
+    { id: 'a4',    x: 565, y: 130, label: 'T₄' },
+    { id: 'b41',   x: 450, y: 225, label: 'T₁' },
+    { id: 'b42',   x: 565, y: 225, label: 'T₂' },
+    { id: 'b43',   x: 665, y: 225, label: 'T₃' },
+    { id: 'c421',  x: 495, y: 320, label: 'T₁' },
+    { id: 'c423',  x: 630, y: 320, label: 'T₃' },
+    { id: 'd4213', x: 495, y: 415, label: 'T₃' },
+    { id: 'd4231', x: 630, y: 415, label: 'T₁' },
+  ];
+  var EDGES = [
+    { from: 'r', to: 'a1' }, { from: 'r', to: 'a2' }, { from: 'r', to: 'a3' }, { from: 'r', to: 'a4' },
+    { from: 'a4', to: 'b41' }, { from: 'a4', to: 'b42' }, { from: 'a4', to: 'b43' },
+    { from: 'b42', to: 'c421' }, { from: 'b42', to: 'c423' },
+    { from: 'c421', to: 'd4213' }, { from: 'c423', to: 'd4231' },
+  ];
+  var SUB = {
+    a1: '(T₁)/8', a2: '(T₂)/2', a3: '(T₃)/6', a4: '(T₄)/1',
+    b41: '(T₄,T₁)/8', b42: '(T₄,T₂)/3', b43: '(T₄,T₃)',
+    c421: '(T₄,T₂,T₁)/8', c423: '(T₄,T₂,T₃)/6',
+    d4213: '(T₄,T₂,T₁,T₃)/10', d4231: '(T₄,T₂,T₃,T₁)/9',
+  };
+  var ALL = NODES.map(function (n) { return n.id; });
+  function subsOf(ids) {
+    var o = {}; ALL.forEach(function (id) { o[id] = ''; });
+    ids.forEach(function (id) { o[id] = SUB[id]; });
+    return o;
+  }
+  function clsOf(introduced, map) {
+    var o = {};
+    ALL.forEach(function (id) {
+      if (map && map[id] !== undefined) o[id] = map[id];
+      else o[id] = introduced.indexOf(id) === -1 ? 'dim' : '';
+    });
+    return o;
+  }
+  function edgesOf(introduced) {
+    var o = {};
+    EDGES.forEach(function (e) {
+      var k = e.from + '->' + e.to;
+      if (introduced.indexOf(k) === -1) o[k] = 'dim';
+    });
+    return o;
+  }
+  var N1 = ['r', 'a1', 'a2', 'a3', 'a4'];
+  var N2 = N1.concat(['b41', 'b42', 'b43']);
+  var N3 = N2.concat(['c421', 'c423']);
+  var N4 = N3.concat(['d4213']);
+  var N5 = N4.concat(['d4231']);
+  var E1 = ['r->a1', 'r->a2', 'r->a3', 'r->a4'];
+  var E2 = E1.concat(['a4->b41', 'a4->b42', 'a4->b43']);
+  var E3 = E2.concat(['b42->c421', 'b42->c423']);
+  var E4 = E3.concat(['c421->d4213']);
+  var E5 = E4.concat(['c423->d4231']);
+  var S1 = ['a1', 'a2', 'a3', 'a4'];
+  var S2 = S1.concat(['b41', 'b42', 'b43']);
+  var S3 = S2.concat(['c421', 'c423']);
+  var S4 = S3.concat(['d4213']);
+  var S5 = S4.concat(['d4231']);
+
+  KOViz.stepper(document.getElementById('viz-t02tree'), {
+    graph: { w: 720, h: 470, nodes: NODES, edges: EDGES },
+    frames: [
+      { desc: 'Synové kořene: (T₁)/5+3 = 8 → ✗ (T₄: max{8,0}+1 = 9 &gt; 2). (T₂)/0+2 = 2 → ✗ (T₄: max{2,0}+1 = 3 &gt; 2). (T₃)/4+2 = 6 → ✗ (T₄: 7 &gt; 2). Kritická T₄ (d̃₄ = 2) shazuje všechny — musí jet první: zbývá (T₄)/1.',
+        nodes: clsOf(N1, { a1: 'bad', a2: 'bad', a3: 'bad', a4: 'hl' }),
+        edges: edgesOf(E1), subs: subsOf(S1) },
+      { desc: 'Synové (T₄)/1: (T₄,T₁)/max{5,1}+3 = 8 → ✗ (T₂: max{8,0}+2 = 10 &gt; 3). (T₄,T₂)/max{0,1}+2 = 3 ≤ 3 ✓. A teď <strong>dekompozice (ii)</strong>: c = 3 ≤ r₁ = 5 i r₃ = 4 → (T₄,T₂) je nový kořen, nad něj se nevracíme — větev (T₄,T₃) se nikdy nevyhodnotí.',
+        nodes: clsOf(N2, { a1: 'bad', a2: 'bad', a3: 'bad', b41: 'bad', b42: 'hl', b43: 'dim' }),
+        edges: edgesOf(E2), subs: subsOf(S2) },
+      { desc: 'Synové nového kořene (T₄,T₂)/3: (T₄,T₂,T₁)/max{5,3}+3 = 8 — zbylá T₃ stíhá těsně (max{8,4}+2 = 10 ≤ 10) → přežívá, DFS jde do něj; (T₄,T₂,T₃)/max{4,3}+2 = 6 počká.',
+        nodes: clsOf(N3, { a1: 'bad', a2: 'bad', a3: 'bad', b41: 'bad', b43: 'dim', c421: 'hl' }),
+        edges: edgesOf(E3), subs: subsOf(S3) },
+      { desc: 'List (T₄,T₂,T₁,T₃)/max{4,8}+2 = 10 ≤ 10 → <strong>první řešení, Cmax = 10</strong>. Rozvrh: T₄⟨0,1), T₂⟨1,3), prostoj, T₁⟨5,8), T₃⟨8,10). Koncový blok od t = 5 startuje s T₁ v r₁ = 5, ale r₃ = 4 &lt; 5 → <strong>BRTP NE</strong>. Utáhni d̃ := min{d̃, 9} = (9, 3, 9, 2) a pokračuj.',
+        nodes: clsOf(N4, { a1: 'bad', a2: 'bad', a3: 'bad', b41: 'bad', b43: 'dim', d4213: 'hl' }),
+        edges: edgesOf(E4), subs: subsOf(S4) },
+      { desc: '(T₄,T₂,T₃)/6: T₁ stíhá i utažený deadline (max{6,5}+3 = 9 ≤ 9) → list (T₄,T₂,T₃,T₁)/max{5,6}+3 = 9 → <strong>lepší řešení, Cmax = 9</strong>. Koncový blok {T₃, T₁} od t = 4: T₃ startuje v r₃ = 4 a r₃ = 4 ≤ r₁ = 5 → <strong>BRTP ANO → optimum, stop</strong>.',
+        nodes: clsOf(N5, { a1: 'bad', a2: 'bad', a3: 'bad', b41: 'bad', b43: 'dim', c421: '', d4213: '', a4: 'good', b42: 'good', c423: 'good', d4231: 'good' }),
+        edges: edgesOf(E5), subs: subsOf(S5) },
+    ],
+    caption: 'T02 — Bratleyho strom (vlastní odvození dle pravidel slidů 17–21 — přiznáno; výsledek souhlasí se vzorovým řešením). Všimni si dekompozice v (T₄,T₂)/3 a neúspěšného BRTP testu u prvního listu /10.',
+  });
+})();
+
+// ===== T02: vysledny Gantt (= vzorove reseni 1:1) =====
+// T4<0,1), T2<1,3), idle<3,4), T3<4,6), T1<6,9); Cmax=9, BRTP od r3=4
+KOViz.gantt(document.getElementById('viz-t02gantt'), {
+  tmax: 10, tstep: 1,
+  rows: [{ id: 'm', label: 'P₁' }],
+  blocks: [
+    { row: 'm', from: 0, to: 1, label: 'T₄', cls: 'good' },
+    { row: 'm', from: 1, to: 3, label: 'T₂', cls: 'good' },
+    { row: 'm', from: 3, to: 4, cls: 'idle' },
+    { row: 'm', from: 4, to: 6, label: 'T₃', cls: 'good' },
+    { row: 'm', from: 6, to: 9, label: 'T₁', cls: 'good' },
+  ],
+  marks: [
+    { t: 0, label: 'r₂ = r₄', cls: 'soft' },
+    { t: 2, label: 'd̃₄' },
+    { t: 3, label: 'd̃₂' },
+    { t: 4, label: 'r₃', cls: 'soft' },
+    { t: 5, label: 'r₁', cls: 'soft' },
+    { t: 9, label: 'C*max = 9' },
+    { t: 10, label: 'd̃₁ = d̃₃' },
+  ],
+  caption: 'T02 — výsledný Gantt (= vzorové řešení 1:1): T₄⟨0,1), T₂⟨1,3), prostoj ⟨3,4), T₃⟨4,6), T₁⟨6,9), C*max = 9. Koncový blok {T₃, T₁} startuje v r₃ = 4 ≤ r₁ = 5 → BRTP → optimum. Prostoj před blokem BRTP nevadí.',
+});
+</script>
+</body>
+</html>

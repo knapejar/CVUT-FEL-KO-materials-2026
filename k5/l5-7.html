@@ -106,7 +106,7 @@
     </ul>
   </div>
 
-  <p>Tahle mapa je zkoušková klasika: druhý řádek (NP-hard bez preempce — nepreemptivní příbuzný s deadliny se řeší Bratleyho B&amp;B, [L5.9]), třetí a čtvrtý řádek je dnešní lekce, poslední řádek (precedence) vyřeší transformace Chetto-Silly-Bouchentouf v <a href="../k5/l5-8.html">[L5.8] Chetto-Silly-Bouchentouf</a>. Že preempce dělá z těžkých problémů lehké, jsi už viděl u <a href="../k5/l5-4.html#takeaways">[L5.4] McNaughton (P|pmtn|Cmax)</a>.</p>
+  <p>Tahle mapa je zkoušková klasika: druhý řádek (NP-hard bez preempce — nepreemptivní příbuzný s deadliny se řeší Bratleyho B&amp;B, <a href="../k5/l5-9.html">[L5.9]</a>), třetí a čtvrtý řádek je dnešní lekce, poslední řádek (precedence) vyřeší transformace Chetto-Silly-Bouchentouf v <a href="../k5/l5-8.html">[L5.8] Chetto-Silly-Bouchentouf</a>. Že preempce dělá z těžkých problémů lehké, jsi už viděl u <a href="../k5/l5-4.html#takeaways">[L5.4] McNaughton (P|pmtn|Cmax)</a>.</p>
 
   <!-- ===== SEKCE 3: HORN ===== -->
   <h2>Hornův algoritmus = iterované EDD</h2>
@@ -190,7 +190,7 @@ end</code></pre>
       <li><strong>$1\,||\,L_{\max}$ řeší EDD:</strong> seřaď podle neklesajících due dat, $\mathcal{O}(n \log n)$; optimalita výměnným (swap) argumentem — prohození sousedů $T_b T_a$ s $d_a \le d_b$ nikdy nezvýší $L_{\max}$.</li>
       <li><strong>$1\,|\,r_j\,|\,L_{\max}$ je NP-hard</strong> (vyplatí se čekat na naléhavou úlohu); <strong>s preempcí je to polynomiální</strong> — Hornův algoritmus = v každém okamžiku běží ready úloha s nejmenším $d_j$, preempce nastává jen při příchodu naléhavější úlohy (v release timech).</li>
       <li><strong>Běh Horna:</strong> rozhodovací body $t_1$ (releasy + dokončení), $\delta = \min\{p_k, t_2 - t_1\}$; výstup nakresli jako Gantt a spočti $L_{\max} = \max_j (C_j - d_j)$ — záporná hodnota je v pořádku (earliness).</li>
-      <li><strong>S $d_j = \tilde{d}_j$ se Hornovi říká EDF</strong> (Earliest Deadline First): minimalizuje $L_{\max}$ a rozhoduje schedulabilitu (feasible ⟺ $L_{\max} \le 0$). Precedence se předzpracují transformací CSB <a href="../k5/l5-8.html#takeaways">[L5.8]</a>; nepreemptivní případ s deadliny řeší Bratleyho B&amp;B [L5.9].</li>
+      <li><strong>S $d_j = \tilde{d}_j$ se Hornovi říká EDF</strong> (Earliest Deadline First): minimalizuje $L_{\max}$ a rozhoduje schedulabilitu (feasible ⟺ $L_{\max} \le 0$). Precedence se předzpracují transformací CSB <a href="../k5/l5-8.html#takeaways">[L5.8]</a>; nepreemptivní případ s deadliny řeší Bratleyho B&amp;B <a href="../k5/l5-9.html">[L5.9]</a>.</li>
     </ul>
   </div>
 

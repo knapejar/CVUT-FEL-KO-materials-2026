@@ -75,7 +75,7 @@
 
   <div class="box info">
     <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 26 (EN 1:1) — pravidlo ořezu</div>
-    <p>“The Branch and Bound algorithm creates a similar tree as Bradley’s algorithm <em>[sic — myšlen Bratleyho algoritmus, [L5.9]]</em>.</p>
+    <p>“The Branch and Bound algorithm creates a similar tree as Bradley’s algorithm <em>[sic — myšlen Bratleyho algoritmus, <a href="../k5/l5-9.html">[L5.9]</a>]</em>.</p>
     <ul>
       <li>Let $J_1$ be the value of the best solution known up to now</li>
       <li>We discard the partial solution of value $J_2$ not only when $J_2 \ge J_1$, but also when $J_2 + J^{LP}\text{(remaining tasks)} \ge J_1$.<br>
@@ -114,14 +114,14 @@
     </div>
   </details>
 
-  <p>Přesně tohle dělá <strong>position-based ILP</strong> ze slidu 16 — formulovaný pro $1|r_j, \tilde{d}_j|C_{max}$, problém, který později vyřešíme i kombinatoricky Bratleyho B&amp;B [L5.9]. Vedle matice $x_{iq}$ má spojité proměnné $t_q$ (start pozice $q$): pozice na sebe navazují, start nesmí předběhnout release time přiřazené úlohy a její deadline $\tilde{d}_i$ musí stihnout. Celý model si rozebereš v úloze T02 — slide k němu poznamenává „more efficient than relative order ILP“.</p>
+  <p>Přesně tohle dělá <strong>position-based ILP</strong> ze slidu 16 — formulovaný pro $1|r_j, \tilde{d}_j|C_{max}$, problém, který později vyřešíme i kombinatoricky Bratleyho B&amp;B <a href="../k5/l5-9.html">[L5.9]</a>. Vedle matice $x_{iq}$ má spojité proměnné $t_q$ (start pozice $q$): pozice na sebe navazují, start nesmí předběhnout release time přiřazené úlohy a její deadline $\tilde{d}_i$ musí stihnout. Celý model si rozebereš v úloze T02 — slide k němu poznamenává „more efficient than relative order ILP“.</p>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.6b</div>
     <ul>
       <li><strong>LP relaxace relative-order modelu</strong> ($0 \le x_{ij} \le 1$, $x \in \mathbb{R}$) dává $J^{LP} \le J^*$ — dolní mez, protože řešení ILP jsou podmnožinou řešení LP (<a href="../k0/l0-7.html#takeaways">[L0.7]</a>); u minimalizace je mez <em>dolní</em>, zrcadlově k maximalizaci z <a href="../k5/l5-5.html#takeaways">[L5.5]</a>.</li>
-      <li><strong>Strom nad pořadími</strong> (jako u Bratleyho [L5.9]): uzel = prefix s pevnou hodnotou $J_2$; ořež, jakmile $J_2 + J^{LP}(\text{zbývající úlohy}) \ge J_1$ (nejlepší známé úplné řešení) — i při rovnosti. Alternativa dle L5.5: větvit na zlomkové $x_{ij} = 0/1$ a řezat při $J^{LP}(\text{uzel}) \ge J_1$.</li>
+      <li><strong>Strom nad pořadími</strong> (jako u Bratleyho <a href="../k5/l5-9.html">[L5.9]</a>): uzel = prefix s pevnou hodnotou $J_2$; ořež, jakmile $J_2 + J^{LP}(\text{zbývající úlohy}) \ge J_1$ (nejlepší známé úplné řešení) — i při rovnosti. Alternativa dle L5.5: větvit na zlomkové $x_{ij} = 0/1$ a řezat při $J^{LP}(\text{uzel}) \ge J_1$.</li>
       <li><strong>LP bod není rozvrh:</strong> zlomkové $x_{ij}$ („napůl před“) nelze zaokrouhlit — z relaxace se používá jen hodnota $J^{LP}$.</li>
       <li><strong>Position-based varianta:</strong> $x_{iq}$ (úloha $i$ na pozici $q$) + starty $t_q$ — permutace přes dvě přiřazovací rovnosti místo $n^3$ trojic; pro $1|r_j, \tilde{d}_j|C_{max}$ „more efficient than relative order ILP“ (slide 16, úloha T02).</li>
     </ul>
@@ -185,7 +185,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Studijní úloha z banky: umět <strong>reprodukovat a vysvětlit</strong> druhé kódování pořadí — přiřazení úloh na pozice. Problém je $1|r_j, \tilde{d}_j|C_{max}$: jeden stroj, release times a deadliny, minimalizuj makespan (tentýž problém řeší kombinatoricky Bratleyho B&amp;B [L5.9]).</p>
+      <p>Studijní úloha z banky: umět <strong>reprodukovat a vysvětlit</strong> druhé kódování pořadí — přiřazení úloh na pozice. Problém je $1|r_j, \tilde{d}_j|C_{max}$: jeden stroj, release times a deadliny, minimalizuj makespan (tentýž problém řeší kombinatoricky Bratleyho B&amp;B <a href="../k5/l5-9.html">[L5.9]</a>).</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
