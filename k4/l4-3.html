@@ -61,7 +61,7 @@
 
   <p>Krok za krokem česky:</p>
   <ul>
-    <li><strong>Krok 1 — startovní přípustný tok.</strong> Při $l \equiv 0$ stačí $f \equiv 0$; u zkoušky bývá přípustný tok rovnou <em>zadaný</em> (sloupek $f_e$ v popisku hrany). Když ale $l &gt; 0$ a tok zadaný není, je už tenhle krok netriviální úloha sama o sobě — řeší ji [L4.7].</li>
+    <li><strong>Krok 1 — startovní přípustný tok.</strong> Při $l \equiv 0$ stačí $f \equiv 0$; u zkoušky bývá přípustný tok rovnou <em>zadaný</em> (sloupek $f_e$ v popisku hrany). Když ale $l &gt; 0$ a tok zadaný není, je už tenhle krok netriviální úloha sama o sobě — řeší ji <a href="l4-7.html">[L4.7]</a>.</li>
     <li><strong>Krok 2 — hledání cesty.</strong> Značkování z <a href="l4-2.html">[L4.2]</a>, neboli dosažitelnost $s \to t$ v reziduálním grafu $G_f$.</li>
     <li><strong>Krok 3 — augmentace.</strong> $+\gamma$ na dopředných, $-\gamma$ na zpětných hranách a zpátky na krok 2. Nic víc v algoritmu není — celá práce je v opakování.</li>
   </ul>
@@ -148,7 +148,7 @@
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.3</div>
     <ul>
-      <li><strong>Ford-Fulkerson = smyčka kolem augmentace:</strong> 1. sežeň přípustný tok ($f \equiv 0$ při $l \equiv 0$, u zkoušky zadán; jinak [L4.7]), 2. najdi augmentující cestu (<a href="l4-2.html#takeaways">[L4.2]</a>), 3. pošli $\gamma$ a aktualizuj — $+\gamma$ na dopředných, $-\gamma$ na zpětných hranách — a zpět na 2.</li>
+      <li><strong>Ford-Fulkerson = smyčka kolem augmentace:</strong> 1. sežeň přípustný tok ($f \equiv 0$ při $l \equiv 0$, u zkoušky zadán; jinak <a href="l4-7.html">[L4.7]</a>), 2. najdi augmentující cestu (<a href="l4-2.html#takeaways">[L4.2]</a>), 3. pošli $\gamma$ a aktualizuj — $+\gamma$ na dopředných, $-\gamma$ na zpětných hranách — a zpět na 2.</li>
       <li><strong>Konec:</strong> v reziduálním grafu už není cesta $s \to t$ (typicky: všechny hrany ze zdroje nasycené). Tok je pak maximální; zdůvodnění řezem a min-cut v <a href="l4-4.html">[L4.4]</a>.</li>
       <li><strong>Zkouškový běh 25. 5. 2026:</strong> start $|f| = 9$; ① $T_1{\to}T_4{\to}T_5{\to}T_8$, $\gamma = 4$; ② $T_1{\to}T_4{\to}T_7{\to}T_8$, $\gamma = 1$; ③ $T_1{\to}T_4{\to}T_5{\to}T_3{\to}T_6{\to}T_8$ přes zpětnou $T_5{\to}T_3$, $\gamma = 2$; výsledek $|f| = 16$.</li>
       <li><strong>Složitost:</strong> celočíselné kapacity → $\gamma \ge 1$ → nejvýš $F$ iterací po $\mathcal{O}(|E|)$, tj. $\mathcal{O}(|E| \cdot F) = \mathcal{O}(|E|^2 \cdot U)$ — pseudopolynomiální (zigzag $2U$ iterací); neceločíselné kapacity: nemusí skončit vůbec. <strong>Edmonds-Karp</strong> (vždy nejkratší cesta, BFS) → $\mathcal{O}(|E|^2 \cdot |V|)$.</li>

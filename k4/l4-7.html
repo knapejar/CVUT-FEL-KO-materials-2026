@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L4.7 · Počáteční přípustný tok při nenulových dolních mezích — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k4">K4 · Toky a řezy</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L4.7</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L4.7</span> Kapitola K4 — Toky a řezy (Slot 4) · <strong>[MUST]</strong> · <em>téma ústní</em>
+  </p>
+  <h1>Počáteční přípustný tok při nenulových dolních mezích</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Transformace úlohy $(G, l, u, s, t)$ s $l(e) &gt; 0$ na feasible flow with balances s nulovými dolními mezemi.</strong> Tři tahy: cirkulační hrana $t \to s$ s kapacitou $\infty$, substituce $f(e) = f'(e) + l(e)$ (nové kapacity $u' = u - l$) a bilance $b(v) = \sum_{\text{do } v} l - \sum_{\text{z } v} l$ — a pak už jen zavoláš rozhodovací úlohu z <a href="l4-6.html#takeaways">[L4.6]</a>.
+  </div>
+
+  <p>Ford-Fulkerson je smyčka „augmentuj, dokud to jde“ — ale krok 1 zní <em>„sežeň přípustný tok“</em> (<a href="l4-3.html#takeaways">[L4.3]</a>). Při $l \equiv 0$ je to zadarmo ($f \equiv 0$), a u zkouškových běhů bývá tok rovnou v zadání. Dnes vyřešíme zbývající případ: síť s nenulovými dolními mezemi, kde startovní tok nikdo nedal. Je to přesné zkouškové zadání (09.07.2021 a další termíny, úloha T01 dole) i téma k ústní — a zároveň vstupní brána k minimum cost flow: cycle canceling v [L4.11] taky potřebuje z čeho vystartovat.</p>
+
+  <!-- ===== SEKCE 1: PROČ JE START PROBLÉM ===== -->
+  <h2>Proč je start vůbec problém</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 24 — How to Find an Initial Feasible Flow for Ford-Fulkerson Algorithm?, 1:1 (úvod)</div>
+    <p><em>If $\forall e \in E(G);\, l(e) = 0$ — easy solution — we use zero flow which satisfies Kirchhoff's law.</em></p>
+    <p><em>If $\exists e \in E(G);\, l(e) &gt; 0$, we transform the Maximum Flow problem with non-zero lower bounds to the <strong>Feasible Flow with Balances and zero lower bounds</strong>.</em></p>
+  </div>
+
+  <p>Celou lekci odpracujeme na příkladu ze slidů 26–27 (orientace hran rekonstruována z popisu obrázku tak, aby seděly kapacity i výsledné bilance — přiznáno; popisek hrany $= l, -, u$, tok zatím neznáme):</p>
+
+  <div class="viz" id="viz-orig"></div>
+
+  <details class="try">
+    <summary>Zkus sám: proč nejde vystartovat z $f \equiv 0$? A co druhý reflex — položit rovnou $f \equiv l$?</summary>
+    <div class="inner">
+      <p>$f \equiv 0$ porušuje dolní meze: hrana $s \to u$ chce $f \ge 1$, hrana $s \to v$ dokonce $f \ge 2$. A $f \equiv l$ sice meze splní ($l \le l \le u$ ✓), ale obecně rozbije Kirchhoffa (<a href="l4-1.html#takeaways">[L4.1]</a>): v uzlu $v$ by přiteklo $l(s{\to}v) + l(u{\to}v) = 2 + 1 = 3$, ale odteklo jen $l(v{\to}t) = 2$. Jednotka by se ve $v$ „ztrácela“. (V uzlu $u$ to náhodou vyjde, $1 = 1$ — ale spoléhat se na to nedá.) Přípustný tok musí vybalancovat <em>obě</em> podmínky najednou — a dokonce nemusí existovat vůbec (drill v <a href="l4-1.html#t-nofeasible">[L4.1] T02</a>). Potřebujeme systematickou konstrukci, ne hádání.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: KROK 1 ===== -->
+  <h2>Krok 1: uzavři síť cirkulační hranou $t \to s$ (slide 24)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: uzly $s$ a $t$ jsou výjimky — Kirchhoff pro ně neplatí. Jak je jediným tahem „zrovnoprávnit“ se zbytkem grafu?</summary>
+    <div class="inner">
+      <p>Vrať tok zpátky: přidej hranu $t \to s$ s $l = 0$ a $u = \infty$. Všechno, co do $t$ přiteče, po ní odteče zpět do $s$ — takže Kirchhoffova rovnice začne platit i v $s$ a $t$. Z toku se stane <strong>cirkulace</strong> (circulation): tok bez začátku a konce, který jen obíhá. Žádný uzel už není speciální — a přesně to potřebujeme, protože další krok bude manipulovat <em>každý</em> uzel stejným pravidlem. Hodnota původního toku přitom nezmizela: je to přesně $f(t \to s)$.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 24 — krok 1, 1:1</div>
+    <p><em>1) We add a circulation problem by <strong>adding an arc from $t$ to $s$ of infinite capacity</strong>. Consequently, the Kirchhoff's law applies to nodes $s$ and $t$. Therefore, a feasible <strong>circulation must satisfy</strong>:</em></p>
+    $$\begin{aligned} l(e) \le f(e) \le u(e) &amp; \quad e \in E(G) \\ \sum_{e \in \delta^+(v)} f(e) - \sum_{e \in \delta^-(v)} f(e) = 0 &amp; \quad v \in V(G) \end{aligned}$$
+  </div>
+
+  <!-- ===== SEKCE 3: KROKY 2+3 ===== -->
+  <h2>Krok 2: substituce $f = f' + l$ — a krok 3: bilance z dolních mezí (slide 25)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: vymysli substituci, po které podmínka $l(e) \le f(e) \le u(e)$ ztratí dolní mez. (Nápověda: neměř celý tok — měř jen to, co je <em>navíc</em>.)</summary>
+    <div class="inner">
+      <p>Povinných $l(e)$ jednotek hranou poteče tak jako tak — zajímavá je jen <strong>nadstavba</strong> $f'(e) := f(e) - l(e)$, tedy $f(e) = f'(e) + l(e)$. Dosazením: $l \le f' + l \le u \iff 0 \le f'(e) \le u(e) - l(e)$. Nová proměnná $f'$ má nulovou dolní mez a kapacitu $u'(e) = u(e) - l(e)$ — přesně svět, ve kterém umí Ford-Fulkerson vystartovat z nuly. Otázka za milion: co ta substituce provede s Kirchhoffem?</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: dosaď $f(e) = f'(e) + l(e)$ do cirkulačního Kirchhoffa $\sum_{\delta^+(v)} f - \sum_{\delta^-(v)} f = 0$. Co zbyde na pravé straně?</summary>
+    <div class="inner">
+      <p>$\sum_{\delta^+(v)} (f' + l) - \sum_{\delta^-(v)} (f' + l) = 0$, tedy po přerovnání $$\sum_{e \in \delta^+(v)} f'(e) - \sum_{e \in \delta^-(v)} f'(e) = \underbrace{\sum_{e \in \delta^-(v)} l(e) - \sum_{e \in \delta^+(v)} l(e)}_{=:\ b(v)}.$$ Na pravé straně se objevila konstanta spočítaná <em>jen ze vstupních dat</em> (žádný neznámý tok!) — a levá strana je přesně bilanční rovnice z <a href="l4-6.html#takeaways">[L4.6]</a>. Dolní meze se proměnily v bilance: uzel, do kterého dolní meze „napumpují“ víc povinného přítoku, než kolik z něj povinně odtéká, se v $f'$-světě chová jako <strong>dodavatel</strong> ($b(v) &gt; 0$ — přebytek musí odeslat); opačný uzel jako <strong>spotřebič</strong> ($b(v) &lt; 0$).</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 25 — How to find an initial feasible flow for Ford-Fulkerson algorithm?, 1:1</div>
+    <p><em>2) Substituting $f(e) = f(e)' + l(e)$, we obtain the transformed problem:</em></p>
+    $$\begin{aligned} 0 \le f(e)' \le u(e) - l(e) &amp; \quad e \in E(G) \\ \sum_{e \in \delta^+(v)} f(e)' - \sum_{e \in \delta^-(v)} f(e)' = \underbrace{\sum_{e \in \delta^-(v)} l(e) - \sum_{e \in \delta^+(v)} l(e)}_{b(v)} &amp; \quad v \in V(G) \end{aligned}$$
+    <p><em>3) This is a <strong>Feasible Flow with Balances and zero lower bounds</strong> because $\sum_{v \in V(G)} b(v) = 0$ (notice that $l(e)$ appears twice in summation, once with a positive and once with a negative sign).</em></p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: spočti $b(v)$ pro všechny čtyři uzly příkladu (cirkulační hrana $t \to s$ má $l = 0$). Vyjde $\sum_v b(v) = 0$?</summary>
+    <div class="inner">
+      <p>Recept: $b(v) = \sum l(\text{hrany do } v) - \sum l(\text{hrany z } v)$.</p>
+      <ul>
+        <li>$b(s) = \underbrace{0}_{t \to s} - \underbrace{(1 + 2)}_{s \to u,\ s \to v} = -3$ — spotřebič (musí přijmout 3 jednotky extra toku).</li>
+        <li>$b(u) = \underbrace{1}_{s \to u} - \underbrace{(1 + 0)}_{u \to v,\ u \to t} = 0$ — vybalancovaný.</li>
+        <li>$b(v) = \underbrace{2 + 1}_{s \to v,\ u \to v} - \underbrace{2}_{v \to t} = +1$ — dodavatel.</li>
+        <li>$b(t) = \underbrace{0 + 2}_{u \to t,\ v \to t} - \underbrace{0}_{t \to s} = +2$ — dodavatel.</li>
+      </ul>
+      <p>$\sum_v b(v) = -3 + 0 + 1 + 2 = 0$ ✓ — a nejde o náhodu: každé $l(e)$ hrany $e = (x, y)$ se v součtu objeví jednou s plusem (u $y$) a jednou s minusem (u $x$), přesně jak říká slide. Tahle kontrola tě u zkoušky zdarma upozorní na početní chybu.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-trans"></div>
+
+  <!-- ===== SEKCE 4: KROK 4 ===== -->
+  <h2>Krok 4: zavolej redukci z [L4.6] a přečti odpověď</h2>
+
+  <p>Dál už nic nového nevymýšlíme — máme instanci $(G', u', b)$ s nulovými dolními mezemi a tu řeší minulá lekce: super-zdroj $s'$ s hranami $u = b(v)$ do dodavatelů, super-stok $t'$ s hranami $u = -b(v)$ ze spotřebičů, max flow, kritérium nasycení (<a href="l4-6.html#takeaways">[L4.6]</a>).</p>
+
+  <div class="box">
+    <div class="box-title">Slide 25 — krok 4 + Conclusion, 1:1</div>
+    <p><em>4) While solving this decision problem (i.e. adding $s', t'$ and solving the maximum flow problem with zero lower bounds) we obtain the initial feasible circulation/flow or decide that it does not exist.</em></p>
+    <p><em><strong>Conclusion:</strong> finding of the <strong>initial flow with nonzero lower bounds</strong> can be transformed to the <strong>Feasible Flow with Balances and zero lower bounds</strong> which can be transformed to the <strong>Maximum Flow with zero lower bounds</strong>.</em></p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: ten max flow v kroku 4 taky někde musí vystartovat. Nekoušeme si do ocasu?</summary>
+    <div class="inner">
+      <p>Ne — a to je celý vtip konstrukce. V redukované síti je <em>všude</em> $l = 0$ (původní hrany po substituci, b-hrany i cirkulační hrana), takže $f' \equiv 0$ je přípustný start a Ford-Fulkerson <a href="l4-3.html#takeaways">[L4.3]</a> normálně poběží. Nenulové dolní meze jsme nezrušili — <em>přestěhovali</em> jsme je do bilancí, kde s nimi max flow umí pracovat.</p>
+    </div>
+  </details>
+
+  <p>Běh na příkladu (redukovaná síť = slide 27; samotný běh je vlastní dopočet, slidy ukazují jen transformaci — přiznáno):</p>
+
+  <div class="viz" id="viz-ffrun"></div>
+
+  <h2>Zpětný převod: $f(e) = f'(e) + l(e)$</h2>
+
+  <p>Odpověď byla ANO — ale úloha nechtěla rozhodnutí, chtěla <em>tok</em>. Ten dostaneš zpětnou substitucí na původních hranách: $f(e) = f'(e) + l(e)$. V příkladu: $f(s{\to}u) = 0 + 1 = 1$, $f(s{\to}v) = 0 + 2 = 2$, $f(u{\to}v) = 0 + 1 = 1$, $f(u{\to}t) = 0 + 0 = 0$, $f(v{\to}t) = 1 + 2 = 3$ — všimni si, že i hrany s $f' = 0$ nesou tok $l(e)$:</p>
+
+  <div class="viz" id="viz-recovered"></div>
+
+  <p>Cirkulační hranu $t \to s$ nakonec smažeš a zbyde obyčejný $s$-$t$ tok s hodnotou $|f| = f(t \to s) = 3$. To je <strong>počáteční přípustný tok</strong>: Ford-Fulkerson z něj na původní síti $(G, l, u, s, t)$ pokračuje augmentacemi v reziduálním grafu — dopředné hrany s $f &lt; u$, zpětné s $f &gt; l$ (<a href="l4-2.html#takeaways">[L4.2]</a>) — až k maximálnímu toku.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
+    <p><strong>1) Znaménko $b(v)$: vstupy minus výstupy.</strong> $b(v) = \sum_{\delta^-(v)} l - \sum_{\delta^+(v)} l$ — opačně, než je v Kirchhoffovi na levé straně (tam je $\delta^+$ první)! Mnemotechnika: povinný <em>přítok</em> dělá z uzlu <em>dodavatele</em> extra toku ($b &gt; 0$), protože napumpované jednotky musí v $f'$-světě odeslat dál.
+    <strong>2) Zapomenutá hrana $t \to s$ s $\infty$.</strong> Bez ní Kirchhoff v $s$ a $t$ neplatí, substituce tam žádné $b$ nevyrobí a transformace nesedí — u zkoušky je to první věc, kterou opravující hledá.
+    <strong>3) Odpověď je $f = f' + l$, ne $f'$.</strong> Po max flow nezapomeň přičíst zpátky dolní meze, smazat $t \to s$ a vrátit se k původní síti — F-F pak pokračuje na ní, ne na redukci.
+    <strong>4) Počáteční tok nemusí existovat.</strong> Když $|f'_{\max}| &lt; B = \sum_{b(v) &gt; 0} b(v)$, přípustný tok v $(G, l, u, s, t)$ prostě není (kritérium i certifikát řezem viz <a href="l4-6.html#takeaways">[L4.6]</a> a <a href="l4-4.html#takeaways">[L4.4]</a>) — a původní max-flow úloha nemá žádné řešení.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.7</div>
+    <ul>
+      <li><strong>$l \equiv 0$ → start zdarma:</strong> $f \equiv 0$ splňuje Kirchhoffa i meze. Při $l(e) &gt; 0$ nulový tok přípustný není a $f \equiv l$ obecně rozbíjí Kirchhoffa.</li>
+      <li><strong>Transformace ve 3 tazích (slidy 24–25):</strong> ① cirkulační hrana $t \to s$ s $(l, u) = (0, \infty)$ — Kirchhoff pak platí všude; ② substituce $f(e) = f'(e) + l(e)$ → $0 \le f'(e) \le u'(e) = u(e) - l(e)$; ③ bilance $b(v) = \sum_{\delta^-(v)} l(e) - \sum_{\delta^+(v)} l(e)$ — jen ze vstupních dat, $\sum_v b(v) = 0$ (každé $l(e)$ jednou $+$ a jednou $-$).</li>
+      <li><strong>Krok 4 = <a href="l4-6.html#takeaways">[L4.6]</a>:</strong> přidej $s', t'$, vyřeš max flow s nulovými $l$ (start $f' \equiv 0$); počáteční tok existuje $\iff$ b-hrany nasycené ($|f'_{\max}| = B$).</li>
+      <li><strong>Zpětný převod:</strong> $f(e) = f'(e) + l(e)$ na původních hranách, smaž $t \to s$ → počáteční $s$-$t$ tok hodnoty $f(t \to s)$; F-F pokračuje na původní síti přes reziduální graf <a href="l4-2.html#takeaways">[L4.2]</a>.</li>
+      <li><strong>Řetěz redukcí (Conclusion, slide 25):</strong> initial flow s nenulovými $l$ → Feasible Flow with Balances s $l = 0$ → Maximum Flow s $l = 0$. Stejný startovní problém řeší i cycle canceling pro MCF v [L4.11].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-initflow">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Initial Feasible Flow for Ford-Fulkerson Algorithm</strong>
+      <span class="task-src">zdroj: zkouška 09.07.2021 (i další termíny), banka #22 — zadání EN 1:1, řešení dle banky; <em>téma ústní</em></span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN 1:1)</span>
+        <p><em>Transform the problem of finding an initial feasible flow (with non-zero lower bound problem $(G, l, u, s, t)$) for Ford-Fulkerson algorithm to problem $(G', u', b)$ i.e., the feasible flow decision problem with zero lower bound.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Teoretická „describe the transformation“ úloha (za 2 b): nechtějí po tobě počítat konkrétní síť, ale <strong>popsat konstrukci</strong> — jak z úlohy „najdi počáteční přípustný tok při $l(e) &gt; 0$“ uděláš instanci $(G', u', b)$ rozhodovací úlohy feasible flow with balances s nulovými dolními mezemi. Tatáž otázka chodí i k ústní.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — kroky 1–4 a vzorce $u' = u - l$, $b(v)$ (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-6.html#takeaways">[L4.6]</a> — co je feasible flow with balances a jak se dořeší max flowem.</li>
+        <li><a href="l4-1.html#takeaways">[L4.1]</a> — Kirchhoff a přípustnost $l \le f \le u$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Odpověď strukturuj přesně podle tří překážek: (1) $s$ a $t$ nemají Kirchhoffa → uzavři síť; (2) dolní meze brání startu z nuly → substituce; (3) substituce změní pravé strany rovnic → to jsou bilance. Ke každému kroku napiš vzorec a jednu větu proč. Nezapomeň říct, čím to končí (max flow + kritérium nasycení) a jak se z $f'$ vrátíš k $f$ — bez toho je odpověď neúplná.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle banky #22)</summary>
+        <div class="inner">
+          <p><strong>Krok 1 — uzavři síť.</strong> Přidej umělou hranu $(t, s)$ s $l(t, s) = 0$, $u(t, s) = \infty$. Úloha o $s$-$t$ toku se změní na úlohu o <strong>cirkulaci</strong>; uzly $s$ a $t$ přestávají být speciální a Kirchhoffův zákon platí ve všech vrcholech.</p>
+          <p><strong>Krok 2 — odstraň dolní meze.</strong> Pro každou hranu $e$ definuj nový neznámý „extra tok“ $f'(e)$ vztahem $f(e) = l(e) + f'(e)$. Pak $$l(e) \le f(e) \le u(e) \iff 0 \le f'(e) \le u(e) - l(e),$$ takže transformovaná kapacita je $u'(e) = u(e) - l(e)$ a dolní meze jsou nulové.</p>
+          <p><strong>Krok 3 — bilance z dolních mezí.</strong> Dosazení $f = l + f'$ do Kirchhoffova zákona dává pro každý uzel $$\sum_{e \in \delta^+(v)} f'(e) - \sum_{e \in \delta^-(v)} f'(e) = b(v) = \sum_{e \in \delta^-(v)} l(e) - \sum_{e \in \delta^+(v)} l(e).$$ Výraz $b(v)$ používá jen vstupní data, ne neznámý tok; platí $\sum_v b(v) = 0$ (každé $l(e)$ se objeví jednou s $+$ a jednou s $-$). Tím je instance $(G', u', b)$ hotová — to je požadovaná odpověď. Význam bilancí: $b(v) &gt; 0$ → $v$ musí odeslat víc extra toku, než přijme (dodavatel); $b(v) &lt; 0$ → musí víc přijmout (spotřebič); $b(v) = 0$ → vybalancovaný.</p>
+          <p><strong>Krok 4 — dořešení max flowem (bonus, <a href="l4-6.html#takeaways">[L4.6]</a>).</strong> Přidej super-zdroj $s^*$ a super-stok $t^*$: pro $b(v) &gt; 0$ hranu $s^* \to v$ s kapacitou $b(v)$, pro $b(v) &lt; 0$ hranu $v \to t^*$ s kapacitou $-b(v)$. Pusť max flow z $s^*$ do $t^*$. Přípustný tok existuje $\iff$ max tok nasytí všechny hrany z $s^*$; pak se původní tok obnoví jako $f(e) = l(e) + f'(e)$. Jinak počáteční přípustný tok neexistuje.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-initdrill">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Initial feasible flow — celá konstrukce na konkrétní síti</strong>
+      <span class="task-src">zdroj: VLASTNÍ drill (instance, otázky i řešení vlastní — přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN — vlastní drill, přiznáno)</span>
+        <p>Consider the network $(G, l, u, s, t)$ below with edges labelled $(l(e), u(e))$: $s \to a\ (2, 3)$, $s \to b\ (0, 2)$, $b \to a\ (1, 2)$, $a \to t\ (0, 3)$, $b \to t\ (0, 1)$. (i) Transform the search for an initial feasible flow into the feasible flow problem with balances and zero lower bounds: close the network, compute the transformed capacities $u'(e)$ and the balances $b(v)$. (ii) Solve the resulting maximum flow problem and decide whether a feasible flow exists. (iii) If it does, recover the flow $f$, verify $l \le f \le u$ and Kirchhoff's law, and state the value $|f|$ of the obtained initial $s$-$t$ flow.</p>
+      </div>
+
+      <div class="viz" id="viz-t02net"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejná konstrukce jako v lekci, ale tentokrát ji celou odpracuješ sám na malé síti: dvě hrany s nenulovou dolní mezí ($s \to a$ s $l = 2$, $b \to a$ s $l = 1$), takže nulový tok nepřipadá v úvahu. Výstupem není jen ANO/NE, ale konkrétní počáteční tok $f$ a jeho hodnota.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — kroky 1–4 + zpětný převod (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-6.html#takeaways">[L4.6]</a> — redukce s $s', t'$ a kritérium nasycení.</li>
+        <li><a href="l4-3.html#takeaways">[L4.3]</a> — běh Ford-Fulkersona po iteracích.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Mechanicky podle receptu: ① $t \to s$ s $(0, \infty)$; ② $u' = u - l$ na každé hraně; ③ $b(v) = \sum_{\text{do}} l - \sum_{\text{z}} l$ pro všechny čtyři uzly + kontrola $\sum b = 0$; ④ $s'$, $t'$, max flow, porovnání $|f'_{\max}|$ s $B$; ⑤ $f = f' + l$ a ověření. Pozor na uzel, do kterého vede hrana s $l &gt; 0$ a zároveň z něj jiná s $l &gt; 0$ vychází — znaménka se odečítají.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
+        <div class="inner">
+          <p><strong>(i) Transformace.</strong> Cirkulační hrana $t \to s$ s $(l, u) = (0, \infty)$. Nové kapacity $u' = u - l$: $s \to a$: $1$, $s \to b$: $2$, $b \to a$: $1$, $a \to t$: $3$, $b \to t$: $1$, $t \to s$: $\infty$. Bilance:</p>
+          <ul>
+            <li>$b(s) = 0 - (2 + 0) = -2$ (spotřebič),</li>
+            <li>$b(a) = (2 + 1) - 0 = +3$ (dodavatel),</li>
+            <li>$b(b) = 0 - (1 + 0) = -1$ (spotřebič),</li>
+            <li>$b(t) = (0 + 0) - 0 = 0$;</li>
+          </ul>
+          <p>$\sum_v b(v) = -2 + 3 - 1 + 0 = 0$ ✓. Redukce dle <a href="l4-6.html#takeaways">[L4.6]</a>: $s' \to a$ ($u = 3$), $s \to t'$ ($u = 2$), $b \to t'$ ($u = 1$); $B = 3$.</p>
+          <p><strong>(ii) Max flow</strong> (start $f' \equiv 0$, všude $l = 0$):</p>
+          <div class="viz" id="viz-t02run"></div>
+          <p>$|f'_{\max}| = 3 = B$ — všechny b-hrany nasycené → počáteční přípustný tok <strong>existuje</strong>.</p>
+          <p><strong>(iii) Zpětný převod</strong> $f = f' + l$ na původních hranách: $f(s \to a) = 0 + 2 = 2$, $f(s \to b) = 1 + 0 = 1$, $f(b \to a) = 0 + 1 = 1$ (hrana s $f' = 0$ nese tok $l = 1$!), $f(a \to t) = 3 + 0 = 3$, $f(b \to t) = 0 + 0 = 0$. Ověření mezí: $2 \in [2, 3]$ ✓, $1 \in [0, 2]$ ✓, $1 \in [1, 2]$ ✓, $3 \in [0, 3]$ ✓, $0 \in [0, 1]$ ✓. Kirchhoff: $a$: přítok $2 + 1 = 3$ = odtok $3$ ✓; $b$: přítok $1$ = odtok $1 + 0$ ✓. Po smazání $t \to s$ je to $s$-$t$ tok: z $s$ odteče $2 + 1 = 3$ a nic do něj nepřiteče, takže $|f| = 3$ (= tok na smazané cirkulační hraně $t \to s$ ✓). Ford-Fulkerson teď může na původní síti pokračovat z $f$ augmentacemi přes reziduální graf <a href="l4-2.html#takeaways">[L4.2]</a>.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L4.7">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k4/l4-6.html"><span class="dir">← Předchozí</span> L4.6 · Feasible flow with balances</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.8 · Matrix rounding přes toky)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Původní síť (slide 26 vlevo; orientace hran rekonstruována z popisu obrázku — přiznáno). Popisek = l, −, u.
+KOViz.graph(document.getElementById('viz-orig'), {
+  directed: true,
+  w: 640, h: 330,
+  nodes: [
+    {id:'s', x:110, y:170, label:'s', sub:'zdroj'},
+    {id:'u', x:280, y:70,  label:'u'},
+    {id:'v', x:280, y:270, label:'v'},
+    {id:'t', x:530, y:170, label:'t', sub:'stok'},
+  ],
+  edges: [
+    {from:'s', to:'u', label:'1,−,3'},
+    {from:'s', to:'v', label:'2,−,4'},
+    {from:'u', to:'v', label:'1,−,3'},
+    {from:'u', to:'t', label:'0,−,2'},
+    {from:'v', to:'t', label:'2,−,3'},
+  ],
+  caption: 'Maximum flow s nenulovými dolními mezemi (slide 26 vlevo): tři hrany mají l(e) &gt; 0, takže f ≡ 0 není přípustný start. Popisek hrany = l, −, u (tok zatím neznáme).',
+});
+
+// 2 — Po krocích 1–3 (slide 26 vpravo): cirkulační hrana t→s, kapacity u′ = u − l, bilance b(v) v uzlech
+KOViz.graph(document.getElementById('viz-trans'), {
+  directed: true,
+  w: 640, h: 330,
+  nodes: [
+    {id:'s', x:110, y:170, label:'s', sub:'b = −3'},
+    {id:'u', x:280, y:70,  label:'u', sub:'b = 0'},
+    {id:'v', x:280, y:270, label:'v', sub:'b = +1'},
+    {id:'t', x:530, y:170, label:'t', sub:'b = +2'},
+  ],
+  edges: [
+    {from:'s', to:'u', label:'0,−,2'},
+    {from:'s', to:'v', label:'0,−,2'},
+    {from:'u', to:'v', label:'0,−,2'},
+    {from:'u', to:'t', label:'0,−,2'},
+    {from:'v', to:'t', label:'0,−,1'},
+    {from:'t', to:'s', label:'0,−,∞', dashed:true, curve:-0.5, cls:'hl'},
+  ],
+  caption: 'Feasible Flow with Balances se zero lower bounds (slide 26 vpravo): krok 1 = čárkovaná cirkulační hrana t→s s (0, ∞); krok 2 = kapacity u′ = u − l (2, 2, 2, 2, 1); krok 3 = bilance b(s) = −3, b(u) = 0, b(v) = +1, b(t) = +2 spočtené jen z dolních mezí. Σ b(v) = 0 ✓.',
+});
+
+// 3 — Stepper: krok 4 = redukce s′/t′ (slide 27) + běh F-F (vlastní dopočet — přiznáno). Popisek = l, f′, u′.
+KOViz.stepper(document.getElementById('viz-ffrun'), {
+  graph: {
+    directed: true,
+    w: 640, h: 390,
+    nodes: [
+      {id:'s',  x:110, y:170, label:'s',  sub:'b = −3'},
+      {id:'u',  x:280, y:70,  label:'u',  sub:'b = 0'},
+      {id:'v',  x:280, y:270, label:'v',  sub:'b = +1'},
+      {id:'t',  x:530, y:170, label:'t',  sub:'b = +2'},
+      {id:'sp', x:430, y:330, label:'s′', sub:'super-zdroj'},
+      {id:'tp', x:110, y:330, label:'t′', sub:'super-stok'},
+    ],
+    edges: [
+      {from:'s', to:'u', label:'0,0,2'},
+      {from:'s', to:'v', label:'0,0,2'},
+      {from:'u', to:'v', label:'0,0,2'},
+      {from:'u', to:'t', label:'0,0,2'},
+      {from:'v', to:'t', label:'0,0,1'},
+      {from:'t', to:'s', label:'0,0,∞', dashed:true, curve:-0.5},
+      {from:'sp', to:'v', label:'0,0,1'},
+      {from:'sp', to:'t', label:'0,0,2'},
+      {from:'s', to:'tp', label:'0,0,3'},
+    ],
+  },
+  frames: [
+    {desc:'Redukovaná síť (slide 27): b(v) &gt; 0 → hrana ze s′ s u = b(v) (s′→v s u = 1, s′→t s u = 2); b(s) = −3 &lt; 0 → hrana s→t′ s u = 3. Všude l = 0, takže f′ ≡ 0 je přípustný start. B = 1 + 2 = 3.',
+     nodes:{sp:'hl', tp:'hl'}, edges:{'sp->v':'hl', 'sp->t':'hl', 's->tp':'hl'}},
+    {desc:'Iterace ①: augmentující cesta s′→v→t→s→t′, γ = min(1, 1, ∞, 3) = 1. |f′| = 1. Všimni si: cesta klidně vede přes původní hranu v→t i přes cirkulační hranu t→s — v redukované síti není žádná hrana „speciální“.',
+     nodes:{},
+     edges:{'sp->v':'hl', 'v->t':'hl', 't->s':'hl', 's->tp':'hl'},
+     labels:{'sp->v':'0,1,1', 'v->t':'0,1,1', 't->s':'0,1,∞', 's->tp':'0,1,3'}},
+    {desc:'Iterace ②: cesta s′→t→s→t′, γ = min(2, ∞, 2) = 2. |f′| = 3 = B a další augmentující cesta neexistuje (obě hrany ze s′ jsou nasycené).',
+     nodes:{},
+     edges:{'sp->t':'hl', 't->s':'hl', 's->tp':'hl'},
+     labels:{'sp->v':'0,1,1', 'v->t':'0,1,1', 't->s':'0,3,∞', 's->tp':'0,3,3', 'sp->t':'0,2,2'}},
+    {desc:'Odpověď ANO: všechny b-hrany nasycené (s′→v: 1 = 1, s′→t: 2 = 2, s→t′: 3 = 3), tj. |f′_max| = B = 3. Extra tok na původních hranách: f′(v→t) = 1, f′(t→s) = 3, jinde f′ = 0.',
+     nodes:{sp:'good', tp:'good'},
+     edges:{'sp->v':'good', 'sp->t':'good', 's->tp':'good'},
+     labels:{'sp->v':'0,1,1', 'v->t':'0,1,1', 't->s':'0,3,∞', 's->tp':'0,3,3', 'sp->t':'0,2,2'}},
+    {desc:'Zpětný převod f(e) = f′(e) + l(e) provedeme pod obrázkem — zvýrazněné původní hrany ponesou kladný tok f (pozor: i ty s f′ = 0, pokud mají l &gt; 0).',
+     nodes:{s:'good', u:'good', v:'good', t:'good'},
+     edges:{'v->t':'hl', 't->s':'hl', 's->u':'hl', 's->v':'hl', 'u->v':'hl'},
+     labels:{'sp->v':'0,1,1', 'v->t':'0,1,1', 't->s':'0,3,∞', 's->tp':'0,3,3', 'sp->t':'0,2,2'}},
+  ],
+  caption: 'Krok 4: redukce na max flow (slide 27) a běh F-F (vlastní dopočet — přiznáno; popisek = l, f′, u′). Dvě iterace γ = 1, 2 → |f′| = 3 = B → počáteční přípustný tok existuje.',
+});
+
+// 4 — Zpětný převod: původní síť s f = f′ + l (popisek = l, f, u)
+KOViz.graph(document.getElementById('viz-recovered'), {
+  directed: true,
+  w: 640, h: 330,
+  nodes: [
+    {id:'s', x:110, y:170, label:'s', sub:'zdroj'},
+    {id:'u', x:280, y:70,  label:'u'},
+    {id:'v', x:280, y:270, label:'v'},
+    {id:'t', x:530, y:170, label:'t', sub:'stok'},
+  ],
+  edges: [
+    {from:'s', to:'u', label:'1,1,3', cls:'good'},
+    {from:'s', to:'v', label:'2,2,4', cls:'good'},
+    {from:'u', to:'v', label:'1,1,3', cls:'good'},
+    {from:'u', to:'t', label:'0,0,2'},
+    {from:'v', to:'t', label:'2,3,3', cls:'good'},
+    {from:'t', to:'s', label:'0,3,∞', dashed:true, curve:-0.5},
+  ],
+  caption: 'Počáteční přípustný tok f = f′ + l (popisek = l, f, u). Kontrola: meze všude l ≤ f ≤ u ✓; Kirchhoff: u: 1 = 1 + 0 ✓, v: 2 + 1 = 3 ✓, s: 3 = 1 + 2 ✓, t: 0 + 3 = 3 ✓. Po smazání čárkované t→s zbyde s-t tok s |f| = 3 — start pro Ford-Fulkersona na původní síti.',
+});
+
+// 5 — T02: statická síť drillu (popisek = l, −, u)
+KOViz.graph(document.getElementById('viz-t02net'), {
+  directed: true,
+  w: 640, h: 330,
+  nodes: [
+    {id:'s', x:110, y:170, label:'s', sub:'zdroj'},
+    {id:'a', x:300, y:70,  label:'a'},
+    {id:'b', x:300, y:270, label:'b'},
+    {id:'t', x:490, y:170, label:'t', sub:'stok'},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'2,−,3'},
+    {from:'s', to:'b', label:'0,−,2'},
+    {from:'b', to:'a', label:'1,−,2'},
+    {from:'a', to:'t', label:'0,−,3'},
+    {from:'b', to:'t', label:'0,−,1'},
+  ],
+  caption: 'T02: síť (G, l, u, s, t), popisek = l, −, u. Hrany s→a (l = 2) a b→a (l = 1) mají nenulové dolní meze.',
+});
+
+// 6 — T02: stepper běhu na redukované síti (uvnitř details — řešení). Popisek = l, f′, u′.
+KOViz.stepper(document.getElementById('viz-t02run'), {
+  graph: {
+    directed: true,
+    w: 640, h: 390,
+    nodes: [
+      {id:'s',  x:110, y:170, label:'s',  sub:'b = −2'},
+      {id:'a',  x:300, y:70,  label:'a',  sub:'b = +3'},
+      {id:'b',  x:300, y:270, label:'b',  sub:'b = −1'},
+      {id:'t',  x:490, y:170, label:'t',  sub:'b = 0'},
+      {id:'sp', x:470, y:40,  label:'s′', sub:'super-zdroj'},
+      {id:'tp', x:110, y:330, label:'t′', sub:'super-stok'},
+    ],
+    edges: [
+      {from:'s', to:'a', label:'0,0,1'},
+      {from:'s', to:'b', label:'0,0,2'},
+      {from:'b', to:'a', label:'0,0,1'},
+      {from:'a', to:'t', label:'0,0,3'},
+      {from:'b', to:'t', label:'0,0,1'},
+      {from:'t', to:'s', label:'0,0,∞', dashed:true, curve:0.9},
+      {from:'sp', to:'a', label:'0,0,3'},
+      {from:'s', to:'tp', label:'0,0,2'},
+      {from:'b', to:'tp', label:'0,0,1'},
+    ],
+  },
+  frames: [
+    {desc:'Redukovaná síť: u′ = u − l na původních hranách, cirkulační t→s (∞), b-hrany s′→a (u = 3), s→t′ (u = 2), b→t′ (u = 1). B = 3, start f′ ≡ 0.',
+     nodes:{sp:'hl', tp:'hl'}, edges:{'sp->a':'hl', 's->tp':'hl', 'b->tp':'hl'}},
+    {desc:'Iterace ①: cesta s′→a→t→s→t′, γ = min(3, 3, ∞, 2) = 2. |f′| = 2.',
+     nodes:{},
+     edges:{'sp->a':'hl', 'a->t':'hl', 't->s':'hl', 's->tp':'hl'},
+     labels:{'sp->a':'0,2,3', 'a->t':'0,2,3', 't->s':'0,2,∞', 's->tp':'0,2,2'}},
+    {desc:'Iterace ②: cesta s′→a→t→s→b→t′, γ = min(1, 1, ∞, 2, 1) = 1. |f′| = 3 = B — hrana s→t′ už byla plná, tak extra tok doteče do t′ přes b.',
+     nodes:{},
+     edges:{'sp->a':'hl', 'a->t':'hl', 't->s':'hl', 's->b':'hl', 'b->tp':'hl'},
+     labels:{'sp->a':'0,3,3', 'a->t':'0,3,3', 't->s':'0,3,∞', 's->tp':'0,2,2', 's->b':'0,1,2', 'b->tp':'0,1,1'}},
+    {desc:'Odpověď ANO: b-hrany nasycené (s′→a: 3 = 3, s→t′: 2 = 2, b→t′: 1 = 1), |f′_max| = 3 = B. Na původních hranách: f′(a→t) = 3, f′(s→b) = 1, jinde f′ = 0.',
+     nodes:{sp:'good', tp:'good'},
+     edges:{'sp->a':'good', 's->tp':'good', 'b->tp':'good'},
+     labels:{'sp->a':'0,3,3', 'a->t':'0,3,3', 't->s':'0,3,∞', 's->tp':'0,2,2', 's->b':'0,1,2', 'b->tp':'0,1,1'}},
+    {desc:'Zpětný převod f = f′ + l: f(s→a) = 0 + 2 = 2, f(s→b) = 1, f(b→a) = 0 + 1 = 1 (!), f(a→t) = 3, f(b→t) = 0. Smaž t→s → s-t tok s |f| = 3.',
+     nodes:{s:'good', a:'good', b:'good', t:'good'},
+     edges:{'s->a':'hl', 's->b':'hl', 'b->a':'hl', 'a->t':'hl', 't->s':'hl'},
+     labels:{'sp->a':'0,3,3', 'a->t':'0,3,3', 't->s':'0,3,∞', 's->tp':'0,2,2', 's->b':'0,1,2', 'b->tp':'0,1,1'}},
+  ],
+  caption: 'T02: běh F-F na redukované síti (popisek = l, f′, u′). Dvě iterace γ = 2, 1 → |f′| = 3 = B → počáteční tok existuje; zpětným převodem f = f′ + l vyjde f = (2, 1, 1, 3, 0) s |f| = 3.',
+});
+</script>
+</body>
+</html>

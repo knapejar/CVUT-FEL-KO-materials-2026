@@ -36,7 +36,7 @@
     <strong>Vrcholy s bilancemi $b(v)$ — zdroje a spotřebiče přímo v uzlech — a rozhodnutí, zda přípustný tok existuje.</strong> Síť s mnoha zdroji a mnoha spotřebiči převedeš na obyčejný max flow: přidáš super-zdroj a super-stok s hranami podle $b(v)$ a odpověď ANO/NE přečteš z toho, zda maximální tok <strong>nasytí všechny b-hrany</strong>.
   </div>
 
-  <p>Zatím měla každá síť jediný zdroj $s$ a jediný stok $t$ a všude jinde platil Kirchhoffův zákon (<a href="l4-1.html#takeaways">[L4.1]</a>). Reálné úlohy ale vypadají jinak: tři rafinerie <em>vyrábějí</em>, čtyři města <em>spotřebovávají</em> a potrubí mezi nimi má omezené kapacity. Žádné $s$, žádné $t$ — jen uzly, které chtějí mít předepsaný přebytek nebo schodek. Dnes se naučíš tuhle úlohu (slidy 21–23) <em>rozhodnout</em>: existuje tok, který všechny bilance splní? Stejný převod budeš za chvíli potřebovat jako vnitřek konstrukce počátečního přípustného toku v [L4.7] a u matrix rounding v [L4.8] — a bilance $b(v)$ se znovu objeví v definici minimum cost flow [L4.10].</p>
+  <p>Zatím měla každá síť jediný zdroj $s$ a jediný stok $t$ a všude jinde platil Kirchhoffův zákon (<a href="l4-1.html#takeaways">[L4.1]</a>). Reálné úlohy ale vypadají jinak: tři rafinerie <em>vyrábějí</em>, čtyři města <em>spotřebovávají</em> a potrubí mezi nimi má omezené kapacity. Žádné $s$, žádné $t$ — jen uzly, které chtějí mít předepsaný přebytek nebo schodek. Dnes se naučíš tuhle úlohu (slidy 21–23) <em>rozhodnout</em>: existuje tok, který všechny bilance splní? Stejný převod budeš za chvíli potřebovat jako vnitřek konstrukce počátečního přípustného toku v <a href="l4-7.html">[L4.7]</a> a u matrix rounding v [L4.8] — a bilance $b(v)$ se znovu objeví v definici minimum cost flow [L4.10].</p>
 
   <!-- ===== SEKCE 1: MOTIVACE ===== -->
   <h2>Víc zdrojů, víc spotřebičů (slide 22)</h2>
@@ -105,7 +105,7 @@
     </ol>
   </div>
 
-  <p>(Slide nové uzly pojmenovává $s$ a $t$; my budeme psát $s'$ a $t'$ — jednak je to jméno, které uvidíš na slidu 27 a v [L4.7], jednak se pak neplete s případným původním $s, t$ v grafu.) Takhle dopadne mini-instance po redukci:</p>
+  <p>(Slide nové uzly pojmenovává $s$ a $t$; my budeme psát $s'$ a $t'$ — jednak je to jméno, které uvidíš na slidu 27 a v <a href="l4-7.html">[L4.7]</a>, jednak se pak neplete s případným původním $s, t$ v grafu.) Takhle dopadne mini-instance po redukci:</p>
 
   <div class="viz" id="viz-reduced"></div>
 
@@ -134,7 +134,7 @@
   <!-- ===== SEKCE 5: DOLNÍ MEZE ===== -->
   <h2>A co dolní meze $l(e)$?</h2>
 
-  <p>Definice na slidu 21 dolní meze $l : E(G) \to \mathbb{R}^+_0$ připouští — ale všimni si, že <em>nové</em> b-hrany je v redukci dostávají nulové, a celý krok 3 („solve the maximum flow problem“) je pohodlný jen tehdy, když $l \equiv 0$ i na původních hranách: pak je nulový tok přípustný start pro F-F (<a href="l4-1.html#takeaways">[L4.1]</a>). Kdyby původní síť měla $l(e) &gt; 0$, k řešení max flow bys nejdřív potřeboval počáteční přípustný tok — což je přesně úloha, kvůli které se tohle všechno učíme. Vtip příští lekce [L4.7]: substituce $f(e) = f'(e) + l(e)$ umí nenulové dolní meze <em>převést na bilance</em> $b(v)$ s nulovými $l$ — a pak zavoláš dnešní redukci. Proto se „feasible flow with balances“ probírá s $l \equiv 0$ a proto je to stavební kámen, ne okrajová kuriozita.</p>
+  <p>Definice na slidu 21 dolní meze $l : E(G) \to \mathbb{R}^+_0$ připouští — ale všimni si, že <em>nové</em> b-hrany je v redukci dostávají nulové, a celý krok 3 („solve the maximum flow problem“) je pohodlný jen tehdy, když $l \equiv 0$ i na původních hranách: pak je nulový tok přípustný start pro F-F (<a href="l4-1.html#takeaways">[L4.1]</a>). Kdyby původní síť měla $l(e) &gt; 0$, k řešení max flow bys nejdřív potřeboval počáteční přípustný tok — což je přesně úloha, kvůli které se tohle všechno učíme. Vtip příští lekce <a href="l4-7.html">[L4.7]</a>: substituce $f(e) = f'(e) + l(e)$ umí nenulové dolní meze <em>převést na bilance</em> $b(v)$ s nulovými $l$ — a pak zavoláš dnešní redukci. Proto se „feasible flow with balances“ probírá s $l \equiv 0$ a proto je to stavební kámen, ne okrajová kuriozita.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
@@ -151,7 +151,7 @@
       <li><strong>Redukce na max flow (slide 23):</strong> super-zdroj $s'$ s hranami $(s', v)$, $u = b(v)$, pro $b(v) &gt; 0$; super-stok $t'$ s hranami $(v, t')$, $u = -b(v)$, pro $b(v) &lt; 0$; všechny nové $l = 0$.</li>
       <li><strong>Kritérium:</strong> přípustný tok s bilancemi existuje $\iff$ maximální tok nasytí všechny b-hrany, tj. $|f_{\max}| = B = \sum_{b(v)&gt;0} b(v)$. Hrany ze $s'$ a do $t'$ se díky $\sum_v b(v) = 0$ nasytí naráz („and/or“). Víc než $B$ tok mít nemůže (řez $A = \{s'\}$).</li>
       <li><strong>Čtení výsledku:</strong> ANO → restrikce max toku na původní hrany je hledaný tok; NE → $|f_{\max}| &lt; B$ a min řez je certifikát.</li>
-      <li><strong>Role v kapitole:</strong> s $l \equiv 0$ startuje F-F z nuly; nenulové dolní meze se v [L4.7] substitucí $f = f' + l$ převedou právě na tuhle úlohu.</li>
+      <li><strong>Role v kapitole:</strong> s $l \equiv 0$ startuje F-F z nuly; nenulové dolní meze se v <a href="l4-7.html">[L4.7]</a> substitucí $f = f' + l$ převedou právě na tuhle úlohu.</li>
     </ul>
   </div>
 
@@ -242,7 +242,7 @@
 
   <div class="pager">
     <a href="../k4/l4-5.html"><span class="dir">← Předchozí</span> L4.5 · Modelování přiřazení jako tok (vrstvená síť) [FOTO]</a>
-    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.7 · Počáteční přípustný tok při nenulových dolních mezích)</a>
+    <a class="next" href="l4-7.html"><span class="dir">Další →</span> L4.7 · Počáteční přípustný tok při nenulových dolních mezích</a>
   </div>
 
 </div>

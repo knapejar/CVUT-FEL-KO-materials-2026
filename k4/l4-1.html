@@ -113,7 +113,7 @@
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „nulový tok je vždy přípustný“</div>
-    <p>Při $l \equiv 0$ ano — $f \equiv 0$ meze triviálně splní a každý algoritmus z něj může vystartovat. Jakmile ale má některá hrana $l(e) &gt; 0$, nulový tok přípustný <strong>není</strong> a přípustný tok dokonce <strong>nemusí existovat vůbec</strong> (vyzkoušíš si v úloze T02 dole). Proto zkouškové zadání Ford-Fulkersona rovnou <em>dává</em> přípustný tok $f$ v popisku $(l_e, f_e, u_e)$ — a proto existuje samostatná konstrukce počátečního přípustného toku, kterou potkáš v [L4.7]; rozhodovací verzi s bilancemi pak v <a href="l4-6.html#takeaways">[L4.6]</a>.</p>
+    <p>Při $l \equiv 0$ ano — $f \equiv 0$ meze triviálně splní a každý algoritmus z něj může vystartovat. Jakmile ale má některá hrana $l(e) &gt; 0$, nulový tok přípustný <strong>není</strong> a přípustný tok dokonce <strong>nemusí existovat vůbec</strong> (vyzkoušíš si v úloze T02 dole). Proto zkouškové zadání Ford-Fulkersona rovnou <em>dává</em> přípustný tok $f$ v popisku $(l_e, f_e, u_e)$ — a proto existuje samostatná konstrukce počátečního přípustného toku, kterou potkáš v <a href="l4-7.html">[L4.7]</a>; rozhodovací verzi s bilancemi pak v <a href="l4-6.html#takeaways">[L4.6]</a>.</p>
   </div>
 
   <!-- ===== SEKCE 5: HODNOTA TOKU ===== -->
@@ -307,7 +307,7 @@
           dohromady $3 \le f(a,t) = f(s,a) \le 2$ — spor. Žádný přípustný tok neexistuje. $\blacksquare$ (Větev $s \to b \to t$ je nevinná: její toky se v konfliktu nevyskytují, sama si vystačí třeba s $f = 0$, protože má $l = 0$.)</p>
           <p><strong>(ii)</strong> Konflikt zmizí, právě když $u(s,a) \ge 3$ — nejmenší úprava je zvýšit $u(s,a)$ z $2$ na $3$. Pak je přípustný např. tok
           $$f(s,a) = f(a,t) = 3, \qquad f(s,b) = f(b,t) = 0,$$
-          (Kirchhoff: $a$: $3 = 3$ ✓, $b$: $0 = 0$ ✓; meze všude ✓) s hodnotou $|f| = 3$. Systematickou konstrukci počátečního přípustného toku — bez hádání — dostaneš v [L4.7].</p>
+          (Kirchhoff: $a$: $3 = 3$ ✓, $b$: $0 = 0$ ✓; meze všude ✓) s hodnotou $|f| = 3$. Systematickou konstrukci počátečního přípustného toku — bez hádání — dostaneš v <a href="l4-7.html">[L4.7]</a>.</p>
         </div>
       </details>
     </div>
