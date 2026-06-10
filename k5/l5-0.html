@@ -137,7 +137,7 @@
 
   <ol>
     <li><strong>Přečti tok prostředních hran:</strong> $f(T_j \to I_{x,y})$ = kolik jednotek úlohy $T_j$ poběží uvnitř intervalu $\langle x, y\rangle$. Kirchhoff zaručuje, že se to na obou stranách sečte správně.</li>
-    <li><strong>Každý interval vyřeš samostatně:</strong> uvnitř $I_{x,y}$ máš kousky úloh o celkové délce $\le (y-x)R$, každý kousek $\le y-x$. Takové kousky vždy jdou „nalít“ na $R$ procesorů tak, aby se žádná úloha nepřekrývala sama se sebou — kousky skládej za sebe a při přetečení konce intervalu zalom na další procesor (systematicky to dělá McNaughtonův algoritmus, lekce [L5.4]; kapacita $y-x$ na hraně zaručí, že zalomený kousek nekoliduje sám se sebou).</li>
+    <li><strong>Každý interval vyřeš samostatně:</strong> uvnitř $I_{x,y}$ máš kousky úloh o celkové délce $\le (y-x)R$, každý kousek $\le y-x$. Takové kousky vždy jdou „nalít“ na $R$ procesorů tak, aby se žádná úloha nepřekrývala sama se sebou — kousky skládej za sebe a při přetečení konce intervalu zalom na další procesor (systematicky to dělá McNaughtonův algoritmus, lekce <a href="../k5/l5-4.html">[L5.4]</a>; kapacita $y-x$ na hraně zaručí, že zalomený kousek nekoliduje sám se sebou).</li>
     <li><strong>Slep intervaly za sebe</strong> a máš Gantt chart celého rozvrhu.</li>
   </ol>
 
@@ -158,7 +158,7 @@
       <li><strong>Body z $\{r_j\} \cup \{\tilde{d}_j\}$ rozdělí časovou osu na intervaly</strong> (parametry dle <a href="../k5/l5-1.html#takeaways">[L5.1]</a>) — uvnitř intervalu se množina běžet-smějících úloh nemění, takže díky pmtn stačí rozhodovat <em>množství</em> práce, ne přesné časy.</li>
       <li><strong>Síť:</strong> $s \to$ úloha (kapacita $p_j$) $\to$ interval, kde úloha smí běžet, tj. $\langle x,y\rangle \subseteq \langle r_j,\tilde d_j\rangle$ (kapacita = délka $y-x$, úloha je sekvenční!) $\to t$ (kapacita délka $\cdot R$).</li>
       <li><strong>Feasibilita = nasycení všech hran ze zdroje:</strong> $|f| = \sum_j p_j$ (<a href="../k4/l4-4.html#takeaways">[L4.4]</a>, <a href="../k4/l4-5.html#takeaways">[L4.5]</a>); jinak rozvrh neexistuje a min řez je certifikát. Zlomkový tok nevadí — pmtn krájí úlohy libovolně.</li>
-      <li><strong>Flow → schedule:</strong> $f(T_j \to I_{x,y})$ = kolik úlohy běží v intervalu; uvnitř intervalu kousky nalít na $R$ procesorů (à la McNaughton [L5.4]) a intervaly slepit. Bez tohoto kroku je odpověď neúplná („chybí flow → schedule“).</li>
+      <li><strong>Flow → schedule:</strong> $f(T_j \to I_{x,y})$ = kolik úlohy běží v intervalu; uvnitř intervalu kousky nalít na $R$ procesorů (à la McNaughton <a href="../k5/l5-4.html">[L5.4]</a>) a intervaly slepit. Bez tohoto kroku je odpověď neúplná („chybí flow → schedule“).</li>
       <li><strong>Funguje jen s pmtn</strong> — nepreemptivní varianty (např. $1|r_j,\tilde d_j|C_{max}$) jsou NP-těžké a tok je nevyřeší [L5.9].</li>
     </ul>
   </div>

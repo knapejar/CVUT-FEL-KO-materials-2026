@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L5.4 · McNaughton (P|pmtn|Cmax) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k5">K5 · Rozvrhování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L5.4</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L5.4</span> Kapitola K5 — Rozvrhování (Slot 5) · <strong>[MUST]</strong>
+  </p>
+  <h1>McNaughton (P |pmtn| C<sub>max</sub>)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Wrap-around plnění</strong> na $R$ strojů s preempcí: spočti $C_{max}^* = \max\{\max_i p_i, \frac{1}{R}\sum_i p_i\}$, nalévej úlohy sekvenčně do „polic“ délky $C_{max}^*$ a při přetečení rozřízni úlohu na další stroj — optimum v $\mathcal{O}(n)$.
+  </div>
+
+  <p>Z <a href="../k5/l5-1.html">[L5.1] Grahamovy notace</a> víš, co znamená $P \,|\, \mathrm{pmtn} \,|\, C_{max}$: $R$ identických paralelních procesorů, <strong>nezávislé preemptivní úlohy</strong> (prázdná $\beta$ jinak = bez precedencí, $r_j = 0$), minimalizuj makespan. A z pmtn-demos v [L5.1] už tušíš, že preempce umí stlačit $C_{max}$ pod nepreemptivní optimum. Dnes ten princip proměníme v kompletní algoritmus — <strong>McNaughtonův</strong> — který je u zkoušky stavebním kamenem: sám o sobě je cvičná klasika a o pár lekcí dál ho bude volat Muntz&nbsp;&amp;&nbsp;Coffman [L5.10] jako podprogram („Use McNaughton to re-schedule parts with more tasks on less res.“).</p>
+
+  <!-- ===== SEKCE 1: MAPA ===== -->
+  <h2>Ostrov „easy“ v NP-hard moři (slide 38)</h2>
+
+  <p>Bez preempce je rozvrhování na paralelních strojích těžké hned od dvou procesorů: rozhodnout, jestli jde $n$ úloh rozdělit na dva stroje s makespanem $\le \frac{1}{2}\sum p_i$, je přesně <strong>2-Partition</strong> — tu jsi modeloval v <a href="../k1/l1-1.html#t-2partition">[L1.1] T01 (2-Partition, vč. vztahu k P2||Cmax)</a>.</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč celá ta 2-Partition obtížnost zmizí, jakmile povolíme preempci?</summary>
+    <div class="inner">
+      <p>Těžké na 2-Partition je, že bankovky (úlohy) jsou <em>nedělitelné</em> — hledáš podmnožinu s přesným součtem. S preempcí smíš úlohu <strong>rozříznout</strong>: naskládej úlohy za sebe do jednoho pásu délky $\sum p_i$ a pás rozstřihni přesně v polovině — každá půlka na jeden stroj. „Kombinatorické hledání podmnožiny“ se změnilo na triviální stříhání pásu. Jediný háček: rozstřižená úloha nesmí běžet na obou strojích <em>současně</em> — a právě tenhle háček řeší McNaughtonova konstrukce níže.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 38 (EN 1:1) — Scheduling on Parallel Identical Resources, Minimizing $C_{max}$ (výběr)</div>
+    <ul>
+      <li>“$P2 \,||\, C_{\max}$ — <strong>NP-hard</strong> … the problem is NP-hard because the <strong>2 partition problem</strong> (see ILP lecture) can be reduced to $P2 \,||\, C_{\max}$ while comparing the optimal $C_{\max}$ with the threshold of $0.5 \cdot \sum_{i \in 1..n} p_i$.”</li>
+      <li>“$P \,|\, \mathrm{pmtn} \,|\, C_{\max}$ — <strong>easy</strong>: can be solved by the <strong>McNaughton algorithm</strong> in $\mathcal{O}(n)$.”</li>
+      <li>“$P \,|\, \mathrm{pmtn}, r_j, \tilde{d}_j \,|\, -$ — <strong>easy</strong>: decision version of <strong>maximum flow problem</strong> (see the lecture on Flows).”</li>
+      <li>“$P \,|\, \mathrm{pmtn}, \mathrm{prec} \,|\, C_{\max}$ — <strong>NP-hard</strong>: <strong>Muntz&amp;Coffman's level algorithm</strong> with factor $r_{MC} = 2 - \frac{2}{R}$.”</li>
+    </ul>
+  </div>
+
+  <p>Mapu si zapamatuj: preempce sama o sobě dělá z $C_{max}$ na identických strojích <em>snadný</em> problém (dnešní lekce); preempce + časová okna $r_j, \tilde{d}_j$ = toky <a href="../k5/l5-0.html">[L5.0]</a>; jakmile ale přibudou precedence, je to zase NP-hard a McNaughton přežívá jen jako podprogram aproximačního Muntze&amp;Coffmana [L5.10]. Nepreemptivní $P\,||\,C_{max}$ řeší DP Rothkopf [L5.11] (pseudopolynomiálně) a aproximačně list scheduling / LPT [L5.12].</p>
+
+  <!-- ===== SEKCE 2: DOLNI MEZ ===== -->
+  <h2>Jak rychle to vůbec může být hotovo?</h2>
+
+  <p>Než začneš rozvrhovat, spočti si, pod co se žádný — ani sebechytřejší — preemptivní rozvrh nedostane.</p>
+
+  <details class="try">
+    <summary>Zkus sám: najdi <strong>dvě</strong> nezávislé dolní meze na $C_{max}$ libovolného rozvrhu $n$ úloh na $R$ strojích (i preemptivního).</summary>
+    <div class="inner">
+      <p><strong>① Práce:</strong> celkem je $\sum_i p_i$ jednotek práce a $R$ strojů jich za čas $C$ odvede nejvýš $R \cdot C$ (a to jen pokud ani okamžik nezahálí). Tedy $C_{max} \ge \frac{1}{R}\sum_i p_i$.</p>
+      <p><strong>② Sekvenčnost:</strong> úloha smí být rozřezaná na kusy a kusy smí běžet na různých strojích — ale nikdy <em>dva kusy téže úlohy současně</em> (úloha neumí běžet paralelně sama se sebou). Nejdelší úloha tedy potřebuje $\max_i p_i$ času čistě za sebou: $C_{max} \ge \max_i p_i$.</p>
+      <p>Dohromady: $C_{max} \ge \max\{\max_i p_i, \frac{1}{R}\sum_i p_i\}$. Pointa lekce: tahle dolní mez je <strong>dosažitelná</strong>.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 40 (EN 1:1) — interpretace $C_{max}^*$</div>
+    <p>“The term $C_{\max}^* = \max\left\{\max_{i=1\ldots n}\{p_i\},\ \frac{1}{R} \sum_{1}^{n} p_i\right\}$ should be interpreted as follows:</p>
+    <ul>
+      <li>component $\max_{i=1\ldots n}\{p_i\}$ represents the <strong>sequential nature of each task</strong> — it's parts can be assigned to different resources, but these parts can not be run simultaneously. Note that each task can be divided into two parts at most.</li>
+      <li>component $\frac{1}{R} \sum_{1}^{n} p_i$ represents a situation when all resources work <strong>without idle waiting</strong>.”</li>
+    </ul>
+  </div>
+
+  <!-- ===== SEKCE 3: ALGORITMUS ===== -->
+  <h2>Algoritmus: nalévání s wrap-around (slide 39)</h2>
+
+  <p>Představ si $R$ „polic“, každou dlouhou přesně $C_{max}^*$. McNaughton bere úlohy <em>v libovolném pořadí</em> a nalévá je na první polici zleva doprava. Když se úloha nevejde (přetekla by za $C_{max}^*$), <strong>rozřízne ji</strong>: kus do konce police nechá tam a zbytkem začne plnit další polici od času $0$ — to je ten <strong>wrap-around</strong>.</p>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 39 (EN 1:1) — McNaughton's Algorithm for $P \,|\, \mathrm{pmtn} \,|\, C_{\max}$</div>
+    <p>“<strong>Input:</strong> $R$, number of parallel identical resources, $n$, number of preemptive tasks and computation times $(p_1, p_2, \ldots, p_n)$.<br>
+    <strong>Output:</strong> $n$-element vectors $s^1, s^2, z^1, z^2$ where $s_i^1$ (resp. $s_i^2$) is start time of the first (resp. second) part of task $T_i$ and $z_i^1$ (resp. $z_i^2$) is the resource ID on which the first (resp. second) part of task $T_i$ will be executed.”</p>
+<pre><code>s_i^1 = s_i^2 = z_i^1 = z_i^2 := 0 for all i ∈ 1..n;
+t := 0; v := 1; i := 1;
+C*_max = max { max_{i=1..n} {p_i}, (1/R) · Σ_{1..n} p_i };
+while i ≤ n do
+    if t + p_i ≤ C*_max then
+        s_i^1 := t; z_i^1 := v; t := t + p_i; i := i + 1;
+    else
+        s_i^2 := t; z_i^2 := v; p_i := p_i − (C*_max − t); t := 0; v := v + 1;
+    end
+end</code></pre>
+    <p>“Time complexity is $\mathcal{O}(n)$.”</p>
+  </div>
+
+  <p>Čtení pseudokódu: $t$ je hladina zaplnění aktuální police $v$. Větev <em>if</em> = úloha se vejde celá. Větev <em>else</em> = přetečení: kus $[t, C_{max}^*]$ zůstane na stroji $v$ (uloží se jako <em>druhá</em> část $s_i^2, z_i^2$ — časově běží později), zbytek $p_i - (C_{max}^* - t)$ se vrátí do smyčky se stejným $i$ a přistane na stroji $v+1$ od času $0$ jako <em>první</em> část ($s_i^1 = 0$). Každá úloha projde větví <em>else</em> nejvýš jednou — proto nejvýš dvě části.</p>
+
+  <details class="try">
+    <summary>Zkus sám (klíčový argument korektnosti): rozříznutá úloha má kusy $[t, C_{max}^*]$ na stroji $v$ a $[0,\, p_i - (C_{max}^* - t)]$ na stroji $v+1$. Proč se nikdy nepřekrývají v čase?</summary>
+    <div class="inner">
+      <p>Kus na novém stroji končí v čase $p_i - (C_{max}^* - t)$ a kus na starém začíná v čase $t$. Překryv by nastal, kdyby $p_i - (C_{max}^* - t) &gt; t$, tj. po úpravě $p_i &gt; C_{max}^*$ — to ale odporuje definici $C_{max}^* \ge \max_i p_i$. <strong>Přesně kvůli tomuhle je v $C_{max}^*$ složka $\max_i p_i$:</strong> zaručuje, že zalomený zbytek doběhne dřív, než první kus na předchozím stroji začne. (A složka $\frac{1}{R}\sum p_i$ zaručuje $\sum p_i \le R \cdot C_{max}^*$, takže se všechno do $R$ polic vejde a algoritmus nikdy nepotřebuje stroj $R+1$.)</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: kolik nejvýš preempcí (řezů) rozvrh obsahuje?</summary>
+    <div class="inner">
+      <p>Řez vzniká jen při přechodu na další stroj a přechodů je nejvýš $R - 1$ (ze stroje $1$ až na stroj $R$). Tedy <strong>nejvýš $R-1$ preempcí</strong>; každá úloha je rozdělena nejvýš na dvě části. To je u zkoušky pěkná kontrola: víc než $R-1$ řezů v tvém Ganttu = někde chyba.</p>
+    </div>
+  </details>
+
+  <p>Optimalita je teď zadarmo: výsledný rozvrh je přípustný (kusy se nepřekrývají, vše se vešlo) a končí v $C_{max}^*$, což je dolní mez každého rozvrhu — takže $C_{max}^*$ je optimum a McNaughton ho dosahuje. Žádné chytré pořadí úloh není potřeba.</p>
+
+  <!-- ===== SEKCE 4: BEH ===== -->
+  <h2>Běh na instanci slidu 40 (Example 1)</h2>
+
+  <p>Slide 40, Example 1: $p = (2, 3, 2, 3, 2)$, $R = 3$. Proklikej běh — v každém kroku sleduj hladinu $t$ a kde řežeme:</p>
+
+  <div class="viz" id="viz-run"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy kolem McNaughtona</div>
+    <ul>
+      <li><strong>„$C_{max}^* = \frac{1}{R}\sum p_i$“ — NE.</strong> Bez složky $\max_i p_i$ vyrobíš rozvrh, kde se rozříznutá dlouhá úloha překrývá sama se sebou. Když $\max_i p_i$ dominuje (viz T01 níže), stroje <em>musí</em> zahálet a průměr $\frac{1}{R}\sum p_i$ je nedosažitelný.</li>
+      <li><strong>McNaughton platí jen pro $P \,|\, \mathrm{pmtn} \,|\, C_{max}$</strong> — nezávislé úlohy, bez precedencí, bez release times. S precedencemi je problém NP-hard a řeší se aproximačně (Muntz&amp;Coffman [L5.10]); s okny $r_j, \tilde{d}_j$ jde feasibilita přes toky <a href="../k5/l5-0.html">[L5.0]</a>.</li>
+      <li><strong>Bez pmtn nelze „zaokrouhlit“:</strong> nepreemptivní $P2\,||\,C_{max}$ je NP-hard (2-Partition, slide 38) — z McNaughtonova rozvrhu nepreemptivní optimum slepením kusů nedostaneš (T02 níže ukazuje instanci, kde je nepreemptivní optimum ostře horší).</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.4</div>
+    <ul>
+      <li><strong>McNaughton ($P \,|\, \mathrm{pmtn} \,|\, C_{max}$, $\mathcal{O}(n)$):</strong> $C_{max}^* = \max\{\max_i p_i,\ \frac{1}{R}\sum_i p_i\}$; úlohy v libovolném pořadí nalévej sekvenčně do polic délky $C_{max}^*$, při přetečení nech kus $[t, C_{max}^*]$ na stroji $v$ a zbytkem pokračuj na stroji $v{+}1$ od času $0$ (wrap-around).</li>
+      <li><strong>Dvě složky meze:</strong> $\max p_i$ = sekvenčnost úlohy (kusy nesmí běžet současně — a zaručuje, že zalomený zbytek délky $p_i - (C_{max}^* - t) \le t$ nekoliduje sám se sebou); $\frac{1}{R}\sum p_i$ = stroje bez zahálení (vše se vejde do $R$ polic).</li>
+      <li><strong>Optimální</strong> pro nezávislé preemptivní úlohy: rozvrh dosáhne dolní meze $C_{max}^*$. Každá úloha má nejvýš 2 části, preempcí je nejvýš $R - 1$ (kontrola Ganttu!).</li>
+      <li><strong>Hranice platnosti:</strong> bez pmtn NP-hard už pro $R = 2$ (2-Partition <a href="../k1/l1-1.html#t-2partition">[L1.1]</a> → Rothkopf [L5.11] / LPT [L5.12]); s precedencemi NP-hard → Muntz&amp;Coffman [L5.10] používá McNaughtona jako podprogram; s $r_j, \tilde{d}_j$ feasibilita → toky <a href="../k5/l5-0.html">[L5.0]</a>. Volba metody: tahák [L5.14].</li>
+      <li>U zkoušky: spočti $C_{max}^*$ (obě složky vypiš!), nakresli Gantt, vyznač preempce a případné zahálení.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ULOHA T01 ===== -->
+  <div class="task" id="t-mcnaughton">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>McNaughton's Algorithm for P |pmtn| C<sub>max</sub> — Example 2</strong>
+      <span class="task-src">zdroj: slide 39 (Input/Output EN 1:1) + slide 40 Example 2; cvičná příprava na Muntz&amp;Coffmana [L5.10]</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; instance = slide 40 Example 2, pokyny i–iii vlastní — přiznáno)</span>
+        <p>“<strong>Input:</strong> $R$, number of parallel identical resources, $n$, number of preemptive tasks and computation times $(p_1, p_2, \ldots, p_n)$. <strong>Output:</strong> $n$-element vectors $s^1, s^2, z^1, z^2$ where $s_i^1$ (resp. $s_i^2$) is start time of the first (resp. second) part of task $T_i$ and $z_i^1$ (resp. $z_i^2$) is the resource ID on which the first (resp. second) part of task $T_i$ will be executed.”</p>
+        <p>“Example 2: $p = (10, 8, 4, 14, 1)$, $R = 3$.”</p>
+        <p>(i) Compute $C_{\max}^*$ (show both components).<br>
+        (ii) Run McNaughton's algorithm and draw the resulting Gantt chart.<br>
+        (iii) How many preemptions does the schedule contain, and which resources are idle (and when)?</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Pět preemptivních nezávislých úloh, tři identické stroje, minimalizuj makespan. Spočítat mez $C_{max}^*$, mechanicky provést nalévání s wrap-around a popsat výsledek (preempce, zahálení). Pozor: tady vyhrává složka $\max p_i$ — instance je schválně jiná než Example 1.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — vzorec $C_{max}^*$ a smyčka algoritmu (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace</a> — čtení $P \,|\, \mathrm{pmtn} \,|\, C_{max}$ a kreslení Ganttova diagramu.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Nejdřív obě složky meze: čemu se rovná $\max_i p_i$ a čemu $\frac{1}{R}\sum_i p_i$? Která vyhraje a co to říká o zahálení strojů ($R \cdot C_{max}^*$ vs. $\sum p_i$)? Pak jen disciplinovaně nalévej v pořadí $T_1, \ldots, T_5$ a u každého přetečení si zapiš obě části ($s^2, z^2$ = kus do konce police, $s^1, z^1$ = zbytek na dalším stroji od nuly) a ověř, že se nepřekrývají.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení <em>(běh a Gantt vlastní provedení algoritmu — přiznáno; $C_{\max}^*$ dle slidu 40)</em></summary>
+        <div class="inner">
+          <p><strong>(i)</strong> $\max_i p_i = 14$ (úloha $T_4$); $\frac{1}{R}\sum_i p_i = \frac{10+8+4+14+1}{3} = \frac{37}{3} \approx 12{,}33$. Slide 40: “compute $C_{\max}^* = \max\{14, \frac{37}{3}\} = 14$.” Vyhrála sekvenčnost — a protože $R \cdot C_{max}^* = 42 &gt; 37 = \sum p_i$, stroje budou dohromady $5$ jednotek času zahálet.</p>
+          <p><strong>(ii)</strong> Běh smyčky ($t$ = hladina aktuální police, $C_{max}^* = 14$):</p>
+          <ul>
+            <li>$T_1$ ($p=10$): $0 + 10 \le 14$ → celá na $P^1$, $[0,10]$; $t = 10$.</li>
+            <li>$T_2$ ($p=8$): $10 + 8 = 18 &gt; 14$ → <em>řez</em>: druhá část $[10,14]$ na $P^1$ ($s_2^2 = 10$, $z_2^2 = 1$; 4 jednotky), zbytek $8-4 = 4$ → první část $[0,4]$ na $P^2$ ($s_2^1 = 0$, $z_2^1 = 2$). Kontrola překryvu: $4 \le 10$ ✓.</li>
+            <li>$T_3$ ($p=4$): $4 + 4 = 8 \le 14$ → celá na $P^2$, $[4,8]$; $t = 8$.</li>
+            <li>$T_4$ ($p=14$): $8 + 14 = 22 &gt; 14$ → <em>řez</em>: druhá část $[8,14]$ na $P^2$ (6 jednotek), zbytek $14-6 = 8$ → první část $[0,8]$ na $P^3$. Kontrola: $8 \le 8$ ✓ (těsně — kusy na sebe přesně navazují).</li>
+            <li>$T_5$ ($p=1$): $8 + 1 = 9 \le 14$ → celá na $P^3$, $[8,9]$. Konec.</li>
+          </ul>
+          <div class="viz" id="viz-t01gantt"></div>
+          <p><strong>(iii)</strong> Preempce: $2$ (úlohy $T_2$ a $T_4$) $= R - 1$ — mez je tu těsná. Zahálí jen $P^3$ v intervalu $[9,14]$, tedy $5$ jednotek $= R \cdot C_{max}^* - \sum p_i = 42 - 37$ ✓. Rozvrh končí v $C_{max} = 14 = C_{max}^*$, a protože $T_4$ sama potřebuje $14$ sekvenčních jednotek, lépe to nejde — <strong>optimální</strong>.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ULOHA T02 ===== -->
+  <div class="task" id="t-pmtngain">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Kolik preempce ušetří — McNaughton vs. nepreemptivní optimum</strong>
+      <span class="task-src">zdroj: VLASTNÍ drill (přiznáno) — navazuje na 2-Partition z [L1.1] a slide 38</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; vlastní — přiznáno)</span>
+        <p>Consider $n = 4$ tasks with processing times $p = (5, 5, 5, 3)$ on $R = 2$ parallel identical resources.</p>
+        <p>(i) Solve $P \,|\, \mathrm{pmtn} \,|\, C_{\max}$ by McNaughton's algorithm: compute $C_{\max}^*$, draw the Gantt chart and count the preemptions.<br>
+        (ii) Now forbid preemption ($P2 \,||\, C_{\max}$). What is the optimal makespan? Compare with (i).<br>
+        (iii) Explain on this instance why the non-preemptive problem is the hard one (which subset-sum question are you implicitly answering?).</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejná čtveřice úloh dvakrát: jednou s preempcí (mechanický McNaughton), jednou bez ní (malý případový rozbor). Cíl je <em>uvidět</em> rozdíl: preempce dosáhne dolní meze práce, nepreemptivní rozvrh ne — a důvod je přesně 2-Partition.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — $C_{max}^*$ a wrap-around (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k1/l1-1.html#t-2partition">[L1.1] T01 — 2-Partition</a> — proč je hledání podmnožiny s daným součtem těžké.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>U (i) jen dosazuj. U (ii) si uvědom: nepreemptivní rozvrh na 2 strojích = rozdělení množiny $\{5,5,5,3\}$ na dvě podmnožiny; makespan = větší ze součtů. Jaké součty podmnožin vůbec existují? Jde trefit $9 = \frac{18}{2}$?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> $C_{max}^* = \max\{5, \frac{5+5+5+3}{2}\} = \max\{5, 9\} = 9$. Nalévání: $T_1$ → $P^1\,[0,5]$; $T_2$: $5+5 = 10 &gt; 9$ → druhá část $[5,9]$ na $P^1$ (4 jednotky), zbytek $1$ → první část $[0,1]$ na $P^2$ (kontrola: $1 \le 5$ ✓); $T_3$ → $P^2\,[1,6]$; $T_4$: $6+3 = 9 \le 9$ → $P^2\,[6,9]$. <strong>Jedna preempce</strong> ($T_2$) $= R-1$; nikdo nezahálí ($2 \cdot 9 = 18 = \sum p_i$); $C_{max} = 9$.</p>
+          <div class="viz" id="viz-t02gantt"></div>
+          <p><strong>(ii)</strong> Bez preempce rozděluješ celé úlohy. Dosažitelné součty podmnožin $\{5,5,5,3\}$ jsou $0, 3, 5, 8, 10, 13, 15, 18$ — součet $9$ <strong>neexistuje</strong>. Nejvyrovnanější dělení je $\{5,3\} \,|\, \{5,5\}$ s náklady $8\,|\,10$, takže nepreemptivní optimum je $C_{max} = \mathbf{10} &gt; 9$. Preempce tu ušetří přesně tu jednotku, kterou nejde „rozměnit“.</p>
+          <p><strong>(iii)</strong> Otázka „existuje nepreemptivní rozvrh s $C_{max} \le \frac{1}{2}\sum p_i = 9$?“ je doslova otázka „existuje podmnožina se součtem $9$?“ — tedy <strong>2-Partition</strong> (slide 38: redukce na $P2\,||\,C_{max}$ s prahem $0{,}5 \cdot \sum p_i$). Proto je nepreemptivní verze NP-hard, zatímco s preempcí jsme v (i) odpověděli za $\mathcal{O}(n)$ stříháním pásu — žádnou podmnožinu hledat nemusíme.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L5.4">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k5/l5-3.html"><span class="dir">← Předchozí</span> L5.3 · Time-indexed ILP pro PS1|temp|Cmax [FOTO]</a>
+    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.5 · Branch &amp; Bound pro ILP (grafické řezání) [FOTO])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// ===== 1 — Běh McNaughtona na Example 1 slidu 40: p = (2,3,2,3,2), R = 3, C* = 4 =====
+// Bloky každého framu = ABSOLUTNÍ stav rozvrhu. Značení částí dle slidu 39:
+// s²/z² = kus do konce police (časově pozdější), s¹/z¹ = zbytek na dalším stroji od 0.
+KOViz.gantt(document.getElementById('viz-run'), {
+  tmax: 4, tstep: 1,
+  rows: [{ id: 'P1', label: 'P¹' }, { id: 'P2', label: 'P²' }, { id: 'P3', label: 'P³' }],
+  blocks: [],
+  marks: [{ t: 4, label: 'C*max = 4' }],
+  frames: [
+    { desc: 'C*max = max{max pᵢ, (1/R)·Σpᵢ} = max{3, 12/3} = 4. Tři „police“ délky 4: kapacita 3·4 = 12 = Σpᵢ přesně — vyhrála složka bez zahálení.',
+      blocks: [],
+      marks: [{ t: 4, label: 'C*max = 4' }] },
+    { desc: 'T₁ (p=2): t + p₁ = 0 + 2 ≤ 4 → celá na P¹ jako [0,2]; hladina t = 2.',
+      blocks: [
+        { row: 'P1', from: 0, to: 2, label: 'T₁', cls: 'good' },
+      ],
+      marks: [{ t: 4, label: 'C*max = 4' }] },
+    { desc: 'T₂ (p=3): 2 + 3 = 5 > 4 → PREEMPCE. Kus [2,4] zůstává na P¹ (s₂² = 2, z₂² = 1; 2 jednotky), zbytek 1 jde na P² od nuly: [0,1] (s₂¹ = 0, z₂¹ = 2). Bez překryvu: zbytek končí v 1 ≤ 2 = start kusu na P¹.',
+      blocks: [
+        { row: 'P1', from: 0, to: 2, label: 'T₁' },
+        { row: 'P1', from: 2, to: 4, label: 'T₂²', cls: 'good' },
+        { row: 'P2', from: 0, to: 1, label: 'T₂¹', cls: 'good' },
+      ],
+      marks: [{ t: 4, label: 'C*max = 4' }] },
+    { desc: 'T₃ (p=2): 1 + 2 = 3 ≤ 4 → celá na P² jako [1,3]; t = 3.',
+      blocks: [
+        { row: 'P1', from: 0, to: 2, label: 'T₁' },
+        { row: 'P1', from: 2, to: 4, label: 'T₂²' },
+        { row: 'P2', from: 0, to: 1, label: 'T₂¹' },
+        { row: 'P2', from: 1, to: 3, label: 'T₃', cls: 'good' },
+      ],
+      marks: [{ t: 4, label: 'C*max = 4' }] },
+    { desc: 'T₄ (p=3): 3 + 3 = 6 > 4 → PREEMPCE. Kus [3,4] na P² (1 jednotka), zbytek 2 na P³: [0,2]. Kontrola: 2 ≤ 3 — žádný překryv T₄ se sebou samou.',
+      blocks: [
+        { row: 'P1', from: 0, to: 2, label: 'T₁' },
+        { row: 'P1', from: 2, to: 4, label: 'T₂²' },
+        { row: 'P2', from: 0, to: 1, label: 'T₂¹' },
+        { row: 'P2', from: 1, to: 3, label: 'T₃' },
+        { row: 'P2', from: 3, to: 4, label: 'T₄²', cls: 'good' },
+        { row: 'P3', from: 0, to: 2, label: 'T₄¹', cls: 'good' },
+      ],
+      marks: [{ t: 4, label: 'C*max = 4' }] },
+    { desc: 'T₅ (p=2): 2 + 2 = 4 ≤ 4 → celá na P³ jako [2,4]. HOTOVO: žádné zahálení (Σp = 12 = 3·4), Cmax = 4 = dolní mez → optimum; preempce 2 = R − 1.',
+      blocks: [
+        { row: 'P1', from: 0, to: 2, label: 'T₁' },
+        { row: 'P1', from: 2, to: 4, label: 'T₂²' },
+        { row: 'P2', from: 0, to: 1, label: 'T₂¹' },
+        { row: 'P2', from: 1, to: 3, label: 'T₃' },
+        { row: 'P2', from: 3, to: 4, label: 'T₄²' },
+        { row: 'P3', from: 0, to: 2, label: 'T₄¹' },
+        { row: 'P3', from: 2, to: 4, label: 'T₅', cls: 'good' },
+      ],
+      marks: [{ t: 4, label: 'Cmax = 4 = C*max' }] },
+  ],
+  caption: 'Slide 40, Example 1: p = (2, 3, 2, 3, 2), R = 3, C*max = max{3, 12/3} = 4. Tᵢ² = část do konce police (časově druhá), Tᵢ¹ = zalomený zbytek na dalším stroji (časově první) — značení dle výstupních vektorů slidu 39.',
+});
+
+// ===== 2 — T01: Example 2 slidu 40: p = (10, 8, 4, 14, 1), R = 3, C* = 14 (běh vlastní — přiznáno) =====
+KOViz.gantt(document.getElementById('viz-t01gantt'), {
+  tmax: 14, tstep: 1,
+  rows: [{ id: 'P1', label: 'P¹' }, { id: 'P2', label: 'P²' }, { id: 'P3', label: 'P³' }],
+  blocks: [
+    { row: 'P1', from: 0, to: 10,  label: 'T₁' },
+    { row: 'P1', from: 10, to: 14, label: 'T₂²', cls: 'good' },
+    { row: 'P2', from: 0, to: 4,   label: 'T₂¹', cls: 'good' },
+    { row: 'P2', from: 4, to: 8,   label: 'T₃' },
+    { row: 'P2', from: 8, to: 14,  label: 'T₄²', cls: 'p' },
+    { row: 'P3', from: 0, to: 8,   label: 'T₄¹', cls: 'p' },
+    { row: 'P3', from: 8, to: 9,   label: 'T₅' },
+    { row: 'P3', from: 9, to: 14,  label: 'idle', cls: 'idle' },
+  ],
+  marks: [
+    { t: 37 / 3, label: 'Σp/R ≈ 12,3', cls: 'soft' },
+    { t: 14, label: 'C*max = 14' },
+  ],
+  caption: 'T01: C*max = max{14, 37/3} = 14 (slide 40, Example 2; rozvrh = vlastní provedení algoritmu, přiznáno). Preempce: T₂ (4+4) a T₄ (8+6 — kusy na sebe v čase 8 přesně navazují). P³ zahálí [9,14]: 5 = 3·14 − 37 jednotek.',
+});
+
+// ===== 3 — T02: vlastní drill p = (5, 5, 5, 3), R = 2, C* = 9 (přiznáno) =====
+KOViz.gantt(document.getElementById('viz-t02gantt'), {
+  tmax: 9, tstep: 1,
+  rows: [{ id: 'P1', label: 'P¹' }, { id: 'P2', label: 'P²' }],
+  blocks: [
+    { row: 'P1', from: 0, to: 5, label: 'T₁' },
+    { row: 'P1', from: 5, to: 9, label: 'T₂²', cls: 'good' },
+    { row: 'P2', from: 0, to: 1, label: 'T₂¹', cls: 'good' },
+    { row: 'P2', from: 1, to: 6, label: 'T₃' },
+    { row: 'P2', from: 6, to: 9, label: 'T₄' },
+  ],
+  marks: [{ t: 9, label: 'C*max = 9' }],
+  caption: 'T02 (i): C*max = max{5, 18/2} = 9, jediná preempce T₂ = R − 1, žádné zahálení. Bez preempce je optimum 10 — součet 9 žádná podmnožina {5,5,5,3} netrefí (2-Partition!). Vlastní drill, přiznáno.',
+});
+</script>
+</body>
+</html>
