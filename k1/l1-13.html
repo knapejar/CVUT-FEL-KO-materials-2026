@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.13 · Worst-case omezení přes kombinace — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.13</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.13</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Worst-case omezení přes kombinace</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Omezení, které musí platit <em>pro každou možnou kombinaci voleb</em> („libovolný student si vybere 1 jídlo na den“), nevypisuješ po kombinacích — zaručíš ho pro <strong>nejhorší dosažitelnou kombinaci</strong>. Tu složíš z denních minim přes pomocné proměnné $z_d$ a big-M deaktivaci.
+  </div>
+
+  <p>Prerekvizity: <a href="l1-2.html#takeaways">[L1.2] Přiřazovací struktura</a>, <a href="l1-4.html#takeaways">[L1.4] big-M</a>, <a href="l1-8.html#takeaways">[L1.8] Omezení rozptylu (max/min jedné množiny)</a>. Nosná úloha je zápočtová <strong>School lunch menu design</strong> (test 2021): sestavuješ týdenní jídelníček školní jídelny. Tři ze čtyř podmínek zadání jsou techniky, které už máš — čtvrtá („any student orders arbitrary combination of meals“) je dnešní nová věc.</p>
+
+  <!-- ===== KOSTRA ===== -->
+  <h2>Kostra: jídelníček jako výběrové binárky</h2>
+  <p>Data: $M = \{1,\dots,100\}$ typů jídel, $D = \{1,\dots,5\}$ dnů; jídlo $m$ má proteiny $p_m$, cenu porce $c_m$ a příznak vegetariánství $v_m \in \{0,1\}$ — vše <strong>konstanty</strong> (vzpomeň na <a href="l1-12.html#takeaways">[L1.12]</a>: příslušnost do skupiny jsou data, součin konstanta × binárka je lineární). Elementární rozhodnutí: <em>je jídlo $m$ v den $d$ na menu?</em></p>
+  $$x_{m,d} \in \{0,1\}, \qquad m \in M,\; d \in D, \qquad x_{m,d} = 1 \iff \text{jídlo } m \text{ je v den } d \text{ na menu.}$$
+
+  <details class="try">
+    <summary>Zkus sám: podmínky 1 („four different meals, at least one vegetarian“), 3 („each meal at most once per week“) a kritérium 2 („minimize cost, 120 portions of each meal on the menu“) jsou samé staré známé. Napiš je.</summary>
+    <div class="inner">
+      <p>Počty na menu jsou součtové podmínky jako v <a href="l1-2.html#takeaways">[L1.2]</a>:</p>
+      $$\sum_{m \in M} x_{m,d} = 4 \quad \forall d \in D, \qquad\qquad \sum_{m \in M} v_m\, x_{m,d} \ge 1 \quad \forall d \in D,$$
+      <p>(„čtyři <em>různá</em> jídla“ je zadarmo — $x_{m,d}$ je jedna binárka na typ jídla, takže 4 jedničky = 4 různé typy; vegetariánský filtr je součin konstanty $v_m$ s binárkou). „Nejvýš jednou za týden“ je součet přes dny:</p>
+      $$\sum_{d \in D} x_{m,d} \le 1 \quad \forall m \in M.$$
+      <p>A kritérium: každý den se každého jídla na menu uvaří přesně 120 porcí, takže cena týdne je</p>
+      $$\min\; 120 \sum_{d \in D} \sum_{m \in M} c_m\, x_{m,d}.$$
+      <p>Konstanta 120 optimum nemění (jen škáluje hodnotu kritéria), ale patří do modelu — zadání mluví o ceně týdenního menu.</p>
+    </div>
+  </details>
+
+  <!-- ===== PODMINKA 4 ===== -->
+  <h2>Podmínka 4: „arbitrary combination of meals“</h2>
+  <p>Zbývá nutriční podmínka: <em>„if any student orders arbitrary combination of meals in the week (exactly one meal per day), his/her total intake of protein must be at least $p^{\min}$“</em>. Tedy: <strong>ať si student vybere z menu kterékoli jídlo každý den, součet proteinů jeho pěti jídel musí vyjít aspoň $p^{\min}$</strong>. Omezení nekvantifikuje přes jednu množinu čísel, ale přes <em>všechny kombinace voleb</em>.</p>
+
+  <details class="try">
+    <summary>Zkus sám: první nápad bývá $\sum_{m} p_m\, x_{m,d} \ge \tfrac{1}{5}p^{\min}$ pro každý den — součet proteinů denního menu. Proč je to špatně?</summary>
+    <div class="inner">
+      <p>Protože $\sum_m p_m x_{m,d}$ je <strong>součet proteinů všech čtyř jídel na menu</strong> — ale student sní každý den jen <em>jedno</em> z nich. Tři jídla s obřím proteinem „dotují“ čtvrté nuzné, a student, který si vybere právě to nuzné, limit nesplní. Podmínka se týká <em>každé volby</em>, ne průměru ani součtu nabídky.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: tak tedy vypsat omezení „$\sum$ proteinů $\ge p^{\min}$“ pro každou kombinaci zvlášť. Kolik kombinací to je — a šlo by to vůbec?</summary>
+    <div class="inner">
+      <p>Kombinace = 1 jídlo na den z denního menu: $4^5 = 1024$ kombinací — a obecně $4^{|D|}$, <strong>exponenciálně</strong> v počtu dnů. A je to ještě horší: menu předem <em>neznáš</em> (rozhoduje o něm sám model), takže bys musel vypsat omezení pro každou pětici jídel z $M$ — to je $100^5 = 10^{10}$ podmíněných omezení, každé „aktivní, jen pokud je všech pět jídel na menu“. Slepá ulička; potřebujeme chytřejší myšlenku.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: která kombinace je ze všech nejtěžší na splnění? A co z toho plyne pro všechny ostatní?</summary>
+    <div class="inner">
+      <p>Volby v jednotlivých dnech jsou <strong>nezávislé</strong> — výběr v pondělí nijak neomezuje výběr v úterý. Nejméně proteinů tedy nasbírá student, který si <strong>každý den vybere proteinové minimum denního menu</strong>:</p>
+      $$\min_{\text{kombinace}} \sum_{d \in D} p_{\text{volba}(d)} \;=\; \sum_{d \in D}\; \min_{m \,\in\, \text{menu}_d} p_m.$$
+      <p>A to je celá pointa: <strong>když nejhorší kombinace splní $\ge p^{\min}$, splní ho každá</strong> — všechny ostatní jsou po dnech aspoň tak dobré. Místo $4^5$ omezení stačí ohlídat jediné číslo: součet denních minim.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-worst"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „min už umím z L1.8“</div>
+    <p>Konstrukce z <a href="l1-8.html#takeaways">[L1.8]</a> ($h_{min} \le h_j$ pro všechna $j$) počítá min přes <strong>jednu pevnou indexovou množinu</strong> (např. všechny muže). Tady je to dvakrát jinak: (1) omezení má platit <strong>pro každou kombinaci voleb</strong> — to se řeší přechodem na nejhorší případ, žádná „jedna množina hodnot“ tu předem není; (2) denní minimum běží jen přes <strong>vybraná</strong> jídla ($x_{m,d} = 1$) — množina je sama rozhodnutím modelu, takže nerovnosti se musí pro nevybraná jídla <em>vypnout</em> přes big-M <a href="l1-4.html#takeaways">[L1.4]</a>. Kdo na lunch menu napíše holé „L1.8 minimum“, model rozbije (hned uvidíš jak).</p>
+  </div>
+
+  <!-- ===== DENNI MINIMUM ===== -->
+  <h2>Denní minimum přes vybraná jídla: $z_d$ + big-M</h2>
+  <p>Chceme pomocnou proměnnou $z_d$ = „kolik proteinů <em>nejmíň</em> dostane student v den $d$“. Plán podle <a href="l1-8.html#takeaways">[L1.8]</a>: svázat $z_d$ shora s hodnotami a součet $\sum_d z_d$ vynutit $\ge p^{\min}$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč nejde napsat prostě $z_d \le p_m$ pro všechna $m \in M$, jako v <a href="l1-8.html#takeaways">[L1.8]</a>?</summary>
+    <div class="inner">
+      <p>Protože by $z_d$ srazilo minimum <strong>přes všech 100 jídel v $M$</strong> — i přes ta, která ten den na menu vůbec nejsou! Jediné nízkoproteinové jídlo v katalogu (klidně nikdy nevařené) by stáhlo všechna $z_d$ dolů a podmínka $\sum_d z_d \ge p^{\min}$ by se stala nesplnitelnou, přestože reálné menu je v pořádku — model by se nesmyslně <strong>zpřísnil</strong>. Nerovnost $z_d \le p_m$ smí „platit“ jen pro jídla s $x_{m,d} = 1$ — a podmíněné omezení = big-M <a href="l1-4.html#takeaways">[L1.4]</a>:</p>
+      $$z_d \;\le\; p_m + M\,(1 - x_{m,d}) \qquad \forall m \in M,\; \forall d \in D.$$
+      <p>Pro $x_{m,d} = 1$ je to ostré $z_d \le p_m$; pro $x_{m,d} = 0$ se pravá strana zvedne o $M$ a omezení nic neřeže.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-gate"></div>
+
+  <details class="try">
+    <summary>Zkus sám: jak velké musí být $M$?</summary>
+    <div class="inner">
+      <p>Vypnutá nerovnost ($x_{m,d}=0$) nesmí řezat žádnou dosažitelnou hodnotu $z_d$. Smysluplné $z_d$ je nejvýš minimum vybraných proteinů, tedy nejvýš $\max_{m} p_m$. Stačí proto</p>
+      $$M = \max_{m \in M} p_m$$
+      <p>(těsnější, taky korektní: $M = \max_m p_m - \min_m p_m$, protože vypnutá pravá strana je pak $p_m + M \ge \min_m p_m + M = \max_m p_m$). Jako vždy u big-M <a href="l1-4.html#takeaways">[L1.4]</a>: dost velké, aby vypnuté omezení neřezalo, ne nesmyslně obří.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: nerovnosti tlačí $z_d$ jen shora. Nepotřebuješ ještě vazbu, že $z_d$ to minimum opravdu <em>je</em> (zespodu)?</summary>
+    <div class="inner">
+      <p><strong>Nepotřebuješ</strong> — stejná jednostranná logika jako v <a href="l1-8.html#takeaways">[L1.8]</a>. Celá konstrukce je:</p>
+      $$z_d \le p_m + M(1 - x_{m,d}) \;\;\forall m, d, \qquad\qquad \sum_{d \in D} z_d \ge p^{\min}.$$
+      <p>Rozmysli oba směry: (⇒) je-li model přípustný, pak pro každý den $z_d \le \min$ vybraných proteinů, takže nejhorší student dostane $\sum_d \min_{m \in \text{menu}_d} p_m \ge \sum_d z_d \ge p^{\min}$ — podmínka 4 platí. (⇐) splňuje-li menu podmínku 4, polož $z_d := \min_{m \in \text{menu}_d} p_m$ a všechna omezení sedí — žádné dobré menu jsme neuřízli. Solver si $z_d$ „nafoukne“ k dennímu minimu sám, protože potřebuje projít součtovým omezením.</p>
+      <p>Spočítej si i cenu: $|M| \cdot |D| = 500$ nerovností + 1 součtová — místo $4^5$ kombinací. Polynomiální zápis exponenciálního požadavku.</p>
+    </div>
+  </details>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.13</div>
+    <ul>
+      <li><strong>POZOR: tohle NENÍ max/min jedné množiny z <a href="l1-8.html#takeaways">[L1.8]</a>.</strong> Tam počítáš min/max přes jednu pevnou množinu hodnot; tady musí nerovnost platit <em>pro každou možnou kombinaci voleb</em> (1 jídlo na den) — kombinatoricky jiná konstrukce.</li>
+      <li><strong>Klíčová myšlenka:</strong> má-li omezení platit pro <em>libovolnou</em> volbu, stačí ho zaručit pro <strong>nejhorší dosažitelnou kombinaci</strong> — uhlídáš-li worst case, ostatní kombinace jsou v pořádku zadarmo. Díky nezávislosti voleb po dnech je nejhorší kombinace = <strong>součet denních minim</strong>.</li>
+      <li><strong>Minimum přes <em>vybrané</em> položky</strong> (množinu volí model): $z_d \le p_m + M(1 - x_{m,d})$ $\forall m, d$ — big-M <a href="l1-4.html#takeaways">[L1.4]</a> vypne nerovnost pro nevybraná jídla. Holé $z_d \le p_m$ $\forall m$ (à la <a href="l1-8.html#takeaways">[L1.8]</a>) by model zpřísnilo o minimum přes celý katalog.</li>
+      <li><strong>Worst-case podmínka pak jednou nerovností:</strong> $\sum_d z_d \ge p^{\min}$; $M = \max_m p_m$. Vazba stačí jednostranná — solver $z_d$ dotlačí k dennímu minimu sám. Exponenciálně mnoho kombinací ⟶ $|M|\cdot|D|$ lineárních omezení.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA ===== -->
+  <div class="task" id="t-lunch">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>School lunch menu design</strong>
+      <span class="task-src">zdroj: zápočtový test 2021 (v1)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Let $M = \{1, \ldots, 100\}$ be a set of different meal types (e.g. schnitzel, lasagne etc.) and let $D = \{1, \ldots, 5\}$ be working days of one specific week. Each portion of meal $m \in M$ provides $p_m$ proteins. For each meal $m \in M$, value $v_m \in \{0, 1\}$ determines whether it is vegetarian or not and value $c_m$ is a cost of cooking one portion of meal $m$.</p>
+        <p>The goal is to design a school lunch menu for one week such that</p>
+        <p>1. each day, four different meals from $M$ are on the menu and at least one of them is vegetarian.</p>
+        <p>2. the cost of the week menu has to be minimized. Every day, exactly 120 portions of each meal on the menu is cooked.</p>
+        <p>3. each meal $m \in M$ is on the menu at most once per week.</p>
+        <p>4. to satisfy recommended weekly limits on the nutrition values, it must hold that if any student orders arbitrary combination of meals in the week (exactly one meal per day), his/her total intake of protein must be at least $p^{\min}$.</p>
+        <p>Formulate this problem as <strong>Integer Linear Programming</strong>.”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Katalog 100 typů jídel (proteiny $p_m$, cena porce $c_m$, vegetariánský příznak $v_m$ — vše data) a 5 pracovních dnů. Rozhoduješ, <em>co bude který den na menu</em>. Čtyři požadavky: (1) každý den přesně 4 různá jídla, z toho aspoň jedno vegetariánské; (2) minimalizuj cenu — každého jídla na menu se vaří přesně 120 porcí; (3) žádné jídlo se za týden neopakuje; (4) <em>každá</em> studentská kombinace (1 jídlo denně z denního menu) dá za týden aspoň $p^{\min}$ proteinů.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — worst-case přes kombinace: denní minima $z_d$ přes big-M deaktivaci, $\sum_d z_d \ge p^{\min}$.</li>
+        <li><a href="l1-2.html#takeaways">[L1.2] Přiřazovací struktura</a> — binárky $x_{m,d}$ a součtové podmínky (přesně 4 denně, nejvýš 1× týdně).</li>
+        <li><a href="l1-4.html#takeaways">[L1.4] big-M</a> — podmíněné vypnutí nerovnosti pro $x_{m,d} = 0$.</li>
+        <li><a href="l1-8.html#takeaways">[L1.8] max/min jedné množiny</a> — jednostranná vazba pomocné proměnné (a vědomí, čím se dnešní konstrukce liší).</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Lineární kritérium</a> — cena týdenního menu.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Rozsekej zadání po podmínkách. Elementární rozhodnutí: jídlo × den → binárka (jaké součty přes řádky/sloupce podmínky 1 a 3 chtějí — rovnost, nebo nerovnost?). U kritéria nezapomeň na 120 porcí. Celý vtip je podmínka 4: nejdřív si ujasni, <em>čí</em> proteiny počítáš (jednoho studenta a jeho pět voleb, ne součet menu!), pak najdi nejhorší kombinaci (nezávislost po dnech) a postav denní minima přes $z_d$ — pozor, minimum jen přes <em>vybraná</em> jídla, tedy big-M, ne holé nerovnosti z [L1.8]. Nakonec zkontroluj velikost $M$.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Proměnné:</strong></p>
+          $$x_{m,d} \in \{0,1\} \;\; \forall m \in M,\, \forall d \in D \;\;(\text{jídlo } m \text{ na menu dne } d), \qquad z_d \in \mathbb{R} \;\; \forall d \in D.$$
+          <p><strong>(1) Každý den 4 různá jídla, aspoň jedno vegetariánské:</strong></p>
+          $$\sum_{m \in M} x_{m,d} = 4 \quad \forall d \in D, \qquad\qquad \sum_{m \in M} v_m\, x_{m,d} \ge 1 \quad \forall d \in D.$$
+          <p>(Různost je automatická — jedna binárka na typ jídla; $v_m$ je konstanta, součin je lineární.)</p>
+          <p><strong>(3) Každé jídlo nejvýš jednou za týden:</strong></p>
+          $$\sum_{d \in D} x_{m,d} \le 1 \quad \forall m \in M.$$
+          <p><strong>(4) Worst-case proteinová podmínka</strong> — denní minimum $z_d$ jen přes vybraná jídla (big-M deaktivace) a součet minim přes týden:</p>
+          $$z_d \le p_m + M\,(1 - x_{m,d}) \quad \forall m \in M,\, \forall d \in D, \qquad\qquad \sum_{d \in D} z_d \ge p^{\min}, \qquad M = \max_{m \in M} p_m.$$
+          <p><em>Proč to stačí:</em> pro $x_{m,d}=1$ je $z_d \le p_m$, takže $z_d \le \min_{m \in \text{menu}_d} p_m$; součet $\sum_d z_d \ge p^{\min}$ tedy zaručuje, že i student volící každý den nejslabší jídlo nasbírá $\ge p^{\min}$ — a každá jiná kombinace je po dnech aspoň tak dobrá. Obráceně každé vyhovující menu lze doplnit $z_d := \min_{m \in \text{menu}_d} p_m$, takže model žádné dobré menu nezakazuje.</p>
+          <p><strong>(2) Kritérium</strong> — 120 porcí od každého jídla na menu:</p>
+          $$\min\; 120 \sum_{d \in D} \sum_{m \in M} c_m\, x_{m,d}.$$
+          <p>Celkem $500$ binárek, $5$ spojitých $z_d$ a $O(|M|\cdot|D|)$ lineárních omezení — žádné vypisování kombinací.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.13">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-12.html"><span class="dir">← Předchozí</span> L1.12 · Implikace mezi skupinami — Loot [FOTO]</a>
+    <a class="next" href="l1-14.html"><span class="dir">Další →</span> L1.14 · Sousednost a prostorová omezení — Toys [FOTO]</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Nejhorší kombinace = denní minima (zmenšený příklad: 3 dny, 3 jídla na denním menu)
+KOViz.graph(document.getElementById('viz-worst'), {
+  directed: true,
+  nodes: [
+    {id: 'a1', x: 140, y: 70,  label: 'm₃',  sub: 'p = 30'},
+    {id: 'a2', x: 140, y: 175, label: 'm₁₇', sub: 'p = 18', cls: 'bad'},
+    {id: 'a3', x: 140, y: 280, label: 'm₄₂', sub: 'p = 25'},
+    {id: 'b1', x: 320, y: 70,  label: 'm₈',  sub: 'p = 22', cls: 'bad'},
+    {id: 'b2', x: 320, y: 175, label: 'm₅₆', sub: 'p = 35'},
+    {id: 'b3', x: 320, y: 280, label: 'm₂₄', sub: 'p = 28'},
+    {id: 'c1', x: 500, y: 70,  label: 'm₆₁', sub: 'p = 40'},
+    {id: 'c2', x: 500, y: 175, label: 'm₅',  sub: 'p = 20', cls: 'bad'},
+    {id: 'c3', x: 500, y: 280, label: 'm₃₃', sub: 'p = 33'},
+  ],
+  edges: [
+    {from: 'a2', to: 'b1', cls: 'bad'},
+    {from: 'b1', to: 'c2', cls: 'bad'},
+    {from: 'a1', to: 'b3', dashed: true},
+    {from: 'b3', to: 'c3', dashed: true},
+  ],
+  caption: 'Sloupce = dny (zmenšeno: 3 dny, 3 jídla na denním menu), u jídel proteiny. Červeně nejhorší kombinace — student volí každý den proteinové minimum: 18 + 22 + 20 = 60. Čárkovaně jedna z dalších 26 kombinací (30 + 28 + 33 = 91) — žádná není po dnech horší než červená. Splní-li limit červená (p<sup>min</sup> ≤ 60), splní ho každá kombinace.'
+});
+
+// Big-M deaktivace: z_d svazují jen jídla NA menu daného dne
+KOViz.graph(document.getElementById('viz-gate'), {
+  directed: false,
+  nodes: [
+    {id: 'z',  x: 110, y: 178, label: 'z₁', sub: 'denní minimum', cls: 'hl'},
+    {id: 'm7',  x: 500, y: 40,  label: 'm₇',  sub: 'p = 31', cls: 'good'},
+    {id: 'm12', x: 500, y: 95,  label: 'm₁₂', sub: 'p = 18', cls: 'good'},
+    {id: 'm23', x: 500, y: 150, label: 'm₂₃', sub: 'p = 44', cls: 'good'},
+    {id: 'm68', x: 500, y: 205, label: 'm₆₈', sub: 'p = 26', cls: 'good'},
+    {id: 'm9',  x: 500, y: 262, label: 'm₉',  sub: 'p = 12'},
+    {id: 'm81', x: 500, y: 317, label: 'm₈₁', sub: 'p = 55'},
+  ],
+  edges: [
+    {from: 'z', to: 'm7',  cls: 'good', label: 'z₁ ≤ 31'},
+    {from: 'z', to: 'm12', cls: 'good', label: 'z₁ ≤ 18'},
+    {from: 'z', to: 'm23', cls: 'good', label: 'z₁ ≤ 44'},
+    {from: 'z', to: 'm68', cls: 'good', label: 'z₁ ≤ 26'},
+    {from: 'z', to: 'm9',  cls: 'dim', dashed: true, label: 'z₁ ≤ 12 + M'},
+    {from: 'z', to: 'm81', cls: 'dim', dashed: true, label: 'z₁ ≤ 55 + M'},
+  ],
+  caption: 'Den 1: zeleně jídla na menu (x<sub>m,1</sub> = 1) — jejich nerovnosti jsou ostré a srazí z₁ ≤ min{31, 18, 44, 26} = 18. Šedě čárkovaně jídla mimo menu (x<sub>m,1</sub> = 0) — big-M jejich nerovnosti vypne. Bez deaktivace by katalogové m₉ (p = 12, ten den se vůbec nevaří!) stáhlo z₁ na 12 a model nesmyslně zpřísnilo.'
+});
+</script>
+</body>
+</html>
