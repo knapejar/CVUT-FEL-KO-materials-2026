@@ -76,7 +76,7 @@
   <div class="box">
     <div class="box-title">Kdy posun $+h$ přece jen projde</div>
     <ul>
-      <li><strong>Všechny porovnávané cesty mají stejný počet hran.</strong> Pak je příplatek $h \cdot |P|$ všude stejný a pořadí se nemění. Příklad z TSP (kapitola K3): všechny hamiltonovské kružnice na $n$ vrcholech mají přesně $n$ hran — slide TSP doslova říká, že přičtením konstanty $h$ ke každé hraně se kritérium zvedne o $n \cdot h$ (a instance se stane metrickou).</li>
+      <li><strong>Všechny porovnávané cesty mají stejný počet hran.</strong> Pak je příplatek $h \cdot |P|$ všude stejný a pořadí se nemění. Příklad z TSP (<a href="../k3/l3-8a.html">[L3.8a] Metrický TSP</a>): všechny hamiltonovské kružnice na $n$ vrcholech mají přesně $n$ hran — slide TSP doslova říká, že přičtením konstanty $h$ ke každé hraně se kritérium zvedne o $n \cdot h$ (a instance se stane metrickou).</li>
       <li><strong>Posun „po vrcholech“ (potenciály).</strong> Johnsonův algoritmus (zmíněný u Floyda <a href="l2-14.html">[L2.14]</a>) přeznačkuje $c'(u,v) = c(u,v) + h(u) - h(v)$ s vhodnou funkcí $h$ na vrcholech: podél <em>každé</em> $s \to t$ cesty se vnitřní členy teleskopicky vyruší a cena vzroste o stejných $h(s) - h(t)$ — nezávisle na počtu hran. To je korektní cesta, jak se zbavit záporných vah; paušální $+h$ na hranu korektní není.</li>
     </ul>
   </div>

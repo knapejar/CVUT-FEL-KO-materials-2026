@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L3.8a · Metrický TSP + trojúhelníková nerovnost + shortcutting — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k3">K3 · Důkaz / teorie</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L3.8a</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L3.8a</span> Kapitola K3 — Důkaz / teorie (Slot 3) · <strong>[MUST]</strong> · stavební kámen pro Christofidese
+  </p>
+  <h1>Metrický TSP + trojúhelníková nerovnost + shortcutting</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Trojúhelníková nerovnost</strong> $c(\{i,j\}) + c(\{j,k\}) \ge c(\{k,i\})$ definuje <strong>metrický TSP</strong> — a umožňuje <strong>shortcutting</strong>: přeskočení už navštívených vrcholů v uzavřeném sledu cenu <em>nikdy nezvýší</em>.
+  </div>
+
+  <p>V <a href="l3-6.html#takeaways">[L3.6] Neexistence r-aproximace pro obecný TSP</a> jsme dokázali, že obecný TSP nejde aproximovat s žádnou zárukou (pokud $P \ne NP$). Slíbená záchrana se jmenuje <strong>metric TSP</strong> (metrický TSP). Dnešní lekce ho definuje a vytěží z definice první nástroj — <strong>shortcutting</strong> (zkracování přes opakované vrcholy). Je to jeden ze tří stavebních kamenů, ze kterých pak složíme double-tree [L3.9] i Christofidese [L3.10]; zbylé dva přijdou v [L3.8b] (dolní mez) a [L3.8c] (Eulerovský tah).</p>
+
+  <!-- ===== SEKCE 1: DEFINICE ===== -->
+  <h2>Co přesně zabilo aproximace — a jak to zakázat</h2>
+
+  <details class="try">
+    <summary>Zkus sám: prohlédni si zabijáckou instanci z <a href="l3-6.html#takeaways">[L3.6]</a> — hrany grafu $G$ stojí $1$, ostatní $2 + (r-1)n$. Čím se tahle „mapa“ liší od skutečných vzdáleností mezi městy? Najdi trojici měst, kde se chová nereálně.</summary>
+    <div class="inner">
+      <p>Vezmi města $i, k$ spojená drahou hranou a libovolné mezilehlé $j$ spojené s oběma levně. Pak <strong>oklika přes $j$ stojí $1 + 1 = 2$, zatímco přímá hrana $2 + (r-1)n$</strong> — oklika je řádově levnější než přímé spojení. U vzdáleností na mapě to nejde: přímé spojení nikdy není delší než zajížďka přes třetí město. Přesně tahle vlastnost reálných vzdáleností se jmenuje <strong>trojúhelníková nerovnost</strong> — a zabijácké instance ji porušují. Zákaz takových instancí je tedy přirozená (a prakticky všudypřítomná) restrikce.</p>
+    </div>
+  </details>
+
+  <p>Slide 22 (EN 1:1): <em>„In most common applications the distances of the <strong>TSP</strong> satisfies the triangle inequality.“</em></p>
+
+  <div class="box">
+    <div class="box-title">Metric TSP (slide 22, 1:1)</div>
+    <ul>
+      <li><strong>Instance:</strong> Complete undirected graph $K_n$ ($n \ge 3$) with weights $c : E(K_n) \to \mathbb{R}^+$ such that $c(\{i,j\}) + c(\{j,k\}) \ge c(\{k,i\})$ for all $i, j, k \in V(K_n)$.</li>
+      <li><strong>Goal:</strong> Find the Hamiltonian circuit $T$ such that $\sum_{e \in E(T)} c(e)$ is minimal.</li>
+    </ul>
+  </div>
+
+  <p>Hamiltonovskou kružnici znáš z <a href="l3-3.html#takeaways">[L3.3]</a>; nové je jen omezení na ceny. Čti ho jako „<strong>přímá hrana není nikdy dražší než oklika přes třetí vrchol</strong>“.</p>
+
+  <details class="try">
+    <summary>Zkus sám: trojúhelníkovou nerovnost jsi v učebnici už dvakrát potkal — kde? A v čem je dnešní použití jiné?</summary>
+    <div class="inner">
+      <p>V <a href="../k2/l2-1.html#takeaways">[L2.1]</a> jako <em>větu</em> o nejkratších vzdálenostech: $l(i,j) \le l(i,k) + l(k,j)$ platí v každém grafu bez záporného cyklu — je to <strong>dokázaná vlastnost funkce $\mathrm{dist}$</strong>, zadarmo. A v <a href="l3-7.html#takeaways">[L3.7]</a> na ní stála detekce záporného cyklu Bellman-Fordem.</p>
+      <p>Dnes je role obrácená: trojúhelníková nerovnost je <strong>předpoklad o vstupních cenách $c$</strong>, který instance buď splňuje, nebo ne. Ekvivalentní čtení: instance je metrická právě tehdy, když je přímá hrana $\{i,k\}$ nejkratší cestou mezi $i$ a $k$ — ceny $c$ se rovnají vlastní metrice vzdáleností.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: METRICKÝ ≠ SNADNÝ ===== -->
+  <h2>Metrický ≠ snadný</h2>
+
+  <details class="try">
+    <summary>Zkus sám: zachránili jsme se restrikcí z těžkosti? Vrať se k důkazu silné NP-těžkosti TSP <a href="l3-5.html#takeaways">[L3.5]</a> — instance tam měly váhy $1$ a $2$. Splňují trojúhelníkovou nerovnost?</summary>
+    <div class="inner">
+      <p>Ano. Nejhorší případ: dvě nejlevnější hrany proti nejdražší, $1 + 1 \ge 2$ — platí (a všechny ostatní kombinace tím spíš: $1+2 \ge 2$, $2+2 \ge 2$, …). Celý důkaz z <a href="l3-5.html#takeaways">[L3.5]</a> tedy běží <em>uvnitř</em> metrických instancí beze změny — <strong>metrický TSP je pořád silně NP-těžký</strong>. Restrikce nezachránila optimální řešení v polynomiálním čase; zachrání (až) aproximace.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 22 (1:1) — složitost metrického TSP</div>
+    <p><em>„The <strong>metric TSP</strong> is strongly NP-hard. Can be proved in the same way as the complexity of <strong>TSP</strong> because weights 1 and 2 preserve the triangle inequality. Therefore the psudopolynomial algs do not exist.“</em> <span style="color:var(--muted)">(překlep „psudopolynomial“ je v originálu)</span></p>
+    <p><em>„But approximation algorithms do exist.“</em></p>
+  </div>
+
+  <p>To je celá pointa kapitoly: NP-těžkost zůstává, ale na metrických instancích už jde slíbit záruku — faktor 2 (double-tree [L3.9]) a dokonce 3/2 (Christofides [L3.10], žebříček #1). Oba důkazy stojí na dnešním shortcuttingu.</p>
+
+  <!-- ===== SEKCE 3: +h TRIK ===== -->
+  <h2>Zmetrikovat umí každý: posun $+h$ (a proč to nic neřeší)</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 22 (1:1) — poznámka o posunu</div>
+    <p><em>„We can make the TSP instance metric simply by adding the same constant $h$ to the cost of every edge (the criterion function is higher by $n * h$), but this does not lead to approx. alg. for non-metric TSP.“</em></p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: v <a href="../k2/l2-15.html#takeaways">[L2.15]</a> jsme dokázali, že posun $+h$ <em>rozbíjí</em> nejkratší cesty. Proč je u TSP bezpečný — proč se po $+h$ nezmění, KTERÝ okruh je optimální?</summary>
+    <div class="inner">
+      <p>U nejkratších cest vadilo, že porovnávané cesty mají <em>různý počet hran</em> — příplatek $h \cdot |P|$ pak není všude stejný. Ale <strong>každá Hamiltonovská kružnice na $n$ vrcholech má přesně $n$ hran</strong>: každý vrchol právě jednou opustíš. Příplatek je tedy pro všechny porovnávané objekty stejných $n \cdot h$, pořadí okruhů se nezmění a kritérium se jen posune o $n \cdot h$ — přesně výjimka „stejný počet hran“ z infoboxu <a href="../k2/l2-15.html#takeaways">[L2.15]</a>. A dost velké $h$ trojúhelníkovou nerovnost spraví: chceme $(c(i,j)+h) + (c(j,k)+h) \ge c(k,i)+h$, tj. $h \ge c(k,i) - c(i,j) - c(j,k)$ pro všechny trojice — stačí $h \ge c_{\max}$ (spočítáš přesněji v T01).</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám (těžší, ale klíčové): tak proč tedy neumíme aproximovat obecný TSP takhle: „přičti $h$, pusť aproximaci pro metrický TSP, odečti $n \cdot h$“? Kdyby to šlo, byli bychom ve sporu s <a href="l3-6.html#takeaways">[L3.6]</a> — najdi, kde se faktor ztratí.</summary>
+    <div class="inner">
+      <p>Nechť $\mathcal{A}$ je r-aproximace pro metrický TSP a $H$ její výstup na posunuté instanci $c' = c + h$. Záruka platí <em>v posunutém světě</em>:</p>
+      $$c'(H) \le r \cdot \mathrm{OPT}' = r\,(\mathrm{OPT} + n h).$$
+      <p>Po návratu do původních cen ($c(H) = c'(H) - nh$):</p>
+      $$c(H) \le r \cdot \mathrm{OPT} + (r-1)\,n h.$$
+      <p><strong>Aditivní člen $(r-1)\,n h$ se neodečte</strong> — a vůči $\mathrm{OPT}$ může být libovolně velký, takže žádný násobný faktor v původním světě nedostaneš. Poznáváš ho? Je to přesně rozdíl $(r-1)n$, kterým zabijácká konstrukce v <a href="l3-6.html#takeaways">[L3.6]</a> roztáhla mezeru mezi „HC existuje“ a „HC neexistuje“. Všechno do sebe zapadá: kdyby se faktor přenášel, [L3.6] by dávala $P = NP$. <em>(Odvození je naše vlastní rozepsání — slide konstatuje jen závěr „does not lead to approx. alg.“.)</em></p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 4: ZOBECNĚNÁ NEROVNOST ===== -->
+  <h2>Zobecněná trojúhelníková nerovnost: zkratka přes víc vrcholů</h2>
+
+  <p>Definice mluví o <em>trojicích</em>. Pro shortcutting budeme potřebovat přeskakovat i <em>několik</em> vrcholů najednou.</p>
+
+  <details class="try">
+    <summary>Zkus sám: v metrické instanci vezmi řetěz $u \to x \to y \to v$ (tři hrany). Platí $c(\{u,v\}) \le c(\{u,x\}) + c(\{x,y\}) + c(\{y,v\})$? Odvoď to dvojím použitím trojúhelníkové nerovnosti — a rozmysli, jak by šlo pokračovat pro libovolně dlouhý řetěz.</summary>
+    <div class="inner">
+      <p>Dvakrát „srovnej roh“:</p>
+      $$c(\{u,y\}) \le c(\{u,x\}) + c(\{x,y\}), \qquad c(\{u,v\}) \le c(\{u,y\}) + c(\{y,v\}).$$
+      <p>Dosazením první do druhé: $c(\{u,v\}) \le c(\{u,x\}) + c(\{x,y\}) + c(\{y,v\})$. Obecně <strong>indukcí přes počet hran řetězu</strong>: přímá hrana mezi konci není nikdy dražší než součet cen podél libovolného řetězu (sledu) mezi nimi. Říkejme tomu <em>zobecněná trojúhelníková nerovnost</em>.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-chain"></div>
+
+  <!-- ===== SEKCE 5: SHORTCUTTING ===== -->
+  <h2>Shortcutting: z uzavřeného sledu Hamiltonovský okruh</h2>
+
+  <p>Teď ten nástroj nasadíme. Algoritmy v [L3.9] a [L3.10] budou vyrábět <strong>uzavřený sled</strong> (closed walk, <a href="../k2/l2-1.html#takeaways">[L2.1]</a>), který projde <em>všemi</em> vrcholy — ale některými víckrát, takže to ještě není Hamiltonovský okruh. Konkrétní příklad (vlastní ilustrační instance; ceny tvoří metriku, ověříš v T02):</p>
+
+  <table>
+    <thead><tr><th>$c(\{\cdot,\cdot\})$</th><th>B</th><th>C</th><th>D</th><th>E</th></tr></thead>
+    <tbody>
+      <tr><td><strong>A</strong></td><td>2</td><td>3</td><td>3</td><td>2</td></tr>
+      <tr><td><strong>B</strong></td><td>—</td><td>1</td><td>2</td><td>3</td></tr>
+      <tr><td><strong>C</strong></td><td>—</td><td>—</td><td>2</td><td>4</td></tr>
+      <tr><td><strong>D</strong></td><td>—</td><td>—</td><td>—</td><td>5</td></tr>
+    </tbody>
+  </table>
+
+  <p>Dán je uzavřený sled $W = A \to B \to C \to B \to D \to B \to A \to E \to A$ — 8 hran, délka $2+1+1+2+2+2+2+2 = 14$, navštíví všech 5 vrcholů, ale $B$ třikrát a $A$ třikrát.</p>
+
+  <details class="try">
+    <summary>Zkus sám: navrhni, jak ze sledu $W$ vyrobit Hamiltonovský okruh — a zdůvodni, proč tvá úprava celkovou cenu nezvýší. (Nápověda: graf je úplný, takže „rovnou dál“ se dá vždycky.)</summary>
+    <div class="inner">
+      <p>Jdi podél sledu a <strong>přeskakuj vrcholy, které už jsi navštívil</strong>: místo abys z $C$ couval do $B$ (už viděno) a teprve pak šel do $D$, skoč <em>přímo</em> $C \to D$ — v úplném grafu $K_n$ ta hrana existuje. Zůstane posloupnost <em>prvních návštěv</em> $A, B, C, D, E$ a návrat do $A$: Hamiltonovský okruh (každý vrchol právě jednou <a href="l3-3.html#takeaways">[L3.3]</a>).</p>
+      <p>A cena? Každá zkratka nahrazuje souvislý úsek sledu přímou hranou mezi jeho konci — a ta podle <strong>zobecněné trojúhelníkové nerovnosti</strong> není dražší než nahrazený úsek. Žádná jiná hrana se nemění, takže celková cena neporoste. Tomuhle postupu se říká <strong>shortcutting</strong> (zkracování).</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-walk"></div>
+
+  <p>Přesně takhle to dělá krok 3 double-tree algoritmu (slide 24, EN 1:1 — tam je vstupem Eulerovský tah $L$, což je speciální uzavřený sled; potkáš ho v [L3.8c]):</p>
+
+  <div class="box">
+    <div class="box-title">Shortcutting = krok 3 double-tree algoritmu (slide 24, 1:1) + jeho záruka (slide 25, 1:1)</div>
+<pre><code>3  Transform the Eulerian walk L to the Hamiltonian circuit H
+   in the complete graph K_n:
+      - create a sequence of nodes on the Eulerian walk L;
+      - we skip nodes that are already in the sequence;
+      - the rest creates the Hamiltonian circuit H;</code></pre>
+    <p>Slide 25, bod 1: <em>„due to the triangle inequality, the skipped nodes don't prolong the route, i.e. $c(E(L)) \ge c(E(H))$“</em>.</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: které DVĚ vlastnosti metrické instance shortcutting potřebuje? (Jednu na to, aby vůbec šel; druhou na to, aby nezdražoval.)</summary>
+    <div class="inner">
+      <ul>
+        <li><strong>Úplnost $K_n$</strong> — zkratková hrana mezi koncem a prvním dalším nenavštíveným vrcholem musí <em>existovat</em>. V obecném (neúplném) grafu by zkratka nemusela vést kudy.</li>
+        <li><strong>Trojúhelníková nerovnost</strong> — zkratka nesmí být <em>dražší</em> než obcházený úsek. V nemetrické instanci může přímá hrana stát víc než celá oklika (přesně to dělaly instance z <a href="l3-6.html#takeaways">[L3.6]</a>) a shortcutting by okruh zdražil.</li>
+      </ul>
+      <p>Obě vlastnosti má metrický TSP z definice — proto je shortcutting „zadarmo“.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 6: VÝHLED ===== -->
+  <h2>K čemu to bude: plán na příští lekce</h2>
+
+  <p>Shortcutting je <strong>poslední krok</strong> obou aproximačních algoritmů: vyrobí z laciného uzavřeného sledu přípustný Hamiltonovský okruh, <em>aniž by pokazil cenu</em> — v řetízcích důkazů obstará nerovnost $c(E(L)) \ge c(E(H))$. Zbývá umět sled lacino <em>vyrobit</em> (Eulerovský tah nad zdvojenou kostrou, [L3.8c]) a cenu sledu svázat s neznámým $\mathrm{OPT}$ (dolní mez $\mathrm{OPT} \ge c(\mathrm{MST})$, [L3.8b] — hned další lekce). Pak už faktory 2 [L3.9] a 3/2 [L3.10] vypadnou složením tří nerovností.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
+    <ul>
+      <li><strong>„Trojúhelníková nerovnost platí vždycky.“</strong> NE — pro vstupní ceny $c$ je to <em>předpoklad</em>, který nemetrické instance porušují (zabijácké instance z <a href="l3-6.html#takeaways">[L3.6]</a>: $1 + 1 &lt; 2 + (r-1)n$). Nezaměň s větou z <a href="../k2/l2-1.html#takeaways">[L2.1]</a> o <em>vzdálenostech</em> $\mathrm{dist}$ — ta platí v každém grafu bez záporného cyklu.</li>
+      <li><strong>„Metrický TSP už je snadný.“</strong> NE — je pořád silně NP-těžký (váhy 1/2 z <a href="l3-5.html#takeaways">[L3.5]</a> jsou metrické), pseudopolynomiální algoritmus neexistuje. Restrikce zachraňuje jen <em>aproximovatelnost</em>.</li>
+      <li><strong>„Shortcutting okruh zkrátí.“</strong> NE nutně — zaručeno je jen <em>nezhoršení</em> ($\le$). Pokud jsou ceny „degenerované“ (zkratka stojí přesně tolik co oklika), vyjde rovnost; v důkazech proto stojí $c(E(L)) \ge c(E(H))$, žádné ostré $&gt;$.</li>
+      <li><strong>„Posunem $+h$ převedu aproximaci metrického TSP na obecný.“</strong> NE — záruka se přenese jako $c(H) \le r \cdot \mathrm{OPT} + (r-1)nh$ a aditivní člen faktor zničí; jinak by to byl spor s <a href="l3-6.html#takeaways">[L3.6]</a>.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.8a</div>
+    <ul>
+      <li><strong>Metrický TSP</strong> (slide 22): úplný $K_n$ ($n \ge 3$), $c : E(K_n) \to \mathbb{R}^+$ s <strong>trojúhelníkovou nerovností</strong> $c(\{i,j\}) + c(\{j,k\}) \ge c(\{k,i\})$ pro všechny trojice; hledá se nejlevnější Hamiltonovský okruh <a href="l3-3.html#takeaways">[L3.3]</a>.</li>
+      <li>Metrický TSP je <strong>stále silně NP-těžký</strong> (váhy 1 a 2 z <a href="l3-5.html#takeaways">[L3.5]</a> trojúhelníkovou nerovnost splňují) — ale na rozdíl od obecného TSP <a href="l3-6.html#takeaways">[L3.6]</a> <strong>aproximační algoritmy existují</strong>.</li>
+      <li><strong>Zobecněná trojúhelníková nerovnost</strong> (indukcí): přímá hrana mezi konci není dražší než libovolný řetěz mezi nimi.</li>
+      <li><strong>Shortcutting:</strong> uzavřený sled přes všechny vrcholy → posloupnost prvních návštěv = Hamiltonovský okruh; každá zkratka nahrazuje úsek sledu přímou hranou, takže $c(E(L)) \ge c(E(H))$. Potřebuje <em>úplnost</em> (zkratka existuje) i <em>metriku</em> (zkratka nezdraží) — proto jdou Eulerovské tahy [L3.8c] převést na Hamiltonovský okruh bez zhoršení.</li>
+      <li>Posun $+h$ zmetrikuje každou instanci (všechny okruhy mají $n$ hran, kritérium $+\,n h$ — výjimka z <a href="../k2/l2-15.html#takeaways">[L2.15]</a>), ale aproximační faktor se nepřenese.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-metric">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Metric TSP — definice, složitost, posun $+h$</strong>
+      <span class="task-src">zdroj: definice + poznámky = slide 22 (06_TSP) EN 1:1; studijní otázky (i)–(iii) vlastní (přiznáno), řešení vlastní dle slidu 22 a [L3.5]/[L3.6]</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN 1:1 = slide 22; study questions own)</span>
+        <p><strong>Metric TSP.</strong> <em>Instance:</em> Complete undirected graph $K_n$ ($n \ge 3$) with weights $c : E(K_n) \to \mathbb{R}^+$ such that $c(\{i,j\}) + c(\{j,k\}) \ge c(\{k,i\})$ for all $i, j, k \in V(K_n)$. <em>Goal:</em> Find the Hamiltonian circuit $T$ such that $\sum_{e \in E(T)} c(e)$ is minimal.</p>
+        <p><em>Study questions (own): (i) Show that the metric TSP is strongly NP-hard. (ii) Show that every TSP instance can be made metric by adding the same constant $h$ to the cost of every edge — how large must $h$ be, and what happens to the criterion function? (iii) Explain why (ii) does not yield an r-approximation algorithm for the non-metric TSP.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Teoretická otázka formátu ústní zkoušky: definice metrického TSP a tři tvrzení ze slidu 22, která máš umět nejen citovat, ale i zdůvodnit — těžkost se dědí, $+h$ zmetrikuje, faktor se nepřenese.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice, trojúhelníková nerovnost, rozbor posunu $+h$.</li>
+        <li><a href="l3-5.html#takeaways">[L3.5] TSP je silně NP-těžký</a> — konstrukce s váhami 1 a 2.</li>
+        <li><a href="l3-6.html#takeaways">[L3.6] Neexistence r-aproximace</a> — proč se faktor nesmí přenést.</li>
+        <li><a href="../k2/l2-15.html#takeaways">[L2.15] Skalování vah</a> — kdy posun $+h$ zachová pořadí řešení.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(i) Nedokazuj nic nového — zkontroluj, že <em>stará</em> konstrukce žije uvnitř nové restrikce. (ii) Rozepiš trojúhelníkovou nerovnost pro posunuté ceny a izoluj $h$; pak spočítej, o kolik se zvedne cena <em>každého</em> okruhu. (iii) Napiš záruku aproximace v posunutém světě a převeď ji zpět — sleduj, co se stane s členem $r \cdot nh$.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní, dle slidu 22)</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Důkaz silné NP-těžkosti TSP <a href="l3-5.html#takeaways">[L3.5]</a> používá instance s váhami $c \in \{1, 2\}$ (hrana $G$ → 1, nehrana → 2; HC v $G$ existuje $\iff$ OPT $= n$). Tyto váhy trojúhelníkovou nerovnost splňují: nejhorší případ je $1 + 1 \ge 2$, všechny ostatní kombinace ($1{+}2 \ge 2$, $2{+}2 \ge 2$, …) tím spíš. Každá instance konstrukce je tedy <em>metrická</em> a redukce z HC funguje beze změny i pro metrický TSP — ten je silně NP-těžký a (pokud $P \ne NP$) nemá ani pseudopolynomiální algoritmus. Slide 22 (1:1): <em>„Can be proved in the same way as the complexity of TSP because weights 1 and 2 preserve the triangle inequality.“</em></p>
+
+          <p><strong>(ii)</strong> Pro $c' = c + h$ chceme $(c(i,j) + h) + (c(j,k) + h) \ge c(k,i) + h$, tj. po úpravě</p>
+          $$h \ge c(k,i) - c(i,j) - c(j,k) \quad \text{pro všechny trojice } i,j,k.$$
+          <p>Stačí tedy $h \ge \max_{i,j,k}\big(c(k,i) - c(i,j) - c(j,k)\big)$; hrubě (ale vždy bezpečně) $h \ge c_{\max}$, protože pak $c(i,j) + c(j,k) + h \ge h \ge c_{\max} \ge c(k,i)$ (ceny jsou nezáporné). Každá Hamiltonovská kružnice má přesně $n$ hran, takže cena <em>každého</em> okruhu vzroste o stejných $n \cdot h$ — pořadí okruhů se nezmění (výjimka „stejný počet hran“ z <a href="../k2/l2-15.html#takeaways">[L2.15]</a>), optimální okruh zůstane optimální a kritérium je vyšší o $n \cdot h$ (slide 22, 1:1: <em>„the criterion function is higher by $n * h$“</em>).</p>
+
+          <p><strong>(iii)</strong> Nechť $\mathcal{A}$ je r-aproximace metrického TSP. Na posunuté instanci platí $c'(H) \le r \cdot \mathrm{OPT}' = r(\mathrm{OPT} + nh)$. Zpět v původních cenách:</p>
+          $$c(H) = c'(H) - nh \le r \cdot \mathrm{OPT} + (r-1)\,nh.$$
+          <p>Záruka už není násobná — aditivní člen $(r-1)nh$ může být vůči $\mathrm{OPT}$ libovolně velký (a u nemetrických instancí $h$ musí být velké, aby nerovnost spravil). Konzistence s teorií: kdyby se faktor přenášel, dostali bychom polynomiální r-aproximaci obecného TSP, a tedy $P = NP$ podle <a href="l3-6.html#takeaways">[L3.6]</a> — mezera $(r-1)n$ v tamní konstrukci je přesně tenhle aditivní člen. $\blacksquare$</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-shortcut">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Shortcutting — proč přeskočené vrcholy cestu neprodlouží</strong>
+      <span class="task-src">zdroj: krok 3 = slide 24, tvrzení = slide 25 bod 1 (06_TSP) EN 1:1; otázka „prove“ a instance vlastní (přiznáno), důkaz vlastní rozepsání jednořádkového argumentu slidu 25</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; quoted parts 1:1 = slides 24–25, question own)</span>
+        <p>Step 3 of the double-tree algorithm transforms a closed walk into a tour: <em>„Transform the Eulerian walk L to the Hamiltonian circuit H in the complete graph $K_n$: create a sequence of nodes on the Eulerian walk L; we skip nodes that are already in the sequence; the rest creates the Hamiltonian circuit H.“</em></p>
+        <p><em>(a) Prove the claim of slide 25: „due to the triangle inequality, the skipped nodes don't prolong the route, i.e. $c(E(L)) \ge c(E(H))$“ — for an arbitrary closed walk $L$ visiting all nodes of a metric TSP instance. (b) Verify that the cost matrix from the lesson (nodes A–E) satisfies the triangle inequality, and run the shortcutting on the closed walk $W = A,B,C,B,D,B,A,E,A$.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Důkazová mini-úloha + propočet: zdůvodnit obecně, že shortcutting nezdražuje (to je nerovnost ①, kterou pak důkazy faktorů 2 i 3/2 jen citují), a přehrát ho na konkrétní pětivrcholové instanci z výkladu.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — zobecněná trojúhelníková nerovnost, mechanika shortcuttingu.</li>
+        <li><a href="l3-3.html#takeaways">[L3.3] Hamiltonovská kružnice</a> — co přesně má vzniknout.</li>
+        <li><a href="../k2/l2-1.html#takeaways">[L2.1]</a> — sled vs. cesta (uzavřený sled smí vrcholy opakovat).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(a) Rozděl sled na úseky mezi po sobě jdoucími <em>prvními návštěvami</em> — úseky pokrývají celý sled a žádná hrana sledu není ve dvou úsecích. Každou hranu okruhu $H$ pak porovnej s „jejím“ úsekem zobecněnou trojúhelníkovou nerovností a sečti. (b) U metriky stačí prověřit všech $3\binom{5}{3} = 30$ nerovností (po trojicích; využij symetrii a kontroluj vždy největší cenu v trojici proti součtu zbylých dvou).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní)</summary>
+        <div class="inner">
+          <p><strong>(a)</strong> Nechť $L = w_0, w_1, \ldots, w_m$ ($w_m = w_0$) je uzavřený sled obsahující všechny vrcholy a nechť $v_1, v_2, \ldots, v_n$ jsou vrcholy v pořadí <em>prvních</em> výskytů na $L$ (tedy $v_1 = w_0$). Shortcutting vrátí $H = v_1, v_2, \ldots, v_n, v_1$ — každý vrchol právě jednou, v úplném $K_n$ všechny hrany existují, takže $H$ je Hamiltonovský okruh.</p>
+          <p>Pro každé $i$ je dvojice $v_i, v_{i+1}$ (a nakonec $v_n, v_1$) spojena souvislým úsekem sledu $L$: od výskytu $v_i$, za nímž následovala první návštěva $v_{i+1}$, vede po hranách sledu úsek $L_i$ do $v_{i+1}$ (mezilehlé vrcholy jsou ty přeskočené); poslední úsek $L_n$ vede od posledního z prvních výskytů zpátky do $w_m = v_1$. Úseky $L_1, \ldots, L_n$ na sebe navazují a beze zbytku <strong>rozdělí celý sled</strong>: $\sum_{i} c(E(L_i)) = c(E(L))$, žádná hrana se nepočítá dvakrát.</p>
+          <p>Zobecněná trojúhelníková nerovnost (indukcí přes délku úseku; báze = hrana samotná, krok = jedno použití $c(\{u,v\}) \le c(\{u,x\}) + c(\{x,v\})$ na první roh úseku) dává pro každý úsek</p>
+          $$c(\{v_i, v_{i+1}\}) \le c(E(L_i)).$$
+          <p>Sečtením přes $i = 1, \ldots, n$:</p>
+          $$c(E(H)) = \sum_{i=1}^{n} c(\{v_i, v_{i+1}\}) \le \sum_{i=1}^{n} c(E(L_i)) = c(E(L)). \qquad \blacksquare$$
+          <p><em>(Slide 25 tenhle argument shrnuje jednou větou — „due to the triangle inequality, the skipped nodes don't prolong the route“; u zkoušky stačí věta + náčrt úseků a jedné zkratky.)</em></p>
+
+          <p><strong>(b) Metrika.</strong> Po trojicích vždy největší cena proti součtu zbylých (ostatní dvě nerovnosti pak platí triviálně, protože ceny jsou kladné): ABC: $3 \le 2{+}1$ ✓; ABD: $3 \le 2{+}2$ ✓; ABE: $3 \le 2{+}2$ ✓; ACD: $3 \le 3{+}2$, $3 \le 3{+}2$ ✓ (remíza největších); ACE: $4 \le 3{+}2$ ✓; ADE: $5 \le 3{+}2$ ✓ (rovnost); BCD: $2 \le 1{+}2$ ✓; BCE: $4 \le 1{+}3$ ✓ (rovnost); BDE: $5 \le 2{+}3$ ✓ (rovnost); CDE: $5 \le 2{+}4$ ✓. Instance je metrická.</p>
+          <p><strong>Běh.</strong> Posloupnost vrcholů na $W$: $A, B, C, \cancel{B}, D, \cancel{B}, \cancel{A}, E, (A)$ → první návštěvy $A, B, C, D, E$, tedy $H = A,B,C,D,E,A$. Úseky a zkratky:</p>
+          <ul>
+            <li>$A \to B$ a $B \to C$: úseky délky 1, beze změny ($2$, $1$).</li>
+            <li>$C \to B \to D$ → zkratka $\{C,D\}$: $2 \le 1 + 2 = 3$ (ušetřena 1).</li>
+            <li>$D \to B \to A \to E$ → zkratka $\{D,E\}$: $5 \le 2 + 2 + 2 = 6$ (ušetřena 1; dvojí použití trojúhelníkové nerovnosti).</li>
+            <li>$E \to A$: úsek délky 1, beze změny ($2$).</li>
+          </ul>
+          <p>Celkem $c(E(H)) = 2+1+2+5+2 = 12 \le 14 = c(E(W))$. ✓</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L3.8a">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k3/l3-7.html"><span class="dir">← Předchozí</span> L3.7 · Korektnost Bellman-Forda</a>
+    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.8b · MST jako dolní mez (OPT ≥ c(MST)))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// 1 — Stepper: zobecněná trojúhelníková nerovnost (řetěz u→x→y→v se postupně "sklapne" na přímou hranu)
+KOViz.stepper(document.getElementById('viz-chain'), {
+  graph: {
+    directed: false,
+    nodes: [
+      {id:'u', x:90,  y:260},
+      {id:'x', x:240, y:100},
+      {id:'y', x:400, y:100},
+      {id:'v', x:550, y:260},
+    ],
+    edges: [
+      {from:'u', to:'x', label:'c(u,x)'},
+      {from:'x', to:'y', label:'c(x,y)'},
+      {from:'y', to:'v', label:'c(y,v)'},
+      {from:'u', to:'y', label:'c(u,y)', dashed:true},
+      {from:'u', to:'v', label:'c(u,v)', dashed:true},
+    ],
+    caption: 'Zobecněná trojúhelníková nerovnost: dvojím (obecně opakovaným) použitím definiční nerovnosti se libovolný řetěz „sklapne" na přímou hranu mezi konci.',
+  },
+  frames: [
+    {desc:'Řetěz u → x → y → v o třech hranách (plné čáry). Cíl: ukázat, že přímá hrana {u,v} (čárkovaná) není dražší než celý řetěz.',
+     edges:{'u->x':'hl', 'x->y':'hl', 'y->v':'hl', 'u->y':'dim', 'u->v':'dim'}},
+    {desc:'První použití trojúhelníkové nerovnosti na trojici (u, x, y): c(u,y) ≤ c(u,x) + c(x,y). Roh x je „srovnán" — řetěz se zkrátil na u → y → v.',
+     nodes:{x:'dim'},
+     edges:{'u->x':'dim', 'x->y':'dim', 'u->y':'hl', 'y->v':'hl', 'u->v':'dim'}},
+    {desc:'Druhé použití na trojici (u, y, v): c(u,v) ≤ c(u,y) + c(y,v) ≤ c(u,x) + c(x,y) + c(y,v). Hotovo — přímá hrana ≤ součet řetězu.',
+     nodes:{x:'dim', y:'dim'},
+     edges:{'u->x':'dim', 'x->y':'dim', 'u->y':'dim', 'y->v':'dim', 'u->v':'good'}},
+    {desc:'Obecně INDUKCÍ přes počet hran řetězu: každý krok srovná jeden roh. Přímá hrana mezi konci není nikdy dražší než libovolný řetěz (sled) mezi nimi — to je přesně licence na přeskakování více vrcholů najednou.',
+     edges:{'u->x':'dim', 'x->y':'dim', 'u->y':'dim', 'y->v':'dim', 'u->v':'good'}},
+  ],
+});
+
+// 2 — Stepper: shortcutting na uzavřeném sledu W = A,B,C,B,D,B,A,E,A (vlastní metrická instance z výkladu)
+KOViz.stepper(document.getElementById('viz-walk'), {
+  graph: {
+    directed: false,
+    nodes: [
+      {id:'A', x:150, y:210},
+      {id:'B', x:300, y:150},
+      {id:'C', x:470, y:80},
+      {id:'D', x:480, y:300},
+      {id:'E', x:110, y:70},
+    ],
+    edges: [
+      {from:'A', to:'B', label:'2'},
+      {from:'B', to:'C', label:'1'},
+      {from:'B', to:'D', label:'2'},
+      {from:'A', to:'E', label:'2'},
+      {from:'C', to:'D', label:'2'},
+      {from:'D', to:'E', label:'5', curve:-0.4},
+    ],
+    caption: 'Vlastní ilustrační instance (úplná metrická K₅, tabulka cen ve výkladu; nakresleno je jen 6 hran, které běh použije). Sled W = A→B→C→B→D→B→A→E→A má délku 14.',
+  },
+  frames: [
+    {desc:'Vstup: uzavřený sled W = A→B→C→B→D→B→A→E→A — 8 hran, délka 2+1+1+2+2+2+2+2 = 14. Navštíví všech 5 vrcholů, ale A i B třikrát (hrany A–B, B–C, B–D, A–E projde každou dvakrát, tam a zpět). Čísla u vrcholů = pořadí návštěv.',
+     nodes:{A:'hl', B:'hl', C:'hl', D:'hl', E:'hl'},
+     edges:{'A->B':'hl', 'B->C':'hl', 'B->D':'hl', 'A->E':'hl', 'C->D':'dim', 'D->E':'dim'},
+     subs:{A:'1·7·9', B:'2·4·6', C:'3', D:'5', E:'8'}},
+    {desc:'Zapiš posloupnost vrcholů a škrtni opakované: A, B, C, B̶, D, B̶, A̶, E, (A). Zůstane posloupnost prvních návštěv A, B, C, D, E — kandidát na Hamiltonovský okruh. Teď zkratky.',
+     nodes:{A:'good', B:'good', C:'good', D:'good', E:'good'},
+     edges:{'A->B':'hl', 'B->C':'hl', 'B->D':'dim', 'A->E':'dim', 'C->D':'dim', 'D->E':'dim'},
+     subs:{A:'1.', B:'2.', C:'3.', D:'4.', E:'5.'}},
+    {desc:'Zkratka 1: úsek C→B→D (B už navštíveno) nahradí přímá hrana {C,D}. Trojúhelníková nerovnost: c(C,D) = 2 ≤ c(C,B) + c(B,D) = 1 + 2 = 3. Ušetřena 1.',
+     nodes:{A:'good', B:'dim', C:'hl', D:'hl', E:'good'},
+     edges:{'A->B':'hl', 'B->C':'hl', 'C->D':'good', 'B->D':'dim', 'A->E':'dim', 'D->E':'dim'},
+     subs:{A:'1.', B:'přeskočen', C:'3.', D:'4.', E:'5.'}},
+    {desc:'Zkratka 2: úsek D→B→A→E (B i A už navštíveny) nahradí přímá hrana {D,E}. Zobecněná trojúhelníková nerovnost (dvě sklapnutí): c(D,E) = 5 ≤ c(D,B) + c(B,A) + c(A,E) = 2 + 2 + 2 = 6. Ušetřena 1.',
+     nodes:{A:'dim', B:'dim', C:'good', D:'hl', E:'hl'},
+     edges:{'A->B':'hl', 'B->C':'hl', 'C->D':'good', 'D->E':'good', 'B->D':'dim', 'A->E':'dim'},
+     subs:{A:'přeskočen', B:'přeskočen', C:'3.', D:'4.', E:'5.'}},
+    {desc:'Výsledek: Hamiltonovský okruh H = A→B→C→D→E→A, c(E(H)) = 2+1+2+5+2 = 12 ≤ 14 = c(E(W)). Závěrečná hrana E→A už ve sledu byla. Shortcutting cenu nezvýšil — přesně záruka c(E(L)) ≥ c(E(H)) ze slidu 25.',
+     nodes:{A:'good', B:'good', C:'good', D:'good', E:'good'},
+     edges:{'A->B':'good', 'B->C':'good', 'C->D':'good', 'D->E':'good', 'A->E':'good', 'B->D':'dim'},
+     subs:{A:'1.', B:'2.', C:'3.', D:'4.', E:'5.'}},
+  ],
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
