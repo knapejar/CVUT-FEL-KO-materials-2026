@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L4.10 · Minimum Cost Flow + reziduální graf s cenami — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k4">K4 · Toky a řezy</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L4.10</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L4.10</span> Kapitola K4 — Toky a řezy (Slot 4) · <strong>[MUST]</strong>
+  </p>
+  <h1>Minimum Cost Flow + reziduální graf s cenami</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Minimum cost flow (tok s minimální cenou)</strong> = pětice $(G, l, u, c, b)$: hledáme přípustný tok splňující bilance, který minimalizuje $\sum_e f(e) \cdot c(e)$ — a reziduální graf k tomu dostává <strong>ceny</strong>: dopředná hrana zdědí $+c(e)$, zpětná dostane $-c(e)$.
+  </div>
+
+  <p>Celá kapitola zatím řešila otázku <em>kolik</em>: maximální tok <a href="l4-3.html#takeaways">[L4.3]</a>, přípustnost s bilancemi <a href="l4-6.html#takeaways">[L4.6]</a> a dolními mezemi <a href="l4-7.html#takeaways">[L4.7]</a>. Dnes přidáme otázku <em>za kolik</em> — každá jednotka toku po hraně něco stojí. Dostaneme <strong>minimum cost flow (MCF, tok s minimální cenou)</strong>: nejobecnější tokovou úlohu kapitoly, do které se schová max flow, nejkratší cesta i listonoš. A protože algoritmus pro MCF (cycle canceling, příští lekce [L4.11]) pracuje v reziduálním grafu, doplníme do reziduálního grafu z <a href="l4-2.html#takeaways">[L4.2]</a> poslední chybějící ingredienci: ceny $c_f$. Přes MCF se v [L4.12] vyřeší i assignment problem — <em>Maďarský (Hungarian) algoritmus je ze zkoušky vyloučen</em>.</p>
+
+  <!-- ===== SEKCE 1: MOTIVACE ===== -->
+  <h2>Za kolik? Nová otázka pro starou síť</h2>
+
+  <p>Vezmi síť ze slidu 32 (přednáška ji používá pro celé MCF). Hrany mají kromě mezí $l, u$ a toku $f$ nově i <strong>cenu $c(e)$ za jednotku toku</strong>; uzly nemají $s$ a $t$, ale <strong>bilance $b(v)$</strong> přesně jako v <a href="l4-6.html#takeaways">[L4.6]</a>: uzel $u$ vyrábí 4 jednotky, uzel $x$ je spotřebuje.</p>
+
+  <div class="viz" id="viz-g"></div>
+
+  <details class="try">
+    <summary>Zkus sám: nakreslený tok bilance splňuje (ověř Kirchhoffa s bilancemi!) a stojí $3 \cdot 2 + 1 \cdot 2 + 0 \cdot 1 + 3 \cdot 3 + 1 \cdot 1 = 18$. Umíš těch 4 jednotky z $u$ do $x$ dopravit levněji? Kolik nejméně?</summary>
+    <div class="inner">
+      <p>Spočítej cenu tras za jednotku: přímo $u \to x$ stojí 1 (ale kapacita jen 2), přes $w$ stojí $2 + 1 = 3$ (kapacita $\min(2,5) = 2$), přes $v$ stojí $2 + 3 = 5$. Nejlevnější mix: 2 jednotky přímo + 2 jednotky přes $w$ = $2 \cdot 1 + 2 \cdot 3 = \mathbf{8}$. Bilance sedí stejně dobře jako u nakresleného toku za 18 — <strong>přípustnost o ceně nic neříká</strong>. Max flow by mezi oběma toky nerozlišoval; potřebujeme novou úlohu, která mezi přípustnými toky vybírá ten nejlevnější. (Že je 8 opravdu minimum, dnes jen tušíme — certifikát dodá příští lekce [L4.11]: žádný záporný cyklus v reziduálním grafu.)</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: DEFINICE ===== -->
+  <h2>Definice (slide 28)</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 28 — Minimum Cost Flow, 1:1</div>
+    <p><em>Extension of the Maximum flow problem – we consider the <strong>edge costs</strong> and the <strong>supply/consumption</strong> of the nodes.</em></p>
+    <p><em><strong>Instance:</strong> 5-tuple $(G, l, u, c, b)$ where $G$ is a digraph, $u: E(G) \to \mathbb{R}^+_0$ represents the upper and $l: E(G) \to \mathbb{R}^+_0$ the lower bounds and:</em></p>
+    <ul>
+      <li><em><strong>cost of arcs</strong> $c: E(G) \to \mathbb{R}$</em></li>
+      <li><em><strong>balance</strong> $b: V(G) \to \mathbb{R}$ that represents the supply/consumption of the nodes and satisfies $\sum_{v \in V(G)} b(v) = 0$.</em></li>
+    </ul>
+    <p><em><strong>Goal:</strong> Find the feasible flow $f$ that minimizes $\sum_{e \in E(G)} f(e) \cdot c(e)$ (we want to transport the flow through the network at the lowest possible cost) and satisfies $\sum_{e \in \delta^+(v)} f(e) - \sum_{e \in \delta^-(v)} f(e) = b(v)$ for all $v \in V(G)$, or decide that it does not exist.</em></p>
+  </div>
+
+  <p>Všimni si tří věcí. ① Síť nemá $s$ ani $t$ — roli „odkud kam“ hrají bilance $b(v)$ z <a href="l4-6.html#takeaways">[L4.6]</a> (kladná = zdroj/výroba, záporná = spotřeba, a $\sum_v b(v) = 0$ je nutná podmínka). ② Cena smí být i <strong>záporná</strong>: $c: E(G) \to \mathbb{R}$, žádné $\mathbb{R}^+_0$ — za poslání jednotky můžeš i „dostat zaplaceno“. ③ Úloha má dvě možná vyústění: nejlevnější přípustný tok, <em>nebo</em> zjištění, že přípustný tok vůbec neexistuje — to už umíš rozhodnout redukcí z <a href="l4-6.html#takeaways">[L4.6]</a>/<a href="l4-7.html#takeaways">[L4.7]</a>.</p>
+
+  <!-- ===== SEKCE 3: LP ===== -->
+  <h2>LP formulace (slide 29)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: LP napiš dřív, než ho uvidíš. Proměnné a omezení už všechny znáš — z max-flow LP <a href="l4-1.html#takeaways">[L4.1]</a> a bilančních rovnic <a href="l4-6.html#takeaways">[L4.6]</a>. Co se změní v účelové funkci?</summary>
+    <div class="inner">
+      <p>Proměnné zůstávají $f(e)$ pro každou hranu, meze $l(e) \le f(e) \le u(e)$ taky. Kirchhoffa nahradí bilanční rovnice $\sum_{\delta^+} - \sum_{\delta^-} = b(v)$ — pro <em>každý</em> uzel (žádné výjimky pro $s, t$, ty tu nejsou). Jediná skutečná novinka: účelová funkce už nemaximalizuje velikost toku, ale <strong>minimalizuje cenu</strong> $\sum_e c(e) f(e)$ — lineární funkci proměnných, takže pořád LP.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 29 — Minimum Cost Flow: LP Formulation, 1:1</div>
+    <p><em>Variable $f(e) \in \mathbb{R}^+_0$ represents the flow on edge $e \in E(G)$.</em></p>
+    <p>$$
+    \begin{aligned}
+    \min \quad & \sum_{e \in E(G)} c(e) \cdot f(e) \\
+    \text{s.t.} \quad & \sum_{e \in \delta^+(v)} f(e) - \sum_{e \in \delta^-(v)} f(e) = b(v) & v \in V(G) \\
+    & l(e) \le f(e) \le u(e) & e \in E(G)
+    \end{aligned}
+    $$</p>
+  </div>
+
+  <!-- ===== SEKCE 4: REDUKCE ===== -->
+  <h2>MCF je nejobecnější úloha kapitoly (slidy 29–30)</h2>
+
+  <p>Slidy předvádějí, že do pětice $(G, l, u, c, b)$ se vejdou tři úlohy, které už znáš. Pokaždé jde jen o chytré nastavení pětice.</p>
+
+  <details class="try">
+    <summary>Zkus sám: jak nastavit $(G, l, u, c, b)$, aby MCF spočítal <em>maximum flow</em> ze $s$ do $t$? Nápověda: MCF minimalizuje — tak ať „víc toku“ znamená „menší cena“.</summary>
+    <div class="inner">
+      <p>Žádný uzel nesmí nic vyrábět: $b(v) = 0$ všude (tok jen krouží — <em>cirkulace</em>). Aby vůbec kroužil, přidej hranu $t \to s$ s $u = \infty$ — a té dej cenu $-1$, všem ostatním cenu 0. Každá jednotka, která proteče sítí z $s$ do $t$, se musí vrátit hranou $t \to s$ a „vydělá“ $-1$. Minimalizace ceny pak žene tok hranou $t \to s$ co nejvýš — tedy maximalizuje tok sítí. Optimální cena je $-|f_{max}|$.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-circ"></div>
+
+  <div class="box">
+    <div class="box-title">Slide 29 (dole) + slide 30 — redukce na MCF, 1:1</div>
+    <p><em>The <strong>Maximum Flow problem</strong> can be polynomially reduced to the Minimum Cost Flow problem:</em></p>
+    <ul>
+      <li><em>Add an edge from $t$ to $s$ with the upper bound equal to $\infty$ and the cost $-1$.</em></li>
+      <li><em>Set the cost of every other edge to $0$.</em></li>
+      <li><em>Set $b(v) = 0$ for all nodes including $s$ and $t$.</em></li>
+      <li><em>Minimum cost circulation (it will be negative) maximizes the flow on the added edge.</em></li>
+    </ul>
+    <p><em>The <strong>Shortest Path from $s$ to $t$</strong> can be reduced to the Min-Cost Flow:</em></p>
+    <ul>
+      <li><em>Use LP formulation of Min-Cost Flow.</em></li>
+      <li><em>Set $b(s) = 1$ and $b(t) = -1$. Set $b(v) = 0 \ \forall v \in V \setminus \{s, t\}$.</em></li>
+      <li><em>Set $l(e) = 0$, $u(e) = \infty$ and $c(e)$ is weight of edge $\forall e \in E$.</em></li>
+      <li><em>You obtain (primal) LP formulation of the Shortest Path Problem (see the example of totally unimodular matrix $A$ in the ILP lecture).</em></li>
+    </ul>
+    <p><em>The <strong>Chinese Postman Problem</strong> (…go along each street at least once…) can be reduced to the Min-Cost Flow:</em></p>
+    <ul>
+      <li><em>Set $b(v) = 0 \ \forall v \in V$.</em></li>
+      <li><em>Set $l(e) = 1$, $u(e) = \infty$ and $c(e)$ is weight of edge $\forall e \in E$.</em></li>
+    </ul>
+  </div>
+
+  <p>Čti ty pětice jako „rukopisy“: <strong>nejkratší cesta</strong> = pošli jedinou jednotku z $s$ ($b(s) = 1$) do $t$ ($b(t) = -1$) a plať za vzdálenost — nejlevnější doprava jednotky teče po nejkratší cestě (LP tu má celočíselné optimum díky TUM matici, viz <a href="../k3/l3-12.html#takeaways">[L3.12]</a>). <strong>Listonoš (Chinese postman)</strong> = cirkulace ($b \equiv 0$), ale dolní mez $l(e) = 1$ vynutí projet každou ulici aspoň jednou; z výsledného toku se pak skládá Eulerovský tah <a href="../k3/l3-8c.html#takeaways">[L3.8c]</a> — celou úlohu rozebereme v [L4.13].</p>
+
+  <!-- ===== SEKCE 5: REZIDUÁLNÍ GRAF S CENAMI ===== -->
+  <h2>Reziduální graf dostává ceny (slide 32)</h2>
+
+  <p>Jak se MCF řeší kombinatoricky (bez LP solveru)? Stejnou filozofií jako max flow: vezmi nějaký přípustný tok a <em>vylepšuj ho v reziduálním grafu</em>. Kapacitní část $G_f$ znáš z <a href="l4-2.html#takeaways">[L4.2]</a> — dopředná hrana s rezervou $u - f$, zpětná s rezervou $f - l$. Jenže teď nevylepšujeme <em>velikost</em>, ale <em>cenu</em> — takže každá reziduální hrana musí říkat, kolik její použití stojí.</p>
+
+  <details class="try">
+    <summary>Zkus sám: dopředná reziduální hrana znamená „pošli po $e$ jednotku navíc“ — ta logicky stojí $c(e)$. Co znamená zpětná hrana a kolik má stát?</summary>
+    <div class="inner">
+      <p>Zpětná hrana $(j, i)$ znamená „<em>zruš</em> jednotku toku na $e = (i, j)$“. Za tu jednotku jsi platil $c(e)$ — když ji zrušíš, peníze se <strong>vrátí</strong>: cena zpětné hrany je $c_f(j, i) = -c(i, j)$. Přesně tahle znaménka dovolí počítat cenu úpravy toku jako obyčejný součet cen podél cesty či cyklu v $G_f$: kladné položky = nově poslané jednotky, záporné = vrácené.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 32 — Residual Graph, 1:1 (kapacitní řádky znáš z <a href="l4-2.html#takeaways">[L4.2]</a>, nové jsou ceny $c_f$)</div>
+    <p><em>The <strong>residual graph</strong> shows where an extra capacity might be found. The residual graph $G_f$ is constructed from network $(G, l, u, b, c)$ and specific feasible flow $f$ as follows:</em></p>
+    <p>$$
+    \begin{aligned}
+    G_f &= (V, E_f, u_f, c_f) \\
+    \bar{E} &= E \cup \{(j, i) : (i, j) \in E\} \\
+    u_f(i, j) &= u(i, j) - f(i, j) & \forall (i, j) \in E \\
+    u_f(j, i) &= f(i, j) - l(i, j) & \forall (i, j) \in E \\
+    E_f &= \{(i, j) \in \bar{E} : u_f(i, j) &gt; 0\} \\
+    c_f(i, j) &= c(i, j) & \forall (i, j) \in E \\
+    c_f(j, i) &= -c(i, j) & \forall (i, j) \in E
+    \end{aligned}
+    $$</p>
+  </div>
+
+  <p>Postav teď $G_f$ pro síť a tok z úvodu (ten za 18). Projdi hranu po hraně — u každé vznikne nejvýš dvojice reziduálních hran a do $E_f$ se dostanou jen ty s $u_f &gt; 0$:</p>
+
+  <div class="viz" id="viz-gf"></div>
+
+  <details class="try">
+    <summary>Zkus sám: najdi v hotovém $G_f$ <em>cyklus se zápornou součtovou cenou</em>. Co by se stalo, kdybys podél něj poslal tolik jednotek, kolik dovolí nejmenší $u_f$ na cyklu?</summary>
+    <div class="inner">
+      <p>Třeba $u \to x \to v \to u$: ceny $1 + (-3) + (-2) = -4 &lt; 0$, kapacity $\min(2, 3, 3) = 2$. Pošli po něm $\gamma = 2$ jednotky: na $u \to x$ tok vzroste o 2, na zpětných úsecích se tok <em>vrátí</em> — $f(v \to x)$ klesne $3 \to 1$ a $f(u \to v)$ klesne $3 \to 1$. Bilance se nezmění (cyklus do žádného uzlu nic nepřidá ani neodebere!), ale cena klesne o $4 \cdot 2 = 8$: z 18 na 10. A v novém $G_f$ je další záporný cyklus ($u \to w \to x \to v \to u$, cena $2 + 1 - 3 - 2 = -2$, $\gamma = 1$) — po něm jsi na ceně $\mathbf{8}$ z prvního try. <strong>Záporný cyklus v $G_f$ = sleva beze změny bilancí.</strong> Opakovat, dokud nějaký existuje — to je celý algoritmus cycle canceling, příští lekce [L4.11] (záporné cykly najde Bellman-Ford, srov. <a href="../k2/l2-12.html#takeaways">[L2.12]</a>).</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
+    <p><strong>1) Zpětná hrana má cenu $-c(e)$</strong> — ne $0$ a ne $+c(e)$. Bez minusu ti „vrácení jednotky“ účtuje peníze dvakrát a záporné cykly nenajdeš.
+    <strong>2) $u_f(j, i) = f - l$, ne $f$.</strong> Stará past z <a href="l4-2.html#takeaways">[L4.2]</a> platí dál: vrátit jde jen to, co je nad dolní mezí.
+    <strong>3) Hrany s $u_f = 0$ v $G_f$ nejsou.</strong> Nasycená hrana ($f = u$) ztratí dopřednou kopii, nevyužitá ($f = l$) zpětnou — nekresli je „pro jistotu“ s nulou, zkreslí hledání cyklů.
+    <strong>4) Zkontroluj $\sum_v b(v) = 0$ a znaménka:</strong> bilanční rovnice je <em>out − in</em> $= b(v)$, takže $b &gt; 0$ je zdroj (výroba), $b &lt; 0$ spotřeba. Když součet nevyjde nula, přípustný tok neexistuje a žádné MCF se nekoná.
+    <strong>5) Cena toku se počítá v původním grafu:</strong> $\sum_{e \in E(G)} f(e) c(e)$. Ceny $c_f$ v reziduálním grafu slouží jen k ocenění <em>úprav</em> toku (cest a cyklů) — nesčítej je s tokem.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.10</div>
+    <ul>
+      <li><strong>MCF (slide 28):</strong> pětice $(G, l, u, c, b)$, $\sum_v b(v) = 0$; najdi přípustný tok minimalizující $\sum_e f(e) \cdot c(e)$ při bilancích $\sum_{\delta^+(v)} f - \sum_{\delta^-(v)} f = b(v)$ a mezích $l \le f \le u$ — nebo rozhodni, že neexistuje. Ceny smí být záporné.</li>
+      <li><strong>LP formulace (slide 29):</strong> proměnné $f(e) \ge 0$, lineární cena, bilanční rovnice pro každý uzel, meze na hranách — max-flow LP <a href="l4-1.html#takeaways">[L4.1]</a> s vyměněnou účelovou funkcí a bilancemi místo $s$/$t$.</li>
+      <li><strong>Reziduální graf s cenami (slide 32):</strong> kapacity jako v <a href="l4-2.html#takeaways">[L4.2]</a> ($u - f$ dopředně, $f - l$ zpětně, hrany s $u_f = 0$ vypadnou); ceny $c_f(i,j) = c(i,j)$ dopředně a $c_f(j,i) = -c(i,j)$ zpětně — zrušená jednotka cenu vrací.</li>
+      <li><strong>MCF je obecný (slidy 29–30):</strong> max flow = cirkulace s hranou $t \to s$ ($u = \infty$, $c = -1$, jinde $c = 0$, $b \equiv 0$); shortest path = $b(s) = 1$, $b(t) = -1$, $c$ = váhy; Chinese postman = $b \equiv 0$, $l \equiv 1$.</li>
+      <li><strong>Záporný cyklus v $G_f$ = zlevnění toku beze změny bilancí</strong> (o $|{\sum c_f}| \cdot \gamma$). Augmentace podél záporných cyklů až do optima = cycle canceling → [L4.11].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-mcf">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Minimum Cost Flow — formulace a redukce</strong>
+      <span class="task-src">zdroj: banka úloh #24 (EN 1:1; v bance „Unsolved“ — studijní otázky i–iii vlastní, řešení dle textu banky/slidů 28–30, přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN 1:1)</span>
+        <p><em>Minimum cost flow is an extension of the Maximum Flow problem where we consider the edge costs and the supply/consumption of the nodes.</em></p>
+        <p><em><strong>Instance:</strong> A 5-tuple $(G, l, u, c, b)$ where $G$ is a digraph, $u : E(G) \to \mathbb{R}_0^+$ represents the upper bounds, $l : E(G) \to \mathbb{R}_0^+$ the lower bounds, and: cost of arcs $c : E(G) \to \mathbb{R}$, balance $b : V(G) \to \mathbb{R}$ represents the supply/consumption of the nodes and satisfies $\sum_{v \in V(G)} b(v) = 0$.</em></p>
+        <p><em><strong>Goal:</strong> Find the feasible flow $f$ that minimizes $\sum_{e \in E(G)} f(e) c(e)$ and satisfies $\sum_{e \in \delta^+(v)} f(e) - \sum_{e \in \delta^-(v)} f(e) = b(v)$ for all $v \in V(G)$, or decide that it does not exist.</em></p>
+        <p>Studijní otázky (vlastní — přiznáno): <em>(i) Give the LP formulation of the Minimum Cost Flow problem. (ii) Show how the Maximum Flow problem can be polynomially reduced to MCF. (iii) Show how the Shortest Path problem (from $s$ to $t$) and the Chinese Postman Problem can be reduced to MCF.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Formulační/teoretická úloha přesně v rozsahu této lekce: definice MCF je dána, po tobě se chce LP model a tři redukce — tedy umět pětici $(G, l, u, c, b)$ „naprogramovat“ tak, aby řešila jinou úlohu. Žádné počítání, jen přesné formulace.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice, LP, redukce (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-1.html#takeaways">[L4.1]</a> — max-flow LP pro srovnání.</li>
+        <li><a href="l4-6.html#takeaways">[L4.6]</a> — bilance $b(v)$ a podmínka $\sum b = 0$.</li>
+        <li><a href="../k3/l3-12.html#takeaways">[L3.12]</a> — proč LP nejkratší cesty vrací celočíselné optimum (TUM).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>U LP si polož tři otázky: co jsou proměnné, co minimalizuju, jaká omezení mám (bilance + meze). U redukcí hledej, <em>kterým knoflíkem</em> pětice se cílová úloha vynutí: max flow potřebuje zápornou cenu (aby se minimalizaci „vyplatilo“ hnát tok), nejkratší cesta potřebuje bilance $\pm 1$ (jediná jednotka), listonoš potřebuje dolní meze (každá ulice aspoň jednou). Vždycky dopiš i jak z výsledku přečíst odpověď původní úlohy.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle textu banky #24, 1:1)</summary>
+        <div class="inner">
+          <p><strong>(i) LP formulace.</strong> Variable $f(e) \in \mathbb{R}_0^+$ represents the flow on edge $e \in E(G)$:</p>
+          <p>$$
+          \begin{aligned}
+          \min \quad & \sum_{e \in E(G)} c(e) f(e) \\
+          \text{s.t.} \quad & \sum_{e \in \delta^+(v)} f(e) - \sum_{e \in \delta^-(v)} f(e) = b(v) & v \in V(G), \\
+          & l(e) \le f(e) \le u(e) & e \in E(G).
+          \end{aligned}
+          $$</p>
+          <p><strong>(ii) Max flow → MCF.</strong> Add an edge from $t$ to $s$ with upper bound $\infty$ and cost $-1$; set the cost of every other edge to 0; set $b(v) = 0$ for all nodes including $s$ and $t$. The minimum cost circulation (its cost will be negative) maximizes the flow on the added edge — optimální cena je $-|f_{max}|$ a max flow přečteš jako tok na hraně $t \to s$.</p>
+          <p><strong>(iii) Shortest path → MCF.</strong> Set $b(s) = 1$, $b(t) = -1$, $b(v) = 0$ for all $v \in V \setminus \{s, t\}$; set $l(e) = 0$, $u(e) = \infty$ and $c(e)$ equal to the edge weight for all $e \in E$. Vznikne (primární) LP formulace nejkratší cesty — jediná jednotka teče z $s$ do $t$ nejlevněji, tedy po nejkratší cestě; celočíselnost optima zaručuje totální unimodularita matice (<a href="../k3/l3-12.html#takeaways">[L3.12]</a>).</p>
+          <p><strong>Chinese postman → MCF.</strong> Set $b(v) = 0$ for all $v \in V$; set $l(e) = 1$, $u(e) = \infty$ and $c(e)$ equal to the edge weight for all $e \in E$. Cirkulace s $l = 1$ projede každou hranu aspoň jednou; $f(e)$ říká, kolikrát se hrana projede, a trasa se z toku složí jako Eulerovský tah v multigrafu s $f(e)$ kopiemi hran (<a href="../k3/l3-8c.html#takeaways">[L3.8c]</a>; detailně [L4.13]).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-residcost">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Residual graph with costs — drill</strong>
+      <span class="task-src">zdroj: VLASTNÍ procvičovací úloha (zadání i řešení vlastní — přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, vlastní — přiznáno)</span>
+        <p><em>Consider the network $(G, l, u, c, b)$ below with balances $b(a) = +2$, $b(b) = 0$, $b(c) = -2$ and a flow $f$ (edge labels read $l, f, u$ · $c$).</em></p>
+        <p><em>(i) Verify that $f$ is feasible and compute its cost. (ii) Construct the residual graph $G_f$, i.e. list all edges of $E_f$ with their residual capacities $u_f$ and residual costs $c_f$. (iii) Is there a negative-cost cycle in $G_f$? If yes, determine $\gamma$ and the cost of the flow after augmenting along the cycle.</em></p>
+      </div>
+
+      <div class="viz" id="viz-t02"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Ruční drill dnešní konstrukce: ověřit přípustnost (meze + bilanční rovnice), postavit $G_f$ se <em>dvěma</em> čísly na hraně ($u_f$ a $c_f$) a najít záporný cyklus — tedy přesně ty kroky, které u zkoušky předcházejí cycle cancelingu [L4.11].</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — vzorce $u_f$, $c_f$ a čtení záporného cyklu (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-2.html#takeaways">[L4.2]</a> — kapacitní část reziduálního grafu.</li>
+        <li><a href="l4-6.html#takeaways">[L4.6]</a> — bilanční rovnice.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Jdi hranu po hraně: každá hrana $E$ vyrobí nejvýš dvě hrany $E_f$ — dopřednou ($u - f$, cena $+c$) a zpětnou ($f - l$, cena $-c$); nulové kapacity škrtni. U cyklu sčítej <em>ceny</em> (rozhodují o znaménku) a z <em>kapacit</em> ber minimum ($\gamma$). Změna ceny toku = (součet cen cyklu) $\times\ \gamma$.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
+        <div class="inner">
+          <p><strong>(i) Přípustnost a cena.</strong> Meze: $2 \in [0,3]$, $2 \in [0,2]$, $0 \in [0,2]$ ✓. Bilance (out − in): $a$: $2 + 0 = 2 = b(a)$ ✓; $b$: $2 - 2 = 0$ ✓; $c$: $0 - (2 + 0) = -2$ ✓. Cena $\sum f \cdot c = 2 \cdot 1 + 2 \cdot 4 + 0 \cdot 2 = \mathbf{10}$.</p>
+          <p><strong>(ii) Reziduální graf.</strong> $a \to b$: dopředná $u_f = 3 - 2 = 1$, $c_f = +1$; zpětná $b \to a$: $u_f = 2 - 0 = 2$, $c_f = -1$. $b \to c$: dopředná $u_f = 2 - 2 = 0$ → <em>v $E_f$ není</em>; zpětná $c \to b$: $u_f = 2$, $c_f = -4$. $a \to c$: dopředná $u_f = 2$, $c_f = +2$; zpětná $u_f = 0 - 0 = 0$ → není. Celkem $E_f = \{a \to b\ (1, +1),\ b \to a\ (2, -1),\ c \to b\ (2, -4),\ a \to c\ (2, +2)\}$:</p>
+          <div class="viz" id="viz-t02gf"></div>
+          <p><strong>(iii) Záporný cyklus.</strong> $a \to c \to b \to a$: cena $2 + (-4) + (-1) = -3 &lt; 0$, $\gamma = \min(2, 2, 2) = 2$. Augmentací tok na $a \to c$ vzroste na 2 a na zpětných úsecích klesne: $f(b \to c): 2 \to 0$, $f(a \to b): 2 \to 0$. Nová cena $= 10 - 3 \cdot 2 = \mathbf{4}$ (kontrola: $2 \cdot 2 = 4$ ✓ — obě jednotky tečou přímo $a \to c$). V novém $G_f$ už záporný cyklus není, takže 4 je optimum — přesně tohle z nás v [L4.11] udělá algoritmus.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L4.10">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k4/l4-9.html"><span class="dir">← Předchozí</span> L4.9 · Bipartitní matching přes max flow</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.11 · Cycle canceling (řešení MCF))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Layout sítě ze slidu 32 (uzly u, v, w, x) — každé volání dostává vlastní kopii uzlů
+function mcfNodes(subs) {
+  return [
+    {id:'u', x:90,  y:180, label:'u', sub:subs[0]},
+    {id:'v', x:320, y:60,  label:'v', sub:subs[1]},
+    {id:'w', x:320, y:300, label:'w', sub:subs[2]},
+    {id:'x', x:550, y:180, label:'x', sub:subs[3]},
+  ];
+}
+
+// 1 — Síť G ze slidu 32: popisek hrany = l, f, u · c; bilance v sub uzlů
+KOViz.graph(document.getElementById('viz-g'), {
+  directed: true,
+  w: 640, h: 380,
+  nodes: mcfNodes(['b = +4', 'b = 0', 'b = 0', 'b = −4']),
+  edges: [
+    {from:'u', to:'v', label:'0,3,4 · c 2'},
+    {from:'u', to:'w', label:'0,1,2 · c 2'},
+    {from:'u', to:'x', label:'0,0,2 · c 1'},
+    {from:'v', to:'x', label:'0,3,3 · c 3'},
+    {from:'w', to:'x', label:'0,1,5 · c 1'},
+  ],
+  caption: 'Síť (G, l, u, c, b) s přípustným tokem — instance ze slidu 32 (popisek hrany = l, f, u · cena c za jednotku; bilance b pod uzly). Tok bilance splňuje a stojí Σ f·c = 18.',
+});
+
+// 2 — Redukce max flow → MCF: cirkulace s hranou t→s za cenu −1 (ilustrační síť vlastní — přiznáno)
+KOViz.graph(document.getElementById('viz-circ'), {
+  directed: true,
+  w: 640, h: 330,
+  nodes: [
+    {id:'s', x:120, y:140, label:'s', sub:'b = 0'},
+    {id:'a', x:320, y:60,  label:'a', sub:'b = 0'},
+    {id:'b', x:320, y:220, label:'b', sub:'b = 0'},
+    {id:'t', x:520, y:140, label:'t', sub:'b = 0'},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'c 0'},
+    {from:'s', to:'b', label:'c 0'},
+    {from:'a', to:'t', label:'c 0'},
+    {from:'b', to:'t', label:'c 0'},
+    {from:'t', to:'s', label:'u = ∞ · c −1', dashed:true, curve:0.9},
+  ],
+  caption: 'Max flow jako MCF (ilustrační síť vlastní — přiznáno): všude b = 0 (cirkulace), původní hrany za cenu 0, nová hrana t → s (čárkovaně) s u = ∞ a cenou −1. Minimalizace ceny žene tok hranou t → s vzhůru = maximalizuje tok sítí.',
+});
+
+// 3 — Stepper: stavba reziduálního grafu s cenami (frames = absolutní stavy; popisek = u_f | c_f)
+KOViz.stepper(document.getElementById('viz-gf'), {
+  graph: {
+    directed: true,
+    w: 640, h: 380,
+    nodes: mcfNodes(['b = +4', 'b = 0', 'b = 0', 'b = −4']),
+    edges: [
+      {from:'u', to:'v', label:'1 | 2',  curve:0.18},
+      {from:'v', to:'u', label:'3 | −2', curve:0.18, dashed:true},
+      {from:'u', to:'w', label:'1 | 2',  curve:0.18},
+      {from:'w', to:'u', label:'1 | −2', curve:0.18, dashed:true},
+      {from:'u', to:'x', label:'2 | 1'},
+      {from:'x', to:'v', label:'3 | −3', dashed:true},
+      {from:'w', to:'x', label:'4 | 1',  curve:0.18},
+      {from:'x', to:'w', label:'1 | −1', curve:0.18, dashed:true},
+    ],
+  },
+  frames: [
+    {desc:'Hrana u→v (0,3,4 · c 2): dopředná u_f = 4 − 3 = 1 s cenou c_f = +2; zpětná v→u: u_f = 3 − 0 = 3 s cenou c_f = −2 (vrácení jednotky vrátí 2).',
+     nodes:{}, edges:{'u->v':'hl', 'v->u':'hl'}},
+    {desc:'Hrana u→w (0,1,2 · c 2): dopředná u_f = 2 − 1 = 1, c_f = +2; zpětná w→u: u_f = 1 − 0 = 1, c_f = −2.',
+     nodes:{}, edges:{'u->w':'hl', 'w->u':'hl'}},
+    {desc:'Hrana u→x (0,0,2 · c 1): dopředná u_f = 2 − 0 = 2, c_f = +1. Zpětná x→u NEvznikne: u_f = f − l = 0 − 0 = 0 (na hraně nic neteče, není co vracet).',
+     nodes:{}, edges:{'u->x':'hl'}},
+    {desc:'Hrana v→x (0,3,3 · c 3): dopředná NEvznikne — u_f = u − f = 3 − 3 = 0 (hrana je nasycená). Zpětná x→v: u_f = 3 − 0 = 3, c_f = −3.',
+     nodes:{}, edges:{'x->v':'hl'}},
+    {desc:'Hrana w→x (0,1,5 · c 1): dopředná u_f = 5 − 1 = 4, c_f = +1; zpětná x→w: u_f = 1 − 0 = 1, c_f = −1.',
+     nodes:{}, edges:{'w->x':'hl', 'x->w':'hl'}},
+    {desc:'Hotový G_f: 8 hran z 10 kandidátů (dvě vypadly kvůli u_f = 0). Dopředné hrany nesou +c, zpětné (čárkované) −c. Teď zkus v try pod obrázkem najít cyklus se zápornou součtovou cenou.',
+     nodes:{}, edges:{}},
+  ],
+  caption: 'Stavba reziduálního grafu G_f pro tok za 18 (popisek hrany = u_f | c_f; zpětné hrany čárkovaně). Hodnoty dopočteny ze vzorců slidu 32 — přiznáno: textový popis obrázku v přepisu má u dvojice u↔v kapacity prohozené (vzorce dávají u→v: 1, v→u: 3).',
+});
+
+// 4 — T02: vlastní drill instance (popisek = l, f, u · c)
+KOViz.graph(document.getElementById('viz-t02'), {
+  directed: true,
+  w: 640, h: 300,
+  nodes: [
+    {id:'a', x:110, y:190, label:'a', sub:'b = +2'},
+    {id:'b', x:320, y:70,  label:'b', sub:'b = 0'},
+    {id:'c', x:530, y:190, label:'c', sub:'b = −2'},
+  ],
+  edges: [
+    {from:'a', to:'b', label:'0,2,3 · c 1'},
+    {from:'b', to:'c', label:'0,2,2 · c 4'},
+    {from:'a', to:'c', label:'0,0,2 · c 2'},
+  ],
+  caption: 'T02 (vlastní instance — přiznáno): síť se třemi uzly, popisek hrany = l, f, u · c, bilance pod uzly. Tok f = (2, 2, 0).',
+});
+
+// 5 — T02 řešení: reziduální graf G_f (uvnitř details; popisek = u_f | c_f)
+KOViz.graph(document.getElementById('viz-t02gf'), {
+  directed: true,
+  w: 640, h: 300,
+  nodes: [
+    {id:'a', x:110, y:190, label:'a', sub:'b = +2'},
+    {id:'b', x:320, y:70,  label:'b', sub:'b = 0'},
+    {id:'c', x:530, y:190, label:'c', sub:'b = −2'},
+  ],
+  edges: [
+    {from:'a', to:'b', label:'1 | 1',  curve:0.18},
+    {from:'b', to:'a', label:'2 | −1', curve:0.18, dashed:true},
+    {from:'c', to:'b', label:'2 | −4', dashed:true},
+    {from:'a', to:'c', label:'2 | 2'},
+  ],
+  caption: 'T02 řešení: G_f (popisek = u_f | c_f, zpětné hrany čárkovaně). Dopředná b→c i zpětná c→a chybí (u_f = 0). Záporný cyklus a→c→b→a má cenu −3 a γ = 2.',
+});
+</script>
+</body>
+</html>
