@@ -13,10 +13,10 @@ Statický web vystavitelný na **GitHub Pages** (žádný build step, vše fungu
 6. **Úlohy „na papír" mají 4-dílný formát**: (a) Co je v zadání? (b) Co budeme potřebovat? = odkazy na lekce (c) Jak nad úlohou uvažovat? (d) Úplné řešení v `<details class="solution">`. Zadání (a) anglicky 1:1 dle originálu.
 7. **[FOTO] úlohy**: závěrečné úlohy kapitol — student počítá na papír a posílá foto ke kontrole. V úloze výrazný box `box foto` s instrukcí.
 8. **Backlinky**: běžné `<a href>` odkazy mezi lekcemi (tlačítko zpět prohlížeče pak funguje). Navíc tlačítko `data-back` v topbaru. Na key takeaways odkazovat anchorem: `../k1/l1-4.html#takeaways`.
-9. **Vizualizace**: vlastní, přes `assets/js/viz.js` (SVG). Grafy NIKDY jen výčtem hran — vždy nakreslit. Po vytvoření vizualizace **vyrenderovat screenshot a zkontrolovat** (návod níže). Glitche nepřípustné.
+9. **Vizualizace**: vlastní, přes `assets/js/viz.js` (SVG). Grafy NIKDY jen výčtem hran — vždy nakreslit. Pozice uzlů rozmísťovat pečlivě bez překryvů.
 10. **Ikony**: `assets/icons/*.svg` (stažené přes `npx better-icons get <set>:<name>`). Nové: `npx better-icons search <term>`, pak `get`.
 11. **Git**: každý dokončený krok subagenta (autor/korektor) končí commitem se stručnou zprávou. Formát: `K1/L1.4: nova lekce big-M` / `K1/L1.4: oprava po kritice`.
-12. **Workflow psaní lekcí** (ověřený): ① Tvůrce napíše lekci (vč. vizualizací, ověří screenshotem) + commit → ② Kritik ve špatné náladě zkontroluje proti zdrojům (fakta, čeština/angličtina, navaznost, glitche) → ③ Korektor ověří validitu výtek a opraví + commit. Lekce se píší **sériově** (navazují na sebe), ne paralelně.
+12. **Workflow psaní lekcí**: lekce píší tvůrci **sériově** jeden po druhém (navazují na sebe), každá lekce končí commitem. Kritika/korektura se NEspouští průběžně — proběhne později v samostatném opravném běhu.
 13. Interní poznámky/plány v `plan/` (STAV.md = aktuální stav, INDEX_ZDROJU.md = mapa zdrojů, JAK_PSAT_LEKCI.md = checklist).
 
 ## Zdroje
@@ -59,12 +59,11 @@ Kanonická šablona: `plan/SABLONA_LEKCE.html` — **kopírovat a plnit**. Záva
 - `.pager` (předchozí/další lekce)
 - skripty na konci: KaTeX CDN (core + auto-render), `viz.js`, `app.js` — relativní cesty `../assets/...`
 
-## Jak vytvořit/ověřit vizualizaci
+## Jak vytvořit vizualizaci
 
-1. Použij `KOViz.graph` (grafy), `KOViz.lpRegion` (LP/ILP 2D oblasti), `KOViz.stepper` (krokování algoritmu — frames jsou ABSOLUTNÍ stavy, ne diffy).
+1. Použij `KOViz.graph` (grafy), `KOViz.lpRegion` (LP/ILP 2D oblasti), `KOViz.fnPlot` (funkce po úsecích), `KOViz.stepper` (krokování algoritmu — frames jsou ABSOLUTNÍ stavy, ne diffy).
 2. Pozice uzlů zadávej ručně (x,y ve viewBoxu 640×360) — rozmístit bez překryvů, popisky hran nesmí kolidovat.
-3. **Ověření**: `& "C:\Program Files\Google\Chrome\Application\chrome.exe" --headless --disable-gpu --screenshot="<abs>\shot.png" --window-size=1000,1400 "file:///<abs cesta k html>"` a screenshot si prohlédni (Read na PNG). Hledej: překryvy textů, useknuté prvky, chybějící šipky, rozbité KaTeX (zobrazené `$...$` = chyba).
-4. Nové sdílené komponenty přidávej do `viz.js` (ne inline do lekcí), ať je používají další lekce. Po změně `viz.js` přidej ukázku do `viz-gallery.html` a překontroluj screenshotem.
+3. Nové sdílené komponenty přidávej do `viz.js` (ne inline do lekcí), ať je používají další lekce. Po změně `viz.js` přidej ukázku do `viz-gallery.html`.
 
 ## Konvence obsahu
 

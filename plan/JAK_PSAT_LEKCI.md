@@ -8,8 +8,7 @@
 6. **Úlohy**: 4-dílný formát (a EN zadání 1:1 / b odkazy na lekce / c jak uvažovat / d úplné řešení v details). FOTO úlohy: hlavička .task-head.foto + foto-badge + box.foto s instrukcí.
 7. **Nebezpečné polopravdy** (OSNOVA „Mezery a rizika" bod 6) → .box.danger.
 8. **Index**: odkaz v index.html už existuje — zkontroluj, že soubor sedí s odkazem.
-9. **Screenshot kontrola**: headless Chrome (příkaz v CLAUDE.md) → Read PNG → oprav glitche (překryvy, useknutí, nerenderovaná $matematika$).
-10. **Commit**: `git add <soubory> && git commit -m "K1/L1.4: nova lekce big-M"`.
+9. **Commit**: `git add <soubory> && git commit -m "K1/L1.4: nova lekce big-M"`.
 
 ## Časté chyby (z kritik)
 - Použití konceptu, který ještě nebyl zaveden (zkontroluj prereq řetěz v OSNOVA).
