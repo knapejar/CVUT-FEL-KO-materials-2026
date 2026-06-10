@@ -868,9 +868,21 @@ let lineWords = []; // [{t0, t1, wf}] na slovo aktuálního řádku
 // karaoke: rozsekej řádek na slova; každé slovo = dvě vrstvy (ztlumená + zlatá
 // výplň), výplň jede zleva doprava v okně [t0,t1] ze SUNG (word-level whisper).
 // Mapování slov proporcionálně podle pořadí — drží rytmus včetně pauz.
+// rozsekání na slova: mezery UVNITŘ tagů (class="hl c5") se nesmí počítat
+function tokenize(html) {
+  const out = []; let cur = ''; let inTag = false;
+  for (const ch of html) {
+    if (ch === '<') inTag = true;
+    else if (ch === '>') inTag = false;
+    if (ch === ' ' && !inTag) { if (cur) out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
 function buildKaraokeLine(li) {
   const [a, b, html] = LINES[li];
-  const tokens = html.split(' ');
+  const tokens = tokenize(html);
   const ww = SUNG.filter(w => w[0] >= a - 0.06 && w[0] < b && w[1] > w[0]);
   const pick = (i) => {
     if (!ww.length) {
@@ -906,6 +918,7 @@ function tick() {
   // per-frame karaoke wipe: zlatá výplň slova jede zleva doprava, když zní
   for (let i = 0; i < lineWords.length; i++) {
     const w = lineWords[i];
+    if (!w.wf) continue;
     const nextStart = i + 1 < lineWords.length ? lineWords[i + 1].t0 : w.t1;
     let p;
     if (t >= Math.max(w.t1, nextStart)) p = 1;
