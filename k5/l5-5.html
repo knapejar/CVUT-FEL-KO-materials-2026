@@ -36,7 +36,7 @@
     <strong>Strom podproblémů nad LP relaxací:</strong> v každém uzlu vyřeš LP <em>graficky</em>; vyjde-li proměnná necelá ($x_i = k \notin \mathbb{Z}$), větvi na $x_i \le \lfloor k \rfloor$ a $x_i \ge \lfloor k \rfloor + 1$; uzly, jejichž LP mez není lepší než dosud nejlepší celočíselné řešení $z^b$, ořež.
   </div>
 
-  <p>Pauza od rozvrhů — ale jen zdánlivá. <strong>Branch &amp; Bound</strong> (metoda větví a mezí) je obecná technika řešení ILP a kapitola K5 ji potřebuje dvakrát: jako bounding LP relaxací pro $1|prec|\sum w_j C_j$ [L5.6b] a jako kostru Bratleyho algoritmu (B&amp;B nad permutacemi úloh) [L5.9]. Zároveň je to samostatná zkoušková úloha: na zápočtovém testu 16.&nbsp;3.&nbsp;2021 padla v <em>obou</em> variantách (jednou minimalizace, jednou maximalizace — obě níže jako T01 a T02) a doložená je i z testu 8.&nbsp;3.&nbsp;2011 a zkoušky 24.&nbsp;5.&nbsp;2011. Teorie = slidy 13–16 přednášky o ILP.</p>
+  <p>Pauza od rozvrhů — ale jen zdánlivá. <strong>Branch &amp; Bound</strong> (metoda větví a mezí) je obecná technika řešení ILP a kapitola K5 ji potřebuje dvakrát: jako bounding LP relaxací pro $1|prec|\sum w_j C_j$ <a href="../k5/l5-6b.html">[L5.6b]</a> a jako kostru Bratleyho algoritmu (B&amp;B nad permutacemi úloh) [L5.9]. Zároveň je to samostatná zkoušková úloha: na zápočtovém testu 16.&nbsp;3.&nbsp;2021 padla v <em>obou</em> variantách (jednou minimalizace, jednou maximalizace — obě níže jako T01 a T02) a doložená je i z testu 8.&nbsp;3.&nbsp;2011 a zkoušky 24.&nbsp;5.&nbsp;2011. Teorie = slidy 13–16 přednášky o ILP.</p>
 
   <!-- ===== SEKCE 1: MEZ Z RELAXACE ===== -->
   <h2>Mez, kterou už máš: LP relaxace</h2>
@@ -174,7 +174,7 @@
       <li><strong>Bounding:</strong> LP relaxace je mez pro celý podstrom (<a href="../k0/l0-7.html#takeaways">[L0.7]</a>: horní u max, dolní u min). Uzel zahoď, když LP je nepřípustné, nebo když $z^{LP} \le z^b$ (max) resp. $z^{LP} \ge z^b$ (min) — i při rovnosti.</li>
       <li><strong>První celé řešení jen inicializuje $z^b$</strong> — optimum máš potvrzené, až jsou všechny větve uzavřené (celé / nepřípustné / ořezané).</li>
       <li><strong>U zkoušky odevzdej:</strong> mřížku s oblastí (a čarami větvení), u každého uzlu $x^{LP}$, $z^{LP}$ a důvod uzavření listu; strom s podmínkami na hranách; nakonec $x^*, z^*$.</li>
-      <li><strong>Dál v K5:</strong> stejný stroj pohání B&amp;B pro $1|prec|\sum w_j C_j$ s LP boundem [L5.6b] a Bratleyho B&amp;B nad permutacemi [L5.9].</li>
+      <li><strong>Dál v K5:</strong> stejný stroj pohání B&amp;B pro $1|prec|\sum w_j C_j$ s LP boundem <a href="../k5/l5-6b.html">[L5.6b]</a> a Bratleyho B&amp;B nad permutacemi [L5.9].</li>
     </ul>
   </div>
 

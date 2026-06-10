@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L5.6b · LP relaxace jako dolní mez v B&B — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k5">K5 · Rozvrhování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L5.6b</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L5.6b</span> Kapitola K5 — Rozvrhování (Slot 5) · <strong>[MUST]</strong>
+  </p>
+  <h1>LP relaxace jako dolní mez v B&amp;B</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Uvolni $x_{ij} \in \{0,1\}$ na $0 \le x_{ij} \le 1$: hodnota $J^{LP}$ je <strong>dolní mez</strong> hodnoty ILP, a v B&amp;B stromu nad pořadími proto smíš zahodit uzel s částečným řešením $J_2$, jakmile $J_2 + J^{LP}(\text{zbývající úlohy}) \ge J_1$ — ne až když $J_2 \ge J_1$.
+  </div>
+
+  <p>Dokončujeme zkouškovou otázku z 9.&nbsp;7.&nbsp;2021: část a) — relative-order ILP — jsme postavili v <a href="../k5/l5-6a.html">[L5.6a] Relative-order ILP pro 1|prec|Σw_jC_j</a>, část b) zní <em>„Explain in detail, how to use relaxed LP solution in Branch and Bound method for $1\,|\text{prec}|\sum w_j C_j$?“</em>. Obecný stroj Branch &amp; Bound už máš z <a href="../k5/l5-5.html#takeaways">[L5.5] Branch &amp; Bound pro ILP</a>; dnes (slide 26) ho napojíme na rozvrhovací model — a protože jde o <em>minimalizaci</em>, všechno se oproti maximalizačnímu pseudokódu zrcadlí.</p>
+
+  <!-- ===== SEKCE 1: SMER MEZE ===== -->
+  <h2>Kterým směrem mez ukazuje?</h2>
+
+  <details class="try">
+    <summary>Zkus sám: model z L5.6a minimalizuje $J = \sum_j \sum_i p_i\,x_{ij}\,w_j$. Když binárky uvolníš na $0 \le x_{ij} \le 1$ a vyřešíš LP, je $J^{LP}$ horní, nebo dolní mez optimální hodnoty ILP? A proč?</summary>
+    <div class="inner">
+      <p><strong>Dolní.</strong> Každé celočíselné přípustné $x$ splňuje i uvolněná omezení, takže množina řešení ILP je <em>podmnožinou</em> množiny řešení LP (<a href="../k0/l0-7.html#takeaways">[L0.7] Co je ILP a LP relaxace</a>). Minimum přes větší množinu nemůže být větší: $J^{LP} \le J^*$. U maximalizace (jak běžel pseudokód v <a href="../k5/l5-5.html#takeaways">[L5.5]</a>) je to zrcadlově horní mez — směr si u zkoušky vždycky odvoď z „větší množina → lepší nebo stejné optimum“, ne z paměti.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 26 (EN 1:1) — Branch and Bound with LP Bounding</div>
+    <p>“We <strong>relax on the integrality</strong> of variable $x$:</p>
+    <ul>
+      <li>$0 \le x_{ij} \le 1$ and $x_{i \in 1..n, j \in 1..n} \in \mathbb{R}$</li>
+      <li>This does not give us the right solution, however we can use the $J^{LP}$(remaining tasks) value of this LP formulation as a <strong>lower bound</strong> on the “amount of remaining work””</li>
+    </ul>
+  </div>
+
+  <p>Všimni si formulace „does not give us the right solution“: LP ti vrátí bod, kde klidně $x_{23} = 0{,}5$ — „$T_2$ je napůl před $T_3$“. Jako rozvrh nesmysl, jako <strong>certifikovaná hodnota</strong> zlato: levněji než $J^{LP}$ to nejde.</p>
+
+  <div class="viz" id="viz-frac"></div>
+
+  <!-- ===== SEKCE 2: TEST V UZLU ===== -->
+  <h2>Strom nad pořadími a test $J_2 + J^{LP} \ge J_1$</h2>
+
+  <p>B&amp;B strom tu nebudeme stavět větvením na souřadnicích jako v <a href="../k5/l5-5.html#takeaways">[L5.5]</a>, ale rovnou nad <strong>pořadími</strong>: uzel = rozhodnutý <em>prefix</em> rozvrhu (která úloha běží první, která druhá, …), větvení = volba další úlohy. Prefix má pevnou hodnotu $J_2 = \sum_{j \in \text{prefix}} w_j C_j$ (časy prefixu jsou určené) a zbytek je menší instance téhož problému.</p>
+
+  <details class="try">
+    <summary>Zkus sám: nejhloupější ořez je „zahoď uzel, když už samotný prefix má $J_2 \ge J_1$“ ($J_1$ = nejlepší dosud nalezené úplné řešení). Jak ořez zesílit pomocí $J^{LP}$ — a proč je to pořád korektní (nikdy nezahodíš optimum)?</summary>
+    <div class="inner">
+      <p>Každé úplné dokončení uzlu stojí $J_2$ <em>plus</em> příspěvek zbývajících úloh, a ten je aspoň $J^{LP}(\text{zbývající úlohy})$ — LP je dolní mez i pro zbytek. Nejlepší list pod uzlem má tedy hodnotu $\ge J_2 + J^{LP}(\text{zbývající})$. Když už <em>tohle</em> je $\ge J_1$, nemůže dole být nic ostře lepšího než incumbent → celý podstrom zahoď. Korektnost stojí přesně na tom, že mez je <em>dolní</em> (optimistická): nikdy si zbytek nenamlouvá levnější, než opravdu je… naopak, namlouvá si ho levnější — a právě proto, když ani optimistický odhad nestačí, realita nestačí tím spíš.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 26 (EN 1:1) — pravidlo ořezu</div>
+    <p>“The Branch and Bound algorithm creates a similar tree as Bradley’s algorithm <em>[sic — myšlen Bratleyho algoritmus, [L5.9]]</em>.</p>
+    <ul>
+      <li>Let $J_1$ be the value of the best solution known up to now</li>
+      <li>We discard the partial solution of value $J_2$ not only when $J_2 \ge J_1$, but also when $J_2 + J^{LP}\text{(remaining tasks)} \ge J_1$.<br>
+      Since the solution space of ILP is a subspace of LP we know: $J\text{(remaining tasks)} \ge J^{LP}\text{(remaining tasks)}$.”</li>
+    </ul>
+  </div>
+
+  <p>Test je neostrý ($\ge$, ne $&gt;$): při rovnosti už pod uzlem nemůže být nic <em>ostře</em> lepšího než $J_1$, takže ho taky zavíráme — stejná logika jako u <a href="../k5/l5-5.html#takeaways">[L5.5]</a>. A druhá volba designu: na zlomkovém $x_{ij}$ se tu <strong>nevětví</strong>. Obecné schéma z L5.5 by větvilo $x_{ij} \le 0 / x_{ij} \ge 1$ (u binárky jsou to přesně větve „$T_j$ před $T_i$“ / „$T_i$ před $T_j$“ — i to je legální odpověď); strom nad prefixy dělá totéž po balících a každý podproblém zůstává rozvrhovací úlohou.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy: zaokrouhlení a směr ořezu</div>
+    <p><strong>① „LP řešení zaokrouhlím a mám rozvrh.“</strong> Ne — zaokrouhlené $x$ může porušit antisymetrii i no-cycle (z $x_{ij} = 0{,}5$ uděláš snadno cyklus) a hlavně nic negarantuje o kvalitě. Z LP relaxace se v B&amp;B používá <strong>jen hodnota</strong> $J^{LP}$ jako mez, ne bod. <strong>② Směr:</strong> minimalizujeme, takže LP je mez <em>dolní</em> a ořezává se při $J_2 + J^{LP} \ge J_1$. Kdo si z maximalizačního pseudokódu L5.5 mechanicky přenese $z^{LP} \le z^b$, ořezává podle špatné strany.</p>
+  </div>
+
+  <!-- ===== SEKCE 3: ODITEROVANI ===== -->
+  <h2>Osahej si to: B&amp;B s LP boundem na instanci z L5.6a</h2>
+
+  <p>Stejná mini-instance jako v L5.6a <em>(vlastní — přiznáno)</em>: $p = (2, 1, 3)$, $w = (1, 3, 2)$, precedence $T_1 \to T_2$. Připomeň si: přípustná pořadí jsou $(T_1,T_2,T_3)$ s $J = 23$, $(T_1,T_3,T_2)$ s $J = 30$ a $(T_3,T_1,T_2)$ s $J = 29$. Projdi DFS běh — sleduj hlavně uzly, kde samotné $J_2$ na ořez nestačí a LP mez ano:</p>
+
+  <div class="viz" id="viz-bb"></div>
+
+  <details class="try">
+    <summary>Zkus sám: v kořeni vyšla LP relaxace celočíselně ($J^{LP} = 23$ v bodě pořadí $(T_1,T_2,T_3)$). Co by to znamenalo pro obecný B&amp;B ve stylu L5.5, který kontroluje celočíselnost LP řešení?</summary>
+    <div class="inner">
+      <p>Skončil by hned v kořeni: celočíselné LP optimum je přípustné pro ILP a má hodnotu rovnou dolní mezi → je to optimum. U $n = 3$ to tahle formulace udělá vždy; pro větší $n$ má polytop pořadí i zlomkové vrcholy a $J^{LP} &lt; J^*$ klidně ostře <em>(pozorování vlastní — slidy ho neuvádějí; přiznáno)</em>. Schéma ze slidu 26 celočíselnost LP bodu vůbec nezkoumá — LP mu dodává jen čísla $J^{LP}(\text{zbývající})$ a úplná řešení sbírá v listech stromu pořadí. Oba pohledy jsou korektní; u zkoušky popisuj ten ze slidu.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 4: POSITION-BASED ===== -->
+  <h2>Position-based varianta: úloha na pozici $q$</h2>
+
+  <details class="try">
+    <summary>Zkus sám: relace „před“ je jeden způsob, jak binárkami zakódovat permutaci. Napadne tě druhý — takový, který nepotřebuje žádná trojicová omezení?</summary>
+    <div class="inner">
+      <p>Přiřazení <strong>úloha → pozice</strong>: $x_{iq} = 1 \iff$ úloha $i$ stojí v pořadí na $q$-tém místě. Permutaci pak vynutí dvě sady přiřazovacích rovností (každá úloha právě jednu pozici, každá pozice právě jednu úlohu) — žádné cykly nehrozí, takže $n^3$ trojic odpadá. Cenou je, že „kdo je přede mnou“ už není vidět ze sloupce — completion times se musí dopočítat přes proměnné startů pozic.</p>
+    </div>
+  </details>
+
+  <p>Přesně tohle dělá <strong>position-based ILP</strong> ze slidu 16 — formulovaný pro $1|r_j, \tilde{d}_j|C_{max}$, problém, který později vyřešíme i kombinatoricky Bratleyho B&amp;B [L5.9]. Vedle matice $x_{iq}$ má spojité proměnné $t_q$ (start pozice $q$): pozice na sebe navazují, start nesmí předběhnout release time přiřazené úlohy a její deadline $\tilde{d}_i$ musí stihnout. Celý model si rozebereš v úloze T02 — slide k němu poznamenává „more efficient than relative order ILP“.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.6b</div>
+    <ul>
+      <li><strong>LP relaxace relative-order modelu</strong> ($0 \le x_{ij} \le 1$, $x \in \mathbb{R}$) dává $J^{LP} \le J^*$ — dolní mez, protože řešení ILP jsou podmnožinou řešení LP (<a href="../k0/l0-7.html#takeaways">[L0.7]</a>); u minimalizace je mez <em>dolní</em>, zrcadlově k maximalizaci z <a href="../k5/l5-5.html#takeaways">[L5.5]</a>.</li>
+      <li><strong>Strom nad pořadími</strong> (jako u Bratleyho [L5.9]): uzel = prefix s pevnou hodnotou $J_2$; ořež, jakmile $J_2 + J^{LP}(\text{zbývající úlohy}) \ge J_1$ (nejlepší známé úplné řešení) — i při rovnosti. Alternativa dle L5.5: větvit na zlomkové $x_{ij} = 0/1$ a řezat při $J^{LP}(\text{uzel}) \ge J_1$.</li>
+      <li><strong>LP bod není rozvrh:</strong> zlomkové $x_{ij}$ („napůl před“) nelze zaokrouhlit — z relaxace se používá jen hodnota $J^{LP}$.</li>
+      <li><strong>Position-based varianta:</strong> $x_{iq}$ (úloha $i$ na pozici $q$) + starty $t_q$ — permutace přes dvě přiřazovací rovnosti místo $n^3$ trojic; pro $1|r_j, \tilde{d}_j|C_{max}$ „more efficient than relative order ILP“ (slide 16, úloha T02).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ULOHA T01 ===== -->
+  <div class="task" id="t-preclpbb">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Branch and Bound with relaxed LP for $1|prec|\sum w_j C_j$ (část b)</strong>
+      <span class="task-src">zdroj: zkouška 9. 7. 2021 (přepis, zadání EN 1:1); táž otázka zkouška 29. 6. 2023</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“a) Using ILP formulate scheduling of nonpreemptive tasks with precedence relations on one resource while minimizing weighted sum of completion times, i.e., $1\,|\text{prec}|\sum w_j C_j$. Task $T_j$ has general processing time $p_j$. Precedence relations are encoded in $e_{ij} \in \{0,1\}$ such that $e_{ij} = 1$ if there is a directed edge from $T_i$ to $T_j$ in the precedence graph $G$ or $i = j$.</p>
+        <p>b) Explain in detail, how to use relaxed LP solution in Branch and Bound method for $1\,|\text{prec}|\sum w_j C_j$?”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Část a) je formulace z minulé lekce — vyřešená v <a href="../k5/l5-6a.html#t-precilp">[L5.6a] T01</a>. Tady řešíme část b): „explain <strong>in detail</strong>“ znamená, že nestačí věta „LP dá mez“ — chtějí relaxaci (co přesně se uvolní), směr meze se zdůvodněním, tvar stromu a přesné pravidlo ořezu.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — relaxace, dolní mez, test $J_2 + J^{LP} \ge J_1$ (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k5/l5-6a.html#takeaways">[L5.6a] Relative-order ILP pro 1|prec|Σw_jC_j</a> — model, který relaxujeme.</li>
+        <li><a href="../k5/l5-5.html#takeaways">[L5.5] Branch &amp; Bound pro ILP (grafické řezání)</a> — obecné schéma větvení a mezí.</li>
+        <li><a href="../k0/l0-7.html#takeaways">[L0.7] Co je ILP a LP relaxace</a> — argument podmnožinou.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Odpověz ve čtyřech krocích a každý zdůvodni: ① co relaxuji (jen integralitu $x$); ② proč je výsledek dolní mez (kam se poděla množina řešení?); ③ jak vypadá strom (co je uzel, co je $J_2$, co znamená „remaining tasks“); ④ kdy uzel zahodím — a proč ten test nikdy nezahodí optimum. Bonusový bod za poznámku, že LP <em>bod</em> se nepoužívá (není to rozvrh), jen hodnota.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle slidu 26, 1:1)</summary>
+        <div class="inner">
+          <p><strong>① Relaxace.</strong> V ILP z části a) uvolníme integralitu proměnných: $0 \le x_{ij} \le 1$, $x_{ij} \in \mathbb{R}$ (kritérium i všechna omezení — precedence, antisymetrie, no-cycle trojice, diagonála — zůstávají). Výsledek je LP, řešitelné polynomiálně.</p>
+          <p><strong>② Směr meze.</strong> Každé přípustné řešení ILP splňuje i omezení LP, takže prostor řešení ILP je podprostorem LP („Since the solution space of ILP is a subspace of LP“); minimum přes nadmnožinu je nejvýš tak velké: $J^{LP} \le J$. LP samo „does not give us the right solution“ (typicky zlomkové $x$, žádný rozvrh), ale jeho <em>hodnota</em> je korektní <strong>dolní mez</strong> množství zbývající práce.</p>
+          <p><strong>③ Strom.</strong> B&amp;B staví strom podobný Bratleyho algoritmu: uzel = částečné řešení (prefix pořadí) s hodnotou $J_2 = \sum_{j \in \text{prefix}} w_j C_j$; potomci = volby další úlohy (respektující precedence). Pro neserazený zbytek uzlu spočítáme $J^{LP}(\text{remaining tasks})$ — LP relaxaci modelu zbývajících úloh (navazujících za prefixem).</p>
+          <p><strong>④ Ořez.</strong> Nechť $J_1$ je hodnota nejlepšího dosud nalezeného úplného řešení. Částečné řešení hodnoty $J_2$ zahodíme nejen když $J_2 \ge J_1$, ale už když
+          $$J_2 + J^{LP}(\text{remaining tasks}) \ge J_1,$$
+          protože skutečné dokončení stojí $J_2 + J(\text{remaining}) \ge J_2 + J^{LP}(\text{remaining}) \ge J_1$ — pod uzlem nemůže být nic ostře lepšího než $J_1$, optimum tedy ořezem nikdy neztratíme. List (úplné pořadí) případně aktualizuje $J_1$; algoritmus končí, když jsou všechny větve uzavřené, a vrátí $J_1$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ULOHA T02 ===== -->
+  <div class="task" id="t-posilp">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Position based ILP formulation for $1 \mid r_j, \tilde{d}_j \mid C_{\max}$</strong>
+      <span class="task-src">zdroj: task bank #36 (studijní úloha dle slidu 16, EN 1:1); otázky i–iii vlastní (přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN — bank #36)</span>
+        <p>“The source slide gives the following position-based ILP formulation. Study it and be able to reproduce/explain it.</p>
+        <p>Let $x_{iq} = 1$ iff task $i$ is at the $q$-th position in the sequence of tasks, and let $t_q$ be the start time of the task on the $q$-th position.”</p>
+        <p><em>(Otázky vlastní — přiznáno:)</em> (i) Write down the full model and explain the role of every constraint. (ii) Which constraints encode the permutation and which the time windows $[r_i, \tilde{d}_i]$? (iii) Compare the model size with the relative-order ILP — why does the slide note “more efficient than relative order ILP”?</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Studijní úloha z banky: umět <strong>reprodukovat a vysvětlit</strong> druhé kódování pořadí — přiřazení úloh na pozice. Problém je $1|r_j, \tilde{d}_j|C_{max}$: jeden stroj, release times a deadliny, minimalizuj makespan (tentýž problém řeší kombinatoricky Bratleyho B&amp;B [L5.9]).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — myšlenka „úloha na pozici $q$“ (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k5/l5-6a.html#takeaways">[L5.6a]</a> — relative-order model pro srovnání velikostí.</li>
+        <li><a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace</a> — čtení $1|r_j, \tilde{d}_j|C_{max}$ ($\tilde{d}_j$ = deadline, tvrdé omezení).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Rozděl model na tři vrstvy: ① permutace (co zaručí, že $x$ je matice přiřazení?), ② časy (jak na sebe pozice navazují a kde se vezme $r$ a $\tilde{d}$ úlohy <em>přiřazené</em> na pozici $q$ — všimni si triku $\sum_i r_i x_{iq}$: suma s právě jednou jedničkou „vybere“ parametr), ③ kritérium ($C_{max}$ = konec poslední pozice). U (iii) spočítej omezení obou modelů.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (formulace dle slidu 16 / banky #36, 1:1; komentáře vlastní — přiznáno)</summary>
+        <div class="inner">
+          $$\begin{aligned}
+          \min \quad & C_{\max} \\
+          \text{subject to:} \quad
+          & \sum_{q=1}^{n} x_{iq} = 1 && i = 1..n \\
+          & \sum_{i=1}^{n} x_{iq} = 1 && q = 1..n \\
+          & t_q \ge \sum_{i=1}^{n} r_i \cdot x_{iq} && q = 1..n \\
+          & t_q \ge t_{q-1} + \sum_{i=1}^{n} p_i \cdot x_{i,q-1} && q = 2..n \\
+          & t_q \le \sum_{i=1}^{n} \tilde{d}_i \cdot x_{iq} - \sum_{i=1}^{n} p_i \cdot x_{iq} && q = 1..n \\
+          & C_{\max} \ge t_n + \sum_{i=1}^{n} p_i \cdot x_{in} &&
+          \end{aligned}$$
+          <p>“<strong>variables:</strong> $x_{i \in 1..n, q \in 1..n} \in \{0,1\}$, $C_{\max} \in \langle 0, UB \rangle$, $t_{q \in 1..n} \in \langle 0, UB \rangle$ … more efficient than relative order ILP”</p>
+          <p><strong>(i)–(ii) Po vrstvách:</strong></p>
+          <ul>
+            <li><strong>Permutace</strong> = první dvě rovnosti: každá úloha právě na jedné pozici a každá pozice obsazena právě jednou úlohou ($x$ je permutační matice). Žádné no-cycle trojice nejsou potřeba.</li>
+            <li><strong>Časy:</strong> $t_q \ge \sum_i r_i x_{iq}$ — start pozice $q$ nesmí předběhnout release time přiřazené úlohy (suma s jedinou jedničkou vybere její $r_i$); $t_q \ge t_{q-1} + \sum_i p_i x_{i,q-1}$ — pozice $q$ začne až po doběhnutí pozice $q-1$ (jeden stroj, navazování); $t_q \le \sum_i \tilde{d}_i x_{iq} - \sum_i p_i x_{iq}$ — úloha na pozici $q$ musí stihnout svůj deadline: start $\le \tilde{d}_i - p_i$. To jsou přesně okna $[r_i, \tilde{d}_i]$.</li>
+            <li><strong>Kritérium:</strong> $C_{\max} \ge t_n + \sum_i p_i x_{in}$ — makespan je aspoň konec poslední pozice; minimalizace ho přitlačí na rovnost.</li>
+          </ul>
+          <p><strong>(iii) Srovnání</strong> <em>(vlastní rozbor — přiznáno)</em>: oba modely mají $n^2$ binárek, ale relative-order model z <a href="../k5/l5-6a.html#takeaways">[L5.6a]</a> potřebuje $\Theta(n^3)$ trojicových omezení proti cyklům; tady permutaci hlídá $2n$ přiřazovacích rovností a časům stačí $O(n)$ řádků navíc (plus $n+1$ spojitých proměnných $t_q$, $C_{max}$ s doménou $\langle 0, UB \rangle$ — $UB$ je jen mez domény, počet proměnných na něm nezávisí, na rozdíl od time-indexed modelu <a href="../k5/l5-3.html#takeaways">[L5.3]</a>). Proto slide: „more efficient than relative order ILP“. Relative-order naopak umí přímo lineárně vyjádřit $\sum w_j C_j$ ze sloupců — každé kódování se hodí na jiné kritérium.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L5.6b">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k5/l5-6a.html"><span class="dir">← Předchozí</span> L5.6a · Relative-order ILP pro 1|prec|Σw_jC_j</a>
+    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.7 · EDD a Hornův algoritmus (1|pmtn,r_j|Lmax))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// ===== 1 — zlomkovy bod LP relaxace (vlastni ilustrace na instanci L5.6a, priznano) =====
+// p=(2,1,3), w=(1,3,2), e12=1; bod x13=x31=0.5, x23=x32=0.5:
+// trojice: x12+x23+x31 = 1+0.5+0.5 = 2 <= 2 OK; x13+x32+x21 = 0.5+0.5+0 = 1 >= 1 OK.
+// C1 = 2+3*0.5 = 3.5; C2 = 2+1+3*0.5 = 4.5; C3 = 2*0.5+0.5+3 = 4.5; J = 3.5+13.5+9 = 26.
+KOViz.graph(document.getElementById('viz-frac'), {
+  directed: true, h: 300,
+  nodes: [
+    { id: 'f1', label: 'T₁', x: 150, y: 75 },
+    { id: 'f2', label: 'T₂', x: 490, y: 75 },
+    { id: 'f3', label: 'T₃', x: 320, y: 240 },
+  ],
+  edges: [
+    { from: 'f1', to: 'f2', label: 'x₁₂ = 1' },
+    { from: 'f1', to: 'f3', label: 'x₁₃ = 0,5', cls: 'dim', curve: 0.25 },
+    { from: 'f3', to: 'f1', label: 'x₃₁ = 0,5', cls: 'dim', curve: 0.25 },
+    { from: 'f2', to: 'f3', label: 'x₂₃ = 0,5', cls: 'dim', curve: 0.25 },
+    { from: 'f3', to: 'f2', label: 'x₃₂ = 0,5', cls: 'dim', curve: 0.25 },
+  ],
+  caption: 'Zlomkový bod LP relaxace na instanci z L5.6a (vlastní — přiznáno): x₁₃ = x₃₁ = x₂₃ = x₃₂ = 0,5. Antisymetrie 0,5 + 0,5 = 1 ✓, trojice 1 + 0,5 + 0,5 = 2 ≤ 2 ✓ — vše přípustné, J = 26. Jenže „polovina T₃ před T₁“ není rozvrh: LP body se nezaokrouhlují, z relaxace se bere jen hodnota J<sup>LP</sup>.',
+});
+
+// ===== 2 — stepper: B&B strom nad poradimi s LP boundingem (vlastni instance, priznano) =====
+// p=(2,1,3), w=(1,3,2), e12=1. Poradi: (1,2,3) J=23, (1,3,2) J=30, (3,1,2) J=29.
+// Koren: J_LP = 23 (a=b=1). Uzel (T1): J2=2, J_LP(zbytek {T2,T3} od t=2) = 3*3+2*6 = 21 -> 23.
+// Uzel (T1,T2): J2 = 2+3*3 = 11, zbytek {T3}: 2*6 = 12 -> 23. List (T1,T2,T3): J = 23 -> J1.
+// Uzel (T1,T3): J2 = 2+2*5 = 12, zbytek {T2}: 3*6 = 18 -> 30 >= 23 rez.
+// Uzel (T3): J2 = 2*3 = 6, zbytek {T1,T2} od t=3 (poradi vynucene): 1*5+3*6 = 23 -> 29 >= 23 rez.
+KOViz.stepper(document.getElementById('viz-bb'), {
+  graph: {
+    directed: true, h: 480,
+    nodes: [
+      { id: 'n0', label: '∅',  x: 320, y: 45 },
+      { id: 'na', label: 'T₁', x: 200, y: 170 },
+      { id: 'nb', label: 'T₃', x: 470, y: 170 },
+      { id: 'nc', label: 'T₂', x: 110, y: 295 },
+      { id: 'nd', label: 'T₃', x: 320, y: 295 },
+      { id: 'ne', label: 'T₃', x: 110, y: 420 },
+    ],
+    edges: [
+      { from: 'n0', to: 'na', label: '1. místo: T₁' },
+      { from: 'n0', to: 'nb', label: '1. místo: T₃' },
+      { from: 'na', to: 'nc', label: '2. místo: T₂' },
+      { from: 'na', to: 'nd', label: '2. místo: T₃' },
+      { from: 'nc', to: 'ne', label: '3. místo: T₃' },
+    ],
+  },
+  frames: [
+    { desc: 'Kořen: prázdný prefix, J₂ = 0, incumbent J₁ = ∞. LP relaxace celého modelu (x₁₂ = 1 drží precedence, zbylé dvojice volné v [0,1]) dává J<sup>LP</sup> = 23 — dolní mez: lépe než 23 to nepůjde.',
+      nodes: { n0: 'hl', na: '', nb: '', nc: '', nd: '', ne: '' },
+      subs: { n0: 'J₂ = 0 | J^LP = 23', na: '', nb: '', nc: '', nd: '', ne: '' },
+      edges: { 'n0->na': 'dim', 'n0->nb': 'dim', 'na->nc': 'dim', 'na->nd': 'dim', 'nc->ne': 'dim' },
+      labels: { 'n0->na': '', 'n0->nb': '', 'na->nc': '', 'na->nd': '', 'nc->ne': '' } },
+    { desc: 'Větvení na 1. místo: kandidáti jen T₁ a T₃ — T₂ první být nesmí, precedence T₁ → T₂ (x₁₂ = 1) ji drží za T₁. DFS půjde nejdřív doleva.',
+      nodes: { n0: '', na: '', nb: '', nc: '', nd: '', ne: '' },
+      subs: { n0: 'J₂ = 0 | J^LP = 23', na: '', nb: '', nc: '', nd: '', ne: '' },
+      edges: { 'n0->na': '', 'n0->nb': '', 'na->nc': 'dim', 'na->nd': 'dim', 'nc->ne': 'dim' },
+      labels: { 'n0->na': '1. místo: T₁', 'n0->nb': '1. místo: T₃', 'na->nc': '', 'na->nd': '', 'nc->ne': '' } },
+    { desc: 'Uzel (T₁): prefix má C₁ = 2, tedy J₂ = w₁C₁ = 1·2 = 2. Zbývají {T₂, T₃} od času 2: LP relaxace zbytku dává J<sup>LP</sup> = 21 (dosažitelné pořadím T₂ pak T₃: 3·3 + 2·6 = 21). Test: 2 + 21 = 23 &lt; J₁ = ∞ → pokračujeme.',
+      nodes: { n0: '', na: 'hl', nb: '', nc: '', nd: '', ne: '' },
+      subs: { n0: 'J^LP = 23', na: 'J₂ = 2 | 2+21 = 23', nb: '', nc: '', nd: '', ne: '' },
+      edges: { 'n0->na': 'hl', 'n0->nb': '', 'na->nc': 'dim', 'na->nd': 'dim', 'nc->ne': 'dim' },
+      labels: { 'n0->na': '1. místo: T₁', 'n0->nb': '1. místo: T₃', 'na->nc': '', 'na->nd': '', 'nc->ne': '' } },
+    { desc: 'Uzel (T₁, T₂): C₂ = 3, J₂ = 2 + 3·3 = 11. Zbývá jediná úloha T₃ od času 3: J<sup>LP</sup> = 2·6 = 12 (jediné dokončení — LP je tu rovnou přesná hodnota). Test: 11 + 12 = 23 &lt; ∞ → dolů.',
+      nodes: { n0: '', na: 'good', nb: '', nc: 'hl', nd: '', ne: '' },
+      subs: { n0: 'J^LP = 23', na: 'J₂ = 2', nb: '', nc: 'J₂ = 11 | 11+12 = 23', nd: '', ne: '' },
+      edges: { 'n0->na': 'hl', 'n0->nb': '', 'na->nc': 'hl', 'na->nd': 'dim', 'nc->ne': 'dim' },
+      labels: { 'n0->na': '1. místo: T₁', 'n0->nb': '1. místo: T₃', 'na->nc': '2. místo: T₂', 'na->nd': '', 'nc->ne': '' } },
+    { desc: 'List (T₁, T₂, T₃): úplné pořadí, J = 1·2 + 3·3 + 2·6 = 23. První úplné řešení → incumbent J₁ = 23. Pozor (L5.5): první celé řešení není konec — zbylé větve musíme uzavřít.',
+      nodes: { n0: '', na: 'good', nb: '', nc: 'good', nd: '', ne: 'good' },
+      subs: { n0: 'J^LP = 23', na: 'J₂ = 2', nb: '', nc: 'J₂ = 11', nd: '', ne: 'J = 23 → J₁ = 23' },
+      edges: { 'n0->na': 'hl', 'n0->nb': '', 'na->nc': 'hl', 'na->nd': 'dim', 'nc->ne': 'good' },
+      labels: { 'n0->na': '1. místo: T₁', 'n0->nb': '1. místo: T₃', 'na->nc': '2. místo: T₂', 'na->nd': '', 'nc->ne': '3. místo: T₃' } },
+    { desc: 'Zpět a doprava: uzel (T₁, T₃): C₃ = 5, J₂ = 1·2 + 2·5 = 12 — samotné J₂ &lt; 23, to by k řezu nestačilo. Ale zbývá T₂ od času 5: J<sup>LP</sup> = 3·6 = 18 a 12 + 18 = 30 ≥ 23 = J₁ → ŘEZ (podstrom = jediný list s J = 30, nemusíme ho navštívit).',
+      nodes: { n0: '', na: 'good', nb: '', nc: 'good', nd: 'bad', ne: 'good' },
+      subs: { n0: 'J^LP = 23', na: 'J₂ = 2', nb: '', nc: 'J₂ = 11', nd: 'J₂ = 12 | 12+18 = 30 ≥ 23', ne: 'J₁ = 23' },
+      edges: { 'n0->na': 'hl', 'n0->nb': '', 'na->nc': '', 'na->nd': 'bad', 'nc->ne': 'good' },
+      labels: { 'n0->na': '1. místo: T₁', 'n0->nb': '1. místo: T₃', 'na->nc': '2. místo: T₂', 'na->nd': '2. místo: T₃', 'nc->ne': '3. místo: T₃' } },
+    { desc: 'Uzel (T₃): C₃ = 3, J₂ = 2·3 = 6 — hluboko pod J₁ = 23, bez LP bychom museli rozvíjet. Zbytek {T₁, T₂} od času 3 (pořadí vynucené precedencí): J<sup>LP</sup> = 1·5 + 3·6 = 23. Test: 6 + 23 = 29 ≥ 23 → ŘEZ celého podstromu bez jediného dalšího uzlu. To je síla LP boundingu.',
+      nodes: { n0: '', na: 'good', nb: 'bad', nc: 'good', nd: 'bad', ne: 'good' },
+      subs: { n0: 'J^LP = 23', na: 'J₂ = 2', nb: 'J₂ = 6 | 6+23 = 29 ≥ 23', nc: 'J₂ = 11', nd: '12+18 = 30 ≥ 23', ne: 'J₁ = 23' },
+      edges: { 'n0->na': '', 'n0->nb': 'bad', 'na->nc': '', 'na->nd': 'bad', 'nc->ne': 'good' },
+      labels: { 'n0->na': '1. místo: T₁', 'n0->nb': '1. místo: T₃', 'na->nc': '2. místo: T₂', 'na->nd': '2. místo: T₃', 'nc->ne': '3. místo: T₃' } },
+    { desc: 'Všechny větve uzavřeny → optimum potvrzeno: pořadí (T₁, T₂, T₃), J* = J₁ = 23. Kontrola proti úplnému výčtu z L5.6a: 23 &lt; 29 &lt; 30 ✓. Všimni si, že J* = J<sup>LP</sup> kořene — u n = 3 LP mez „sedí na zemi“; pro větší n bývá ostře menší a strom řeže o to víc.',
+      nodes: { n0: 'good', na: 'good', nb: 'bad', nc: 'good', nd: 'bad', ne: 'good' },
+      subs: { n0: 'J^LP = 23', na: 'J₂ = 2', nb: '29 ≥ 23 řez', nc: 'J₂ = 11', nd: '30 ≥ 23 řez', ne: 'J* = 23' },
+      edges: { 'n0->na': 'good', 'n0->nb': 'bad', 'na->nc': 'good', 'na->nd': 'bad', 'nc->ne': 'good' },
+      labels: { 'n0->na': '1. místo: T₁', 'n0->nb': '1. místo: T₃', 'na->nc': '2. místo: T₂', 'na->nd': '2. místo: T₃', 'nc->ne': '3. místo: T₃' } },
+  ],
+  caption: 'B&B nad pořadími s LP boundingem (slide 26) na vlastní instanci z L5.6a (přiznáno): p = (2, 1, 3), w = (1, 3, 2), e₁₂ = 1. Uzel nese poslední zařazenou úlohu; sub = J₂ a test J₂ + J^LP(zbývající) vs. J₁. Červené uzly = ořezané podstromy.',
+});
+</script>
+</body>
+</html>

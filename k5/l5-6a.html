@@ -36,7 +36,7 @@
     <strong>Pořadové proměnné</strong> $x_{ij} = 1 \iff T_i$ běží před $T_j$: rozvrh na jednom stroji je permutace a tu zakóduješ antisymetrií $x_{ij} + x_{ji} = 1$, zákazem cyklů přes trojice a precedencí $x_{ij} \ge e_{ij}$ — a completion time pak <em>není</em> $p_j$, ale $C_j = \sum_i p_i\,x_{ij}$.
   </div>
 
-  <p>Tohle je doložená zkoušková otázka: na zkoušce 9.&nbsp;7.&nbsp;2021 padla i s b) částí o B&amp;B (přepis ručního řešení se dochoval — včetně chyby, kterou za chvíli uvidíš červeně opravenou) a na zkoušce 29.&nbsp;6.&nbsp;2023 zněla otázka 6 doslova: <em>„SCHED — ILP formulace pro $1|prec|\sum w_j C_j$, rict jak se LP relaxace toho ILP da pouzit pri branch and bound algoritmu.“</em> Dnes postavíme tu ILP formulaci (slidy 24–25); LP relaxace + B&amp;B (slide 26) je příští lekce [L5.6b], která použije stroj z <a href="../k5/l5-5.html#takeaways">[L5.5] Branch &amp; Bound pro ILP</a>.</p>
+  <p>Tohle je doložená zkoušková otázka: na zkoušce 9.&nbsp;7.&nbsp;2021 padla i s b) částí o B&amp;B (přepis ručního řešení se dochoval — včetně chyby, kterou za chvíli uvidíš červeně opravenou) a na zkoušce 29.&nbsp;6.&nbsp;2023 zněla otázka 6 doslova: <em>„SCHED — ILP formulace pro $1|prec|\sum w_j C_j$, rict jak se LP relaxace toho ILP da pouzit pri branch and bound algoritmu.“</em> Dnes postavíme tu ILP formulaci (slidy 24–25); LP relaxace + B&amp;B (slide 26) je příští lekce <a href="../k5/l5-6b.html">[L5.6b] LP relaxace jako dolní mez v B&amp;B</a>, která použije stroj z <a href="../k5/l5-5.html#takeaways">[L5.5] Branch &amp; Bound pro ILP</a>.</p>
 
   <!-- ===== SEKCE 1: PROC VUBEC ILP ===== -->
   <h2>Proč na to potřebujeme ILP?</h2>
@@ -184,7 +184,7 @@
       <li><strong>Tři skupiny omezení:</strong> precedence $x_{ij} \ge e_{ij}$; antisymetrie $x_{ij} + x_{ji} = 1$ ($i \ne j$); no-cycle $1 \le x_{ij} + x_{jk} + x_{ki} \le 2$ pro trojice (dolní mez vyřadí obrácený cyklus; delší cykly v turnaji vždy obsahují trojúhelník, takže trojice stačí).</li>
       <li><strong>Past kritéria:</strong> $C_j$ není $p_j$ ani „$p_i x_{ij} \le C_j$“ — je to <strong>součet dob všech úloh před $j$ plus $p_j$</strong>: $C_j = \sum_i p_i\,x_{ij}$ (diagonála přidá $p_j$). Kritérium $\min \sum_j \sum_i p_i\,x_{ij}\,w_j$ je lineární, protože $p_i, w_j$ jsou parametry.</li>
       <li><strong>Velikost modelu nezávisí na $UB$</strong> ($n^2$ proměnných, ~$n^3$ omezení) — opačný trade-off než time-indexed model <a href="../k5/l5-3.html#takeaways">[L5.3]</a>.</li>
-      <li><strong>K čemu dál:</strong> LP relaxace tohoto ILP dává dolní mez $J^{LP}$ pro Branch &amp; Bound — to je [L5.6b], technika větvení a mezí z <a href="../k5/l5-5.html#takeaways">[L5.5]</a>.</li>
+      <li><strong>K čemu dál:</strong> LP relaxace tohoto ILP dává dolní mez $J^{LP}$ pro Branch &amp; Bound — to je <a href="../k5/l5-6b.html">[L5.6b]</a>, technika větvení a mezí z <a href="../k5/l5-5.html#takeaways">[L5.5]</a>.</li>
     </ul>
   </div>
 
@@ -203,7 +203,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Část a) chce <strong>celou ILP formulaci</strong> — proměnné, kritérium, všechna omezení, parametry a domény. Kódování $e_{ij}$ (včetně diagonály $e_{ii} = 1$) ti zadání dává, takže se očekává relative-order model. Část b) je o LP relaxaci jako dolní mezi v B&amp;B — řeší ji příští lekce [L5.6b]; tady ji jen poznáme podle zadání.</p>
+      <p>Část a) chce <strong>celou ILP formulaci</strong> — proměnné, kritérium, všechna omezení, parametry a domény. Kódování $e_{ij}$ (včetně diagonály $e_{ii} = 1$) ti zadání dává, takže se očekává relative-order model. Část b) je o LP relaxaci jako dolní mezi v B&amp;B — řeší ji příští lekce <a href="../k5/l5-6b.html#t-preclpbb">[L5.6b]</a>; tady ji jen poznáme podle zadání.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -231,7 +231,7 @@
           \end{aligned}$$
           <p><strong>Parametry:</strong> $w_i, p_i \in \mathbb{R}_0^+$ pro $i \in 1..n$; $e_{ij} \in \{0,1\}$. <strong>Proměnné:</strong> $x_{ij} \in \{0,1\}$.</p>
           <p>K vysvětlení (ústně/poznámkou): antisymetrie dělá z $x$ turnaj, trojicová podmínka zakáže cykly v obou orientacích (součty 3 a 0) a delší cyklus v turnaji vždy obsahuje trojúhelník; $C_j$ <em>musí</em> být suma — nerovnost $p_i x_{ij} \le C_j$ je doložená zkoušková chyba (červená oprava: „to nestačí !! $C_j$ je suma processingu“).</p>
-          <p><strong>Část b)</strong> — stručně (detailně v [L5.6b]): integrální podmínku na $x$ uvolníme na $0 \le x_{ij} \le 1$; hodnota $J^{LP}$ takové LP relaxace je <strong>dolní mez</strong> hodnoty ILP (prostor řešení ILP je podmnožinou LP), takže v B&amp;B stromu můžeme uzel s částečným řešením hodnoty $J_2$ zahodit, jakmile $J_2 + J^{LP}(\text{zbývající úlohy}) \ge J_1$, kde $J_1$ je nejlepší dosud nalezené celočíselné řešení.</p>
+          <p><strong>Část b)</strong> — stručně (detailně v <a href="../k5/l5-6b.html#t-preclpbb">[L5.6b]</a>): integrální podmínku na $x$ uvolníme na $0 \le x_{ij} \le 1$; hodnota $J^{LP}$ takové LP relaxace je <strong>dolní mez</strong> hodnoty ILP (prostor řešení ILP je podmnožinou LP), takže v B&amp;B stromu můžeme uzel s částečným řešením hodnoty $J_2$ zahodit, jakmile $J_2 + J^{LP}(\text{zbývající úlohy}) \ge J_1$, kde $J_1$ je nejlepší dosud nalezené celočíselné řešení.</p>
         </div>
       </details>
     </div>
@@ -285,7 +285,7 @@
 
   <div class="pager">
     <a href="../k5/l5-5.html"><span class="dir">← Předchozí</span> L5.5 · Branch &amp; Bound pro ILP (grafické řezání) [FOTO]</a>
-    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.6b · LP relaxace jako dolní mez v B&amp;B)</a>
+    <a class="next" href="../k5/l5-6b.html"><span class="dir">Další →</span> L5.6b · LP relaxace jako dolní mez v B&amp;B</a>
   </div>
 
 </div>
