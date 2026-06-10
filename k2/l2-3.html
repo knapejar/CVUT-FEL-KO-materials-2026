@@ -80,7 +80,7 @@ end</code></pre>
   <p>Slidy 16 a 29 popisují výstup algoritmů shodně: vektory $l$ <em>a</em> $p$ — pro $v \in V(G)$ je $l(v)$ délka nejkratší cesty z $s$ a $p(v)$ předchozí vrchol na ní; pro $v$ nedosažitelný z $s$ je $l(v) = \infty$ a $p(v)$ nedefinované.</p>
 
   <details class="try">
-    <summary>Zkus sám: vzdálenost $l(w)$ už mám — jak z hodnot $p(\cdot)$ zrekonstruuji samotnou nejkratší <em>cestu</em> do $w$?</summary>
+    <summary>Zkus sám: vzdálenost $l(w)$ už mám — jak z hodnot $p(\cdot)$ zrekonstruuji samotnou nejkratší <em>cestu</em> do <span style="white-space:nowrap">$w$?</span></summary>
     <div class="inner">
       <p><strong>Couváním:</strong> $p(w)$ říká, odkud nejkratší cesta do $w$ přišla; $p(p(w))$ odkud přišla tam; … a tak dál, dokud nedojdu do $s$. Posloupnost pak otočím: $s \to \dots \to p(p(w)) \to p(w) \to w$.</p>
       <p>Každý vrchol si pamatuje jen <em>jednoho</em> předchůdce, takže hrany $\{(p(v), v)\}$ dohromady tvoří strom zakořeněný v $s$ — <strong>shortest paths tree, SPT</strong> (strom nejkratších cest). Jeden vektor $p$ tak kóduje nejkratší cesty do <em>všech</em> vrcholů najednou.</p>
@@ -193,11 +193,11 @@ end</code></pre>
     <div class="task-head">
       <span class="task-id">T02</span>
       <strong>Relax until done &amp; reconstruct the path from p</strong>
-      <span class="task-src">zdroj: prezentace/03_SPT_KO.md, slide 16/29 (význam vektorů l a p)</span>
+      <span class="task-src">zdroj: vlastní procvičovací úloha na koncept slidů 16/29 prezentace/03_SPT_KO.md (význam vektorů l a p)</span>
     </div>
     <div class="task-body">
       <div class="assignment">
-        <span class="lbl">Assignment (EN, dle slidů 16 a 29)</span>
+        <span class="lbl">Assignment (EN, procvičovací — koncept slidů 16 a 29)</span>
         <p>Consider the digraph with nodes $s$, $a$, $b$, $c$ and edges $(s,a)$, $(s,b)$, $(a,b)$, $(a,c)$, $(b,c)$ with weights $1$, $4$, $2$, $5$, $1$. The vectors $l$ and $p$ currently hold $l(s)=0$, $l(a)=1$, $l(b)=4$, $l(c)=6$ and $p(a)=s$, $p(b)=s$, $p(c)=a$.</p>
         <p>(i) Which edges can still be relaxed, i.e. satisfy $l(w) \gt l(v) + c(v,w)$? (ii) Perform relaxations until no edge can be relaxed and give the final vectors $l$ and $p$. (iii) Use the vector $p$ to reconstruct the shortest $s$–$c$ path.</p>
       </div>
@@ -229,7 +229,7 @@ end</code></pre>
           <p><strong>(ii)</strong> Relaxuj $(a,b)$: $l(b) := 3$, $p(b) := a$. Tím se změnil vstup hrany $(b,c)$ — otestuj znovu: $6 \gt 3+1 = 4$ → relaxuj: $l(c) := 4$, $p(c) := b$. Další kolo testů: $(s,a)$ rovnost, $(s,b)$: $3 \gt 4$? ne, $(a,b)$ rovnost, $(a,c)$: $4 \gt 6$? ne, $(b,c)$ rovnost — <strong>nic nejde relaxovat</strong>. Finální stav:</p>
           <p>$$l = (l(s), l(a), l(b), l(c)) = (0,\, 1,\, 3,\, 4), \qquad p(a) = s,\; p(b) = a,\; p(c) = b.$$</p>
           <p>(Kdybychom v (ii) začali hranou $(b,c)$, dostali bychom dočasně $l(c)=5$ — a po relaxaci $(a,b)$ by hrana $(b,c)$ prošla testem znovu: $5 \gt 3+1$. Výsledek je stejný, jen o krok později — pořadí mění průběh, ne výsledek, přesně jako v T01.)</p>
-          <p><strong>(iii)</strong> Couvání z $c$: $p(c) = b$, $p(b) = a$, $p(a) = s$ → otočením dostaneme nejkratší cestu $$s \to a \to b \to c$$ s délkou $1 + 2 + 1 = 4 = l(c)$ ✓. Hrany $(s,a), (a,b), (b,c)$ jsou zároveň strom nejkratších cest (SPT) z $s$.</p>
+          <p><strong>(iii)</strong> Couvání z $c$: $p(c) = b$, $p(b) = a$, $p(a) = s$ → otočením dostaneme nejkratší cestu $s \to a \to b \to c$ s délkou $1 + 2 + 1 = 4 = l(c)$ ✓. Hrany $(s,a), (a,b), (b,c)$ jsou zároveň strom nejkratších cest (SPT) z $s$.</p>
         </div>
       </details>
     </div>
@@ -361,19 +361,19 @@ KOViz.stepper(document.getElementById('viz-t01-run'), {
     {desc:'Průchod 1: (3,4) nic (l(3)=∞), (2,3) nic (l(2)=∞), (1,2): ∞ &gt; 0−2 → l(2):=−2, p(2):=1. Jen krok a).',
      nodes:{1:'hl', 2:'good'},
      edges:{'1->2':'hl'},
-     subs:{1:'l=0', 2:'l=−2', 3:'l=∞', 4:'l=∞'}},
+     subs:{1:'l=0', 2:'l=−2, p=1', 3:'l=∞', 4:'l=∞'}},
     {desc:'Průchod 2: (3,4) nic, (2,3): ∞ &gt; −2+1 → l(3):=−1, p(3):=2, (1,2) nic. Krok b).',
      nodes:{1:'hl', 2:'good', 3:'good'},
      edges:{'1->2':'good', '2->3':'hl'},
-     subs:{1:'l=0', 2:'l=−2', 3:'l=−1', 4:'l=∞'}},
+     subs:{1:'l=0', 2:'l=−2, p=1', 3:'l=−1, p=2', 4:'l=∞'}},
     {desc:'Průchod 3: (3,4): ∞ &gt; −1+2 → l(4):=1, p(4):=3. Krok c) — SPT hotov po 3 průchodech.',
      nodes:{1:'hl', 2:'good', 3:'good', 4:'good'},
      edges:{'1->2':'good', '2->3':'good', '3->4':'hl'},
-     subs:{1:'l=0', 2:'l=−2', 3:'l=−1', 4:'l=1'}},
+     subs:{1:'l=0', 2:'l=−2, p=1', 3:'l=−1, p=2', 4:'l=1, p=3'}},
     {desc:'Nejlepší pořadí — zleva doprava v jediném průchodu: (1,2) → l(2):=−2, (2,3) → l(3):=−1, (3,4) → l(4):=1. Kroky a), b), c) naráz: 1 průchod. Výsledek je v obou případech stejný.',
      nodes:{1:'hl', 2:'good', 3:'good', 4:'good'},
      edges:{'1->2':'good', '2->3':'good', '3->4':'good'},
-     subs:{1:'l=0', 2:'l=−2', 3:'l=−1', 4:'l=1'}},
+     subs:{1:'l=0', 2:'l=−2, p=1', 3:'l=−1, p=2', 4:'l=1, p=3'}},
   ],
 });
 
