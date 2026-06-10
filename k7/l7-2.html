@@ -36,7 +36,7 @@
     <strong>DP tabulka indexovaná cenou</strong>: buňka $x_k^j$ = <em>minimální váha</em>, kterou lze dosáhnout ceny přesně $k$ výběrem z položek $1..j$ — duál ke kapacitní tabulce z <a href="l7-1.html#takeaways">[L7.1]</a>, složitost $O(nC)$, optimum se čte jako nejpravější dosažitelná cena posledního řádku.
   </div>
 
-  <p>V <a href="l7-1.html#takeaways">[L7.1] Knapsack DP (tabulka + backtracking)</a> jsi vyplňoval tabulku <em>položky × kapacita</em> a v každé buňce maximalizoval cenu. Přednáška (slidy 8–9) ale předvádí DP pro batoh primárně v <strong>opačné orientaci</strong> — a právě tahle orientace je základem aproximačního schématu, na které navazuje 2-aproximace z <a href="../k3/l3-11.html#takeaways">[L3.11]</a>. Nejdřív ale proč vůbec tabulku otáčet:</p>
+  <p>V <a href="l7-1.html#takeaways">[L7.1] Knapsack DP (tabulka + backtracking)</a> jsi vyplňoval tabulku <em>položky × kapacita</em> a v každé buňce maximalizoval cenu. Přednáška (slidy 8–9) ale předvádí DP pro batoh primárně v <strong>opačné orientaci</strong> — a právě tahle orientace je základem aproximačního schématu (FPTAS), které samo navazuje na 2-aproximaci z <a href="../k3/l3-11.html#takeaways">[L3.11]</a>. Nejdřív ale proč vůbec tabulku otáčet:</p>
 
   <!-- ===== VÝKLAD ===== -->
   <h2>Otočení tabulky: co když váhy nejsou hezká celá čísla?</h2>
@@ -96,7 +96,7 @@ end</code></pre>
   <details class="try">
     <summary>Zkus sám: v kapacitní tabulce bylo optimum vždy v pravém dolním rohu $(n, W)$. Kde se čte z tabulky indexované cenou — a proč roh nefunguje?</summary>
     <div class="inner">
-      <p>Sloupce jsou teď <em>ceny</em> a cena je cílová funkce: chceš <strong>nejpravější sloupec posledního řádku, který je vůbec dosažitelný</strong> — $i := \max\{k : x_k^n &lt; \infty\}$ (díky kapacitnímu filtru je každá konečná buňka automaticky $\le W$). Pravý dolní roh je sloupec $k = C$, a $C$ je jen <em>horní mez</em> (např. $\sum_j c_j$ = „vezmu úplně všechno“) — té většinou žádný přípustný výběr nedosáhne, takže v rohu typicky sedí $\infty$. Přesně na tohle mířila červená poznámka hodnotitele u zkouškové úlohy (citovaná v řešení T01 lekce [L7.1]): „opt. řešení nemusí být v pravém dolním rohu.“</p>
+      <p>Sloupce jsou teď <em>ceny</em> a cena je cílová funkce: chceš <strong>nejpravější sloupec posledního řádku, který je vůbec dosažitelný</strong> — $i := \max\{k : x_k^n &lt; \infty\}$ (díky kapacitnímu filtru je každá konečná buňka automaticky $\le W$). Pravý dolní roh je sloupec $k = C$, a $C$ je jen <em>horní mez</em> (např. $\sum_j c_j$ = „vezmu úplně všechno“) — té většinou žádný přípustný výběr nedosáhne, takže v rohu typicky sedí $\infty$. Přesně na tohle mířila červená poznámka studenta u zkouškové úlohy (citovaná v řešení T01 lekce [L7.1]): „opt. řešení nemusí být v pravém dolním rohu.“</p>
     </div>
   </details>
 
@@ -120,7 +120,7 @@ end</code></pre>
       <li><strong>Optimum NENÍ v pravém dolním rohu</strong> — čte se $i = \max\{k : x_k^n &lt; \infty\}$, nejpravější konečná buňka posledního řádku (roh $k = C$ bývá $\infty$). Záměna s kapacitní tabulkou [L7.1], kde roh funguje vždy, je nejčastější přehmat.</li>
       <li><strong>V buňce se minimalizuje, ne maximalizuje.</strong> Hodnota = váha (čím míň, tím líp); test vzetí je $x_{k-c_j}^{j-1} + w_j \le \min\{W, x_k^{j-1}\}$ — bez kapacitního filtru $W$ by tabulka hlásila nepřípustné „dosažitelné“ ceny.</li>
       <li><strong>Unikátnost neodečteš jen z remíz:</strong> stejně drahé, ale těžší výběry (s váhou $\le W$) tabulka zahodí beze stopy — viz dvojče $\{I_1, I_3, I_4\}$ výše. Remíza ⇒ víc optim; žádná remíza ⇏ unikátní (výjimka: $x_i^n = W$, viz try výše).</li>
-      <li><strong>Sloupce = ceny vyžadují celočíselné ceny</strong> (váhy smí být reálné). Obráceně — celé váhy, necelé ceny — patří kapacitní tabulce [L7.1] (slide 10 schválně volí $c = (3.1, 4.2, 5.1, 4.3)$).</li>
+      <li><strong>Sloupce = ceny vyžadují celočíselné ceny</strong> (váhy smí být reálné). Obráceně — celé váhy, necelé ceny — patří kapacitní tabulce [L7.1] (slide 10 schválně volí $c = (3{,}1;\ 4{,}2;\ 5{,}1;\ 4{,}3)$).</li>
     </ul>
   </div>
 
