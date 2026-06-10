@@ -36,7 +36,7 @@
     <strong>Smyčka kolem augmentace.</strong> Jeden vylepšovací krok už umíš z <a href="l4-2.html">[L4.2]</a> — Ford-Fulkersonův algoritmus ho prostě <strong>opakuje</strong>: najdi augmentující cestu, pošli po ní $\gamma$, aktualizuj tok (i přes zpětné hrany) — a skonči, až žádná augmentující cesta neexistuje.
   </div>
 
-  <p>V <a href="l4-2.html#takeaways">[L4.2] Reziduální graf a augmentující cesta</a> jsme na zkouškové síti z 25. 5. 2026 značkováním našli cestu $T_1 \to T_4 \to T_5 \to T_8$ s $\gamma = 4$ a zvedli tok z $|f| = 9$ na $13$. Dnes to dotáhneme: poběžíme dál, iteraci za iterací, až na maximum — přesně tak, jak to chce zkouškové zadání („<em>Show the augmenting path in each iteration.</em>“).</p>
+  <p>V <a href="l4-2.html#takeaways">[L4.2] Reziduální graf a augmentující cesta</a> jsme na zkouškové síti z&nbsp;25.&nbsp;5.&nbsp;2026 značkováním našli cestu $T_1 \to T_4 \to T_5 \to T_8$ s $\gamma = 4$ a zvedli tok z $|f| = 9$ na $13$. Dnes to dotáhneme: poběžíme dál, iteraci za iterací, až na maximum — přesně tak, jak to chce zkouškové zadání („<em>Show the augmenting path in each iteration.</em>“).</p>
 
   <!-- ===== SEKCE 1: ALGORITMUS ===== -->
   <h2>Algoritmus: tři řádky (slide 11)</h2>
@@ -83,7 +83,7 @@
   <p>Stojí za to vidět, <em>kolik</em> tok stojí na volbě cest: čtyři iterace s $\gamma = 5, 5, 3, 1$. Slide na závěr poznamenává, že množina $A = \{s, u, v\}$ určuje <em>minimum capacity cut</em> — co to znamená a proč zaručuje, že $14$ je opravdu maximum, je obsah <a href="l4-4.html">[L4.4]</a>.</p>
 
   <!-- ===== SEKCE 3: BĚH NA ZKOUŠKOVÉ SÍTI ===== -->
-  <h2>Hlavní číslo: běh na zkouškové síti (25. 5. 2026)</h2>
+  <h2>Hlavní číslo: běh na zkouškové síti (25.&nbsp;5.&nbsp;2026)</h2>
 
   <p>Teď zkouškové zadání. Síť i startovní tok $|f| = 9$ známe z <a href="l4-1.html">[L4.1]</a>, reziduální graf a první cestu z <a href="l4-2.html">[L4.2]</a>. Iterace 1 je tedy hotová — pokračujeme, dokud to jde.</p>
 
@@ -150,7 +150,7 @@
     <ul>
       <li><strong>Ford-Fulkerson = smyčka kolem augmentace:</strong> 1. sežeň přípustný tok ($f \equiv 0$ při $l \equiv 0$, u zkoušky zadán; jinak <a href="l4-7.html">[L4.7]</a>), 2. najdi augmentující cestu (<a href="l4-2.html#takeaways">[L4.2]</a>), 3. pošli $\gamma$ a aktualizuj — $+\gamma$ na dopředných, $-\gamma$ na zpětných hranách — a zpět na 2.</li>
       <li><strong>Konec:</strong> v reziduálním grafu už není cesta $s \to t$ (typicky: všechny hrany ze zdroje nasycené). Tok je pak maximální; zdůvodnění řezem a min-cut v <a href="l4-4.html">[L4.4]</a>.</li>
-      <li><strong>Zkouškový běh 25. 5. 2026:</strong> start $|f| = 9$; ① $T_1{\to}T_4{\to}T_5{\to}T_8$, $\gamma = 4$; ② $T_1{\to}T_4{\to}T_7{\to}T_8$, $\gamma = 1$; ③ $T_1{\to}T_4{\to}T_5{\to}T_3{\to}T_6{\to}T_8$ přes zpětnou $T_5{\to}T_3$, $\gamma = 2$; výsledek $|f| = 16$.</li>
+      <li><strong>Zkouškový běh 25.&nbsp;5.&nbsp;2026:</strong> start $|f| = 9$; ① $T_1{\to}T_4{\to}T_5{\to}T_8$, $\gamma = 4$; ② $T_1{\to}T_4{\to}T_7{\to}T_8$, $\gamma = 1$; ③ $T_1{\to}T_4{\to}T_5{\to}T_3{\to}T_6{\to}T_8$ přes zpětnou $T_5{\to}T_3$, $\gamma = 2$; výsledek $|f| = 16$.</li>
       <li><strong>Složitost:</strong> celočíselné kapacity → $\gamma \ge 1$ → nejvýš $F$ iterací po $\mathcal{O}(|E|)$, tj. $\mathcal{O}(|E| \cdot F) = \mathcal{O}(|E|^2 \cdot U)$ — pseudopolynomiální (zigzag $2U$ iterací); neceločíselné kapacity: nemusí skončit vůbec. <strong>Edmonds-Karp</strong> (vždy nejkratší cesta, BFS) → $\mathcal{O}(|E|^2 \cdot |V|)$.</li>
       <li>U zkoušky vypiš <strong>každou iteraci</strong>: cestu, výpočet $\gamma$ jako minimum rezerv ($u - f$ dopředné, $f - l$ zpětné) a změněné toky.</li>
     </ul>
@@ -160,7 +160,7 @@
   <div class="task" id="t-ffrun">
     <div class="task-head">
       <span class="task-id">T01</span>
-      <strong>Ford-Fulkerson Algorithm (zkouška 25. 5. 2026)</strong>
+      <strong>Ford-Fulkerson Algorithm (zkouška 25.&nbsp;5.&nbsp;2026)</strong>
       <span class="task-src">zdroj: zkouška KO 25.05.2026 = task bank #21 (zadání EN 1:1; čtení špatně čitelných diagonál sítě dle [L4.1])</span>
     </div>
     <div class="task-body">
@@ -246,7 +246,7 @@
         <summary>d) Úplné řešení</summary>
         <div class="inner">
           <p><strong>(i)</strong> Střídej cesty $P_1 = s \to u \to v \to t$ a $P_2 = s \to v \to u \to t$, kde $P_2$ prochází příčku $u \to v$ <strong>zpětně</strong>. Na $P_1$ je $\gamma = \min\{U - f_{su},\ 1 - f_{uv},\ U - f_{vt}\} = 1$ (příčka). Augmentací se příčka nasytí ($f_{uv} = 1$). Na $P_2$ je $\gamma = \min\{U - f_{sv},\ f_{uv} - 0,\ U - f_{ut}\} = 1$ (zpětná rezerva příčky) a augmentace ji zase vyprázdní ($f_{uv} = 0$). Každá iterace zvedne $|f|$ přesně o $1$ a maximum je $F = 2U$ (víc se přes $\{s\}$ nevejde: $U + U$) — celkem $2U$ iterací. Běh prvních iterací je proklikatelný ve výkladu výše.</p>
-          <p><strong>(ii)</strong> Cesty $s \to u \to t$ ($\gamma = U$) a $s \to v \to t$ ($\gamma = U$): po dvou iteracích $|f| = 2U$, všechny hrany ze zdroje nasycené → stop. Tok je stejný, práce tisíckrát menší.</p>
+          <p><strong>(ii)</strong> Cesty $s \to u \to t$ ($\gamma = U$) a $s \to v \to t$ ($\gamma = U$): po dvou iteracích $|f| = 2U$, všechny hrany ze zdroje nasycené → stop. Tok je stejný, práce stokrát menší (2 vs. 200 iterací).</p>
           <p><strong>(iii)</strong> Pro celočíselné kapacity zvedne každá iterace tok aspoň o $1$, takže iterací je nejvýš $F$; nalezení cesty stojí $\mathcal{O}(|E|)$, celkem $\mathcal{O}(|E| \cdot F) = \mathcal{O}(|E|^2 \cdot U)$ — pseudopolynomiálně (slide 18; pro neceločíselné kapacity nemusí algoritmus skončit vůbec). <strong>Edmonds a Karp [1972]:</strong> v kroku 2 vždy vybrat <strong>nejkratší</strong> augmentující cestu (počtem hran, tj. BFS v reziduálním grafu) — pak je složitost $\mathcal{O}(|E|^2 \cdot |V|)$ nezávisle na velikosti kapacit. Tady BFS najde dvouhranové cesty $s{\to}u{\to}t$, $s{\to}v{\to}t$ dřív než tříhranový zigzag, takže zlý běh vůbec nenastane.</p>
         </div>
       </details>
