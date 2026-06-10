@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2 + (r−1)·n (TSP) — immersive video · KO Hitovky</title>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #11141d;
+    --text: #e8eaf0;
+    --muted: #8b93a7;
+    --accent: #ffb000;
+    --border: #232a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; overflow: hidden;
+  }
+  #topbar {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; font-size: 13px; color: var(--muted);
+  }
+  #topbar a { color: var(--muted); text-decoration: none; }
+  #topbar a:hover { color: var(--accent); }
+  #topbar .title { color: var(--text); font-weight: 700; }
+  #topbar .badge {
+    font-size: 11px; color: var(--bg); background: var(--accent);
+    border-radius: 10px; padding: 2px 9px; font-weight: 700;
+  }
+  #stagewrap {
+    flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
+    min-height: 0; padding: 0 16px;
+  }
+  #stage {
+    position: relative;
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #0b0e16; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+  }
+  #stage canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  #subtitle {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 26px 4% 16px;
+    background: linear-gradient(to top, rgba(5,7,12,0.88) 0%, rgba(5,7,12,0.55) 65%, transparent 100%);
+    text-align: center; pointer-events: none;
+    font-size: clamp(14px, 2.4vw, 28px); font-weight: 700; line-height: 1.4;
+    color: #fff;
+  }
+  #subtitle .m {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    color: #7dd3fc;
+  }
+  #subtitle .hl {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    padding: 0 4px; border-radius: 5px;
+  }
+  #subtitle .c1 { background: rgba(125,211,252,0.15); color: #7dd3fc; }
+  #subtitle .c2 { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+  #subtitle .c3 { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+  #subtitle .c4 { background: rgba(52,211,153,0.15);  color: #4ade80; }
+  #subtitle .c5 { background: rgba(244,114,182,0.16); color: #f9a8d4; }
+  .kw { position: relative; display: inline-block; white-space: nowrap; }
+  .kw .wb { opacity: 0.42; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+  .kw .wf {
+    position: absolute; left: 0; top: 0; width: 0%;
+    overflow: hidden; white-space: nowrap;
+    text-shadow: 0 0 16px rgba(255,176,0,0.85), 0 2px 10px rgba(0,0,0,0.95);
+  }
+  .kw .wf, .kw .wf * { color: #ffd34d !important; }
+  #bigplay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(5,7,12,0.55); cursor: pointer; z-index: 5;
+    flex-direction: column; gap: 18px;
+  }
+  #bigplay.hidden { display: none; }
+  #bigplay .pbtn {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--accent); color: #1a1200;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; box-shadow: 0 0 60px rgba(255,176,0,0.45);
+    transition: transform .15s;
+  }
+  #bigplay:hover .pbtn { transform: scale(1.08); }
+  #bigplay .hint { color: var(--text); font-size: 15px; font-weight: 600; text-shadow: 0 2px 8px #000; }
+  #bigplay .hint small { display: block; color: var(--muted); font-weight: 400; margin-top: 6px; }
+  #controls {
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 4px 16px;
+  }
+  #controls button {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    width: 42px; height: 42px; border-radius: 50%; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: border-color .15s, color .15s;
+  }
+  #controls button:hover { border-color: var(--accent); color: var(--accent); }
+  #seek {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 6px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--p, 0%), #2a3040 var(--p, 0%));
+    border-radius: 3px; outline: none; cursor: pointer;
+  }
+  #seek::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px rgba(255,176,0,0.6); cursor: pointer;
+  }
+  #seek::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; border: none;
+    background: var(--accent); cursor: pointer;
+  }
+  .time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 44px; text-align: center; }
+  @media (max-height: 560px) { #topbar { display: none; } }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="pisnicky.html">← Zpěvník</a>
+  <span class="title">2 + (r−1)·n (TSP)</span>
+  <span class="badge">IMMERSIVE VIDEO 🤘</span>
+  <span style="margin-left:auto">mezerník = play/pauza · ←/→ = ±5 s · R = od začátku</span>
+</div>
+
+<div id="stagewrap">
+  <div id="stage">
+    <div id="subtitle"></div>
+    <div id="bigplay">
+      <div class="pbtn">▶</div>
+      <div class="hint">TSP nelze aproximovat — důkaz sporem v kovárně propasti 🤘<small>2 min 55 s · zpívaná videolekce · každé slovo = runa</small></div>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btnPlay" title="Play / pauza">▶</button>
+  <button id="btnRestart" title="Od začátku">⟲</button>
+  <span class="time" id="tCur">0:00</span>
+  <input type="range" id="seek" min="0" max="175.5" step="0.01" value="0">
+  <span class="time" id="tDur">2:55</span>
+</div>
+
+<audio id="player" src="audio/hamiltonuv-okruh.mp3" preload="auto"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
+<script>
+(async function () {
+'use strict';
+
+// ════════════════════════════════════════════════════════════════════
+// 0) helpers
+// ════════════════════════════════════════════════════════════════════
+const C = {
+  gold: 0xffb000, goldHi: 0xffd34d, green: 0x4ade80, pink: 0xf472b6,
+  cyan: 0x7dd3fc, violet: 0xa78bfa, white: 0xffffff, red: 0xef4444,
+  lava: 0xff4d1a, ember: 0xff9540, steel: 0x9fb0c8, dark: 0x0b0e16,
+  muted: 0x8b93a7,
+};
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - clamp01(t), 3);
+const ph = (t, a, b) => clamp01((t - a) / (b - a));
+
+// ════════════════════════════════════════════════════════════════════
+// 1) PENTAGRAM GRAF + kotvy refrénů (word-level whisper)
+// ════════════════════════════════════════════════════════════════════
+const PCX = 380, PCY = 350, PR = 165;
+const NODES = [...Array(5)].map((_, i) => ({
+  x: PCX + PR * Math.sin(i * 2 * Math.PI / 5),
+  y: PCY - PR * Math.cos(i * 2 * Math.PI / 5),
+}));
+// G = vstupní graf HC (obsahuje hamiltonovský okruh v hvězdicovém pořadí 0-2-4-1-3)
+const G_EDGES = [[0, 2], [2, 4], [4, 1], [1, 3], [3, 0], [0, 1]]; // 6 hran
+const NON_EDGES = [[1, 2], [2, 3], [3, 4], [4, 0]];               // 4 doplněné (drahé)
+const HC = [0, 2, 4, 1, 3]; // pentagram!
+const ANCH = [
+  { jedna: 40.96, dva: 44.42, neni1: 49.40, nejvys: 50.12, exist: 53.38, vic: 54.48, neni2: 56.71, spor: 57.68, pnp: 59.60 },
+  { jedna: 90.62, dva: 93.70, neni1: 98.56, nejvys: 99.44, exist: 102.69, vic: 103.74, neni2: 105.97, spor: 106.94, pnp: 108.86 },
+  { jedna: 132.10, dva: 135.50, neni1: 140.30, nejvys: 141.10, exist: 142.70, vic: 145.90, neni2: 148.20, spor: 149.00, pnp: 151.50 },
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 2) PIXI + particles + SHAKE + WORD RUNES (animace každého slova!)
+// ════════════════════════════════════════════════════════════════════
+const app = new PIXI.Application({ width: 1280, height: 720, antialias: true, background: 0x07060a });
+document.getElementById('stage').appendChild(app.view);
+const sceneLayer = new PIXI.Container();
+const fxLayer = new PIXI.Container();
+app.stage.addChild(sceneLayer, fxLayer);
+let SHAKE = 0;
+const dotG = new PIXI.Graphics();
+dotG.beginFill(0xffffff, 1).drawCircle(0, 0, 32).endFill();
+const dotTex = app.renderer.generateTexture(dotG);
+const parts = [];
+function burst(x, y, tint, count = 18, speed = 220, size = 0.1, gravity = 200) {
+  for (let i = 0; i < count; i++) {
+    const p = new PIXI.Sprite(dotTex);
+    p.anchor.set(0.5); p.x = x; p.y = y; p.tint = tint;
+    p.blendMode = PIXI.BLEND_MODES.ADD;
+    const a = Math.random() * 6.283, v = speed * (0.3 + Math.random() * 0.8);
+    p._vx = Math.cos(a) * v; p._vy = Math.sin(a) * v;
+    p._life = 0.6 + Math.random() * 0.7; p._t = 0; p._g = gravity;
+    p.scale.set(size * (0.5 + Math.random()));
+    fxLayer.addChild(p); parts.push(p);
+  }
+}
+// ash (popel) — padá celým videem
+const ash = [];
+for (let i = 0; i < 50; i++) {
+  const a = new PIXI.Sprite(dotTex);
+  a.anchor.set(0.5);
+  a.x = Math.random() * 1280; a.y = Math.random() * 720;
+  a.scale.set(0.012 + Math.random() * 0.02);
+  a.alpha = 0.15 + Math.random() * 0.3;
+  a.tint = Math.random() < 0.3 ? C.ember : 0x6a7488;
+  a._vy = 14 + Math.random() * 26; a._ph = Math.random() * 6.28;
+  fxLayer.addChild(a); ash.push(a);
+}
+// WORD RUNES — každé zazpívané slovo se zhmotní jako žhnoucí runa
+const runes = [];
+let runeSlot = 0;
+function spawnRune(word, caps) {
+  const plain = word.replace(/<[^>]*>/g, '').replace(/[„“…—]/g, '').trim();
+  if (!plain) return;
+  const big = caps || /!$/.test(plain);
+  const t = new PIXI.Text(plain.toUpperCase(), {
+    fontFamily: "'Segoe UI', system-ui, sans-serif",
+    fontSize: big ? 46 : 26, fontWeight: '900',
+    fill: big ? ['#fff3b0', '#ff4d1a'] : ['#ffd34d', '#b8410e'],
+    stroke: 0x1a0b05, strokeThickness: big ? 7 : 4,
+    dropShadow: true, dropShadowColor: 0xff4d1a, dropShadowBlur: 14, dropShadowDistance: 0,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  runeSlot = (runeSlot + 1) % 7;
+  t.x = big ? 640 : 140 + runeSlot * 165 + (Math.random() - 0.5) * 50;
+  t.y = big ? 560 : 648;
+  t._vy = big ? -130 : -85 - Math.random() * 40;
+  t._life = big ? 1.5 : 1.1; t._t = 0; t._big = big;
+  t.rotation = (Math.random() - 0.5) * 0.12;
+  fxLayer.addChild(t); runes.push(t);
+  burst(t.x, t.y + 8, big ? C.lava : C.ember, big ? 22 : 7, big ? 240 : 110, big ? 0.11 : 0.06, 30);
+  if (big) SHAKE = Math.max(SHAKE, 9);
+}
+app.ticker.add(() => {
+  const dt = app.ticker.deltaMS / 1000;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p._t += dt; p.x += p._vx * dt; p.y += p._vy * dt;
+    p._vy += p._g * dt; p.alpha = clamp01(1 - p._t / p._life);
+    if (p._t > p._life) { fxLayer.removeChild(p); p.destroy(); parts.splice(i, 1); }
+  }
+  for (const a of ash) {
+    a.y += a._vy * dt; a._ph += dt;
+    a.x += Math.sin(a._ph) * 12 * dt;
+    if (a.y > 730) { a.y = -10; a.x = Math.random() * 1280; }
+  }
+  for (let i = runes.length - 1; i >= 0; i--) {
+    const r = runes[i];
+    r._t += dt; r.y += r._vy * dt; r._vy *= 0.985;
+    const k = r._t / r._life;
+    r.alpha = k < 0.15 ? k / 0.15 : 1 - ph(k, 0.45, 1);
+    r.scale.set(r._big ? lerp(1.6, 1.0, easeOut(k * 2)) : 1);
+    if (r._t > r._life) { fxLayer.removeChild(r); r.destroy(); runes.splice(i, 1); }
+  }
+  // shake decay
+  if (SHAKE > 0.1) {
+    sceneLayer.x = (Math.random() - 0.5) * SHAKE;
+    sceneLayer.y = (Math.random() - 0.5) * SHAKE;
+    SHAKE *= Math.pow(0.0018, dt);
+  } else { sceneLayer.x = 0; sceneLayer.y = 0; }
+});
+function txt(str, size, color, weight = '800', family = "'Segoe UI', system-ui, sans-serif") {
+  const t = new PIXI.Text(str, {
+    fontFamily: family, fontSize: size, fill: color, fontWeight: weight,
+    align: 'center', dropShadow: true, dropShadowColor: 0x000000,
+    dropShadowBlur: 8, dropShadowAlpha: 0.6, dropShadowDistance: 2,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  return t;
+}
+const MATH = "'Cambria Math', Cambria, Georgia, serif";
+
+// Hamiltonův portrét (public domain, Wikimedia Commons — viz assets/img/CREDITS.txt)
+let hamTex = null;
+try { hamTex = await PIXI.Assets.load('assets/img/hamilton.png'); } catch (e) { console.warn('portrait load failed', e); }
+
+// ════════════════════════════════════════════════════════════════════
+// 3) KULISA — vulkanická scéna + pentagramový graf + portrét
+// ════════════════════════════════════════════════════════════════════
+function buildHell(c) {
+  const g = new PIXI.Graphics(); c.addChildAt(g, 0);
+  function render(t, o = {}) {
+    g.clear();
+    // nebe
+    g.beginFill(0x120a14, 1).drawRect(0, 0, 1280, 300).endFill();
+    g.beginFill(0x1c0f14, 1).drawRect(0, 300, 1280, 220).endFill();
+    g.beginFill(0x2a1210, 1).drawRect(0, 520, 1280, 200).endFill();
+    // sopky
+    g.beginFill(0x16090b, 1);
+    g.drawPolygon([0, 560, 200, 360, 330, 560]);
+    g.drawPolygon([1000, 560, 1130, 330, 1280, 560]);
+    g.endFill();
+    g.beginFill(C.lava, 0.6 + 0.25 * Math.sin(t * 3));
+    g.drawPolygon([185, 372, 200, 360, 218, 374, 200, 382]);
+    g.drawPolygon([1115, 344, 1130, 330, 1148, 346, 1130, 355]);
+    g.endFill();
+    // blesk (řízený nebo náhodný puls)
+    const flash = o.flash || (Math.sin(t * 1.7) > 0.992 ? 0.7 : 0);
+    if (flash > 0) {
+      g.lineStyle(5, 0xeef3ff, flash);
+      const bx = o.flashX ?? 640;
+      g.moveTo(bx, 0); g.lineTo(bx - 30, 110); g.lineTo(bx + 14, 150); g.lineTo(bx - 26, 260);
+      g.lineStyle(0);
+      g.beginFill(0xeef3ff, flash * 0.12).drawRect(0, 0, 1280, 720).endFill();
+    }
+    // ohnivá linie dole
+    g.lineStyle(0);
+    g.beginFill(0x1a0b05, 1).drawRect(0, 640, 1280, 80).endFill();
+    g.beginFill(C.lava, 0.5);
+    g.moveTo(0, 660);
+    for (let x = 0; x <= 1280; x += 40) g.lineTo(x, 652 + Math.sin(x * 0.08 + t * 5) * 7);
+    g.lineTo(1280, 720); g.lineTo(0, 720);
+    g.closePath().endFill();
+    // easter egg: zaváté v popelu
+    return flash;
+  }
+  return { render };
+}
+function buildGraph(c) {
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const wT = [];
+  function render(t, o = {}) {
+    g.clear();
+    // summon circle pod grafem
+    const circ = o.circle ?? 0.3;
+    g.lineStyle(3, C.lava, 0.25 + 0.2 * circ * (0.6 + 0.4 * Math.sin(t * 2.4)));
+    g.drawCircle(PCX, PCY, PR + 38);
+    g.drawCircle(PCX, PCY, PR + 52);
+    // hrany G (levné)
+    G_EDGES.forEach(([a, b], i) => {
+      const on = o.cheapHL && t > o.cheapHL;
+      g.lineStyle(on ? 6 : 4, on ? C.cyan : C.steel, o.gAlpha ?? 0.9);
+      g.moveTo(NODES[a].x, NODES[a].y); g.lineTo(NODES[b].x, NODES[b].y);
+    });
+    // doplněné hrany (drahé, lávové) — odlévají se v čase forgeT
+    NON_EDGES.forEach(([a, b], i) => {
+      const p = o.forgeT ? ph(t, o.forgeT + i * 0.55, o.forgeT + i * 0.55 + 0.5) : 1;
+      if (p <= 0) return;
+      const hot = o.expHL && t > o.expHL;
+      g.lineStyle(hot ? 6 : 4, C.lava, (0.55 + 0.45 * (hot ? 0.6 + 0.4 * Math.sin(t * 6) : 0)) * p);
+      g.moveTo(NODES[a].x, NODES[a].y);
+      g.lineTo(lerp(NODES[a].x, NODES[b].x, p), lerp(NODES[a].y, NODES[b].y, p));
+    });
+    // HC pentagram (когда Hamilton žije)
+    if (o.pentagram > 0) {
+      g.lineStyle(7, C.goldHi, 0.9 * o.pentagram);
+      for (let i = 0; i < 5; i++) {
+        const a = NODES[HC[i]], b = NODES[HC[(i + 1) % 5]];
+        g.moveTo(a.x, a.y); g.lineTo(b.x, b.y);
+      }
+    }
+    // uzly
+    NODES.forEach((P, i) => {
+      g.lineStyle(0);
+      g.beginFill(0x07060a, 1).drawCircle(P.x, P.y, 17).endFill();
+      g.beginFill(o.pentagram > 0 ? C.goldHi : C.steel, 1).drawCircle(P.x, P.y, 13).endFill();
+    });
+  }
+  return { render };
+}
+// portrét v rámu — sláva / škrtnutí
+function buildPortrait(c) {
+  const wrap = new PIXI.Container(); wrap.x = 985; wrap.y = 330; wrap.alpha = 0; c.addChild(wrap);
+  const g = new PIXI.Graphics(); wrap.addChild(g);
+  let spr = null;
+  if (hamTex) {
+    spr = new PIXI.Sprite(hamTex); spr.anchor.set(0.5);
+    spr.width = 186; spr.height = 255; wrap.addChild(spr);
+  }
+  const name = txt('W. R. HAMILTON', 17, C.goldHi, '900'); name.y = 152; wrap.addChild(name);
+  const xg = new PIXI.Graphics(); wrap.addChild(xg);
+  function render(t, o = {}) {
+    // o.show = čas slávy, o.cross = čas škrtnutí, o.crown = čas korunovace
+    const vis = o.show ? easeOut(ph(t, o.show, o.show + 0.6)) : 0;
+    wrap.alpha = vis;
+    wrap.y = lerp(250, 330, vis);
+    g.clear();
+    const dead = o.cross && t > o.cross;
+    // aura
+    if (!dead) g.beginFill(C.goldHi, 0.12 + 0.07 * Math.sin(t * 4)).drawCircle(0, 0, 165).endFill();
+    // rám
+    g.lineStyle(10, dead ? 0x4a3a16 : C.gold, 1);
+    g.beginFill(0x120d08, spr ? 0 : 0.9);
+    g.drawRoundedRect(-100, -135, 200, 270, 10);
+    g.endFill();
+    [[-100, -135], [100, -135], [-100, 135], [100, 135]].forEach(([x, y]) => {
+      g.lineStyle(0); g.beginFill(dead ? 0x4a3a16 : C.goldHi, 1).drawCircle(x, y, 9).endFill();
+    });
+    if (spr) spr.tint = dead ? 0x665555 : 0xffffff;
+    // škrtnutí
+    xg.clear();
+    if (dead) {
+      const p = easeOut(ph(t, o.cross, o.cross + 0.45));
+      xg.lineStyle(14, C.red, 0.95);
+      xg.moveTo(-95, -125); xg.lineTo(lerp(-95, 95, p), lerp(-125, 125, p));
+      if (p > 0.5) { xg.moveTo(95, -125); xg.lineTo(lerp(95, -95, (p - 0.5) * 2), lerp(-125, 125, (p - 0.5) * 2)); }
+    }
+    // koruna (bridge)
+    if (o.crown) {
+      const cp = easeOut(ph(t, o.crown, o.crown + 0.8));
+      if (cp > 0) {
+        const cy = lerp(-260, -168, cp);
+        g.lineStyle(3, 0x7a5a10, 1);
+        g.beginFill(C.goldHi, 1);
+        g.drawPolygon([-52, cy + 28, 52, cy + 28, 52, cy + 6, 30, cy + 18, 12, cy - 6, 0, cy + 14, -12, cy - 6, -30, cy + 18, -52, cy + 6]);
+        g.endFill();
+      }
+    }
+  }
+  return { render };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 4) SCÉNY
+// ════════════════════════════════════════════════════════════════════
+const scenes = [];
+function scene(t0, t1, build) {
+  const s = { t0, t1, st: null };
+  s.init = () => { s.st = build(); sceneLayer.addChild(s.st.c); };
+  s.update = (lt) => s.st && s.st.update(lt);
+  s.destroy = () => { if (s.st) { sceneLayer.removeChild(s.st.c); s.st.c.destroy({ children: true }); s.st = null; } };
+  scenes.push(s);
+  return s;
+}
+function caption(c, str, color = C.gold, y = 42, size = 25) {
+  const t = txt(str, size, color, '800');
+  t.x = 640; t.y = y; c.addChild(t);
+  return t;
+}
+
+// ── INTRO [0 – 19.5]: titul + summon circle ──
+scene(0, 19.5, () => {
+  const c = new PIXI.Container();
+  const hell = buildHell(c);
+  const graph = buildGraph(c);
+  const t1 = txt('TSP', 150, 0xdfe6f5, '900'); t1.x = 870; t1.y = 200; t1.alpha = 0;
+  const t2 = txt('NEAPROXIMOVATELNÝ', 44, C.lava, '900'); t2.x = 870; t2.y = 300; t2.alpha = 0;
+  const t3 = txt('důkaz sporem — kovárna propasti 🤘', 24, C.muted, '700'); t3.x = 870; t3.y = 358; t3.alpha = 0;
+  c.addChild(t1, t2, t3);
+  const fired = new Set();
+  return { c, update(lt) {
+    const flash = (lt > 1.2 && lt < 1.5) || (lt > 6.0 && lt < 6.25) ? 0.85 : 0;
+    hell.render(lt, { flash, flashX: 870 });
+    graph.render(lt, { circle: easeOut(ph(lt, 3, 8)), gAlpha: 0.55, forgeT: -1 });
+    t1.alpha = easeOut(ph(lt, 1.2, 2.2));
+    t1.scale.set(lerp(1.6, 1, easeOut(ph(lt, 1.2, 2.6))));
+    t2.alpha = easeOut(ph(lt, 6.0, 7.0));
+    t3.alpha = easeOut(ph(lt, 9.0, 10.0));
+    if (lt > 1.3 && !fired.has('a')) { fired.add('a'); SHAKE = 14; burst(870, 200, C.lava, 36, 340, 0.14); }
+    if (lt > 6.1 && !fired.has('b')) { fired.add('b'); SHAKE = 10; burst(870, 300, C.red, 26, 280, 0.12); }
+  } };
+});
+
+// ── VERSE 1 [19.5 – 40.96]: předpoklad sporu + kovárna K5 ──
+scene(19.5, 40.96, () => {
+  const c = new PIXI.Container();
+  const hell = buildHell(c);
+  const graph = buildGraph(c);
+  const portrait = buildPortrait(c);
+  const cap = caption(c, '');
+  const apx = txt('APXʳ', 40, C.violet, '900', MATH); apx.x = 985; apx.y = 150; apx.alpha = 0; c.addChild(apx);
+  const apxSub = txt('„kdyby existovala r-aproximace…“', 20, C.muted, '700'); apxSub.x = 985; apxSub.y = 196; apxSub.alpha = 0; c.addChild(apxSub);
+  const qm = txt('?', 90, C.red, '900'); qm.x = 985; qm.y = 330; qm.alpha = 0; c.addChild(qm);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 19.5;
+    hell.render(lt, {});
+    // kovárna: G hrany od 30.7 (vezmi graf G), lávové odlévání od 32.8 (postav úplný)
+    graph.render(lt, {
+      circle: 0.5,
+      gAlpha: lt > 30.7 ? 0.95 : 0.5,
+      forgeT: lt > 32.8 ? 32.8 : 1e9,
+    });
+    portrait.render(lt, { show: lt > 26.5 ? 26.5 : 0 });
+    qm.alpha = lt > 26.5 && lt < 30.7 ? 0.85 + 0.15 * Math.sin(lt * 6) : 0;
+    apx.alpha = easeOut(ph(lt, 20.2, 21.2));
+    apxSub.alpha = easeOut(ph(lt, 21.5, 22.5));
+    apx.scale.set(1 + 0.05 * Math.sin(lt * 4) * apx.alpha);
+    if (lt > 20.3 && !fired.has('apx')) { fired.add('apx'); burst(985, 150, C.violet, 20, 240, 0.11); }
+    if (lt > 26.6 && !fired.has('q')) { fired.add('q'); burst(985, 330, C.red, 16, 200, 0.1); }
+    NON_EDGES.forEach(([a, b], i) => {
+      const ft = 32.8 + i * 0.55;
+      if (lt > ft && !fired.has('f' + i)) {
+        fired.add('f' + i);
+        burst((NODES[a].x + NODES[b].x) / 2, (NODES[a].y + NODES[b].y) / 2, C.lava, 14, 180, 0.09);
+      }
+    });
+    if (lt < 25.28) { cap.text = 'PŘEDPOKLAD SPORU: mám stroj APXʳ na obecný TSP'; cap.style.fill = C.violet; }
+    else if (lt < 30.7) { cap.text = '…pak rozhodnu NP-úplný HAMILTONŮV OKRUH polynomiálně?!'; cap.style.fill = C.red; }
+    else if (lt < 35.7) { cap.text = 'KOVÁRNA: vezmi G, doplň na úplný K₅ (lávové hrany)'; cap.style.fill = C.lava; }
+    else { cap.text = 'a teď ty VÁHY… (tady se rodí propast)'; cap.style.fill = C.goldHi; }
+  } };
+});
+
+// ── CHORUS factory: váhy + PROPAST + portrét + P=NP deska ──
+function chorusScene(t0, t1, an) {
+  scene(t0, t1, () => {
+    const c = new PIXI.Container();
+    const hell = buildHell(c);
+    const graph = buildGraph(c);
+    const portrait = buildPortrait(c);
+    const cap = caption(c, '');
+    const w1 = txt('1', 54, C.cyan, '900', MATH); w1.x = PCX - 60; w1.y = 110; w1.alpha = 0; c.addChild(w1);
+    const w1b = txt('hrana v G', 18, C.cyan, '700'); w1b.x = PCX - 60; w1b.y = 150; w1b.alpha = 0; c.addChild(w1b);
+    const w2 = txt('2 + (r−1)·n', 44, C.lava, '900', MATH); w2.x = PCX + 105, w2.y = 110; w2.alpha = 0; c.addChild(w2);
+    const w2b = txt('hrana MIMO G', 18, C.lava, '700'); w2b.x = PCX + 105; w2b.y = 150; w2b.alpha = 0; c.addChild(w2b);
+    // propast — číselná osa s kaňonem
+    const gg = new PIXI.Graphics(); c.addChild(gg);
+    const nLab = txt('n', 24, C.goldHi, '900', MATH); nLab.alpha = 0; c.addChild(nLab);
+    const rnLab = txt('r·n', 24, C.cyan, '900', MATH); rnLab.alpha = 0; c.addChild(rnLab);
+    const rn1Lab = txt('r·n + 1', 24, C.lava, '900', MATH); rn1Lab.alpha = 0; c.addChild(rn1Lab);
+    // P=NP deska
+    const tablet = new PIXI.Container(); tablet.x = 640; tablet.y = 560; tablet.alpha = 0; c.addChild(tablet);
+    const tg = new PIXI.Graphics(); tablet.addChild(tg);
+    const tT = txt('P = NP', 40, 0xcfd8e8, '900', MATH); tablet.addChild(tT);
+    const fired = new Set();
+    return { c, update(lt0) {
+      const lt = lt0 + t0;
+      const sporP = lt > an.spor;
+      const flash = sporP && lt < an.spor + 0.35 ? 0.95 : 0;
+      hell.render(lt, { flash, flashX: 640 });
+      graph.render(lt, {
+        circle: 1,
+        cheapHL: an.jedna, expHL: an.dva,
+        pentagram: lt > an.exist && lt < an.vic ? easeOut(ph(lt, an.exist, an.exist + 0.5)) : (lt >= an.vic ? Math.max(0, 1 - ph(lt, an.vic, an.vic + 0.6)) : 0),
+      });
+      portrait.render(lt, { show: an.exist, cross: an.neni2 });
+      // váhy
+      w1.alpha = lt > an.jedna ? 1 : 0; w1b.alpha = w1.alpha;
+      w2.alpha = lt > an.dva ? 1 : 0; w2b.alpha = w2.alpha;
+      w1.scale.set(lerp(1.8, 1, easeOut(ph(lt, an.jedna, an.jedna + 0.4))));
+      w2.scale.set(lerp(1.8, 1, easeOut(ph(lt, an.dva, an.dva + 0.4))));
+      if (lt > an.jedna && !fired.has('1')) { fired.add('1'); burst(PCX - 60, 110, C.cyan, 22, 250, 0.11); }
+      if (lt > an.dva && !fired.has('2')) { fired.add('2'); burst(PCX + 105, 110, C.lava, 26, 280, 0.12); SHAKE = Math.max(SHAKE, 7); }
+      // PROPAST: osa od „nejvýš r·n“
+      gg.clear();
+      if (lt > an.nejvys) {
+        const ax0 = 740, ax1 = 1240, ay = 540;
+        const gapX = lerp(ax0, ax1, 0.55);
+        const open = easeOut(ph(lt, an.neni1, an.neni1 + 0.8)) * 26 + 8;
+        gg.lineStyle(6, C.steel, 0.95);
+        gg.moveTo(ax0, ay); gg.lineTo(gapX - open, ay);
+        gg.moveTo(gapX + open, ay); gg.lineTo(ax1, ay);
+        // kaňon
+        gg.lineStyle(3, C.lava, 0.9);
+        gg.moveTo(gapX - open, ay); gg.lineTo(gapX - open / 2, ay + 46); gg.lineTo(gapX, ay + 30); gg.lineTo(gapX + open / 2, ay + 52); gg.lineTo(gapX + open, ay);
+        nLab.alpha = 1; nLab.x = ax0 + 30; nLab.y = ay - 24;
+        rnLab.alpha = 1; rnLab.x = gapX - open - 26; rnLab.y = ay - 24;
+        rn1Lab.alpha = 1; rn1Lab.x = gapX + open + 44; rn1Lab.y = ay - 24;
+        // ukazatel APX výsledku
+        const mk = lt > an.vic ? lerp(gapX + open + 40, ax1 - 30, 0.3) : lerp(ax0 + 20, gapX - open - 10, clamp01((lt - an.nejvys) / 2));
+        gg.lineStyle(0);
+        gg.beginFill(lt > an.vic ? C.lava : C.goldHi, 1);
+        gg.drawPolygon([mk - 9, ay - 38, mk + 9, ay - 38, mk, ay - 22]);
+        gg.endFill();
+      } else { nLab.alpha = 0; rnLab.alpha = 0; rn1Lab.alpha = 0; }
+      // deska P=NP — roztříští se na SPOR!
+      tablet.alpha = lt > an.nejvys ? 1 : 0;
+      tg.clear();
+      if (!sporP) {
+        tg.lineStyle(4, 0x55617a, 1);
+        tg.beginFill(0x222a3a, 0.95);
+        tg.drawRoundedRect(-130, -44, 260, 88, 10);
+        tg.endFill();
+        tT.text = 'P = NP'; tT.style.fill = 0xcfd8e8;
+      } else {
+        const p = easeOut(ph(lt, an.spor, an.spor + 0.8));
+        // střepy
+        [[-1.4, -1, -0.4], [1.3, -0.8, 0.5], [-0.9, 1.1, -0.3], [1.0, 1.2, 0.6], [0, 1.5, 0.2]].forEach(([dx, dy, dr], i) => {
+          tg.lineStyle(3, 0x55617a, 1 - p * 0.5);
+          tg.beginFill(0x222a3a, 0.9 - p * 0.4);
+          const ox = dx * 130 * p, oy = dy * 90 * p + 60 * p * p;
+          tg.drawRoundedRect(-55 + ox, -30 + oy, 95, 52, 6);
+          tg.endFill();
+        });
+        tT.text = 'P ≠ NP'; tT.style.fill = C.goldHi;
+        tT.scale.set(lerp(1.6, 1, p));
+        if (!fired.has('spor')) { fired.add('spor'); SHAKE = 18; burst(640, 560, 0xeef3ff, 44, 380, 0.15); }
+      }
+      if (lt > an.pnp && !fired.has('pnp')) { fired.add('pnp'); burst(640, 560, C.goldHi, 26, 280, 0.12); }
+      // captions
+      if (lt < an.nejvys) { cap.text = 'OCENĚNÍ HRAN: levné v G, drahé mimo G'; cap.style.fill = C.goldHi; }
+      else if (lt < an.vic) { cap.text = 'výsledek ≤ r·n  ⟺  HAMILTON EXISTUJE (pentagram!)'; cap.style.fill = C.goldHi; }
+      else if (lt < an.spor) { cap.text = 'výsledek > r·n  ⟹  Hamilton NENÍ — propast nelze přeskočit'; cap.style.fill = C.lava; }
+      else { cap.text = 'APXʳ by rozhodl NP-úplný problém → SPOR (pokud P ≠ NP)'; cap.style.fill = 0xeef3ff; }
+    } };
+  });
+}
+chorusScene(40.96, 62.3, ANCH[0]);
+
+// ── VERSE 2 [62.3 – 90.62]: POČTY V PLAMENECH ──
+scene(62.3, 90.62, () => {
+  const c = new PIXI.Container();
+  const hell = buildHell(c);
+  const graph = buildGraph(c);
+  const cap = caption(c, '');
+  const L1 = txt('OKRUH JE:', 26, C.goldHi, '900'); L1.x = 920; L1.y = 130; L1.alpha = 0; c.addChild(L1);
+  const L2 = txt('OPT = n', 42, C.goldHi, '900', MATH); L2.x = 920; L2.y = 180; L2.alpha = 0; c.addChild(L2);
+  const L3 = txt('APXʳ vrátí ≤ r·n', 32, C.cyan, '900', MATH); L3.x = 920; L3.y = 240; L3.alpha = 0; c.addChild(L3);
+  const R1 = txt('OKRUH NENÍ → aspoň 1 drahá hrana:', 24, C.lava, '900'); R1.x = 880; R1.y = 330; R1.alpha = 0; c.addChild(R1);
+  const sum1 = txt('(n−1)·1', 34, C.steel, '900', MATH); sum1.x = 700; sum1.y = 410; sum1.alpha = 0; c.addChild(sum1);
+  const sum2 = txt('+ 2', 34, C.lava, '900', MATH); sum2.x = 830; sum2.y = 410; sum2.alpha = 0; c.addChild(sum2);
+  const sum3 = txt('+ (r−1)·n', 34, C.lava, '900', MATH); sum3.x = 970, sum3.y = 410; sum3.alpha = 0; c.addChild(sum3);
+  const sumR = txt('= r·n + 1', 52, 0xfff3b0, '900', MATH); sumR.x = 880; sumR.y = 490; sumR.alpha = 0; c.addChild(sumR);
+  const note = txt('> r·n — víc, než smí APXʳ vrátit!', 24, C.red, '800', MATH); note.x = 880; note.y = 552; note.alpha = 0; c.addChild(note);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 62.3;
+    hell.render(lt, {});
+    graph.render(lt, {
+      circle: 0.7,
+      pentagram: lt < 75.3 ? easeOut(ph(lt, 63.5, 64.5)) : Math.max(0, 1 - ph(lt, 75.3, 76.0)),
+      expHL: lt > 77.6 ? 77.6 : 1e9,
+    });
+    L1.alpha = easeOut(ph(lt, 63.0, 63.8));
+    L2.alpha = easeOut(ph(lt, 66.97, 67.8));
+    L3.alpha = easeOut(ph(lt, 69.34, 70.2));
+    R1.alpha = easeOut(ph(lt, 75.86, 76.7));
+    sum1.alpha = easeOut(ph(lt, 79.67, 80.3));
+    sum2.alpha = easeOut(ph(lt, 81.49, 82.0));
+    sum3.alpha = easeOut(ph(lt, 82.53, 83.4));
+    sumR.alpha = easeOut(ph(lt, 85.08, 85.9));
+    sumR.scale.set(lerp(1.7, 1, easeOut(ph(lt, 85.08, 86.0))) * (1 + 0.04 * Math.sin(lt * 6)));
+    note.alpha = easeOut(ph(lt, 88.68, 89.5));
+    [['l2', 67.05, L2, C.goldHi], ['l3', 69.45, L3, C.cyan], ['r1', 75.95, R1, C.lava], ['s1', 79.75, sum1, C.steel], ['s2', 81.55, sum2, C.lava], ['s3', 82.6, sum3, C.lava], ['sr', 85.2, sumR, 0xfff3b0], ['nt', 88.75, note, C.red]].forEach(([k, at, el, col]) => {
+      if (lt > at && !fired.has(k)) { fired.add(k); burst(el.x, el.y, col, 16, 200, 0.1); if (k === 'sr') SHAKE = 10; }
+    });
+    if (lt < 75.3) { cap.text = 'SVĚT 1: Hamilton žije → projdi pentagram za n'; cap.style.fill = C.goldHi; }
+    else { cap.text = 'SVĚT 2: Hamilton není → každý okruh platí drahou hranu'; cap.style.fill = C.lava; }
+  } };
+});
+
+chorusScene(90.62, 112.0, ANCH[1]);
+
+// ── BRIDGE [112.0 – 132.02]: DOOM — váhy 1/2, koruna ──
+scene(112.0, 132.02, () => {
+  const c = new PIXI.Container();
+  const hell = buildHell(c);
+  const portrait = buildPortrait(c);
+  const cap = caption(c, '');
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const tab1 = txt('1', 64, 0xcfd8e8, '900', MATH); tab1.x = 280; tab1.y = 350; tab1.alpha = 0; c.addChild(tab1);
+  const tab2 = txt('2', 64, 0xcfd8e8, '900', MATH); tab2.x = 470; tab2.y = 350; tab2.alpha = 0; c.addChild(tab2);
+  const tri = txt('1 + 1 ≥ 2 ✓ — trojúhelník PLATÍ', 30, C.green, '900', MATH); tri.x = 380; tri.y = 480; tri.alpha = 0; c.addChild(tri);
+  const král = txt('METRICKÝ TSP — NP-TĚŽKÝ KRÁL', 36, C.goldHi, '900'); král.x = 640; král.y = 620; král.alpha = 0; c.addChild(král);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 112.0;
+    hell.render(lt, { flash: lt > 124.5 && lt < 124.75 ? 0.8 : 0 });
+    portrait.render(lt, { show: 113.0, crown: lt > 124.5 ? 124.5 : 0 });
+    g.clear();
+    // kamenné desky s váhami
+    [[tab1, 113.66], [tab2, 114.56]].forEach(([el, at], i) => {
+      const p = easeOut(ph(lt, at, at + 0.6));
+      el.alpha = p;
+      if (p > 0) {
+        g.lineStyle(4, 0x55617a, p);
+        g.beginFill(0x222a3a, 0.95 * p);
+        g.drawRoundedRect(el.x - 65, 350 - 70 * p + (1 - p) * 60 - 44 + 44, 130, 140, 10);
+        g.endFill();
+      }
+      if (lt > at && !fired.has('t' + i)) { fired.add('t' + i); burst(el.x, 350, 0x8a96ad, 16, 200, 0.1); SHAKE = Math.max(SHAKE, 6); }
+    });
+    tri.alpha = easeOut(ph(lt, 115.5, 116.6));
+    král.alpha = easeOut(ph(lt, 124.5, 125.5));
+    král.scale.set(1 + 0.03 * Math.sin(lt * 4) * král.alpha);
+    if (lt > 115.6 && !fired.has('tri')) { fired.add('tri'); burst(380, 480, C.green, 20, 230, 0.11); }
+    if (lt > 124.6 && !fired.has('kr')) { fired.add('kr'); SHAKE = 12; burst(985, 170, C.goldHi, 30, 300, 0.13); }
+    if (lt < 120.84) { cap.text = 'váhy jen 1 a 2 → trojúhelníková nerovnost drží'; cap.style.fill = C.green; }
+    else if (lt < 127.02) { cap.text = 'i METRICKÝ TSP zůstává NP-těžký (jen už ne neaproximovatelný)'; cap.style.fill = C.goldHi; }
+    else { cap.text = 'OPT = n ⟺ Hamilton žije — redukce stojí navěky'; cap.style.fill = 0xdfe6f5; }
+  } };
+});
+
+chorusScene(132.02, 157.0, ANCH[2]);
+
+// ── OUTRO [157 – 176]: uhlíky ──
+scene(157.0, 176, () => {
+  const c = new PIXI.Container();
+  const hell = buildHell(c);
+  const graph = buildGraph(c);
+  const f1 = txt('OBECNÝ TSP: ŽÁDNÁ r-APROXIMACE', 38, C.lava, '900'); f1.x = 640; f1.y = 180; f1.alpha = 0; c.addChild(f1);
+  const f2 = txt('(pokud P ≠ NP)', 26, 0xdfe6f5, '800', MATH); f2.x = 640; f2.y = 240; f2.alpha = 0; c.addChild(f2);
+  const f3 = txt('Hotovo. Vypal důkaz na papír — L3.6', 20, C.muted, '700'); f3.x = 640; f3.y = 300; f3.alpha = 0; c.addChild(f3);
+  const egg = txt('P ≠ NP (zatím)', 14, 0x554433, '700', MATH); egg.x = 1100; egg.y = 690; egg.rotation = -0.03; c.addChild(egg);
+  return { c, update(lt0) {
+    const lt = lt0 + 157.0;
+    hell.render(lt, {});
+    graph.render(lt, { circle: Math.max(0, 1 - (lt - 157) / 12), gAlpha: 0.4, pentagram: 0.25 + 0.1 * Math.sin(lt) });
+    f1.alpha = easeOut(ph(lt, 158.5, 160));
+    f2.alpha = easeOut(ph(lt, 161, 162.5));
+    f3.alpha = easeOut(ph(lt, 164, 165.5));
+  } };
+});
+
+// ════════════════════════════════════════════════════════════════════
+// 5) TITULKY — řádky 1:1 jako sekce „Zpívej“ ve zpěvníku
+// ════════════════════════════════════════════════════════════════════
+const SUNG = [[0,0.04],[0.04,0.68],[0.68,6.29],[6.29,10.78],[10.78,11.91],[11.91,23.14],[23.14,23.49],[23.49,24.72],[24.72,25.28],[25.28,25.28],[25.28,26.07],[26.07,26.53],[26.53,27.8],[27.8,28.42],[28.42,30.2],[30.2,30.7],[30.7,31.37],[31.37,31.9],[31.9,32.25],[32.25,32.82],[32.82,33.48],[33.48,33.88],[33.88,34.18],[34.18,34.33],[34.33,35.7],[35.7,35.83],[35.83,36.37],[36.37,36.64],[36.64,37.59],[37.59,37.99],[37.99,39.6],[39.6,39.74],[39.74,40.96],[40.96,41.91],[41.91,42.58],[42.58,43.25],[43.25,43.38],[43.38,44.06],[44.06,44.42],[44.42,44.91],[44.91,45.58],[45.58,45.74],[45.74,46.58],[46.58,47.41],[47.41,48.24],[48.24,48.73],[48.73,49.4],[49.4,50.12],[50.12,51.16],[51.16,51.29],[51.29,51.94],[51.94,52.33],[52.33,53.38],[53.38,54.48],[54.48,54.48],[54.48,55.21],[55.21,56.71],[56.71,57.68],[57.68,58.64],[58.64,59.44],[59.44,59.6],[59.6,60.4],[60.4,60.76],[60.76,62.41],[62.41,64.06],[64.06,66.97],[66.97,67.8],[67.8,68.04],[68.04,68.98],[68.98,69.14],[69.14,69.34],[69.34,71.36],[71.36,73.03],[73.03,73.94],[73.94,74.05],[74.05,74.63],[74.63,74.82],[74.82,75.34],[75.34,75.86],[75.86,77.16],[77.16,77.67],[77.67,78.28],[78.28,78.78],[78.78,79.54],[79.54,79.67],[79.67,80.32],[80.32,80.97],[80.97,81.49],[81.49,81.88],[81.88,82.4],[82.4,82.53],[82.53,83.22],[83.22,83.68],[83.68,83.68],[83.68,83.94],[83.94,84.58],[84.58,84.96],[84.96,85.08],[85.08,85.69],[85.69,85.84],[85.84,86.34],[86.34,87.14],[87.14,87.53],[87.53,88.1],[88.1,88.68],[88.68,90.62],[90.62,91.46],[91.46,92.06],[92.06,92.66],[92.66,92.78],[92.78,93.38],[93.38,93.7],[93.7,94.17],[94.17,94.8],[94.8,94.96],[94.96,95.75],[95.75,96.53],[96.53,97.31],[97.31,97.78],[97.78,98.56],[98.56,99.44],[99.44,100.48],[100.48,100.61],[100.61,101.26],[101.26,101.65],[101.65,102.69],[102.69,103.74],[103.74,104.47],[104.47,105.97],[105.97,106.94],[106.94,107.9],[107.9,108.7],[108.7,108.86],[108.86,109.66],[109.66,110.04],[110.04,113.6],[113.6,113.66],[113.66,113.66],[113.66,114.41],[114.41,114.56],[114.56,115.02],[115.02,118.16],[118.16,119.73],[119.73,120.84],[120.84,121.78],[121.78,121.97],[121.97,123.65],[123.65,124.56],[124.56,124.85],[124.85,125.14],[125.14,126.26],[126.26,127.02],[127.02,127.88],[127.88,128.49],[128.49,128.85],[128.85,129.71],[129.71,130.31],[130.31,131.3],[131.3,132.02],[132.02,132.96],[132.96,133.64],[133.64,134.3],[134.3,134.43],[134.43,135.11],[135.11,135.44],[135.44,135.92],[135.92,136.57],[136.57,136.75],[136.75,137.55],[137.55,138.36],[138.36,139.17],[139.17,139.64],[139.64,140.32],[140.32,141.04],[141.04,142.29],[142.29,142.45],[142.45,143.24],[143.24,143.46],[143.46,143.54],[143.54,143.64],[143.64,143.64],[143.64,144.73],[144.73,145.82],[145.82,146.78],[146.78,148.08],[148.08,148.9],[148.9,151.11],[151.11,151.63],[151.63,151.73],[151.73,152.28],[152.28,157],[157,157],[157,174.38],[174.38,174.51],[174.51,174.53],[174.53,174.62],[174.62,174.67],[174.67,174.75],[174.75,174.77],[174.77,174.86],[174.86,174.9],[174.9,175.02],[175.02,175.24]];
+const H = (cls, s) => `<span class="hl ${cls}">${s}</span>`;
+const CH1L = `JEDNA — když hrana v grafu JE!`;
+const CH2L = `${H('c4', '2 + (r−1)·n')} — když NENÍ!`;
+const CH3L = `Nejvýš ${H('c1', 'r·n')}? Hamilton EXISTUJE!`;
+const CH4L = `Víc? Hamilton NENÍ!`;
+const CH5L = `— Spor, pokud ${H('c5', 'P ≠ NP')}!`;
+const LINES = [
+  [19.5, 25.28, `Kdyby byla ${H('c1', 'r')}-aproximace na obecný ${H('c3', 'TSP')},`],
+  [25.28, 30.7, `rozhodl bych Hamiltonův okruh polynomiálně, jé!`],
+  [30.7, 35.7, `Vezmi graf ${H('c2', 'G')}, postav úplný graf na ${H('c2', 'n')} vrcholech,`],
+  [35.7, 40.96, `a teď ty váhy — ať nezůstaneš v koncích:`],
+  [40.96, 44.42, CH1L], [44.42, 50.12, CH2L], [50.12, 54.48, CH3L], [54.48, 57.68, CH4L], [57.68, 61.8, CH5L],
+  [62.3, 69.14, `Když okruh existuje, optimum je přesně ${H('c2', 'n')},`],
+  [69.14, 74.82, `aproximace vrátí nejvýš ${H('c1', 'r·n')}.`],
+  [74.82, 79.54, `Když okruh neexistuje, jedna drahá hrana stačí:`],
+  [79.54, 84.8, `${H('c4', '(n−1) + 2 + (r−1)·n')} —`],
+  [84.8, 90.62, `${H('c4', 'r·n + 1')} — to už nic nezamlží!`],
+  [90.62, 93.7, CH1L], [93.7, 99.44, CH2L], [99.44, 103.74, CH3L], [103.74, 106.94, CH4L], [106.94, 110.04, CH5L],
+  [112.3, 120.84, `Dej váhy jedna a dva — trojúhelník platí dál…`],
+  [120.84, 127.02, `proto i METRICKÝ ${H('c3', 'TSP')} je ${H('c5', 'NP')}-těžký král!`],
+  [127.02, 132.02, `Optimum rovno ${H('c2', 'n')} — právě když Hamilton žije…`],
+  [132.02, 135.44, CH1L], [135.44, 141.04, CH2L], [141.04, 145.82, CH3L], [145.82, 148.9, CH4L], [148.9, 156.0, CH5L],
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 6) PLAYER / KARAOKE + WORD-EVENT BUS / CONTROLS
+// ════════════════════════════════════════════════════════════════════
+const player = document.getElementById('player');
+const subEl = document.getElementById('subtitle');
+const bigplay = document.getElementById('bigplay');
+const btnPlay = document.getElementById('btnPlay');
+const btnRestart = document.getElementById('btnRestart');
+const seek = document.getElementById('seek');
+const tCur = document.getElementById('tCur');
+const tDur = document.getElementById('tDur');
+
+let curScene = null, lastLocal = -1, curLine = -1, lastT = 0;
+let lineWords = [];
+function tokenize(html) {
+  const out = []; let cur = ''; let inTag = false;
+  for (const ch of html) {
+    if (ch === '<') inTag = true;
+    else if (ch === '>') inTag = false;
+    if (ch === ' ' && !inTag) { if (cur) out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+function isCapsToken(tok) {
+  const plain = tok.replace(/<[^>]*>/g, '');
+  const letters = plain.replace(/[^a-zA-ZáčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]/g, '');
+  return letters.length >= 2 && letters === letters.toUpperCase();
+}
+function buildKaraokeLine(li) {
+  const [a, b, html] = LINES[li];
+  const tokens = tokenize(html);
+  const ww = SUNG.filter(w => w[0] >= a - 0.06 && w[0] < b && w[1] > w[0]);
+  const pick = (i) => {
+    if (!ww.length) {
+      const step = (b - a) / tokens.length;
+      return [a + step * i, a + step * (i + 1)];
+    }
+    const wi = tokens.length === 1 ? 0 : Math.round(i * (ww.length - 1) / (tokens.length - 1));
+    return ww[wi];
+  };
+  subEl.innerHTML = tokens.map(tok =>
+    `<span class="kw"><span class="wb">${tok}</span><span class="wf">${tok}</span></span>`).join(' ');
+  const els = [...subEl.querySelectorAll('.kw')];
+  lineWords = tokens.map((tok, i) => {
+    const [t0, t1] = pick(i);
+    return { t0, t1: Math.max(t1, t0 + 0.12), wf: els[i] ? els[i].querySelector('.wf') : null, tok, caps: isCapsToken(tok) };
+  });
+}
+function tick() {
+  const t = player.currentTime;
+  const s = scenes.find(sc => t >= sc.t0 && t < sc.t1) || scenes[scenes.length - 1];
+  if (s !== curScene) { curScene && curScene.destroy(); curScene = s; s.init(); lastLocal = -1; }
+  const localT = t - s.t0;
+  if (localT < lastLocal - 0.05) { s.destroy(); s.init(); }
+  s.update(localT);
+  lastLocal = localT;
+  const li = LINES.findIndex(([a, b]) => t >= a && t < b);
+  if (li !== curLine) {
+    curLine = li;
+    if (li >= 0) buildKaraokeLine(li);
+    else { subEl.innerHTML = ''; lineWords = []; }
+    subEl.style.opacity = li >= 0 ? 1 : 0;
+  }
+  // WORD-EVENT BUS: každé slovo vystřelí svou runu přesně v t0
+  if (!player.paused && t > lastT && t - lastT < 0.5) {
+    for (const w of lineWords) {
+      if (w.t0 > lastT && w.t0 <= t) spawnRune(w.tok, w.caps);
+    }
+  }
+  lastT = t;
+  for (let i = 0; i < lineWords.length; i++) {
+    const w = lineWords[i];
+    if (!w.wf) continue;
+    const nextStart = i + 1 < lineWords.length ? lineWords[i + 1].t0 : w.t1;
+    let p;
+    if (t >= Math.max(w.t1, nextStart)) p = 1;
+    else p = clamp01((t - w.t0) / (w.t1 - w.t0));
+    w.wf.style.width = (p * 100).toFixed(1) + '%';
+  }
+  if (!seekDragging) {
+    seek.value = t;
+    seek.style.setProperty('--p', (t / (player.duration || 175.5) * 100) + '%');
+  }
+  tCur.textContent = fmtTime(t);
+  requestAnimationFrame(tick);
+}
+function fmtTime(t) { t = Math.max(0, t || 0); return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`; }
+
+let seekDragging = false;
+seek.addEventListener('input', () => {
+  seekDragging = true;
+  player.currentTime = +seek.value;
+  seek.style.setProperty('--p', (+seek.value / (player.duration || 175.5) * 100) + '%');
+});
+seek.addEventListener('change', () => { seekDragging = false; });
+function togglePlay() { if (player.paused) player.play(); else player.pause(); }
+player.addEventListener('play', () => { btnPlay.textContent = '⏸'; bigplay.classList.add('hidden'); });
+player.addEventListener('pause', () => { btnPlay.textContent = '▶'; if (player.currentTime < 0.05 || player.ended) bigplay.classList.remove('hidden'); });
+player.addEventListener('ended', () => { bigplay.classList.remove('hidden'); bigplay.querySelector('.hint').innerHTML = 'Ještě jednou?<small>R = od začátku</small>'; });
+player.addEventListener('loadedmetadata', () => {
+  seek.max = player.duration;
+  tDur.textContent = fmtTime(player.duration);
+});
+btnPlay.addEventListener('click', togglePlay);
+btnRestart.addEventListener('click', () => { player.currentTime = 0; player.play(); });
+bigplay.addEventListener('click', () => { player.play(); });
+document.getElementById('stage').addEventListener('click', (e) => {
+  if (e.target.closest('#bigplay')) return;
+  togglePlay();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  else if (e.code === 'ArrowRight') player.currentTime = Math.min(player.duration || 175, player.currentTime + 5);
+  else if (e.code === 'ArrowLeft') player.currentTime = Math.max(0, player.currentTime - 5);
+  else if (e.key === 'r' || e.key === 'R' || e.code === 'Home') { player.currentTime = 0; player.play(); }
+});
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
