@@ -100,6 +100,8 @@ end</code></pre>
     </div>
   </details>
 
+  <p>Krokovaný protipříklad (pozor, spoiler — nejdřív zkus najít vlastní graf na papír):</p>
+
   <div class="viz" id="viz-neg"></div>
 
   <div class="box danger">
@@ -112,7 +114,7 @@ end</code></pre>
 
   <h2>Label-setting vs. label-correcting, složitost</h2>
   <p>Dijkstra je tzv. <strong>label-setting algoritmus</strong> (slide 20): v každé iteraci se jedna značka $l(v)$ stane trvalou (optimální). Naproti tomu <strong>label-correcting algoritmy</strong> (např. Bellman-Ford [L2.12] nebo Floyd [L2.14]) považují všechny značky za dočasné až do úplně posledního kroku, kdy se trvalými stanou všechny najednou — přesně jak sliboval výhled v <a href="l2-3.html#takeaways">[L2.3]</a>.</p>
-  <p><strong>Časová složitost</strong> Dijkstry je $\mathcal{O}(n^2)$, resp. $\mathcal{O}(m + n \log n)$ s prioritní frontou (datová struktura, která umí rychle vydávat minimum; $n = |V(G)|$, $m = |E(G)|$). Pro speciální grafy existují i lineární algoritmy — mj. pro DAGy, kde pořadí relaxací zadarmo dá topologické uspořádání [L2.13].</p>
+  <p><strong>Časová složitost</strong> Dijkstry je $\mathcal{O}(n^2)$, resp. $\mathcal{O}(m + n \log n)$ s prioritní frontou (datová struktura, která umí rychle vydávat minimum; $n = |V(G)|$, $m = |E(G)|$). Pro speciální grafy existují i lineární algoritmy — mj. pro DAGy, kde pořadí relaxací dostaneme zadarmo z topologického uspořádání [L2.13].</p>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
   <div class="box takeaways" id="takeaways">
@@ -130,7 +132,7 @@ end</code></pre>
     <div class="task-head">
       <span class="task-id">T01</span>
       <strong>Dijkstra — iterate on a graph of 8 nodes</strong>
-      <span class="task-src">zdroj: testy/a4b35ko__test2_2015.md (Test 2, zadání A i B — Dijkstra na grafu o 8 uzlech, vektory l a p; konkrétní graf se v přepisu nedochoval, graf níže je vlastní rekonstrukce ve formátu zadání)</span>
+      <span class="task-src">zdroj: testy/a4b35ko__test2_2015.md (Test 2, zadání A i B — Dijkstra na grafu o 8 uzlech, vektory l a p; konkrétní graf se v přepisu nedochoval, graf níže je vlastní rekonstrukce ve formátu zadání; požadavek na pořadí přidávání do R je doplněn nad rámec přepisu — využije se v L2.5)</span>
     </div>
     <div class="task-body">
       <div class="assignment">
