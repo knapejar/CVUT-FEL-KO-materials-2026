@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.4 · Dijkstrův algoritmus (běh) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.4</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.4</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>Dijkstrův algoritmus (běh)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Dijkstrova strategie pořadí relaxací: <em>opakovaně vyber neuzavřený vrchol s nejmenší značkou $l$, uzavři ho a relaxuj jeho odchozí hrany</em>. Pro <strong>nezáporné váhy</strong> je takto uzavřená značka rovnou definitivní — Dijkstra je <em>label-setting</em> algoritmus.
+  </div>
+
+  <p>Prerekvizity: <a href="l2-3.html#takeaways">[L2.3] Relaxace hrany</a>. Tam jsme viděli, že všechny algoritmy kapitoly skládají týž krok — relaxaci — a liší se jen <em>strategií pořadí</em>. Dnes první a nejslavnější strategie: Dijkstra [1959].</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Jakou strategii pořadí zvolit?</h2>
+  <p>Z úlohy T01 v <a href="l2-3.html#t-order">[L2.3]</a> víš, že dobré pořadí relaxací ušetří celé průchody. Ideál by byl relaxovat odchozí hrany každého vrcholu <em>právě jednou</em> — a to jde jen tehdy, když vrchol expanduju až ve chvíli, kdy už se jeho značka nikdy nezmění.</p>
+
+  <details class="try">
+    <summary>Zkus sám: váhy hran jsou <strong>nezáporné</strong>. U kterého z neuzavřených vrcholů si můžeš být jistý, že jeho aktuální značka $l(v)$ už neklesne?</summary>
+    <div class="inner">
+      <p>U toho s <strong>nejmenší značkou</strong> $l(v) = \min_{i \notin R} l(i)$ (kde $R$ je množina už uzavřených vrcholů). Proč: kdyby do $v$ vedla ještě kratší cesta, musela by někde poprvé opustit $R$ — přes nějaký neuzavřený vrchol $k$. Jenže ten má značku $l(k) \ge l(v)$ a zbytek cesty z $k$ do $v$ jen <em>přidává nezáporné</em> délky. Kratší to tedy být nemůže.</p>
+      <p>Přesně tohle je Dijkstrův nápad: vrchol s nejmenší značkou smím <strong>uzavřít</strong> (prohlásit značku za definitivní) a jeho odchozí hrany relaxovat — každou jen jednou za celý běh.</p>
+      <p><em>(Tohle je intuice; poctivý indukční důkaz korektnosti patří do kapitoly K3 — tady v K2 nás zajímá běh a použití.)</em></p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Dijkstra Algorithm [1959] — nonnegative weights (slide 16, 1:1)</div>
+    <p><strong>Input:</strong> digraph $G$, weights $c : E(G) \to \mathbb{R}^+_0$ and node $s \in V(G)$.<br>
+    <strong>Output:</strong> Vectors $l$ and $p$. For $v \in V(G)$, $l(v)$ is the length of the shortest path from $s$ and $p(v)$ is the previous node in the path. If $v$ is unreachable from $s$, $l(v) = \infty$ and $p(v)$ is undefined.</p>
+    <pre><code>l(s) := 0; l(v) := ∞ for v ≠ s; R := ∅;
+while R ≠ V(G) do
+    Find v ∈ V(G) \ R such that l(v) = min_{i ∈ V(G) \ R} l(i);
+    R := R ∪ {v}  // in the first run we add vertex s
+    // further calculate non-permanent value of l(w) for
+    //   every node on border of R
+    for w ∈ V(G) \ R such that (v, w) ∈ E(G) do
+        if l(w) &gt; l(v) + c(v, w) then
+            l(w) := l(v) + c(v, w); p(w) := v;
+        end
+    end
+end</code></pre>
+    <p>Vnitřní <code>if</code> je doslova relaxace z <a href="l2-3.html#takeaways">[L2.3]</a>. Výběru vrcholu $v$ a relaxaci jeho odchozích hran se říká <strong>expanze</strong> vrcholu $v$ — na <em>pořadí expanze</em> se zaměří hned další lekce [L2.5]. Množina $R$ obsahuje <strong>uzavřené</strong> (permanent) vrcholy: jejich $l$ už je výsledná vzdálenost.</p>
+  </div>
+
+  <h2>Běh na příkladu</h2>
+  <p>Proklikej si celý běh ze startu $s$ — sleduj, jak se vrcholy uzavírají v pořadí <em>rostoucí</em> značky a jak se značky na hranici $R$ ještě opravují:</p>
+
+  <div class="viz" id="viz-run"></div>
+
+  <details class="try">
+    <summary>Zkus sám: vrchol $b$ dostal nejdřív značku $l(b)=5$ (přímou hranou), a přesto se uzavřel s $l(b)=4$. Není to spor s tím, že Dijkstra značky „zatrvalňuje“?</summary>
+    <div class="inner">
+      <p>Není. Trvalá je značka až <strong>okamžikem uzavření</strong> (přidání do $R$). Dokud je vrchol venku, jeho značka je obyčejný pracovní odhad z <a href="l2-3.html#takeaways">[L2.3]</a> a smí klesat — to se stalo $b$ při expanzi $a$. Slide 16 tomu říká <em>non-permanent value on border of R</em>: hranice $R$ má rozpracované odhady, vnitřek $R$ hotové vzdálenosti.</p>
+      <p>Všimni si pořadí uzavírání: $s\,(0),\ a\,(2),\ b\,(4),\ c\,(5)$ — značky uzavíraných vrcholů <strong>neklesají</strong>. To je charakteristický rys Dijkstry a budeme ho potřebovat v [L2.5].</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: co se stane, když je minimum mezi neuzavřenými vrcholy $\infty$? A kdy můžeš běh ukončit dřív, když tě zajímá jen jeden cíl $t$?</summary>
+    <div class="inner">
+      <p>Minimum $\infty$ znamená, že do žádného zbylého vrcholu jsme zatím neviděli cestu — a protože expandované hrany vedou jen z $R$, už ani neuvidíme. Takové vrcholy jsou <strong>nedosažitelné</strong>: uzavřou se s $l(v) = \infty$ a $p(v)$ nedefinovaným, přesně podle výstupní specifikace slidu 16. (Relaxace z nich nic neudělají: $\infty + c$ nic nepodleze.)</p>
+      <p>A pokud hledáme jen cestu $s \to t$: jakmile se $t$ dostane do $R$, jeho značka je definitivní — algoritmus lze <strong>ukončit v okamžiku zařazení $t$ do $R$</strong> (slide 21). Zbytek běhu by počítal vzdálenosti, které nepotřebujeme.</p>
+    </div>
+  </details>
+
+  <h2>Proč „nonnegative weights“ není jen okrasa</h2>
+
+  <details class="try">
+    <summary>Zkus sám: najdi co nejmenší graf se zápornou hranou (ale <em>bez</em> záporného cyklu!), na kterém Dijkstra vrátí špatnou vzdálenost.</summary>
+    <div class="inner">
+      <p>Stačí tři vrcholy: $s \to a$ s váhou $1$, $s \to b$ s váhou $2$ a $b \to a$ s váhou $-2$. Skutečná nejkratší cesta do $a$ vede přes $b$ a má délku $0$. Dijkstra ale uzavře $a$ hned ve druhé iteraci se značkou $1$ — minimum mezi neuzavřenými — a tu už nikdy nepřepíše. Proklikej:</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-neg"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: Dijkstra funguje JEN pro nezáporné váhy</div>
+    <ul>
+      <li>Celý trik „nejmenší značka = hotovo“ stojí na tom, že obejití přes jiný vrchol může délku jen <strong>přidat</strong>. Záporná hrana tenhle argument zboří — a to i bez záporného cyklu <a href="l2-1.html#takeaways">[L2.1]</a> a přesto, že samotné relaxaci záporné váhy nevadí <a href="l2-3.html#takeaways">[L2.3]</a>. Pokazí se <em>strategie pořadí</em>, ne relaxace.</li>
+      <li>Se zápornými hranami (bez záporných cyklů) je potřeba label-correcting algoritmus — Bellman-Ford [L2.12].</li>
+    </ul>
+  </div>
+
+  <h2>Label-setting vs. label-correcting, složitost</h2>
+  <p>Dijkstra je tzv. <strong>label-setting algoritmus</strong> (slide 20): v každé iteraci se jedna značka $l(v)$ stane trvalou (optimální). Naproti tomu <strong>label-correcting algoritmy</strong> (např. Bellman-Ford [L2.12] nebo Floyd [L2.14]) považují všechny značky za dočasné až do úplně posledního kroku, kdy se trvalými stanou všechny najednou — přesně jak sliboval výhled v <a href="l2-3.html#takeaways">[L2.3]</a>.</p>
+  <p><strong>Časová složitost</strong> Dijkstry je $\mathcal{O}(n^2)$, resp. $\mathcal{O}(m + n \log n)$ s prioritní frontou (datová struktura, která umí rychle vydávat minimum; $n = |V(G)|$, $m = |E(G)|$). Pro speciální grafy existují i lineární algoritmy — mj. pro DAGy, kde pořadí relaxací zadarmo dá topologické uspořádání [L2.13].</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.4</div>
+    <ul>
+      <li><strong>Dijkstrův běh:</strong> udržuj vektory $l$ a $p$ <a href="l2-3.html#takeaways">[L2.3]</a>; opakovaně vyber neuzavřený vrchol s nejmenším $l$, přidej ho do $R$ (uzavři) a relaxuj jeho odchozí hrany do neuzavřených vrcholů.</li>
+      <li>Vrcholy se uzavírají v pořadí <strong>neklesajících</strong> značek; značka je trvalá od okamžiku uzavření (<em>label-setting</em>), na hranici $R$ je jen pracovní odhad. Nedosažitelné vrcholy skončí s $l = \infty$, $p$ nedefinované; při hledání jediného cíle $t$ lze skončit zařazením $t$ do $R$.</li>
+      <li>Funguje <strong>JEN pro nezáporné váhy</strong> — záporná hrana (i bez záporného cyklu) rozbije argument „přes dražší vrchol to kratší být nemůže“. Pak je nutný Bellman-Ford [L2.12].</li>
+      <li>Složitost $\mathcal{O}(n^2)$, resp. $\mathcal{O}(m + n \log n)$ s prioritní frontou. Důkaz korektnosti (indukce přes $R$) patří do kapitoly K3.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-iterate">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Dijkstra — iterate on a graph of 8 nodes</strong>
+      <span class="task-src">zdroj: testy/a4b35ko__test2_2015.md (Test 2, zadání A i B — Dijkstra na grafu o 8 uzlech, vektory l a p; konkrétní graf se v přepisu nedochoval, graf níže je vlastní rekonstrukce ve formátu zadání)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, formát dle test2 2015)</span>
+        <p>You are given the directed graph with 8 nodes below. Run Dijkstra's algorithm from node $1$ and create two vectors $l$ and $p$, where vector $l$ contains the lengths of the shortest paths from the starting node and vector $p$ contains the predecessor of each node. Perform 8 iterations of the algorithm and write out the vectors after each iteration. In addition, write out the order in which the nodes were added to the set $R$.</p>
+      </div>
+
+      <div class="viz" id="viz-t01"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Orientovaný graf s 8 vrcholy a nezápornými váhami, start ve vrcholu $1$. Máme oditerovat Dijkstru: po každé z 8 iterací (každá uzavře jeden vrchol) vypsat aktuální vektory $l$ a $p$ a nakonec uvést pořadí uzavírání. Pozor na vrchol $8$ — nevede do něj žádná hrana.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — výběr minima mezi neuzavřenými, uzavření, expanze.</li>
+        <li><a href="l2-3.html#takeaways">[L2.3] Relaxace hrany</a> — test s ostrou nerovností, zápis $l$ a $p$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Veď si tabulku: řádek = iterace, sloupce = $l(1), \dots, l(8)$, a zvlášť si značkuj, kdo už je v $R$. V každé iteraci nejdřív <em>vyber</em> minimum mezi neuzavřenými (zapiš si pořadí!), pak relaxuj jen jeho odchozí hrany do neuzavřených vrcholů. Nezapomeň: při rovnosti $l(w) = l(v) + c(v,w)$ se nepřepisuje nic — test je ostrý. Hodnoty $\infty$ nech $\infty$, dokud je relaxace skutečně nesníží.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Init: $l = (0, \infty, \infty, \infty, \infty, \infty, \infty, \infty)$, $R = \emptyset$. Zápis $l$ vždy po dokončení iterace; změny tučně.</p>
+          <ul>
+            <li><strong>It 1:</strong> min je $1\,(0)$ → $R=\{1\}$. Relaxace $(1,2)$: $l(2):=\mathbf{4}$, $p(2):=1$; $(1,3)$: $l(3):=\mathbf{1}$, $p(3):=1$. → $l = (0, 4, 1, \infty, \infty, \infty, \infty, \infty)$.</li>
+            <li><strong>It 2:</strong> min je $3\,(1)$ → uzavři $3$. $(3,5)$: $l(5):=\mathbf{3}$, $p(5):=3$; $(3,4)$: $l(4):=\mathbf{7}$, $p(4):=3$. → $l = (0, 4, 1, 7, 3, \infty, \infty, \infty)$.</li>
+            <li><strong>It 3:</strong> min je $5\,(3 \lt 4)$ → uzavři $5$ (dřív než $2$!). $(5,6)$: $l(6):=\mathbf{7}$, $p(6):=5$. → $l = (0, 4, 1, 7, 3, 7, \infty, \infty)$.</li>
+            <li><strong>It 4:</strong> min je $2\,(4)$ → uzavři $2$. $(2,4)$: $7 \gt 4+2 = 6$ → $l(4):=\mathbf{6}$, $p(4):=2$ (oprava odhadu na hranici $R$). → $l = (0, 4, 1, 6, 3, 7, \infty, \infty)$.</li>
+            <li><strong>It 5:</strong> min je $4\,(6)$ → uzavři $4$. $(4,6)$: $7 \gt 6+1 = 7$? <strong>Ne</strong> — rovnost, ostrý test nepustí, $p(6)$ zůstává $5$. $(4,7)$: $l(7):=\mathbf{10}$, $p(7):=4$. → $l = (0, 4, 1, 6, 3, 7, 10, \infty)$.</li>
+            <li><strong>It 6:</strong> min je $6\,(7)$ → uzavři $6$. $(6,7)$: $10 \gt 7+2 = 9$ → $l(7):=\mathbf{9}$, $p(7):=6$ — druhá oprava. → $l = (0, 4, 1, 6, 3, 7, 9, \infty)$.</li>
+            <li><strong>It 7:</strong> min je $7\,(9)$ → uzavři $7$. Žádné odchozí hrany. → $l$ beze změny.</li>
+            <li><strong>It 8:</strong> zbývá jen $8$ s $l(8) = \infty$ → uzavři $8$. Vrchol je z $1$ nedosažitelný: $l(8) = \infty$, $p(8)$ nedefinované (přesně dle výstupní specifikace slidu 16). $R = V(G)$, konec.</li>
+          </ul>
+          <p><strong>Výsledné vektory:</strong></p>
+          <p>$$l = (0,\, 4,\, 1,\, 6,\, 3,\, 7,\, 9,\, \infty), \qquad p = (-,\, 1,\, 1,\, 2,\, 3,\, 5,\, 6,\, -).$$</p>
+          <p><strong>Pořadí přidávání do $R$:</strong> $1, 3, 5, 2, 4, 6, 7, 8$ — značky $0, 1, 3, 4, 6, 7, 9, \infty$ neklesají ✓. Kontrola cestou: couváním ze $7$ po $p$: $p(7)=6$, $p(6)=5$, $p(5)=3$, $p(3)=1$ → nejkratší cesta $1 \to 3 \to 5 \to 6 \to 7$ délky $1+2+4+2 = 9 = l(7)$ ✓.</p>
+        </div>
+      </details>
+
+      <p>Krokovaná verze řešení (pozor, spoiler — nejdřív si to zkus na papír):</p>
+      <div class="viz" id="viz-t01-run"></div>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L2.4">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l2-3.html"><span class="dir">← Předchozí</span> L2.3 · Relaxace hrany</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.5 · Pořadí expanze a tie-breaking — Edge costs assignment [FOTO])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Běh Dijkstry na 4 vrcholech (výklad)
+KOViz.stepper(document.getElementById('viz-run'), {
+  graph: {
+    directed: true,
+    w: 640, h: 330,
+    nodes: [
+      {id:'s', x:90,  y:170},
+      {id:'a', x:220, y:70},
+      {id:'b', x:430, y:280},
+      {id:'c', x:560, y:170},
+    ],
+    edges: [
+      {from:'s', to:'a', label:'2'},
+      {from:'s', to:'b', label:'5'},
+      {from:'a', to:'b', label:'2', curve:-0.3},
+      {from:'a', to:'c', label:'6'},
+      {from:'b', to:'c', label:'1'},
+    ],
+  },
+  frames: [
+    {desc:'Init: l(s)=0, ostatní ∞, R = ∅. Zelená = uzavřeno (v R), žlutá = právě expandovaný vrchol.',
+     nodes:{},
+     edges:{},
+     subs:{s:'l=0', a:'l=∞', b:'l=∞', c:'l=∞'}},
+    {desc:'It 1: min mezi neuzavřenými je s (0) → R={s}. Expanze s: relaxuj (s,a): l(a):=2, p(a):=s; (s,b): l(b):=5, p(b):=s.',
+     nodes:{s:'hl'},
+     edges:{'s->a':'hl', 's->b':'hl'},
+     subs:{s:'l=0', a:'l=2, p=s', b:'l=5, p=s', c:'l=∞'}},
+    {desc:'It 2: min je a (2 &lt; 5) → uzavři a; l(a)=2 je od teď trvalé. Expanze a: (a,b): 5 &gt; 2+2 → l(b):=4, p(b):=a — odhad na hranici R se opravil! (a,c): l(c):=8, p(c):=a.',
+     nodes:{s:'good', a:'hl'},
+     edges:{'s->a':'good', 'a->b':'hl', 'a->c':'hl', 's->b':'dim'},
+     subs:{s:'l=0', a:'l=2, p=s', b:'l=4, p=a', c:'l=8, p=a'}},
+    {desc:'It 3: min je b (4 &lt; 8) → uzavři b. Expanze b: (b,c): 8 &gt; 4+1 → l(c):=5, p(c):=b — druhá oprava na hranici.',
+     nodes:{s:'good', a:'good', b:'hl'},
+     edges:{'s->a':'good', 'a->b':'good', 'b->c':'hl', 'a->c':'dim', 's->b':'dim'},
+     subs:{s:'l=0', a:'l=2, p=s', b:'l=4, p=a', c:'l=5, p=b'}},
+    {desc:'It 4: zbývá c (5) → uzavři; žádné odchozí hrany. R = V(G), konec. Výsledek: l=(0,2,4,5), p=(−,s,a,b); zelené hrany (p(v),v) = strom nejkratších cest. Pořadí uzavírání: s, a, b, c — značky 0,2,4,5 neklesají.',
+     nodes:{s:'good', a:'good', b:'good', c:'good'},
+     edges:{'s->a':'good', 'a->b':'good', 'b->c':'good', 'a->c':'dim', 's->b':'dim'},
+     subs:{s:'l=0', a:'l=2, p=s', b:'l=4, p=a', c:'l=5, p=b'}},
+  ],
+});
+
+// 2 — Protipříklad: záporná hrana (bez záporného cyklu) rozbije Dijkstru
+KOViz.stepper(document.getElementById('viz-neg'), {
+  graph: {
+    directed: true,
+    w: 640, h: 300,
+    nodes: [
+      {id:'s', x:110, y:60},
+      {id:'a', x:520, y:60},
+      {id:'b', x:310, y:230},
+    ],
+    edges: [
+      {from:'s', to:'a', label:'1'},
+      {from:'s', to:'b', label:'2'},
+      {from:'b', to:'a', label:'−2'},
+    ],
+  },
+  frames: [
+    {desc:'It 1: uzavři s (0), relaxuj (s,a): l(a):=1; (s,b): l(b):=2. Skutečná vzdálenost do a je přitom 0 (cestou s→b→a).',
+     nodes:{s:'hl'},
+     edges:{'s->a':'hl', 's->b':'hl'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=2, p=s'}},
+    {desc:'It 2: min mezi neuzavřenými je a (1 &lt; 2) → Dijkstra uzavře a a prohlásí l(a)=1 za trvalé. To je ten okamžik, kde se to pokazí.',
+     nodes:{s:'good', a:'hl'},
+     edges:{'s->a':'good', 's->b':'dim'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=2, p=s'}},
+    {desc:'It 3: uzavři b (2). Hrana (b,a) je napjatá: 1 &gt; 2+(−2) = 0 — jenže a ∈ R, vnitřní smyčka (for w ∈ V(G)\\R) ji už vůbec netestuje. Výstup l(a)=1 je špatně — správná vzdálenost je 0. Záporná hrana zbořila argument „přes dražší vrchol to kratší být nemůže“.',
+     nodes:{s:'good', a:'bad', b:'hl'},
+     edges:{'s->a':'good', 's->b':'good', 'b->a':'bad'},
+     subs:{s:'l=0', a:'l=1 ✗', b:'l=2, p=s'}},
+  ],
+});
+
+// 3 — Graf k úloze T01 (8 vrcholů, start 1; vrchol 8 nedosažitelný)
+KOViz.graph(document.getElementById('viz-t01'), {
+  directed: true,
+  w: 640, h: 330,
+  nodes: [
+    {id:'1', x:60,  y:187},
+    {id:'3', x:180, y:120},
+    {id:'2', x:180, y:255},
+    {id:'5', x:320, y:120},
+    {id:'4', x:320, y:255},
+    {id:'6', x:460, y:120},
+    {id:'7', x:580, y:250},
+    {id:'8', x:590, y:70},
+  ],
+  edges: [
+    {from:'1', to:'2', label:'4'},
+    {from:'1', to:'3', label:'1'},
+    {from:'3', to:'5', label:'2'},
+    {from:'3', to:'4', label:'6'},
+    {from:'2', to:'4', label:'2'},
+    {from:'5', to:'6', label:'4'},
+    {from:'4', to:'6', label:'1'},
+    {from:'4', to:'7', label:'4'},
+    {from:'6', to:'7', label:'2'},
+  ],
+  caption: 'T01: orientovaný graf s 8 vrcholy, start = 1. Do vrcholu 8 nevede žádná hrana.',
+});
+
+// 4 — Krokované řešení T01 (8 iterací Dijkstry)
+KOViz.stepper(document.getElementById('viz-t01-run'), {
+  graph: {
+    directed: true,
+    w: 640, h: 330,
+    nodes: [
+      {id:'1', x:60,  y:187},
+      {id:'3', x:180, y:120},
+      {id:'2', x:180, y:255},
+      {id:'5', x:320, y:120},
+      {id:'4', x:320, y:255},
+      {id:'6', x:460, y:120},
+      {id:'7', x:580, y:250},
+      {id:'8', x:590, y:70},
+    ],
+    edges: [
+      {from:'1', to:'2', label:'4'},
+      {from:'1', to:'3', label:'1'},
+      {from:'3', to:'5', label:'2'},
+      {from:'3', to:'4', label:'6'},
+      {from:'2', to:'4', label:'2'},
+      {from:'5', to:'6', label:'4'},
+      {from:'4', to:'6', label:'1'},
+      {from:'4', to:'7', label:'4'},
+      {from:'6', to:'7', label:'2'},
+    ],
+  },
+  frames: [
+    {desc:'Init: l(1)=0, ostatní ∞, R = ∅.',
+     nodes:{},
+     edges:{},
+     subs:{1:'l=0', 2:'l=∞', 3:'l=∞', 4:'l=∞', 5:'l=∞', 6:'l=∞', 7:'l=∞', 8:'l=∞'}},
+    {desc:'It 1: uzavři 1 (0). Relaxuj (1,2): l(2):=4, p(2):=1; (1,3): l(3):=1, p(3):=1.',
+     nodes:{1:'hl'},
+     edges:{'1->2':'hl', '1->3':'hl'},
+     subs:{1:'l=0', 2:'l=4, p=1', 3:'l=1, p=1', 4:'l=∞', 5:'l=∞', 6:'l=∞', 7:'l=∞', 8:'l=∞'}},
+    {desc:'It 2: min je 3 (1 &lt; 4) → uzavři 3. (3,5): l(5):=3, p(5):=3; (3,4): l(4):=7, p(4):=3.',
+     nodes:{1:'good', 3:'hl'},
+     edges:{'1->3':'good', '3->5':'hl', '3->4':'hl', '1->2':'dim'},
+     subs:{1:'l=0', 2:'l=4, p=1', 3:'l=1, p=1', 4:'l=7, p=3', 5:'l=3, p=3', 6:'l=∞', 7:'l=∞', 8:'l=∞'}},
+    {desc:'It 3: min je 5 (3 &lt; 4) → uzavři 5 — pozor, dřív než 2! (5,6): l(6):=7, p(6):=5.',
+     nodes:{1:'good', 3:'good', 5:'hl'},
+     edges:{'1->3':'good', '3->5':'good', '5->6':'hl', '1->2':'dim', '3->4':'dim'},
+     subs:{1:'l=0', 2:'l=4, p=1', 3:'l=1, p=1', 4:'l=7, p=3', 5:'l=3, p=3', 6:'l=7, p=5', 7:'l=∞', 8:'l=∞'}},
+    {desc:'It 4: min je 2 (4) → uzavři 2. (2,4): 7 &gt; 4+2 → l(4):=6, p(4):=2 (oprava!).',
+     nodes:{1:'good', 3:'good', 5:'good', 2:'hl'},
+     edges:{'1->3':'good', '3->5':'good', '5->6':'good', '1->2':'good', '2->4':'hl', '3->4':'dim'},
+     subs:{1:'l=0', 2:'l=4, p=1', 3:'l=1, p=1', 4:'l=6, p=2', 5:'l=3, p=3', 6:'l=7, p=5', 7:'l=∞', 8:'l=∞'}},
+    {desc:'It 5: min je 4 (6 &lt; 7) → uzavři 4. (4,6): 7 &gt; 6+1 = 7? Ne — rovnost, ostrý test nic nepřepíše, p(6) zůstává 5. (4,7): l(7):=10, p(7):=4.',
+     nodes:{1:'good', 3:'good', 5:'good', 2:'good', 4:'hl'},
+     edges:{'1->3':'good', '3->5':'good', '5->6':'good', '1->2':'good', '2->4':'good', '4->7':'hl', '4->6':'dim', '3->4':'dim'},
+     subs:{1:'l=0', 2:'l=4, p=1', 3:'l=1, p=1', 4:'l=6, p=2', 5:'l=3, p=3', 6:'l=7, p=5', 7:'l=10, p=4', 8:'l=∞'}},
+    {desc:'It 6: min je 6 (7 &lt; 10) → uzavři 6. (6,7): 10 &gt; 7+2 = 9 → l(7):=9, p(7):=6 — oprava i takhle pozdě: dokud vrchol není v R, jeho značka je jen odhad.',
+     nodes:{1:'good', 3:'good', 5:'good', 2:'good', 4:'good', 6:'hl'},
+     edges:{'1->3':'good', '3->5':'good', '5->6':'good', '1->2':'good', '2->4':'good', '6->7':'hl', '4->7':'dim', '4->6':'dim', '3->4':'dim'},
+     subs:{1:'l=0', 2:'l=4, p=1', 3:'l=1, p=1', 4:'l=6, p=2', 5:'l=3, p=3', 6:'l=7, p=5', 7:'l=9, p=6', 8:'l=∞'}},
+    {desc:'It 7: min je 7 (9) → uzavři 7. Žádné odchozí hrany.',
+     nodes:{1:'good', 3:'good', 5:'good', 2:'good', 4:'good', 6:'good', 7:'hl'},
+     edges:{'1->3':'good', '3->5':'good', '5->6':'good', '1->2':'good', '2->4':'good', '6->7':'good', '4->7':'dim', '4->6':'dim', '3->4':'dim'},
+     subs:{1:'l=0', 2:'l=4, p=1', 3:'l=1, p=1', 4:'l=6, p=2', 5:'l=3, p=3', 6:'l=7, p=5', 7:'l=9, p=6', 8:'l=∞'}},
+    {desc:'It 8: zbývá 8 s l(8)=∞ → uzavři; vrchol je nedosažitelný (l=∞, p nedefinované). R = V(G), konec. Výsledek: l=(0,4,1,6,3,7,9,∞), p=(−,1,1,2,3,5,6,−); pořadí do R: 1,3,5,2,4,6,7,8. Zelené hrany = strom nejkratších cest.',
+     nodes:{1:'good', 3:'good', 5:'good', 2:'good', 4:'good', 6:'good', 7:'good', 8:'good'},
+     edges:{'1->3':'good', '3->5':'good', '5->6':'good', '1->2':'good', '2->4':'good', '6->7':'good', '4->7':'dim', '4->6':'dim', '3->4':'dim'},
+     subs:{1:'l=0', 2:'l=4, p=1', 3:'l=1, p=1', 4:'l=6, p=2', 5:'l=3, p=3', 6:'l=7, p=5', 7:'l=9, p=6', 8:'l=∞'}},
+  ],
+});
+</script>
+</body>
+</html>
