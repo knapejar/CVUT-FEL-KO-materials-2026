@@ -203,7 +203,7 @@ end
     <ul>
       <li><strong>Faktor $2 - \frac{1}{R}$ je worst-case záruka, ne typický výsledek.</strong> LS klidně najde optimum (instance slidu 43: $C_{max} = 17 = \sum p_i / R$). Ale taky se na faktor přesně dosáhne (instance slidu 42) — „heuristika“ tu neznamená „bez záruky“, znamená to r-aproximaci dle <a href="../k3/l3-1.html#takeaways">[L3.1]</a>.</li>
       <li><strong>LPT faktor $\frac{4}{3} - \frac{1}{3R}$ platí jen pro $P\,||\,C_{max}$.</strong> S precedencemi smíš tvrdit jen obecných $2 - \frac{1}{R}$ (věta o LS platí pro libovolný, i setříděný list). Neprohazuj.</li>
-      <li><strong>Nezaměň role: LS je aproximační, ne exaktní.</strong> Exaktně řeší $P\,||\,C_{max}$ Rothkopf DP <a href="../k5/l5-11.html">[L5.11]</a> (pseudopolynomiálně, bez prec); s preempcí je $P\,|\,pmtn\,|\,C_{max}$ snadný McNaughton <a href="../k5/l5-4.html">[L5.4]</a> a $P\,|\,pmtn,prec\,|\,C_{max}$ řeší Muntz&amp;Coffman <a href="../k5/l5-10.html">[L5.10]</a> (sám je pro obecné DAGy aproximační s faktorem $2 - \frac{2}{R}$). Volba metody: tahák [L5.14].</li>
+      <li><strong>Nezaměň role: LS je aproximační, ne exaktní.</strong> Exaktně řeší $P\,||\,C_{max}$ Rothkopf DP <a href="../k5/l5-11.html">[L5.11]</a> (pseudopolynomiálně, bez prec); s preempcí je $P\,|\,pmtn\,|\,C_{max}$ snadný McNaughton <a href="../k5/l5-4.html">[L5.4]</a> a $P\,|\,pmtn,prec\,|\,C_{max}$ řeší Muntz&amp;Coffman <a href="../k5/l5-10.html">[L5.10]</a> (sám je pro obecné DAGy aproximační s faktorem $2 - \frac{2}{R}$). Volba metody: tahák <a href="../k5/l5-14.html">[L5.14]</a>.</li>
       <li><strong>„První v listu“ ≠ „první podle indexu“.</strong> Výběr jde přes nejmenší availability time $a_i$ a teprve mezi nimi rozhoduje pořadí v $L$ — proto LS někdy nechá stroj čekat krátce na připravovanou úlohu a proto vznikají anomálie při prohození položek.</li>
     </ul>
   </div>
@@ -216,7 +216,7 @@ end
       <li><strong>Faktor [Graham 1966]:</strong> pro $P\,|\,prec\,|\,C_{max}$ i $P\,||\,C_{max}$ a <em>libovolný</em> list je $r_{LS} = 2 - \frac{1}{R}$; těsné na $n = (R-1)R + 1$, $p = (1, \ldots, 1, R)$ se špatným pořadím (dlouhá úloha nakonec).</li>
       <li><strong>LPT:</strong> setřiď $L$ nerostoucně podle $p_i$ → pro $P\,||\,C_{max}$ faktor $r_{LPT} = \frac{4}{3} - \frac{1}{3R}$, složitost $\mathcal{O}(n \log n)$; zpřesnění $r_{LPT} = 1 + \frac{1}{k} - \frac{1}{kR}$ ($k$ = počet úloh na stroji, který končí poslední).</li>
       <li><strong>Anomálie:</strong> $C_{max}$ může vzrůst po zkrácení $p_i$, odebrání precedencí i přidání stroje (a po přeskupení listu) — LS není monotónní, platí jen worst-case faktor.</li>
-      <li><strong>Volba metody</strong> (tahák [L5.14]): $P\,|\,prec\,|\,C_{max}$ bez pmtn = list scheduling; s pmtn = M&amp;C <a href="../k5/l5-10.html#takeaways">[L5.10]</a>; bez prec exaktně Rothkopf <a href="../k5/l5-11.html#takeaways">[L5.11]</a>, s pmtn McNaughton <a href="../k5/l5-4.html#takeaways">[L5.4]</a>.</li>
+      <li><strong>Volba metody</strong> (tahák <a href="../k5/l5-14.html">[L5.14]</a>): $P\,|\,prec\,|\,C_{max}$ bez pmtn = list scheduling; s pmtn = M&amp;C <a href="../k5/l5-10.html#takeaways">[L5.10]</a>; bez prec exaktně Rothkopf <a href="../k5/l5-11.html#takeaways">[L5.11]</a>, s pmtn McNaughton <a href="../k5/l5-4.html#takeaways">[L5.4]</a>.</li>
     </ul>
   </div>
 

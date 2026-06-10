@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L5.14 · Referenční tabulka: problém → algoritmus (tahák) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k5">K5 · Rozvrhování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L5.14</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L5.14</span> Kapitola K5 — Rozvrhování (Slot 5) · <strong>[MUST]</strong> · tahák, ústní
+  </p>
+  <h1>Referenční tabulka: problém → algoritmus (tahák)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Žádný nový algoritmus</strong> — jen klíč: jak z Grahamova zápisu $\alpha\,|\,\beta\,|\,\gamma$ <a href="../k5/l5-1.html">[L5.1]</a> přečíst, <em>kterou</em> metodu z K5 nasadit. Zdrojem jsou souhrnné slidy 13, 23, 27 a 38 přednášky.
+  </div>
+
+  <p>Poslední lekce kapitoly nic nového nevykládá — sbírá úrodu. U písemky bývá metoda <strong>obvykle napsaná přímo v zadání</strong> („[Rothkopf]“ v nadpisu, “Use Muntz&amp;Coffman's algorithm…”), takže tahák je hlavně pojistka pro případ, kdy tam není, a kostra odpovědi pro <strong>ústní</strong> („čím se řeší … a proč zrovna tím?“). Všechny řádky tabulky jsou doslova ze souhrnných slidů přednášky; detaily algoritmů už znáš z lekcí, na které tabulka odkazuje.</p>
+
+  <!-- ===== SEKCE 1: JAK TAHAK CIST ===== -->
+  <h2>Tři otázky, kterými tahák čteš</h2>
+
+  <details class="try">
+    <summary>Zkus sám: dostaneš zápis $1\,|\,pmtn, r_j\,|\,L_{max}$. Na která tři pole zápisu se podíváš a v jakém pořadí, abys trefil metodu?</summary>
+    <div class="inner">
+      <p>Přesně v pořadí polí Grahamovy notace <a href="../k5/l5-1.html#takeaways">[L5.1]</a>:</p>
+      <ol>
+        <li><strong>$\alpha$ — co mám za zdroje?</strong> Jeden stroj ($1$), paralelní identické ($P$), nebo project scheduling s temporálními omezeními ($PS$)? Tím se rozhoduje mezi třemi „patry“ tabulky.</li>
+        <li><strong>$\gamma$ — co minimalizuji?</strong> $C_{max}$, $\sum w_j C_j$, $L_{max}$, nebo nic (prázdné $\gamma$ = rozhodovací/feasibility problém)? Stejné $\beta$ u jiného kritéria = úplně jiný svět.</li>
+        <li><strong>$\beta$ — jaká mám pravidla?</strong> Hlavně: je povolená preempce ($pmtn$)? Jsou precedence ($prec$)? Jsou release timy $r_j$ a deadliny $\tilde{d}_j$? Každý z těchto přepínačů typicky přehodí easy ↔ NP-hard, nebo vymění algoritmus.</li>
+      </ol>
+      <p>Pro $1\,|\,pmtn, r_j\,|\,L_{max}$: jeden stroj, kritérium $L_{max}$, s preempcí a release timy → <strong>Hornův algoritmus</strong> <a href="../k5/l5-7.html">[L5.7]</a>.</p>
+    </div>
+  </details>
+
+  <p>Než tabulku ukážu celou, dvě kontrolní otázky na nejčastější zkouškové „chytáky“ — jestli je trefíš, tahák už vlastně umíš.</p>
+
+  <details class="try">
+    <summary>Zkus sám: na jednom stroji jsou $1\,||\,C_{max}$, $1\,|\,r_j\,|\,C_{max}$ i $1\,|\,\tilde{d}_j\,|\,C_{max}$ triviální (stačí správně seřadit). Co se stane, když se $r_j$ a $\tilde{d}_j$ potkají v jednom zápisu?</summary>
+    <div class="inner">
+      <p>$1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ je <strong>silně NP-hard</strong> — kombinace oken $\langle r_j, \tilde{d}_j \rangle$ umí postavit „ploty“ a zakódovat 3-PARTITION, jak jsi viděl v <a href="../k5/l5-13.html">[L5.13]</a>. Řadicí pravidla (dle $r_j$, dle $\tilde{d}_j$ = EDF) fungují jen na každé omezení zvlášť; dohromady zbývá <strong>Bratleyho branch &amp; bound</strong> <a href="../k5/l5-9.html">[L5.9]</a> nebo ILP <a href="../k5/l5-6b.html">[L5.6b]</a>. Výjimka dle slidu 13: pro $p_j = 1$ polynomiální algoritmus existuje.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: $P\,|\,pmtn\,|\,C_{max}$ vs. $P2\,||\,C_{max}$ — jeden je easy a druhý NP-hard. Který je který a proč?</summary>
+    <div class="inner">
+      <p>Easy je ten <em>s preempcí</em>: $P\,|\,pmtn\,|\,C_{max}$ řeší <strong>McNaughton</strong> v $\mathcal{O}(n)$ <a href="../k5/l5-4.html">[L5.4]</a> — optimum $C^*_{max} = \max\{\max_i p_i, \sum_i p_i / R\}$ se prostě „nalije“ wrap-around plněním. Bez preempce je už $P2\,||\,C_{max}$ NP-hard (slide 38: redukce z <strong>2-PARTITION</strong> s prahem $\frac{1}{2}\sum p_i$, viz <a href="../k1/l1-1.html#t-2partition">[L1.1]</a>) — proto exaktně Rothkopfovo DP <a href="../k5/l5-11.html">[L5.11]</a>, aproximačně LPT <a href="../k5/l5-12.html">[L5.12]</a>. Preempce tu mění svět: rozbíjet úlohy na kousky je to, co dělá problém spojitě „nalévatelným“.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: TABULKA ===== -->
+  <h2 id="tab">Referenční tabulka (souhrnné slidy 13, 23, 27, 38 + PS)</h2>
+
+  <p>Tučně je vždy metoda, kterou po tobě zkouška typicky chce <em>odsimulovat</em>. „Easy“ a „NP-hard“ jsou doslovné verdikty slidů.</p>
+
+  <table>
+    <thead>
+      <tr><th>Problém ($\alpha\,|\,\beta\,|\,\gamma$)</th><th>Těžkost</th><th>Metoda</th><th>Lekce</th><th>Poznámka</th></tr>
+    </thead>
+    <tbody>
+      <tr><th colspan="5">Jeden stroj — $C_{max}$ (slide 13)</th></tr>
+      <tr>
+        <td>$1\,||\,C_{max}$, $\;1\,|\,prec\,|\,C_{max}$</td><td>easy</td>
+        <td>libovolné (topologické) pořadí</td>
+        <td><a href="../k5/l5-1.html">[L5.1]</a></td>
+        <td>vždy $C_{max} = \sum p_j$</td>
+      </tr>
+      <tr>
+        <td>$1\,|\,r_j\,|\,C_{max}$</td><td>easy</td>
+        <td>řazení dle neklesajícího $r_j$</td>
+        <td><a href="../k5/l5-9.html">[L5.9]</a></td>
+        <td>nejmenší $r_j$ první</td>
+      </tr>
+      <tr>
+        <td>$1\,|\,\tilde{d}_j\,|\,C_{max}$</td><td>easy</td>
+        <td>EDF (řazení dle neklesajícího $\tilde{d}_j$)</td>
+        <td><a href="../k5/l5-9.html">[L5.9]</a></td>
+        <td>přípustný rozvrh nemusí existovat</td>
+      </tr>
+      <tr>
+        <td>$1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$</td><td><strong>silně NP-hard</strong></td>
+        <td><strong>Bratley B&amp;B</strong>; position-based ILP</td>
+        <td><a href="../k5/l5-9.html">[L5.9]</a>, <a href="../k5/l5-6b.html">[L5.6b]</a></td>
+        <td>3-PARTITION <a href="../k5/l5-13.html">[L5.13]</a>; pro $p_j = 1$ polynomiální</td>
+      </tr>
+
+      <tr><th colspan="5">Jeden stroj — $\sum C_j$, $\sum w_j C_j$ (slide 23)</th></tr>
+      <tr>
+        <td>$1\,||\,\sum C_j$, $\;1\,||\,\sum w_j C_j$</td><td>easy</td>
+        <td>SPT / weighted SPT (neklesající $p_j / w_j$)</td>
+        <td><a href="../k5/l5-6a.html">[L5.6a]</a></td>
+        <td>jen třídění</td>
+      </tr>
+      <tr>
+        <td>$1\,|\,prec\,|\,\sum w_j C_j$</td><td><strong>NP-hard</strong></td>
+        <td><strong>relative-order ILP</strong> + B&amp;B s LP relaxací</td>
+        <td><a href="../k5/l5-6a.html">[L5.6a]</a>, <a href="../k5/l5-6b.html">[L5.6b]</a></td>
+        <td>$x_{ij}$ = „$T_i$ před $T_j$“; pozor na $C_j = \sum_i p_i x_{ij} + p_j$</td>
+      </tr>
+
+      <tr><th colspan="5">Jeden stroj — $L_{max}$ (slide 27)</th></tr>
+      <tr>
+        <td>$1\,||\,L_{max}$</td><td>polynomiální</td>
+        <td><strong>EDD</strong> (earliest due date first)</td>
+        <td><a href="../k5/l5-7.html">[L5.7]</a></td>
+        <td>optimalita swap argumentem</td>
+      </tr>
+      <tr>
+        <td>$1\,|\,r_j\,|\,L_{max}$</td><td><strong>NP-hard</strong></td>
+        <td>— (bez preempce nic polynomiálního)</td>
+        <td><a href="../k5/l5-7.html">[L5.7]</a></td>
+        <td>preempce je tu klíč k easy</td>
+      </tr>
+      <tr>
+        <td>$1\,|\,pmtn, r_j\,|\,L_{max}$</td><td>polynomiální</td>
+        <td><strong>Horn</strong> (iterované EDD)</td>
+        <td><a href="../k5/l5-7.html">[L5.7]</a></td>
+        <td>preempce jen v release timech</td>
+      </tr>
+      <tr>
+        <td>$1\,|\,pmtn, r_j, d_j{=}\tilde{d}_j\,|\,L_{max}$</td><td>polynomiální</td>
+        <td>týž Horn — říká se mu <strong>EDF</strong></td>
+        <td><a href="../k5/l5-7.html">[L5.7]</a></td>
+        <td>$L_{max} \le 0$ ⟺ schedulovatelné</td>
+      </tr>
+      <tr>
+        <td>$1\,|\,pmtn, prec, r_j, d_j{=}\tilde{d}_j\,|\,L_{max}$</td><td>polynomiální</td>
+        <td><strong>Chetto-Silly-Bouchentouf</strong> → EDF</td>
+        <td><a href="../k5/l5-8.html">[L5.8]</a></td>
+        <td>$r'$ dopředně, $\tilde{d}'$ zpětně, pak nezávislé úlohy</td>
+      </tr>
+
+      <tr><th colspan="5">Paralelní identické stroje — $C_{max}$ (slide 38)</th></tr>
+      <tr>
+        <td>$P\,|\,pmtn\,|\,C_{max}$</td><td>easy</td>
+        <td><strong>McNaughton</strong>, $\mathcal{O}(n)$</td>
+        <td><a href="../k5/l5-4.html">[L5.4]</a></td>
+        <td>$C^* = \max\{\max p_i, \textstyle\sum p_i / R\}$, wrap-around</td>
+      </tr>
+      <tr>
+        <td>$P\,|\,pmtn, r_j, \tilde{d}_j\,|\,-$</td><td>easy</td>
+        <td><strong>max flow</strong> (rozhodovací verze)</td>
+        <td><a href="../k5/l5-0.html">[L5.0]</a></td>
+        <td>intervaly z $\{r_j\} \cup \{\tilde{d}_j\}$; feasibilita = nasycený zdroj</td>
+      </tr>
+      <tr>
+        <td>$P\,||\,C_{max}$ (NP-hard už $P2\,||\,C_{max}$)</td><td><strong>NP-hard</strong></td>
+        <td>exaktně <strong>Rothkopf DP</strong>; aproximačně <strong>LPT</strong></td>
+        <td><a href="../k5/l5-11.html">[L5.11]</a>, <a href="../k5/l5-12.html">[L5.12]</a></td>
+        <td>2-PARTITION <a href="../k1/l1-1.html#t-2partition">[L1.1]</a>; DP $\mathcal{O}(n \cdot UB^R)$; $r_{LPT} = \frac{4}{3} - \frac{1}{3R}$</td>
+      </tr>
+      <tr>
+        <td>$P\,|\,prec\,|\,C_{max}$</td><td><strong>NP-hard</strong></td>
+        <td><strong>list scheduling</strong></td>
+        <td><a href="../k5/l5-12.html">[L5.12]</a></td>
+        <td>faktor $r_{LS} = 2 - \frac{1}{R}$; pozor na anomálie</td>
+      </tr>
+      <tr>
+        <td>$P\,|\,pmtn, prec\,|\,C_{max}$</td><td><strong>NP-hard</strong></td>
+        <td><strong>Muntz&amp;Coffman</strong> (level algoritmus)</td>
+        <td><a href="../k5/l5-10.html">[L5.10]</a></td>
+        <td>faktor $r_{MC} = 2 - \frac{2}{R}$; exaktní pro $P2$ a stromy</td>
+      </tr>
+
+      <tr><th colspan="5">Project scheduling — temporální omezení (slidy 59–75)</th></tr>
+      <tr>
+        <td>$PS1\,|\,temp\,|\,C_{max}$</td><td><strong>NP-hard</strong></td>
+        <td><strong>time-indexed ILP</strong> (proměnné $x_{it}$)</td>
+        <td><a href="../k5/l5-3.html">[L5.3]</a></td>
+        <td>graf TC <a href="../k5/l5-2.html">[L5.2]</a>; NP-těžkost z Bratleyho <a href="../k5/l5-13.html">[L5.13]</a>; existuje i relative-order model (slidy 68–70, mimo náš kurz lekcí)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>A obecná zbraň přes všechny řádky: cokoli z toho umíš zapsat jako ILP a poslat do <strong>branch &amp; boundu</strong> <a href="../k5/l5-5.html">[L5.5]</a> — exaktně, bez polynomiální záruky. To je legitimní odpověď přesně tam, kde tabulka říká NP-hard (a lenost tam, kde říká easy).</p>
+
+  <!-- ===== SEKCE 3: ROZHODOVACI STROMY ===== -->
+  <h2>Tatáž tabulka jako dva rozhodovací stromy</h2>
+
+  <p>Dvě nejhustší rodiny tabulky se dají odříkat jako posloupnost ano/ne otázek na $\beta$ — přesně tak je dobré je u ústní vyslovit.</p>
+
+  <div class="viz" id="viz-treep"></div>
+
+  <div class="viz" id="viz-treelmax"></div>
+
+  <!-- ===== SEKCE 4: SEBETEST ===== -->
+  <h2>Rychlý sebetest — poznáš metodu?</h2>
+
+  <p>Zápisy níže jsou skutečné zkouškové problémy z lekcí této kapitoly. Odpověz dřív, než rozklikneš.</p>
+
+  <details class="try">
+    <summary>Zkus sám: (a) $P\,|\,pmtn, prec\,|\,C_{max}$ (zkouška 02.06.2021, doloženo i 1.6.2026) — (b) $PS1\,|\,temp\,|\,C_{max}$, “give the ILP formulation” (zkouška 25.5.2026)?</summary>
+    <div class="inner">
+      <p><strong>(a) Muntz&amp;Coffman</strong> <a href="../k5/l5-10.html">[L5.10]</a>: levely odzadu, sdílení kapacity $\beta$, kroky $\delta$, McNaughton jako podprogram. <strong>(b) Time-indexed ILP</strong> <a href="../k5/l5-3.html">[L5.3]</a>: binární $x_{it}$ „$T_i$ startuje v $t$“, čtyři skupiny omezení, dekódování $s_i = \sum_t t \cdot x_{it}$.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: (a) $P\,|\,pmtn, r_j, \tilde{d}_j\,|\,-$ , “does a feasible schedule exist?” (zkouška 2023) — (b) $1\,|\,pmtn, r_j\,|\,L_{max}$?</summary>
+    <div class="inner">
+      <p><strong>(a) Max flow</strong> <a href="../k5/l5-0.html">[L5.0]</a>: prázdné $\gamma$ = rozhodovací problém; intervaly z bodů $\{r_j\} \cup \{\tilde{d}_j\}$, síť zdroj → úlohy ($p_j$) → intervaly (délka, resp. délka·$R$) → stok; feasibilní ⟺ $|f| = \sum p_j$. <strong>(b) Horn</strong> <a href="../k5/l5-7.html">[L5.7]</a>: v každém release timu znovu EDD mezi uvolněnými úlohami.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: (a) $P\,||\,C_{max}$, $R = 2$, zadány jen processing timy, “[Rothkopf]” — (b) $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$, malá instance se stromem řešení?</summary>
+    <div class="inner">
+      <p><strong>(a) Rothkopfovo DP</strong> <a href="../k5/l5-11.html">[L5.11]</a>: vrstvy dosažitelných zátěží $(t_1, t_2)$, čtení $\min \max$, zpětná rekonstrukce + Gantt. <strong>(b) Bratleyho B&amp;B</strong> <a href="../k5/l5-9.html">[L5.9]</a>: uzly $(\sigma)/c$, ořez deadline testem, dekompozice, BRTP test optimality.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné záměny v tabulce</div>
+    <ul>
+      <li><strong>Horn potřebuje $pmtn$.</strong> $1\,|\,r_j\,|\,L_{max}$ <em>bez</em> preempce je NP-hard (slide 27) — neexistuje „Horn bez preempce“. Stejně tak McNaughton: bez $pmtn$ je už $P2\,||\,C_{max}$ NP-hard.</li>
+      <li><strong>Aproximační ≠ exaktní.</strong> LS ($2 - \frac{1}{R}$), LPT ($\frac{4}{3} - \frac{1}{3R}$) a M&amp;C ($2 - \frac{2}{R}$) vracejí jen zaručeně-ne-moc-špatné rozvrhy; exaktní jsou EDD/Horn/CSB/McNaughton (polynomiální problémy) a Rothkopf/Bratley/ILP+B&amp;B (NP-hard problémy). M&amp;C je exaktní jen pro $P2$ a stromové precedence.</li>
+      <li><strong>Toky <a href="../k5/l5-0.html">[L5.0]</a> nic neminimalizují.</strong> Řeší jen feasibilitu (prázdné $\gamma$) a jen s $pmtn$ — tok smí úlohu libovolně porcovat mezi intervaly.</li>
+      <li><strong>$L_{max}$ implikuje due daty $d_j$</strong>, i když v $\beta$ nejsou vypsané (slide 27) — a nezaměň $d_j$ (měkké, měří se zpoždění) s $\tilde{d}_j$ (tvrdé deadliny, rozhodují přípustnost) <a href="../k5/l5-1.html#takeaways">[L5.1]</a>.</li>
+      <li><strong>„NP-hard“ v tabulce neznamená „neřešitelné“,</strong> znamená „sáhni po B&amp;B / DP / ILP a počítej s exponenciálou“ — a obráceně: na easy řádek u zkoušky nevytahuj ILP, chtějí třídicí pravidlo a zdůvodnění.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.14</div>
+    <ul>
+      <li><strong>Čtení klíče:</strong> $\alpha$ (1 / P / PS) → $\gamma$ ($C_{max}$ / $\sum w_j C_j$ / $L_{max}$ / nic = feasibilita) → $\beta$ ($pmtn$? $prec$? $r_j, \tilde{d}_j$?). V zadání zkoušky obvykle stojí, jaký algoritmus chtějí — tahák je pojistka a kostra ústní odpovědi.</li>
+      <li><strong>KLÍČ (problém → algoritmus):</strong> $P\,||\,C_{max}$, $R = 2$, jen processing timy = <strong>Rothkopf DP</strong> <a href="../k5/l5-11.html">[L5.11]</a>; $P\,|\,prec\,|\,C_{max}$ = <strong>list scheduling</strong> <a href="../k5/l5-12.html">[L5.12]</a>; $P\,|\,pmtn, prec\,|\,C_{max}$ = <strong>Muntz&amp;Coffman</strong> <a href="../k5/l5-10.html">[L5.10]</a>; $P\,|\,pmtn\,|\,C_{max}$ = <strong>McNaughton</strong> <a href="../k5/l5-4.html">[L5.4]</a>; $1\,|\,pmtn, r_j\,|\,L_{max}$ = <strong>Horn</strong> <a href="../k5/l5-7.html">[L5.7]</a>; $1\,|\,pmtn, prec, r_j, d_j\,|\,L_{max}$ = <strong>CSB</strong> <a href="../k5/l5-8.html">[L5.8]</a>; $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ = <strong>Bratley</strong> <a href="../k5/l5-9.html">[L5.9]</a>; $PS1\,|\,temp\,|\,C_{max}$ = <strong>time-indexed ILP</strong> <a href="../k5/l5-3.html">[L5.3]</a>; $P\,|\,pmtn, r_j, \tilde{d}_j\,|\,-$ feasibilita = <strong>toky</strong> <a href="../k5/l5-0.html">[L5.0]</a>.</li>
+      <li><strong>Easy řádky = třídění:</strong> $1\,||\,C_{max}$ libovolně, $1\,|\,r_j\,|$ dle $r_j$, $1\,|\,\tilde{d}_j\,|$ EDF, $1\,||\,L_{max}$ EDD, $1\,||\,\sum w_j C_j$ weighted SPT ($p_j/w_j$). NP-hard řádky = B&amp;B / DP / ILP (<a href="../k5/l5-5.html">[L5.5]</a>, <a href="../k5/l5-6a.html">[L5.6a]</a>/<a href="../k5/l5-6b.html">[L5.6b]</a>); aproximace LS/LPT/M&amp;C s faktory $2-\frac1R$ / $\frac43-\frac1{3R}$ / $2-\frac2R$.</li>
+      <li><strong>Přepínače těžkosti:</strong> $pmtn$ dělá z $P\,||\,C_{max}$ a $1\,|\,r_j\,|\,L_{max}$ polynomiální problémy; kombinace $r_j + \tilde{d}_j$ na jednom stroji bez preempce dělá silně NP-hard <a href="../k5/l5-13.html">[L5.13]</a>. Celá tabulka: <a href="#tab">#tab</a>.</li>
+    </ul>
+  </div>
+
+  <p>Tím je kapitola K5 u konce. Pokračuje Slot 6: <strong>CSP a hranová konzistence</strong> — poslední nová technika před zkouškou.</p>
+
+  <label class="done-toggle" data-lesson-id="L5.14">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k5/l5-13.html"><span class="dir">← Předchozí</span> L5.13 · NP-těžkost rozvrhování (redukce)</a>
+    <a class="next" href="../index.html#k6"><span class="dir">Další →</span> Pokračování se připravuje (L6.1 · CSP a arc consistency)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// ===== 1 — Rozhodovací strom: P | … | Cmax (slide 38) =====
+(function () {
+  KOViz.graph(document.getElementById('viz-treep'), {
+    w: 640, h: 360,
+    nodes: [
+      { id: 'q1', label: 'pmtn?', x: 90,  y: 180, cls: 'hl', sub: 'P | … | Cmax' },
+      { id: 'q2', label: 'prec?', x: 290, y: 95 },
+      { id: 'q3', label: 'prec?', x: 290, y: 265 },
+      { id: 'mc',   label: 'M&C',  x: 520, y: 50,  sub: 'Muntz&Coffman, 2 − 2/R · [L5.10]' },
+      { id: 'mcn',  label: 'McN',  x: 520, y: 140, sub: 'McNaughton, O(n) exakt · [L5.4]' },
+      { id: 'ls',   label: 'LS',   x: 520, y: 230, sub: 'list scheduling, 2 − 1/R · [L5.12]' },
+      { id: 'roth', label: 'DP',   x: 520, y: 315, sub: 'Rothkopf DP / LPT · [L5.11], [L5.12]' },
+    ],
+    edges: [
+      { from: 'q1', to: 'q2', label: 'ano' },
+      { from: 'q1', to: 'q3', label: 'ne' },
+      { from: 'q2', to: 'mc',  label: 'ano' },
+      { from: 'q2', to: 'mcn', label: 'ne' },
+      { from: 'q3', to: 'ls',   label: 'ano' },
+      { from: 'q3', to: 'roth', label: 'ne' },
+    ],
+    caption: 'Rodina P|…|Cmax (slide 38) jako dvě ano/ne otázky na β. Zvláštní případ mimo strom: s r_j, d̃_j a prázdným γ je to feasibility přes max flow [L5.0].',
+  });
+})();
+
+// ===== 2 — Rozhodovací strom: 1 | … | Lmax (slide 27) =====
+(function () {
+  KOViz.graph(document.getElementById('viz-treelmax'), {
+    w: 640, h: 360,
+    nodes: [
+      { id: 'q1', label: 'pmtn?', x: 90,  y: 180, cls: 'hl', sub: '1 | … | Lmax' },
+      { id: 'q2', label: 'prec?', x: 290, y: 95 },
+      { id: 'q3', label: 'rⱼ?',  x: 290, y: 265 },
+      { id: 'csb',  label: 'CSB',  x: 520, y: 50,  sub: 'CSB → EDF · [L5.8]' },
+      { id: 'horn', label: 'Horn', x: 520, y: 140, sub: 'iterované EDD · [L5.7]' },
+      { id: 'np',   label: 'NP',   x: 520, y: 230, cls: 'bad', sub: 'NP-hard, bez pmtn nic polynom.' },
+      { id: 'edd',  label: 'EDD',  x: 520, y: 315, sub: 'třídění dle dⱼ · [L5.7]' },
+    ],
+    edges: [
+      { from: 'q1', to: 'q2', label: 'ano' },
+      { from: 'q1', to: 'q3', label: 'ne' },
+      { from: 'q2', to: 'csb',  label: 'ano' },
+      { from: 'q2', to: 'horn', label: 'ne' },
+      { from: 'q3', to: 'np',  label: 'ano' },
+      { from: 'q3', to: 'edd', label: 'ne' },
+    ],
+    caption: 'Rodina 1|…|Lmax (slide 27). S preempcí vždy polynomiální (Horn / CSB→EDF); bez preempce jen čisté EDD — jakmile přibudou r_j, je problém NP-hard.',
+  });
+})();
+</script>
+</body>
+</html>
