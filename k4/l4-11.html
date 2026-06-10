@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L4.11 · Cycle canceling (řešení MCF) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k4">K4 · Toky a řezy</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L4.11</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L4.11</span> Kapitola K4 — Toky a řezy (Slot 4) · <strong>[MUST]</strong> · souvisí s ústní
+  </p>
+  <h1>Cycle canceling (řešení MCF)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Cycle canceling (rušení cyklů)</strong>: začni přípustným tokem, hledej <strong>záporný cyklus</strong> v reziduálním grafu $G_f$ (Bellman-Fordem) a augmentuj podél něj o $\gamma = \min_{e \in E(C)} u_f(e)$ — opakuj, dokud záporný cyklus existuje.
+  </div>
+
+  <p>Minulá lekce <a href="l4-10.html#takeaways">[L4.10] Minimum Cost Flow + reziduální graf s cenami</a> skončila objevem: <em>záporný cyklus v $G_f$ = sleva beze změny bilancí</em>. Na instanci ze slidu 32 jsi tak ručně srazil cenu toku z 18 přes 10 na 8. Dnes z toho objevu uděláme algoritmus — <strong>cycle canceling</strong> (slide 31, cvičení cv09) — a celý běh si odkrokujeme. Je to hlavní kombinatorický řešič MCF a častá otázka u ústní (spolu s Bellman-Fordem <a href="../k2/l2-12.html#takeaways">[L2.12]</a>, který v něm hraje detektiva).</p>
+
+  <!-- ===== SEKCE 1: ALGORITMUS ===== -->
+  <h2>Od slevy k algoritmu (slide 31)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: algoritmus už vlastně znáš. Ford-Fulkerson <a href="l4-3.html#takeaways">[L4.3]</a> zní „dokud v $G_f$ existuje augmentující cesta $s \to t$, augmentuj o $\gamma$“. Dnes nezvyšujeme velikost, ale snižujeme cenu — a z [L4.10] víš, co cenu snižuje. Zformuluj celý algoritmus sám (tři kroky).</summary>
+    <div class="inner">
+      <p>Stačí ve FF smyčce vyměnit „augmentující cesta“ za „záporný cyklus“: ① sežeň <em>přípustný</em> tok (bilance musí sedět od začátku — to je úloha z <a href="l4-6.html#takeaways">[L4.6]</a>/<a href="l4-7.html#takeaways">[L4.7]</a>, tady ji jen použijeme); ② postav $G_f$ s cenami dle [L4.10] a najdi v něm cyklus se zápornou součtovou cenou; ③ pošli po něm $\gamma = $ minimum reziduálních kapacit na cyklu a vrať se na ②. Když záporný cyklus není, skonči — tok už zlevnit nejde. Jediné, co zatím neumíš, je krok ② „najdi záporný cyklus“ — to doženeme hned v další sekci.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 31 — Minimum Cost Flow: Cycle Canceling Algorithm, 1:1</div>
+    <p><em><strong>Input:</strong> Network $(G, l, u, b, c)$. <strong>Output:</strong> Minimum cost flow $f$.</em></p>
+    <ol>
+      <li><em>Find feasible flow $f$ while solving <strong>Feasible Flow with Balances</strong> in $(G, l, u, b)$.</em></li>
+      <li><em>Build <strong>residual graph</strong> $G_f$ with respect to $f$. Find a <strong>negative-cost cycle</strong> $C$ in residual graph $G_f$. If none exists then stop.</em></li>
+      <li><em>Compute $\gamma = \min_{e \in E(C)} u_f(e)$. Augment $f$ along $C$ by $\gamma$. Go to 2.</em></li>
+    </ol>
+  </div>
+
+  <p>Všechny tři kroky stojí na věcech z dřívějších lekcí — proto je lekce o <em>jedné</em> nové věci, totiž o jejich složení do smyčky. Krok 1 je přesně <a href="l4-6.html#takeaways">[L4.6]</a> (a při $l &gt; 0$ <a href="l4-7.html#takeaways">[L4.7]</a>). Krok 2 staví $G_f$ podle vzorců z <a href="l4-10.html#takeaways">[L4.10]</a>: dopředná hrana $(u_f = u - f,\ c_f = +c)$, zpětná $(u_f = f - l,\ c_f = -c)$, hrany s $u_f = 0$ vypadnou. Krok 3 je augmentace jako ve FF <a href="l4-3.html#takeaways">[L4.3]</a> — jen po <em>cyklu</em>, ne po cestě: na hranách cyklu souhlasných s původním grafem tok o $\gamma$ <em>vzroste</em>, na protisměrných <em>klesne</em>. Cvičení cv09 (Lab 9) to zapisuje pseudokódem:</p>
+
+  <div class="box">
+    <div class="box-title">cv09 (Lab 9) — Algorithm 1: Cycle canceling algorithm for Minimum-Cost Flow Problem, 1:1</div>
+    <p><em><strong>Require:</strong> initial feasible balanced flow $f$ in $(G, l, u, c, b)$ &nbsp; <strong>Ensure:</strong> minimum-cost flow $f$ in $(G, l, u, c, b)$</em></p>
+<pre>function CYCLE-CANCELING(G, l, u, c, b, f)
+    G_f ← build residual graph w.r.t. f
+    while True do
+        δ, C ← BELLMAN-FORD(G_f)
+        if δ &gt; 0 then
+            for all e = (i, j) ∈ C do
+                if e is a forward arc in G then       ▷ i.e., (i, j) ∈ E
+                    f(i, j) ← f(i, j) + δ
+                else
+                    f(j, i) ← f(j, i) − δ
+                end if
+                u_f(i, j) ← u_f(i, j) − δ              ▷ update residual graph G_f
+                u_f(j, i) ← u_f(j, i) + δ
+            end for
+        else
+            break
+        end if
+    end while
+    return f
+end function</pre>
+    <p style="margin-top:8px">Pozn.: slide 31 značí kapacitu cyklu $\gamma$, cv09 píše $\delta$ — je to totéž číslo $\min_{e \in E(C)} u_f(e)$. Všimni si poslední dvojice řádků: augmentace o $\delta$ ubere kapacitu hranám cyklu a stejně tolik přidá hranám protisměrným — $G_f$ se přepočítá lokálně, nemusí se stavět celý znovu.</p>
+  </div>
+
+  <!-- ===== SEKCE 2: DETEKCE ===== -->
+  <h2>Krok 2 pod lupou: záporný cyklus najde Bellman-Ford</h2>
+
+  <details class="try">
+    <summary>Zkus sám: nástroj na záporné cykly už máš — Bellman-Ford s detekcí <a href="../k2/l2-12.html#takeaways">[L2.12]</a> („relaxuje se i po $|V|-1$ iteracích ⟹ záporný cyklus“). Jenže BF startuje z jednoho uzlu a vidí jen to, co je z něj <em>dosažitelné</em>. Z kterého uzlu ho v $G_f$ pustit, aby mu žádný cyklus neutekl?</summary>
+    <div class="inner">
+      <p>Z žádného existujícího — žádný uzel $G_f$ nemusí mít dosah na celý graf. Trik: přidej <strong>pomocný uzel $s$</strong> a veď z něj hranu s cenou $0$ do <em>každého</em> uzlu $G_f$. Z $s$ je teď dosažitelné všechno, takže BF z $s$ prohledá celý graf. A protože do $s$ žádná hrana <em>nevede</em>, nemůže pomocný uzel ležet na žádném cyklu — žádný falešný záporný cyklus jsme nevyrobili a ceny cyklů se nulovými hranami nezměnily.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 31 (dole) — detekce záporného cyklu, 1:1</div>
+    <p><em>The <strong>negative-cost cycle</strong> $C$ in residual graph can be found as follows:</em></p>
+    <ol>
+      <li><em>Consider residual graph $(G_f, u_f, c_f)$ where all edges have $u_f(e) &gt; 0$</em></li>
+      <li><em>Add node $s$ and connect it to every $v \in V(G_f)$ by edge $e(s, v)$ with cost $c_f(e) = 0$.</em></li>
+      <li><em>Use, for example, <strong>Bellman-Ford algorithm</strong> to detect a negative-cost cycle (with respect to cost $c_f$).</em></li>
+      <li><em>Recover negative-cost cycle $C$ or state that it does not exist.</em></li>
+    </ol>
+  </div>
+
+  <div class="viz" id="viz-detect"></div>
+
+  <p>Samotnou detekci a rekonstrukci cyklu (přes vektor předchůdců) tu znovu nevykládáme — je to <a href="../k2/l2-12.html#takeaways">[L2.12]</a>; proč to funguje, dokazuje <a href="../k3/l3-7.html#takeaways">[L3.7]</a>. U ústní se obojí potkává: „k čemu je detekce záporného cyklu?“ → <em>mimo jiné právě tady, v kroku 2 cycle cancelingu</em>.</p>
+
+  <!-- ===== SEKCE 3: BĚH ===== -->
+  <h2>Celý běh na instanci ze slidu 32</h2>
+
+  <p>Spustíme algoritmus na síti, kterou důvěrně znáš z <a href="l4-10.html#takeaways">[L4.10]</a> (slide 32): uzly $u, v, w, x$ s bilancemi $b(u) = +4$, $b(x) = -4$, startovní přípustný tok za 18. (Slide 33 předvádí běh na obměně téže sítě — cykly $(v,w,x)$ a $(v,u,w)$ —, ale přepis obrázku p-38 neobsahuje hodnoty hran; proto krokujeme přesně instanci slidu 32, kde čísla máme ověřená — přiznáno.) Popisek hrany = $u_f \mid c_f$, protisměrné hrany čárkovaně; hrany s $u_f = 0$ jsou zešedlé s popiskem „$u_f = 0$“ — do $E_f$ <em>nepatří</em>, ve stepperu zůstávají jen proto, aby šlo krokovat oběma směry.</p>
+
+  <div class="viz" id="viz-run"></div>
+
+  <details class="try">
+    <summary>Zkus sám: poslední reziduální graf $G_f^{(3)}$ má pořád spoustu hran i cyklů — třeba $w \to x \to w$. Proč algoritmus přesto skončil? A co kdyby nějaký cyklus vyšel přesně na cenu 0?</summary>
+    <div class="inner">
+      <p>Zastavovací podmínka nezní „žádný cyklus“, ale „žádný <em>záporný</em> cyklus“. V $G_f^{(3)}$ spočítej součty: $w \to x \to w$ má $1 + (-1) = 0$, $u \to v \to x \to u$ má $2 + 3 - 1 = +4$, $u \to v \to x \to w \to u$ má $2 + 3 - 1 - 2 = +2$… žádný součet není záporný, takže žádná úprava toku už cenu nesníží — 8 je optimum a neexistence záporného cyklu je jeho <strong>certifikát</strong> (přesně ten, který [L4.10] slibovala). Cyklus s cenou $0$ nevadí: augmentace po něm cenu nezmění — vyrobí jen <em>jiné optimum</em> za stejných 8.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 4: SLOŽITOST ===== -->
+  <h2>Kolik iterací to může trvat? (slide 34)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: ať $U = \max u(i,j)$ a $C = \max |c(i,j)|$, vše celočíselné. Cena libovolného přípustného toku leží mezi $-|E| C U$ a $+|E| C U$ (každá z $|E|$ hran přispěje nejvýš $\pm C U$). Každá iterace cenu sníží aspoň o… kolik? A kolik nejvýš iterací tedy proběhne?</summary>
+    <div class="inner">
+      <p>Při celočíselných datech je cena cyklu záporné <em>celé</em> číslo ($\le -1$) a $\gamma \ge 1$, takže každá iterace ubere aspoň $1$. Z ceny $\le |E| C U$ na cenu $\ge -|E| C U$ je to nejvýš $2|E| C U$ iterací. Každá iterace volá Bellman-Forda za $\mathcal{O}(|V| \cdot |E|)$ — dohromady $\mathcal{O}(|V| \cdot |E|^2 \cdot C \cdot U)$. Pozor: v odhadu sedí <em>hodnoty</em> $C$ a $U$, ne jen velikost grafu — je to <strong>pseudopolynomiální</strong> složitost, stejný úkaz jako u FF s $\mathcal{O}(|E| \cdot F)$ <a href="l4-3.html#takeaways">[L4.3]</a>.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 34 — Cycle Canceling Algorithm: Complexity and its improvements, 1:1</div>
+    <p><em>Let $U = \max_{(i,j) \in E} u(i, j)$ and $C = \max_{(i,j) \in E} |c(i, j)|$. For any feasible flow $f$ its cost $c(f)$ is bounded as:</em></p>
+    <p>$$-|E| \cdot C \cdot U \le c(f) \le |E| \cdot C \cdot U$$</p>
+    <p><em>Each iteration decreases the objective by at least 1. Conclusion: there are at most $2|E| \cdot C \cdot U$ iterations. The Bellman-Ford complexity is $\mathcal{O}(|V| \cdot |E|)$. <strong>Overall time complexity is $\mathcal{O}(|V| \cdot |E|^2 \cdot C \cdot U)$.</strong></em></p>
+    <p><em>An idea for improvement: Find the most negative cycle, but it is <strong>NP-hard</strong>. Better idea for improvement: Solution by a <strong>Minimum Mean Cycle Canceling Algorithm</strong>: Find cycle $C$ whose mean weight $\frac{c(E(C))}{|E(C)|}$ is minimum in $\mathcal{O}(|V| \cdot |E|)$. Minimum Mean Cycle Canceling Algorithm runs in $\mathcal{O}(|V|^2 \cdot |E|^3 \cdot \log |V|)$.</em></p>
+  </div>
+
+  <p>Čti poslední odstavec slidu jako příběh o výběru cyklu: brát <em>nejzápornější</em> cyklus by iterace srazilo, ale jeho nalezení je NP-těžké; brát cyklus s minimální <em>průměrnou</em> cenou na hranu jde polynomiálně — a celé minimum mean cycle canceling pak běží v čase polynomiálním jen ve velikosti grafu, bez $C$ a $U$. Pro ruční počítání u zkoušky je to jedno: vezmi kterýkoli záporný cyklus, který vidíš.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
+    <p><strong>1) Augmentuje se po CYKLU, ne po cestě $s \to t$.</strong> MCF žádné $s, t$ nemá — cesta by rozbila bilance, cyklus je nechává netknuté. (FF augmentuje cesty, cycle canceling cykly — to je celý rozdíl smyček.)
+    <strong>2) Stop = žádný ZÁPORNÝ cyklus,</strong> ne „žádný cyklus“. Cykly s cenou $\ge 0$ v $G_f$ klidně zbydou; nulové znamenají jen alternativní optima.
+    <strong>3) $\gamma$ ber z reziduálních kapacit $u_f$ na cyklu,</strong> ne z původních $u$ — a protisměrná hrana cyklu znamená, že tok na původní hraně o $\gamma$ <em>klesne</em> ($f(j,i) \leftarrow f(j,i) - \delta$ v Algorithm 1).
+    <strong>4) Bellman-Forda pouštěj z pomocného uzlu $s$</strong> s $0$-hranami do všech uzlů — z obyčejného uzlu nemusí být celý $G_f$ dosažitelný a cyklus ti uteče; $s$ sám žádný cyklus nepřidá (nemá vstupní hrany).
+    <strong>5) Startovat se musí z PŘÍPUSTNÉHO toku</strong> (bilance + meze) — $f \equiv 0$ obecně přípustný není; sežeň ho přes <a href="l4-6.html#takeaways">[L4.6]</a>/<a href="l4-7.html#takeaways">[L4.7]</a>.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.11</div>
+    <ul>
+      <li><strong>Cycle canceling (slide 31):</strong> ① přípustný tok přes Feasible Flow with Balances <a href="l4-6.html#takeaways">[L4.6]</a>/<a href="l4-7.html#takeaways">[L4.7]</a>; ② postav $G_f$ s cenami <a href="l4-10.html#takeaways">[L4.10]</a> a najdi záporný cyklus $C$ — když není, stop; ③ $\gamma = \min_{e \in E(C)} u_f(e)$, augmentuj podél $C$ o $\gamma$, zpět na ②.</li>
+      <li><strong>Detekce záporného cyklu:</strong> pomocný uzel $s$ + hrany ceny $0$ do všech uzlů, pak Bellman-Ford <a href="../k2/l2-12.html#takeaways">[L2.12]</a>; $s$ nemá vstupní hrany, takže žádný cyklus nepřidá.</li>
+      <li><strong>Augmentace po cyklu:</strong> souhlasné hrany $+\gamma$, protisměrné $-\gamma$; bilance se nemění a cena klesne o $|c_f(C)| \cdot \gamma$. Žádný záporný cyklus v $G_f$ = certifikát optimality.</li>
+      <li><strong>Analogie s FF <a href="l4-3.html#takeaways">[L4.3]</a>:</strong> stejná smyčka, jen „augmentující cesta v $G_f$“ → „záporný cyklus v $G_f$“ a „zvyšuj $|f|$“ → „snižuj cenu“.</li>
+      <li><strong>Složitost (slide 34):</strong> nejvýš $2|E| C U$ iterací × BF $\mathcal{O}(|V||E|)$ = $\mathcal{O}(|V| \cdot |E|^2 \cdot C \cdot U)$ — pseudopolynomiální; nejzápornější cyklus je NP-hard, minimum mean cycle canceling běží polynomiálně v $\mathcal{O}(|V|^2 |E|^3 \log |V|)$.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-cyclecancel">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Cycle canceling — algoritmus a jeho čtyři ingredience</strong>
+      <span class="task-src">zdroj: cv09_mcf_objecttracking.md (Lab 9, text EN 1:1; otázky i–iv vlastní — přiznáno; téma ústní)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN 1:1)</span>
+        <p><em>The cycle canceling algorithm for solving Minimum Cost Flow Problem is conceptually very similar to Ford-Fulkerson's algorithm for Maximum Flow problem. Ford-Fulkerson starts from a feasible flow, that is further improved via consequent iterations. Similarly, the cycle canceling algorithm gradually reduces the cost of the flow while keeping balances satisfied in each vertex. Such an improvement in each iteration is characterized by a cost-negative cycle in a suitably defined graph – so-called residual graph. After a cost-negative cycle is found, the flow is augmented along the cycle which results into a new flow that still satisfies balances but is cheaper. The algorithm terminates when no additional cost-negative cycle can be found.</em></p>
+        <p><em>There are four key ingredients when implementing the cycle canceling algorithm: 1. Residual graph, 2. Main loop, 3. Detecting a negative cycle, 4. Finding the initial balanced flow.</em></p>
+        <p>Studijní otázky (vlastní — přiznáno): <em>(i) Define the residual graph $G_f$ (capacities and costs). (ii) Write down the main loop of the algorithm. (iii) Explain how a cost-negative cycle is detected. (iv) Explain how the initial feasible balanced flow is found.</em></p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Teoretická/ústní úloha: popsat cycle canceling jako stavebnici čtyř dílů. Všechny čtyři už z kurzu znáš — tady jde o to umět je vyjmenovat, přesně zapsat a říct, ve které lekci (resp. na kterém slidu) každý díl bydlí.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — smyčka, detekce, složitost (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-10.html#takeaways">[L4.10] Minimum Cost Flow + reziduální graf s cenami</a> — vzorce $u_f$, $c_f$.</li>
+        <li><a href="../k2/l2-12.html#takeaways">[L2.12] Bellman-Ford + detekce záporného cyklu</a>.</li>
+        <li><a href="l4-6.html#takeaways">[L4.6]</a> + <a href="l4-7.html#takeaways">[L4.7]</a> — počáteční přípustný tok.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Drž se paralely s FF: „z čeho startuju → v čem hledám zlepšení → jak zlepšení provedu → kdy končím“. U každé ingredience si vybav <em>vzorec nebo konstrukci</em>, ne jen jméno: u $G_f$ čtveřici vzorců, u detekce pomocný uzel $s$, u startu redukci s $s', t'$.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle cv09 / slidů 31–32)</summary>
+        <div class="inner">
+          <p><strong>(i) Residual graph</strong> (cv09 §1.1 = slide 32, 1:1):</p>
+          <p>$$
+          \begin{aligned}
+          G_f &= (V, E_f, u_f, c_f) \\
+          u_f(i, j) &= u(i, j) - f(i, j) & \forall (i, j) \in E \\
+          u_f(j, i) &= f(i, j) - l(i, j) & \forall (i, j) \in E \\
+          c_f(i, j) &= c(i, j) & \forall (i, j) \in E \\
+          c_f(j, i) &= -c(i, j) & \forall (i, j) \in E
+          \end{aligned}
+          $$</p>
+          <p>Hrany s $u_f(e) = 0$ se vynechávají (nemohou ležet na žádném augmentujícím cyklu); $G_f$ má tedy nejvýš $2|E|$ hran. Detailně <a href="l4-10.html#takeaways">[L4.10]</a>.</p>
+          <p><strong>(ii) Main loop</strong> (cv09 Algorithm 1 = slide 31): dokud Bellman-Ford v $G_f$ najde záporný cyklus $C$ s kapacitou $\delta = \min_{e \in C} u_f(e) &gt; 0$, augmentuj: pro každou hranu $e = (i,j) \in C$, je-li $e$ dopředná v $G$, pak $f(i,j) \leftarrow f(i,j) + \delta$, jinak $f(j,i) \leftarrow f(j,i) - \delta$; reziduální kapacity uprav $u_f(i,j) \leftarrow u_f(i,j) - \delta$ a $u_f(j,i) \leftarrow u_f(j,i) + \delta$. Když záporný cyklus neexistuje, vrať $f$ — je to minimum cost flow.</p>
+          <p><strong>(iii) Detecting a negative cycle</strong> (cv09 §1.3 = slide 31 dole, 1:1): <em>1. Take the current $G_f$, remove all edges with zero residual capacity. 2. Introduce a dummy vertex $s$ and connect it with every other vertex in $G_f$ by edge with cost $c_f(e) = 0$. 3. Compute the shortest path tree (with respect to costs $c_f$) from the dummy vertex $s$ to all other vertices. 4. Recover a negative cycle or state that it does not exist.</em> — Bellman-Ford relaxuje i po $|V| - 1$ iteracích ⟺ záporný cyklus, který se zrekonstruuje z vektoru předchůdců (<a href="../k2/l2-12.html#takeaways">[L2.12]</a>, důkaz <a href="../k3/l3-7.html#takeaways">[L3.7]</a>).</p>
+          <p><strong>(iv) Initial feasible balanced flow</strong> (cv09 §1.4, 1:1): <em>1. Introduce dummy vertices $s, t$ to the original graph $G$. 2. Connect $s$ with vertices $v \in V$, if $b(v) &gt; 0$, set $l(s, v) = 0$ and $u(s, v) = b(v)$. 3. Connect vertices $v \in V$ with $t$, if $b(v) &lt; 0$, set $l(v, t) = 0$ and $u(v, t) = -b(v)$. 4. Find maximum flow $f$ in this graph by Ford-Fulkerson algorithm. 5. If $f$ saturates all outgoing edges from $s$, then disconnect $s$ and $t$ from $G$. Now, the flow $f$ is a feasible balanced flow for the original minimum-cost flow problem.</em> — To je přesně redukce z <a href="l4-6.html#takeaways">[L4.6]</a>; nenulové dolní meze řeší <a href="l4-7.html#takeaways">[L4.7]</a>.</p>
+          <p>Bonus k ústní: složitost $\mathcal{O}(|V| \cdot |E|^2 \cdot C \cdot U)$ (slide 34, pseudopolynomiální) a kontext cvičení: cv09 tímhle algoritmem řeší <em>data association</em> při sledování hráčů ve videu — přiřazovací problém jako MCF, viz [L4.12].</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-ccrun">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Cycle canceling — ruční běh od startu k certifikátu</strong>
+      <span class="task-src">zdroj: VLASTNÍ procvičovací úloha (zadání, instance i řešení vlastní — přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, vlastní — přiznáno)</span>
+        <p><em>Consider the minimum-cost flow instance $(G, l, u, c, b)$ below with balances $b(a) = +3$, $b(b) = b(c) = 0$, $b(d) = -3$ and the initial feasible flow $f$ (edge labels read $l, f, u$ · $c$).</em></p>
+        <p><em>(i) Verify that $f$ is feasible and compute its cost. (ii) Run the cycle canceling algorithm: in each iteration draw the residual graph $G_f$, find a cost-negative cycle, determine $\delta$ and augment. (iii) When the algorithm stops, state the minimum cost and give the certificate of optimality.</em></p>
+      </div>
+
+      <div class="viz" id="viz-t02"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Kompletní ruční běh dnešního algoritmu na malé síti: start je darovaný (tok je v zadání), takže zbývá smyčka kroků 2–3 — reziduální grafy, záporné cykly, augmentace — a na závěr certifikát, že levněji to nejde.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — smyčka + zastavení (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-10.html#takeaways">[L4.10]</a> — stavba $G_f$ s cenami (drill <a href="l4-10.html#t-residcost">T02 tam</a> je přímá rozcvička).</li>
+        <li><a href="../k2/l2-12.html#takeaways">[L2.12]</a> — kdyby cyklus nebyl vidět od oka, najde ho Bellman-Ford.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>U malé sítě nemusíš formálně spouštět Bellman-Forda — záporné cykly hledej od oka, ale <em>systematicky</em>: projdi cykly v $G_f$ a sčítej ceny $c_f$. Po každé augmentaci přepočítej jen hrany cyklu ($u_f \mp \delta$), zbytek $G_f$ se nemění. Konči teprve, až součty <em>všech</em> cyklů vyjdou $\ge 0$ — a tuhle kontrolu napiš, to je certifikát.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
+        <div class="inner">
+          <p><strong>(i) Přípustnost a cena.</strong> Meze: $3 \in [0,3]$, $3 \in [0,4]$, $0 \in [0,3]$, $0 \in [0,3]$, $0 \in [0,2]$ ✓. Bilance (out − in): $a$: $3 + 0 = 3 = b(a)$ ✓; $b$: $(3 + 0) - 3 = 0$ ✓; $c$: $0 - 0 = 0$ ✓; $d$: $0 - 3 = -3$ ✓. Cena $= 3 \cdot 1 + 3 \cdot 4 = \mathbf{15}$.</p>
+          <p><strong>(ii) Běh</strong> (odkrokuj si):</p>
+          <div class="viz" id="viz-t02run"></div>
+          <p>Iterace 1: v $G_f^{(1)}$ je záporný cyklus $d \to b \to c \to d$ s cenou $-4 + 1 + 1 = -2$ a $\delta = \min(3, 2, 3) = 2$ → tok na $b \to d$ klesne $3 \to 1$ (protisměrná hrana), na $b \to c$ a $c \to d$ vzroste $0 \to 2$; cena $15 - 2 \cdot 2 = 11$. Iterace 2: v $G_f^{(2)}$ je záporný cyklus $b \to a \to c \to d \to b$ s cenou $-1 + 2 + 1 - 4 = -2$ a $\delta = \min(3, 3, 1, 1) = 1$ → $f(a \to b)\!: 3 \to 2$, $f(a \to c)\!: 0 \to 1$, $f(c \to d)\!: 2 \to 3$, $f(b \to d)\!: 1 \to 0$; cena $11 - 2 \cdot 1 = \mathbf{9}$. (Bellman-Ford může cykly najít i v jiném pořadí — skončit musí vždy na ceně 9.)</p>
+          <p><strong>(iii) Certifikát.</strong> V $G_f^{(3)}$ projdi všechny cykly: $a \to b \to a$: $1 - 1 = 0$; $a \to c \to a$: $2 - 2 = 0$; $a \to c \to b \to a$: $2 - 1 - 1 = 0$; $a \to b \to d \to c \to a$: $1 + 4 - 1 - 2 = +2$; $b \to d \to c \to b$: $4 - 1 - 1 = +2$. Žádný záporný ⟹ tok $f^* = (a{\to}b\!: 2,\ b{\to}d\!: 0,\ a{\to}c\!: 1,\ c{\to}d\!: 3,\ b{\to}c\!: 2)$ s cenou $\mathbf{9}$ je optimální. (Nulové cykly prozrazují alternativní optima — např. poslat všechny 3 jednotky přes $a \to c \to d$ stojí také 9.)</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L4.11">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k4/l4-10.html"><span class="dir">← Předchozí</span> L4.10 · Minimum Cost Flow + reziduální graf s cenami</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.12 · Assignment problem přes MCF + min-weight perfect matching)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Layout sítě ze slidu 32 (shodný s L4.10) — každé volání dostává vlastní kopii uzlů
+function mcfNodes(subs) {
+  return [
+    {id:'u', x:90,  y:180, label:'u', sub:subs[0]},
+    {id:'v', x:320, y:60,  label:'v', sub:subs[1]},
+    {id:'w', x:320, y:300, label:'w', sub:subs[2]},
+    {id:'x', x:550, y:180, label:'x', sub:subs[3]},
+  ];
+}
+
+// 1 — Detekce: G_f⁽¹⁾ + pomocný uzel s s 0-hranami (konstrukce slide 31; popisky hran = jen ceny c_f)
+KOViz.graph(document.getElementById('viz-detect'), {
+  directed: true,
+  w: 640, h: 380,
+  nodes: mcfNodes(['', '', '', '']).concat([{id:'s', x:550, y:40, label:'s', cls:'hl'}]),
+  edges: [
+    {from:'u', to:'v', label:'2',  curve:0.18},
+    {from:'v', to:'u', label:'−2', curve:0.18, dashed:true},
+    {from:'u', to:'w', label:'2',  curve:0.18},
+    {from:'w', to:'u', label:'−2', curve:0.18, dashed:true},
+    {from:'u', to:'x', label:'1',  curve:0.18},
+    {from:'x', to:'v', label:'−3'},
+    {from:'w', to:'x', label:'1',  curve:0.18},
+    {from:'x', to:'w', label:'−1', curve:0.18, dashed:true},
+    {from:'s', to:'u', label:'0', dashed:true, cls:'hl'},
+    {from:'s', to:'v', label:'0', dashed:true, cls:'hl'},
+    {from:'s', to:'w', label:'0', dashed:true, cls:'hl', curve:-0.25},
+    {from:'s', to:'x', label:'0', dashed:true, cls:'hl'},
+  ],
+  caption: 'Detekce záporného cyklu v G_f⁽¹⁾ (tok za 18 z [L4.10]; popisky = ceny c_f, reziduální kapacity pro Bellman-Forda nehrají roli). Pomocný uzel s (zvýrazněně, vpravo nahoře) má 0-hrany do všech uzlů — všechno je z něj dosažitelné a žádný cyklus nepřidal (nic do něj nevede). BF z s odhalí např. cyklus u → x → v → u s cenou 1 − 3 − 2 = −4.',
+});
+
+// 2 — HLAVNÍ BĚH: cycle canceling na instanci slidu 32 (frames = absolutní stavy G_f; popisek hrany = u_f | c_f)
+KOViz.stepper(document.getElementById('viz-run'), {
+  graph: {
+    directed: true,
+    w: 640, h: 380,
+    nodes: mcfNodes(['b = +4', 'b = 0', 'b = 0', 'b = −4']),
+    edges: [
+      {from:'u', to:'v', label:'1 | 2',  curve:0.18},
+      {from:'v', to:'u', label:'3 | −2', curve:0.18, dashed:true},
+      {from:'u', to:'w', label:'1 | 2',  curve:0.18},
+      {from:'w', to:'u', label:'1 | −2', curve:0.18, dashed:true},
+      {from:'u', to:'x', label:'2 | 1',   curve:0.18},
+      {from:'x', to:'u', label:'u_f = 0', curve:0.18, dashed:true},
+      {from:'v', to:'x', label:'u_f = 0', curve:0.18},
+      {from:'x', to:'v', label:'3 | −3',  curve:0.18, dashed:true},
+      {from:'w', to:'x', label:'4 | 1',   curve:0.18},
+      {from:'x', to:'w', label:'1 | −1',  curve:0.18, dashed:true},
+    ],
+  },
+  frames: [
+    {desc:'Krok 1 algoritmu: přípustný tok f⁽¹⁾ = (u→v: 3, u→w: 1, u→x: 0, v→x: 3, w→x: 1) za cenu 18 (z [L4.10]; obecně by ho dodal [L4.6]/[L4.7]). Nakreslen je G_f⁽¹⁾ — popisek u_f | c_f, protisměrné hrany čárkovaně; v→x a x→u mají u_f = 0, v E_f nejsou (zešedlé).',
+     nodes:{}, edges:{'x->u':'dim', 'v->x':'dim'}},
+    {desc:'Krok 2: Bellman-Ford (z pomocného s, viz výše) najde záporný cyklus C₁ = u → x → v → u: c_f(C₁) = 1 + (−3) + (−2) = −4 < 0. Kapacita cyklu γ = min(2, 3, 3) = 2.',
+     nodes:{}, edges:{'x->u':'dim', 'v->x':'dim', 'u->x':'bad', 'x->v':'bad', 'v->u':'bad'}},
+    {desc:'Krok 3: augmentace o γ = 2. Dopředná u→x: f roste 0 → 2; protisměrné x→v a v→u: tok na původních hranách klesá — f(v→x): 3 → 1, f(u→v): 3 → 1. Nový tok f⁽²⁾ za 18 − 4·2 = 10. Nový G_f⁽²⁾: u→x je nasycená (vypadla), objevily se x→u a v→x.',
+     nodes:{}, edges:{'u->x':'dim'},
+     labels:{'u->v':'3 | 2', 'v->u':'1 | −2', 'u->x':'u_f = 0', 'x->u':'2 | −1', 'v->x':'2 | 3', 'x->v':'1 | −3'}},
+    {desc:'Krok 2 podruhé: v G_f⁽²⁾ je záporný cyklus C₂ = u → w → x → v → u: c_f(C₂) = 2 + 1 + (−3) + (−2) = −2 < 0, γ = min(1, 4, 1, 1) = 1.',
+     nodes:{}, edges:{'u->x':'dim', 'u->w':'bad', 'w->x':'bad', 'x->v':'bad', 'v->u':'bad'},
+     labels:{'u->v':'3 | 2', 'v->u':'1 | −2', 'u->x':'u_f = 0', 'x->u':'2 | −1', 'v->x':'2 | 3', 'x->v':'1 | −3'}},
+    {desc:'Krok 3 podruhé: augmentace o γ = 1. f(u→w): 1 → 2, f(w→x): 1 → 2; protisměrně f(v→x): 1 → 0, f(u→v): 1 → 0. Tok f⁽³⁾ = (0, 2, 2, 0, 2) za 10 − 2·1 = 8. Nový G_f⁽³⁾: u→w nasycená, v→u a x→v zmizely (tok na původních hranách klesl na l = 0).',
+     nodes:{}, edges:{'u->x':'dim', 'u->w':'dim', 'v->u':'dim', 'x->v':'dim'},
+     labels:{'u->v':'4 | 2', 'v->u':'u_f = 0', 'u->w':'u_f = 0', 'w->u':'2 | −2', 'u->x':'u_f = 0', 'x->u':'2 | −1', 'v->x':'3 | 3', 'x->v':'u_f = 0', 'w->x':'3 | 1', 'x->w':'2 | −1'}},
+    {desc:'Krok 2 potřetí: žádný záporný cyklus! Projdi je: w→x→w: 1 − 1 = 0; u→v→x→u: 2 + 3 − 1 = +4; u→v→x→w→u: 2 + 3 − 1 − 2 = +2; w→u→v→x→w: −2 + 2 + 3 − 1 = +2. STOP — f⁽³⁾ s cenou 8 je minimum cost flow (a 8 je přesně hodnota vytušená v [L4.10]).',
+     nodes:{}, edges:{'u->x':'dim', 'u->w':'dim', 'v->u':'dim', 'x->v':'dim'},
+     labels:{'u->v':'4 | 2', 'v->u':'u_f = 0', 'u->w':'u_f = 0', 'w->u':'2 | −2', 'u->x':'u_f = 0', 'x->u':'2 | −1', 'v->x':'3 | 3', 'x->v':'u_f = 0', 'w->x':'3 | 1', 'x->w':'2 | −1'}},
+  ],
+  caption: 'Běh cycle cancelingu na instanci slidu 32 (start = tok za 18 z [L4.10]). Popisek hrany = u_f | c_f; protisměrné hrany čárkovaně; hrany s popiskem „u_f = 0“ jsou zešedlé a v E_f NEJSOU (u zkoušky je vůbec nekresli — tady zůstávají, aby šlo krokovat tam a zpět). Nalezený záporný cyklus červeně. Dvě iterace: 18 → 10 → 8, pak certifikát optimality.',
+});
+
+// 3 — T02: vlastní instance (popisek = l, f, u · c)
+KOViz.graph(document.getElementById('viz-t02'), {
+  directed: true,
+  w: 640, h: 380,
+  nodes: [
+    {id:'a', x:90,  y:180, label:'a', sub:'b = +3'},
+    {id:'b', x:300, y:60,  label:'b', sub:'b = 0'},
+    {id:'c', x:300, y:300, label:'c', sub:'b = 0'},
+    {id:'d', x:530, y:180, label:'d', sub:'b = −3'},
+  ],
+  edges: [
+    {from:'a', to:'b', label:'0,3,3 · c 1'},
+    {from:'b', to:'d', label:'0,3,4 · c 4'},
+    {from:'a', to:'c', label:'0,0,3 · c 2'},
+    {from:'c', to:'d', label:'0,0,3 · c 1'},
+    {from:'b', to:'c', label:'0,0,2 · c 1'},
+  ],
+  caption: 'T02 (vlastní instance — přiznáno): popisek hrany = l, f, u · cena c; bilance pod uzly. Startovní tok f = (a→b: 3, b→d: 3, ostatní 0).',
+});
+
+// 4 — T02 řešení: běh cycle cancelingu (uvnitř details; popisek = u_f | c_f)
+KOViz.stepper(document.getElementById('viz-t02run'), {
+  graph: {
+    directed: true,
+    w: 640, h: 380,
+    nodes: [
+      {id:'a', x:90,  y:180, label:'a', sub:'b = +3'},
+      {id:'b', x:300, y:60,  label:'b', sub:'b = 0'},
+      {id:'c', x:300, y:300, label:'c', sub:'b = 0'},
+      {id:'d', x:530, y:180, label:'d', sub:'b = −3'},
+    ],
+    edges: [
+      {from:'a', to:'b', label:'u_f = 0', curve:0.18},
+      {from:'b', to:'a', label:'3 | −1',  curve:0.18, dashed:true},
+      {from:'b', to:'d', label:'1 | 4',   curve:0.18},
+      {from:'d', to:'b', label:'3 | −4',  curve:0.18, dashed:true},
+      {from:'a', to:'c', label:'3 | 2',   curve:0.18},
+      {from:'c', to:'a', label:'u_f = 0', curve:0.18, dashed:true},
+      {from:'c', to:'d', label:'3 | 1',   curve:0.18},
+      {from:'d', to:'c', label:'u_f = 0', curve:0.18, dashed:true},
+      {from:'b', to:'c', label:'2 | 1',   curve:0.18},
+      {from:'c', to:'b', label:'u_f = 0', curve:0.18, dashed:true},
+    ],
+  },
+  frames: [
+    {desc:'G_f⁽¹⁾ pro start f = (3, 3, 0, 0, 0) za 15: a→b nasycená (u_f = 0, zešedlá — v E_f není), nevyužité hrany nemají zpětné kopie. Záporný cyklus C₁ = d → b → c → d: −4 + 1 + 1 = −2, δ = min(3, 2, 3) = 2.',
+     nodes:{}, edges:{'a->b':'dim', 'c->a':'dim', 'd->c':'dim', 'c->b':'dim', 'd->b':'bad', 'b->c':'bad', 'c->d':'bad'}},
+    {desc:'Augmentace o δ = 2: f(b→d): 3 → 1 (protisměrná d→b), f(b→c): 0 → 2, f(c→d): 0 → 2; cena 15 − 2·2 = 11. G_f⁽²⁾: b→c se nasytila, přibyly d→c a c→b. Nový záporný cyklus C₂ = b → a → c → d → b: −1 + 2 + 1 − 4 = −2, δ = min(3, 3, 1, 1) = 1.',
+     nodes:{}, edges:{'a->b':'dim', 'c->a':'dim', 'b->c':'dim', 'b->a':'bad', 'a->c':'bad', 'c->d':'bad', 'd->b':'bad'},
+     labels:{'b->d':'3 | 4', 'd->b':'1 | −4', 'c->d':'1 | 1', 'd->c':'2 | −1', 'b->c':'u_f = 0', 'c->b':'2 | −1'}},
+    {desc:'Augmentace o δ = 1: f(a→b): 3 → 2, f(a→c): 0 → 1, f(c→d): 2 → 3, f(b→d): 1 → 0; cena 11 − 2·1 = 9. G_f⁽³⁾: c→d nasycená, d→b zmizela (f = l = 0), a→b se vrátila do E_f. Žádný záporný cyklus (a→b→a: 0; a→c→a: 0; a→c→b→a: 0; a→b→d→c→a: +2; b→d→c→b: +2) → STOP, optimum 9.',
+     nodes:{}, edges:{'c->d':'dim', 'd->b':'dim', 'b->c':'dim'},
+     labels:{'a->b':'1 | 1', 'b->a':'2 | −1', 'b->d':'4 | 4', 'd->b':'u_f = 0', 'a->c':'2 | 2', 'c->a':'1 | −2', 'c->d':'u_f = 0', 'd->c':'3 | −1', 'b->c':'u_f = 0', 'c->b':'2 | −1'}},
+  ],
+  caption: 'T02 řešení: dvě iterace cycle cancelingu (15 → 11 → 9). Popisek hrany = u_f | c_f; protisměrné hrany čárkovaně; hrany s „u_f = 0“ jsou zešedlé a v E_f nejsou; nalezený cyklus červeně. Frames = stavy G_f po sobě.',
+});
+</script>
+</body>
+</html>

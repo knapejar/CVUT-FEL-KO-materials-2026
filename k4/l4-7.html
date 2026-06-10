@@ -36,7 +36,7 @@
     <strong>Transformace úlohy $(G, l, u, s, t)$ s $l(e) &gt; 0$ na feasible flow with balances s nulovými dolními mezemi.</strong> Tři tahy: cirkulační hrana $t \to s$ s kapacitou $\infty$, substituce $f(e) = f'(e) + l(e)$ (nové kapacity $u' = u - l$) a bilance $b(v) = \sum_{\text{do } v} l - \sum_{\text{z } v} l$ — a pak už jen zavoláš rozhodovací úlohu z <a href="l4-6.html#takeaways">[L4.6]</a>.
   </div>
 
-  <p>Ford-Fulkerson je smyčka „augmentuj, dokud to jde“ — ale krok 1 zní <em>„sežeň přípustný tok“</em> (<a href="l4-3.html#takeaways">[L4.3]</a>). Při $l \equiv 0$ je to zadarmo ($f \equiv 0$), a u zkouškových běhů bývá tok rovnou v zadání. Dnes vyřešíme zbývající případ: síť s nenulovými dolními mezemi, kde startovní tok nikdo nedal. Je to přesné zkouškové zadání (09.07.2021 a další termíny, úloha T01 dole) i téma k ústní — a zároveň vstupní brána k minimum cost flow: cycle canceling v [L4.11] taky potřebuje z čeho vystartovat.</p>
+  <p>Ford-Fulkerson je smyčka „augmentuj, dokud to jde“ — ale krok 1 zní <em>„sežeň přípustný tok“</em> (<a href="l4-3.html#takeaways">[L4.3]</a>). Při $l \equiv 0$ je to zadarmo ($f \equiv 0$), a u zkouškových běhů bývá tok rovnou v zadání. Dnes vyřešíme zbývající případ: síť s nenulovými dolními mezemi, kde startovní tok nikdo nedal. Je to přesné zkouškové zadání (09.07.2021 a další termíny, úloha T01 dole) i téma k ústní — a zároveň vstupní brána k minimum cost flow: cycle canceling v <a href="l4-11.html">[L4.11]</a> taky potřebuje z čeho vystartovat.</p>
 
   <!-- ===== SEKCE 1: PROČ JE START PROBLÉM ===== -->
   <h2>Proč je start vůbec problém</h2>
@@ -160,7 +160,7 @@
       <li><strong>Transformace ve 3 tazích (slidy 24–25):</strong> ① cirkulační hrana $t \to s$ s $(l, u) = (0, \infty)$ — Kirchhoff pak platí všude; ② substituce $f(e) = f'(e) + l(e)$ → $0 \le f'(e) \le u'(e) = u(e) - l(e)$; ③ bilance $b(v) = \sum_{\delta^-(v)} l(e) - \sum_{\delta^+(v)} l(e)$ — jen ze vstupních dat, $\sum_v b(v) = 0$ (každé $l(e)$ jednou $+$ a jednou $-$).</li>
       <li><strong>Krok 4 = <a href="l4-6.html#takeaways">[L4.6]</a>:</strong> přidej $s', t'$, vyřeš max flow s nulovými $l$ (start $f' \equiv 0$); počáteční tok existuje $\iff$ b-hrany nasycené ($|f'_{\max}| = B$).</li>
       <li><strong>Zpětný převod:</strong> $f(e) = f'(e) + l(e)$ na původních hranách, smaž $t \to s$ → počáteční $s$-$t$ tok hodnoty $f(t \to s)$; F-F pokračuje na původní síti přes reziduální graf <a href="l4-2.html#takeaways">[L4.2]</a>.</li>
-      <li><strong>Řetěz redukcí (Conclusion, slide 25):</strong> initial flow s nenulovými $l$ → Feasible Flow with Balances s $l = 0$ → Maximum Flow s $l = 0$. Stejný startovní problém řeší i cycle canceling pro MCF v [L4.11].</li>
+      <li><strong>Řetěz redukcí (Conclusion, slide 25):</strong> initial flow s nenulovými $l$ → Feasible Flow with Balances s $l = 0$ → Maximum Flow s $l = 0$. Stejný startovní problém řeší i cycle canceling pro MCF v <a href="l4-11.html#takeaways">[L4.11]</a>.</li>
     </ul>
   </div>
 

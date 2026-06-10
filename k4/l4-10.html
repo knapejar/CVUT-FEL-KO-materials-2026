@@ -36,7 +36,7 @@
     <strong>Minimum cost flow (tok s minimální cenou)</strong> = pětice $(G, l, u, c, b)$: hledáme přípustný tok splňující bilance, který minimalizuje $\sum_e f(e) \cdot c(e)$ — a reziduální graf k tomu dostává <strong>ceny</strong>: dopředná hrana zdědí $+c(e)$, zpětná dostane $-c(e)$.
   </div>
 
-  <p>Celá kapitola zatím řešila otázku <em>kolik</em>: maximální tok <a href="l4-3.html#takeaways">[L4.3]</a>, přípustnost s bilancemi <a href="l4-6.html#takeaways">[L4.6]</a> a dolními mezemi <a href="l4-7.html#takeaways">[L4.7]</a>. Dnes přidáme otázku <em>za kolik</em> — každá jednotka toku po hraně něco stojí. Dostaneme <strong>minimum cost flow (MCF, tok s minimální cenou)</strong>: nejobecnější tokovou úlohu kapitoly, do které se schová max flow, nejkratší cesta i listonoš. A protože algoritmus pro MCF (cycle canceling, příští lekce [L4.11]) pracuje v reziduálním grafu, doplníme do reziduálního grafu z <a href="l4-2.html#takeaways">[L4.2]</a> poslední chybějící ingredienci: ceny $c_f$. Přes MCF se v [L4.12] vyřeší i assignment problem — <em>Maďarský (Hungarian) algoritmus je ze zkoušky vyloučen</em>.</p>
+  <p>Celá kapitola zatím řešila otázku <em>kolik</em>: maximální tok <a href="l4-3.html#takeaways">[L4.3]</a>, přípustnost s bilancemi <a href="l4-6.html#takeaways">[L4.6]</a> a dolními mezemi <a href="l4-7.html#takeaways">[L4.7]</a>. Dnes přidáme otázku <em>za kolik</em> — každá jednotka toku po hraně něco stojí. Dostaneme <strong>minimum cost flow (MCF, tok s minimální cenou)</strong>: nejobecnější tokovou úlohu kapitoly, do které se schová max flow, nejkratší cesta i listonoš. A protože algoritmus pro MCF (cycle canceling, příští lekce <a href="l4-11.html">[L4.11]</a>) pracuje v reziduálním grafu, doplníme do reziduálního grafu z <a href="l4-2.html#takeaways">[L4.2]</a> poslední chybějící ingredienci: ceny $c_f$. Přes MCF se v [L4.12] vyřeší i assignment problem — <em>Maďarský (Hungarian) algoritmus je ze zkoušky vyloučen</em>.</p>
 
   <!-- ===== SEKCE 1: MOTIVACE ===== -->
   <h2>Za kolik? Nová otázka pro starou síť</h2>
@@ -48,7 +48,7 @@
   <details class="try">
     <summary>Zkus sám: nakreslený tok bilance splňuje (ověř Kirchhoffa s bilancemi!) a stojí $3 \cdot 2 + 1 \cdot 2 + 0 \cdot 1 + 3 \cdot 3 + 1 \cdot 1 = 18$. Umíš těch 4 jednotky z $u$ do $x$ dopravit levněji? Kolik nejméně?</summary>
     <div class="inner">
-      <p>Spočítej cenu tras za jednotku: přímo $u \to x$ stojí 1 (ale kapacita jen 2), přes $w$ stojí $2 + 1 = 3$ (kapacita $\min(2,5) = 2$), přes $v$ stojí $2 + 3 = 5$. Nejlevnější mix: 2 jednotky přímo + 2 jednotky přes $w$ = $2 \cdot 1 + 2 \cdot 3 = \mathbf{8}$. Bilance sedí stejně dobře jako u nakresleného toku za 18 — <strong>přípustnost o ceně nic neříká</strong>. Max flow by mezi oběma toky nerozlišoval; potřebujeme novou úlohu, která mezi přípustnými toky vybírá ten nejlevnější. (Že je 8 opravdu minimum, dnes jen tušíme — certifikát dodá příští lekce [L4.11]: žádný záporný cyklus v reziduálním grafu.)</p>
+      <p>Spočítej cenu tras za jednotku: přímo $u \to x$ stojí 1 (ale kapacita jen 2), přes $w$ stojí $2 + 1 = 3$ (kapacita $\min(2,5) = 2$), přes $v$ stojí $2 + 3 = 5$. Nejlevnější mix: 2 jednotky přímo + 2 jednotky přes $w$ = $2 \cdot 1 + 2 \cdot 3 = \mathbf{8}$. Bilance sedí stejně dobře jako u nakresleného toku za 18 — <strong>přípustnost o ceně nic neříká</strong>. Max flow by mezi oběma toky nerozlišoval; potřebujeme novou úlohu, která mezi přípustnými toky vybírá ten nejlevnější. (Že je 8 opravdu minimum, dnes jen tušíme — certifikát dodá příští lekce <a href="l4-11.html#takeaways">[L4.11]</a>: žádný záporný cyklus v reziduálním grafu.)</p>
     </div>
   </details>
 
@@ -164,7 +164,7 @@
   <details class="try">
     <summary>Zkus sám: najdi v hotovém $G_f$ <em>cyklus se zápornou součtovou cenou</em>. Co by se stalo, kdybys podél něj poslal tolik jednotek, kolik dovolí nejmenší $u_f$ na cyklu?</summary>
     <div class="inner">
-      <p>Třeba $u \to x \to v \to u$: ceny $1 + (-3) + (-2) = -4 &lt; 0$, kapacity $\min(2, 3, 3) = 2$. Pošli po něm $\gamma = 2$ jednotky: na $u \to x$ tok vzroste o 2, na zpětných úsecích se tok <em>vrátí</em> — $f(v \to x)$ klesne $3 \to 1$ a $f(u \to v)$ klesne $3 \to 1$. Bilance se nezmění (cyklus do žádného uzlu nic nepřidá ani neodebere!), ale cena klesne o $4 \cdot 2 = 8$: z 18 na 10. A v novém $G_f$ je další záporný cyklus ($u \to w \to x \to v \to u$, cena $2 + 1 - 3 - 2 = -2$, $\gamma = 1$) — po něm jsi na ceně $\mathbf{8}$ z prvního try. <strong>Záporný cyklus v $G_f$ = sleva beze změny bilancí.</strong> Opakovat, dokud nějaký existuje — to je celý algoritmus cycle canceling, příští lekce [L4.11] (záporné cykly najde Bellman-Ford, srov. <a href="../k2/l2-12.html#takeaways">[L2.12]</a>).</p>
+      <p>Třeba $u \to x \to v \to u$: ceny $1 + (-3) + (-2) = -4 &lt; 0$, kapacity $\min(2, 3, 3) = 2$. Pošli po něm $\gamma = 2$ jednotky: na $u \to x$ tok vzroste o 2, na zpětných úsecích se tok <em>vrátí</em> — $f(v \to x)$ klesne $3 \to 1$ a $f(u \to v)$ klesne $3 \to 1$. Bilance se nezmění (cyklus do žádného uzlu nic nepřidá ani neodebere!), ale cena klesne o $4 \cdot 2 = 8$: z 18 na 10. A v novém $G_f$ je další záporný cyklus ($u \to w \to x \to v \to u$, cena $2 + 1 - 3 - 2 = -2$, $\gamma = 1$) — po něm jsi na ceně $\mathbf{8}$ z prvního try. <strong>Záporný cyklus v $G_f$ = sleva beze změny bilancí.</strong> Opakovat, dokud nějaký existuje — to je celý algoritmus cycle canceling, příští lekce <a href="l4-11.html#takeaways">[L4.11]</a> (záporné cykly najde Bellman-Ford, srov. <a href="../k2/l2-12.html#takeaways">[L2.12]</a>).</p>
     </div>
   </details>
 
@@ -185,7 +185,7 @@
       <li><strong>LP formulace (slide 29):</strong> proměnné $f(e) \ge 0$, lineární cena, bilanční rovnice pro každý uzel, meze na hranách — max-flow LP <a href="l4-1.html#takeaways">[L4.1]</a> s vyměněnou účelovou funkcí a bilancemi místo $s$/$t$.</li>
       <li><strong>Reziduální graf s cenami (slide 32):</strong> kapacity jako v <a href="l4-2.html#takeaways">[L4.2]</a> ($u - f$ dopředně, $f - l$ zpětně, hrany s $u_f = 0$ vypadnou); ceny $c_f(i,j) = c(i,j)$ dopředně a $c_f(j,i) = -c(i,j)$ zpětně — zrušená jednotka cenu vrací.</li>
       <li><strong>MCF je obecný (slidy 29–30):</strong> max flow = cirkulace s hranou $t \to s$ ($u = \infty$, $c = -1$, jinde $c = 0$, $b \equiv 0$); shortest path = $b(s) = 1$, $b(t) = -1$, $c$ = váhy; Chinese postman = $b \equiv 0$, $l \equiv 1$.</li>
-      <li><strong>Záporný cyklus v $G_f$ = zlevnění toku beze změny bilancí</strong> (o $|{\sum c_f}| \cdot \gamma$). Augmentace podél záporných cyklů až do optima = cycle canceling → [L4.11].</li>
+      <li><strong>Záporný cyklus v $G_f$ = zlevnění toku beze změny bilancí</strong> (o $|{\sum c_f}| \cdot \gamma$). Augmentace podél záporných cyklů až do optima = cycle canceling → <a href="l4-11.html#takeaways">[L4.11]</a>.</li>
     </ul>
   </div>
 
@@ -255,7 +255,7 @@
       <div class="viz" id="viz-t02"></div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Ruční drill dnešní konstrukce: ověřit přípustnost (meze + bilanční rovnice), postavit $G_f$ se <em>dvěma</em> čísly na hraně ($u_f$ a $c_f$) a najít záporný cyklus — tedy přesně ty kroky, které u zkoušky předcházejí cycle cancelingu [L4.11].</p>
+      <p>Ruční drill dnešní konstrukce: ověřit přípustnost (meze + bilanční rovnice), postavit $G_f$ se <em>dvěma</em> čísly na hraně ($u_f$ a $c_f$) a najít záporný cyklus — tedy přesně ty kroky, které u zkoušky předcházejí cycle cancelingu <a href="l4-11.html">[L4.11]</a>.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -273,7 +273,7 @@
           <p><strong>(i) Přípustnost a cena.</strong> Meze: $2 \in [0,3]$, $2 \in [0,2]$, $0 \in [0,2]$ ✓. Bilance (out − in): $a$: $2 + 0 = 2 = b(a)$ ✓; $b$: $2 - 2 = 0$ ✓; $c$: $0 - (2 + 0) = -2$ ✓. Cena $\sum f \cdot c = 2 \cdot 1 + 2 \cdot 4 + 0 \cdot 2 = \mathbf{10}$.</p>
           <p><strong>(ii) Reziduální graf.</strong> $a \to b$: dopředná $u_f = 3 - 2 = 1$, $c_f = +1$; zpětná $b \to a$: $u_f = 2 - 0 = 2$, $c_f = -1$. $b \to c$: dopředná $u_f = 2 - 2 = 0$ → <em>v $E_f$ není</em>; zpětná $c \to b$: $u_f = 2$, $c_f = -4$. $a \to c$: dopředná $u_f = 2$, $c_f = +2$; zpětná $u_f = 0 - 0 = 0$ → není. Celkem $E_f = \{a \to b\ (1, +1),\ b \to a\ (2, -1),\ c \to b\ (2, -4),\ a \to c\ (2, +2)\}$:</p>
           <div class="viz" id="viz-t02gf"></div>
-          <p><strong>(iii) Záporný cyklus.</strong> $a \to c \to b \to a$: cena $2 + (-4) + (-1) = -3 &lt; 0$, $\gamma = \min(2, 2, 2) = 2$. Augmentací tok na $a \to c$ vzroste na 2 a na zpětných úsecích klesne: $f(b \to c): 2 \to 0$, $f(a \to b): 2 \to 0$. Nová cena $= 10 - 3 \cdot 2 = \mathbf{4}$ (kontrola: $2 \cdot 2 = 4$ ✓ — obě jednotky tečou přímo $a \to c$). V novém $G_f$ už záporný cyklus není, takže 4 je optimum — přesně tohle z nás v [L4.11] udělá algoritmus.</p>
+          <p><strong>(iii) Záporný cyklus.</strong> $a \to c \to b \to a$: cena $2 + (-4) + (-1) = -3 &lt; 0$, $\gamma = \min(2, 2, 2) = 2$. Augmentací tok na $a \to c$ vzroste na 2 a na zpětných úsecích klesne: $f(b \to c): 2 \to 0$, $f(a \to b): 2 \to 0$. Nová cena $= 10 - 3 \cdot 2 = \mathbf{4}$ (kontrola: $2 \cdot 2 = 4$ ✓ — obě jednotky tečou přímo $a \to c$). V novém $G_f$ už záporný cyklus není, takže 4 je optimum — přesně tohle z nás v <a href="l4-11.html#t-ccrun">[L4.11]</a> udělá algoritmus.</p>
         </div>
       </details>
     </div>
@@ -285,7 +285,7 @@
 
   <div class="pager">
     <a href="../k4/l4-9.html"><span class="dir">← Předchozí</span> L4.9 · Bipartitní matching přes max flow</a>
-    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.11 · Cycle canceling (řešení MCF))</a>
+    <a class="next" href="../k4/l4-11.html"><span class="dir">Další →</span> L4.11 · Cycle canceling (řešení MCF)</a>
   </div>
 
 </div>
