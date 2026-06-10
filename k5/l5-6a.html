@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L5.6a · Relative-order ILP pro 1|prec|Σw_jC_j — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k5">K5 · Rozvrhování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L5.6a</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L5.6a</span> Kapitola K5 — Rozvrhování (Slot 5) · <strong>[MUST]</strong>
+  </p>
+  <h1>Relative-order ILP pro 1|prec|Σw<sub>j</sub>C<sub>j</sub></h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Pořadové proměnné</strong> $x_{ij} = 1 \iff T_i$ běží před $T_j$: rozvrh na jednom stroji je permutace a tu zakóduješ antisymetrií $x_{ij} + x_{ji} = 1$, zákazem cyklů přes trojice a precedencí $x_{ij} \ge e_{ij}$ — a completion time pak <em>není</em> $p_j$, ale $C_j = \sum_i p_i\,x_{ij}$.
+  </div>
+
+  <p>Tohle je doložená zkoušková otázka: na zkoušce 9.&nbsp;7.&nbsp;2021 padla i s b) částí o B&amp;B (přepis ručního řešení se dochoval — včetně chyby, kterou za chvíli uvidíš červeně opravenou) a na zkoušce 29.&nbsp;6.&nbsp;2023 zněla otázka 6 doslova: <em>„SCHED — ILP formulace pro $1|prec|\sum w_j C_j$, rict jak se LP relaxace toho ILP da pouzit pri branch and bound algoritmu.“</em> Dnes postavíme tu ILP formulaci (slidy 24–25); LP relaxace + B&amp;B (slide 26) je příští lekce [L5.6b], která použije stroj z <a href="../k5/l5-5.html#takeaways">[L5.5] Branch &amp; Bound pro ILP</a>.</p>
+
+  <!-- ===== SEKCE 1: PROC VUBEC ILP ===== -->
+  <h2>Proč na to potřebujeme ILP?</h2>
+
+  <details class="try">
+    <summary>Zkus sám: bez precedencí, $1\,||\,\sum w_j C_j$ — úlohy s dobami $p_j$ a vahami $w_j$ na jednom stroji. Jak je seřadíš, aby vážený součet dokončení byl nejmenší? (Zkus nejdřív $w_j = 1$.)</summary>
+    <div class="inner">
+      <p>Pro $w_j = 1$ řadíš od nejkratší: <strong>SPT</strong> (Shortest Processing Time first) — krátká úloha na začátku „zdržuje“ všechny za sebou nejméně. S vahami totéž v poměru: <strong>WSPT</strong> — neklesající $p_j / w_j$ (krátké a důležité dopředu). Obojí je <em>greedy</em> a běží v $O(n \log n)$ — žádné ILP. Jenže přidej precedence a greedy se rozbije: „urgentní“ úloha může být zamčená za pomalým předchůdcem a lokální prohození už nejde.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 23 (EN 1:1) — Scheduling on One Resource — Minimizing $\sum w_j C_j$</div>
+    <ul>
+      <li>“$1 \,||\, \sum C_j$ — <strong>easy</strong> — <strong>SPT rule</strong> (Shortest Processing Time first) — schedule the tasks in a non-decreasing order of $p_j$”</li>
+      <li>“$1 \,||\, \sum w_j C_j$ — <strong>easy</strong> — <strong>Weighted SPT</strong> — schedule the tasks in a non-decreasing order of $\frac{p_j}{w_j}$”</li>
+      <li>“$1 \,|\, \mathrm{prec} \,|\, \sum C_j$ — <strong>NP-hard</strong>”</li>
+    </ul>
+  </div>
+
+  <p>Už jen nevážené $1|prec|\sum C_j$ je NP-těžké — a přesně proto se ptáme na <strong>ILP formulaci</strong> (zápis problému z <a href="../k5/l5-1.html#takeaways">[L5.1] Grahamovy notace</a> čteš: jeden stroj, úlohy s precedencemi z grafu $G$ jako v <a href="../k5/l5-2.html#takeaways">[L5.2] Precedence a temporální omezení</a>, minimalizuj $\sum w_j C_j$; bez preempce — to je default prázdného $\beta$).</p>
+
+  <!-- ===== SEKCE 2: ROZVRH = PERMUTACE ===== -->
+  <h2>Rozvrh na jednom stroji = pořadí</h2>
+
+  <p>Na jednom stroji bez release times se nevyplatí nikdy čekat: každou mezeru můžeš zavřít posunutím všeho doleva a žádné $C_j$ se nezhorší. Optimální rozvrh je tedy <strong>permutace úloh bez mezer</strong> — jediné, co hledáme, je <em>pořadí</em>.</p>
+
+  <details class="try">
+    <summary>Zkus sám: jak zakóduješ „pořadí $n$ úloh“ do binárních proměnných (<a href="../k0/l0-8.html#takeaways">[L0.8]</a>)? Nech se inspirovat tím, jak je v zadání zakódovaný precedenční graf: $e_{ij} = 1$, když vede hrana $T_i \to T_j$.</summary>
+    <div class="inner">
+      <p>Stejným jazykem: binárka <strong>pro každou dvojici</strong>, $x_{ij} = 1 \iff T_i$ je v rozvrhu <em>před</em> $T_j$. Permutace je přesně relace „před“ na všech dvojicích — úplná (každá dvojice rozhodnutá), antisymetrická a bez cyklů. Pozor: $x_{ij}$ zavádíš pro <em>všechny</em> dvojice, ne jen pro hrany $G$ — i dvě precedencí nesvázané úlohy musí na jednom stroji nějaké pořadí mít.</p>
+    </div>
+  </details>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 24 (EN 1:1) — Branch and Bound with LP for $1 \,|\, \mathrm{prec} \,|\, \sum w_j C_j$</div>
+    <ul>
+      <li>“First, we formulate the problem as an ILP:</li>
+      <li>we use <strong>variable</strong> $x_{ij} \in \{0, 1\}$ such that $x_{ij} = 1$ iff $T_i$ precedes $T_j$ or $i = j$</li>
+      <li>we encode <strong>precedence relations</strong> into $e_{ij} \in \{0, 1\}$ such that $e_{ij} = 1$ iff there is a directed edge from $T_i$ to $T_j$ in the precedence graph $G$ or $i = j$”</li>
+    </ul>
+  </div>
+
+  <p>Drobnost s velkým dopadem: konvence „or $i = j$“ znamená $x_{ii} = 1$ a $e_{ii} = 1$ na diagonále — uvidíš za chvíli, že se diagonála hodí do vzorce pro $C_j$.</p>
+
+  <!-- ===== SEKCE 3: OMEZENI ===== -->
+  <h2>Omezení: precedence, antisymetrie, žádný cyklus</h2>
+
+  <p><strong>① Precedence:</strong> když $G$ obsahuje hranu $T_i \to T_j$, musí být $T_i$ před $T_j$ i v rozvrhu. To je implikace „$e_{ij} = 1 \Rightarrow x_{ij} = 1$“, a protože obojí jsou binárky (a $e$ je parametr), stačí nerovnost
+  $$x_{ij} \ge e_{ij} \qquad i, j \in 1..n.$$
+  Pro $e_{ij} = 0$ nic nevynucuje, pro $e_{ij} = 1$ přibije $x_{ij} = 1$. (Diagonálu $x_{ii} = 1$ vynutí $e_{ii} = 1$; slide 25 ji pro jistotu uvádí i explicitně.)</p>
+
+  <p><strong>② Antisymetrie:</strong> pro každou dvojici $i \ne j$ právě jeden směr:
+  $$x_{ij} + x_{ji} = 1 \qquad i, j \in 1..n,\ i \ne j.$$
+  Buď $T_i$ před $T_j$, nebo naopak — nikdy obojí, nikdy nic. (Je to „buď–anebo“ bez big-M: nepotřebujeme žádné časy, jen směr. Srovnej s <a href="../k1/l1-4.html#takeaways">[L1.4] big-M: disjunkce omezení</a>, kde se stejná disjunkce řeší přes velkou konstantu, protože tam figurují spojité starty.)</p>
+
+  <details class="try">
+    <summary>Zkus sám: stačí to? Najdi matici $x$ pro 3 úlohy, která splní antisymetrii (i precedenci s prázdným $G$) — a přesto nepopisuje žádné pořadí.</summary>
+    <div class="inner">
+      <p>$x_{12} = x_{23} = x_{31} = 1$ (a doplněk $x_{21} = x_{32} = x_{13} = 0$). Každá dvojice je v pořádku, ale dohromady: $T_1$ před $T_2$, $T_2$ před $T_3$, $T_3$ před $T_1$ — <strong>cyklus</strong>. Žádná úloha není první, takový „rozvrh“ neexistuje. Antisymetrie hlídá dvojice; cykličnost je vlastnost <em>trojic a víc</em>.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-cycle"></div>
+
+  <p><strong>③ No-cycle:</strong> pro každou trojici navzájem různých $i, j, k$:
+  $$1 \le x_{ij} + x_{jk} + x_{ki} \le 2 \qquad i, j, k \in 1..n,\ i \ne j \ne k.$$
+  Součet $3$ by znamenal cyklus $T_i \to T_j \to T_k \to T_i$; součet $0$ znamená (díky antisymetrii) $x_{ji} = x_{kj} = x_{ik} = 1$, tedy tentýž cyklus obráceně. Obě hodnoty zakazujeme, povolené zůstávají jen „tranzitivní“ kombinace 1 a 2.</p>
+
+  <details class="try">
+    <summary>Zkus sám: trojice zakazují jen cykly délky 3. Co cyklus délky 4 a víc — neproklouzne?</summary>
+    <div class="inner">
+      <p>Neproklouzne. Po antisymetrii je digraf proměnných $x$ <strong>turnaj</strong> (mezi každou dvojicí právě jedna šipka) — a v turnaji každý cyklus obsahuje cyklus délky 3: vezmi cyklus $a \to b \to c \to \cdots \to a$ délky $\ge 4$ a podívej se na šipku mezi $a$ a $c$. Je-li $x_{ca} = 1$, máš trojúhelník $a \to b \to c \to a$; je-li $x_{ac} = 1$, zkrátil jsi cyklus o vrchol $b$ — a opakuj. Nejkratší cyklus turnaje má tedy délku 3, takže zákaz trojic stačí. <em>(Zdůvodnění vlastní — slidy to nedokazují; přiznáno.)</em></p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 4: KRITERIUM — PAST ===== -->
+  <h2>Kritérium: čemu se rovná $C_j$?</h2>
+
+  <details class="try">
+    <summary>Zkus sám (tady se na zkoušce chybuje): máš matici $x$. Napiš <em>lineární</em> vyjádření completion time $C_j$. Nápověda: rozvrh nemá mezery — co všechno proběhne, než $T_j$ skončí?</summary>
+    <div class="inner">
+      <p>Než $T_j$ skončí, proběhnou <strong>všechny úlohy, které jsou před ní</strong> (tj. všechna $T_i$ s $x_{ij} = 1$, $i \ne j$), a pak ona sama:
+      $$C_j = p_j + \sum_{i \ne j} p_i\,x_{ij} \;=\; \sum_{i=1}^{n} p_i\,x_{ij},$$
+      kde druhá rovnost využila diagonálu $x_{jj} = 1$ — proto ta konvence „or $i = j$“! Žádná další proměnná ani omezení nejsou potřeba: $C_j$ je prostě lineární výraz v $x$ (sloupec $j$ matice, skalárně s vektorem $p$).</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „$C_j$ svážu nerovností s $p$“</div>
+    <p>V dochovaném ručním řešení této otázky ze zkoušky 9.&nbsp;7.&nbsp;2021 student napsal omezení „$p_i \cdot x_{ij} \le C_j$ &nbsp;// set $C_j$“ — a opravující k tomu červeně: <em>„to nestačí !! $C_j$ je suma processingu“</em>. Nerovnost $p_i x_{ij} \le C_j$ říká jen „$C_j$ je aspoň tak velké jako každý jednotlivý předchůdce“, jenže předchůdci se <strong>sčítají</strong> (stroj je jeden, běží za sebou). Správně: $C_j = \sum_i p_i\,x_{ij}$ — completion time není $p_j$ ani maximum, je to <strong>součet dob všech úloh před $j$ plus $p_j$</strong>. Tohle je ta skrytá past celé formulace.</p>
+  </div>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 24 (EN 1:1) — criterion</div>
+    <p>“<strong>criterion</strong> — completion time of task $T_j$ consists of $p_j$ and the processing time of its predecessors:</p>
+    $$\begin{aligned}
+    C_j &= \sum_{i=1}^{n} p_i \cdot x_{ij} \\
+    w_j \cdot C_j &= \sum_{i=1}^{n} p_i \cdot x_{ij} \cdot w_j \\
+    J = \sum_{j=1}^{n} w_j \cdot C_j &= \sum_{j=1}^{n} \sum_{i=1}^{n} p_i \cdot x_{ij} \cdot w_j
+    \end{aligned}$$
+    <p>from all feasible schedules $x$ we look for the one that minimizes $J(x)$, i.e. $\min_x J(x)$”</p>
+  </div>
+
+  <p>Výraz $p_i \cdot x_{ij} \cdot w_j$ vypadá jako součin tří věcí, ale $p_i$ a $w_j$ jsou <strong>parametry</strong> (čísla ze zadání) — proměnná je v každém členu jen jedna, takže kritérium je lineární a ILP je legální.</p>
+
+  <!-- ===== SEKCE 5: CELY MODEL ===== -->
+  <h2>Celý model (slide 25)</h2>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 25 (EN 1:1) — ILP formulation for $1 \,|\, \mathrm{prec} \,|\, \sum w_j C_j$</div>
+    $$\begin{aligned}
+    \min \quad & \sum_{j=1}^{n} \sum_{i=1}^{n} p_i \cdot x_{ij} \cdot w_j \\
+    \text{subject to:} \quad
+    & x_{i,j} \ge e_{i,j} && i, j \in 1..n && \text{“if } T_i \text{ precedes } T_j \text{ in } G\text{, then it precedes } T_j \text{ in the schedule”} \\
+    & x_{i,j} + x_{j,i} = 1 && i, j \in 1..n,\ i \ne j && \text{“either } T_i \text{ precedes } T_j\text{, or vice versa”} \\
+    & 1 \le x_{i,j} + x_{j,k} + x_{k,i} \le 2 && i, j, k \in 1..n,\ i \ne j \ne k && \text{“no cycle exists in the digraph of } x\text{”} \\
+    & x_{i,i} = 1 && i \in 1..n &&
+    \end{aligned}$$
+    <p>“<strong>parameters:</strong> $w_{i \in 1..n}, p_{i \in 1..n} \in \mathbb{R}_0^+$, $e_{i \in 1..n, j \in 1..n} \in \{0, 1\}$ &nbsp;&nbsp; <strong>variables:</strong> $x_{i \in 1..n, j \in 1..n} \in \{0, 1\}$”</p>
+  </div>
+
+  <p>Velikost: $n^2$ binárek a kvůli trojicím řádově $n^3$ omezení — ale <strong>nic nezávisí na délce rozvrhu</strong>. To je přesně opačný trade-off než time-indexed model z <a href="../k5/l5-3.html#takeaways">[L5.3] Time-indexed ILP pro PS1|temp|Cmax</a>, jehož velikost roste s horní mezí $UB$ (srovnání obou reprezentací = slide 71, citované v L5.3). Časy tu vůbec nejsou proměnné: pořadí je určuje samo.</p>
+
+  <!-- ===== SEKCE 6: ODITEROVANI ===== -->
+  <h2>Osahej si to: od pořadí k matici $x$ a k $J$</h2>
+
+  <p>Mini-instance <em>(vlastní — přiznáno)</em>: $n = 3$, $p = (2, 1, 3)$, $w = (1, 3, 2)$, precedenční graf $G$ má jedinou hranu $T_1 \to T_2$. Proklikej, jak pořadí určí matici $x$ a jak se z jejích <em>sloupců</em> čtou $C_j$:</p>
+
+  <div class="viz" id="viz-order"></div>
+
+  <p>Matice $x$ pro vítězné pořadí $(T_1, T_2, T_3)$ — všimni si jedničkové diagonály a toho, že $C_j$ je skalární součin vektoru $p$ se <em>sloupcem</em> $j$:</p>
+
+  $$x = \begin{pmatrix} 1 & 1 & 1 \\ 0 & 1 & 1 \\ 0 & 0 & 1 \end{pmatrix},
+  \qquad C_j = \sum_i p_i\,x_{ij}:\quad C = (2,\ 3,\ 6),
+  \qquad J = 1\!\cdot\!2 + 3\!\cdot\!3 + 2\!\cdot\!6 = 23.$$
+
+  <div class="viz" id="viz-gantt"></div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.6a</div>
+    <ul>
+      <li><strong>Rozvrh na jednom stroji = permutace</strong>; kódují ji pořadové proměnné $x_{ij} = 1 \iff T_i$ předchází $T_j$ (konvence $x_{ii} = 1$), zavedené pro <em>všechny</em> dvojice, ne jen hrany $G$.</li>
+      <li><strong>Tři skupiny omezení:</strong> precedence $x_{ij} \ge e_{ij}$; antisymetrie $x_{ij} + x_{ji} = 1$ ($i \ne j$); no-cycle $1 \le x_{ij} + x_{jk} + x_{ki} \le 2$ pro trojice (dolní mez vyřadí obrácený cyklus; delší cykly v turnaji vždy obsahují trojúhelník, takže trojice stačí).</li>
+      <li><strong>Past kritéria:</strong> $C_j$ není $p_j$ ani „$p_i x_{ij} \le C_j$“ — je to <strong>součet dob všech úloh před $j$ plus $p_j$</strong>: $C_j = \sum_i p_i\,x_{ij}$ (diagonála přidá $p_j$). Kritérium $\min \sum_j \sum_i p_i\,x_{ij}\,w_j$ je lineární, protože $p_i, w_j$ jsou parametry.</li>
+      <li><strong>Velikost modelu nezávisí na $UB$</strong> ($n^2$ proměnných, ~$n^3$ omezení) — opačný trade-off než time-indexed model <a href="../k5/l5-3.html#takeaways">[L5.3]</a>.</li>
+      <li><strong>K čemu dál:</strong> LP relaxace tohoto ILP dává dolní mez $J^{LP}$ pro Branch &amp; Bound — to je [L5.6b], technika větvení a mezí z <a href="../k5/l5-5.html#takeaways">[L5.5]</a>.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ULOHA T01 ===== -->
+  <div class="task" id="t-precilp">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Scheduling on One Resource — Minimizing $\sum w_j C_j$ (ILP formulace)</strong>
+      <span class="task-src">zdroj: zkouška 9. 7. 2021 (přepis, zadání EN 1:1); táž otázka zkouška 29. 6. 2023</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“a) Using ILP formulate scheduling of nonpreemptive tasks with precedence relations on one resource while minimizing weighted sum of completion times, i.e., $1\,|\text{prec}|\sum w_j C_j$. Task $T_j$ has general processing time $p_j$. Precedence relations are encoded in $e_{ij} \in \{0,1\}$ such that $e_{ij} = 1$ if there is a directed edge from $T_i$ to $T_j$ in the precedence graph $G$ or $i = j$.</p>
+        <p>b) Explain in detail, how to use relaxed LP solution in Branch and Bound method for $1\,|\text{prec}|\sum w_j C_j$?”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Část a) chce <strong>celou ILP formulaci</strong> — proměnné, kritérium, všechna omezení, parametry a domény. Kódování $e_{ij}$ (včetně diagonály $e_{ii} = 1$) ti zadání dává, takže se očekává relative-order model. Část b) je o LP relaxaci jako dolní mezi v B&amp;B — řeší ji příští lekce [L5.6b]; tady ji jen poznáme podle zadání.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — pořadové proměnné, tři skupiny omezení, past s $C_j$ (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace</a> — přečíst $1|prec|\sum w_j C_j$.</li>
+        <li><a href="../k0/l0-8.html#takeaways">[L0.8] Binární proměnná</a> — $x_{ij} \in \{0,1\}$.</li>
+        <li><a href="../k5/l5-2.html#takeaways">[L5.2] Precedence a temporální omezení</a> — co je precedenční graf $G$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Postupuj v pořadí, v jakém jsme model stavěli: ① co je rozhodnutí? (pořadí → $x_{ij}$ pro každou dvojici) ② co ho dělá přípustným? (precedence z $e$, antisymetrie, žádný cyklus — nezapomeň, proč dvojice nestačí) ③ co měříme? ($C_j$ — a tady zpomal: je to součet, ne jednotlivá nerovnost). Nakonec deklaruj parametry a proměnné — u zkoušky se na „variables/parameters“ řádek opravdu kouká.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle slidů 24–25, 1:1)</summary>
+        <div class="inner">
+          <p><strong>Proměnné:</strong> $x_{ij} \in \{0,1\}$ pro $i, j \in 1..n$; $x_{ij} = 1 \iff T_i$ předchází $T_j$ v rozvrhu, nebo $i = j$.</p>
+          <p><strong>Kritérium:</strong> completion time se skládá z $p_j$ a dob všech předchůdců v rozvrhu, $C_j = \sum_{i=1}^{n} p_i\,x_{ij}$ (diagonála $x_{jj} = 1$ dodá $p_j$), tedy</p>
+          $$\min \sum_{j=1}^{n} \sum_{i=1}^{n} p_i \cdot x_{ij} \cdot w_j$$
+          <p><strong>Omezení:</strong></p>
+          $$\begin{aligned}
+          & x_{i,j} \ge e_{i,j} && i, j \in 1..n && \text{(hrana } T_i \to T_j \text{ v } G \Rightarrow T_i \text{ před } T_j \text{ v rozvrhu)} \\
+          & x_{i,j} + x_{j,i} = 1 && i, j \in 1..n,\ i \ne j && \text{(buď } T_i \text{ před } T_j\text{, nebo naopak)} \\
+          & 1 \le x_{i,j} + x_{j,k} + x_{k,i} \le 2 && i, j, k \in 1..n,\ i \ne j \ne k && \text{(v digrafu } x \text{ není cyklus)} \\
+          & x_{i,i} = 1 && i \in 1..n
+          \end{aligned}$$
+          <p><strong>Parametry:</strong> $w_i, p_i \in \mathbb{R}_0^+$ pro $i \in 1..n$; $e_{ij} \in \{0,1\}$. <strong>Proměnné:</strong> $x_{ij} \in \{0,1\}$.</p>
+          <p>K vysvětlení (ústně/poznámkou): antisymetrie dělá z $x$ turnaj, trojicová podmínka zakáže cykly v obou orientacích (součty 3 a 0) a delší cyklus v turnaji vždy obsahuje trojúhelník; $C_j$ <em>musí</em> být suma — nerovnost $p_i x_{ij} \le C_j$ je doložená zkoušková chyba (červená oprava: „to nestačí !! $C_j$ je suma processingu“).</p>
+          <p><strong>Část b)</strong> — stručně (detailně v [L5.6b]): integrální podmínku na $x$ uvolníme na $0 \le x_{ij} \le 1$; hodnota $J^{LP}$ takové LP relaxace je <strong>dolní mez</strong> hodnoty ILP (prostor řešení ILP je podmnožinou LP), takže v B&amp;B stromu můžeme uzel s částečným řešením hodnoty $J_2$ zahodit, jakmile $J_2 + J^{LP}(\text{zbývající úlohy}) \ge J_1$, kde $J_1$ je nejlepší dosud nalezené celočíselné řešení.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ULOHA T02 ===== -->
+  <div class="task" id="t-xdecode">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Drill: matice $x$ tam a zpět</strong>
+      <span class="task-src">zdroj: VLASTNÍ drill na instanci z výkladu (přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; vlastní — přiznáno)</span>
+        <p>“Consider $n = 3$ tasks with $p = (2, 1, 3)$, $w = (1, 3, 2)$ and a single precedence edge $T_1 \to T_2$ (i.e. $e_{12} = 1$, $e_{ii} = 1$, all other $e_{ij} = 0$).</p>
+        <p>(i) Write the matrix $x$ corresponding to the order $(T_3, T_1, T_2)$, verify all constraints of the relative-order ILP and compute the criterion value $J$.</p>
+        <p>(ii) Take $x$ with $x_{12} = x_{23} = x_{31} = 1$ (completed by antisymmetry and $x_{ii} = 1$). Is it feasible? Which constraint fails?</p>
+        <p>(iii) For general $n$: how many variables and (roughly) how many constraints does the model have? Does its size depend on the upper bound of the schedule length $UB$?”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Tři rychlé kontroly porozumění: zakódovat pořadí do $x$ a spočítat $J$ ze sloupců (i), poznat nepřípustnou matici a pojmenovat porušené omezení (ii), a říct velikost modelu (iii) — přesně ten druh podotázek, kterými se u ústní části ověřuje, že formulaci nemáš jen namemorovanou.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — vzorec $C_j = \sum_i p_i x_{ij}$ a tři skupiny omezení (<a href="#takeaways">takeaways</a>).</li>
+        <li>Stepper výše — stejná instance, jiné pořadí.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(i) Řádek $i$ matice říká „koho všechno $T_i$ předbíhá“: první úloha pořadí má jedničky všude, poslední jen na diagonále. $C_j$ čti po <em>sloupcích</em>. Zkontroluj hlavně $x_{12} \ge e_{12}$. (ii) Sečti trojici $x_{12} + x_{23} + x_{31}$. (iii) Spočítej zvlášť dvojice a trojice indexů; pak se zeptej, kde by se $UB$ vůbec mohlo objevit.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Pořadí $(T_3, T_1, T_2)$: $T_3$ předbíhá obě ($x_{31} = x_{32} = 1$), $T_1$ předbíhá $T_2$ ($x_{12} = 1$), zbytek dvojic 0, diagonála 1:</p>
+          $$x = \begin{pmatrix} 1 & 1 & 0 \\ 0 & 1 & 0 \\ 1 & 1 & 1 \end{pmatrix}$$
+          <p>Kontroly: $x_{12} = 1 \ge e_{12} = 1$ ✓; antisymetrie pro všechny tři dvojice ✓; trojice: $x_{12} + x_{23} + x_{31} = 1 + 0 + 1 = 2$ ✓ a $x_{21} + x_{13} + x_{32} = 0 + 0 + 1 = 1$ ✓. Sloupce: $C_1 = p_1 + p_3 = 5$, $C_2 = p_1 + p_2 + p_3 = 6$, $C_3 = p_3 = 3$.</p>
+          $$J = w_1 C_1 + w_2 C_2 + w_3 C_3 = 1 \cdot 5 + 3 \cdot 6 + 2 \cdot 3 = 29 \;(&gt; 23 = J^* \text{ pořadí } (T_1, T_2, T_3)).$$
+          <p><strong>(ii)</strong> Nepřípustná: trojicová podmínka dává $x_{12} + x_{23} + x_{31} = 3 \not\le 2$ — cyklus $T_1 \to T_2 \to T_3 \to T_1$, žádná úloha není první. Precedence i antisymetrie přitom platí — proto no-cycle omezení v modelu být <em>musí</em>.</p>
+          <p><strong>(iii)</strong> Proměnných je $n^2$ (všechna $x_{ij}$). Omezení: $n^2$ precedenčních, $n^2 - n$ antisymetrií (každá neuspořádaná dvojice se v zápisu slidu objeví dvakrát — jednou by stačila), $n(n-1)(n-2)$ trojicových (zrcadlová orientace trojice je díky antisymetrii implikovaná: součty obou orientací dávají dohromady 3, takže by stačila polovina) a $n$ diagonálních — celkem řádově $\Theta(n^3)$. Na $UB$ velikost <strong>nezávisí vůbec</strong> — v modelu žádný čas nefiguruje; to je hlavní rozdíl proti time-indexed modelu <a href="../k5/l5-3.html#takeaways">[L5.3]</a> s $n \cdot UB$ proměnnými.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L5.6a">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k5/l5-5.html"><span class="dir">← Předchozí</span> L5.5 · Branch &amp; Bound pro ILP (grafické řezání) [FOTO]</a>
+    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.6b · LP relaxace jako dolní mez v B&amp;B)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// ===== 1 — cyklus, ktery projde antisymetrii (vlastni ilustrace) =====
+KOViz.graph(document.getElementById('viz-cycle'), {
+  directed: true, h: 300,
+  nodes: [
+    { id: 'c1', label: 'T₁', x: 200, y: 70 },
+    { id: 'c2', label: 'T₂', x: 440, y: 70 },
+    { id: 'c3', label: 'T₃', x: 320, y: 235 },
+  ],
+  edges: [
+    { from: 'c1', to: 'c2', label: 'x₁₂ = 1', cls: 'bad' },
+    { from: 'c2', to: 'c3', label: 'x₂₃ = 1', cls: 'bad' },
+    { from: 'c3', to: 'c1', label: 'x₃₁ = 1', cls: 'bad' },
+  ],
+  caption: 'Antisymetrie platí pro každou dvojici (x₂₁ = x₃₂ = x₁₃ = 0), a přesto žádné pořadí neexistuje — „před“ se zacyklilo. Trojicová podmínka to odhalí: x₁₂ + x₂₃ + x₃₁ = 3 &gt; 2.',
+});
+
+// ===== 2 — stepper: poradi → matice x → C_j (vlastni mini-instance, priznano) =====
+// p = (2,1,3), w = (1,3,2), e12 = 1. Poradi (1,2,3): C = (2,3,6), J = 23;
+// poradi (1,3,2): C = (2,6,5), J = 30; poradi (3,1,2): C = (5,6,3), J = 29.
+KOViz.stepper(document.getElementById('viz-order'), {
+  graph: {
+    directed: true, h: 360,
+    nodes: [
+      { id: 't1', label: 'T₁', x: 150, y: 90 },
+      { id: 't2', label: 'T₂', x: 490, y: 90 },
+      { id: 't3', label: 'T₃', x: 320, y: 265 },
+    ],
+    edges: [
+      { from: 't1', to: 't2', label: '' },
+      { from: 't1', to: 't3', label: '' },
+      { from: 't2', to: 't3', label: '', curve: 0.3 },
+      { from: 't3', to: 't2', label: '', curve: 0.3 },
+    ],
+  },
+  frames: [
+    { desc: 'Zadání: p = (2, 1, 3), w = (1, 3, 2); precedenční graf G má jedinou hranu T₁ → T₂ (e₁₂ = 1, jinak e_ij = 0 pro i ≠ j). Omezení x₁₂ ≥ e₁₂ přibije x₁₂ = 1: v každém přípustném rozvrhu poběží T₁ před T₂. Dvojice {T₁,T₃} a {T₂,T₃} jsou volné — o nich rozhodne ILP.',
+      nodes: { t1: '', t2: '', t3: '' },
+      subs: { t1: 'p₁ = 2, w₁ = 1', t2: 'p₂ = 1, w₂ = 3', t3: 'p₃ = 3, w₃ = 2' },
+      edges: { 't1->t2': '', 't1->t3': 'dim', 't2->t3': 'dim', 't3->t2': 'dim' },
+      labels: { 't1->t2': 'e₁₂ = 1', 't1->t3': '', 't2->t3': '', 't3->t2': '' } },
+    { desc: 'Zvolme pořadí (T₁, T₂, T₃). Matice x je „turnaj“: pro každou dvojici právě jedna šipka (antisymetrie) a dohromady žádný cyklus. Tady x₁₂ = x₁₃ = x₂₃ = 1, k tomu diagonála x₁₁ = x₂₂ = x₃₃ = 1 (smyčky nekreslíme).',
+      nodes: { t1: '', t2: '', t3: '' },
+      subs: { t1: 'p₁ = 2, w₁ = 1', t2: 'p₂ = 1, w₂ = 3', t3: 'p₃ = 3, w₃ = 2' },
+      edges: { 't1->t2': '', 't1->t3': '', 't2->t3': '', 't3->t2': 'dim' },
+      labels: { 't1->t2': 'x₁₂ = 1', 't1->t3': 'x₁₃ = 1', 't2->t3': 'x₂₃ = 1', 't3->t2': '' } },
+    { desc: 'C₁ ze sloupce j = 1: jednička jen na diagonále (x₁₁ = 1, žádné x_i1 = 1 pro i ≠ 1) → C₁ = Σᵢ pᵢ·x_i1 = p₁ = 2. Před T₁ nic neběží.',
+      nodes: { t1: 'hl', t2: '', t3: '' },
+      subs: { t1: 'C₁ = p₁ = 2', t2: 'p₂ = 1, w₂ = 3', t3: 'p₃ = 3, w₃ = 2' },
+      edges: { 't1->t2': '', 't1->t3': '', 't2->t3': '', 't3->t2': 'dim' },
+      labels: { 't1->t2': 'x₁₂ = 1', 't1->t3': 'x₁₃ = 1', 't2->t3': 'x₂₃ = 1', 't3->t2': '' } },
+    { desc: 'C₂ ze sloupce j = 2: x₁₂ = 1 a x₂₂ = 1 → C₂ = p₁ + p₂ = 3. Completion time = všechno, co běží přede mnou, plus já — proto suma, ne jednotlivé nerovnosti.',
+      nodes: { t1: 'good', t2: 'hl', t3: '' },
+      subs: { t1: 'C₁ = 2', t2: 'C₂ = 2 + 1 = 3', t3: 'p₃ = 3, w₃ = 2' },
+      edges: { 't1->t2': 'hl', 't1->t3': '', 't2->t3': '', 't3->t2': 'dim' },
+      labels: { 't1->t2': 'x₁₂ = 1', 't1->t3': 'x₁₃ = 1', 't2->t3': 'x₂₃ = 1', 't3->t2': '' } },
+    { desc: 'C₃ ze sloupce j = 3: x₁₃ = x₂₃ = x₃₃ = 1 → C₃ = p₁ + p₂ + p₃ = 6. Kritérium: J = Σ wⱼCⱼ = 1·2 + 3·3 + 2·6 = 23.',
+      nodes: { t1: 'good', t2: 'good', t3: 'hl' },
+      subs: { t1: 'C₁ = 2', t2: 'C₂ = 3', t3: 'C₃ = 2 + 1 + 3 = 6' },
+      edges: { 't1->t2': '', 't1->t3': 'hl', 't2->t3': 'hl', 't3->t2': 'dim' },
+      labels: { 't1->t2': 'x₁₂ = 1', 't1->t3': 'x₁₃ = 1', 't2->t3': 'x₂₃ = 1', 't3->t2': '' } },
+    { desc: 'Jiné přípustné pořadí (T₁, T₃, T₂): šipka mezi T₂ a T₃ se otočí (x₃₂ = 1), x₁₂ = 1 musí zůstat kvůli precedenci. Sloupce: C = (2, 6, 5) → J = 1·2 + 3·6 + 2·5 = 30. Třetí přípustné pořadí (T₃, T₁, T₂) dává J = 29. Optimum je tedy (T₁, T₂, T₃) s J* = 23 — „těžká“ T₂ (w₂ = 3) co nejdřív, jen co jí precedence dovolí. ILP tohle vybírání pořadí dělá za nás.',
+      nodes: { t1: '', t2: '', t3: '' },
+      subs: { t1: 'C₁ = 2', t2: 'C₂ = 6', t3: 'C₃ = 5' },
+      edges: { 't1->t2': '', 't1->t3': '', 't2->t3': 'dim', 't3->t2': '' },
+      labels: { 't1->t2': 'x₁₂ = 1', 't1->t3': 'x₁₃ = 1', 't2->t3': '', 't3->t2': 'x₃₂ = 1' } },
+  ],
+  caption: 'Vlastní mini-instance (přiznáno): n = 3, p = (2, 1, 3), w = (1, 3, 2), e₁₂ = 1. Šipka = x_ij = 1; smyčky x_ii = 1 nekreslíme. C_j čteš ze sloupce j matice x.',
+});
+
+// ===== 3 — Gantt optimalniho rozvrhu (T1, T2, T3), J* = 23 =====
+KOViz.gantt(document.getElementById('viz-gantt'), {
+  tmax: 6, tstep: 1,
+  rows: [{ id: 'p1', label: 'P¹' }],
+  blocks: [
+    { row: 'p1', from: 0, to: 2, label: 'T₁' },
+    { row: 'p1', from: 2, to: 3, label: 'T₂', cls: 'hl' },
+    { row: 'p1', from: 3, to: 6, label: 'T₃' },
+  ],
+  marks: [
+    { t: 2, label: 'C₁ = 2', cls: 'soft' },
+    { t: 3, label: 'C₂ = 3' },
+    { t: 6, label: 'C₃ = 6', cls: 'soft' },
+  ],
+  caption: 'Optimální rozvrh = pořadí (T₁, T₂, T₃) bez mezer: J* = 1·2 + 3·3 + 2·6 = 23. Úloha T₂ (zvýrazněná, w₂ = 3) jde hned, jak jí precedence T₁ → T₂ dovolí.',
+});
+</script>
+</body>
+</html>

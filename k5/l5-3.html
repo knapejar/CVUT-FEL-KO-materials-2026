@@ -50,7 +50,7 @@
     </ul>
   </div>
 
-  <p>Pořadové proměnné $x_{ij}$ (relative-order) potkáme u $1\,|\,prec\,|\,\sum w_j C_j$ v [L5.6a]; dnešní lekce je celá o první cestě. Podmínka „processing times are positive integers“ není drobnost: time-indexed model <strong>diskretizuje čas</strong> na okamžiky $t \in \{0, 1, \ldots, UB-1\}$, takže celočíselné musí být doby $p_i$ i délky hran $l_{ij}$ — jinak by optimum mohlo ležet mimo mřížku.</p>
+  <p>Pořadové proměnné $x_{ij}$ (relative-order) potkáme u $1\,|\,prec\,|\,\sum w_j C_j$ v <a href="../k5/l5-6a.html">[L5.6a] Relative-order ILP pro 1|prec|Σw_jC_j</a>; dnešní lekce je celá o první cestě. Podmínka „processing times are positive integers“ není drobnost: time-indexed model <strong>diskretizuje čas</strong> na okamžiky $t \in \{0, 1, \ldots, UB-1\}$, takže celočíselné musí být doby $p_i$ i délky hran $l_{ij}$ — jinak by optimum mohlo ležet mimo mřížku.</p>
 
   <!-- ===== SEKCE 2: SKLADAME MODEL ===== -->
   <h2>Poskládej si model sám</h2>
@@ -135,7 +135,7 @@
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.3</div>
     <ul>
-      <li><strong>Time-indexed model:</strong> binárka $x_{it} = 1 \iff s_i = t$ (úloha <em>začíná</em>, ne běží!); čas diskretizovaný na $t \in \{0, \ldots, UB-1\}$, doby $p_i$ kladná celá čísla. Druhá reprezentace = relative-order $x_{ij}$ [L5.6a].</li>
+      <li><strong>Time-indexed model:</strong> binárka $x_{it} = 1 \iff s_i = t$ (úloha <em>začíná</em>, ne běží!); čas diskretizovaný na $t \in \{0, \ldots, UB-1\}$, doby $p_i$ kladná celá čísla. Druhá reprezentace = relative-order $x_{ij}$ <a href="../k5/l5-6a.html#takeaways">[L5.6a]</a>.</li>
       <li><strong>Čtyři skupiny omezení:</strong> ① „právě jednou“ $\sum_t x_{it} = 1$ a čtení startu $s_i = \sum_t t \cdot x_{it}$ <a href="../k1/l1-15.html#takeaways">[L1.15]</a>; ② temporální $\sum_t t\,x_{it} + l_{ij} \le \sum_t t\,x_{jt}$ pro každou hranu $G$ <a href="../k5/l5-2.html#takeaways">[L5.2]</a>; ③ zdroj: $\sum_i \sum_{k=\max(0,t-p_i+1)}^{t} x_{ik} \le 1$ pro každý čas $t$ — sčítají se <em>okna startů</em>, ne starty; ④ $\sum_t t\,x_{it} + p_i \le C_{max}$, kritérium $\min C_{max}$.</li>
       <li><strong>Proměnné:</strong> $x_{it} \in \{0,1\}$, $C_{max} \in \{0, \ldots, UB\}$; horizont $UB$ = libovolná horní mez $C_{max}$, např. $UB = \sum_i \max\{p_i, \max l_{ij}\}$ — menší než optimum být nesmí.</li>
       <li><strong>Velikost:</strong> $n \cdot UB + 1$ proměnných, $|E| + UB + 2n$ omezení — roste s hodnotou $UB$ (pseudopolynomiálně), proto těsný horizont pomáhá.</li>
