@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.1 · Záporné váhy ano, záporné cykly ne — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.1</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.1</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>Záporné váhy ano, záporné cykly ne</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Kdy nejkratší cesta vůbec existuje: záporné váhy hran problém nerozbijí, ale <em>záporný cyklus</em> ano — nejkratší sled pak neexistuje a hledání nejkratší cesty se stává NP-těžkým.
+  </div>
+
+  <p>Prerekvizity: <a href="../k0/l0-3.html#takeaways">[L0.3] Cesta, sled, tah, cyklus</a> (rozdíl cesta vs. sled je tady klíčový), <a href="../k0/l0-1.html#takeaways">[L0.1] Co je graf</a>. Otevíráme kapitolu K2 — slot 2 zkoušky (nejkratší cesty, 7 bodů, padá v ~90 % termínů). A přesně otázka této lekce — <em>„proč vadí záporné cykly?“</em> — je doložená otázka z ústní zkoušky. Než se v dalších lekcích pustíme do algoritmů, musíme vědět, kdy má úloha vůbec smysl.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Úloha nejkratší cesty (Shortest Path)</h2>
+  <p>Definice ze slidů (kurz ji uvádí anglicky — nech si ji projít hlavou v obou jazycích):</p>
+  <div class="assignment" style="margin-bottom:14px">
+    <span class="lbl">Problem statement (slidy, EN)</span>
+    <p><strong>Shortest Path.</strong> <em>Instance:</em> Digraph $G$, weights $c : E(G) \to \mathbb{R}$, nodes $s, t \in V(G)$. <em>Goal:</em> Find the shortest $s$–$t$ path $P$, i.e. one of minimum weight $c(E(P))$, or decide that $t$ is unreachable from $s$.</p>
+  </div>
+  <p>Česky: v orientovaném grafu s ohodnocením hran $c$ hledáme <strong>nejkratší cestu</strong> (shortest path) z $s$ do $t$ — cestu s nejmenším součtem vah hran. <strong>Délka cesty</strong> $P$ je $c(E(P)) = \sum_{e \in E(P)} c(e)$ a <strong>vzdálenost</strong> $l(s,t)$ je délka nejkratší $s$–$t$ cesty. Příbuzné varianty: z $s$ do <em>všech</em> vrcholů (<strong>shortest path tree — SPT</strong>, strom nejkratších cest), ze všech do $t$ (stačí otočit hrany), a mezi <em>všemi dvojicemi</em> (<strong>all pairs shortest path</strong>). Variantu $s \to t$ se podle slidů stejně řeší algoritmy pro SPT — asymptoticky rychlejší algoritmus jen pro jednu dvojici není znám.</p>
+
+  <details class="try">
+    <summary>Zkus sám: všimni si v definici oboru vah — $c : E(G) \to \mathbb{R}$, tedy i záporné. K čemu by záporná váha hrany byla dobrá?</summary>
+    <div class="inner">
+      <p>Dvě typické situace:</p>
+      <ul>
+        <li><strong>Nejdelší cesta</strong> (longest path): podle slidů se převádí na nejkratší <em>otočením znaménka vah</em> — hledáme minimum místo maxima. Z kladných zisků se tak stanou záporné „náklady“. (Tahle transformace se nám bude hodit u investičních úloh v DAG.)</li>
+        <li><strong>Smíšené náklady a zisky</strong>: hrana může reálně vydělávat (dotovaný úsek, zisk z obchodu po cestě) — váha je pak záporná přirozeně.</li>
+      </ul>
+      <p>Proto chceme teorii, která záporné váhy <em>unese</em>. Otázka lekce: kde přesně je hranice, za kterou se úloha rozbije?</p>
+    </div>
+  </details>
+
+  <h2>Co přesně rozbije záporný cyklus</h2>
+  <p>Vzpomeň si na rozdíl z <a href="../k0/l0-3.html#takeaways">[L0.3]</a>: <strong>cesta</strong> (path) nesmí opakovat vrcholy, <strong>sled</strong> (edge progression) smí cokoliv. Teď si vezmi graf, ve kterém je cyklus se <em>záporným</em> součtem vah.</p>
+
+  <details class="try">
+    <summary>Zkus sám: sled z $s$ do $t$ projde okolo záporného cyklu. Co se stane s jeho délkou, když cyklus oběhne ještě jednou navíc? A kolikrát to může opakovat?</summary>
+    <div class="inner">
+      <p>Každý oběh přičte záporné číslo — sled se <em>zkrátí</em>. A opakovat to může donekonečna: délka sledu klesá k $-\infty$, takže <strong>nejkratší sled neexistuje</strong>. U cesty tenhle trik nejde — oběh cyklu by zopakoval vrchol, což cesta zakazuje.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-cycle"></div>
+
+  <p>Pro <em>cestu</em> je situace pořád zdravá. V konečném grafu je jen konečně mnoho cest z $s$ do $t$ (žádná nesmí opakovat vrcholy, takže má nejvýš $|V|-1$ hran) — a minimum konečné množiny vždy existuje. Slidy to formulují jako větu:</p>
+  <div class="box">
+    <div class="box-title">Věta — existence nejkratší cesty (slide 8)</div>
+    <p>Pokud v grafu existuje cesta z $s$ do $t$, pak existuje i <strong>nejkratší</strong> cesta z $s$ do $t$. <em>Pozor: pro sled to neplatí</em> — v grafu se záporným cyklem najdeme vždy ještě kratší sled, který cyklus oběhne znovu.</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: nejkratší cesta tedy existuje vždy (když je $t$ dosažitelný). Tak proč je záporný cyklus vůbec problém?</summary>
+    <div class="inner">
+      <p>Problém není <em>existence</em>, ale <em>nalezení</em>. Rychlost algoritmů pro nejkratší cesty stojí podle slidů na tom, že <strong>se nestarají o opakování vrcholů</strong> — nerozlišují cestu od sledu. To si můžou dovolit jen tehdy, když nejkratší sled „automaticky“ odpovídá nejkratší cestě. Záporný cyklus tuhle ekvivalenci zničí (nejkratší sled neexistuje) — a najednou je potřeba opakování vrcholů hlídat <em>explicitně</em>, což dělá úlohu <strong>NP-těžkou</strong> <a href="../k0/l0-7.html#takeaways">[L0.7]</a>.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Věta — nejkratší sled vs. nejkratší cesta (slide 9)</div>
+    <ul>
+      <li>Pokud graf neobsahuje cyklus <strong>záporné ani nulové</strong> váhy, pak <em>každý</em> nejkratší sled z $s$ do $t$ <strong>je</strong> nejkratší cestou z $s$ do $t$.</li>
+      <li>Pokud graf neobsahuje cyklus <strong>záporné</strong> váhy, pak každý nejkratší sled z $s$ do $t$ <strong>obsahuje</strong> nejkratší cestu z $s$ do $t$ a má stejnou délku (případné nulové cykly navíc lze vystřihnout).</li>
+    </ul>
+  </div>
+
+  <p>Tohle je celá pointa názvu lekce: <strong>záporné váhy ano</strong> — dokud nevytvoří záporný cyklus, smí algoritmus klidně počítat se sledy a výsledek bude nejkratší cesta. <strong>Záporné cykly ne</strong> — s nimi se úloha mění z polynomiální na NP-těžkou. (Které algoritmy zvládnou záporné hrany a které ne, rozebereme u Dijkstry [L2.4] a Bellman-Forda [L2.12]; Bellman-Ford navíc umí záporný cyklus aspoň <em>detekovat</em>.)</p>
+
+  <details class="try">
+    <summary>Zkus sám (otázka přímo ze slidu 11): co naopak nesmí obsahovat graf, když nás zajímá <em>nejdelší</em> cesta?</summary>
+    <div class="inner">
+      <p><strong>Kladné cykly.</strong> Nejdelší cesta = nejkratší cesta po otočení znamének vah — a záporný cyklus v otočeném grafu je přesně kladný cyklus v původním. Sled by na kladném cyklu nabíral délku do $+\infty$. Proto např. „maximalizace zisku“ na grafu s kladným ziskovým cyklem je stejně těžká úloha (vrátí se nám to v [L2.17]).</p>
+    </div>
+  </details>
+
+  <h2>Trojúhelníková nerovnost — a jak ji záporný cyklus poruší</h2>
+  <p>Bez záporných cyklů se vzdálenosti chovají „geometricky slušně“. Slide 10:</p>
+  <div class="box">
+    <div class="box-title">Věta — trojúhelníková nerovnost (slide 10)</div>
+    <p>Pokud graf neobsahuje cyklus záporné váhy, pak pro <strong>všechny trojice vrcholů</strong> $i, j, k$ platí $l(i,j) \le l(i,k) + l(k,j)$.</p>
+    <p><em>Důsledek</em> (značíme $c(i,j)$ váhu hrany z $i$ do $j$): $\;l(i,j) \le c(i,j)$, $\;l(i,j) \le l(i,k) + c(k,j)$, $\;l(i,j) \le c(i,k) + l(k,j)$.</p>
+  </div>
+  <p>Intuice: cesta přes mezizastávku $k$ je jedna z možností, jak se dostat z $i$ do $j$ — nemůže být lepší než optimum… <em>pokud</em> ovšem slepením dvou nejkratších cest zase vznikne cesta (nebo aspoň sled, který umíme zkrátit na cestu stejné délky). A přesně to záporný cyklus pokazí. Slide 11 to ukazuje na tomhle grafu:</p>
+
+  <div class="viz" id="viz-triangle"></div>
+
+  <details class="try">
+    <summary>Zkus sám: spočítej v obrázku $l(i,j)$, $l(i,k)$ a $l(k,j)$ (délky nejkratších <em>cest</em>) a dosaď do trojúhelníkové nerovnosti. Co vyjde?</summary>
+    <div class="inner">
+      <p>$l(i,j) = \min\{5,\; 6 + (-2)\} = 4$ (cesta $i{\to}k{\to}j$), $\;l(i,k) = \min\{6,\; 5 + (-1)\} = 4$ (cesta $i{\to}j{\to}k$), $\;l(k,j) = -2$. Dosazení:</p>
+      $$\begin{aligned} l(i,j) &\le l(i,k) + l(k,j) \\ 6 - 2 &\le (5 - 1) + (-2) \\ 4 &\le 2 \quad \ldots \text{ spor!} \end{aligned}$$
+      <p>Proč věta selhala? Graf obsahuje záporný cyklus $j \to k \to j$ s váhou $(-1) + (-2) = -3$. Slepením nejkratší cesty $i \to j \to k$ a hrany $k \to j$ vznikne <em>sled</em>, který tenhle záporný cyklus obsahuje — a sled se zkrátit na stejně dlouhou cestu nedá. Trojúhelníková nerovnost (a s ní celá výstavba algoritmů v dalších lekcích) tedy <strong>předpokládá graf bez záporných cyklů</strong>.</p>
+    </div>
+  </details>
+
+  <h2>Neorientované grafy: jen nezáporné váhy</h2>
+  <p>Celou dobu mluvíme o digrafech. Neorientovaný graf se na orientovaný převádí standardně: každá neorientovaná hrana $\{v, w\}$ se nahradí <em>dvojicí</em> orientovaných hran $(v,w)$ a $(w,v)$ se stejnou váhou.</p>
+
+  <details class="try">
+    <summary>Zkus sám: co tenhle převod udělá s neorientovanou hranou váhy $-3$?</summary>
+    <div class="inner">
+      <p>Vzniknou hrany $(v,w)$ a $(w,v)$, obě s váhou $-3$ — a ty spolu tvoří cyklus $v \to w \to v$ s váhou $-6$. <strong>Jediná záporná neorientovaná hrana = záporný cyklus.</strong> Proto se u neorientovaných grafů uvažují jen instance s <em>nezápornými</em> váhami.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-undirected"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nezaměňuj „záporná hrana“ a „záporný cyklus“</div>
+    <ul>
+      <li>V <strong>orientovaném</strong> grafu záporná hrana sama o sobě <em>nevadí</em> — úloha je v pořádku, dokud žádný cyklus nemá záporný součet. (Jen ne každý algoritmus ji zvládne — to rozlišíme u Dijkstry [L2.4] vs. Bellman-Forda [L2.12].)</li>
+      <li>V <strong>neorientovaném</strong> grafu je každá záporná hrana po převodu rovnou záporný 2-cyklus — tam je „záporná hrana“ a „záporný cyklus“ totéž.</li>
+      <li>„Nejkratší cesta neexistuje“ je u záporného cyklu <em>nepřesné</em>: neexistuje nejkratší <strong>sled</strong> ($\to -\infty$); nejkratší <strong>cesta</strong> existuje, ale je NP-těžké ji najít.</li>
+    </ul>
+  </div>
+
+  <h2>Proč zrovna NP-těžké?</h2>
+  <p>Tvrzení „se záporným cyklem je hledání nejkratší cesty NP-těžké“ má na slidu 12 elegantní zdůvodnění — redukci z existence <strong>Hamiltonovské kružnice</strong> (cyklus navštěvující každý vrchol právě jednou):</p>
+
+  <details class="try">
+    <summary>Pro zvídavé: jak z grafu $G$ vyrobit instanci nejkratší cesty, která „pozná“ Hamiltonovskou kružnici?</summary>
+    <div class="inner">
+      <p>Konstrukce ze slidu 12: vezmi $G$ a všem hranám dej váhu $-1$ (graf $G'$). Zvol libovolný vrchol $v$ a vytvoř jeho duplikát $v'$ včetně hran. Přidej zdroj $s$, cíl $t$ a hrany $(s, v)$ a $(v', t)$ s váhou $0$. Pak nejkratší cesta z $s$ do $t$ v $G'$ má délku $-|V(G)|$ <em>právě tehdy</em>, když v $G$ existuje Hamiltonovská kružnice: cesta dlouhá $-|V(G)|$ musí použít $|V(G)|$ hran váhy $-1$ bez opakování vrcholů — tedy obejít všechny vrcholy a vrátit se „do $v$“ (přes duplikát $v'$). A protože každý cyklus v $G$ se v $G'$ stal záporným cyklem, umí takové grafy řešit jen algoritmus, který zvládá záporné cykly — kdyby byl polynomiální, řešil by polynomiálně i NP-těžkou Hamiltonovskou kružnici.</p>
+      <p>Tady nám stačí závěr; důkazové techniky tohohle typu (redukce) si budeš procvičovat v kapitole K3. Souhrnnou zkouškovou úlohu na záporné cykly potkáš ve FOTO vyvrcholení [L2.18].</p>
+    </div>
+  </details>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.1</div>
+    <ul>
+      <li><strong>Záporné váhy hran jsou OK</strong>, dokud netvoří <strong>záporný cyklus</strong>: pak nejkratší sled neexistuje (délka $\to -\infty$) a najít nejkratší cestu je <strong>NP-těžké</strong> (redukce z Hamiltonovské kružnice).</li>
+      <li>Hledáme <strong>cestu</strong> (bez opakování vrcholů), ne sled <a href="../k0/l0-3.html#takeaways">[L0.3]</a>; existuje-li nějaká $s$–$t$ cesta, nejkratší cesta existuje vždy.</li>
+      <li>Bez záporných cyklů <strong>nejkratší sled obsahuje nejkratší cestu stejné délky</strong> — proto smí algoritmy ignorovat opakování vrcholů a být rychlé.</li>
+      <li>Bez záporných cyklů platí <strong>trojúhelníková nerovnost</strong> $l(i,j) \le l(i,k) + l(k,j)$; záporný cyklus ji rozbije.</li>
+      <li><strong>Neorientovaná záporná hrana = záporný 2-cyklus</strong> po převodu na digraf → u neorientovaných grafů jen nezáporné váhy.</li>
+      <li>U <em>nejdelší</em> cesty vadí symetricky <strong>kladné cykly</strong> (otočení znamének vah).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHY ===== -->
+  <div class="task" id="t-triangle">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Negative cycle vs. triangle inequality</strong>
+      <span class="task-src">zdroj: prezentace/03_SPT_KO.md, slide 10–11 (příklad 1:1)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, dle slidů 10–11)</span>
+        <p>Consider a digraph with nodes $i$, $j$, $k$ and edges: $(i,j)$ with weight $5$, $(i,k)$ with weight $6$, $(j,k)$ with weight $-1$, and $(k,j)$ with weight $-2$. Recall the theorem: if the graph does not contain a cycle of negative weight, then distances between all triplets of nodes satisfy $l(i,j) \le l(i,k) + l(k,j)$. Compute the distances $l(i,j)$, $l(i,k)$, $l(k,j)$, check the triangle inequality, and explain the result.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Konkrétní digraf o třech vrcholech a čtyřech hranách (je to přesně graf z obrázku výše). Máme spočítat tři vzdálenosti — délky nejkratších <em>cest</em> —, dosadit je do trojúhelníkové nerovnosti a vysvětlit, co se děje.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li><a href="../k0/l0-3.html#takeaways">[L0.3] Cesta, sled, tah, cyklus</a> — vzdálenost je délka nejkratší <em>cesty</em>.</li>
+        <li>Tato lekce — trojúhelníková nerovnost a její předpoklad „bez záporných cyklů“.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Graf je maličký — vzdálenosti spočítej výčtem všech cest (mezi každou dvojicí jsou nejvýš dvě). Pak se ptej: je splněn <em>předpoklad</em> věty? Projdi všechny cykly v grafu a sečti jejich váhy. Nakonec si rozmysli, co přesně vznikne slepením dvou nejkratších cest, jejichž délky v nerovnosti sčítáš.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Vzdálenosti</strong> (cesty nesmí opakovat vrcholy, takže kandidátů je málo):</p>
+          <ul>
+            <li>$l(i,j) = \min\{\,c(i,j),\; c(i,k) + c(k,j)\,\} = \min\{5,\; 6 - 2\} = 4$ — nejkratší cesta $i \to k \to j$.</li>
+            <li>$l(i,k) = \min\{\,c(i,k),\; c(i,j) + c(j,k)\,\} = \min\{6,\; 5 - 1\} = 4$ — nejkratší cesta $i \to j \to k$.</li>
+            <li>$l(k,j) = c(k,j) = -2$ — jediná $k$–$j$ cesta je přímá hrana.</li>
+          </ul>
+          <p><strong>Trojúhelníková nerovnost:</strong></p>
+          $$\begin{aligned} l(i,j) &\le l(i,k) + l(k,j) \\ 6-2 &\le (5-1) + (-2) \\ 4 &\le 2 \quad \ldots \text{ spor (nerovnost neplatí)} \end{aligned}$$
+          <p><strong>Vysvětlení:</strong> věta tady nic neslibuje, protože její předpoklad je porušen — graf obsahuje záporný cyklus $j \to k \to j$ s váhou $(-1) + (-2) = -3$. Mechanismus selhání: důkaz nerovnosti stojí na slepení nejkratší $i$–$k$ cesty a nejkratší $k$–$j$ cesty do jednoho objektu. Tady ale $i$–$k$ cesta prochází vrcholem $j$, takže slepením vznikne <em>sled</em> $i \to j \to k \to j$, který obsahuje právě ten záporný cyklus — a nedá se zkrátit na cestu stejné délky. Přesně tohle je obecný důvod, proč všechny věty a algoritmy kapitoly K2 předpokládají graf bez záporných cyklů.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="task" id="t-undirected">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Negative undirected edge</strong>
+      <span class="task-src">zdroj: prezentace/03_SPT_KO.md, slide 7 (1:1)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, dle slidu 7)</span>
+        <p>When we transform an undirected graph to a directed graph, every undirected edge connecting $v$ and $w$ is transformed to two edges $(v,w)$ and $(w,v)$. Explain why this transformation of a negative undirected edge results in a negative cycle, and why we therefore consider only instances with nonnegative weights when working with undirected graphs.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Vysvětlovací otázka (typické téma na ústní): proč standardní převod neorientovaného grafu na digraf nesnese záporné hrany.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — převod neorientované hrany na dvojici protisměrných hran; co způsobí záporný cyklus.</li>
+        <li><a href="../k0/l0-3.html#takeaways">[L0.3] Cesta, sled, tah, cyklus</a> — definice cyklu.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Nakresli si jednu neorientovanou hranu $\{v,w\}$ s váhou $c &lt; 0$ a proveď převod. Jaký nejmenší cyklus v digrafu vznikl a jakou má váhu? Pak použij hlavní poznatek lekce: co záporný cyklus dělá s nejkratším sledem a se složitostí úlohy.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Neorientovaná hrana $\{v,w\}$ s váhou $c$ se převede na hrany $(v,w)$ a $(w,v)$, <em>obě</em> s váhou $c$. Ty spolu tvoří cyklus $v \to w \to v$ o váze $2c$. Je-li $c &lt; 0$, je $2c &lt; 0$ — vznikl <strong>záporný cyklus</strong>, a to z jediné záporné hrany, bez ohledu na zbytek grafu.</p>
+          <p>Důsledky (z této lekce): v digrafu se záporným cyklem neexistuje nejkratší sled (oběhy $v \to w \to v$ srážejí délku k $-\infty$), takže algoritmy postavené na ztotožnění „nejkratší sled = nejkratší cesta“ nelze použít, a hledání nejkratší cesty je v takové třídě instancí NP-těžké. Proto se po převodu na digraf uvažují u neorientovaných grafů <strong>jen instance s nezápornými váhami</strong> — tam žádný záporný cyklus vzniknout nemůže a celý aparát kapitoly K2 funguje.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L2.1">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k1/l1-15.html"><span class="dir">← Předchozí</span> L1.15 · Časově/pozičně indexované proměnné (K1)</a>
+    <a class="next" href="l2-2.html"><span class="dir">Další →</span> L2.2 · Bellmanův princip optimality + Bellmanova rovnice</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Sled obíhající záporný cyklus: délka klesá k −∞
+KOViz.stepper(document.getElementById('viz-cycle'), {
+  graph: {
+    directed: true,
+    nodes: [
+      {id:'s', x:70,  y:210},
+      {id:'a', x:220, y:210},
+      {id:'b', x:340, y:90},
+      {id:'c', x:460, y:210},
+      {id:'t', x:590, y:210},
+    ],
+    edges: [
+      {from:'s', to:'a', label:'2'},
+      {from:'a', to:'b', label:'1'},
+      {from:'b', to:'c', label:'1'},
+      {from:'c', to:'a', label:'−4', curve:-0.5},
+      {from:'c', to:'t', label:'2'},
+    ],
+  },
+  frames: [
+    {desc:'CESTA s→a→b→c→t: délka 2+1+1+2 = <b>6</b>. Žádný vrchol se neopakuje — tohle je nejkratší cesta.',
+     nodes:{s:'hl', a:'good', b:'good', c:'good', t:'hl'},
+     edges:{'s->a':'good', 'a->b':'good', 'b->c':'good', 'c->t':'good'}},
+    {desc:'Cyklus a→b→c→a má váhu 1+1−4 = <b>−2</b> — záporný cyklus. SLED ho smí oběhnout: s→a→b→c→<b>a→b→c</b>→t má délku 6 + (−2) = <b>4</b>.',
+     nodes:{s:'hl', a:'bad', b:'bad', c:'bad', t:'hl'},
+     edges:{'s->a':'good', 'a->b':'bad', 'b->c':'bad', 'c->a':'bad', 'c->t':'good'}},
+    {desc:'Druhý oběh: délka <b>2</b>. Třetí: <b>0</b>. Čtvrtý: <b>−2</b>… Každý oběh záporného cyklu sled o 2 zkrátí.',
+     nodes:{s:'hl', a:'bad', b:'bad', c:'bad', t:'hl'},
+     edges:{'s->a':'good', 'a->b':'bad', 'b->c':'bad', 'c->a':'bad', 'c->t':'good'}},
+    {desc:'Délka sledu klesá k <b>−∞</b>: nejkratší SLED neexistuje. Nejkratší CESTA existuje (krok 1, délka 6) — ale algoritmus, který nerozlišuje cestu od sledu, ji nenajde. Obecně je to NP-těžké.',
+     nodes:{s:'hl', a:'bad', b:'bad', c:'bad', t:'hl'},
+     edges:{'s->a':'', 'a->b':'bad', 'b->c':'bad', 'c->a':'bad', 'c->t':''}},
+  ],
+});
+
+// 2 — Příklad ze slidu 11: záporný cyklus rozbije trojúhelníkovou nerovnost
+KOViz.graph(document.getElementById('viz-triangle'), {
+  directed: true,
+  w: 640, h: 300,
+  nodes: [
+    {id:'i', x:120, y:220},
+    {id:'k', x:320, y:70},
+    {id:'j', x:520, y:220},
+  ],
+  edges: [
+    {from:'i', to:'j', label:'5'},
+    {from:'i', to:'k', label:'6'},
+    {from:'j', to:'k', label:'−1', curve:0.55},
+    {from:'k', to:'j', label:'−2', curve:0.55},
+  ],
+  caption: 'Příklad ze slidu 11: hrany (i,j) = 5, (i,k) = 6, (j,k) = −1, (k,j) = −2. Dvojice hran mezi j a k tvoří záporný cyklus j→k→j s váhou −3.',
+});
+
+// 3 — Neorientovaná záporná hrana = záporný cyklus po převodu na digraf
+KOViz.graph(document.getElementById('viz-undirected'), {
+  directed: true,
+  w: 640, h: 320,
+  nodes: [
+    {id:'v1', label:'v', x:150, y:80},
+    {id:'w1', label:'w', x:150, y:250},
+    {id:'v2', label:'v', x:490, y:80},
+    {id:'w2', label:'w', x:490, y:250},
+  ],
+  edges: [
+    {from:'v1', to:'w1', label:'−3', undirected:true},
+    {from:'v2', to:'w2', label:'−3', curve:0.4, cls:'bad'},
+    {from:'w2', to:'v2', label:'−3', curve:0.4, cls:'bad'},
+  ],
+  caption: 'Vlevo: neorientovaná hrana {v, w} s váhou −3. Vpravo: po převodu na digraf vzniknou hrany (v,w) a (w,v), obě −3 — dohromady záporný cyklus v→w→v s váhou −6. Proto u neorientovaných grafů jen nezáporné váhy.',
+});
+</script>
+</body>
+</html>
