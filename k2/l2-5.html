@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.5 · Pořadí expanze a tie-breaking — Edge costs assignment [FOTO] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.5</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.5</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>Pořadí expanze a tie-breaking — Edge costs assignment [FOTO]</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Pořadí expanze Dijkstry je čitelné přímo ze značek (uzavírá se v pořadí neklesajících $l$, remízy řeší <em>tie-break</em>) — a hrany, které vnitřní smyčka nikdy netestuje, jsou pro běh <strong>neviditelné</strong>. Díky tomu umíme úlohu obrátit: <em>navrhnout váhy hran tak, aby běh Dijkstry dopadl přesně podle zadání</em>.
+  </div>
+
+  <p>Prerekvizity: <a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a>. Tam jsme si u běhů opakovaně všímali, že se vrcholy uzavírají v pořadí neklesajících značek — dnes ten slíbený postřeh povýšíme na pracovní nástroj a vytěžíme z něj celou zkouškovou úlohu <strong>Edge costs assignment</strong> (přiřazení cen hran).</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Pořadí expanze čteš ze značek</h2>
+  <p>Dijkstra v každé iteraci uzavře neuzavřený vrchol s <em>nejmenší</em> značkou. Protože uzavřená značka už nikdy neklesne a nové odhady vznikají jen přičítáním nezáporných vah k už uzavřeným značkám, uzavírají se vrcholy v pořadí <strong>neklesajících $l$</strong> — viz <a href="l2-4.html#takeaways">[L2.4]</a>. Pořadí expanze tedy není žádná nezávislá informace „navíc“: je svázané s hodnotami vzdáleností.</p>
+
+  <details class="try">
+    <summary>Zkus sám: v úloze T01 lekce <a href="l2-4.html#t-iterate">[L2.4]</a> vyšlo $l = (0, 4, 1, 6, 3, 7, 9, \infty)$. Dokážeš z toho zrekonstruovat pořadí přidávání do $R$, aniž bys běh opakoval?</summary>
+    <div class="inner">
+      <p>Ano — stačí vrcholy <strong>seřadit podle výsledné značky</strong>: $0, 1, 3, 4, 6, 7, 9, \infty$ dává pořadí $1, 3, 5, 2, 4, 6, 7, 8$. Přesně to vyšlo i krokováním běhu.</p>
+      <p>Funguje to ale jednoznačně jen tehdy, když jsou všechny značky <em>navzájem různé</em>. Při rovnosti dvou značek pořadí z vektoru $l$ nepoznáš — a jak hned uvidíme, nepozná ho jednoznačně ani sám algoritmus.</p>
+    </div>
+  </details>
+
+  <h2>Hrany, které běh vůbec nevidí</h2>
+  <p>Druhá ingredience dneška je nenápadný detail pseudokódu ze slidu 16: vnitřní smyčka relaxuje jen hrany <code>for w ∈ V(G) \ R</code>. Hrana $(v,w)$ se testuje <em>jedinkrát za celý běh</em> — při expanzi $v$ — a pokud je v tu chvíli $w$ už uzavřené, <strong>přeskočí se bez testu</strong>. Přesně tohle v <a href="l2-4.html#takeaways">[L2.4]</a> položilo Dijkstru na záporné hraně: hranu $(b,a)$ vedoucí do uzavřeného vrcholu už nikdo netestoval. Dnes stejný jev využijeme pozitivně. Proklikej si běh a sleduj hranu $b \to a$:</p>
+
+  <div class="viz" id="viz-free"></div>
+
+  <details class="try">
+    <summary>Zkus sám: co se stane s během, když váhu hrany $b \to a$ změníš z $6$ na $1$? A na $100$?</summary>
+    <div class="inner">
+      <p><strong>Vůbec nic.</strong> Až do expanze $b$ je běh s váhou $1$, $6$ i $100$ identický — váha $b \to a$ do té doby v ničem nefiguruje. A při expanzi $b$ je $a$ už uzavřené, takže smyčka hranu přeskočí, ať na ní stojí cokoliv. Zbytek běhu je zase identický.</p>
+      <p>Váha takové hrany je pro běh <strong>neviditelná</strong>: můžeš ji změnit na libovolnou hodnotu a pořadí expanze, vektor $l$ i vektor $p$ vyjdou stejně. (Stejně neviditelné jsou hrany vycházející z <em>posledního</em> uzavřeného vrcholu — při jeho expanzi už žádný neuzavřený $w$ nezbývá.)</p>
+      <p>Pozor na jemnost: hrana, která se testuje, ale nikdy žádnou značku nesníží (test ostře nevyjde), <em>úplně volná není</em>. Zvětšovat ji můžeš libovolně, ale zmenšit jen po určitou mez — pod ní by začala vyhrávat relaxace a běh by se změnil. Taková hrana má jen povolené <strong>rozmezí</strong>.</p>
+    </div>
+  </details>
+
+  <h2>Remízy a tie-breaking</h2>
+  <p>Řádek <code>Find v ∈ V(G) \ R such that l(v) = min…</code> ze slidu 16 neříká, <em>kterého</em> kandidáta vybrat, když je minimálních značek víc. Pravidlu, kterým se implementace při takové remíze rozhodne (např. „vezmi vrchol s nejmenším indexem“), se říká <strong>tie-breaking</strong> (rozhodování remíz) — a pseudokód žádné nepředepisuje.</p>
+
+  <details class="try">
+    <summary>Zkus sám: změň v grafu výše váhu hrany $s \to b$ ze $4$ na $1$. Jaká pořadí expanze jsou teď možná a co všechno se mezi nimi liší?</summary>
+    <div class="inner">
+      <p>Po expanzi $s$ je $l(a) = l(b) = 1$ — remíza. Podle tie-breaku se běh větví:</p>
+      <ul>
+        <li><strong>Nejdřív $a$:</strong> pořadí $s, a, b, c$; testuje se hrana $a \to b$ ($1 &gt; 1+2$? ne), hrana $b \to a$ se přeskočí.</li>
+        <li><strong>Nejdřív $b$:</strong> pořadí $s, b, a, c$; testuje se naopak $b \to a$ ($1 &gt; 1+6$? ne) a přeskočí se $a \to b$.</li>
+      </ul>
+      <p>Výsledný vektor $l = (0, 1, 1, 2)$ vyjde v obou větvích stejně — vzdálenosti jsou pro nezáporné váhy jednoznačné. Liší se ale <strong>pořadí expanze</strong> a dokonce i <strong>množina testovaných (a tedy neviditelných) hran</strong>.</p>
+      <p>Proto když zkouškové zadání říká, že Dijkstra <em>„must visit/expand the vertices in the following order“</em>, znamená to: pořadí musí vyjít <strong>při každém tie-breaku</strong> — tvoje váhy musí zařídit, aby v okamžiku každého výběru bylo minimum <em>jediné</em> (samé ostré nerovnosti, žádná remíza).</p>
+    </div>
+  </details>
+
+  <h2>Reverzní úloha: navrhni váhy</h2>
+  <p>Teď úlohu otočíme — přesně tak je postavená zkoušková úloha Edge costs assignment. Zadané je <em>pořadí expanze</em>, <em>výsledná nejkratší cesta</em> a <em>strop na její cenu</em>; hledají se váhy. Recept:</p>
+  <ol>
+    <li><strong>Pořadí → značky.</strong> Pořadí expanze znamená ostře rostoucí posloupnost značek (remízy nesmí nastat): $0 = l(v_1) &lt; l(v_2) &lt; \dots$ Zvol konkrétní malá čísla, např. $0, 1, 2, 3, \dots$ — strop na cenu cesty hlídej u cílového vrcholu.</li>
+    <li><strong>Značky → stromové hrany.</strong> Každou značku musí někdo „doručit“: pro každý vrchol $w$ vyber hranu $(v, w)$ z dříve uzavřeného $v$ a nastav $c(v,w) = l(w) - l(v)$. To budou hrany stromu nejkratších cest — vektor $p$ musí odpovídat požadované cestě.</li>
+    <li><strong>Zbylé hrany nesmí škodit.</strong> Každá další hrana, kterou běh testuje, nesmí žádnou značku podlézt <em>ani remizovat</em> (remíza při relaxaci by mohla změnit $p$, remíza značek výběr). Nastav ji dost velkou a ověř celý běh.</li>
+    <li><strong>Volné hrany.</strong> Hrany, jejichž relaxace se nikdy neprovede (vedou do vrcholu uzavřeného dřív, než se expanduje jejich začátek), můžeš měnit libovolně — to je v úloze druhá otázka.</li>
+  </ol>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: „neleží na nejkratší cestě“ ≠ „lze měnit libovolně“</div>
+    <ul>
+      <li>Volnost hrany se posuzuje podle <strong>běhu</strong> (kdy a zda se hrana testuje), ne podle toho, jestli leží na výsledné cestě. V úloze T01 níže hrana $d \to t$ na nejkratší cestě $s\!-\!a\!-\!t$ neleží, a přesto ji volně měnit <strong>nelze</strong> — s malou váhou by vytvořila zkratku $s\!-\!b\!-\!d\!-\!t$ a rozbila zadané podmínky.</li>
+      <li>Naopak hranu vedoucí do brzy uzavřeného vrcholu můžeš měnit na cokoliv, i kdyby vypadala sebedůležitěji.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.5</div>
+    <ul>
+      <li>Vrcholy se uzavírají v pořadí <strong>neklesajících značek</strong> <a href="l2-4.html#takeaways">[L2.4]</a> — pořadí expanze přečteš seřazením výsledného vektoru $l$ (jednoznačně jen bez remíz).</li>
+      <li><strong>Tie-breaking</strong> = pravidlo pro výběr při rovnosti značek; pseudokód ho nespecifikuje. Zkouškové „must expand in the following order“ proto vyžaduje, aby minimum bylo v každém výběru jediné (ostré nerovnosti).</li>
+      <li>Hrana, jejíž relaxace se <strong>nikdy neprovede</strong> (vede do vrcholu uzavřeného dřív, než se expanduje její začátek), je pro běh neviditelná — lze ji změnit na cokoliv z $\mathbb{N}$. Hrana testovaná, ale nikdy nevítězná, má jen povolené <strong>rozmezí</strong> (nahoru volně, dolů po mez).</li>
+      <li><strong>Reverzní návrh vah:</strong> pořadí → ostře rostoucí značky → stromové hrany $c(v,w) = l(w) - l(v)$ → zbylé hrany nesmí podlézt ani remizovat → volné hrany = ty nikdy netestované.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA ===== -->
+  <div class="task" id="t-edgecosts">
+    <div class="task-head foto">
+      <span class="task-id">T01</span>
+      <strong>Edge costs assignment</strong>
+      <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
+      <span class="task-src">zdroj: zkouška KO 25.05.2026 (7 b.); dříve 02.06.2021; bank #12. Pozn.: přepisy zkoušek uvádějí u hrany mezi $d$ a $t$ orientaci $t \to d$, ale banka i oficiální odpověď (volné jsou jen $a \to d$ a $c \to d$) odpovídají orientaci $d \to t$ — graf níže ji přebírá z banky.</span>
+    </div>
+    <div class="task-body">
+      <div class="viz" id="viz-task"></div>
+
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>Consider the graph above. Assign edge weights from $\mathbb{N} = \{1, 2, \dots\}$ to each edge so that <em>(multiple edges can be assigned the same weight)</em>:</p>
+        <ol>
+          <li>Dijkstra algorithm searching the shortest path from vertex $s$ to vertex $t$ must visit/expand the vertices in the following order: $s, b, d, a, c, t$.</li>
+          <li>The resulting shortest path is $s - a - t$.</li>
+          <li>The cost of the shortest path (sum of path's edge weights) is $\leq 5$.</li>
+        </ol>
+        <p>After you assigned the edge weights such that conditions 1–3 hold, mark the edges whose value can be changed to any value from $\mathbb{N}$ such that a run of Dijkstra algorithm still necessarily results in satisfying conditions 1–3.</p>
+      </div>
+
+      <div class="box foto">
+        <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+        <p>Tuhle úlohu vyřeš celou <strong>NA PAPÍR</strong> — od prázdného listu, bez koukání do lekce ani do řešení, ideálně na čas (na zkoušce na ni budeš mít zhruba 15–20 minut; je za 7 bodů). Pak mi pošli fotku — zkontroluju ti ji a vytknu chyby přesně jako hodnotitel.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Orientovaný graf s vrcholy $s, a, b, c, d, t$ a osmi hranami <em>bez vah</em> — váhy z $\mathbb{N}$ navrhuješ ty. Úloha má dvě části: ① přiřadit váhy tak, aby Dijkstra ze $s$ expandoval přesně v pořadí $s, b, d, a, c, t$, výsledná nejkratší cesta byla $s\!-\!a\!-\!t$ a její cena nejvýš $5$; ② u hotového přiřazení označit hrany, které lze přepsat na <em>libovolnou</em> hodnotu z $\mathbb{N}$, aniž by se podmínky 1–3 mohly rozbít (slovo <em>necessarily</em>: musí to vyjít při každém tie-breaku).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — pořadí expanze ze značek, tie-breaking, neviditelné hrany, recept na reverzní návrh.</li>
+        <li><a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a> — ověření návrhu oditerováním.</li>
+        <li><a href="l2-3.html#takeaways">[L2.3] Relaxace hrany</a> — ostrý test: při rovnosti se $p$ nepřepisuje.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Jdi přesně podle receptu z výkladu. Pořadí $s, b, d, a, c, t$ znamená ostře rostoucí značky $0 = l(s) &lt; l(b) &lt; l(d) &lt; l(a) &lt; l(c) &lt; l(t)$, a podmínka 3 přidává $l(t) \le 5$ — takže se nabízí rovnou $0, 1, 2, 3, 4, 5$. Pak si rozmysli, <em>kdo komu značku doručí</em>: jediná hrana do $b$ je $s \to b$, do $d$ vedou tři, ale v okamžiku uzavření $d$ je z nich expandované jen $b$… Podmínka 2 říká, že $l(t)$ musí doručit hrana $a \to t$ (tj. $p(t) = a$), s cenou cesty $c(s,a) + c(a,t) = l(t)$. Nakonec prověř hrany mimo strom: jak velké musí být $c(d,t)$, aby relaxace z $d$ cestu $s\!-\!a\!-\!t$ nepodlezla <em>ani neremizovala</em>? A volné hrany hledej podle pravidla z výkladu: které hrany vedou do vrcholu, jenž se uzavře dřív, než se expanduje jejich začátek?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>① Návrh značek.</strong> Pořadí $s, b, d, a, c, t$ + strop $5$ → zvol $l(s)=0$, $l(b)=1$, $l(d)=2$, $l(a)=3$, $l(c)=4$, $l(t)=5$.</p>
+          <p><strong>② Stromové hrany</strong> (kdo značku doručí): $l(b)$ jedině hranou $s \to b$ → $c(s,b)=1$. $l(d)$ může v čase uzavření $d$ doručit jen $b$ → $c(b,d) = 2-1 = 1$. $l(a)$ jedině hranou $s \to a$ → $c(s,a)=3$. $l(c)$ jedině hranou $b \to c$ → $c(b,c) = 4-1 = 3$. $l(t)$ musí kvůli podmínce 2 doručit $a \to t$ → $c(a,t) = 5-3 = 2$; cena cesty $3+2 = 5 \le 5$ ✓.</p>
+          <p><strong>③ Zbylé hrany nesmí škodit.</strong> Hrana $d \to t$ se testuje při expanzi $d$ (3. iterace) a nastaví $l(t) = 2 + c(d,t)$. Aby pak relaxace $a \to t$ ještě ostře vyhrála ($2 + c(d,t) &gt; 3 + 2 = 5$), musí být $c(d,t) \ge 4$. Menší hodnoty selžou:</p>
+          <ul>
+            <li>$c(d,t) = 3$ → $l(t) = 5$ a test $5 &gt; 5$ <em>nevyjde</em> — ostrá relaxace z <a href="l2-3.html#takeaways">[L2.3]</a> nechá $p(t) = d$ a výsledná cesta je $s\!-\!b\!-\!d\!-\!t$: podmínka 2 padá. (Přesně tohle míní poznámka „necessarily“ — s jiným, „vstřícnějším“ tie-breakingem při rovnosti by to náhodou vyjít mohlo, ale jistě ne.)</li>
+            <li>$c(d,t) = 2$ → $l(t) = 4$: remíza s $l(c)$ při výběru 5. iterace, pořadí není vynucené; navíc nejkratší cesta je $s\!-\!b\!-\!d\!-\!t$. Padá 1 i 2.</li>
+            <li>$c(d,t) = 1$ → $l(t) = 3$: remíza s $l(a)$ už ve 4. iteraci. Padá 1.</li>
+          </ul>
+          <p>Zvolíme tedy např. $c(d,t) = 4$. Hrany $a \to d$ a $c \to d$ běh nikdy netestuje (viz ⑤), jejich hodnota je libovolná — pro konkrétnost třeba $1$.</p>
+          <p><strong>Jedno platné přiřazení</strong> (shodné s bankou):</p>
+          <p>$$c(s,a)=3,\quad c(s,b)=1,\quad c(a,t)=2,\quad c(b,d)=1,\quad c(b,c)=3,\quad c(d,t)=4,$$</p>
+          <p>a $c(a,d) = x$, $c(c,d) = y$ libovolné ($x, y \in \mathbb{N}$).</p>
+          <p><strong>④ Ověření během</strong> (každý výběr má jediné minimum → pořadí platí pro každý tie-break):</p>
+          <ul>
+            <li><strong>It 1:</strong> uzavři $s\,(0)$; $l(a):=3$, $l(b):=1$.</li>
+            <li><strong>It 2:</strong> min je $b\,(1)$; $l(d):=2$, $p(d):=b$; $l(c):=4$, $p(c):=b$.</li>
+            <li><strong>It 3:</strong> min je $d\,(2 &lt; 3)$; $l(t):=2+4=6$, $p(t):=d$.</li>
+            <li><strong>It 4:</strong> min je $a\,(3 &lt; 4)$; $(a,t)$: $6 &gt; 3+2=5$ → $l(t):=5$, $p(t):=a$; $(a,d)$: $d \in R$, netestuje se.</li>
+            <li><strong>It 5:</strong> min je $c\,(4 &lt; 5)$; $(c,d)$: $d \in R$, netestuje se.</li>
+            <li><strong>It 6:</strong> zbývá $t\,(5)$, konec.</li>
+          </ul>
+          <p>Pořadí expanze $s, b, d, a, c, t$ ✓ (značky $0,1,2,3,4,5$ ostře rostou); couváním po $p$: $p(t)=a$, $p(a)=s$ → cesta $s\!-\!a\!-\!t$ ✓ s cenou $3+2 = 5 \le 5$ ✓.</p>
+          <p><strong>⑤ Volné hrany.</strong> $d$ se uzavírá ve 3. iteraci — dřív, než se expanduje $a$ (4. it.) i $c$ (5. it.). Hrany $a \to d$ a $c \to d$ proto vnitřní smyčka (<code>for w ∈ V(G) \ R</code>) nikdy netestuje a běh je na jejich hodnotě nezávislý:</p>
+          <p>$$\boxed{a \to d \quad\text{a}\quad c \to d}$$</p>
+          <p>Žádná další hrana volná není: $c(s,b)$, $c(b,d)$, $c(s,a)$, $c(b,c)$, $c(a,t)$ určují značky (jejich změna posune pořadí nebo cenu cesty) a $c(d,t)$ je svázané mezí $c(d,t) \ge 4$ — viz ③ (to je přesně polopravda z červeného boxu: $d \to t$ na nejkratší cestě neleží, a přesto volné není).</p>
+        </div>
+      </details>
+
+      <p>Krokovaná verze ověřovacího běhu (pozor, spoiler na řešení — nejdřív si úlohu vyřeš na papír):</p>
+      <div class="viz" id="viz-sol"></div>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L2.5">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l2-4.html"><span class="dir">← Předchozí</span> L2.4 · Dijkstrův algoritmus (běh)</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.6 · Split vrcholu (cena na vrcholu → na hraně))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Neviditelná hrana b→a (výklad)
+KOViz.stepper(document.getElementById('viz-free'), {
+  graph: {
+    directed: true,
+    w: 640, h: 330,
+    nodes: [
+      {id:'s', x:90,  y:170},
+      {id:'a', x:310, y:60},
+      {id:'b', x:310, y:280},
+      {id:'c', x:550, y:170},
+    ],
+    edges: [
+      {from:'s', to:'a', label:'1'},
+      {from:'s', to:'b', label:'4'},
+      {from:'a', to:'b', label:'2', curve:-0.5},
+      {from:'b', to:'a', label:'6', curve:-0.5},
+      {from:'a', to:'c', label:'5'},
+      {from:'b', to:'c', label:'1'},
+    ],
+  },
+  frames: [
+    {desc:'It 1: uzavři s (0). Relaxuj (s,a): l(a):=1, p(a):=s; (s,b): l(b):=4, p(b):=s. Zelená = uzavřeno (v R), žlutá = právě expandovaný vrchol.',
+     nodes:{s:'hl'},
+     edges:{'s->a':'hl', 's->b':'hl'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=4, p=s', c:'l=∞'}},
+    {desc:'It 2: min je a (1 &lt; 4) → uzavři a. (a,b): 4 &gt; 1+2 → l(b):=3, p(b):=a; (a,c): l(c):=6, p(c):=a.',
+     nodes:{s:'good', a:'hl'},
+     edges:{'s->a':'good', 'a->b':'hl', 'a->c':'hl', 's->b':'dim'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=3, p=a', c:'l=6, p=a'}},
+    {desc:'It 3: min je b (3 &lt; 6) → uzavři b. (b,c): 6 &gt; 3+1 → l(c):=4, p(c):=b. A hrana (b,a)? Vede do a ∈ R — vnitřní smyčka (for w ∈ V(G)\\R) ji vůbec netestuje, ať na ní stojí cokoliv.',
+     nodes:{s:'good', a:'good', b:'hl'},
+     edges:{'s->a':'good', 'a->b':'good', 'b->c':'hl', 'b->a':'dim', 'a->c':'dim', 's->b':'dim'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=3, p=a', c:'l=4, p=b'}},
+    {desc:'It 4: zbývá c (4) → uzavři, konec. Pořadí expanze s, a, b, c (značky 0,1,3,4 neklesají). Hrana b→a se za celý běh ani jednou netestovala → je pro běh NEVIDITELNÁ: změň 6 na 1 nebo na 100 a celý běh dopadne úplně stejně.',
+     nodes:{s:'good', a:'good', b:'good', c:'good'},
+     edges:{'s->a':'good', 'a->b':'good', 'b->c':'good', 'b->a':'dim', 'a->c':'dim', 's->b':'dim'},
+     subs:{s:'l=0', a:'l=1, p=s', b:'l=3, p=a', c:'l=4, p=b'}},
+  ],
+});
+
+// 2 — Graf k úloze T01 (bez vah — váhy navrhuje student)
+KOViz.graph(document.getElementById('viz-task'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s', x:70,  y:180},
+    {id:'a', x:250, y:80},
+    {id:'b', x:250, y:280},
+    {id:'c', x:420, y:320},
+    {id:'t', x:560, y:70},
+    {id:'d', x:560, y:240},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'?'},
+    {from:'s', to:'b', label:'?'},
+    {from:'a', to:'t', label:'?'},
+    {from:'a', to:'d', label:'?'},
+    {from:'b', to:'d', label:'?'},
+    {from:'b', to:'c', label:'?'},
+    {from:'c', to:'d', label:'?'},
+    {from:'d', to:'t', label:'?', curve:0.4},
+  ],
+  caption: 'T01: orientovaný graf, zdroj s (vlevo), cíl t (vpravo nahoře). Váhy hran z ℕ navrhuješ ty.',
+});
+
+// 3 — Krokované ověření řešení T01 (váhy z banky; a→d = x, c→d = y libovolné)
+KOViz.stepper(document.getElementById('viz-sol'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'s', x:70,  y:180},
+      {id:'a', x:250, y:80},
+      {id:'b', x:250, y:280},
+      {id:'c', x:420, y:320},
+      {id:'t', x:560, y:70},
+      {id:'d', x:560, y:240},
+    ],
+    edges: [
+      {from:'s', to:'a', label:'3'},
+      {from:'s', to:'b', label:'1'},
+      {from:'a', to:'t', label:'2'},
+      {from:'a', to:'d', label:'x', dashed:true},
+      {from:'b', to:'d', label:'1'},
+      {from:'b', to:'c', label:'3'},
+      {from:'c', to:'d', label:'y', dashed:true},
+      {from:'d', to:'t', label:'4', curve:0.4},
+    ],
+  },
+  frames: [
+    {desc:'Návrh: pořadí s, b, d, a, c, t → ostře rostoucí značky 0 &lt; 1 &lt; 2 &lt; 3 &lt; 4 &lt; 5 (strop 5 u t). Čárkované hrany a→d (x) a c→d (y) mají libovolnou hodnotu z ℕ.',
+     nodes:{},
+     edges:{},
+     subs:{s:'cíl: l=0', b:'cíl: l=1', d:'cíl: l=2', a:'cíl: l=3', c:'cíl: l=4', t:'cíl: l=5'}},
+    {desc:'It 1: uzavři s (0). Relaxuj (s,a): l(a):=3, p(a):=s; (s,b): l(b):=1, p(b):=s.',
+     nodes:{s:'hl'},
+     edges:{'s->a':'hl', 's->b':'hl'},
+     subs:{s:'l=0', a:'l=3, p=s', b:'l=1, p=s', c:'l=∞', d:'l=∞', t:'l=∞'}},
+    {desc:'It 2: min je b (1 &lt; 3) → uzavři b. (b,d): l(d):=2, p(d):=b; (b,c): l(c):=4, p(c):=b.',
+     nodes:{s:'good', b:'hl'},
+     edges:{'s->b':'good', 'b->d':'hl', 'b->c':'hl', 's->a':'dim'},
+     subs:{s:'l=0', a:'l=3, p=s', b:'l=1, p=s', c:'l=4, p=b', d:'l=2, p=b', t:'l=∞'}},
+    {desc:'It 3: min je d (2 &lt; 3) → uzavři d. (d,t): l(t):=2+4=6, p(t):=d. Právě proto musí být c(d,t) ≥ 4 — menší hodnota by cestu s-a-t podlezla nebo remizovala.',
+     nodes:{s:'good', b:'good', d:'hl'},
+     edges:{'s->b':'good', 'b->d':'good', 'd->t':'hl', 's->a':'dim', 'b->c':'dim'},
+     subs:{s:'l=0', a:'l=3, p=s', b:'l=1, p=s', c:'l=4, p=b', d:'l=2, p=b', t:'l=6, p=d'}},
+    {desc:'It 4: min je a (3 &lt; 4) → uzavři a. (a,t): 6 &gt; 3+2=5 → l(t):=5, p(t):=a — cesta se přepojila na s-a-t. (a,d): d ∈ R → hrana se vůbec netestuje, x je neviditelné.',
+     nodes:{s:'good', b:'good', d:'good', a:'hl'},
+     edges:{'s->b':'good', 'b->d':'good', 's->a':'good', 'a->t':'hl', 'a->d':'dim', 'd->t':'dim', 'b->c':'dim'},
+     subs:{s:'l=0', a:'l=3, p=s', b:'l=1, p=s', c:'l=4, p=b', d:'l=2, p=b', t:'l=5, p=a'}},
+    {desc:'It 5: min je c (4 &lt; 5) → uzavři c. (c,d): d ∈ R → netestuje se, y je neviditelné.',
+     nodes:{s:'good', b:'good', d:'good', a:'good', c:'hl'},
+     edges:{'s->b':'good', 'b->d':'good', 's->a':'good', 'a->t':'good', 'b->c':'good', 'c->d':'dim', 'a->d':'dim', 'd->t':'dim'},
+     subs:{s:'l=0', a:'l=3, p=s', b:'l=1, p=s', c:'l=4, p=b', d:'l=2, p=b', t:'l=5, p=a'}},
+    {desc:'It 6: zbývá t (5) → uzavři, konec. Pořadí s, b, d, a, c, t ✓ (každý výběr měl jediné minimum → platí pro každý tie-break); p(t)=a, p(a)=s → cesta s-a-t ✓ s cenou 3+2=5 ≤ 5 ✓. Volné hrany: a→d a c→d.',
+     nodes:{s:'good', b:'good', d:'good', a:'good', c:'good', t:'good'},
+     edges:{'s->b':'good', 'b->d':'good', 's->a':'good', 'a->t':'good', 'b->c':'good', 'c->d':'dim', 'a->d':'dim', 'd->t':'dim'},
+     subs:{s:'l=0', a:'l=3, p=s', b:'l=1, p=s', c:'l=4, p=b', d:'l=2, p=b', t:'l=5, p=a'}},
+  ],
+});
+</script>
+</body>
+</html>

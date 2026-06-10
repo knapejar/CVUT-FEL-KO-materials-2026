@@ -285,6 +285,7 @@ summary::-webkit-details-marker { display: none; }
 /* SVG prvky grafů — barvy přes CSS proměnné */
 .viz svg .node circle { fill: var(--bg-card); stroke: var(--ink-soft); stroke-width: 2; }
 .viz svg .node text { fill: var(--ink); font-weight: 600; }
+.viz svg .node .subtext { paint-order: stroke; stroke: var(--bg-card); stroke-width: 4px; stroke-linejoin: round; }
 .viz svg .node.hl circle { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2.6; }
 .viz svg .node.good circle { fill: var(--good-soft); stroke: var(--good); }
 .viz svg .node.bad circle { fill: var(--bad-soft); stroke: var(--bad); }
