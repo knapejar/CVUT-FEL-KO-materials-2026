@@ -60,7 +60,7 @@
     </ul>
   </div>
 
-  <p>Mapu si zapamatuj: preempce sama o sobě dělá z $C_{max}$ na identických strojích <em>snadný</em> problém (dnešní lekce); preempce + časová okna $r_j, \tilde{d}_j$ = toky <a href="../k5/l5-0.html">[L5.0]</a>; jakmile ale přibudou precedence, je to zase NP-hard a McNaughton přežívá jen jako podprogram aproximačního Muntze&amp;Coffmana <a href="../k5/l5-10.html">[L5.10]</a>. Nepreemptivní $P\,||\,C_{max}$ řeší DP Rothkopf <a href="../k5/l5-11.html">[L5.11]</a> (pseudopolynomiálně) a aproximačně list scheduling / LPT [L5.12].</p>
+  <p>Mapu si zapamatuj: preempce sama o sobě dělá z $C_{max}$ na identických strojích <em>snadný</em> problém (dnešní lekce); preempce + časová okna $r_j, \tilde{d}_j$ = toky <a href="../k5/l5-0.html">[L5.0]</a>; jakmile ale přibudou precedence, je to zase NP-hard a McNaughton přežívá jen jako podprogram aproximačního Muntze&amp;Coffmana <a href="../k5/l5-10.html">[L5.10]</a>. Nepreemptivní $P\,||\,C_{max}$ řeší DP Rothkopf <a href="../k5/l5-11.html">[L5.11]</a> (pseudopolynomiálně) a aproximačně list scheduling / LPT <a href="../k5/l5-12.html">[L5.12]</a>.</p>
 
   <!-- ===== SEKCE 2: DOLNI MEZ ===== -->
   <h2>Jak rychle to vůbec může být hotovo?</h2>
@@ -148,7 +148,7 @@ end</code></pre>
       <li><strong>McNaughton ($P \,|\, \mathrm{pmtn} \,|\, C_{max}$, $\mathcal{O}(n)$):</strong> $C_{max}^* = \max\{\max_i p_i,\ \frac{1}{R}\sum_i p_i\}$; úlohy v libovolném pořadí nalévej sekvenčně do polic délky $C_{max}^*$, při přetečení nech kus $[t, C_{max}^*]$ na stroji $v$ a zbytkem pokračuj na stroji $v{+}1$ od času $0$ (wrap-around).</li>
       <li><strong>Dvě složky meze:</strong> $\max p_i$ = sekvenčnost úlohy (kusy nesmí běžet současně — a zaručuje, že zalomený zbytek délky $p_i - (C_{max}^* - t) \le t$ nekoliduje sám se sebou); $\frac{1}{R}\sum p_i$ = stroje bez zahálení (vše se vejde do $R$ polic).</li>
       <li><strong>Optimální</strong> pro nezávislé preemptivní úlohy: rozvrh dosáhne dolní meze $C_{max}^*$. Každá úloha má nejvýš 2 části, preempcí je nejvýš $R - 1$ (kontrola Ganttu!).</li>
-      <li><strong>Hranice platnosti:</strong> bez pmtn NP-hard už pro $R = 2$ (2-Partition <a href="../k1/l1-1.html#t-2partition">[L1.1]</a> → Rothkopf <a href="../k5/l5-11.html">[L5.11]</a> / LPT [L5.12]); s precedencemi NP-hard → Muntz&amp;Coffman <a href="../k5/l5-10.html">[L5.10]</a> používá McNaughtona jako podprogram; s $r_j, \tilde{d}_j$ feasibilita → toky <a href="../k5/l5-0.html">[L5.0]</a>. Volba metody: tahák [L5.14].</li>
+      <li><strong>Hranice platnosti:</strong> bez pmtn NP-hard už pro $R = 2$ (2-Partition <a href="../k1/l1-1.html#t-2partition">[L1.1]</a> → Rothkopf <a href="../k5/l5-11.html">[L5.11]</a> / LPT <a href="../k5/l5-12.html">[L5.12]</a>); s precedencemi NP-hard → Muntz&amp;Coffman <a href="../k5/l5-10.html">[L5.10]</a> používá McNaughtona jako podprogram; s $r_j, \tilde{d}_j$ feasibilita → toky <a href="../k5/l5-0.html">[L5.0]</a>. Volba metody: tahák [L5.14].</li>
       <li>U zkoušky: spočti $C_{max}^*$ (obě složky vypiš!), nakresli Gantt, vyznač preempce a případné zahálení.</li>
     </ul>
   </div>

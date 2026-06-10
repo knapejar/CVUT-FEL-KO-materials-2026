@@ -148,7 +148,7 @@ Use McNaughton to re-schedule parts with more tasks on less res.;</code></pre>
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy kolem Muntz&amp;Coffmana</div>
     <ul>
       <li><strong>Levely nejsou statické.</strong> Po každé iteraci klesnou běžícím úlohám o $\delta \cdot \beta$ („decrease proc. times and levels“). Kdo třídí pořád podle <em>počátečních</em> levelů, vyrobí jiný (a obecně horší) rozvrh — přesně tahle zkratka je v kolujících ručních řešeních, viz T01.</li>
-      <li><strong>Bez sdílení kapacity to není Muntz&amp;Coffman.</strong> „Prostě pustím $R$ nejvyšších levelů“ je list scheduling [L5.12]; chybí $\beta = h/|\mathcal{S}|$ i případy (2), (3) — a v T01 to dává $14$ místo optimálních $13{,}5$.</li>
+      <li><strong>Bez sdílení kapacity to není Muntz&amp;Coffman.</strong> „Prostě pustím $R$ nejvyšších levelů“ je list scheduling <a href="../k5/l5-12.html">[L5.12]</a>; chybí $\beta = h/|\mathcal{S}|$ i případy (2), (3) — a v T01 to dává $14$ místo optimálních $13{,}5$.</li>
       <li><strong>$\lceil \sum p_i / R \rceil$ není při pmtn dolní mez.</strong> Zaokrouhlovat smíš jen bez preempce (kde jsou všechny časy celé); s pmtn je mez $\sum p_i / R$ — a $C_{max}$ klidně zlomkové.</li>
       <li><strong>$\mathcal{Z}$ = úlohy se <em>všemi</em> předchůdci hotovými.</strong> Volný procesor neznamená, že smíš sáhnout po úloze, které „už skoro“ doběhl předchůdce — klidně se zahálí (T02, iterace 2 a 4).</li>
       <li><strong>Exaktní jen pro $R = 2$ a lesy (forest);</strong> obecně je to aproximace s faktorem $2 - \tfrac{2}{R}$. A nezapomeň na závěrečný McNaughton — odevzdat „rozvrh“, kde tři úlohy sdílejí dva stroje, nelze.</li>
