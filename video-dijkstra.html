@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dijkstra — důkaz korektnosti — immersive video · KO Hitovky</title>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #11141d;
+    --text: #e8eaf0;
+    --muted: #8b93a7;
+    --accent: #ffb000;
+    --border: #232a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; overflow: hidden;
+  }
+  #topbar {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; font-size: 13px; color: var(--muted);
+  }
+  #topbar a { color: var(--muted); text-decoration: none; }
+  #topbar a:hover { color: var(--accent); }
+  #topbar .title { color: var(--text); font-weight: 700; }
+  #topbar .badge {
+    font-size: 11px; color: var(--bg); background: var(--accent);
+    border-radius: 10px; padding: 2px 9px; font-weight: 700;
+  }
+  #stagewrap {
+    flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
+    min-height: 0; padding: 0 16px;
+  }
+  #stage {
+    position: relative;
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #0b0e16; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+  }
+  #stage canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  #subtitle {
+    position: absolute; left: 4%; right: 4%; bottom: 4.5%;
+    text-align: center; pointer-events: none;
+    font-size: clamp(13px, 2.2vw, 24px); font-weight: 600; line-height: 1.35;
+    color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,0.95), 0 0 4px rgba(0,0,0,0.9);
+  }
+  #subtitle .m {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    color: #7dd3fc;
+  }
+  #bigplay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(5,7,12,0.55); cursor: pointer; z-index: 5;
+    flex-direction: column; gap: 18px;
+  }
+  #bigplay.hidden { display: none; }
+  #bigplay .pbtn {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--accent); color: #1a1200;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; box-shadow: 0 0 60px rgba(255,176,0,0.45);
+    transition: transform .15s;
+  }
+  #bigplay:hover .pbtn { transform: scale(1.08); }
+  #bigplay .hint { color: var(--text); font-size: 15px; font-weight: 600; text-shadow: 0 2px 8px #000; }
+  #bigplay .hint small { display: block; color: var(--muted); font-weight: 400; margin-top: 6px; }
+  #controls {
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 4px 16px;
+  }
+  #controls button {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    width: 42px; height: 42px; border-radius: 50%; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: border-color .15s, color .15s;
+  }
+  #controls button:hover { border-color: var(--accent); color: var(--accent); }
+  #seek {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 6px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--p, 0%), #2a3040 var(--p, 0%));
+    border-radius: 3px; outline: none; cursor: pointer;
+  }
+  #seek::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px rgba(255,176,0,0.6); cursor: pointer;
+  }
+  #seek::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; border: none;
+    background: var(--accent); cursor: pointer;
+  }
+  .time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 44px; text-align: center; }
+  @media (max-height: 560px) { #topbar { display: none; } }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="pisnicky.html">← Zpěvník</a>
+  <span class="title">Jednou zavřený, navždy zavřený (Dijkstra)</span>
+  <span class="badge">IMMERSIVE VIDEO</span>
+  <span style="margin-left:auto">mezerník = play/pauza · ←/→ = ±5 s · R = od začátku</span>
+</div>
+
+<div id="stagewrap">
+  <div id="stage">
+    <div id="subtitle"></div>
+    <div id="bigplay">
+      <div class="pbtn">▶</div>
+      <div class="hint">Dijkstra — běh algoritmu &amp; důkaz korektnosti<small>3 min 10 s · zpívaná videolekce</small></div>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btnPlay" title="Play / pauza">▶</button>
+  <button id="btnRestart" title="Od začátku">⟲</button>
+  <span class="time" id="tCur">0:00</span>
+  <input type="range" id="seek" min="0" max="189.6" step="0.01" value="0">
+  <span class="time" id="tDur">3:10</span>
+</div>
+
+<audio id="player" src="audio/relaxacni-hrana.mp3" preload="auto"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
+<script>
+(async function () {
+'use strict';
+
+// ════════════════════════════════════════════════════════════════════
+// 0) COLORS + helpers
+// ════════════════════════════════════════════════════════════════════
+const C = {
+  bg: 0x0b0e16, gold: 0xffb000, goldHi: 0xffd34d, green: 0x4ade80,
+  pink: 0xf472b6, cyan: 0x7dd3fc, violet: 0xa78bfa, white: 0xffffff,
+  dim: 0x37415a, muted: 0x8b93a7, red: 0xef4444, open: 0xdfe6f5,
+};
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - clamp01(t), 3);
+const ph = (t, a, b) => clamp01((t - a) / (b - a));
+
+// ════════════════════════════════════════════════════════════════════
+// 1) GRAPH + REAL DIJKSTRA RUN (events with old/new labels)
+// ════════════════════════════════════════════════════════════════════
+const N = [
+  { x: 150, y: 400, name: 's' },  // 0 = s
+  { x: 405, y: 215, name: 'a' },
+  { x: 405, y: 565, name: 'b' },
+  { x: 670, y: 135, name: 'c' },
+  { x: 670, y: 405, name: 'd' },
+  { x: 670, y: 610, name: 'e' },
+  { x: 940, y: 290, name: 'f' },
+  { x: 1075, y: 510, name: 't' },
+];
+const n = N.length;
+const E = [ // directed [a, b, w]
+  [0, 1, 4], [0, 2, 2],
+  [2, 1, 1], [1, 3, 5], [1, 4, 3], [2, 4, 7], [2, 5, 5],
+  [4, 3, 2], [3, 6, 3], [4, 6, 6], [5, 4, 1],
+  [5, 7, 8], [4, 7, 6], [6, 7, 2],
+];
+// — run Dijkstra, record sequential events —
+// ev kinds: {k:'pick', v} {k:'close', v} {k:'relax', a, b, w, oldL, newL, imp}
+const EV = [];
+{
+  const lab = Array(n).fill(Infinity); lab[0] = 0;
+  const closed = Array(n).fill(false);
+  for (let round = 0; round < n; round++) {
+    let v = -1;
+    for (let i = 0; i < n; i++) if (!closed[i] && lab[i] < Infinity && (v === -1 || lab[i] < lab[v])) v = i;
+    if (v === -1) break;
+    EV.push({ k: 'pick', v });
+    closed[v] = true;
+    EV.push({ k: 'close', v, l: lab[v] });
+    for (const [a, b, w] of E) {
+      if (a !== v || closed[b]) continue;
+      const cand = lab[v] + w;
+      const imp = cand < lab[b];
+      EV.push({ k: 'relax', a, b, w, oldL: lab[b], newL: imp ? cand : lab[b], imp });
+      if (imp) lab[b] = cand;
+    }
+  }
+}
+const FINAL = (() => { // final labels
+  const lab = Array(n).fill(Infinity); lab[0] = 0;
+  for (const e of EV) if (e.k === 'relax' && e.imp) lab[e.b] = e.newL;
+  return lab;
+})();
+
+// — assign times to events (verse 1 dramaturgy) —
+// round 0 (s) slow: pick 27.9–29.7, close 29.7–31.2, its relaxes 32.9–35.9
+// everything else compressed 36.1–39.55
+{
+  let i = 0;
+  // round 0 = first pick+close
+  EV[0].t0 = 27.9; EV[0].t1 = 29.7;
+  EV[1].t0 = 29.7; EV[1].t1 = 31.2;
+  i = 2;
+  const r0relax = [];
+  while (i < EV.length && EV[i].k === 'relax') { r0relax.push(EV[i]); i++; }
+  r0relax.forEach((e, j) => {
+    e.t0 = 32.9 + j * (3.0 / r0relax.length);
+    e.t1 = e.t0 + (3.0 / r0relax.length) * 0.92;
+  });
+  const rest = EV.slice(i);
+  const T0 = 36.1, T1 = 39.55, slot = (T1 - T0) / rest.length;
+  rest.forEach((e, j) => { e.t0 = T0 + j * slot; e.t1 = e.t0 + slot * 0.9; });
+}
+// state of the run at absolute time t (deterministic, seek-safe)
+function runState(t) {
+  const lab = Array(n).fill(Infinity); lab[0] = 0;
+  const closed = Array(n).fill(false);
+  let active = null;
+  for (const e of EV) {
+    if (t >= e.t1) {
+      if (e.k === 'close') closed[e.v] = true;
+      if (e.k === 'relax' && e.imp) lab[e.b] = e.newL;
+    } else if (t >= e.t0) { active = { e, p: ph(t, e.t0, e.t1) }; break; }
+    else break;
+  }
+  return { lab, closed, active };
+}
+const fmtL = v => v === Infinity ? '∞' : String(v);
+
+// ════════════════════════════════════════════════════════════════════
+// 2) PIXI SETUP (shared with christofides architecture)
+// ════════════════════════════════════════════════════════════════════
+const app = new PIXI.Application({ width: 1280, height: 720, antialias: true, background: C.bg });
+document.getElementById('stage').appendChild(app.view);
+const starLayer = new PIXI.Container();
+const sceneLayer = new PIXI.Container();
+const fxLayer = new PIXI.Container();
+app.stage.addChild(starLayer, sceneLayer, fxLayer);
+
+const dotG = new PIXI.Graphics();
+dotG.beginFill(0xffffff, 1).drawCircle(0, 0, 32).endFill();
+const dotTex = app.renderer.generateTexture(dotG);
+
+const stars = [];
+for (let i = 0; i < 70; i++) {
+  const s = new PIXI.Sprite(dotTex);
+  s.anchor.set(0.5);
+  s.x = Math.random() * 1280; s.y = Math.random() * 720;
+  s.scale.set(0.015 + Math.random() * 0.035);
+  s.alpha = 0.12 + Math.random() * 0.25;
+  s.tint = Math.random() < 0.25 ? C.gold : 0x9fb4ff;
+  s._vy = 2 + Math.random() * 6; s._tw = Math.random() * 6.28;
+  starLayer.addChild(s); stars.push(s);
+}
+const parts = [];
+function burst(x, y, tint, count = 18, speed = 220, size = 0.1) {
+  for (let i = 0; i < count; i++) {
+    const p = new PIXI.Sprite(dotTex);
+    p.anchor.set(0.5); p.x = x; p.y = y; p.tint = tint;
+    p.blendMode = PIXI.BLEND_MODES.ADD;
+    const a = Math.random() * 6.283, v = speed * (0.3 + Math.random() * 0.8);
+    p._vx = Math.cos(a) * v; p._vy = Math.sin(a) * v;
+    p._life = 0.6 + Math.random() * 0.7; p._t = 0;
+    p.scale.set(size * (0.5 + Math.random()));
+    fxLayer.addChild(p); parts.push(p);
+  }
+}
+app.ticker.add(() => {
+  const dt = app.ticker.deltaMS / 1000;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p._t += dt; p.x += p._vx * dt; p.y += p._vy * dt;
+    p._vy += 220 * dt; p.alpha = clamp01(1 - p._t / p._life);
+    if (p._t > p._life) { fxLayer.removeChild(p); p.destroy(); parts.splice(i, 1); }
+  }
+  for (const s of stars) {
+    s.y += s._vy * dt; s._tw += dt * 2;
+    s.alpha = 0.1 + 0.18 * (0.5 + 0.5 * Math.sin(s._tw));
+    if (s.y > 730) { s.y = -10; s.x = Math.random() * 1280; }
+  }
+});
+
+function txt(str, size, color, weight = '800', family = "'Segoe UI', system-ui, sans-serif") {
+  const t = new PIXI.Text(str, {
+    fontFamily: family, fontSize: size, fill: color, fontWeight: weight,
+    align: 'center', dropShadow: true, dropShadowColor: 0x000000,
+    dropShadowBlur: 8, dropShadowAlpha: 0.6, dropShadowDistance: 2,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  return t;
+}
+const MATH = "'Cambria Math', Cambria, Georgia, serif";
+
+// — directed edge with arrowhead —
+function arrowEdge(g, A, B, width, color, alpha, shrink = 22, prog = 1) {
+  if (prog <= 0) return;
+  const dx = B.x - A.x, dy = B.y - A.y, len = Math.hypot(dx, dy);
+  const ux = dx / len, uy = dy / len;
+  const sx = A.x + ux * shrink, sy = A.y + uy * shrink;
+  const exF = B.x - ux * shrink, eyF = B.y - uy * shrink;
+  const ex = lerp(sx, exF, easeOut(prog)), ey = lerp(sy, eyF, easeOut(prog));
+  g.lineStyle(width, color, alpha);
+  g.moveTo(sx, sy); g.lineTo(ex, ey);
+  // arrowhead
+  const hx = ex, hy = ey, hs = 9 + width;
+  g.lineStyle(0);
+  g.beginFill(color, alpha);
+  g.moveTo(hx, hy);
+  g.lineTo(hx - ux * hs - uy * hs * 0.55, hy - uy * hs + ux * hs * 0.55);
+  g.lineTo(hx - ux * hs + uy * hs * 0.55, hy - uy * hs - ux * hs * 0.55);
+  g.closePath().endFill();
+}
+function drawLock(g, x, y, s, col, alpha = 1) {
+  g.lineStyle(3 * s, col, alpha);
+  g.arc(x, y - 4 * s, 5 * s, Math.PI, 0); // shackle
+  g.lineStyle(0);
+  g.beginFill(col, alpha).drawRoundedRect(x - 8 * s, y - 4 * s, 16 * s, 12 * s, 3 * s).endFill();
+}
+
+// node renderer for main graph
+function drawGraphNode(g, v, closed, hot) {
+  const p = N[v];
+  if (closed) g.beginFill(C.gold, 0.10).drawCircle(p.x, p.y, 34).endFill();
+  if (hot > 0) g.beginFill(C.cyan, 0.14 * hot).drawCircle(p.x, p.y, 30 + 14 * hot).endFill();
+  g.lineStyle(0);
+  g.beginFill(0x0b0e16, 1).drawCircle(p.x, p.y, 19).endFill();
+  g.beginFill(closed ? C.gold : C.open, 1).drawCircle(p.x, p.y, 16).endFill();
+}
+
+function makeGraphScene() {
+  const c = new PIXI.Container();
+  const g = new PIXI.Graphics();
+  c.addChild(g);
+  return { c, g };
+}
+const scenes = [];
+function scene(t0, t1, build) {
+  const s = { t0, t1, _b: build, st: null };
+  s.init = () => { s.st = build(); sceneLayer.addChild(s.st.c); };
+  s.update = (lt) => s.st && s.st.update(lt, t1 - t0);
+  s.destroy = () => { if (s.st) { sceneLayer.removeChild(s.st.c); s.st.c.destroy({ children: true }); s.st = null; } };
+  scenes.push(s);
+  return s;
+}
+function caption(c, str, color = C.gold, y = 50, size = 29) {
+  const t = txt(str, size, color, '800');
+  t.x = 640; t.y = y; c.addChild(t);
+  return t;
+}
+// full main-graph renderer reused by several scenes
+function buildMainGraph(c) {
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const nameT = N.map((p, v) => {
+    const t = txt(p.name, 17, 0x0b0e16, '900'); t.x = p.x; t.y = p.y; c.addChild(t); return t;
+  });
+  const labT = N.map((p, v) => {
+    const t = txt('', 23, C.cyan, '800', MATH);
+    t.x = p.x + (v === 0 ? -2 : 0); t.y = p.y - 42; c.addChild(t); return t;
+  });
+  const wT = E.map(([a, b, w]) => {
+    const A = N[a], B = N[b];
+    const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
+    const dx = B.x - A.x, dy = B.y - A.y, l = Math.hypot(dx, dy);
+    const t = txt(String(w), 19, C.muted, '700');
+    t.x = mx - dy / l * 18; t.y = my + dx / l * 18; c.addChild(t); return t;
+  });
+  function render(t, opts = {}) {
+    const { lab, closed, active } = runState(t);
+    g.clear();
+    // edges
+    for (let i = 0; i < E.length; i++) {
+      const [a, b] = E[i];
+      const isActive = active && active.e.k === 'relax' && active.e.a === a && active.e.b === b;
+      arrowEdge(g, N[a], N[b], 3, isActive ? C.cyan : C.dim, isActive ? 1 : 0.85);
+      if (isActive) {
+        // pulse dot
+        const A = N[a], B = N[b];
+        const pp = easeOut(active.p);
+        g.beginFill(C.cyan, 1).drawCircle(lerp(A.x, B.x, pp), lerp(A.y, B.y, pp), 8).endFill();
+      }
+      wT[i].style.fill = isActive ? C.cyan : C.muted;
+    }
+    // pick ring
+    if (active && active.e.k === 'pick') {
+      const p = N[active.e.v], rr = lerp(60, 24, easeOut(active.p));
+      g.lineStyle(4, C.goldHi, 0.9);
+      g.drawCircle(p.x, p.y, rr);
+    }
+    // nodes + locks + labels
+    for (let v = 0; v < n; v++) {
+      const hot = active && ((active.e.k === 'relax' && active.e.b === v && active.e.imp) ? 1 - active.p : 0);
+      drawGraphNode(g, v, closed[v], hot || 0);
+      if (closed[v]) drawLock(g, N[v].x + 22, N[v].y - 20, 1.05, C.gold);
+      let shown = lab[v];
+      if (active && active.e.k === 'relax' && active.e.b === v && active.e.imp && active.p > 0.72) shown = active.e.newL;
+      labT[v].text = (opts.hideLabels ? '' : 'ℓ=' + fmtL(shown));
+      labT[v].style.fill = closed[v] ? C.gold : C.cyan;
+      if (active && active.e.k === 'close' && active.e.v === v) {
+        const s = 1 + 0.35 * Math.sin(active.p * Math.PI);
+        labT[v].scale.set(s);
+      } else labT[v].scale.set(1);
+    }
+    return { lab, closed, active };
+  }
+  return { g, render, labT };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 3) SCENES
+// ════════════════════════════════════════════════════════════════════
+
+// ── INTRO [0 – 15.8] ──
+scene(0, 15.8, () => {
+  const { c, g } = makeGraphScene();
+  const t1 = txt('DIJKSTRA', 92, C.gold); t1.x = 640; t1.y = 200;
+  const t2 = txt('důkaz korektnosti', 40, 0xdfe6f5, '700'); t2.x = 640; t2.y = 296;
+  const t3 = txt('„jednou zavřený, navždy zavřený“', 30, C.cyan, '600', MATH); t3.x = 640; t3.y = 372;
+  const q = txt('nejkratší cesty ze s · nezáporné váhy · indukce přes množinu R', 23, C.muted, '600');
+  q.x = 640; q.y = 660;
+  c.addChild(t1, t2, t3, q);
+  const mg = buildMainGraph(c);
+  let fired = false;
+  return { c, update(lt) {
+    t1.alpha = easeOut(ph(lt, 0.4, 1.4)); t1.scale.set(lerp(1.25, 1, easeOut(ph(lt, 0.4, 1.4))));
+    t2.alpha = easeOut(ph(lt, 1.6, 2.4));
+    t3.alpha = easeOut(ph(lt, 2.8, 3.7));
+    if (!fired && lt > 0.5) { fired = true; burst(640, 200, C.gold, 28, 280, 0.13); }
+    const shift = easeOut(ph(lt, 6.5, 8.5));
+    t1.y = lerp(200, 86, shift); t1.scale.set(lerp(1, 0.45, shift));
+    t2.alpha *= (1 - shift); t3.y = lerp(372, 130, shift); t3.scale.set(lerp(1, 0.75, shift));
+    q.alpha = easeOut(ph(lt, 8.5, 9.5));
+    const gp = easeOut(ph(lt, 7.5, 12));
+    mg.g.alpha = gp;
+    c.children.forEach(ch => { if (ch !== t1 && ch !== t2 && ch !== t3 && ch !== q && ch !== mg.g) ch.alpha = Math.min(ch.alpha + 0.04, gp); });
+    mg.render(-1, { hideLabels: lt < 11 }); // before run: labels appear at 11s as ∞
+    if (lt >= 11) mg.render(-1);
+  } };
+});
+
+// ── VERSE 1: BĚH ALGORITMU [15.8 – 39.74] ──
+scene(15.8, 39.74, () => {
+  const { c } = makeGraphScene();
+  const cap = caption(c, '');
+  const sub = txt('', 21, C.muted, '600'); sub.x = 640; sub.y = 92; c.addChild(sub);
+  const mg = buildMainGraph(c);
+  let firedClose = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 15.8;
+    const st = mg.render(lt);
+    // captions per phase
+    if (lt < 21.8) { cap.text = 'INIT — ℓ(s) = 0, všude jinde ∞'; cap.style.fill = C.cyan; sub.text = 'a předchůdci p(·) prázdní'; }
+    else if (lt < 27.8) { cap.text = 'R = ∅ — množina ZAVŘENÝCH vrcholů'; cap.style.fill = C.gold; sub.text = 'kdo se do R zavře, už z ní nevyleze'; }
+    else if (lt < 31.4) { cap.text = 'VYBER otevřený vrchol s NEJMENŠÍM ℓ → zavři do R'; cap.style.fill = C.goldHi; sub.text = ''; }
+    else if (lt < 36.1) { cap.text = 'RELAXUJ hrany, co vedou ven'; cap.style.fill = C.cyan; sub.text = 'ℓ(b) > ℓ(v) + c(v,b)  ⇒  zlepši ℓ(b)'; }
+    else { cap.text = '…a znova dokola, dokud je co zavírat'; cap.style.fill = C.gold; sub.text = 'label SETTING — zavřený label se už nikdy neopravuje'; }
+    // burst on each close
+    if (st.active && st.active.e.k === 'close' && !firedClose.has(st.active.e.v) && st.active.p > 0.3) {
+      firedClose.add(st.active.e.v);
+      burst(N[st.active.e.v].x, N[st.active.e.v].y, C.gold, 14, 180, 0.09);
+    }
+  } };
+});
+
+// ── CHORUS factory [A invariant · B nerovnost · C závěr] ──
+function chorusScene(t0, bS, cS, t1) {
+  scene(t0, t1, () => {
+    const { c } = makeGraphScene();
+    // mini closed graph bottom-left
+    const mini = new PIXI.Container(); mini.scale.set(0.34); mini.x = 40; mini.y = 420; mini.alpha = 0.45;
+    const mgr = buildMainGraph(mini); c.addChild(mini);
+    const w1 = txt('JEDNOU ZAVŘENÝ', 76, C.gold, '900'); w1.x = 640; w1.y = 180; w1.alpha = 0;
+    const w2 = txt('NAVŽDY ZAVŘENÝ', 76, C.goldHi, '900'); w2.x = 640; w2.y = 272; w2.alpha = 0;
+    const w3 = txt('ℓ už se nezmění', 30, C.muted, '700', MATH); w3.x = 640; w3.y = 348; w3.alpha = 0;
+    const f1 = txt('ℓ(v) ≤ ℓ(k)', 92, C.cyan, '900', MATH); f1.x = 640; f1.y = 210; f1.alpha = 0;
+    const f2 = txt('pro každý otevřený k', 26, C.muted, '600'); f2.x = 640; f2.y = 286; f2.alpha = 0;
+    const f3 = txt('c(e) ≥ 0 — hrana nikdy záporná není', 36, C.green, '800', MATH); f3.x = 640; f3.y = 372; f3.alpha = 0;
+    const e1 = txt('přes OTEVŘENÉ to kratší nebude', 46, 0xdfe6f5, '800'); e1.x = 640; e1.y = 222; e1.alpha = 0;
+    const e2 = txt('ℓ(k) + c(cesta) ≥ ℓ(k) ≥ ℓ(v)', 34, C.cyan, '700', MATH); e2.x = 640; e2.y = 300; e2.alpha = 0;
+    const stamp = txt('BEZ VRÁCENÍ!', 64, C.white, '900'); stamp.x = 640; stamp.y = 420; stamp.alpha = 0; stamp.rotation = -0.05;
+    c.addChild(w1, w2, w3, f1, f2, f3, e1, e2, stamp);
+    const lockBig = new PIXI.Graphics(); lockBig.alpha = 0; c.addChild(lockBig);
+    drawLock(lockBig, 640, 480, 4.5, C.gold);
+    const fired = new Set();
+    return { c, update(lt0) {
+      const lt = lt0 + t0;
+      const inA = lt < bS, inB = lt >= bS && lt < cS, inC = lt >= cS;
+      // A
+      w1.alpha = inA ? easeOut(ph(lt, t0 + 0.2, t0 + 1.0)) : Math.max(0, w1.alpha - 0.07);
+      w2.alpha = inA ? easeOut(ph(lt, t0 + 1.6, t0 + 2.5)) : Math.max(0, w2.alpha - 0.07);
+      w3.alpha = inA ? easeOut(ph(lt, t0 + 4.2, t0 + 5.0)) : Math.max(0, w3.alpha - 0.07);
+      lockBig.alpha = inA ? easeOut(ph(lt, t0 + 2.0, t0 + 3.0)) * 0.9 : Math.max(0, lockBig.alpha - 0.07);
+      lockBig.scale.set(1 + 0.05 * Math.sin(lt * 4));
+      lockBig.pivot.set(0, 0);
+      if (inA && lt > t0 + 1.7 && !fired.has('w2')) { fired.add('w2'); burst(640, 272, C.gold, 26, 270, 0.12); }
+      // B
+      f1.alpha = inB ? easeOut(ph(lt, bS + 0.2, bS + 1.0)) : Math.max(0, f1.alpha - 0.07);
+      f2.alpha = inB ? easeOut(ph(lt, bS + 1.2, bS + 2.0)) : Math.max(0, f2.alpha - 0.07);
+      f3.alpha = inB ? easeOut(ph(lt, bS + 3.4, bS + 4.3)) : Math.max(0, f3.alpha - 0.07);
+      f1.scale.set(1 + 0.04 * Math.sin(lt * 5) * f1.alpha);
+      if (inB && lt > bS + 0.3 && !fired.has('f1')) { fired.add('f1'); burst(640, 210, C.cyan, 26, 260, 0.12); }
+      if (inB && lt > bS + 3.5 && !fired.has('f3')) { fired.add('f3'); burst(640, 372, C.green, 18, 200, 0.1); }
+      // C
+      e1.alpha = inC ? easeOut(ph(lt, cS + 0.2, cS + 1.0)) : Math.max(0, e1.alpha - 0.07);
+      e2.alpha = inC ? easeOut(ph(lt, cS + 1.4, cS + 2.2)) : Math.max(0, e2.alpha - 0.07);
+      stamp.alpha = inC ? easeOut(ph(lt, cS + 3.4, cS + 4.0)) : Math.max(0, stamp.alpha - 0.07);
+      stamp.scale.set(lerp(1.6, 1, easeOut(ph(lt, cS + 3.4, cS + 4.2))));
+      if (inC && lt > cS + 3.5 && !fired.has('st')) { fired.add('st'); burst(640, 420, C.white, 30, 300, 0.13); }
+      // mini graph fully closed (end of run)
+      mgr.render(1e9);
+    } };
+  });
+}
+chorusScene(39.74, 49.28, 57.28, 66.74);
+
+// ── VERSE 2: BELLMAN + DVA PŘÍPADY [66.74 – 95.64] ──
+scene(66.74, 95.64, () => {
+  const { c, g } = makeGraphScene();
+  const cap = caption(c, '');
+  const formula = txt('ℓ(v) = min  { ℓ(k) + c(k, v) }', 44, C.cyan, '800', MATH);
+  formula.x = 640; formula.y = 130; formula.alpha = 0; c.addChild(formula);
+  const formSub = txt('přes všechny předchůdce k', 22, C.muted, '600'); formSub.x = 640; formSub.y = 172; formSub.alpha = 0; c.addChild(formSub);
+  // abstract diagram: golden R region left, node v right, two predecessors
+  const Rlab = txt('R (zavřené)', 26, C.gold, '800'); Rlab.x = 330; Rlab.y = 250; Rlab.alpha = 0; c.addChild(Rlab);
+  const vP = { x: 880, y: 430 }, k1P = { x: 420, y: 380 }, k2P = { x: 560, y: 620 }, sP = { x: 230, y: 430 };
+  const case1 = txt('✓ k ∈ R — hranu (k,v) už jsem zrelaxoval', 30, C.green, '800'); case1.x = 700; case1.y = 240; case1.alpha = 0; c.addChild(case1);
+  const case1b = txt('vnitřní smyčka prošla VŠECHNY hrany z R ven', 22, C.muted, '600'); case1b.x = 700; case1b.y = 280; case1b.alpha = 0; c.addChild(case1b);
+  const case2 = txt('? k ∉ R — tady se láme celý sen…', 34, C.red, '900'); case2.x = 660; case2.y = 555; case2.alpha = 0; c.addChild(case2);
+  return { c, update(lt0) {
+    const lt = lt0 + 66.74;
+    g.clear();
+    cap.text = 'Je ℓ(v) opravdu nejkratší? Zkontroluj Bellmanovu rovnici'; cap.style.fill = C.cyan;
+    formula.alpha = easeOut(ph(lt, 68.5, 69.8));
+    formSub.alpha = easeOut(ph(lt, 70.0, 71.0));
+    formula.scale.set(1 + 0.03 * Math.sin(lt * 4) * formula.alpha);
+    const dia = easeOut(ph(lt, 72.0, 74.0));
+    if (dia > 0) {
+      // R region blob
+      g.lineStyle(3, C.gold, 0.8 * dia);
+      g.beginFill(C.gold, 0.07 * dia);
+      g.drawEllipse(330, 430, 230, 165);
+      g.endFill();
+      Rlab.alpha = dia;
+      // nodes
+      const drawDot = (P, col, r = 17) => {
+        g.lineStyle(0);
+        g.beginFill(0x0b0e16, 1).drawCircle(P.x, P.y, r + 3).endFill();
+        g.beginFill(col, 1).drawCircle(P.x, P.y, r).endFill();
+      };
+      // edges k1->v (case 1), k2->v (case 2), s->k path inside R
+      const p1 = ph(lt, 78.4, 80.0); // case 1 highlight
+      const p2 = ph(lt, 87.3, 89.0); // case 2 highlight
+      arrowEdge(g, sP, k1P, 3, C.gold, 0.7 * dia);
+      arrowEdge(g, k1P, vP, 5, p1 > 0 ? C.green : C.dim, (0.5 + 0.5 * p1) * dia, 24, 1);
+      arrowEdge(g, k2P, vP, 5, p2 > 0 ? C.red : C.dim, (0.5 + 0.5 * p2) * dia, 24, 1);
+      drawDot(sP, C.gold); drawDot(k1P, C.gold); drawDot(vP, C.open);
+      drawDot(k2P, p2 > 0 ? C.red : C.open);
+      drawLock(g, sP.x + 20, sP.y - 18, 0.9, C.gold, dia);
+      drawLock(g, k1P.x + 20, k1P.y - 18, 0.9, C.gold, dia);
+      // labels
+      g.lineStyle(0);
+      // pulse along case edges
+      if (p1 > 0 && p1 < 1) {
+        g.beginFill(C.green, 1).drawCircle(lerp(k1P.x, vP.x, p1), lerp(k1P.y, vP.y, p1), 8).endFill();
+      }
+      if (p2 > 0 && p2 < 1) {
+        g.beginFill(C.red, 1).drawCircle(lerp(k2P.x, vP.x, p2), lerp(k2P.y, vP.y, p2), 8).endFill();
+      }
+    }
+    case1.alpha = easeOut(ph(lt, 78.6, 79.6));
+    case1b.alpha = easeOut(ph(lt, 80.5, 81.5));
+    case2.alpha = easeOut(ph(lt, 87.5, 88.5));
+    case2.scale.set(1 + 0.05 * Math.sin(lt * 6) * case2.alpha);
+  } };
+});
+
+chorusScene(95.64, 103.28, 111.64, 120.2);
+
+// ── BRIDGE: PROTIPŘÍKLAD SE ZÁPORNOU HRANOU [120.2 – 147.2] ──
+scene(120.2, 147.2, () => {
+  const { c, g } = makeGraphScene();
+  const cap = caption(c, 'Kde by se důkaz zlomil?', C.red, 56, 36);
+  const sP = { x: 330, y: 380 }, aP = { x: 760, y: 250 }, bP = { x: 760, y: 540 };
+  const names = [['s', sP], ['a', aP], ['b', bP]].map(([nm, P]) => {
+    const t = txt(nm, 18, 0x0b0e16, '900'); t.x = P.x; t.y = P.y; c.addChild(t); return t;
+  });
+  const lA = txt('ℓ(a) = 2 → ZAVŘÍT?', 26, C.gold, '800', MATH); lA.x = 760; lA.y = 178; lA.alpha = 0; c.addChild(lA);
+  const broke = txt('cesta s→b→a = 9 − 8 = 1  <  2', 34, C.red, '900', MATH); broke.x = 640; broke.y = 645; broke.alpha = 0; c.addChild(broke);
+  const fix1 = txt('PROTO: c(e) ≥ 0', 46, C.green, '900', MATH); fix1.x = 960; fix1.y = 200; fix1.alpha = 0; c.addChild(fix1);
+  const fix2 = txt('label setting · O(n²)', 32, C.cyan, '800', MATH); fix2.x = 960, fix2.y = 280; fix2.alpha = 0; c.addChild(fix2);
+  const fix3 = txt('indukce přes |R|', 32, C.violet, '800', MATH); fix3.x = 960; fix3.y = 350; fix3.alpha = 0; c.addChild(fix3);
+  let fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 120.2;
+    g.clear();
+    const intro = easeOut(ph(lt, 121.5, 123.5));
+    const closeA = ph(lt, 124.5, 126.0);   // dijkstra closes a
+    const evil = ph(lt, 129.8, 132.5);     // negative path draws
+    const crack = ph(lt, 132.5, 134.5);    // lock breaks
+    const fix = lt >= 135.3;
+    names.forEach(t => t.alpha = intro);
+    // edges
+    arrowEdge(g, sP, aP, 4, C.dim, 0.9 * intro);
+    arrowEdge(g, sP, bP, 4, C.dim, 0.9 * intro);
+    arrowEdge(g, bP, aP, 5, evil > 0 ? C.red : C.dim, intro * (0.5 + 0.5 * Math.min(1, evil * 2)), 22, evil > 0 ? evil : 1);
+    // weights
+    g.lineStyle(0);
+    const wlbl = (x, y, s2, col = C.muted, a = intro) => { /* drawn as texts below */ };
+    // nodes
+    const dot = (P, col) => {
+      g.beginFill(0x0b0e16, 1).drawCircle(P.x, P.y, 21).endFill();
+      g.beginFill(col, 1).drawCircle(P.x, P.y, 18).endFill();
+    };
+    dot(sP, C.gold);
+    dot(aP, closeA > 0.5 && crack < 0.5 ? C.gold : (crack >= 0.5 ? C.red : C.open));
+    dot(bP, C.open);
+    if (intro > 0) {
+      drawLock(g, sP.x + 22, sP.y - 20, 1, C.gold, intro);
+    }
+    if (closeA > 0.5 && crack <= 0) drawLock(g, aP.x + 24, aP.y - 22, 1.1, C.gold);
+    if (crack > 0 && crack < 1) {
+      // lock shaking & breaking
+      const sh = Math.sin(lt * 40) * 4 * (1 - crack);
+      drawLock(g, aP.x + 24 + sh, aP.y - 22, 1.1, C.red, 1 - crack * 0.6);
+      if (!fired.has('crack')) { fired.add('crack'); burst(aP.x + 24, aP.y - 22, C.red, 30, 300, 0.12); }
+    }
+    // weight texts (re-created cheap via graphics-less approach: use static texts once)
+    if (!fired.has('w')) {
+      fired.add('w');
+      const mk = (s2, x, y, col) => { const t = txt(s2, 24, col, '800', MATH); t.x = x; t.y = y; c.addChild(t); t._keep = true; };
+      mk('2', (sP.x + aP.x) / 2 - 16, (sP.y + aP.y) / 2 - 22, C.muted);
+      mk('9', (sP.x + bP.x) / 2 - 16, (sP.y + bP.y) / 2 + 22, C.muted);
+      mk('−8', bP.x + 52, (aP.y + bP.y) / 2, C.red);
+    }
+    lA.alpha = closeA > 0.4 ? 1 : 0;
+    if (closeA > 0.4 && !fired.has('la')) { fired.add('la'); burst(aP.x, aP.y, C.gold, 12, 160, 0.08); }
+    broke.alpha = easeOut(ph(lt, 131.0, 132.2));
+    broke.scale.set(1 + 0.04 * Math.sin(lt * 7) * broke.alpha);
+    // fix cards
+    fix1.alpha = easeOut(ph(lt, 135.4, 136.4));
+    fix2.alpha = easeOut(ph(lt, 138.3, 139.3));
+    fix3.alpha = easeOut(ph(lt, 142.2, 143.2));
+    if (lt > 135.5 && !fired.has('f1')) { fired.add('f1'); burst(960, 200, C.green, 20, 220, 0.11); }
+    if (lt < 135.3) {
+      cap.text = lt < 129.8 ? 'Kde by se důkaz zlomil? Kdyby váhy záporné byly…' : 'levná hrana ZA otevřeným vrcholem zabije invariant';
+      cap.style.fill = C.red;
+    } else {
+      cap.text = 'Dijkstra žije jen s nezápornými hranami';
+      cap.style.fill = C.green;
+    }
+  } };
+});
+
+chorusScene(147.2, 157.24, 164.9, 174.1);
+
+// ── OUTRO [174.1 – 190] ──
+scene(174.1, 190, () => {
+  const { c, g } = makeGraphScene();
+  const t1 = txt('c(e) ≥ 0', 84, C.green, '900', MATH); t1.x = 640; t1.y = 230; t1.alpha = 0; c.addChild(t1);
+  const t2 = txt('…jinak BELLMAN–FORD, příteli', 40, C.cyan, '800'); t2.x = 640; t2.y = 350; t2.alpha = 0; c.addChild(t2);
+  const t3 = txt('n−1 kol · všechny hrany · O(n·m)  →  píseň 9', 24, C.muted, '600', MATH); t3.x = 640; t3.y = 410; t3.alpha = 0; c.addChild(t3);
+  const fin = txt('Hotovo. Teď to dokaž na papír — L3.2', 24, C.muted, '600'); fin.x = 640; fin.y = 560; fin.alpha = 0; c.addChild(fin);
+  return { c, update(lt0) {
+    const lt = lt0 + 174.1;
+    g.clear();
+    t1.alpha = easeOut(ph(lt, 175.5, 177));
+    t1.scale.set(1 + 0.03 * Math.sin(lt * 2.5));
+    t2.alpha = easeOut(ph(lt, 177.5, 179));
+    t3.alpha = easeOut(ph(lt, 179.5, 181));
+    fin.alpha = easeOut(ph(lt, 183, 185));
+    // faint closed graph constellation
+    g.lineStyle(2, C.gold, 0.13);
+    for (const [a, b] of E) { g.moveTo(N[a].x * 0.6 + 250, N[a].y * 0.4 + 380); g.lineTo(N[b].x * 0.6 + 250, N[b].y * 0.4 + 380); }
+  } };
+});
+
+// ════════════════════════════════════════════════════════════════════
+// 4) SUBTITLES (whisper-synced; lines per plan/SUNO_PISNICKY.md)
+// ════════════════════════════════════════════════════════════════════
+const M_ = s => `<span class="m">${s}</span>`;
+const LINES = [
+  [15.8, 21.8, `V ${M_('s')} začni s nulou, všude jinde nekonečno,`],
+  [21.8, 27.7, `množina ${M_('R')} je prázdná — kdo v ní skončí, skončil věčně.`],
+  [27.82, 32.76, `Vyber vrchol s nejmenším ${M_('ℓ')} a zavři ho do ${M_('R')},`],
+  [32.76, 39.74, `relaxuj hrany, co vedou ven — a znova, dokola.`],
+  [39.74, 49.28, `Jednou zavřený, navždy zavřený — ${M_('ℓ')} už se nezmění,`],
+  [49.28, 57.28, `${M_('ℓ(v) ≤ ℓ(k)')}, a hrana nikdy záporná není —`],
+  [57.28, 66.0, `proto přes otevřené to kratší nebude — bez vrácení!`],
+  [72.5, 78.44, `Bellmanova rovnice chce minimum přes předchůdce ${M_('k')}:`],
+  [78.44, 83.9, `když ${M_('k ∈ R')}, tu hranu už jsem relaxoval já —`],
+  [83.9, 87.26, `vnitřní smyčka prošla všechny hrany z ${M_('R')} ven.`],
+  [87.26, 95.64, `Když ${M_('k')} leží venku? Tam se láme celý sen:`],
+  [95.64, 103.28, `Jednou zavřený, navždy zavřený — ${M_('ℓ')} už se nezmění,`],
+  [103.28, 111.64, `${M_('ℓ(v) ≤ ℓ(k)')}, a hrana nikdy záporná není —`],
+  [111.64, 120.2, `proto přes otevřené to kratší nebude — bez vrácení!`],
+  [122.0, 129.72, `Kde by se důkaz zlomil? Kdyby váhy záporné byly —`],
+  [129.72, 135.26, `levná hrana za otevřeným vrcholem by tvrzení zabily.`],
+  [135.26, 138.24, `Proto Dijkstra jen s nezápornými,`],
+  [138.24, 142.16, `label setting, ${M_('O(n²)')},`],
+  [142.16, 147.0, `indukce přes velikost množiny ${M_('R')} je mu zárukou.`],
+  [147.9, 157.24, `Jednou zavřený, navždy zavřený — ${M_('ℓ')} už se nezmění,`],
+  [157.24, 164.9, `${M_('ℓ(v) ≤ ℓ(k)')}, a hrana nikdy záporná není —`],
+  [164.9, 174.1, `proto přes otevřené to kratší nebude — bez vrácení!`],
+  [176.5, 182.8, `Nezáporné váhy… jinak Bellman-Ford, příteli.`],
+  [182.86, 189.0, `…bez vrácení.`],
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 5) PLAYER / SCENE MANAGER / CONTROLS
+// ════════════════════════════════════════════════════════════════════
+const player = document.getElementById('player');
+const subEl = document.getElementById('subtitle');
+const bigplay = document.getElementById('bigplay');
+const btnPlay = document.getElementById('btnPlay');
+const btnRestart = document.getElementById('btnRestart');
+const seek = document.getElementById('seek');
+const tCur = document.getElementById('tCur');
+const tDur = document.getElementById('tDur');
+
+let curScene = null, lastLocal = -1, curLine = -1;
+function tick() {
+  const t = player.currentTime;
+  const s = scenes.find(sc => t >= sc.t0 && t < sc.t1) || scenes[scenes.length - 1];
+  if (s !== curScene) { curScene && curScene.destroy(); curScene = s; s.init(); lastLocal = -1; }
+  const localT = t - s.t0;
+  if (localT < lastLocal - 0.05) { s.destroy(); s.init(); }
+  s.update(localT);
+  lastLocal = localT;
+  const li = LINES.findIndex(([a, b]) => t >= a && t < b);
+  if (li !== curLine) {
+    curLine = li;
+    subEl.innerHTML = li >= 0 ? LINES[li][2] : '';
+    subEl.style.opacity = li >= 0 ? 1 : 0;
+  }
+  if (!seekDragging) {
+    seek.value = t;
+    seek.style.setProperty('--p', (t / (player.duration || 189.6) * 100) + '%');
+  }
+  tCur.textContent = fmtTime(t);
+  requestAnimationFrame(tick);
+}
+function fmtTime(t) { t = Math.max(0, t || 0); return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`; }
+
+let seekDragging = false;
+seek.addEventListener('input', () => {
+  seekDragging = true;
+  player.currentTime = +seek.value;
+  seek.style.setProperty('--p', (+seek.value / (player.duration || 189.6) * 100) + '%');
+});
+seek.addEventListener('change', () => { seekDragging = false; });
+
+function togglePlay() { if (player.paused) player.play(); else player.pause(); }
+player.addEventListener('play', () => { btnPlay.textContent = '⏸'; bigplay.classList.add('hidden'); });
+player.addEventListener('pause', () => { btnPlay.textContent = '▶'; if (player.currentTime < 0.05 || player.ended) bigplay.classList.remove('hidden'); });
+player.addEventListener('ended', () => { bigplay.classList.remove('hidden'); bigplay.querySelector('.hint').innerHTML = 'Ještě jednou?<small>R = od začátku</small>'; });
+player.addEventListener('loadedmetadata', () => {
+  seek.max = player.duration;
+  tDur.textContent = fmtTime(player.duration);
+});
+btnPlay.addEventListener('click', togglePlay);
+btnRestart.addEventListener('click', () => { player.currentTime = 0; player.play(); });
+bigplay.addEventListener('click', () => { player.play(); });
+document.getElementById('stage').addEventListener('click', (e) => {
+  if (e.target.closest('#bigplay')) return;
+  togglePlay();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  else if (e.code === 'ArrowRight') player.currentTime = Math.min(player.duration || 189, player.currentTime + 5);
+  else if (e.code === 'ArrowLeft') player.currentTime = Math.max(0, player.currentTime - 5);
+  else if (e.key === 'r' || e.key === 'R' || e.code === 'Home') { player.currentTime = 0; player.play(); }
+});
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
