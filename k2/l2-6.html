@@ -99,14 +99,14 @@
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: směr a konce nesmíš zaměnit</div>
     <ul>
-      <li><strong>Vstupy do $v_1$, výstupy z $v_2$</strong> — ne naopak. Při prohození by hrana $v_1 \to v_2$ nebyla průchozí součástí cesty (do $v_1$ by nic nevedlo, resp. cesta by cenu obešla) a graf by se rozpadl.</li>
+      <li><strong>Vstupy do $v_1$, výstupy z $v_2$</strong> — ne naopak. Dvě různé chyby, dva různé průšvihy: <em>a)</em> při prohození (vstupy do $v_2$, výstupy z $v_1$) cesta v $v_2$ uvízne — z $v_2$ nic nevede, do $v_1$ nic nepřichází, průchod vrcholem přestane existovat a graf se rozpadne; <em>b)</em> při zapomenutém přepojení (vstupy i výstupy necháš na témže vrcholu z dvojice) cesta projde, ale hranu $v_1 \to v_2$ mine a cenu $w(v)$ <strong>obejde</strong>.</li>
       <li><strong>Hledej cestu $s_1 \to t_2$.</strong> Definice ze slidu počítá váhy <em>všech</em> vrcholů podél cesty, včetně koncových — start v $s_2$ nebo cíl v $t_1$ by ceny $w(s)$, $w(t)$ vynechal. (Pozorování navíc: pokud konkrétní úloha za koncové vrcholy <em>neplatí</em>, můžeš to zařídit právě volbou $s_2 \to t_1$.)</li>
     </ul>
   </div>
 
   <div class="box info">
     <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">K čemu to bude</div>
-    <p>Split vrcholu je půlka zkouškové úlohy <em>Dangerous adventure</em> [L2.8] — tam sedí „ceny“ (pravděpodobnosti přežití) na hranách <em>i</em> vrcholech. Druhou půlku, převod součinu pravděpodobností na součet přes $-\log$, přidá příští lekce [L2.7].</p>
+    <p>Ve zkouškové úloze <em>Dangerous adventure</em> [L2.8] sedí „ceny“ (pravděpodobnosti přežití) na hranách <em>i</em> vrcholech. Split je <strong>jeden ze dvou korektních způsobů</strong>, jak to zvládnout — druhý je složit cenu vrcholu do jeho vstupních hran, což tam funguje exaktně právě proto, že zadání za $s$ a $t$ neplatí (stejný efekt jako volba $s_2 \to t_1$ z poznámky výše); vzorové řešení jde touhle druhou cestou. Druhou půlku úlohy, převod součinu pravděpodobností na součet přes $-\log$, přidá příští lekce [L2.7].</p>
   </div>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
@@ -116,7 +116,7 @@
       <li><strong>Split vrcholu:</strong> $v \to v_1, v_2$ + hrana $v_1 \to v_2$ s váhou $w(v)$; hrany vstupující do $v$ vedou do $v_1$, hrany vycházející z $v$ vycházejí z $v_2$.</li>
       <li>Hledá se cesta $s_1 \to t_2$: cesty si odpovídají 1:1 a váha (hrany + vrcholy) se přesně zachová — výsledek přečteš smazáním indexů.</li>
       <li>Nový graf má $2n$ vrcholů a $m + n$ hran — asymptotika Dijkstry se nemění; nezáporné ceny hran i vrcholů dají nezáporné váhy, takže Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> funguje.</li>
-      <li>Ve zkouškové úloze Dangerous adventure [L2.8] se split kombinuje s transformací $-\log$ [L2.7].</li>
+      <li>Ve zkouškové úloze Dangerous adventure [L2.8] se s transformací $-\log$ [L2.7] kombinuje split, nebo složení ceny vrcholu do vstupních hran (jde to, protože $s$ a $t$ tam cenu nenesou).</li>
     </ul>
   </div>
 
