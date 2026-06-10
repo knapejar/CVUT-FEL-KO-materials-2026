@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.13 · SP v DAG v O(V+E) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.13</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.13</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>SP v DAG v O(V+E)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    V <strong>acyklickém</strong> grafu nemusíš pořadí relaxací ani hledat (Dijkstra), ani nahrazovat opakováním (Bellman-Ford): <strong>topologické uspořádání</strong> ho dává zadarmo. Jeden průchod, každá hrana relaxována právě jednou, $\mathcal{O}(|V| + |E|)$ — a záporné hrany nevadí.
+  </div>
+
+  <p>Bellman-Ford <a href="l2-12.html#takeaways">[L2.12]</a> platí za neznalost pořadí $n-1$ průchody přes všechny hrany; Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> si dobré pořadí počítá za běhu výběrem minima — ale jen pro $c \ge 0$. Z úlohy <a href="l2-3.html#t-order">[L2.3] T01</a> přitom víme, že při <em>šťastném</em> pořadí hran stačil Bellman-Fordovi jediný průchod. Dnešní otázka: kdy takové pořadí dostaneme <strong>zadarmo, předem a bez podmínky $c \ge 0$</strong>?</p>
+
+  <!-- ===== SEKCE 1 ===== -->
+  <h2>Acyklický graf = pořadí zadarmo</h2>
+
+  <details class="try">
+    <summary>Zkus sám: jaké pořadí hran zaručí, že Bellman-Fordovi stačí jediný průchod?</summary>
+    <div class="inner">
+      <p>Z intuice „$k$-tého průchodu“ <a href="l2-12.html#takeaways">[L2.12]</a>: značka $l(w)$ je správně, jakmile byly hrany nejkratší cesty $s \to \cdots \to w$ relaxovány <strong>v pořadí podél cesty</strong>. Jediný průchod tedy stačí, když seznam hran projde <em>každou</em> nejkratší cestu „po proudu“ — tj. když existuje seřazení vrcholů takové, že každá hrana vede jen „doleva → doprava“, a hrany relaxujeme po vrcholech zleva doprava.</p>
+      <p>Kdy takové seřazení existuje? Přesně tehdy, když graf nemá orientovaný cyklus — na cyklu by musel být nějaký vrchol „před sebou samým“ <a href="../k0/l0-4.html#takeaways">[L0.4]</a>. Tomu seřazení se říká <strong>topologické uspořádání</strong> a graf, který ho má, je <strong>DAG</strong>.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Shortest Paths in Directed Acyclic Graphs (DAGs) — slide 40, 1:1</div>
+    <p><strong>Definition:</strong> A <strong>topological order</strong> of $G$ is an order of the vertices $V(G) = v_1, \ldots, v_n$ such that for each edge $(v_i, v_j) \in E(G)$ we have $i &lt; j$.</p>
+    <p><strong>Proposition:</strong> A directed graph has a topological order if and only if it is acyclic (see the proof in [3]).</p>
+    <p><strong>Consequence:</strong> DAG vertices can be arranged on a line so that all edges go from left to right.</p>
+    <p><strong>Observation:</strong> shortest path from $s$ to $v_i$ cannot use any node from $v_{i+1}, \ldots, v_n$, therefore we can find the shortest paths in topological order.</p>
+  </div>
+
+  <p>Pojmy DAG a topologické uspořádání známe z <a href="../k0/l0-4.html#takeaways">[L0.4]</a> — včetně toho, jak uspořádání najít (opakovaně odeber vrchol s nulovým in-degree, jde to v lineárním čase). Tady je graf ze slidu 40 — na první pohled obyčejný digraf se zápornými hranami:</p>
+
+  <div class="viz" id="viz-dag"></div>
+
+  <details class="try">
+    <summary>Zkus sám: najdi topologické uspořádání grafu výše. Je jednoznačné?</summary>
+    <div class="inner">
+      <p>Postupné odebírání vrcholů s nulovým in-degree <a href="../k0/l0-4.html#takeaways">[L0.4]</a>: na začátku je bez vstupní hrany jen $s$. Po odebrání $s$ jen $b$ (do $a$ pořád vede $b \to a$), po $b$ jen $a$, pak $d$, $c$, $e$. Vyjde $s, b, a, d, c, e$ — a protože v každém kroku byl kandidát právě jeden, je uspořádání <strong>jednoznačné</strong> (obecně být nemusí, viz úloha v <a href="../k0/l0-4.html#takeaways">[L0.4]</a>).</p>
+      <p>Teď „Consequence“ ze slidu: srovnej vrcholy v tomhle pořadí na přímku a všechny hrany potečou zleva doprava — uvidíš to na vizualizaci běhu níže.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: proč nejkratší cesta z $s = v_1$ do $v_i$ nemůže použít žádný z vrcholů $v_{i+1}, \ldots, v_n$?</summary>
+    <div class="inner">
+      <p>Všechny hrany vedou v topologickém pořadí „doprava“. Kdyby cesta do $v_i$ prošla nějakým $v_j$ s $j &gt; i$, musela by se z $v_j$ vrátit „doleva“ do $v_i$ — a žádná hrana doleva nevede. To je celé „Observation“ — a přesně ono dovolí počítat značky po vrcholech zleva doprava: ve chvíli, kdy je na řadě $v_i$, jsou už <em>všichni možní předchůdci</em> hotoví.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2 ===== -->
+  <h2>Algoritmus: jeden průchod v topologickém pořadí</h2>
+
+  <p>Slide 41 to říká přímo: <em>„May be seen as simplified version of Bellman-Ford algorithm.“</em> Místo $n-1$ průchodů přes všechny hrany <a href="l2-12.html#takeaways">[L2.12]</a> jediný průchod po vrcholech — u vrcholu $v_i$ zrelaxuj <a href="l2-3.html#takeaways">[L2.3]</a> všechny jeho <strong>vstupní</strong> hrany:</p>
+
+  <div class="box">
+    <div class="box-title">Algorithm for DAGs — slide 41, 1:1</div>
+    <p><strong>Input:</strong> directed acyclic graph $G$ with topologically ordered vertices $v_1, \ldots, v_n$, weights $c : E(G) \to \mathbb{R}$.<br>
+    <strong>Output:</strong> vectors $l$ and $p$. For all $i = 1 \ldots n$, $l(v_i)$ is the length of the shortest path from $v_1$ and $p(v_i)$ is the last but one node. If $v_i$ is not reachable from $v_1$, then $l(v_i) = \infty$ and $p(v_i)$ is undefined.</p>
+    <pre><code>l(v_1) := 0; l(v_i) := ∞ for i = 2 ... n;
+for i := 2 to n do
+    for every edge of graph (v_j, v_i) ∈ E(G) do
+        if l(v_i) &gt; l(v_j) + c(v_j, v_i) then
+            l(v_i) := l(v_j) + c(v_j, v_i); p(v_i) := v_j;
+        end
+    end
+end</code></pre>
+    <p><strong>Correctness:</strong> induction on $i$ and observation on previous slide. — <strong>Time complexity</strong> $\mathcal{O}(|V| + |E|)$.</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: porovnej vnitřní smyčku s Bellman-Fordem <a href="l2-12.html#takeaways">[L2.12]</a>. Co je stejné a co se změnilo?</summary>
+    <div class="inner">
+      <p>Relaxační <code>if</code> je znak po znaku stejný — společné jádro všech SP algoritmů <a href="l2-3.html#takeaways">[L2.3]</a>. Změnilo se <em>které</em> hrany a <em>kdy</em>: Bellman-Ford bere v každém průchodu <strong>všechny</strong> hrany grafu, tady se u vrcholu $v_i$ berou jen jeho <strong>vstupní</strong> hrany $(v_j, v_i)$ — a protože vstupní hrany jednotlivých vrcholů dohromady dají každou hranu grafu právě jednou, celý běh relaxuje <strong>každou hranu přesně jednou</strong>.</p>
+      <p>A proč to stačí? Když je na řadě $v_i$, jsou značky všech $v_j$ s $j &lt; i$ už finální (indukce) a nejkratší cesta do $v_i$ jiné předchůdce mít nemůže (Observation). Vnitřní smyčka tedy vyhodnotí Bellmanovu rovnici <a href="l2-2.html#takeaways">[L2.2]</a> pro $v_i$ s definitivními hodnotami — $l(v_i)$ je po svém kroku <strong>hotové a už se nikdy nezmění</strong>.</p>
+    </div>
+  </details>
+
+  <p>Běh na grafu ze slidu 40 — vrcholy srovnané na přímce v topologickém pořadí $s, b, a, d, c, e$, hrany jdou jen zleva doprava:</p>
+
+  <div class="viz" id="viz-run"></div>
+
+  <details class="try">
+    <summary>Zkus sám: v kroku $i = 3$ vyhrála záporná hrana $(b,a)$ nad přímou hranou $(s,a)$. Proč to tady — na rozdíl od Dijkstry <a href="l2-4.html#takeaways">[L2.4]</a> — nemůže nic rozbít?</summary>
+    <div class="inner">
+      <p>Dijkstra se na záporné hraně spálila, protože vrchol <em>uzavřela dřív</em>, než k němu dorazila levnější (záporná) oklika — její pořadí „podle nejmenší značky“ je správné jen pro $c \ge 0$. Tady ale pořadí neurčují značky, nýbrž <strong>topologie</strong>: $a$ přijde na řadu až po $s$ i $b$, takže oklika přes $b$ je v tu chvíli už spočítaná — ať jsou váhy jakékoliv, klidně záporné. A záporný <em>cyklus</em>, jediný skutečný zabiják nejkratších cest <a href="l2-1.html#takeaways">[L2.1]</a>, v DAGu být nemůže — DAG nemá vůbec žádný cyklus.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 3 ===== -->
+  <h2>Složitost a srovnání</h2>
+
+  <details class="try">
+    <summary>Zkus sám: spočítej práci algoritmu a zdůvodni $\mathcal{O}(|V| + |E|)$.</summary>
+    <div class="inner">
+      <p>Inicializace projde $n$ vrcholů → $\mathcal{O}(|V|)$. Hlavní smyčka navštíví každý vrchol jednou a každou hranu zrelaxuje právě jednou (hrana $(v_j, v_i)$ se objeví jen v kroku svého koncového vrcholu $v_i$) → $\mathcal{O}(|E|)$. Dohromady $\mathcal{O}(|V| + |E|)$ — <strong>lineárně ve velikosti grafu</strong>, rychleji to ani nejde (každou hranu je nutné aspoň přečíst). I topologické seřazení samotné stihneš v $\mathcal{O}(|V| + |E|)$ <a href="../k0/l0-4.html#takeaways">[L0.4]</a>, takže lineární zůstává i celek.</p>
+    </div>
+  </details>
+
+  <table>
+    <thead>
+      <tr><th></th><th>Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a></th><th>Bellman-Ford <a href="l2-12.html#takeaways">[L2.12]</a></th><th>SP v DAG</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>předpoklad</td><td>$c \ge 0$</td><td>bez záporného cyklu</td><td><strong>acyklický graf</strong> (váhy $c \in \mathbb{R}$ libovolné)</td></tr>
+      <tr><td>pořadí relaxací</td><td>počítá za běhu (výběr minima)</td><td>žádné — všechny hrany $(n-1)\times$</td><td><strong>zadarmo z topologického uspořádání</strong></td></tr>
+      <tr><td>každá hrana relaxována</td><td>$1\times$</td><td>až $(n-1)\times$</td><td><strong>právě $1\times$</strong></td></tr>
+      <tr><td>složitost</td><td>$\mathcal{O}(n^2)$, resp. $\mathcal{O}(m + n \log n)$</td><td>$\mathcal{O}(nm)$</td><td>$\mathcal{O}(n + m)$</td></tr>
+    </tbody>
+  </table>
+
+  <p>Korektnost je na slidu odbytá jednou větou („induction on $i$ and observation“) — a víc opravdu netřeba: indukční krok jsme si rozmysleli v try otázce výše. Na rozdíl od důkazů Dijkstry a Bellman-Forda (kapitola K3, žebříček ústních důkazů) se tady u zkoušky čeká právě tahle krátká úvaha.</p>
+
+  <!-- ===== SEKCE 4 ===== -->
+  <h2>Bonus zadarmo: nejdelší cesty</h2>
+
+  <details class="try">
+    <summary>Zkus sám: jak stejným algoritmem najít v DAGu <em>nejdelší</em> cestu z $v_1$?</summary>
+    <div class="inner">
+      <p>Dvě rovnocenné cesty: <strong>(i)</strong> vynásob všechny váhy $-1$ a pusť algoritmus beze změny — graf zůstal DAG a záporné váhy mu nevadí; nejkratší cesta v $-c$ je nejdelší v $c$. <strong>(ii)</strong> Přepiš algoritmus přímo na maximum: inicializuj $l(v_i) := -\infty$ a otoč test na $l(v_i) &lt; l(v_j) + c(v_j, v_i)$.</p>
+      <p>V <em>obecném</em> grafu je nejdelší cesta těžký problém (přes kladné cykly se „nabaluje“ délka — podrobně v lekci [L2.17]); v DAGu žádný cyklus není, a tak je nejdelší cesta stejně snadná jako nejkratší. Přesně to jsme už použili u investic pana Dow Jonese <a href="l2-9.html#takeaways">[L2.9]</a>: maximalizace zhodnocení byla nejdelší cesta v DAGu let.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: tři polopravdy kolem DAG-SP</div>
+    <ul>
+      <li><strong>„Prostě projdu vrcholy, jak jsou očíslované v zadání.“</strong> Vstup algoritmu chce vrcholy <em>už topologicky seřazené</em> — seřazení je součást práce (taky $\mathcal{O}(|V|+|E|)$, <a href="../k0/l0-4.html#takeaways">[L0.4]</a>). Na písemce nejdřív najdi/zdůvodni topologické pořadí (klidně graf překresli na přímku), pak teprve relaxuj.</li>
+      <li><strong>„Funguje to i s pár cykly, když nejsou záporné.“</strong> Nefunguje — s jediným orientovaným cyklem topologické uspořádání vůbec neexistuje (Proposition) a algoritmus nelze ani spustit. Pak je na řadě Bellman-Ford <a href="l2-12.html#takeaways">[L2.12]</a> (či Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> pro $c \ge 0$).</li>
+      <li><strong>„Nejdelší cesta se najde snadno.“</strong> Jen v DAGu! V obecném grafu s kladnými vahami je to NP-těžký problém (lekce [L2.17]); trik ×$(-1)$ tam vyrobí záporné cykly. Pro all-pairs variantu nejdelších cest viz Floyd [L2.14].</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.13</div>
+    <ul>
+      <li><strong>SP v DAG:</strong> topologicky seřaď vrcholy <a href="../k0/l0-4.html#takeaways">[L0.4]</a> a v tomto pořadí u každého vrcholu zrelaxuj <a href="l2-3.html#takeaways">[L2.3]</a> jeho vstupní hrany — jeden průchod, každá hrana právě jednou; značka $l(v_i)$ je po svém kroku finální (nejkratší cesta do $v_i$ nemůže použít pozdější vrcholy).</li>
+      <li><strong>Lineární čas $\mathcal{O}(|V| + |E|)$</strong> včetně topologického seřazení; záporné hrany nevadí — pořadí dává topologie, ne značky, a záporný cyklus v DAGu neexistuje.</li>
+      <li><strong>Funguje i pro nejdelší cesty</strong> (váhy ×$(-1)$, nebo $-\infty$ + otočený test) — v DAGu snadné, v obecném grafu NP-těžké [L2.17].</li>
+      <li>Je to „zjednodušený Bellman-Ford“ <a href="l2-12.html#takeaways">[L2.12]</a>: topologické pořadí nahradí $n-1$ průchodů jediným. <em>(Téma ústní.)</em></li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-dag">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Shortest Paths in Directed Acyclic Graphs (DAGs)</strong>
+      <span class="task-src">zdroj: banka #20 (Unsolved, [P] Potential task from slides = slidy 40–41); konkrétní graf banka neuvádí — instance vlastní; řešení vlastní</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN — bank #20 / slides 40–41)</span>
+        <p><strong>Definition:</strong> A topological order of $G$ is an order of the vertices $V(G) = v_1, \ldots, v_n$ such that for each edge $(v_i, v_j) \in E(G)$ we have $i &lt; j$.</p>
+        <p><strong>Proposition:</strong> A directed graph has a topological order if and only if it is acyclic.</p>
+        <p><strong>Consequence:</strong> DAG vertices can be arranged on a line so that all edges go from left to right.</p>
+        <p><strong>Observation:</strong> shortest path from $s$ to $v_i$ cannot use any node from $v_{i+1}, \ldots, v_n$, therefore we can find the shortest paths in topological order.</p>
+        <p>Algorithm for DAGs may be seen as simplified version of Bellman-Ford algorithm.</p>
+        <p><strong>Input:</strong> directed acyclic graph $G$ with topologically ordered vertices $v_1, \ldots, v_n$, weights $c : E(G) \to \mathbb{R}$.</p>
+        <p><strong>Output:</strong> vectors $l$ and $p$. For all $i = 1 \ldots n$, $l(v_i)$ is the length of the shortest path from $v_1$ and $p(v_i)$ is the last but one node. If $v_i$ is not reachable from $v_1$, then $l(v_i) = \infty$ and $p(v_i)$ is undefined.</p>
+        <p><em>Study task: compute shortest paths in a DAG by processing vertices in topological order.</em></p>
+        <p>(Instance for the run — own addition, the bank gives no concrete graph: the graph below, source node $A$. First find a topological order, then compute $l$ and $p$.)</p>
+      </div>
+
+      <div class="viz" id="viz-t01"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Studijní úloha ze slidů: na DAGu o $n = 6$ vrcholech spočítat nejkratší cesty z $A$ jediným průchodem v topologickém pořadí. Pozor — vrcholy v obrázku <em>nejsou</em> srovnané na přímce: první krok je topologické uspořádání najít. V grafu jsou záporné hrany a jeden vrchol, do kterého z $A$ nevede nic.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — průchod v topologickém pořadí, finálnost značek, $\mathcal{O}(|V|+|E|)$.</li>
+        <li><a href="../k0/l0-4.html#takeaways">[L0.4] DAG a topologické uspořádání</a> — jak uspořádání najít (odebírání vrcholů s nulovým in-degree).</li>
+        <li><a href="l2-3.html#takeaways">[L2.3] Relaxace hrany</a> — relaxační krok, vektory $l$ a $p$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Nejdřív topologie: opakovaně hledej vrcholy bez nezpracované vstupní hrany (může jich být víc → uspořádání nemusí být jednoznačné, vyber libovolné platné). Pak veď tabulku $l$ a $p$ a zpracovávej vrcholy zleva doprava: u každého projdi <em>jen jeho vstupní</em> hrany a vezmi minimum z $l(\text{předchůdce}) + c$. Hodnoty předchůdců už jsou finální, takže se k hotovému vrcholu nikdy nevracíš. Nedosažitelný vrchol prostě zůstane na $\infty$ — a dej pozor, co jeho $\infty$ udělá (neudělá) s hranami, které z něj vedou.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — banka úlohu neřeší)</summary>
+        <div class="inner">
+          <p><strong>Topologické uspořádání.</strong> Nulový in-degree mají na startu $A$ i $E$ — uspořádání tedy <em>není jednoznačné</em> (srov. <a href="../k0/l0-4.html#takeaways">[L0.4]</a>). Zvolme $A, C, B, D, E, F$: ověř, že každá hrana vede doprava — $(A,C), (A,B), (C,B), (C,D), (B,D), (B,F), (D,F), (E,F)$ ✓. (Stejně dobré je např. $E, A, C, B, D, F$; výsledné $l$, $p$ vyjdou totožně.)</p>
+          <p><strong>Průchod</strong> (u každého vrcholu minimum přes vstupní hrany, hodnoty předchůdců už finální):</p>
+          <ul>
+            <li>$i=2$, vrchol $C$: vstupní $(A,C)$: $l(C) = 0 + 2 = 2$, $p(C) = A$.</li>
+            <li>$i=3$, vrchol $B$: $(A,B)$: $0 + 5 = 5$; $(C,B)$: $2 + (-3) = -1$ → $l(B) = -1$, $p(B) = C$ (záporná hrana v klidu vyhrála — oklika přes $C$ je levnější než přímá hrana).</li>
+            <li>$i=4$, vrchol $D$: $(C,D)$: $2 + 4 = 6$; $(B,D)$: $-1 + 1 = 0$ → $l(D) = 0$, $p(D) = B$.</li>
+            <li>$i=5$, vrchol $E$: žádná vstupní hrana → $l(E) = \infty$, $p(E)$ nedefinováno (přesně dle výstupní specifikace).</li>
+            <li>$i=6$, vrchol $F$: $(B,F)$: $-1 + 4 = 3$; $(D,F)$: $0 + 2 = 2$; $(E,F)$: $\infty + 1$ nic nepodleze → $l(F) = 2$, $p(F) = D$.</li>
+          </ul>
+          <table>
+            <thead><tr><th></th><th>$A$</th><th>$C$</th><th>$B$</th><th>$D$</th><th>$E$</th><th>$F$</th></tr></thead>
+            <tbody>
+              <tr><td>$l$</td><td>$0$</td><td>$2$</td><td>$-1$</td><td>$0$</td><td>$\infty$</td><td>$2$</td></tr>
+              <tr><td>$p$</td><td>$-$</td><td>$A$</td><td>$C$</td><td>$B$</td><td>$-$</td><td>$D$</td></tr>
+            </tbody>
+          </table>
+          <p>Strom nejkratších cest: $A \to C$, $C \to B$, $B \to D$, $D \to F$; např. do $F$ vede $A \to C \to B \to D \to F$ s délkou $2 - 3 + 1 + 2 = 2$. Každá z $8$ hran byla relaxována právě jednou → $\mathcal{O}(|V| + |E|)$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <p>Krokovaný běh řešení T01 (pozor, spoiler — nejdřív si projdi tabulku sám na papír):</p>
+  <div class="viz" id="viz-t01run"></div>
+
+  <label class="done-toggle" data-lesson-id="L2.13">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k2/l2-12.html"><span class="dir">← Předchozí</span> L2.12 · Bellman-Fordův algoritmus + detekce záporného cyklu (běh)</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.14 · Floyd-Warshall (all-pairs) + nejdelší cesty [NICE])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// ---- Graf ze slidu 40 — „obyčejné“ nakreslení (rekonstrukce) ----
+KOViz.graph(document.getElementById('viz-dag'), {
+  directed: true, w: 640, h: 360, nodeR: 20,
+  nodes: [
+    { id: 's', x: 90,  y: 200, label: 's' },
+    { id: 'a', x: 300, y: 70,  label: 'a' },
+    { id: 'b', x: 230, y: 300, label: 'b' },
+    { id: 'c', x: 400, y: 150, label: 'c' },
+    { id: 'd', x: 460, y: 290, label: 'd' },
+    { id: 'e', x: 580, y: 100, label: 'e' },
+  ],
+  edges: [
+    { from: 's', to: 'a', label: '3' },
+    { from: 's', to: 'b', label: '2' },
+    { from: 'b', to: 'a', label: '−2' },
+    { from: 'b', to: 'd', label: '2' },
+    { from: 'a', to: 'd', label: '3', curve: 0.3 },
+    { from: 'a', to: 'c', label: '1' },
+    { from: 'd', to: 'c', label: '−1' },
+    { from: 'd', to: 'e', label: '1' },
+  ],
+  caption: 'DAG ze slidu 40 (rekonstrukce: přepis uvádí vrcholy s, a, b, c, d, e, multimnožinu vah 1, 2, 3, −2, −1, 1, 2, 3 a topologické pořadí s, b, a, d, c, e — konkrétní hrany se v přepisu nedochovaly, volba vlastní a s popisem konzistentní). Cyklus nikde — je to DAG, i když to z obrázku není na první pohled vidět.',
+});
+
+// ---- Týž graf na přímce + stepper běhu ----
+const GLINE = {
+  directed: true, w: 640, h: 360, nodeR: 20,
+  nodes: [
+    { id: 's', x: 60,  y: 230, label: 's' },
+    { id: 'b', x: 160, y: 230, label: 'b' },
+    { id: 'a', x: 260, y: 230, label: 'a' },
+    { id: 'd', x: 360, y: 230, label: 'd' },
+    { id: 'c', x: 460, y: 230, label: 'c' },
+    { id: 'e', x: 560, y: 230, label: 'e' },
+  ],
+  edges: [
+    { from: 's', to: 'b', label: '2' },
+    { from: 'b', to: 'a', label: '−2' },
+    { from: 'a', to: 'd', label: '3' },
+    { from: 'd', to: 'c', label: '−1' },
+    { from: 's', to: 'a', label: '3', curve: -2.2 },
+    { from: 'b', to: 'd', label: '2', curve: -2.2 },
+    { from: 'a', to: 'c', label: '1', curve: -2.2 },
+    { from: 'd', to: 'e', label: '1', curve: -2.2 },
+  ],
+};
+KOViz.stepper(document.getElementById('viz-run'), {
+  graph: GLINE,
+  frames: [
+    {
+      nodes: { s: 'hl' },
+      subs: { s: 'l=0', b: 'l=∞', a: 'l=∞', d: 'l=∞', c: 'l=∞', e: 'l=∞' },
+      desc: 'Vrcholy srovnané na přímce v topologickém pořadí s, b, a, d, c, e — všechny hrany vedou zleva doprava (Consequence ze slidu 40). Inicializace: l(s)=0, ostatní ∞. Poběžíme JEDNOU zleva doprava; u každého vrcholu zrelaxujeme jen jeho vstupní hrany.',
+    },
+    {
+      nodes: { s: 'hl', b: 'hl' },
+      edges: { 's->b': 'hl' },
+      subs: { s: 'l=0', b: 'l=2', a: 'l=∞', d: 'l=∞', c: 'l=∞', e: 'l=∞' },
+      desc: 'i=2, vrchol b: jediná vstupní hrana (s,b): l(b) ← 0+2 = 2, p(b)=s. Hotovo a NAVŽDY — žádný pozdější vrchol už b vylepšit nemůže (hrany doleva neexistují).',
+    },
+    {
+      nodes: { s: 'hl', b: 'hl', a: 'hl' },
+      edges: { 's->b': 'hl', 'b->a': 'hl', 's->a': 'dim' },
+      subs: { s: 'l=0', b: 'l=2', a: 'l=0', d: 'l=∞', c: 'l=∞', e: 'l=∞' },
+      desc: 'i=3, vrchol a: vstupní hrany (s,a) a (b,a). Přímá (s,a): 0+3 = 3; oklika (b,a): 2+(−2) = 0 → l(a) ← 0, p(a)=b. Záporná hrana vyhrála bez jakéhokoliv dramatu — oba předchůdci už mají finální značky.',
+    },
+    {
+      nodes: { s: 'hl', b: 'hl', a: 'hl', d: 'hl' },
+      edges: { 's->b': 'hl', 'b->a': 'hl', 'a->d': 'hl', 'b->d': 'dim' },
+      subs: { s: 'l=0', b: 'l=2', a: 'l=0', d: 'l=3', c: 'l=∞', e: 'l=∞' },
+      desc: 'i=4, vrchol d: (b,d): 2+2 = 4; (a,d): 0+3 = 3 → l(d) ← 3, p(d)=a. Hrana (b,d) (šedě) prohrála — a tím pro ni běh skončil: každá hrana se testuje právě jednou.',
+    },
+    {
+      nodes: { s: 'hl', b: 'hl', a: 'hl', d: 'hl', c: 'hl' },
+      edges: { 's->b': 'hl', 'b->a': 'hl', 'a->c': 'hl', 'd->c': 'dim' },
+      subs: { s: 'l=0', b: 'l=2', a: 'l=0', d: 'l=3', c: 'l=1', e: 'l=∞' },
+      desc: 'i=5, vrchol c: (a,c): 0+1 = 1; (d,c): 3+(−1) = 2 → l(c) ← 1, p(c)=a. I tady záporná hrana v klidu soutěžila — jen tentokrát prohrála.',
+    },
+    {
+      nodes: { s: 'hl', b: 'hl', a: 'hl', d: 'hl', c: 'hl', e: 'hl' },
+      edges: { 's->b': 'hl', 'b->a': 'hl', 'a->d': 'hl', 'd->e': 'hl' },
+      subs: { s: 'l=0', b: 'l=2', a: 'l=0', d: 'l=3', c: 'l=1', e: 'l=4' },
+      desc: 'i=6, vrchol e: jediná vstupní hrana (d,e): l(e) ← 3+1 = 4, p(e)=d. Konec — žádné další průchody, žádný fixpoint k ověřování.',
+    },
+    {
+      nodes: { s: 'good', b: 'good', a: 'good', d: 'good', c: 'good', e: 'good' },
+      edges: { 's->b': 'good', 'b->a': 'good', 'a->d': 'good', 'a->c': 'good', 'd->e': 'good' },
+      subs: { s: 'l=0', b: 'l=2', a: 'l=0', d: 'l=3', c: 'l=1', e: 'l=4' },
+      desc: 'Výsledek: l = (0, 2, 0, 3, 1, 4) v pořadí s, b, a, d, c, e; p = (−, s, b, a, a, d). Zeleně strom nejkratších cest. Bilance: 8 hran = 8 relaxací (Bellman-Ford by jich na 6 vrcholech zkusil až 5×8 = 40) → O(|V|+|E|).',
+    },
+  ],
+  caption: 'Běh algoritmu pro DAGy na grafu ze slidu 40 (rekonstrukce, viz výše) v topologickém pořadí s, b, a, d, c, e. Každá hrana je relaxována právě jednou; značka vrcholu je po jeho kroku finální.',
+});
+
+// ---- T01: statický graf zadání (vlastní instance; schválně NEseřazená na přímce) ----
+const T01G = {
+  directed: true, w: 640, h: 360, nodeR: 20,
+  nodes: [
+    { id: 'A', x: 90,  y: 160, label: 'A' },
+    { id: 'B', x: 320, y: 250, label: 'B' },
+    { id: 'C', x: 250, y: 90,  label: 'C' },
+    { id: 'D', x: 480, y: 170, label: 'D' },
+    { id: 'E', x: 180, y: 300, label: 'E' },
+    { id: 'F', x: 560, y: 300, label: 'F' },
+  ],
+  edges: [
+    { from: 'A', to: 'C', label: '2' },
+    { from: 'A', to: 'B', label: '5' },
+    { from: 'C', to: 'B', label: '−3' },
+    { from: 'C', to: 'D', label: '4' },
+    { from: 'B', to: 'D', label: '1' },
+    { from: 'B', to: 'F', label: '4' },
+    { from: 'D', to: 'F', label: '2' },
+    { from: 'E', to: 'F', label: '1' },
+  ],
+};
+KOViz.graph(document.getElementById('viz-t01'), Object.assign({}, T01G, {
+  caption: 'Instance k T01 (vlastní): DAG s vrcholy A–F, start A. Vrcholy nejsou srovnané — topologické uspořádání si najdi sám (a všimni si vrcholu E).',
+}));
+
+// ---- T01: stepper řešení (za details.solution kvůli getBBox) ----
+KOViz.stepper(document.getElementById('viz-t01run'), {
+  graph: T01G,
+  frames: [
+    {
+      nodes: { A: 'hl' },
+      subs: { A: 'l=0', B: 'l=∞', C: 'l=∞', D: 'l=∞', E: 'l=∞', F: 'l=∞' },
+      desc: 'Topologické uspořádání: nulový in-degree mají A i E → není jednoznačné; volíme A, C, B, D, E, F (každá hrana vede doprava ✓). Inicializace: l(A)=0, ostatní ∞.',
+    },
+    {
+      nodes: { A: 'hl', C: 'hl' },
+      edges: { 'A->C': 'hl' },
+      subs: { A: 'l=0', B: 'l=∞', C: 'l=2', D: 'l=∞', E: 'l=∞', F: 'l=∞' },
+      desc: 'i=2, vrchol C: vstupní jen (A,C): l(C) ← 0+2 = 2, p(C)=A. Finální.',
+    },
+    {
+      nodes: { A: 'hl', C: 'hl', B: 'hl' },
+      edges: { 'A->C': 'hl', 'C->B': 'hl', 'A->B': 'dim' },
+      subs: { A: 'l=0', B: 'l=−1', C: 'l=2', D: 'l=∞', E: 'l=∞', F: 'l=∞' },
+      desc: 'i=3, vrchol B: (A,B): 0+5 = 5; (C,B): 2+(−3) = −1 → l(B) ← −1, p(B)=C. Záporná oklika přes C porazila přímou hranu (šedě) — v topologickém pořadí žádný problém.',
+    },
+    {
+      nodes: { A: 'hl', C: 'hl', B: 'hl', D: 'hl' },
+      edges: { 'A->C': 'hl', 'C->B': 'hl', 'B->D': 'hl', 'C->D': 'dim' },
+      subs: { A: 'l=0', B: 'l=−1', C: 'l=2', D: 'l=0', E: 'l=∞', F: 'l=∞' },
+      desc: 'i=4, vrchol D: (C,D): 2+4 = 6; (B,D): −1+1 = 0 → l(D) ← 0, p(D)=B.',
+    },
+    {
+      nodes: { A: 'hl', C: 'hl', B: 'hl', D: 'hl', E: 'bad' },
+      subs: { A: 'l=0', B: 'l=−1', C: 'l=2', D: 'l=0', E: 'l=∞', F: 'l=∞' },
+      desc: 'i=5, vrchol E: žádná vstupní hrana → l(E) zůstává ∞, p(E) nedefinováno — přesně dle výstupní specifikace pro vrchol nedosažitelný z v₁.',
+    },
+    {
+      nodes: { A: 'hl', C: 'hl', B: 'hl', D: 'hl', E: 'bad', F: 'hl' },
+      edges: { 'D->F': 'hl', 'B->F': 'dim', 'E->F': 'dim' },
+      subs: { A: 'l=0', B: 'l=−1', C: 'l=2', D: 'l=0', E: 'l=∞', F: 'l=2' },
+      desc: 'i=6, vrchol F: (B,F): −1+4 = 3; (D,F): 0+2 = 2; (E,F): ∞+1 nic nepodleze → l(F) ← 2, p(F)=D. Hrana z nedosažitelného E se korektně neuplatní.',
+    },
+    {
+      nodes: { A: 'good', C: 'good', B: 'good', D: 'good', E: 'bad', F: 'good' },
+      edges: { 'A->C': 'good', 'C->B': 'good', 'B->D': 'good', 'D->F': 'good' },
+      subs: { A: 'l=0', B: 'l=−1', C: 'l=2', D: 'l=0', E: 'l=∞', F: 'l=2' },
+      desc: 'Výsledek: l = (0, 2, −1, 0, ∞, 2) v pořadí A, C, B, D, E, F; p = (−, A, C, B, −, D). Zeleně SPT: A→C→B→D→F (délka 2−3+1+2 = 2); 8 hran = 8 relaxací → O(|V|+|E|).',
+    },
+  ],
+  caption: 'Běh řešení T01: topologické pořadí A, C, B, D, E, F; jeden průchod, každá hrana právě jednou, E zůstává nedosažitelné (∞).',
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
