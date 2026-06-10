@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.9 · Modelování reálné úlohy jako SP (DAG / stavový prostor) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.9</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.9</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>Modelování reálné úlohy jako SP (DAG / stavový prostor)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Doteď byl graf vždy součástí zadání. Dnes se naučíš postavit ho ze slovní úlohy sám: rozhodnout, <strong>co je vrchol (stav), co je hrana (přechod) a co její cena</strong> — a podle vah a cyklů výsledného grafu vybrat správný algoritmus.
+  </div>
+
+  <p>Zkouškové úlohy ze Slotu 2 často nezačínají obrázkem grafu, ale příběhem a větou <em>„formulate this as a shortest path problem“</em>. V <a href="l2-8.html#takeaways">[L2.8] Dangerous adventure</a> byla mapa (graf) aspoň daná a vymýšlel se jen převod vah. Dnes nedostaneš vůbec nic — ani vrcholy, ani hrany. Ukážeme si to na dvou klasických úlohách ze zkouškových reportáží: investicích pana Dow Jonese a směnách řidiče autobusu.</p>
+
+  <!-- ===== DOW JONES ===== -->
+  <h2>Pan Dow Jones investuje</h2>
+  <p>Panu Dow Jonesovi je 50 let a chce v 65 letech vybrat ze svého penzijního účtu co nejvíc peněz. Na 15 let dopředu zná všechny investiční příležitosti — každá má <strong>počáteční rok</strong> $k$, <strong>dobu splatnosti</strong> (maturity period) $p$ let a <strong>zhodnocení</strong> (appreciation) $a$ <em>za celé období splatnosti</em>. V každém okamžiku má všechny peníze vložené v nejvýše jedné příležitosti (nedělí je). Konkrétní tabulka deseti příležitostí je v úloze T01 níže; zkouška chce: zformuluj to jako problém nejkratší cesty.</p>
+
+  <details class="try">
+    <summary>Zkus sám: žádný graf v zadání není. Co zvolíš za vrcholy?</summary>
+    <div class="inner">
+      <p>Hledej veličinu, která se příběhem „vine“ a po které se postupuje vpřed: tady je to <strong>čas</strong>. Vrchol = rok $t \in \{0, 1, \ldots, 15\}$ (věk $50 + t$). Start $s$ = rok $0$, cíl $t$ = rok $15$. Vrchol čteme jako <em>stav</em>: „peníze jsou volné v roce $t$“.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: nemusí být součástí stavu i aktuální částka na účtu?</summary>
+    <div class="inner">
+      <p>Ne — a to je klíčové pozorování. Každá příležitost <strong>násobí</strong> částku faktorem $1 + a$ bez ohledu na to, kolik peněz zrovna je; množina budoucích možností závisí jen na roce, ne na částce. Stav má nést <em>přesně tu informaci, která rozhoduje o budoucnosti</em> — tady stačí rok. (Kdyby výnos závisel na výši vkladu, rok by nestačil a stav by musel být bohatší.)</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: co budou hrany? Pozor — příležitost <em>a</em> končí v roce 4, ale žádná jiná příležitost v roce 4 nezačíná (začátky jsou 0, 1, 2, 3, 5, 6, 7, 8, 11, 13). Co s tím?</summary>
+    <div class="inner">
+      <p>Příležitost $(k, p, a)$ je hrana $k \to k + p$ s násobkem $1 + a$. Jenže jen s těmito hranami by z roku 4 nevedlo nic a model by tvrdil, že po příležitosti <em>a</em> už investování skončilo. Přidej proto <strong>čekací hranu</strong> $t \to t+1$ s násobkem $1$ pro každý rok: peníze mohou rok ležet na účtu. („V jediné příležitosti“ znamená, že je nedělí mezi víc příležitostí najednou — ne že nesmí ležet ladem.)</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-dj"></div>
+
+  <details class="try">
+    <summary>Zkus sám: cesta $0 \to 15$ teď odpovídá investiční strategii. Jaká je její hodnota — a jaký SP problém vlastně řešíme? (Vzpomeň si na <a href="l2-7.html#takeaways">[L2.7]</a>.)</summary>
+    <div class="inner">
+      <p>Výsledná částka = vklad $\times$ <strong>součin</strong> násobků $1 + a_e$ přes hrany cesty a chceme ji <strong>maximalizovat</strong>. To je přesně situace pro $-\log$ z <a href="l2-7.html#takeaways">[L2.7]</a>: polož $c(e) := -\log(1 + a_e)$ a minimalizuj součet. Jenže $1 + a_e \ge 1$, takže $-\log(1 + a_e) \le 0$ — <strong>všechny váhy jsou záporné</strong> (čekací hrany mají $-\log 1 = 0$). Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> je tedy mimo hru.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: záporné váhy — je to katastrofa? Kdy přesně jsou záporné váhy skutečný problém (<a href="l2-1.html#takeaways">[L2.1]</a>)?</summary>
+    <div class="inner">
+      <p>Problém nejsou záporné <em>hrany</em>, ale záporné <em>cykly</em> <a href="l2-1.html#takeaways">[L2.1]</a>. A náš graf žádný cyklus nemá: <strong>každá hrana vede z dřívějšího roku do pozdějšího</strong>. Je to <strong>DAG</strong> <a href="../k0/l0-4.html#takeaways">[L0.4]</a> — vrcholy dokonce už od začátku stojí na přímce v topologickém uspořádání a všechny hrany jdou zleva doprava. Bez cyklů není ani záporný cyklus, takže nejkratší cesta je dobře definovaná.</p>
+    </div>
+  </details>
+
+  <p>Stejnou věc lze říct i bez $-\log$: maximalizace zhodnocení je <strong>nejdelší cesta v DAG</strong> s vahami $\log(1 + a_e)$ — a právě acykličnost ji dělá řešitelnou (v obecném grafu je nejdelší cesta těžká, podrobně v lekci [L2.17]). Jak nejkratší/nejdelší cestu v DAG spočítat v lineárním čase jedním průchodem zleva doprava, ukáže lekce [L2.13]; intuice už ale máš: stačí vyhodnocovat Bellmanovu rovnici <a href="l2-2.html#takeaways">[L2.2]</a> po vrcholech v topologickém pořadí.</p>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Recept: stav — přechod — cena (— kontrola)</div>
+    <ol>
+      <li><strong>Stav = vrchol.</strong> Minimální informace, která určuje budoucí možnosti. Test: „když znám stav, vím přesně, co všechno teď můžu udělat?“</li>
+      <li><strong>Přechod = hrana, cena = co stojí.</strong> Elementární rozhodnutí, které mění stav. Nezapomeň na „nicnedělací“ přechody (čekání). Součiny a maximalizaci převeď přes $-\log$ <a href="l2-7.html#takeaways">[L2.7]</a>.</li>
+      <li><strong>$s$, $t$ a korespondence.</strong> U zkoušky explicitně napiš: každé přípustné řešení úlohy $\leftrightarrow$ nějaká $s$–$t$ cesta a hodnota řešení = délka cesty. Bez této věty formulace není úplná.</li>
+      <li><strong>Kontrola.</strong> Podívej se na znaménka vah a na cykly výsledného grafu — teprve podle toho vyber algoritmus (tabulka níže).</li>
+    </ol>
+  </div>
+
+  <!-- ===== BUS DRIVER ===== -->
+  <h2>Řidič autobusu: stav nemusí být jen „čas“</h2>
+  <p>Druhá zkoušková klasika (z knihy <em>Network Flows</em>, Ahuja–Magnanti–Orlin): autobusový provoz běží od 9 do 17 hodin a je potřeba ho celý pokrýt směnami řidičů. K dispozici jsou směny 9–11, 9–13, 12–14, 12–16, 12–17, 14–16 a 15–17, každá s danou cenou; směny se smějí překrývat. Cíl: pokrýt celou dobu 9–17 co nejlevněji — a zadání výslovně chce formulaci, <strong>aby šla úloha vyřešit Dijkstrou</strong>.</p>
+
+  <details class="try">
+    <summary>Zkus sám: použij recept naivně — vrchol = hodina 9…17, směna $[a, b]$ = hrana $a \to b$ s cenou směny. Najdi cestu $9 \to 17$. Kde to skřípe?</summary>
+    <div class="inner">
+      <p>Cesta neexistuje: po směně 9–13 stojíš ve vrcholu 13, ale žádná směna ve 13 nezačíná (začátky jsou 9, 12, 14, 15); po 9–11 stojíš v 11 — totéž. Přitom pokrytí existuje: 9–13 a 12–17 dohromady pokryjí všechno, jen se <em>překrývají</em>. Naivní model překryv zakazuje, je tedy <strong>moc přísný</strong> — zakazuje přípustná řešení.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: jak překryv povolit jedinou levnou úpravou grafu?</summary>
+    <div class="inner">
+      <p>Čti vrchol jako <strong>stav „provoz je pokryt od 9 do $t$“</strong>. Pokrytí se nepokazí tím, že ho v duchu o hodinu „zkrátíme“: přidej <strong>hranu zpět</strong> $t \to t - 1$ s cenou $0$. Pak $9 \xrightarrow{9\text{–}13} 13 \xrightarrow{0} 12 \xrightarrow{12\text{–}17} 17$. Hrana zpět říká: další směna smí začít už o hodinu dřív, než dosavadní pokrytí končí — to je přesně povolený překryv.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-bus"></div>
+
+  <details class="try">
+    <summary>Zkus sám: najdi v obrázku nejlevnější pokrytí (ceny směn jsou ilustrační — v zkouškové reportáži se nedochovaly).</summary>
+    <div class="inner">
+      <p>Optimum je <strong>115</strong>: směny 9–13 (45), 12–16 (40) a 15–17 (30), tedy cesta $9 \to 13 \to 12 \to 16 \to 15 \to 17$ se dvěma hranami zpět. Srovnej: 9–13 + 12–17 dá $45 + 75 = 120$; 9–13 + 12–14 + 14–16 + 15–17 dá $45 + 25 + 25 + 30 = 125$.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: je tenhle graf DAG? A smí na něj Dijkstra?</summary>
+    <div class="inner">
+      <p>DAG to <strong>není</strong> — hrany zpět tvoří s dopřednými hranami cykly (např. $12 \to 14 \to 13 \to 12$). Ale Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> DAG nepotřebuje: potřebuje <strong>nezáporné váhy</strong>, a ty tu jsou (ceny směn $> 0$, hrany zpět $= 0$). Všimni si zrcadlové situace k panu Dow Jonesovi: tam DAG se zápornými vahami (Dijkstra ne, acykličnost zachraňuje), tady cykly s nezápornými vahami (Dijkstra ano).</p>
+    </div>
+  </details>
+
+  <h2>Kontrola po modelování: který algoritmus?</h2>
+  <p>Formulací práce nekončí — poslední krok receptu je podívat se, jaký graf nám vlastně vznikl:</p>
+  <table>
+    <tr><th>Výsledný graf</th><th>Algoritmus</th></tr>
+    <tr><td>váhy $\ge 0$ (na cyklech nezáleží)</td><td><strong>Dijkstra</strong> <a href="l2-4.html#takeaways">[L2.4]</a> — $O(n^2)$, resp. $O(|E| \log |V|)$ s haldou</td></tr>
+    <tr><td><strong>DAG</strong> <a href="../k0/l0-4.html#takeaways">[L0.4]</a> (váhy libovolné, i záporné; zvládne i nejdelší cestu)</td><td>jeden průchod v topologickém pořadí — lekce [L2.13], $O(|V| + |E|)$</td></tr>
+    <tr><td>záporné váhy a cykly zároveň</td><td>Bellman-Ford — lekce [L2.12]; pozor, záporný <em>cyklus</em> dělá SP nedefinovaným <a href="l2-1.html#takeaways">[L2.1]</a></td></tr>
+  </table>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: tři modelovací pasti</div>
+    <ul>
+      <li><strong>Zapomenuté čekací / zpětné hrany.</strong> Model bez nich prohlásí řešitelnou úlohu za neřešitelnou (Dow Jones bez čekání, řidič bez překryvu). Po sestavení grafu si vždy ručně přelož <em>jedno konkrétní přípustné řešení</em> na $s$–$t$ cestu — když to nejde, chybí hrany.</li>
+      <li><strong>Stav nese málo informace.</strong> Stav musí určovat všechny budoucí možnosti. U Dow Jonese stačí rok jen proto, že zhodnocení je multiplikativní a na částce nezávislé. Jakmile budoucnost závisí na víc věcech (kdo kde stojí, kolik vody je v nádobě…), patří do stavu všechny — to je téma příští lekce [L2.10].</li>
+      <li><strong>„Pustím Dijkstru“ bez kontroly vah.</strong> Maximalizace přes $-\log$ násobků $\ge 1$ dává <em>záporné</em> váhy — Dijkstra na ně mlčky vrátí špatný výsledek (protipříklad v <a href="l2-4.html#takeaways">[L2.4]</a>). Záchranou je tady acykličnost, ne Dijkstra.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.9</div>
+    <ul>
+      <li><strong>Recept modelování:</strong> stav = vrchol (minimální informace určující budoucnost), přechod = hrana s cenou (včetně „čekání“), $s$, $t$ + explicitní korespondence <em>řešení úlohy ↔ $s$–$t$ cesta</em>.</li>
+      <li><strong>Úlohy s časovou osou:</strong> vrcholy = časové body, hrany = příležitosti/směny s cenou; hrany vedou vpřed v čase → graf je DAG <a href="../k0/l0-4.html#takeaways">[L0.4]</a>.</li>
+      <li><strong>Maximalizace zhodnocení = nejdelší cesta v DAG</strong>; přes $-\log$ <a href="l2-7.html#takeaways">[L2.7]</a> nejkratší cesta se zápornými vahami — v DAG to nevadí, žádný cyklus = žádný záporný cyklus <a href="l2-1.html#takeaways">[L2.1]</a>.</li>
+      <li>Stav může být i „pokryto do $t$“ — hrany zpět s cenou 0 povolí překryv směn; váhy $\ge 0$ → Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> funguje i mimo DAG.</li>
+      <li><strong>Po modelování zkontroluj znaménka vah a cykly</strong> → volba algoritmu: Dijkstra / topologický průchod [L2.13] / Bellman-Ford [L2.12].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-dowjones">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Investment Opportunities (Mr. Dow Jones)</strong>
+      <span class="task-src">zdroj: slide 42, 3_SPT_KO.pdf (kniha [1] Ahuja–Magnanti–Orlin); stejné znění ve studentském souhrnu zkoušek (bez řešení)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Mr. Dow Jones, 50 years old, wishes to place his Individual Retirement Account funds in various investment opportunities so that at the age of 65 years, when he withdraws the funds, he has accrued maximum possible amount of money. Assume that Mr. Jones knows the investment alternatives for the next 15 years - each opportunity has starting year $k$, maturity period $p$ (in years) and appreciation $a$ it offers for the maturity period. How would you formulate this investment problem as a shortest path problem, assuming that at any point in time, Mr. Jones invests all his funds in a single investment alternative.”</p>
+        <table>
+          <tr><th>opportunity</th><td>a</td><td>b</td><td>c</td><td>d</td><td>e</td><td>f</td><td>g</td><td>h</td><td>i</td><td>j</td></tr>
+          <tr><th>starting year</th><td>0</td><td>1</td><td>3</td><td>2</td><td>5</td><td>6</td><td>7</td><td>8</td><td>11</td><td>13</td></tr>
+          <tr><th>maturity period</th><td>4</td><td>5</td><td>6</td><td>5</td><td>4</td><td>5</td><td>6</td><td>5</td><td>4</td><td>2</td></tr>
+          <tr><th>appreciation</th><td>3.9%</td><td>4.7%</td><td>6.2%</td><td>4.2%</td><td>3.8%</td><td>4.1%</td><td>5.2%</td><td>5.8%</td><td>4.1%</td><td>3.2%</td></tr>
+        </table>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Patnáctiletý horizont (roky 0–15, věk 50–65), deset příležitostí — každá je trojice (počáteční rok $k$, splatnost $p$ let, zhodnocení $a$ za celé období). Peníze jsou vždy vcelku v nejvýše jedné příležitosti. Úkolem je <em>formulace</em>: popsat graf (vrcholy, hrany, váhy) a zdůvodnit, že nejkratší cesta v něm odpovídá strategii s maximálním výnosem. Konkrétní optimum spočítat můžeš, ale otázka zní „how would you formulate“.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — recept stav–přechod–cena, čekací hrany.</li>
+        <li><a href="l2-7.html#takeaways">[L2.7] Transformace −log</a> — max součin → min součet.</li>
+        <li><a href="../k0/l0-4.html#takeaways">[L0.4] Strom, kostra, les, DAG</a> — topologické uspořádání, acykličnost.</li>
+        <li><a href="l2-1.html#takeaways">[L2.1] Záporné váhy ano, záporné cykly ne</a> — proč záporné váhy v DAG nevadí.</li>
+        <li><a href="l2-2.html#takeaways">[L2.2] Bellmanova rovnice</a> — pro výpočet hodnot po topologickém pořadí.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Polož si otázky receptu: Co je stav (a proč v něm nemusí být částka)? Co je přechod a co stojí? Jak se dostaneš přes roky, kdy žádná příležitost nezačíná? Co přesně maximalizuješ a kterou lekcí to převedeš na součet? A nakonec kontrola: jaké znaménko mají váhy a proč to tady nevadí?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Graf.</strong> Vrcholy $V = \{0, 1, \ldots, 15\}$ = roky (stav „peníze jsou volné v roce $t$“); $s = 0$, $t = 15$. Hrany: pro každou příležitost $(k, p, a)$ hrana $k \to k + p$ s násobkem $1 + a$; pro každý rok $t \le 14$ <strong>čekací hrana</strong> $t \to t + 1$ s násobkem $1$ (peníze leží na účtu — „single investment alternative“ zakazuje dělit peníze, ne nechat je ležet). Každá strategie investování ↔ právě jedna cesta $0 \to 15$ a výsledná částka = vklad $\times$ součin násobků podél cesty.</p>
+          <p><strong>Převod na nejkratší cestu.</strong> Maximalizujeme součin $\prod_e (1 + a_e)$ → podle <a href="l2-7.html#takeaways">[L2.7]</a> polož $c(e) := -\log(1 + a_e)$ a minimalizuj $\sum_e c(e)$; logaritmus je rostoucí, takže vítězná cesta se nemění. Váhy vyjdou <strong>záporné</strong> ($1 + a_e \ge 1$), čekací hrany mají váhu $0$. To je v pořádku: všechny hrany vedou z dřívějšího roku do pozdějšího, graf je <strong>DAG</strong> <a href="../k0/l0-4.html#takeaways">[L0.4]</a> (roky na přímce = topologické uspořádání), takže neobsahuje žádný cyklus — tím spíš žádný záporný <a href="l2-1.html#takeaways">[L2.1]</a> a nejkratší cesta je dobře definovaná. (Ekvivalentně: nejdelší cesta v DAG s vahami $\log(1 + a_e)$.) Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> se kvůli záporným vahám použít nesmí; v DAG stačí vyhodnotit Bellmanovu rovnici <a href="l2-2.html#takeaways">[L2.2]</a> po vrcholech zleva doprava — algoritmus s $O(|V| + |E|)$ podrobně v lekci [L2.13]. Tím je formulace (= požadovaná odpověď) hotová.</p>
+          <p><strong>Bonus: konkrétní optimum.</strong> Označ $v(t)$ nejlepší dosažitelný násobek v roce $t$ a vyhodnocuj multiplikativní obdobu Bellmanovy rovnice zleva doprava, $v(w) = \max_{(u,w)} v(u) \cdot m(u,w)$ (stejný princip jako multiplikativní pravidlo v <a href="l2-7.html#takeaways">[L2.7]</a>, T01b). Hodnota se mění jen v koncových letech příležitostí (mezi nimi ji kopírují čekací hrany):</p>
+          <table>
+            <tr><th>roky $t$</th><td>0–3</td><td>4–5</td><td>6–8</td><td>9–10</td><td>11–12</td><td>13–14</td><td>15</td></tr>
+            <tr><th>$v(t)$</th><td>$1$</td><td>$1{,}039$</td><td>$1{,}047$</td><td>$1{,}0785$</td><td>$1{,}0899$</td><td>$1{,}1077$</td><td>$\mathbf{1{,}1432}$</td></tr>
+            <tr><th>vítězná hrana</th><td>—</td><td>a</td><td>b</td><td>e</td><td>f</td><td>h</td><td>j</td></tr>
+          </table>
+          <p>Rozhodující porovnání: rok 9: $\max(1{,}047;\; c\!: 1{,}062;\; e\!: 1{,}039 \cdot 1{,}038 = 1{,}0785)$ → e; rok 13: $\max(1{,}0899;\; g\!: 1{,}047 \cdot 1{,}052 = 1{,}1014;\; h\!: 1{,}047 \cdot 1{,}058 = 1{,}1077)$ → h; rok 15: $\max(1{,}1077;\; i\!: 1{,}0899 \cdot 1{,}041 = 1{,}1346;\; j\!: 1{,}1077 \cdot 1{,}032 = 1{,}1432)$ → j. Zpětným čtením vítězných hran: <strong>rok počkat, b (roky 1–6), dva roky počkat, h (8–13), j (13–15)</strong>; celkem $1{,}047 \cdot 1{,}058 \cdot 1{,}032 \approx 1{,}1432$, tedy asi +14,3 % za 15 let.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="viz" id="viz-dj-opt"></div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-busdriver">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Směny řidiče autobusu — formulace pro Dijkstru (zkoušková reportáž)</strong>
+      <span class="task-src">zdroj: studentský souhrn ko_souhrn.md (přepis úlohy ze zkoušky; kniha Ahuja–Magnanti–Orlin str. 127, bez řešení)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (přepis ze studentského souhrnu, 1:1 CZ)</span>
+        <p>Formulace problému tak, aby šel vyřešit Dijkstrou. Máme řidiče autobusu a směny v době 9-17. K dispozici jsou různé časy směn (9-11, 9-13, 12-14, 12-16, 12-17, 14-16, 15-17 cca) a ke směnám ceny. Je to někde v knížce Network Flows - Ahuja, Magnanti, Orlin.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Provoz 9–17 hodin je třeba beze zbytku pokrýt směnami z daného seznamu (časy v přepisu jsou „cca“); každá směna má cenu, směny se mohou překrývat. Minimalizuje se celková cena. Konkrétní ceny se v reportáži nedochovaly — v ukázce výkladu jsme zvolili ilustrační (30, 45, 25, 40, 75, 25, 30). Odpovědí je formulace grafu, na kterém problém vyřeší Dijkstra.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — stav „pokryto do $t$“ a hrany zpět s cenou 0.</li>
+        <li><a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a> — předpoklad nezáporných vah, složitost.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Začni receptem: co je stav? (Pozor — „hodina 9…17“ sama o sobě nestačí, rozmysli si, co vrchol <em>znamená</em>.) Proč naivní hrany „směna = $a \to b$“ nestačí — najdi pokrytí, které jim unikne. Jak levně povolit překryv? A nakonec kontrola pro Dijkstru: jsou všechny váhy nezáporné? Vadí, že graf není DAG?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Graf.</strong> Vrcholy $V = \{9, 10, \ldots, 17\}$, vrchol $t$ = stav „provoz je souvisle pokryt od 9 do $t$“; $s = 9$ (nic nepokryto, hodnota 9 = začátek), cíl $17$. Hrany dvojího druhu:</p>
+          <ul>
+            <li>pro každou směnu $[a, b]$ s cenou $c_{ab}$ hrana $a \to b$ s vahou $c_{ab}$ (směnu lze „přiložit“, právě když pokrytí sahá aspoň do jejího začátku);</li>
+            <li>pro každé $t \ge 10$ <strong>hrana zpět</strong> $t \to t - 1$ s vahou $0$ (pokrytí do $t$ je i pokrytím do $t-1$ — tím se povolí překryv směn).</li>
+          </ul>
+          <p><strong>Korespondence.</strong> Každá $9$–$17$ cesta vybírá množinu směn, jejichž sjednocení souvisle pokrývá 9–17 (každá směnová hrana začíná v už pokrytém čase a posune pokrytí do svého konce), a její délka = součet cen vybraných směn. Obráceně: libovolné přípustné pokrytí seřaď podle začátků směn a přelož na cestu — mezi koncem jedné směny a začátkem další sestup hranami zpět (zadarmo). Nejkratší cesta tedy odpovídá nejlevnějšímu pokrytí. (Optimální cesta žádnou směnu nezopakuje — opakování by jen přičetlo kladnou cenu.)</p>
+          <p><strong>Kontrola pro Dijkstru.</strong> Všechny váhy jsou nezáporné (ceny směn $> 0$, hrany zpět $0$) — přesně předpoklad Dijkstry <a href="l2-4.html#takeaways">[L2.4]</a>. Graf kvůli hranám zpět <em>není</em> DAG, ale to Dijkstrovi nevadí; na 9 vrcholech běží v $O(n^2)$, obecně $O(|E| \log |V|)$ s haldou. Tím je požadovaná formulace hotová.</p>
+          <p><strong>Na ilustračních cenách</strong> z výkladu vyjde optimum $115$: $9 \xrightarrow{9\text{–}13\,(45)} 13 \xrightarrow{0} 12 \xrightarrow{12\text{–}16\,(40)} 16 \xrightarrow{0} 15 \xrightarrow{15\text{–}17\,(30)} 17$ — viz zvýrazněná cesta na obrázku pod úlohou.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="viz" id="viz-bus-opt"></div>
+
+  <label class="done-toggle" data-lesson-id="L2.9">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l2-8.html"><span class="dir">← Předchozí</span> L2.8 · VYVRCHOLENÍ: Dangerous adventure [FOTO]</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.10 · Stavový automat jako graf)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// ---- Dow Jones: časová osa let 0..15 ----
+function djNodes() {
+  const ns = [];
+  for (let i = 0; i <= 15; i++) ns.push({ id: 'y' + i, x: 40 + 58 * i, y: 300, label: String(i) });
+  return ns;
+}
+// příležitosti: [id, od, do, popisek, prohnutí]
+const DJ_OPP = [
+  ['a',  0,  4, 'a: ×1.039', -2.2],
+  ['b',  1,  6, 'b: ×1.047', -2.83],
+  ['c',  3,  9, 'c: ×1.062', -5.17],
+  ['d',  2,  7, 'd: ×1.042', -4.3],
+  ['e',  5,  9, 'e: ×1.038', -1.67],
+  ['f',  6, 11, 'f: ×1.041', -2.83],
+  ['g',  7, 13, 'g: ×1.052', -5.17],
+  ['h',  8, 13, 'h: ×1.058', -4.0],
+  ['i', 11, 15, 'i: ×1.041', -2.2],
+  ['j', 13, 15, 'j: ×1.032', -1.0],
+];
+function djEdges(optMode) {
+  // optMode: false = vše neutrální; true = zvýrazni optimální cestu (čekání 0→1, b, čekání 6→7→8, h, j)
+  const goodIdle = { 0: true, 6: true, 7: true };
+  const goodOpp = { b: true, h: true, j: true };
+  const es = [];
+  for (let i = 0; i < 15; i++) {
+    const e = { from: 'y' + i, to: 'y' + (i + 1) };
+    if (optMode) e.cls = goodIdle[i] ? 'good' : 'dim';
+    es.push(e);
+  }
+  DJ_OPP.forEach(([o, k, kp, lbl, cv]) => {
+    const e = { from: 'y' + k, to: 'y' + kp, label: lbl, curve: cv };
+    if (optMode) e.cls = goodOpp[o] ? 'good' : 'dim';
+    es.push(e);
+  });
+  return es;
+}
+
+KOViz.graph(document.getElementById('viz-dj'), {
+  directed: true,
+  w: 960, h: 360, nodeR: 16,
+  nodes: djNodes(),
+  edges: djEdges(false),
+  caption: 'Investiční DAG pana Dow Jonese: vrchol = rok t (věk 50 + t), oblouky = příležitosti a–j s násobkem 1 + a za celé období splatnosti, vodorovné hrany = „peníze rok počkají na účtu“ (×1). Všechny hrany vedou zleva doprava — graf je DAG v topologickém uspořádání.',
+});
+
+KOViz.graph(document.getElementById('viz-dj-opt'), {
+  directed: true,
+  w: 960, h: 360, nodeR: 16,
+  nodes: djNodes(),
+  edges: djEdges(true),
+  caption: 'SPOILER k řešení T01 (proto je obrázek až za ním): optimální strategie — rok počkat, b (1–6), dva roky počkat, h (8–13), j (13–15); celkem ×1.047 · 1.058 · 1.032 ≈ 1.1432.',
+});
+
+// ---- Řidič autobusu: hodiny 9..17, směny + hrany zpět ----
+function busNodes() {
+  const ns = [];
+  for (let i = 0; i <= 8; i++) ns.push({ id: 'h' + (9 + i), x: 60 + 65 * i, y: 250, label: String(9 + i) });
+  return ns;
+}
+// směny: [od, do, cena, prohnutí]
+const BUS_SHIFTS = [
+  [9,  11, '30', -1.5],
+  [9,  13, '45', -3],
+  [12, 14, '25', -1.5],
+  [12, 16, '40', -3],
+  [12, 17, '75', -4.5],
+  [14, 16, '25', -1.5],
+  [15, 17, '30', -1.5],
+];
+function busEdges(optMode) {
+  // optimální pokrytí: 9–13 (45), zpět 13→12, 12–16 (40), zpět 16→15, 15–17 (30)
+  const goodShift = { '9-13': true, '12-16': true, '15-17': true };
+  const goodBack = { 13: true, 16: true };
+  const es = [];
+  BUS_SHIFTS.forEach(([a, b, c, cv]) => {
+    const e = { from: 'h' + a, to: 'h' + b, label: c, curve: cv };
+    if (optMode) e.cls = goodShift[a + '-' + b] ? 'good' : 'dim';
+    es.push(e);
+  });
+  for (let t = 10; t <= 17; t++) {
+    const e = { from: 'h' + t, to: 'h' + (t - 1), label: '0', curve: -1.4, dashed: true };
+    if (optMode) e.cls = goodBack[t] ? 'good' : 'dim';
+    es.push(e);
+  }
+  return es;
+}
+
+KOViz.graph(document.getElementById('viz-bus'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: busNodes(),
+  edges: busEdges(false),
+  caption: 'Graf řidiče autobusu: vrchol t = „pokryto od 9 do t“, oblouky nahoře = směny s (ilustrační) cenou, čárkované hrany dole = krok zpět o hodinu zadarmo (povolený překryv). Kvůli hranám zpět to není DAG — ale váhy jsou nezáporné, takže Dijkstra funguje.',
+});
+
+KOViz.graph(document.getElementById('viz-bus-opt'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: busNodes(),
+  edges: busEdges(true),
+  caption: 'SPOILER k řešení T02 (proto je obrázek až za ním): optimum 115 = směny 9–13 (45) + 12–16 (40) + 15–17 (30); cesta používá dvě hrany zpět (13→12 a 16→15).',
+});
+</script>
+</body>
+</html>
