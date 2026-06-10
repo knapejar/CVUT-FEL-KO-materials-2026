@@ -4,19 +4,29 @@ Aktualizováno: 10. 6. 2026
 
 ## Hotovo
 - [x] OSNOVA.md (93 lekcí, 3× kriticky iterováno workflow)
-- [x] Infrastruktura: style.css (light+dark), viz.js (graph/lpRegion/stepper/icon), app.js (téma, progress, KaTeX, back), šablona lekce, index.html, viz-gallery.html
+- [x] Infrastruktura: style.css (light+dark), viz.js (graph/lpRegion/stepper/icon/fnPlot), app.js (téma, progress, KaTeX, back), šablona lekce, index.html, viz-gallery.html
 - [x] Ikony (28×, better-icons CLI → assets/icons/)
 - [x] plan/INDEX_ZDROJU.md — mapa zdrojů s čísly řádků
 - [x] CLAUDE.md s trvalými pokyny
+- [x] **K0 kompletní (L0.1–L0.8)** — pipeline tvůrce→kritik→korektor, hotovo 10. 6. 2026
+- [x] **K1 kompletní (L1.1–L1.15)** — pipeline tvůrce→kritik→korektor, hotovo 10. 6. 2026
+- [x] Závěrečná kontrola K0+K1 (10. 6. 2026): všech 23 souborů existuje, pager řetěz L0.1→…→L0.8→L1.1→…→L1.15→index#k2 sedí (názvy i cesty), odkazy v index.html všechny existují, screenshot kontrola index + namátkové lekce. Opraveno: l1-1.html měl živý href na neexistující ../k5/l5-1.html (→ textová zmínka [L5.1], **při psaní L5.1 href doplnit zpět**); l1-6.html pager zkracoval titulek L1.5.
 
 ## Píše se
-- [ ] K0: L0.1–L0.8 (pipeline tvůrce→kritik→korektor) — L0.1–L0.4 po korektuře (79000cc), L0.5–L0.8 napsány tvůrcem (čeká kritik)
-- [ ] K1: L1.1–L1.15 — L1.1, L1.2 po korektuře; L1.3 po korektuře; L1.4 po korektuře; L1.5 po korektuře; L1.6 po korektuře; L1.7 po korektuře; L1.8 po korektuře; L1.9 po korektuře; L1.10 po korektuře; L1.11 po korektuře; L1.12 po korektuře; L1.14 po korektuře (Toys assignment [FOTO] — 3/3 výtky opraveny, commit 64d41a0); L1.15 napsána tvůrcem (Časově/pozičně indexované proměnné — $x_{i,t}$, $\sum_t x_{i,t}=1$, čtení $s_i=\sum_t t\,x_{i,t}$, okna zdroje vs. „kolize = stejný start“, pozice bez hodin/koně, kombinace $x_{i,c,t}$; úlohy: Penguins on ice (T03, 02.06.2021) + Knights Placement [NICE]; vizualizace: stepper tabulky binárek $x_{i,t}$, graf útočných dvojic koně, stepper tučňáků 3×3; po korektuře — 3/3 výtky opraveny: horizont sjednocen na $t \in \{0,\ldots,UB-1\}$ dle slidu 66, „+1“ v počtu proměnných vysvětleno jako $C_{max}$, pasivum „vstoupena“ přeformulováno; **VĚDOMĚ ODLOŽENO: třetí doplňková úloha T60 Warehousing / data storing / 2D cutting (OSNOVA ř. 301) — dle pozn. OSNOVY o odložitelných [NICE] úlohách v L1.15; při revizi K1 zvážit doplnění**); L1.13 po korektuře (big-M konstanta přejmenována na $K$ — symbol $M$ je v zadání lunch menu obsazený množinou jídel; doplněn předpoklad $p_m \ge 0$ u volby $K = \max_m p_m$); viz.js: přidán `labelAt` u lpRegion constraints + posun popisku objective šipky; oprava lpRegion: dedupe průsečíků hraniční čáry procházející rohy okna (jinak se čára+popisek nevykreslí — ukázka 4b ve viz-gallery); přidán `KOViz.fnPlot` (graf funkce po úsecích — nespojité fce, ukázka 4c ve viz-gallery, použit v L1.6); fnPlot: přidán `xmin` (záporný rozsah osy x + čárkovaná svislice v x=0 — ukázka 4d ve viz-gallery, použit v L1.10)
+- (nic — fronta K2)
+
+## Detail K1 (historie korektur)
+- K1: L1.1–L1.15 — L1.1, L1.2 po korektuře; L1.3 po korektuře; L1.4 po korektuře; L1.5 po korektuře; L1.6 po korektuře; L1.7 po korektuře; L1.8 po korektuře; L1.9 po korektuře; L1.10 po korektuře; L1.11 po korektuře; L1.12 po korektuře; L1.14 po korektuře (Toys assignment [FOTO] — 3/3 výtky opraveny, commit 64d41a0); L1.15 napsána tvůrcem (Časově/pozičně indexované proměnné — $x_{i,t}$, $\sum_t x_{i,t}=1$, čtení $s_i=\sum_t t\,x_{i,t}$, okna zdroje vs. „kolize = stejný start“, pozice bez hodin/koně, kombinace $x_{i,c,t}$; úlohy: Penguins on ice (T03, 02.06.2021) + Knights Placement [NICE]; vizualizace: stepper tabulky binárek $x_{i,t}$, graf útočných dvojic koně, stepper tučňáků 3×3; po korektuře — 3/3 výtky opraveny: horizont sjednocen na $t \in \{0,\ldots,UB-1\}$ dle slidu 66, „+1“ v počtu proměnných vysvětleno jako $C_{max}$, pasivum „vstoupena“ přeformulováno; **VĚDOMĚ ODLOŽENO: třetí doplňková úloha T60 Warehousing / data storing / 2D cutting (OSNOVA ř. 301) — dle pozn. OSNOVY o odložitelných [NICE] úlohách v L1.15; při revizi K1 zvážit doplnění**); L1.13 po korektuře (big-M konstanta přejmenována na $K$ — symbol $M$ je v zadání lunch menu obsazený množinou jídel; doplněn předpoklad $p_m \ge 0$ u volby $K = \max_m p_m$); viz.js: přidán `labelAt` u lpRegion constraints + posun popisku objective šipky; oprava lpRegion: dedupe průsečíků hraniční čáry procházející rohy okna (jinak se čára+popisek nevykreslí — ukázka 4b ve viz-gallery); přidán `KOViz.fnPlot` (graf funkce po úsecích — nespojité fce, ukázka 4c ve viz-gallery, použit v L1.6); fnPlot: přidán `xmin` (záporný rozsah osy x + čárkovaná svislice v x=0 — ukázka 4d ve viz-gallery, použit v L1.10)
 
 ## Fronta
 - K2 (18 lekcí) → K3 (16) → K4 (15) → K5 (16) → K6 (3) → K7 (2)
 
 ## Poznámky k psaní lekcí (ověřené postupy)
+- **Dopředné odkazy**: href jen na soubor, který UŽ existuje; na budoucí lekce pouze textová zmínka [Lx.y] bez href (jinak rozbitý odkaz na webu). Po dopsání cílové lekce href doplnit — seznam dlužných míst veď ve STAV.md.
+- **Pager labely 1:1 s `<title>` cílové lekce** — při přejmenování lekce vždy greppnout její ID napříč k*/ a opravit všechny výskyty.
+- **Závěrečná kontrola kapitoly**: skript projde všechna `href` v k*/ a index.html a ověří existenci souborů (bash for+grep, viz commit závěru K0+K1) — odhalí překlepy levněji než ruční klikání.
+- **Kritik čte zdroje znovu sám** (ne jen lekci) — nejčastější reálné výtky: vymyšlená čísla v úloze, koncept použitý před zavedením, CZ zadání místo EN 1:1.
+- **Nové viz-komponenty do viz.js + ukázka do viz-gallery.html** (fnPlot, labelAt vznikly takto) — další lekce je pak přebírají bez duplikace.
 - Zadání úloh hledej v INDEX_ZDROJU.md → čti PŘESNÉ řádky zdrojů, zadání citovat 1:1 EN.
 - Stepper frames jsou ABSOLUTNÍ stavy (ne diffy) — viz viz-gallery.html ukázka 5.
 - Po vytvoření lekce: headless Chrome screenshot → Read PNG → kontrola glitchů.
