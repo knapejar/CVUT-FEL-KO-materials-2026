@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L5.3 · Time-indexed ILP pro PS1|temp|Cmax [FOTO] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k5">K5 · Rozvrhování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L5.3</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L5.3</span> Kapitola K5 — Rozvrhování (Slot 5) · <strong>[MUST]</strong> · FOTO checkpoint kapitoly
+  </p>
+  <h1>Time-indexed ILP pro PS1 |temp| C<sub>max</sub></h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Kompletní <strong>time-indexed model</strong>: binárka $x_{it} = 1 \iff$ úloha $T_i$ <em>začíná</em> v čase $t$, čtyři skupiny omezení (právě jednou / temporální / zdroj / $C_{max}$) a minimalizace $C_{max}$ nad horizontem $UB$.
+  </div>
+
+  <p>V <a href="../k5/l5-2.html">[L5.2] Precedence a temporální omezení; graf TC</a> jsme skončili u špatné zprávy: jakmile zdroj unese jen jednu úlohu najednou, je $PS1 \,|\, temp \,|\, C_{max}$ NP-hard a kladný cyklus už nestačí. Dnes ten problém <em>vyřešíme</em> — přesně, jako ILP. Je to nejdoloženější zkoušková úloha kapitoly: chtěli ji 25.&nbsp;5.&nbsp;2026 (oba termíny) i 2.&nbsp;6.&nbsp;2021, vždy se stejným zněním „Formulate $PS1\,|temp|\,C_{max}$ problem as a time-indexed ILP.“ Stavebnici binárek $x_{it}$ už máš z <a href="../k1/l1-15.html#takeaways">[L1.15] Časově/pozičně indexované proměnné</a> — dnes z ní poskládáme celý model.</p>
+
+  <!-- ===== SEKCE 1: DVĚ REPREZENTACE ===== -->
+  <h2>Dvě cesty k ILP (slide 65)</h2>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 65 (EN 1:1) — Task can be represented in two ways</div>
+    <ul>
+      <li>“<strong>Time-indexed</strong> — ILP model is based on variable $x_{it}$, which is equal to 1 iff $s_i = t$. Otherwise, it is equal to zero. Processing times are assumed to be <strong>positive integers</strong>.”</li>
+      <li>“<strong>Relative-order</strong> — ILP model is based on the relative order of tasks given by variable $x_{ij}$, which is equal to 1 iff task $T_i$ precedes task $T_j$. Otherwise, it is equal to zero. The processing times are nonnegative real numbers (tasks with zero processing time may be used to represent events).”</li>
+      <li>“Both models contain two types of constraints: <strong>temporal constraints</strong>; <strong>resource constraints</strong> — prevent overlapping of tasks.”</li>
+    </ul>
+  </div>
+
+  <p>Pořadové proměnné $x_{ij}$ (relative-order) potkáme u $1\,|\,prec\,|\,\sum w_j C_j$ v [L5.6a]; dnešní lekce je celá o první cestě. Podmínka „processing times are positive integers“ není drobnost: time-indexed model <strong>diskretizuje čas</strong> na okamžiky $t \in \{0, 1, \ldots, UB-1\}$, takže celočíselné musí být doby $p_i$ i délky hran $l_{ij}$ — jinak by optimum mohlo ležet mimo mřížku.</p>
+
+  <!-- ===== SEKCE 2: SKLADAME MODEL ===== -->
+  <h2>Poskládej si model sám</h2>
+
+  <p>Z <a href="../k1/l1-15.html#takeaways">[L1.15]</a> už umíš celou stavebnici: binárku $x_{it}$, „začíná právě jednou“ $\sum_t x_{it} = 1$, čtení startu $s_i = \sum_t t \cdot x_{it}$ (funguje <em>jen</em> ve dvojici s „právě jednou“!) a zdrojové omezení přes <em>okna startů</em>. Z <a href="../k5/l5-2.html#takeaways">[L5.2]</a> máš vstup: digraf $G$ temporálních omezení $s_i + l_{ij} \le s_j$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: napiš temporální omezení hrany $T_i \xrightarrow{l_{ij}} T_j$ pomocí binárek $x_{it}$. A rozmysli, co v modelu PS1 |temp| C<sub>max</sub> ještě pořád chybí.</summary>
+    <div class="inner">
+      <p>Dosadíš čtení startu za oba starty:</p>
+      $$\sum_{t=0}^{UB-1} t \cdot x_{it} \;+\; l_{ij} \;\le\; \sum_{t=0}^{UB-1} t \cdot x_{jt} \qquad \text{pro každou hranu } (i,j) \text{ grafu } G.$$
+      <p>Jedna hrana = jedna lineární nerovnost, žádné big-M. Chybí ještě dvě věci: <strong>kritérium</strong> (zatím nic neminimalizujeme — $C_{max}$ není proměnná modelu) a <strong>horizont $UB$</strong> (bez něj nevíme, kolik binárek vůbec založit).</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: kritérium je $C_{max} = \max_i (s_i + p_i)$ — maximum není lineární. Jak se minimalizace maxima linearizuje?</summary>
+    <div class="inner">
+      <p>Stejný trik jako u <a href="../k1/l1-8.html#takeaways">[L1.8] max/min množiny</a>: zaveď <strong>novou proměnnou</strong> $C_{max}$ a přitlač ji shora na všechny konce:</p>
+      $$\min C_{max} \qquad \text{s omezeními} \qquad s_i + p_i \le C_{max} \quad \forall i.$$
+      <p>Minimalizace pak sama stáhne $C_{max}$ přesně na největší $s_i + p_i$. V řeči binárek: $\sum_t t \cdot x_{it} + p_i \le C_{max}$.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: navrhni bezpečný horizont $UB$ (horní mez $C_{max}$), když znáš $p_i$ a délky hran $l_{ij}$.</summary>
+    <div class="inner">
+      <p>Bezpečné (hrubé) je „všechno popořadě a po každém kroku počkej nejdelší možný odstup“: slide 66 navrhuje</p>
+      $$UB = \sum_{i=1}^{n} \max\Big\{p_i,\; \max_{i,j \in \{1,\ldots,n\}} l_{ij}\Big\}.$$
+      <p>Každá úloha „spotřebuje“ nejvýš $\max\{p_i, l_{max}\}$ času, než smí odstartovat další. Na verdiktu nezáleží, jestli je $UB$ těsné — jen <strong>nesmí být menší než optimální $C_{max}$</strong> (jinak optimum odřízneš). Čím menší ale $UB$ je, tím menší model — viz počítání níže.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 3: CELY MODEL ===== -->
+  <h2>Celý model (slide 66 = vzorové zkouškové řešení)</h2>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Time-indexed Model for $PS1\,|\,temp\,|\,C_{max}$ (slide 66, EN 1:1)</div>
+    $$
+    \begin{aligned}
+    \min \, & C_{max} \\
+    \sum_{t=0}^{UB-1} (t \cdot x_{it}) + l_{ij} & \le \sum_{t=0}^{UB-1} (t \cdot x_{jt}) && \forall l_{ij} \ne -\infty \text{ a } i \ne j \ \text{(temp. const.)} \\
+    \sum_{i=1}^{n} \Bigg( \sum_{k = \max(0,\, t - p_i + 1)}^{t} x_{ik} \Bigg) & \le 1 && \forall t \in \{0, \ldots UB - 1\} \ \text{(resource)} \\
+    \sum_{t=0}^{UB-1} x_{it} & = 1 && \forall i \in \{1, \ldots n\} \ (T_i \text{ is scheduled}) \\
+    \sum_{t=0}^{UB-1} (t \cdot x_{it}) + p_i & \le C_{max} && \forall i \in \{1, \ldots n\}
+    \end{aligned}
+    $$
+    <p>“variables: $x_{it} \in \{0, 1\}$, $C_{max} \in \{0, \ldots UB\}$.<br>
+    $UB$ — upper bound of $C_{max}$ (e.g. $UB = \sum_{i=1}^n \max\{p_i, \max_{i,j \in \{1, \ldots, n\}} l_{ij}\}$).<br>
+    Start time of $T_i$ is $s_i = \sum_{t=0}^{UB-1} (t \cdot x_{it})$.<br>
+    Model contains $n \cdot UB + 1$ variables and $|E| + UB + 2n$ constraints. Constant $|E|$ represents the number of temporal constraints (edges in $G$).”</p>
+  </div>
+
+  <p>Čtení po řádcích: zápis „$\forall l_{ij} \ne -\infty$“ je jen slidová konvence pro „pro každou <em>existující</em> hranu grafu $G$“ (neexistenci hrany kóduje $l_{ij} = -\infty$) — temporálních nerovností je tedy $|E|$. Zdrojové omezení sčítá pro každý okamžik $t$ <strong>okna startů</strong>: úloha $T_i$ v čase $t$ běží, právě když odstartovala v některém $k$ s $t - p_i + 1 \le k \le t$ (ořezáno zdola nulou) — to je přesně okno z <a href="../k1/l1-15.html#takeaways">[L1.15]</a>. Třetí řádek je „právě jednou“, čtvrtý $C_{max}$.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „$x_{it} = 1$ znamená, že $T_i$ v čase $t$ běží“</div>
+    <p>NE — $x_{it} = 1$ znamená, že $T_i$ v čase $t$ <strong>začíná</strong> ($s_i = t$); každý řádek tabulky má jen <em>jednu</em> jedničku, i když $p_i = 5$. Kdo to splete, napíše zdrojové omezení jako $\sum_i x_{it} \le 1$ — to ale zakazuje jen <em>společné starty</em>, a úlohy s $p_i &gt; 1$ se vesele překryjí (přesně past z <a href="../k1/l1-15.html#takeaways">[L1.15]</a>). Vnitřní suma přes okno $k \in \{\max(0, t-p_i+1), \ldots, t\}$ je to, co dělá z tabulky startů hlídač <em>obsazenosti</em> — u zkoušky ji nezapomeň a umět vysvětlit.</p>
+  </div>
+
+  <p>Proklikej si všechny čtyři skupiny omezení na instanci ze slidu 67 — $\mathcal{T} = \{T_1, T_2, T_3\}$, $p = (1, 2, 1)$, $UB = 5$:</p>
+
+  <div class="viz" id="viz-table"></div>
+
+  <p>A dekódování výsledku: solver vrátí jedničky, ty z nich přečteš starty $s_i = \sum_t t \cdot x_{it}$ a nakreslíš Gantt — na jediném zdroji se bloky nesmí překrývat:</p>
+
+  <div class="viz" id="viz-decode"></div>
+
+  <!-- ===== SEKCE 4: VELIKOST ===== -->
+  <h2>Cena modelu: $UB$ je číslo, ne velikost vstupu</h2>
+
+  <details class="try">
+    <summary>Zkus sám: spočítej proměnné a omezení modelu obecně (a ověř na instanci výše: $n = 3$, $UB = 5$, jedna hrana v $G$).</summary>
+    <div class="inner">
+      <p><strong>Proměnné:</strong> $n \cdot UB$ binárek $x_{it}$ + jedna proměnná $C_{max}$ = $n \cdot UB + 1$. <strong>Omezení:</strong> $|E|$ temporálních + $UB$ zdrojových (jedno na každý okamžik) + $n$ „právě jednou“ + $n$ pro $C_{max}$ = $|E| + UB + 2n$. Na instanci: $3 \cdot 5 + 1 = 16$ proměnných a $1 + 5 + 6 = 12$ omezení.</p>
+    </div>
+  </details>
+
+  <p>Všimni si, že velikost modelu roste s <strong>hodnotou</strong> $UB$ (tedy s velikostí čísel $p_i$, $l_{ij}$), ne s počtem úloh — stejná „pseudopolynomiální“ daň, jakou platí DP Rothkopf [L5.11]. Proto se vyplatí těsný horizont; a protože $PS1\,|\,temp\,|\,C_{max}$ je NP-hard (<a href="../k5/l5-2.html#takeaways">[L5.2]</a>; redukcí z Bratleyho problému, detail v [L5.13]), nic „chytřejšího“ než ILP + solver se ani nečeká.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.3</div>
+    <ul>
+      <li><strong>Time-indexed model:</strong> binárka $x_{it} = 1 \iff s_i = t$ (úloha <em>začíná</em>, ne běží!); čas diskretizovaný na $t \in \{0, \ldots, UB-1\}$, doby $p_i$ kladná celá čísla. Druhá reprezentace = relative-order $x_{ij}$ [L5.6a].</li>
+      <li><strong>Čtyři skupiny omezení:</strong> ① „právě jednou“ $\sum_t x_{it} = 1$ a čtení startu $s_i = \sum_t t \cdot x_{it}$ <a href="../k1/l1-15.html#takeaways">[L1.15]</a>; ② temporální $\sum_t t\,x_{it} + l_{ij} \le \sum_t t\,x_{jt}$ pro každou hranu $G$ <a href="../k5/l5-2.html#takeaways">[L5.2]</a>; ③ zdroj: $\sum_i \sum_{k=\max(0,t-p_i+1)}^{t} x_{ik} \le 1$ pro každý čas $t$ — sčítají se <em>okna startů</em>, ne starty; ④ $\sum_t t\,x_{it} + p_i \le C_{max}$, kritérium $\min C_{max}$.</li>
+      <li><strong>Proměnné:</strong> $x_{it} \in \{0,1\}$, $C_{max} \in \{0, \ldots, UB\}$; horizont $UB$ = libovolná horní mez $C_{max}$, např. $UB = \sum_i \max\{p_i, \max l_{ij}\}$ — menší než optimum být nesmí.</li>
+      <li><strong>Velikost:</strong> $n \cdot UB + 1$ proměnných, $|E| + UB + 2n$ omezení — roste s hodnotou $UB$ (pseudopolynomiálně), proto těsný horizont pomáhá.</li>
+      <li>Řešení dekóduješ $s_i = \sum_t t \cdot x_{it}$ a kreslíš Gantt; samotný problém je NP-hard [L5.2], time-indexed ILP je pro něj zkouškový standard (tabulka volby metody v [L5.14]).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 [FOTO] ===== -->
+  <div class="task" id="t-timeindexed">
+    <div class="task-head foto">
+      <span class="task-id">T01</span>
+      <strong>Time-indexed ILP Model for PS1 |temp| C<sub>max</sub></strong>
+      <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
+      <span class="task-src">zdroj: zkouška 25.5.2026 (oba termíny) + 02.06.2021 = bank #35, EN 1:1</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>Formulate $PS1\,|temp|\,C_{max}$ problem as a time-indexed ILP.</p>
+        <ul>
+          <li><strong>Input:</strong> The number of non-preemptive tasks $n$ and processing times $[p_1, p_2, \ldots, p_n]$. The temporal constraints defined by digraph $G$.</li>
+          <li><strong>Output:</strong> $n$-element vector $s$, where $s_i$ is the start time of $T_i$.</li>
+        </ul>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Čistě formulační úloha bez čísel: vypsat kompletní time-indexed ILP — proměnné s doménami, kritérium, všechny čtyři skupiny omezení a říct, co je $UB$ a jak se z jedniček přečte výstup $s$. Žádný běh algoritmu, žádný Gantt; boduje se úplnost a správnost modelu.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — celý model (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k1/l1-15.html#takeaways">[L1.15] Časově/pozičně indexované proměnné</a> — $x_{it}$, „právě jednou“, čtení startu, okna.</li>
+        <li><a href="../k5/l5-2.html#takeaways">[L5.2] Temporální omezení</a> — co znamená hrana $l_{ij}$ grafu $G$.</li>
+        <li><a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace</a> — co říká $PS1 \,|\, temp \,|\, C_{max}$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Piš model v pevném pořadí, ať nic nevypadne: ① proměnné + domény (a hned definuj $UB$), ② kritérium, ③ „$T_i$ is scheduled“, ④ temporální omezení (dosazené čtení startů), ⑤ zdrojové omezení (okna! — u něj čekej doplňující otázku „why?“), ⑥ věta „$s_i = \sum_t t \cdot x_{it}$“ — bez ní jsi formálně nevydal požadovaný výstup $s$. Nakonec se hodí velikost modelu — snadné body navíc.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Proměnné.</strong> $x_{it} \in \{0,1\}$ pro $i \in \{1,\ldots,n\}$, $t \in \{0,\ldots,UB-1\}$, s významem $x_{it} = 1 \iff s_i = t$; a $C_{max} \in \{0, \ldots, UB\}$. Zde $UB$ je libovolná horní mez makespanu, např. $UB = \sum_{i=1}^n \max\{p_i, \max_{i,j} l_{ij}\}$; doby $p_i$ jsou kladná celá čísla (diskretizace času).</p>
+          <p><strong>Model</strong> (= slide 66; dochované vzorové zkouškové řešení z fotek je s ním shodné 1:1):</p>
+          $$
+          \begin{aligned}
+          \min \, & C_{max} \\
+          \sum_{t=0}^{UB-1} (t \cdot x_{it}) + l_{ij} & \le \sum_{t=0}^{UB-1} (t \cdot x_{jt}) && \forall l_{ij} \ne -\infty \text{ a } i \ne j \ \text{(temp. const.)} \\
+          \sum_{i=1}^{n} \Bigg( \sum_{k = \max(0,\, t - p_i + 1)}^{t} x_{ik} \Bigg) & \le 1 && \forall t \in \{0, \ldots UB - 1\} \ \text{(resource)} \\
+          \sum_{t=0}^{UB-1} x_{it} & = 1 && \forall i \in \{1, \ldots n\} \ (T_i \text{ is scheduled}) \\
+          \sum_{t=0}^{UB-1} (t \cdot x_{it}) + p_i & \le C_{max} && \forall i \in \{1, \ldots n\}
+          \end{aligned}
+          $$
+          <p><strong>Komentáře, které u zkoušky řekni nahlas:</strong></p>
+          <ul>
+            <li><em>Temp. const.:</em> jedna nerovnost na každou hranu $(i,j) \in E(G)$ — je to $s_i + l_{ij} \le s_j$ z [L5.2] s dosazeným $s_i = \sum_t t\,x_{it}$ ($l_{ij} = -\infty$ značí „hrana neexistuje“).</li>
+            <li><em>Resource:</em> úloha $T_i$ běží v čase $t$ $\iff$ odstartovala v $k \in \{t-p_i+1, \ldots, t\}$ (ořez na $k \ge 0$); součet oken přes všechny úlohy $\le 1$ = kapacita jednoho zdroje. Pouhé $\sum_i x_{it} \le 1$ NESTAČÍ (hlídá jen starty).</li>
+            <li><em>Výstup:</em> $s_i = \sum_{t=0}^{UB-1} t \cdot x_{it}$ — díky „is scheduled“ čte přesně polohu jedničky.</li>
+            <li><em>Velikost:</em> $n \cdot UB + 1$ proměnných, $|E| + UB + 2n$ omezení ($|E|$ = počet temporálních hran).</li>
+          </ul>
+          <p><em>Pozn. (varianta z banky): horizont jde zúžit per úloha — start $T_i$ má smysl jen pro $t \le UB - p_i$, takže binárky $x_{it}$ s $t &gt; UB - p_i$ lze vynechat (resp. položit 0). Slidová verze s plným rozsahem $t \in \{0,\ldots,UB-1\}$ je u zkoušky plně uznávaná.</em></p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="box foto">
+    <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+    <p>Tohle je doložená zkoušková úloha z 25.&nbsp;5.&nbsp;2026 — napiš celý model NA PAPÍR z hlavy (bez koukání do řešení), včetně domén proměnných, definice $UB$, věty o čtení $s_i$ a počtu proměnných/omezení. Pošli mi fotku — zkontroluju ti ji a vytknu chyby (nejčastější: zdrojové omezení bez oken).</p>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-ilpps">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>ILP Project Scheduling — dosazení na zkouškovou instanci</strong>
+      <span class="task-src">zdroj: vlastní drill na instanci zkoušky 2023 z [L5.2] (přiznáno; úloha „ILP Project Scheduling“ ze zkoušky 24.5.2011 je dochována jen jako fotky)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN; vlastní — instance z L5.2/T02)</span>
+        <p>Consider the construction-project instance from L5.2 (activities A, B, C, D with $p = (1, 2, 3, 2)$, dummy activities Start and End with $p = 0$, and the temporal-constraint graph with 11 edges: Start→A,B,C,D ($0$), A→B ($+1$), B→A ($-1$), A→C ($+2$), C→D ($+6$), D→C ($-7$), D→End ($+5$), End→Start ($-14$)). Now the activities share a <strong>single resource</strong> (no two activities may overlap), i.e. solve $PS1\,|temp|\,C_{max}$ by the time-indexed ILP.</p>
+        <p>(i) Using the generic bound from the lecture, compute $UB$ and the number of variables and constraints of the model.<br>
+        (ii) Write the temporal constraint for the edge C→D ($l_{CD} = +6$) in terms of the variables $x_{it}$.<br>
+        (iii) Write the resource constraint for time $t = 2$ (which $x_{ik}$ appear in it?). Show that the earliest-start schedule $s = (0, 1, 2, 8)$ from L5.2 violates it.<br>
+        (iv) Find an optimal schedule on the single resource and draw its Gantt chart. What is the project duration?</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Stejný graf TC jako v <a href="../k5/l5-2.html#t-tcdrill">[L5.2] T02</a> (limit projektu 14), ale tentokrát s kapacitou zdroje 1 — tedy přesně situace, pro kterou je time-indexed model stavěný. Drilluje se dosazení modelu na konkrétní čísla: velikost, jedna temporální nerovnost, jedno zdrojové omezení a dekódování/oprava rozvrhu.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — model a počty (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="../k5/l5-2.html#t-tcdrill">[L5.2] T02</a> — instance, cykly, nejdřívější starty $s = (0,1,2,8)$.</li>
+        <li><a href="../k1/l1-15.html#takeaways">[L1.15]</a> — okna startů.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>U (i) jen dosazuj: kolik je uzlů včetně dummy aktivit? Jaké je největší $l_{ij}$? U (iii) projdi úlohy jednu po druhé a vypiš okno $k \in \{\max(0, 2-p_i+1), \ldots, 2\}$ — co vyjde pro dummy aktivity s $p = 0$? U (iv) si rozmysli, proč C nemůže začít dřív než v čase 3, když B běží $[s_A+1, s_A+3)$ a zároveň $s_C \ge s_A + 2$.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Úloh včetně dummy je $n = 6$, největší délka hrany $\max l_{ij} = 6$ (C→D). Obecná mez: $UB = \sum_i \max\{p_i, 6\} = 6 + 6 + 6 + 6 + 6 + 6 = 36$. Model pak má $n \cdot UB + 1 = 6 \cdot 36 + 1 = \mathbf{217}$ proměnných a $|E| + UB + 2n = 11 + 36 + 12 = \mathbf{59}$ omezení. <em>(Těsněji — vlastní úvaha: hrana End→Start ($-14$) dává $s_{End} \le 14$ a přes hrany $D \to End$, $C \to D$, … se pod 14 vejdou všechny starty, takže stačí $UB = 15$ → $91$ proměnných, $38$ omezení. Vidíš, jak horizont škáluje celý model.)</em></p>
+          <p><strong>(ii)</strong> Hrana C→D ($+6$), tedy $s_C + 6 \le s_D$, po dosazení čtení startů:</p>
+          $$\sum_{t=0}^{UB-1} t \cdot x_{C,t} \;+\; 6 \;\le\; \sum_{t=0}^{UB-1} t \cdot x_{D,t}.$$
+          <p><strong>(iii)</strong> Okna pro $t = 2$: A ($p=1$): $k \in \{2\}$; B ($p=2$): $k \in \{1,2\}$; C ($p=3$): $k \in \{0,1,2\}$; D ($p=2$): $k \in \{1,2\}$; Start a End mají $p = 0$, takže jejich okno $k \in \{3, \ldots, 2\}$ je <em>prázdné</em> — dummy aktivity zdroj nespotřebovávají a v omezení se neobjeví. Celkem:</p>
+          $$x_{A,2} + x_{B,1} + x_{B,2} + x_{C,0} + x_{C,1} + x_{C,2} + x_{D,1} + x_{D,2} \;\le\; 1.$$
+          <p>Earliest-start rozvrh z [L5.2] má $s_B = 1$ a $s_C = 2$, tedy $x_{B,1} = 1$ a $x_{C,2} = 1$ → levá strana $= 2 &gt; 1$. <strong>Porušeno</strong> — B běží $[1,3)$ a C $[2,5)$, v čase 2 by na jednom zdroji běžely obě. (V [L5.2] T02 to nevadilo jen díky předpokladu neomezené kapacity.)</p>
+          <p><strong>(iv)</strong> C musí na zdroj počkat, až doběhne B. Celá úvaha (vlastní): C nemůže běžet před B — to by chtělo $s_C + 3 \le s_B = s_A + 1$, tedy $s_C \le s_A - 2$, ve sporu s $s_C \ge s_A + 2$. Takže $s_C \ge s_B + 2 = s_A + 3 \ge 3$, a odtud $s_{End} \ge s_C + 6 + 5 \ge 14$. Rozvrh $s = (s_A, s_B, s_C, s_D) = (0, 1, 3, 9)$, $s_{End} = 14$ všechno splní: $s_B = s_A + 1$ ✓, $s_C = 3 \ge 2$ ✓, $s_D = 9 \in [s_C + 6, s_C + 7] = [9, 10]$ ✓, $s_{End} = 14 \ge s_D + 5$ ✓, limit $14 \le 14$ ✓, žádné překryvy ✓ — je tedy <strong>optimální</strong>; trvání projektu je přesně <strong>14</strong> (limit z g) je těsný; poslední skutečná aktivita D končí v čase 11, zbytek do 14 je povinný odstup z f)). Kritérium modelu: $C_{max} = s_{End} + 0 = 14$.</p>
+          <div class="viz" id="viz-t02gantt"></div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L5.3">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k5/l5-2.html"><span class="dir">← Předchozí</span> L5.2 · Precedence a temporální omezení; graf TC</a>
+    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.4 · McNaughton (P|pmtn|Cmax))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// ===== 1 — Tabulka binárek x_it na instanci slidu 67: čtyři skupiny omezení (stepper) =====
+// Instance slide 67 1:1: T1, T2, T3, p = (1, 2, 1), UB = 5. Rozvrh s = (0, 1, 3) a temporální
+// hrana l_13 = 3 jsou vlastní doplněk pro ilustraci (slide rozvrh nevypisuje) — přiznáno.
+(function () {
+  const rows = [70, 165, 260];
+  const cols = [150, 250, 350, 450, 550];
+  const ones = { '1,0': 1, '2,1': 1, '3,3': 1 };   // x_{1,0} = x_{2,1} = x_{3,3} = 1
+  const nodes = [
+    { id: 'T1', x: 55, y: rows[0], label: 'T₁' },
+    { id: 'T2', x: 55, y: rows[1], label: 'T₂' },
+    { id: 'T3', x: 55, y: rows[2], label: 'T₃' },
+  ];
+  for (let i = 1; i <= 3; i++) for (let t = 0; t <= 4; t++) {
+    const one = ones[i + ',' + t];
+    nodes.push({
+      id: 'x' + i + t, x: cols[t], y: rows[i - 1],
+      label: one ? '1' : '0',
+      cls: one ? 'good' : '',
+      sub: (i === 3) ? ('t = ' + t) : undefined,
+    });
+  }
+  KOViz.stepper(document.getElementById('viz-table'), {
+    graph: { h: 330, directed: false, nodes: nodes, edges: [] },
+    frames: [
+      { desc: 'Tabulka binárek x<sub>i,t</sub>: řádky = úlohy s p = (1, 2, 1), sloupce = časy t = 0…4 (UB = 5). Zelené jedničky = STARTY rozvrhu s = (0, 1, 3) — v každém řádku jen jedna, i když p₂ = 2.' },
+      { desc: '③ „T₁ is scheduled“ (slide 67 vlevo): řádkový součet x₁,₀ + x₁,₁ + x₁,₂ + x₁,₃ + x₁,₄ = 1. Bez něj by čtení startu s₁ = Σ t·x₁,ₜ lhalo (L1.15). Stejná rovnost pro každý řádek.',
+        nodes: { T1: 'hl', x10: 'good', x11: 'hl', x12: 'hl', x13: 'hl', x14: 'hl' } },
+      { desc: '④ Zdrojové omezení pro t = 2 (slide 67 vpravo): sečti OKNA startů, při kterých by úloha v čase 2 běžela — x₁,₂ + (x₂,₁ + x₂,₂) + x₃,₂ ≤ 1. T₂ má p₂ = 2, proto ji v čase 2 drží i start v t = 1. Tady: 0 + (1 + 0) + 0 = 1 ✓ (běží jen T₂).',
+        nodes: { x12: 'hl', x21: 'good', x22: 'hl', x32: 'hl' } },
+      { desc: '② Temporální hrana, např. l₁₃ = 3 (vlastní ilustrace): Σ t·x₁,ₜ + 3 ≤ Σ t·x₃,ₜ → s₁ + 3 = 0 + 3 ≤ s₃ = 3 ✓ — splněno těsně. Jedna hrana grafu G = jedna taková nerovnost.',
+        nodes: { x10: 'good', x33: 'good', T1: 'hl', T3: 'hl' } },
+      { desc: '⑤ C<sub>max</sub>: pro každý řádek s<sub>i</sub> + p<sub>i</sub> ≤ C<sub>max</sub>: 0+1 = 1, 1+2 = 3, 3+1 = 4 → min C<sub>max</sub> = 4 (těsné pro T₃). Celkem: 3·5 + 1 = 16 proměnných, 1 + 5 + 6 = 12 omezení (s jedinou hranou l₁₃).',
+        nodes: { x33: 'good', T3: 'hl' } },
+    ],
+    caption: 'Instance slidu 67 (T₁–T₃, p = (1, 2, 1), UB = 5); kroky 2–3 odpovídají rámečkům slidu („T₁ is scheduled“, „Resource constr. at time 2“ — popis obrázku vyznačuje x₁,₂, x₂,₁, x₃,₂; úplné okno T₂ obsahuje i x₂,₂). Rozvrh s = (0, 1, 3) a kroky 4–5 jsou vlastní doplněk — přiznáno.',
+  });
+})();
+
+// ===== 2 — Dekódování: z jedniček rozvrh na jediném zdroji (vlastní dokreslení — přiznáno) =====
+KOViz.gantt(document.getElementById('viz-decode'), {
+  tmax: 5, tstep: 1,
+  rows: [{ id: 'R', label: 'zdroj' }],
+  blocks: [
+    { row: 'R', from: 0, to: 1, label: 'T₁' },
+    { row: 'R', from: 1, to: 3, label: 'T₂', cls: 'good' },
+    { row: 'R', from: 3, to: 4, label: 'T₃', cls: 'p' },
+  ],
+  marks: [
+    { t: 0, label: 's₁ = 0', cls: 'soft' },
+    { t: 1, label: 's₂ = 1', cls: 'soft' },
+    { t: 3, label: 's₃ = 3', cls: 'soft' },
+    { t: 4, label: 'Cmax = 4' },
+  ],
+  caption: 'Dekódování řešení: s₁ = Σ t·x₁,ₜ = 0, s₂ = 1, s₃ = 3; C<sub>max</sub> = max(sᵢ + pᵢ) = 4. PS1 = jediný řádek — bloky se nesmí překrývat (to hlídají zdrojová omezení).',
+});
+
+// ===== 3 — T02: jeden zdroj — earliest-start z L5.2 koliduje, posun C na 3 to spraví =====
+KOViz.gantt(document.getElementById('viz-t02gantt'), {
+  tmax: 14, tstep: 1,
+  rows: [{ id: 'A' }, { id: 'B' }, { id: 'C' }, { id: 'D' }],
+  blocks: [],
+  frames: [
+    { desc: 'Earliest-start rozvrh z [L5.2] T02: s = (0, 1, 2, 8). B [1,3) a C [2,5) se v čase 2 překrývají — zdrojové omezení pro t = 2 dá 2 > 1. Na jednom zdroji NEpřípustné.',
+      blocks: [
+        { row: 'A', from: 0, to: 1,  label: 'A' },
+        { row: 'B', from: 1, to: 3,  label: 'B', cls: 'bad' },
+        { row: 'C', from: 2, to: 5,  label: 'C', cls: 'bad' },
+        { row: 'D', from: 8, to: 10, label: 'D' },
+      ],
+      marks: [{ t: 2, label: 'kolize v t = 2', cls: 'bad' }, { t: 14, label: 'limit 14', cls: 'soft' }] },
+    { desc: 'Optimum PS1: s = (0, 1, 3, 9) — C počká, až B doběhne (s_C ≥ s_A + 3), D pak v okně [s_C+6, s_C+7], s_End = s_D + 5 = 14 ≤ 14 — limit g) je těsný. Žádné dva bloky se nepřekrývají; zdroj mezi 6 a 9 zahálí.',
+      blocks: [
+        { row: 'A', from: 0, to: 1,  label: 'A' },
+        { row: 'B', from: 1, to: 3,  label: 'B' },
+        { row: 'C', from: 3, to: 6,  label: 'C', cls: 'good' },
+        { row: 'D', from: 9, to: 11, label: 'D', cls: 'good' },
+      ],
+      marks: [{ t: 9, label: '≥ s_C + 6', cls: 'soft' }, { t: 11, label: 'D končí: 11' }, { t: 14, label: 'End = limit 14' }] },
+  ],
+  caption: 'Řádky = aktivity (kvůli čitelnosti); zdroj je ale jen JEDEN — bloky se nesmí překrývat ani napříč řádky. Vlastní drill na zkouškové instanci 2023, přiznáno.',
+});
+</script>
+</body>
+</html>

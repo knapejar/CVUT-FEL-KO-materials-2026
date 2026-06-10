@@ -36,7 +36,7 @@
     Temporální omezení $s_i + l_{ij} \le s_j$ — jediná nerovnost mezi <em>starty</em> dvou úloh — a jeho orientovaný graf. Kladná hrana = „nejdřív po…“, záporná hrana = „nejpozději do…“, <strong>kladný cyklus = rozvrh neexistuje</strong>.
   </div>
 
-  <p>V <a href="../k5/l5-1.html">[L5.1] Grahamově notaci</a> jsme v poli $\beta$ potkali zkratky $\mathrm{prec}$ (precedence) a $temp$ (temporal constraints) — třeba ve zkouškovém problému $PS1 \,|\, temp \,|\, C_{max}$. Tahle lekce vysvětluje, co přesně se za $temp$ skrývá: jak jednou nerovností popsat „B začne přesně 1 po A“, „D nejdřív 3 po dokončení C“ i „celý projekt musí skončit do 12“ — a jak z těchto nerovností sestavit <strong>graf temporálních omezení</strong> (graf TC), ze kterého feasibilitu přečteš z cyklů. Příští lekce [L5.3] pak nad tímhle grafem postaví time-indexed ILP.</p>
+  <p>V <a href="../k5/l5-1.html">[L5.1] Grahamově notaci</a> jsme v poli $\beta$ potkali zkratky $\mathrm{prec}$ (precedence) a $temp$ (temporal constraints) — třeba ve zkouškovém problému $PS1 \,|\, temp \,|\, C_{max}$. Tahle lekce vysvětluje, co přesně se za $temp$ skrývá: jak jednou nerovností popsat „B začne přesně 1 po A“, „D nejdřív 3 po dokončení C“ i „celý projekt musí skončit do 12“ — a jak z těchto nerovností sestavit <strong>graf temporálních omezení</strong> (graf TC), ze kterého feasibilitu přečteš z cyklů. Příští lekce <a href="../k5/l5-3.html">[L5.3]</a> pak nad tímhle grafem postaví time-indexed ILP.</p>
 
   <!-- ===== SEKCE 1: OD PRECEDENCE K TEMPORÁLNÍMU OMEZENÍ ===== -->
   <h2>Od precedence k temporálnímu omezení</h2>
@@ -144,7 +144,7 @@
     <p>U <em>nejkratších cest</em> v K2 škodil <strong>záporný</strong> cyklus. Tady jsme ale ve světě <em>nejdelších cest</em> (omezení tlačí starty nahoru) — škodí <strong>KLADNÝ cyklus</strong>; záporné cykly jsou naopak užitečné (relativní okna — slide 59 výslovně píše „may include negative cycles“) a nulový cyklus vynucuje rovnost startů. Na otázku „Is this instance schedulable? Why?“ odpovídej přes (ne)existenci kladného cyklu.</p>
   </div>
 
-  <p>Druhá půlka pravdy: bez kapacitního omezení je absence kladného cyklu i <em>postačující</em>, ale jakmile zdroj unese jen jednu úlohu najednou ($PS1$), je to jen podmínka <em>nutná</em> — úlohy se navíc nesmí překrývat a problém je NP-hard (slide 54). Proto se $PS1 \,|\, temp \,|\, C_{max}$ řeší time-indexed ILP — příští lekce [L5.3].</p>
+  <p>Druhá půlka pravdy: bez kapacitního omezení je absence kladného cyklu i <em>postačující</em>, ale jakmile zdroj unese jen jednu úlohu najednou ($PS1$), je to jen podmínka <em>nutná</em> — úlohy se navíc nesmí překrývat a problém je NP-hard (slide 54). Proto se $PS1 \,|\, temp \,|\, C_{max}$ řeší time-indexed ILP — příští lekce <a href="../k5/l5-3.html">[L5.3]</a>.</p>
 
   <!-- ===== SEKCE 5: DUMMY UZLY A KÓDOVÁNÍ ZADÁNÍ ===== -->
   <h2>Graf TC ze slovního zadání: dummy Start a End</h2>
@@ -179,7 +179,7 @@
       <li><strong>Katalog $l_{ij}$:</strong> $= p_i$ precedence; $&gt; p_i$ odstup po dokončení (dry); $0 &lt; l &lt; p_i$ částečné výsledky (cut-through); $= 0$ start nejpozději zároveň; $&lt; 0$ <strong>relativní deadline</strong>. Dvojice $l_{ij} \ge 0$, $l_{ji} &lt; 0$ = <strong>relativní časové okno</strong>; vůle okna = |délka záporného cyklu|.</li>
       <li><strong>Stavba grafu TC:</strong> uzly = úlohy + dummy Start/End s $p=0$; každá věta zadání = jedna nerovnost = jedna hrana („exactly“ = dvě hrany); „po dokončení“ = přičti $p_i$; horní mez (deadline, max. délka projektu $D$) = <strong>záporná hrana v protisměru</strong> (např. $End \to Start$ s $-D$).</li>
       <li><strong>Rozvrhnutelnost:</strong> součet nerovností podél cyklu dá $\sum l \le 0$ ⟹ <strong>kladný cyklus = instance NENÍ rozvrhnutelná</strong> (nutná podmínka; bez kapacitního omezení i postačující). Nejdřívější starty $s_j$ = nejdelší cesty ze Startu; výpočet/detekce Bellman-Fordem na $-l$ [L2.12].</li>
-      <li>S kapacitou zdroje ($PS1 \,|\, temp \,|\, C_{max}$) je absence kladného cyklu jen nutná — problém je NP-hard a řeší se time-indexed ILP [L5.3].</li>
+      <li>S kapacitou zdroje ($PS1 \,|\, temp \,|\, C_{max}$) je absence kladného cyklu jen nutná — problém je NP-hard a řeší se time-indexed ILP <a href="../k5/l5-3.html">[L5.3]</a>.</li>
     </ul>
   </div>
 
@@ -300,7 +300,7 @@
 
   <div class="pager">
     <a href="../k5/l5-0.html"><span class="dir">← Předchozí</span> L5.0 · Rozvrhování přes toky (P|pmtn,rj,dj|) [FOTO]</a>
-    <a class="next" href="../index.html#k5"><span class="dir">Další →</span> Pokračování se připravuje (L5.3 · Time-indexed ILP pro PS1|temp|Cmax [FOTO])</a>
+    <a class="next" href="../k5/l5-3.html"><span class="dir">Další →</span> L5.3 · Time-indexed ILP pro PS1|temp|Cmax [FOTO]</a>
   </div>
 
 </div>
