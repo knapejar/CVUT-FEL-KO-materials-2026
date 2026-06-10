@@ -1,6 +1,6 @@
 # SUNO písničky — memorovací hitovky pro KO (zkouška 15. 6. 2026)
 
-12 písní = 12 nejhůř zapamatovatelných věcí z předmětu (vybráno podle frekvence
+13 písní = nejhůř zapamatovatelné věci z předmětu (vybráno podle frekvence
 v historických testech; fakta ověřena 1:1 proti slidům). Každá píseň má jiný žánr,
 aby se ti nepletly dohromady.
 
@@ -695,10 +695,137 @@ Na konci vem největší ká s váhou nejvýš dvojité vé —
 
 ---
 
+## 13. AC-3 PODRUHÉ — „Pomaličku" (reggaeton à la Despacito)
+
+**Téma:** AC-3 ještě jednou, tentokrát jako letní latino hit (duet k písni 7 — kdo si nepamatuje
+synth-pop, zapamatuje si reggaeton). Fakta 1:1 ze slidů 08_CP (slide 25–30): definice AC,
+orientovanost, REVISE, fronta `Q := E(G)`, pravidlo znovuzařazení (i ≠ m), revize (k,m)
+nemění AC hrany (m,k), prázdná doména → fail, AC není úplná (trojúhelník ≠).
+
+**Nápad/Cíl písně:** AC-3 jako pomalý letní tanec na parketu. **Každé á si hledá svoje bé**
+(= podporu přes hranu); kdo partnera nenajde, opouští parket (= REVISE ho smaže z domény).
+Mazání jde „pomaličku", hodnotu po hodnotě, a fronta se pořád vrací. Pointa v bridgi:
+**i když všichni mají pár (vše je konzistentní), svatba — řešení — zaručená není.**
+AC je neúplná: pomaličku ti zúží svět, ale dořešit to musíš sám (search). Posluchač si odnese
+dvě věci: mantru „pro každé á existuje bé" a varování „konzistence ≠ řešení".
+
+**Frázování (proč to sedne do rytmu Despacita):**
+- „Po-ma-lič-ku" = 4 slabiky, přízvuk na začátku taktu — sedí 1:1 na hlavní hook
+  (a navíc je to doslovný překlad názvu — „pomalu, pomaličku").
+- Refrén = 4 + 12 + 12 + 12 slabik, dvakrát za sebou; všechny řádky rýmované na „-ičku"
+  (stejná role jako průběžný rým „-ito" v originále).
+- Pre-chorus = 13 + 9 + 13 + 9 slabik (dlouhý řádek → krátká odpověď, stoupavá melodie).
+- Rapová sloka zrcadlí slavné dvojité zdrobněliny: „krůček po krůčku… kousek po kousíčku".
+- Tempo ~89 bpm, dembow beat, akustická kytara v intru.
+
+**Title:** `Pomaličku (AC-3)`
+
+**Styles:**
+```
+latin pop, reggaeton, 89 bpm, dembow rhythm, acoustic spanish guitar intro, smooth seductive male vocals, melodic rap verse by second male vocalist, czech language vocals, all lyrics in Czech, summer hit, sensual groove, extremely catchy chorus, polished modern production
+```
+
+**Lyrics:**
+```
+[Intro]
+[Acoustic guitar, slow latin riff]
+[Spoken Word]
+Á cé tři… pomaličku…
+(iks í… iks jé… ej)
+
+[Verse 1]
+Tý…
+hrana iks í iks jé — kdy je konzistentní?
+Pro každé á z dé í najdi bé v dé jé,
+ať spolu splní všechna omezení.
+Pozor — hrana má směr, zpátky neplatí!
+
+Jé…
+binární cé es pé, to je digraf gé,
+mezi iks í, iks jé šipky obě dvě,
+celé cé es pé je konzistentní jenom,
+když každá z hran orientovaných sedí, jé.
+
+[Pre-Chorus]
+Jó, rivajz projde každé á v doméně dé í,
+hledá mu podporu — bé v dé jé,
+kdo svoje bé nenajde, ten z domény letí,
+vyber si ká em, rivajz to teď!
+
+[Chorus]
+Pomaličku,
+mažu ti hodnoty z domén pomaličku,
+kdo nemá svoje bé, zmizí za chviličku,
+doména se tenčí, kousek po kousíčku.
+
+Pomaličku,
+vracím hrany do ká zpátky, pomaličku,
+jen tu od em ne — tu nechám na poličku,
+fronta zas naskočí — jedem pomaličku.
+
+[Post-Chorus]
+(Škrtej! Škrtej!)
+Každé á si hledá svoje bé, to jediné (e-oh),
+kdo je sám a bez podpory, opouští parket (e-oh).
+(Škrtej! Škrtej!)
+Revize ká em hraně em ká neublíží (e-oh),
+ta zůstává konzistentní, klidně si spí (e-oh).
+
+[Rap Verse]
+Krůček po krůčku, mažu si pomaličku,
+hodnotu za hodnotou, kousek po kousíčku,
+fronta na startu: všechny hrany z grafu gé,
+vyberu ká em, reviduju dé ká, jé!
+Když jsem něco smazal, hrany do ká zpátky jdou,
+jen hranu od em ne — tu mazání nezviklá,
+a prázdná doména? Fail! Stopni muziku —
+v týhle části prostoru řešení nenajdu!
+
+[Pre-Chorus]
+Jó, fronta se mi tenčí, už je skoro prázdná,
+poslední rivajz — nic nemažu,
+když nic nemažu, nic nevracím do fronty,
+domény jsou konzistentní, jé!
+
+[Chorus]
+Pomaličku,
+mažu ti hodnoty z domén pomaličku,
+kdo nemá svoje bé, zmizí za chviličku,
+doména se tenčí, kousek po kousíčku.
+
+Pomaličku,
+vracím hrany do ká zpátky, pomaličku,
+jen tu od em ne — tu nechám na poličku,
+fronta zas naskočí — jedem pomaličku.
+
+[Bridge]
+[Slow, intimate]
+Tři v trojúhelníku, jedna dvě v doméně,
+každý s každým nerovná se — zní to nadějně…
+všechno konzistentní — a řešení žádné!
+Konzistence hran ti štěstí nezaručí,
+pomaličku zúžím svět — dohledat musíš sám.
+
+[Chorus]
+Pomaličku,
+mažu ti hodnoty z domén pomaličku,
+kdo nemá svoje bé, zmizí za chviličku,
+doména se tenčí, kousek po kousíčku.
+
+[Outro]
+Pomaličku…
+(každé á si hledá svoje bé)
+Pomaličku…
+(kdo nemá svoje bé, ten z domény jde)
+[End]
+```
+
+---
+
 ## Další kandidáti (kdyby ses rozjel — stačí říct, dopíšu)
 
-13. **Initial feasible flow** (4 kroky transformace, balance = Σl dovnitř − Σl ven, hrana t→s s ∞) — padá jako 2bodová kuchařka.
-14. **Big-M + B&B pro ILP** (pořadí testů: infeasible → bound → integer → branch; ⌊k⌋ / ⌊k⌋+1) — slot 1 padá 100 %.
-15. **Horn/EDF** (čtyřkrok t1, t2, T', δ + swap důkaz optimality).
-16. **Bratley + BRTP** (3 podmínky bloku, postačující ≠ nutná).
-17. **Totální unimodularita** (definice „každá čtvercová podmatice" + 2 postačující podmínky).
+14. **Initial feasible flow** (4 kroky transformace, balance = Σl dovnitř − Σl ven, hrana t→s s ∞) — padá jako 2bodová kuchařka.
+15. **Big-M + B&B pro ILP** (pořadí testů: infeasible → bound → integer → branch; ⌊k⌋ / ⌊k⌋+1) — slot 1 padá 100 %.
+16. **Horn/EDF** (čtyřkrok t1, t2, T', δ + swap důkaz optimality).
+17. **Bratley + BRTP** (3 podmínky bloku, postačující ≠ nutná).
+18. **Totální unimodularita** (definice „každá čtvercová podmatice" + 2 postačující podmínky).
