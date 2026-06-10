@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Christofides 3/2 — immersive video · KO Hitovky</title>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #11141d;
+    --text: #e8eaf0;
+    --muted: #8b93a7;
+    --accent: #ffb000;
+    --border: #232a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; overflow: hidden;
+  }
+  #topbar {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; font-size: 13px; color: var(--muted);
+  }
+  #topbar a { color: var(--muted); text-decoration: none; }
+  #topbar a:hover { color: var(--accent); }
+  #topbar .title { color: var(--text); font-weight: 700; }
+  #topbar .badge {
+    font-size: 11px; color: var(--bg); background: var(--accent);
+    border-radius: 10px; padding: 2px 9px; font-weight: 700;
+  }
+  #stagewrap {
+    flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
+    min-height: 0; padding: 0 16px;
+  }
+  #stage {
+    position: relative;
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #0b0e16; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+  }
+  #stage canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  #subtitle {
+    position: absolute; left: 4%; right: 4%; bottom: 4.5%;
+    text-align: center; pointer-events: none;
+    font-size: clamp(13px, 2.2vw, 24px); font-weight: 600; line-height: 1.35;
+    color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,0.95), 0 0 4px rgba(0,0,0,0.9);
+  }
+  #subtitle .m {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    color: #7dd3fc;
+  }
+  #bigplay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(5,7,12,0.55); cursor: pointer; z-index: 5;
+    flex-direction: column; gap: 18px;
+  }
+  #bigplay.hidden { display: none; }
+  #bigplay .pbtn {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--accent); color: #1a1200;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; box-shadow: 0 0 60px rgba(255,176,0,0.45);
+    transition: transform .15s;
+  }
+  #bigplay:hover .pbtn { transform: scale(1.08); }
+  #bigplay .hint { color: var(--text); font-size: 15px; font-weight: 600; text-shadow: 0 2px 8px #000; }
+  #bigplay .hint small { display: block; color: var(--muted); font-weight: 400; margin-top: 6px; }
+  #controls {
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 4px 16px;
+  }
+  #controls button {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    width: 42px; height: 42px; border-radius: 50%; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: border-color .15s, color .15s;
+  }
+  #controls button:hover { border-color: var(--accent); color: var(--accent); }
+  #seek {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 6px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--p, 0%), #2a3040 var(--p, 0%));
+    border-radius: 3px; outline: none; cursor: pointer;
+  }
+  #seek::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px rgba(255,176,0,0.6); cursor: pointer;
+  }
+  #seek::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; border: none;
+    background: var(--accent); cursor: pointer;
+  }
+  .time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 44px; text-align: center; }
+  @media (max-height: 560px) { #topbar { display: none; } }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="pisnicky.html">← Zpěvník</a>
+  <span class="title">Jedna a půl (Christofides)</span>
+  <span class="badge">IMMERSIVE VIDEO</span>
+  <span style="margin-left:auto">mezerník = play/pauza · ←/→ = ±5 s · R = od začátku</span>
+</div>
+
+<div id="stagewrap">
+  <div id="stage">
+    <div id="subtitle"></div>
+    <div id="bigplay">
+      <div class="pbtn">▶</div>
+      <div class="hint">Christofidesův algoritmus &amp; důkaz faktoru 3/2<small>2 min 41 s · zpívaná videolekce</small></div>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btnPlay" title="Play / pauza">▶</button>
+  <button id="btnRestart" title="Od začátku">⟲</button>
+  <span class="time" id="tCur">0:00</span>
+  <input type="range" id="seek" min="0" max="161.4" step="0.01" value="0">
+  <span class="time" id="tDur">2:41</span>
+</div>
+
+<audio id="player" src="audio/christofidova-jedna-pul.mp3" preload="auto"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
+<script>
+(async function () {
+'use strict';
+
+// ════════════════════════════════════════════════════════════════════
+// 0) COLORS + helpers
+// ════════════════════════════════════════════════════════════════════
+const C = {
+  bg: 0x0b0e16, gold: 0xffb000, goldHi: 0xffd34d, green: 0x4ade80,
+  pink: 0xf472b6, cyan: 0x7dd3fc, violet: 0xa78bfa, white: 0xffffff,
+  dim: 0x2a3346, muted: 0x8b93a7, red: 0xef4444,
+};
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - clamp01(t), 3);
+const easeIO = t => { t = clamp01(t); return t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; };
+// phase helper: progress 0..1 of [a,b] within localT
+const ph = (t, a, b) => clamp01((t - a) / (b - a));
+
+// ════════════════════════════════════════════════════════════════════
+// 1) GRAPH INSTANCE — everything computed for real
+// ════════════════════════════════════════════════════════════════════
+const N = [ // 8 cities, stage coords (metric = Euclidean plane)
+  { x: 350, y: 215 }, { x: 645, y: 150 }, { x: 930, y: 235 },
+  { x: 1005, y: 445 }, { x: 790, y: 565 }, { x: 505, y: 585 },
+  { x: 285, y: 465 }, { x: 655, y: 372 },
+];
+const n = N.length;
+const dist = (i, j) => Math.hypot(N[i].x - N[j].x, N[i].y - N[j].y);
+const UNIT = 60; // px per "cost unit" for displayed numbers
+const cost = (i, j) => dist(i, j) / UNIT;
+const fmt = v => v.toFixed(1);
+
+// — MST (Prim) —
+const mst = [];
+{
+  const inT = [true, ...Array(n - 1).fill(false)];
+  for (let k = 1; k < n; k++) {
+    let best = null;
+    for (let a = 0; a < n; a++) if (inT[a])
+      for (let b = 0; b < n; b++) if (!inT[b])
+        if (!best || dist(a, b) < dist(best[0], best[1])) best = [a, b];
+    inT[best[1]] = true; mst.push(best);
+  }
+}
+const degT = Array(n).fill(0);
+mst.forEach(([a, b]) => { degT[a]++; degT[b]++; });
+const W = [...Array(n).keys()].filter(v => degT[v] % 2 === 1);
+
+// — min-weight perfect matching on W (brute force, |W| small) —
+function bestMatching(list) {
+  if (list.length === 0) return { cost: 0, pairs: [] };
+  const [first, ...rest] = list;
+  let best = null;
+  for (let i = 0; i < rest.length; i++) {
+    const partner = rest[i];
+    const remain = rest.filter((_, k) => k !== i);
+    const sub = bestMatching(remain);
+    const c = dist(first, partner) + sub.cost;
+    if (!best || c < best.cost) best = { cost: c, pairs: [[first, partner], ...sub.pairs] };
+  }
+  return best;
+}
+const M = bestMatching(W).pairs;
+
+// — Euler walk on multigraph T ∪ M (Hierholzer) —
+const multiE = [...mst.map(([a, b]) => ({ a, b })), ...M.map(([a, b]) => ({ a, b }))];
+function eulerWalk() {
+  const adj = Array.from({ length: n }, () => []);
+  multiE.forEach((e, i) => { adj[e.a].push(i); adj[e.b].push(i); });
+  const used = Array(multiE.length).fill(false);
+  const stack = [multiE[0].a], circuit = [];
+  while (stack.length) {
+    const v = stack[stack.length - 1];
+    let found = -1;
+    while (adj[v].length) {
+      const ei = adj[v].pop();
+      if (!used[ei]) { found = ei; break; }
+    }
+    if (found === -1) { circuit.push(stack.pop()); }
+    else {
+      used[found] = true;
+      const e = multiE[found];
+      stack.push(e.a === v ? e.b : e.a);
+    }
+  }
+  return circuit.reverse();
+}
+const L = eulerWalk(); // node sequence, length = |E|+1, closed
+
+// — shortcutting → Hamiltonian circuit H —
+const Horder = [];
+{
+  const seen = new Set();
+  for (const v of L) if (!seen.has(v)) { seen.add(v); Horder.push(v); }
+}
+const Hedges = Horder.map((v, i) => [v, Horder[(i + 1) % n]]);
+
+// — OPT (brute force TSP, fix node 0) —
+let OPTorder = null, OPTcost = Infinity;
+{
+  const perm = [...Array(n - 1).keys()].map(v => v + 1);
+  const rec = (arr, chosen) => {
+    if (!arr.length) {
+      let c = dist(0, chosen[0]);
+      for (let i = 0; i < chosen.length - 1; i++) c += dist(chosen[i], chosen[i + 1]);
+      c += dist(chosen[chosen.length - 1], 0);
+      if (c < OPTcost) { OPTcost = c; OPTorder = [0, ...chosen]; }
+      return;
+    }
+    for (let i = 0; i < arr.length; i++) rec(arr.filter((_, k) => k !== i), [...chosen, arr[i]]);
+  };
+  rec(perm, []);
+}
+const OPTedges = OPTorder.map((v, i) => [v, OPTorder[(i + 1) % n]]);
+// C_W = OPT shortcut to W vertices only, alternate edges → two matchings
+const CWorder = OPTorder.filter(v => W.includes(v));
+const CWedges = CWorder.map((v, i) => [v, CWorder[(i + 1) % CWorder.length]]);
+
+const cT = mst.reduce((s, [a, b]) => s + cost(a, b), 0);
+const cM = M.reduce((s, [a, b]) => s + cost(a, b), 0);
+const cL = cT + cM;
+const cH = Hedges.reduce((s, [a, b]) => s + cost(a, b), 0);
+const cOPT = OPTcost / UNIT;
+
+// walk geometry for comet animation along L
+const walkSegs = [];
+let walkLen = 0;
+for (let i = 0; i < L.length - 1; i++) {
+  const a = N[L[i]], b = N[L[i + 1]];
+  const len = Math.hypot(b.x - a.x, b.y - a.y);
+  walkSegs.push({ a, b, len, off: walkLen, ai: L[i], bi: L[i + 1] });
+  walkLen += len;
+}
+function walkPoint(d) {
+  d = Math.max(0, Math.min(walkLen - 0.001, d));
+  for (const s of walkSegs) if (d <= s.off + s.len) {
+    const t = (d - s.off) / s.len;
+    return { x: lerp(s.a.x, s.b.x, t), y: lerp(s.a.y, s.b.y, t) };
+  }
+  return walkSegs[walkSegs.length - 1].b;
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 2) PIXI SETUP
+// ════════════════════════════════════════════════════════════════════
+const app = new PIXI.Application({ width: 1280, height: 720, antialias: true, background: C.bg });
+document.getElementById('stage').appendChild(app.view);
+
+const starLayer = new PIXI.Container();
+const sceneLayer = new PIXI.Container();
+const fxLayer = new PIXI.Container();
+app.stage.addChild(starLayer, sceneLayer, fxLayer);
+
+// glow dot texture
+const dotG = new PIXI.Graphics();
+dotG.beginFill(0xffffff, 1).drawCircle(0, 0, 32).endFill();
+const dotTex = app.renderer.generateTexture(dotG);
+const softG = new PIXI.Graphics();
+for (let r = 32; r > 0; r -= 2) softG.beginFill(0xffffff, 0.045).drawCircle(0, 0, r).endFill();
+const softTex = app.renderer.generateTexture(softG);
+
+// — starfield —
+const stars = [];
+for (let i = 0; i < 70; i++) {
+  const s = new PIXI.Sprite(dotTex);
+  s.anchor.set(0.5);
+  s.x = Math.random() * 1280; s.y = Math.random() * 720;
+  s.scale.set(0.015 + Math.random() * 0.035);
+  s.alpha = 0.12 + Math.random() * 0.25;
+  s.tint = Math.random() < 0.25 ? C.gold : 0x9fb4ff;
+  s._vy = 2 + Math.random() * 6; s._tw = Math.random() * 6.28;
+  starLayer.addChild(s); stars.push(s);
+}
+
+// — particles —
+const parts = [];
+function burst(x, y, tint, count = 18, speed = 220, size = 0.1) {
+  for (let i = 0; i < count; i++) {
+    const p = new PIXI.Sprite(dotTex);
+    p.anchor.set(0.5); p.x = x; p.y = y; p.tint = tint;
+    p.blendMode = PIXI.BLEND_MODES.ADD;
+    const a = Math.random() * 6.283, v = speed * (0.3 + Math.random() * 0.8);
+    p._vx = Math.cos(a) * v; p._vy = Math.sin(a) * v;
+    p._life = 0.6 + Math.random() * 0.7; p._t = 0;
+    p.scale.set(size * (0.5 + Math.random()));
+    fxLayer.addChild(p); parts.push(p);
+  }
+}
+app.ticker.add(() => {
+  const dt = app.ticker.deltaMS / 1000;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p._t += dt; p.x += p._vx * dt; p.y += p._vy * dt;
+    p._vy += 220 * dt; p.alpha = clamp01(1 - p._t / p._life);
+    if (p._t > p._life) { fxLayer.removeChild(p); p.destroy(); parts.splice(i, 1); }
+  }
+  for (const s of stars) {
+    s.y += s._vy * dt; s._tw += dt * 2;
+    s.alpha = 0.1 + 0.18 * (0.5 + 0.5 * Math.sin(s._tw));
+    if (s.y > 730) { s.y = -10; s.x = Math.random() * 1280; }
+  }
+});
+
+// — text helpers —
+function txt(str, size, color, weight = '800', family = "'Segoe UI', system-ui, sans-serif") {
+  const t = new PIXI.Text(str, {
+    fontFamily: family, fontSize: size, fill: color, fontWeight: weight,
+    align: 'center', dropShadow: true, dropShadowColor: 0x000000,
+    dropShadowBlur: 8, dropShadowAlpha: 0.6, dropShadowDistance: 2,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  return t;
+}
+const MATH = "'Cambria Math', Cambria, Georgia, serif";
+
+// — graph drawing helpers (deterministic per frame) —
+function partialLine(g, A, B, prog) {
+  if (prog <= 0) return;
+  g.moveTo(A.x, A.y);
+  g.lineTo(lerp(A.x, B.x, easeOut(prog)), lerp(A.y, B.y, easeOut(prog)));
+}
+function drawNodes(g, opts = {}) {
+  for (let v = 0; v < n; v++) {
+    const o = (opts.per && opts.per(v)) || {};
+    const r = o.r ?? 13, col = o.col ?? 0xdfe6f5, glow = o.glow ?? 0;
+    if (glow > 0) {
+      g.beginFill(o.glowCol ?? C.gold, 0.10 * glow).drawCircle(N[v].x, N[v].y, r + 14 + 6 * glow).endFill();
+    }
+    g.lineStyle(0);
+    g.beginFill(0x0b0e16, 1).drawCircle(N[v].x, N[v].y, r + 2.5).endFill();
+    g.beginFill(col, 1).drawCircle(N[v].x, N[v].y, r).endFill();
+  }
+}
+
+// Scene base: container with its own graphics + texts; full redraw each update
+function makeGraphScene() {
+  const c = new PIXI.Container();
+  const g = new PIXI.Graphics();
+  c.addChild(g);
+  return { c, g };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 3) SCENES
+// ════════════════════════════════════════════════════════════════════
+const scenes = [];
+function scene(t0, t1, build) {
+  const s = { t0, t1, _b: build, st: null };
+  s.init = () => { s.st = build(); sceneLayer.addChild(s.st.c); };
+  s.update = (lt) => s.st && s.st.update(lt, t1 - t0);
+  s.destroy = () => { if (s.st) { sceneLayer.removeChild(s.st.c); s.st.c.destroy({ children: true }); s.st = null; } };
+  scenes.push(s);
+  return s;
+}
+
+// ── caption helper (top of stage) ──
+function caption(c, str, color = C.gold, y = 52, size = 30) {
+  const t = txt(str, size, color, '800');
+  t.x = 640; t.y = y;
+  c.addChild(t);
+  return t;
+}
+
+// ────────────────────────────────────────────────────────────────────
+// SCENE: INTRO  [0 – 16.4]
+// ────────────────────────────────────────────────────────────────────
+scene(0, 16.4, () => {
+  const { c, g } = makeGraphScene();
+  const t1 = txt('METRICKÝ TSP', 54, 0xdfe6f5); t1.x = 640; t1.y = 200;
+  const t2 = txt('CHRISTOFIDES', 86, C.gold); t2.x = 640; t2.y = 300;
+  const t3 = txt('≤ 3/2 · OPT', 64, C.cyan, '700', MATH); t3.x = 640; t3.y = 408;
+  const q = txt('8 měst v rovině · cena = vzdálenost · najdi nejkratší okruh přes všechna', 24, C.muted, '600');
+  q.x = 640; q.y = 660;
+  c.addChild(t1, t2, t3, q);
+  let fired = [false, false, false];
+  return { c, update(lt) {
+    t1.alpha = easeOut(ph(lt, 0.1, 0.9)); t1.scale.set(lerp(1.15, 1, easeOut(ph(lt, 0.1, 0.9))));
+    t2.alpha = easeOut(ph(lt, 2.0, 2.8)); t2.scale.set(lerp(1.3, 1, easeOut(ph(lt, 2.0, 2.8))));
+    t3.alpha = easeOut(ph(lt, 3.3, 4.0));
+    if (!fired[0] && lt > 2.1) { fired[0] = true; burst(640, 300, C.gold, 26, 260, 0.13); }
+    if (!fired[1] && lt > 3.4) { fired[1] = true; burst(640, 408, C.cyan, 22, 220, 0.11); }
+    // beat pulse on 3/2
+    t3.scale.set(1 + 0.05 * Math.max(0, Math.sin(lt * 4.4)));
+    // graph fade-in from t=6
+    const gp = ph(lt, 6, 12.5);
+    const tShift = easeIO(ph(lt, 5.2, 7));
+    t1.y = lerp(200, 92, tShift); t2.y = lerp(300, 92, tShift); t3.y = lerp(408, 92, tShift);
+    t1.alpha *= (1 - tShift); t3.alpha *= (1 - tShift);
+    t2.scale.set(lerp(1, 0.5, tShift));
+    q.alpha = easeOut(ph(lt, 6.5, 7.5));
+    g.clear();
+    if (gp > 0) {
+      // complete graph edges, staggered
+      let idx = 0; const total = n * (n - 1) / 2;
+      g.lineStyle(1.5, C.dim, 0.8);
+      for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) {
+        const ep = ph(gp, idx / total * 0.7, idx / total * 0.7 + 0.3);
+        partialLine(g, N[a], N[b], ep);
+        idx++;
+      }
+      drawNodes(g, { per: v => ({ r: 13 * easeOut(ph(gp, v / n * 0.5, v / n * 0.5 + 0.25)), glow: 0.4 }) });
+    }
+    return;
+  } };
+});
+
+// ────────────────────────────────────────────────────────────────────
+// SCENE: VERSE 1  [16.4 – 37.08]  — kroky 1–3 algoritmu
+// phases: A kostra 16.4–19.66 · B liché 19.66–25.08 · C sudost 25.08–32.4 · D matching 32.4–37.08
+// ────────────────────────────────────────────────────────────────────
+scene(16.4, 37.08, () => {
+  const { c, g } = makeGraphScene();
+  const cap = caption(c, '', C.gold);
+  const sub = txt('', 21, C.muted, '600'); sub.x = 640; sub.y = 96; c.addChild(sub);
+  const badge = txt(`|W| = ${W.length} — vždy SUDÝ počet`, 34, C.violet, '800'); badge.x = 640; badge.y = 152; badge.alpha = 0; c.addChild(badge);
+  const why = txt('Σ deg(v) = 2|E|  ⇒  lichých vrcholů je sudě', 22, C.muted, '600', MATH); why.x = 640; why.y = 196; why.alpha = 0; c.addChild(why);
+  const degTexts = N.map((p, v) => {
+    const t = txt(String(degT[v]), 19, 0x0b0e16, '900');
+    t.x = p.x; t.y = p.y; t.alpha = 0; c.addChild(t); return t;
+  });
+  let burstsDone = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 16.4; // absolute
+    g.clear();
+    // faint complete graph
+    g.lineStyle(1, C.dim, 0.45);
+    for (let a = 0; a < n; a++) for (let b = a + 1; b < n; b++) { g.moveTo(N[a].x, N[a].y); g.lineTo(N[b].x, N[b].y); }
+    // A: MST draw-on
+    const pA = ph(lt, 16.4, 19.9);
+    g.lineStyle(5, C.green, 1);
+    mst.forEach(([a, b], i) => partialLine(g, N[a], N[b], ph(pA, i / mst.length * 0.75, i / mst.length * 0.75 + 0.25)));
+    // B: odd vertices
+    const pB = ph(lt, 19.9, 25.08);
+    // D: matching
+    const pD = ph(lt, 32.6, 36.9);
+    g.lineStyle(5, C.pink, 1);
+    M.forEach(([a, b], i) => partialLine(g, N[a], N[b], ph(pD, i / M.length * 0.6, i / M.length * 0.6 + 0.4)));
+    // nodes
+    drawNodes(g, { per: v => {
+      const odd = W.includes(v);
+      const wOn = odd && pB > (W.indexOf(v) / W.length) * 0.5;
+      const pulse = wOn ? 0.6 + 0.4 * Math.sin(lt * 6 + v) : 0;
+      return { r: 13, col: wOn ? C.gold : 0xdfe6f5, glow: wOn ? 0.6 + pulse * 0.5 : 0.15, glowCol: C.gold };
+    } });
+    // degree numbers during B+C
+    degTexts.forEach((t, v) => {
+      t.alpha = pB > 0.1 && lt < 33.5 ? easeOut(ph(pB, 0.1, 0.4)) : Math.max(0, t.alpha - 0.05);
+      t.text = String(degT[v]);
+    });
+    // captions per phase
+    if (lt < 19.9) { cap.text = 'KROK 1 — najdi nejlevnější kostru T (MST)'; cap.style.fill = C.green; sub.text = `c(T) = ${fmt(cT)}`; }
+    else if (lt < 25.08) { cap.text = 'KROK 2 — vrcholy LICHÉHO stupně → množina W'; cap.style.fill = C.gold; sub.text = 'čísla = stupně vrcholů v T'; }
+    else if (lt < 32.4) { cap.text = 'KROK 2 — vrcholy LICHÉHO stupně → množina W'; cap.style.fill = C.gold; sub.text = ''; }
+    else { cap.text = 'KROK 3 — nejlevnější perfektní párování M na W'; cap.style.fill = C.pink; sub.text = `c(M) = ${fmt(cM)}`; }
+    badge.alpha = lt > 25.4 && lt < 33 ? easeOut(ph(lt, 25.4, 26.2)) : Math.max(0, badge.alpha - 0.04);
+    why.alpha = lt > 27 && lt < 33 ? easeOut(ph(lt, 27, 28)) : Math.max(0, why.alpha - 0.04);
+    badge.scale.set(1 + 0.04 * Math.sin(lt * 5));
+    if (!burstsDone.has('w') && lt > 25.5) { burstsDone.add('w'); W.forEach(v => burst(N[v].x, N[v].y, C.gold, 10, 160, 0.08)); }
+    if (!burstsDone.has('m') && lt > 33) { burstsDone.add('m'); M.forEach(([a, b]) => burst((N[a].x + N[b].x) / 2, (N[a].y + N[b].y) / 2, C.pink, 8, 140, 0.08)); }
+  } };
+});
+
+// ────────────────────────────────────────────────────────────────────
+// SCENE FACTORY: CHORUS — pětikrokový checklist + 3/2 stamp
+// part A: 5 slov · part B: 3/2·OPT + O(n³)
+// ────────────────────────────────────────────────────────────────────
+function chorusScene(t0, aEnd, t1) {
+  scene(t0, t1, () => {
+    const { c, g } = makeGraphScene();
+    // mini graph s H okruhem v pozadí
+    const mini = new PIXI.Container(); mini.scale.set(0.42); mini.x = 110; mini.y = 250; mini.alpha = 0.5;
+    const mg = new PIXI.Graphics(); mini.addChild(mg); c.addChild(mini);
+    const words = ['KOSTRA', 'LICHÉ', 'PÁROVÁNÍ', 'EULER', 'ZKRATKA'];
+    const wcols = [C.green, C.gold, C.pink, C.cyan, C.violet];
+    const fr = [0.20, 0.36, 0.42, 0.66, 0.73]; // word activation fractions of part A
+    const wt = words.map((w, i) => {
+      const t = txt(w, 74, wcols[i], '900');
+      t.x = [240, 565, 935, 420, 800][i];
+      t.y = [225, 225, 225, 380, 380][i];
+      t.alpha = 0.13; c.addChild(t); return t;
+    });
+    const hot = txt('HOTOVO!', 56, C.white, '900'); hot.x = 640; hot.y = 510; hot.alpha = 0; hot.rotation = -0.06; c.addChild(hot);
+    const big = txt('≤ 3/2 · OPT', 110, C.gold, '900', MATH); big.x = 640; big.y = 300; big.alpha = 0; c.addChild(big);
+    const on3 = txt('O(n³)', 56, C.cyan, '800', MATH); on3.x = 640; on3.y = 432; on3.alpha = 0; c.addChild(on3);
+    const who = txt('— CHRISTOFIDES 1976 —', 26, C.muted, '700'); who.x = 640; who.y = 510; who.alpha = 0; c.addChild(who);
+    const fired = new Set();
+    const aDur = aEnd - t0, bDur = t1 - aEnd;
+    return { c, update(lt) {
+      const inA = lt < aDur;
+      const fA = clamp01(lt / aDur), fB = clamp01((lt - aDur) / bDur);
+      wt.forEach((t, i) => {
+        const on = fA >= fr[i];
+        const targetA = inA ? (on ? 1 : 0.13) : Math.max(0, 0.5 - fB * 1.2);
+        t.alpha += (targetA - t.alpha) * 0.25;
+        const k = on && inA ? 1 + 0.10 * Math.max(0, 1 - (fA - fr[i]) * 9) : 1;
+        t.scale.set(k);
+        if (on && !fired.has(i)) { fired.add(i); burst(t.x, t.y, wcols[i], 20, 240, 0.11); }
+      });
+      hot.alpha = inA ? easeOut(ph(fA, 0.80, 0.88)) : Math.max(0, hot.alpha - 0.06);
+      if (inA && fA > 0.80 && !fired.has('hot')) { fired.add('hot'); burst(640, 510, C.white, 24, 260, 0.1); }
+      big.alpha = easeOut(ph(fB, 0.04, 0.18));
+      big.scale.set(lerp(1.5, 1, easeOut(ph(fB, 0.04, 0.22))) * (1 + 0.04 * Math.sin(lt * 5)));
+      on3.alpha = easeOut(ph(fB, 0.42, 0.55));
+      who.alpha = easeOut(ph(fB, 0.62, 0.75));
+      if (fB > 0.05 && !fired.has('big')) { fired.add('big'); burst(640, 300, C.gold, 36, 330, 0.15); }
+      if (fB > 0.43 && !fired.has('on3')) { fired.add('on3'); burst(640, 432, C.cyan, 16, 200, 0.1); }
+      // mini H cycle comet
+      mg.clear();
+      mg.lineStyle(4, C.gold, 0.8);
+      Hedges.forEach(([a, b]) => { mg.moveTo(N[a].x, N[a].y); mg.lineTo(N[b].x, N[b].y); });
+      drawNodes(mg, { per: () => ({ r: 12, glow: 0 }) });
+      const hp = (lt * 0.14) % 1; // comet loops
+      // comet point along H
+      let total = 0; const lens = Hedges.map(([a, b]) => { const l = dist(a, b); total += l; return l; });
+      let d = hp * total, px = N[Horder[0]].x, py = N[Horder[0]].y;
+      for (let i = 0; i < Hedges.length; i++) {
+        if (d <= lens[i]) { const [a, b] = Hedges[i]; const tt = d / lens[i]; px = lerp(N[a].x, N[b].x, tt); py = lerp(N[a].y, N[b].y, tt); break; }
+        d -= lens[i];
+      }
+      mg.beginFill(C.goldHi, 1).drawCircle(px, py, 9).endFill();
+      mini.alpha = inA ? 0.5 : Math.max(0.12, 0.5 - fB);
+    } };
+  });
+}
+chorusScene(37.08, 43.92, 49.08);
+
+// ────────────────────────────────────────────────────────────────────
+// SCENE: VERSE 2  [49.08 – 75.12] — T∪M, Euler, zkratka, trojúhelník
+// A sudé stupně 49.08–58.34 · B euler 58.34–65.12 · C zkratka 65.12–70.86 · D trojúhelník 70.86–75.12
+// ────────────────────────────────────────────────────────────────────
+scene(49.08, 75.12, () => {
+  const { c, g } = makeGraphScene();
+  const cap = caption(c, '');
+  const sub = txt('', 21, C.muted, '600'); sub.x = 640; sub.y = 96; c.addChild(sub);
+  const degTexts = N.map((p, v) => {
+    const t = txt('', 18, 0xffffff, '900');
+    t.x = p.x + 24; t.y = p.y - 22; t.alpha = 0; c.addChild(t); return t;
+  });
+  const tri = new PIXI.Container(); tri.x = 1070; tri.y = 560; tri.alpha = 0; c.addChild(tri);
+  {
+    const tg = new PIXI.Graphics();
+    tg.lineStyle(4, C.gold, 1); tg.moveTo(-90, 50); tg.lineTo(90, 50);
+    tg.lineStyle(3, C.muted, 0.9); tg.moveTo(-90, 50); tg.lineTo(0, -55); tg.lineTo(90, 50);
+    tri.addChild(tg);
+    const lab = txt('c(i,j) ≤ c(i,k) + c(k,j)', 20, C.cyan, '700', MATH); lab.y = 92; tri.addChild(lab);
+  }
+  const degM = Array(n).fill(0);
+  multiE.forEach(e => { degM[e.a]++; degM[e.b]++; });
+  let fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 49.08;
+    g.clear();
+    const inA = lt < 58.34, inB = lt < 65.12, inC = lt < 70.86;
+    // base T+M
+    const tmAlpha = lt < 65.12 ? 1 : (lt < 70.86 ? 0.35 : 0.15);
+    g.lineStyle(5, C.green, tmAlpha);
+    mst.forEach(([a, b]) => { g.moveTo(N[a].x, N[a].y); g.lineTo(N[b].x, N[b].y); });
+    g.lineStyle(5, C.pink, tmAlpha);
+    M.forEach(([a, b]) => { g.moveTo(N[a].x, N[a].y); g.lineTo(N[b].x, N[b].y); });
+    if (inA) {
+      cap.text = 'T ∪ M — KAŽDÝ vrchol má teď sudý stupeň'; cap.style.fill = C.green;
+      sub.text = 'lichý + 1 (hrana z M) = sudý  ⇒  Eulerův tah existuje';
+      degTexts.forEach((t, v) => {
+        const on = ph(lt, 51 + v * 0.5, 51.6 + v * 0.5);
+        t.alpha = easeOut(on); t.text = String(degM[v]);
+        t.style.fill = degM[v] % 2 === 0 ? C.green : C.red;
+        if (on > 0.5 && !fired.has('d' + v)) { fired.add('d' + v); burst(N[v].x + 24, N[v].y - 22, C.green, 6, 110, 0.06); }
+      });
+    } else degTexts.forEach(t => t.alpha = Math.max(0, t.alpha - 0.05));
+    // B: euler traversal
+    if (lt >= 58.34) {
+      const pB = ph(lt, 58.5, 64.9);
+      const dNow = (inB ? easeIO(pB) : 1) * walkLen;
+      g.lineStyle(6, C.gold, inC ? 0.9 : 0.35);
+      for (const s of walkSegs) {
+        if (dNow <= s.off) break;
+        const segP = clamp01((dNow - s.off) / s.len);
+        g.moveTo(s.a.x, s.a.y);
+        g.lineTo(lerp(s.a.x, s.b.x, segP), lerp(s.a.y, s.b.y, segP));
+      }
+      if (inB) {
+        const pt = walkPoint(dNow);
+        g.beginFill(C.goldHi, 1).drawCircle(pt.x, pt.y, 11).endFill();
+        g.beginFill(C.goldHi, 0.25).drawCircle(pt.x, pt.y, 22).endFill();
+        cap.text = 'KROK 4 — Eulerův tah L: každou hranou PRÁVĚ JEDNOU'; cap.style.fill = C.gold;
+        sub.text = `c(L) = c(T) + c(M) = ${fmt(cL)}`;
+      }
+    }
+    // C: shortcut → H
+    if (lt >= 65.12) {
+      const pC = ph(lt, 65.3, 70.5);
+      g.lineStyle(7, C.goldHi, 1);
+      Hedges.forEach(([a, b], i) => partialLine(g, N[a], N[b], ph(pC, i / n * 0.8, i / n * 0.8 + 0.2)));
+      if (inC) {
+        cap.text = 'KROK 5 — ZKRATKA: opakované vrcholy přeskoč → okruh H'; cap.style.fill = C.goldHi;
+        sub.text = `c(H) = ${fmt(cH)}  ≤  c(L) = ${fmt(cL)}`;
+      }
+    }
+    if (lt >= 70.86) {
+      cap.text = 'Trojúhelníková nerovnost ⇒ zkratka NIKDY neprodlouží';
+      cap.style.fill = C.cyan;
+      sub.text = 'tady se POPRVÉ použila metrika';
+      tri.alpha = Math.min(1, tri.alpha + 0.06);
+      tri.scale.set(1 + 0.03 * Math.sin(lt * 4));
+    }
+    drawNodes(g, { per: v => ({ r: 12, glow: 0.2 }) });
+  } };
+});
+
+chorusScene(75.12, 82.54, 87.54);
+
+// ────────────────────────────────────────────────────────────────────
+// SCENE: BRIDGE = DŮKAZ  [87.54 – 111.54]
+// L0 titulek 87.54–91.04 · L1 OPT≥c(T) 91.04–96.66 · L2 OPT/2≥c(M) 96.66–104.54 · L3 řetěz 104.54–111.54
+// ────────────────────────────────────────────────────────────────────
+scene(87.54, 111.54, () => {
+  const { c, g } = makeGraphScene();
+  // graph shrinks to left
+  const gWrap = new PIXI.Container(); gWrap.addChild(g);
+  gWrap.scale.set(0.62); gWrap.x = 28; gWrap.y = 130; c.addChild(gWrap);
+  const title = txt('DŮKAZ — řetěz čtyř nerovností', 40, C.gold, '900'); title.x = 640; title.y = 56; c.addChild(title);
+  const cards = [
+    { f: 'OPT ≥ c(T)', e: 'okruh bez jedné hrany je kostra — a T je ta nejlevnější', col: C.green },
+    { f: 'OPT/2 ≥ c(M)', e: 'OPT zkrať jen na W: okruh C_W ≤ OPT — jeho hrany ob jednu = DVĚ párování ⇒ levnější ≤ OPT/2 ≥ c(M)', col: C.pink },
+    { f: 'c(T) + c(M) = c(L)', e: 'Euler projde každou hranu T∪M právě jednou', col: C.gold },
+    { f: 'c(L) ≥ c(H)', e: 'zkratka nezdraží (metrika podruhé)', col: C.cyan },
+  ];
+  const cardTexts = cards.map((cd, i) => {
+    const wrap = new PIXI.Container();
+    wrap.x = 985; wrap.y = 168 + i * 118; wrap.alpha = 0;
+    const f = txt(cd.f, 38, cd.col, '900', MATH); wrap.addChild(f);
+    const e = txt(cd.e, 16.5, C.muted, '600'); e.y = 40;
+    e.style.wordWrap = true; e.style.wordWrapWidth = 540; wrap.addChild(e);
+    c.addChild(wrap); return wrap;
+  });
+  const chain = txt('', 33, C.white, '900', MATH); chain.x = 640; chain.y = 664; c.addChild(chain);
+  let fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 87.54;
+    g.clear();
+    title.alpha = easeOut(ph(lt, 87.7, 88.6));
+    title.scale.set(1 + 0.03 * Math.sin(lt * 3));
+    const inL1 = lt >= 91.04 && lt < 96.66, inL2 = lt >= 96.66 && lt < 104.54, inL3 = lt >= 104.54;
+    // card reveals
+    cardTexts[0].alpha = easeOut(ph(lt, 91.1, 91.9));
+    cardTexts[1].alpha = easeOut(ph(lt, 96.7, 97.5));
+    cardTexts[2].alpha = easeOut(ph(lt, 104.6, 105.3));
+    cardTexts[3].alpha = easeOut(ph(lt, 107.0, 107.7));
+    ['c0', 'c1', 'c2', 'c3'].forEach((k, i) => {
+      const th = [91.2, 96.8, 104.7, 107.1][i];
+      if (lt > th && !fired.has(k)) { fired.add(k); burst(985, 168 + i * 118, cards[i].col, 14, 170, 0.09); }
+    });
+    // ── left graph per phase ──
+    if (lt < 91.04) {
+      // OPT cycle intro
+      const p = ph(lt, 88.2, 90.6);
+      g.lineStyle(5, C.goldHi, 0.95);
+      OPTedges.forEach(([a, b], i) => partialLine(g, N[a], N[b], ph(p, i / n * 0.8, i / n * 0.8 + 0.2)));
+      drawNodes(g, { per: () => ({ r: 13, glow: 0.2 }) });
+      const optLab = `OPT = ${fmt(cOPT)}`;
+      g.lineStyle(0);
+      // (label via caption-free: draw under)
+      if (!this?._optT) {}
+      // simple: reuse chain text early
+      chain.text = optLab; chain.alpha = p;
+    } else if (inL1) {
+      // OPT cycle, remove 1 edge → spanning tree; MST ghost
+      const blink = ph(lt, 92.2, 93.0);
+      g.lineStyle(5, C.goldHi, 0.9);
+      OPTedges.forEach(([a, b], i) => {
+        if (i === 0) return; // removed edge
+        g.moveTo(N[a].x, N[a].y); g.lineTo(N[b].x, N[b].y);
+      });
+      // removed edge blinking out
+      const [ra, rb] = OPTedges[0];
+      g.lineStyle(5, C.red, Math.max(0, 1 - blink) * (0.5 + 0.5 * Math.sin(lt * 10)));
+      g.moveTo(N[ra].x, N[ra].y); g.lineTo(N[rb].x, N[rb].y);
+      // MST ghost
+      const mp = ph(lt, 93.5, 95.5);
+      g.lineStyle(6, C.green, 0.85 * mp);
+      mst.forEach(([a, b]) => { g.moveTo(N[a].x, N[a].y); g.lineTo(N[b].x, N[b].y); });
+      drawNodes(g, { per: () => ({ r: 13, glow: 0.2 }) });
+      chain.text = `okruh − hrana = kostra ≥ c(T) = ${fmt(cT)}   ⇒   OPT ≥ c(T)`;
+      chain.alpha = 0.95; chain.style.fontSize = 26;
+    } else if (inL2) {
+      // OPT faint, W highlighted, C_W chords alternate-colored
+      g.lineStyle(3, C.goldHi, 0.22);
+      OPTedges.forEach(([a, b]) => { g.moveTo(N[a].x, N[a].y); g.lineTo(N[b].x, N[b].y); });
+      const pcw = ph(lt, 97.6, 99.6);
+      const alt = ph(lt, 100.2, 101.2);
+      CWedges.forEach(([a, b], i) => {
+        const col = alt > 0 ? (i % 2 === 0 ? C.pink : C.cyan) : C.violet;
+        g.lineStyle(6, col, 0.95);
+        partialLine(g, N[a], N[b], ph(pcw, i / CWedges.length * 0.7, i / CWedges.length * 0.7 + 0.3));
+      });
+      drawNodes(g, { per: v => W.includes(v)
+        ? { r: 14, col: C.gold, glow: 0.8, glowCol: C.gold }
+        : { r: 10, col: 0x55607a, glow: 0 } });
+      if (alt <= 0) { chain.text = `C_W: zkratka OPT jen po W  ⇒  c(C_W) ≤ OPT`; }
+      else { chain.text = `hrany C_W ob jednu = M₁ ∪ M₂  ⇒  min(M₁,M₂) ≤ OPT/2  ⇒  c(M) ≤ OPT/2`; }
+      chain.alpha = 0.95; chain.style.fontSize = 25;
+    } else {
+      // final: T+M = L ≥ H + assembled chain
+      g.lineStyle(5, C.green, 0.85);
+      mst.forEach(([a, b]) => { g.moveTo(N[a].x, N[a].y); g.lineTo(N[b].x, N[b].y); });
+      g.lineStyle(5, C.pink, 0.85);
+      M.forEach(([a, b]) => { g.moveTo(N[a].x, N[a].y); g.lineTo(N[b].x, N[b].y); });
+      const hp = ph(lt, 107.2, 109.0);
+      g.lineStyle(7, C.goldHi, 0.95 * hp);
+      Hedges.forEach(([a, b]) => { g.moveTo(N[a].x, N[a].y); g.lineTo(N[b].x, N[b].y); });
+      drawNodes(g, { per: () => ({ r: 12, glow: 0.25 }) });
+      const cp = ph(lt, 108.0, 109.2);
+      chain.style.fontSize = 31;
+      chain.text = 'c(H) ≤ c(L) = c(T) + c(M) ≤ OPT + OPT/2 = 3/2 · OPT';
+      chain.alpha = easeOut(cp);
+      chain.scale.set(1 + 0.04 * Math.sin(lt * 5) * cp);
+      if (cp > 0.5 && !fired.has('chain')) { fired.add('chain'); burst(640, 664, C.gold, 34, 300, 0.13); }
+    }
+  } };
+});
+
+// ────────────────────────────────────────────────────────────────────
+// SCENE: VERSE 3  [111.54 – 134.54] — double-tree vs Christofides
+// ────────────────────────────────────────────────────────────────────
+scene(111.54, 134.54, () => {
+  const { c } = makeGraphScene();
+  const cap = caption(c, 'DOUBLE-TREE  vs.  CHRISTOFIDES', C.white, 48, 34);
+  // two mini graphs
+  function half(x, label, col) {
+    const wrap = new PIXI.Container(); wrap.x = x; wrap.y = 150; wrap.scale.set(0.42);
+    const gg = new PIXI.Graphics(); wrap.addChild(gg);
+    const lab = txt(label, 56, col, '900'); lab.x = 640; lab.y = -90; wrap.addChild(lab);
+    c.addChild(wrap);
+    return { wrap, gg, lab };
+  }
+  const Ldt = half(35, 'DOUBLE-TREE', C.muted);
+  const Rch = half(660, 'CHRISTOFIDES', C.gold);
+  const fl = txt('2 × OPT · O(n²)', 40, C.muted, '800', MATH); fl.x = 305; fl.y = 560; fl.alpha = 0; c.addChild(fl);
+  const fr2 = txt('3/2 × OPT · O(n³)', 44, C.gold, '900', MATH); fr2.x = 930; fr2.y = 560; fr2.alpha = 0; c.addChild(fr2);
+  const verdict = txt('stejná kostra · levnější oprava lichých stupňů ⇒ lepší faktor', 22, C.muted, '600'); verdict.x = 640; verdict.y = 652; verdict.alpha = 0; c.addChild(verdict);
+  const win = txt('✓ DŮKAZ MÁME', 40, C.green, '900'); win.x = 930; win.y = 640; win.alpha = 0; win.rotation = -0.05; c.addChild(win);
+  let fired = new Set();
+  // perpendicular offset for doubled edges
+  const off = (a, b, d) => {
+    const dx = N[b].x - N[a].x, dy = N[b].y - N[a].y, l = Math.hypot(dx, dy);
+    return { ox: -dy / l * d, oy: dx / l * d };
+  };
+  return { c, update(lt0) {
+    const lt = lt0 + 111.54;
+    const pDup = ph(lt, 112.2, 115.8);   // doubling animation
+    const pM = ph(lt, 122.2, 127.5);     // matching animation right
+    // LEFT: doubled MST
+    const gg = Ldt.gg; gg.clear();
+    gg.lineStyle(5, C.green, 0.9);
+    mst.forEach(([a, b]) => { gg.moveTo(N[a].x, N[a].y); gg.lineTo(N[b].x, N[b].y); });
+    gg.lineStyle(5, 0x86efac, 0.9);
+    mst.forEach(([a, b], i) => {
+      const p = ph(pDup, i / mst.length * 0.7, i / mst.length * 0.7 + 0.3);
+      if (p <= 0) return;
+      const { ox, oy } = off(a, b, 9);
+      gg.moveTo(N[a].x + ox, N[a].y + oy);
+      gg.lineTo(lerp(N[a].x + ox, N[b].x + ox, p), lerp(N[a].y + oy, N[b].y + oy, p));
+    });
+    drawNodes(gg, { per: () => ({ r: 14, glow: 0 }) });
+    // RIGHT: MST + matching
+    const gr = Rch.gg; gr.clear();
+    gr.lineStyle(5, C.green, 0.9);
+    mst.forEach(([a, b]) => { gr.moveTo(N[a].x, N[a].y); gr.lineTo(N[b].x, N[b].y); });
+    gr.lineStyle(6, C.pink, 0.95);
+    M.forEach(([a, b], i) => partialLine(gr, N[a], N[b], ph(pM, i / M.length * 0.6, i / M.length * 0.6 + 0.4)));
+    drawNodes(gr, { per: v => ({ r: 14, col: W.includes(v) ? C.gold : 0xdfe6f5, glow: 0 }) });
+    // stamps
+    fl.alpha = easeOut(ph(lt, 117.0, 118.0));
+    fr2.alpha = easeOut(ph(lt, 128.8, 129.8));
+    fr2.scale.set(1 + 0.05 * Math.sin(lt * 5) * fr2.alpha);
+    verdict.alpha = easeOut(ph(lt, 124.5, 125.5));
+    win.alpha = easeOut(ph(lt, 131.6, 132.4));
+    if (lt > 117.1 && !fired.has('fl')) { fired.add('fl'); burst(305, 560, C.muted, 12, 150, 0.08); }
+    if (lt > 128.9 && !fired.has('fr')) { fired.add('fr'); burst(930, 560, C.gold, 28, 280, 0.12); }
+    if (lt > 131.7 && !fired.has('win')) { fired.add('win'); burst(930, 640, C.green, 30, 300, 0.12); }
+  } };
+});
+
+chorusScene(134.54, 140.54, 145.54);
+
+// ────────────────────────────────────────────────────────────────────
+// SCENE: OUTRO  [145.54 – 162]
+// ────────────────────────────────────────────────────────────────────
+scene(145.54, 162, () => {
+  const { c, g } = makeGraphScene();
+  const words = ['KOSTRA', 'LICHÉ', 'PÁROVÁNÍ', 'EULER', 'ZKRATKA'];
+  const wcols = [C.green, C.gold, C.pink, C.cyan, C.violet];
+  const wt = words.map((w, i) => {
+    const t = txt(w, 44, wcols[i], '900');
+    t.x = 215 + i * 212; t.y = 200; t.alpha = 0; c.addChild(t); return t;
+  });
+  const fin = txt('c(H) ≤ 3/2 · OPT', 72, C.gold, '900', MATH); fin.x = 640; fin.y = 360; fin.alpha = 0; c.addChild(fin);
+  const done = txt('Hotovo. Teď to dokaž na papír — L3.10', 24, C.muted, '600'); done.x = 640; done.y = 470; done.alpha = 0; c.addChild(done);
+  return { c, update(lt0) {
+    const lt = lt0 + 145.54;
+    g.clear();
+    // slow rotating H constellation faint
+    g.lineStyle(2, C.gold, 0.18);
+    Hedges.forEach(([a, b]) => { g.moveTo(N[a].x, N[a].y + 160); g.lineTo(N[b].x, N[b].y + 160); });
+    wt.forEach((t, i) => {
+      const w = 0.5 + 0.5 * Math.sin(lt * 1.6 + i * 1.1);
+      t.alpha = easeOut(ph(lt, 146 + i * 0.6, 147 + i * 0.6)) * (0.35 + 0.65 * w);
+    });
+    fin.alpha = easeOut(ph(lt, 150, 151.5));
+    fin.scale.set(1 + 0.03 * Math.sin(lt * 2.5));
+    done.alpha = easeOut(ph(lt, 152.5, 154));
+  } };
+});
+
+// ════════════════════════════════════════════════════════════════════
+// 4) SUBTITLES (karaoke lines, whisper-synced)
+// ════════════════════════════════════════════════════════════════════
+const M_ = s => `<span class="m">${s}</span>`;
+const LINES = [
+  [0.0, 4.3, `Metrický ${M_('TSP')} · Christofides · jedna a půl`],
+  [16.3, 19.66, `Najdi nejlevnější kostru, budem jí říkat ${M_('T')}`],
+  [19.66, 25.08, `vrcholy lichého stupně hoď do množiny ${M_('W')}`],
+  [25.08, 32.40, `vždycky je jich sudý počet — to je jistá věc`],
+  [32.40, 37.08, `nejlevnější párování ${M_('M')} na nich najdi přec!`],
+  [37.08, 43.92, `Kostra! Liché! Párování! Euler! Zkratka! Hotovo!`],
+  [43.92, 49.08, `Jedna a půl krát optimum — ${M_('O(n³)')} — Christofidovo!`],
+  [50.2, 58.34, `Kostra ${M_('T')} plus matching ${M_('M')} — všechny stupně sudé jsou`],
+  [58.34, 65.12, `Eulerův tah ${M_('L')} tam projde každou hranou jedinou`],
+  [65.12, 70.86, `zkratkou přeskoč vrcholy, cos viděl už dřív`],
+  [70.86, 75.12, `trojúhelník zaručí, že okruh ${M_('H')} je kratší, div!`],
+  [75.4, 82.54, `Kostra! Liché! Párování! Euler! Zkratka! Hotovo!`],
+  [82.54, 87.54, `Jedna a půl krát optimum — ${M_('O(n³)')} — Christofidovo!`],
+  [87.54, 91.04, `Čtyři nerovnosti, řetěz, co tě spasí:`],
+  [91.04, 96.66, `${M_('OPT ≥ c(T)')} — okruh bez hrany je kostra taky`],
+  [96.66, 104.54, `${M_('OPT/2 ≥ c(M)')} — okruh dá dvě párování`],
+  [104.54, 111.54, `${M_('c(T) + c(M) = c(L)')} — a ${M_('c(L) ≥ c(H)')}, bez ptaní!`],
+  [111.54, 116.54, `Double-tree je chudší bratr: hrany kostry zdvojí`],
+  [116.54, 121.54, `faktor dva, ${M_('O(n²)')} — s tím se nespokojíš`],
+  [121.54, 128.54, `Christofides místo zdvojení vezme matching ${M_('M')}`],
+  [128.54, 134.54, `proto jedna a půl optima — a důkaz máme všem!`],
+  [134.8, 140.54, `Kostra! Liché! Párování! Euler! Zkratka! Hotovo!`],
+  [140.54, 145.54, `Jedna a půl krát optimum — ${M_('O(n³)')} — Christofidovo!`],
+  [146.3, 155.2, `Kostra, liché, párování, Euler, zkratka…`],
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 5) PLAYER / SCENE MANAGER / CONTROLS
+// ════════════════════════════════════════════════════════════════════
+const player = document.getElementById('player');
+const subEl = document.getElementById('subtitle');
+const bigplay = document.getElementById('bigplay');
+const btnPlay = document.getElementById('btnPlay');
+const btnRestart = document.getElementById('btnRestart');
+const seek = document.getElementById('seek');
+const tCur = document.getElementById('tCur');
+const tDur = document.getElementById('tDur');
+
+let curScene = null, lastLocal = -1, curLine = -1;
+function tick() {
+  const t = player.currentTime;
+  // scene switch / rewind detection
+  const s = scenes.find(sc => t >= sc.t0 && t < sc.t1) || scenes[scenes.length - 1];
+  if (s !== curScene) { curScene && curScene.destroy(); curScene = s; s.init(); lastLocal = -1; }
+  const localT = t - s.t0;
+  if (localT < lastLocal - 0.05) { s.destroy(); s.init(); } // backward seek inside scene
+  s.update(localT);
+  lastLocal = localT;
+  // subtitle
+  const li = LINES.findIndex(([a, b]) => t >= a && t < b);
+  if (li !== curLine) {
+    curLine = li;
+    subEl.innerHTML = li >= 0 ? LINES[li][2] : '';
+    subEl.style.opacity = li >= 0 ? 1 : 0;
+  }
+  // controls
+  if (!seekDragging) {
+    seek.value = t;
+    seek.style.setProperty('--p', (t / (player.duration || 161.4) * 100) + '%');
+  }
+  tCur.textContent = fmtTime(t);
+  requestAnimationFrame(tick);
+}
+function fmtTime(t) { t = Math.max(0, t || 0); return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`; }
+
+let seekDragging = false;
+seek.addEventListener('input', () => {
+  seekDragging = true;
+  player.currentTime = +seek.value;
+  seek.style.setProperty('--p', (+seek.value / (player.duration || 161.4) * 100) + '%');
+});
+seek.addEventListener('change', () => { seekDragging = false; });
+
+function togglePlay() {
+  if (player.paused) { player.play(); } else { player.pause(); }
+}
+player.addEventListener('play', () => { btnPlay.textContent = '⏸'; bigplay.classList.add('hidden'); });
+player.addEventListener('pause', () => { btnPlay.textContent = '▶'; if (player.currentTime < 0.05 || player.ended) bigplay.classList.remove('hidden'); });
+player.addEventListener('ended', () => { bigplay.classList.remove('hidden'); bigplay.querySelector('.hint').innerHTML = 'Ještě jednou?<small>R = od začátku</small>'; });
+player.addEventListener('loadedmetadata', () => {
+  seek.max = player.duration;
+  tDur.textContent = fmtTime(player.duration);
+});
+
+btnPlay.addEventListener('click', togglePlay);
+btnRestart.addEventListener('click', () => { player.currentTime = 0; player.play(); });
+bigplay.addEventListener('click', () => { player.play(); });
+document.getElementById('stage').addEventListener('click', (e) => {
+  if (e.target.closest('#bigplay')) return;
+  togglePlay();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  else if (e.code === 'ArrowRight') player.currentTime = Math.min(player.duration || 161, player.currentTime + 5);
+  else if (e.code === 'ArrowLeft') player.currentTime = Math.max(0, player.currentTime - 5);
+  else if (e.key === 'r' || e.key === 'R' || e.code === 'Home') { player.currentTime = 0; player.play(); }
+});
+
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>

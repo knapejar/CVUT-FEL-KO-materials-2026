@@ -67,6 +67,12 @@
     font-size: 11px; color: var(--muted); border: 1px dashed var(--muted);
     border-radius: 10px; padding: 2px 9px; white-space: nowrap;
   }
+  .video-link {
+    font-size: 11px; font-weight: 700; text-decoration: none;
+    color: #0b0e16; background: #7dd3fc; border-radius: 10px;
+    padding: 3px 10px; white-space: nowrap; transition: transform .12s, box-shadow .12s;
+  }
+  .video-link:hover { transform: scale(1.06); box-shadow: 0 0 14px rgba(125,211,252,0.5); }
   audio { width: 100%; max-width: 420px; height: 34px; margin-left: auto; }
 
   /* ── two-column body: lyrics left (singable), explanation right ── */
@@ -186,6 +192,7 @@ Lekce označené „připravujeme“ zatím nejsou hotové — odkazy doplníme 
     <div class="song-num">1</div>
     <div class="song-title">Jedna a půl (Christofides)</div>
     <span class="genre">pop-punk</span>
+    <a class="video-link" href="video-christofides.html">🎬 Immersive video</a>
     <audio controls preload="none" data-name="1 — Jedna a půl (Christofides)" src="audio/christofidova-jedna-pul.mp3"></audio>
   </div>
   <div class="song-body">
