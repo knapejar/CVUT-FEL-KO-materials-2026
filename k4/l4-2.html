@@ -36,7 +36,7 @@
     Kde v síti zbývá <strong>volná kapacita — vpřed i vzad</strong>: dopředu lze tok přidat, dokud $f(e) &lt; u(e)$, dozadu lze tok ubrat, dokud $f(e) &gt; l(e)$. Zabalené do jednoho objektu je to <strong>reziduální graf</strong> $G_f$ a cesta $s \to t$ v něm je <strong>augmentující cesta</strong>.
   </div>
 
-  <p>V <a href="l4-1.html#takeaways">[L4.1] Síť, tok, Kirchhoffův zákon</a> jsme na zkouškové síti z 25. 5. 2026 ověřili, že zadané $f$ je přípustný tok s hodnotou $|f| = 9$, a bez počítání odvodili mez $|f| \le 16$. Mezi 9 a 16 je propast — dnes si postavíme nástroj, kterým se tok <em>vylepšuje</em>. Ford-Fulkersonův algoritmus, který ho v [L4.3] bude opakovat v cyklu, pak už bude jen jednověté „opakuj, dokud to jde“.</p>
+  <p>V <a href="l4-1.html#takeaways">[L4.1] Síť, tok, Kirchhoffův zákon</a> jsme na zkouškové síti z 25. 5. 2026 ověřili, že zadané $f$ je přípustný tok s hodnotou $|f| = 9$, a bez počítání odvodili mez $|f| \le 16$. Mezi 9 a 16 je propast — dnes si postavíme nástroj, kterým se tok <em>vylepšuje</em>. Ford-Fulkersonův algoritmus, který ho v <a href="l4-3.html">[L4.3]</a> bude opakovat v cyklu, pak už bude jen jednověté „opakuj, dokud to jde“.</p>
 
   <!-- ===== SEKCE 1: DOPŘEDNÝ NÁPAD ===== -->
   <h2>První nápad: protlačit víc po cestě s rezervou</h2>
@@ -97,7 +97,7 @@
     </div>
   </details>
 
-  <p>A co se po nalezení cesty stane? Slide 11 (zbytek slidu — celý algoritmus — si necháme do [L4.3]):</p>
+  <p>A co se po nalezení cesty stane? Slide 11 (zbytek slidu — celý algoritmus — si necháme do <a href="l4-3.html">[L4.3]</a>):</p>
 
   <div class="box">
     <div class="box-title">Slide 11 — augmentační krok, 1:1</div>
@@ -171,7 +171,7 @@
   <details class="try">
     <summary>Zkus sám: kudy všudy vedou augmentující cesty? Čím musí každá začínat a jaká je $\gamma$ té zvýrazněné?</summary>
     <div class="inner">
-      <p>Z $T_1$ vede v $G_f$ <strong>jediná</strong> hrana, $T_1 \to T_4$ s $u_f = 7$ (hrany do $T_2$ a $T_3$ jsou nasycené, takže dopředné reziduální hrany nemají) — každá augmentující cesta začíná $T_1 \to T_4$. Zvýrazněná cesta $T_1 \to T_4 \to T_5 \to T_8$ má $\gamma = \min\{7, 8, 4\} = 4$. Další možnosti: $T_1 \to T_4 \to T_7 \to T_8$ s $\gamma = \min\{7, 1, 3\} = 1$, nebo přes zpětnou hranu $T_5 \to T_3$: $T_1 \to T_4 \to T_5 \to T_3 \to T_6 \to T_8$ s $\gamma = \min\{7, 8, 3, 6, 3\} = 3$. Kterou pořadí vybrat a jak iterovat až k maximu — to je [L4.3].</p>
+      <p>Z $T_1$ vede v $G_f$ <strong>jediná</strong> hrana, $T_1 \to T_4$ s $u_f = 7$ (hrany do $T_2$ a $T_3$ jsou nasycené, takže dopředné reziduální hrany nemají) — každá augmentující cesta začíná $T_1 \to T_4$. Zvýrazněná cesta $T_1 \to T_4 \to T_5 \to T_8$ má $\gamma = \min\{7, 8, 4\} = 4$. Další možnosti: $T_1 \to T_4 \to T_7 \to T_8$ s $\gamma = \min\{7, 1, 3\} = 1$, nebo přes zpětnou hranu $T_5 \to T_3$: $T_1 \to T_4 \to T_5 \to T_3 \to T_6 \to T_8$ s $\gamma = \min\{7, 8, 3, 6, 3\} = 3$. Kterou pořadí vybrat a jak iterovat až k maximu — to je <a href="l4-3.html">[L4.3]</a>.</p>
     </div>
   </details>
 
@@ -209,7 +209,7 @@
     <p><em>The flow from $s$ to $t$ is the <strong>maximum</strong> if and only if there is no augmenting path.</em></p>
   </div>
 
-  <p>Směr „maximální ⇒ žádná cesta“ je snadný (cesta by tok zvedla o $\gamma &gt; 0$). Opačný směr dokáže až řez: množina označených vrcholů v posledním, neúspěšném značkování vytvoří minimální řez — to je obsah [L4.4]. V [L4.3] zatím kritérium použijeme jako zastavovací podmínku Ford-Fulkersona.</p>
+  <p>Směr „maximální ⇒ žádná cesta“ je snadný (cesta by tok zvedla o $\gamma &gt; 0$). Opačný směr dokáže až řez: množina označených vrcholů v posledním, neúspěšném značkování vytvoří minimální řez — to je obsah [L4.4]. V <a href="l4-3.html">[L4.3]</a> zatím kritérium použijeme jako zastavovací podmínku Ford-Fulkersona.</p>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
   <div class="box takeaways" id="takeaways">
@@ -220,7 +220,7 @@
       <li><strong>Reziduální graf</strong> $G_f$: dopředná hrana s $u_f = u - f$, zpětná s $u_f = f - l$, nulové se vynechají. Augmentující cesta = <strong>obyčejná orientovaná cesta $s \to t$ v $G_f$</strong>, $\gamma$ = minimum $u_f$ podél ní.</li>
       <li><strong>Augmentace</strong>: $+\gamma$ na dopředných, $-\gamma$ na zpětných hranách — zachová přípustnost i Kirchhoffa a zvedne $|f|$ o $\gamma$.</li>
       <li>Pozor: zpětná kapacita je $f - l$, <strong>ne</strong> $f$ — při $l &gt; 0$ může zpětná hrana chybět i při kladném toku (na zkouškové síti $T_8 \to T_7$).</li>
-      <li>Hledání cesty = <strong>značkování</strong> (vlna dosažitelnosti z $s$ v $G_f$; krok 2 = dopředné, krok 3 = zpětné hrany). Tok je maximální ⟺ augmentující cesta neexistuje — zastavovací podmínka [L4.3], důkaz řezem [L4.4].</li>
+      <li>Hledání cesty = <strong>značkování</strong> (vlna dosažitelnosti z $s$ v $G_f$; krok 2 = dopředné, krok 3 = zpětné hrany). Tok je maximální ⟺ augmentující cesta neexistuje — zastavovací podmínka <a href="l4-3.html">[L4.3]</a>, důkaz řezem [L4.4].</li>
     </ul>
   </div>
 
@@ -243,7 +243,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Zkoušková síť s 12 hranami a startovním tokem $|f| = 9$ (přípustnost jsme ověřili v [L4.1] T01). Máme mechanicky postavit $G_f$ — pro každou hranu spočíst obě reziduální kapacity a nulové vyhodit — a pak v něm najít orientovanou cestu $T_1 \to T_8$. Přesně tohle je přípravný krok každé iterace Ford-Fulkersona, takže si tu předpočítáváme první iteraci pro [L4.3].</p>
+      <p>Zkoušková síť s 12 hranami a startovním tokem $|f| = 9$ (přípustnost jsme ověřili v [L4.1] T01). Máme mechanicky postavit $G_f$ — pro každou hranu spočíst obě reziduální kapacity a nulové vyhodit — a pak v něm najít orientovanou cestu $T_1 \to T_8$. Přesně tohle je přípravný krok každé iterace Ford-Fulkersona, takže si tu předpočítáváme první iteraci pro <a href="l4-3.html">[L4.3]</a>.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -265,7 +265,7 @@
           <p><strong>(ii)</strong> Hrana $T_7 \to T_8$: nese kladný tok $f = 1$, ale $u_f(T_8, T_7) = f - l = 1 - 1 = 0$, takže zpětná hrana $T_8 \to T_7$ v $G_f$ <strong>není</strong>. Vrátit jde jen tok nad dolní mezí — a tady je celý tok „přibitý“ povinným minimem $l = 1$. (To je přesně polopravda z danger boxu: kapacita zpětné hrany není $f$, ale $f - l$.)</p>
           <p><strong>(iii)</strong> Z $T_1$ vede v $G_f$ jediná hrana $T_1 \to T_4$, takže každá augmentující cesta začíná $T_1 \to T_4$. Například
           $$T_1 \to T_4 \to T_5 \to T_8, \qquad \gamma = \min\{7,\ 8,\ 4\} = 4.$$
-          Augmentací vznikne tok $|f| = 13$ ($f_{14} = 4$, $f_{45} = 4$, $f_{58} = 8$) — to bude 1. iterace vzorového běhu Ford-Fulkersona v [L4.3]. (Jiné správné odpovědi: $T_1 \to T_4 \to T_7 \to T_8$ s $\gamma = 1$, nebo $T_1 \to T_4 \to T_5 \to T_3 \to T_6 \to T_8$ s $\gamma = 3$ přes zpětnou hranu $T_5 \to T_3$.)</p>
+          Augmentací vznikne tok $|f| = 13$ ($f_{14} = 4$, $f_{45} = 4$, $f_{58} = 8$) — to bude 1. iterace vzorového běhu Ford-Fulkersona v <a href="l4-3.html">[L4.3]</a>. (Jiné správné odpovědi: $T_1 \to T_4 \to T_7 \to T_8$ s $\gamma = 1$, nebo $T_1 \to T_4 \to T_5 \to T_3 \to T_6 \to T_8$ s $\gamma = 3$ přes zpětnou hranu $T_5 \to T_3$.)</p>
         </div>
       </details>
     </div>
@@ -330,7 +330,7 @@
 
   <div class="pager">
     <a href="../k4/l4-1.html"><span class="dir">← Předchozí</span> L4.1 · Síť, tok, Kirchhoffův zákon</a>
-    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.3 · Ford-Fulkerson: iterativní augmentace (běh))</a>
+    <a class="next" href="../k4/l4-3.html"><span class="dir">Další →</span> L4.3 · Ford-Fulkerson: iterativní augmentace (běh)</a>
   </div>
 
 </div>

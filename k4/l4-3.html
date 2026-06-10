@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L4.3 · Ford-Fulkerson: iterativní augmentace (běh) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k4">K4 · Toky a řezy</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L4.3</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L4.3</span> Kapitola K4 — Toky a řezy (Slot 4) · <strong>[MUST]</strong>
+  </p>
+  <h1>Ford-Fulkerson: iterativní augmentace (běh)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Smyčka kolem augmentace.</strong> Jeden vylepšovací krok už umíš z <a href="l4-2.html">[L4.2]</a> — Ford-Fulkersonův algoritmus ho prostě <strong>opakuje</strong>: najdi augmentující cestu, pošli po ní $\gamma$, aktualizuj tok (i přes zpětné hrany) — a skonči, až žádná augmentující cesta neexistuje.
+  </div>
+
+  <p>V <a href="l4-2.html#takeaways">[L4.2] Reziduální graf a augmentující cesta</a> jsme na zkouškové síti z 25. 5. 2026 značkováním našli cestu $T_1 \to T_4 \to T_5 \to T_8$ s $\gamma = 4$ a zvedli tok z $|f| = 9$ na $13$. Dnes to dotáhneme: poběžíme dál, iteraci za iterací, až na maximum — přesně tak, jak to chce zkouškové zadání („<em>Show the augmenting path in each iteration.</em>“).</p>
+
+  <!-- ===== SEKCE 1: ALGORITMUS ===== -->
+  <h2>Algoritmus: tři řádky (slide 11)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: z [L4.2] umíš najít augmentující cestu (značkování), spočítat $\gamma$ a augmentovat. Sestav z těch dílů celý algoritmus pro maximální tok. Co potřebuješ na startu? A kdy se zastavíš?</summary>
+    <div class="inner">
+      <p>Na startu potřebuješ <strong>nějaký přípustný tok</strong> — augmentace přípustnost jen udržuje, takže od něčeho přípustného musíš vyjít. Pak v cyklu: najdi augmentující cestu, spočti $\gamma$, augmentuj. Zastavíš se, když augmentující cesta <strong>neexistuje</strong> — podle kritéria maximality z <a href="l4-2.html#takeaways">[L4.2]</a> je v tu chvíli tok maximální, takže pokračovat ani není kam.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 11 — Ford-Fulkerson Algorithm, 1:1</div>
+    <p><em><strong>Input:</strong> Network $(G, l, u, s, t)$.<br>
+    <strong>Output:</strong> Maximum feasible flow $f$ from $s$ to $t$.</em></p>
+    <ol>
+      <li><em>Find the feasible flow $f(e)$ for all $e \in E(G)$.</em></li>
+      <li><em>Find an augmenting path $P$. If none exists then stop.</em></li>
+      <li><em>Compute $\gamma$, the capacity of an augmenting path $P$. Augment the flow from $s$ to $t$ and go to 2.</em></li>
+    </ol>
+  </div>
+
+  <p>Krok za krokem česky:</p>
+  <ul>
+    <li><strong>Krok 1 — startovní přípustný tok.</strong> Při $l \equiv 0$ stačí $f \equiv 0$; u zkoušky bývá přípustný tok rovnou <em>zadaný</em> (sloupek $f_e$ v popisku hrany). Když ale $l &gt; 0$ a tok zadaný není, je už tenhle krok netriviální úloha sama o sobě — řeší ji [L4.7].</li>
+    <li><strong>Krok 2 — hledání cesty.</strong> Značkování z <a href="l4-2.html">[L4.2]</a>, neboli dosažitelnost $s \to t$ v reziduálním grafu $G_f$.</li>
+    <li><strong>Krok 3 — augmentace.</strong> $+\gamma$ na dopředných, $-\gamma$ na zpětných hranách a zpátky na krok 2. Nic víc v algoritmu není — celá práce je v opakování.</li>
+  </ul>
+
+  <!-- ===== SEKCE 2: ROZCVIČKA — BĚH NA MALÉ SÍTI ===== -->
+  <h2>Rozcvička: celý běh na malé síti (slide 13)</h2>
+
+  <p>Slidy předvádějí běh na malé síti s nulovými dolními mezemi a nulovým startovním tokem (krok 1 je zadarmo). Proklikej si ho — sleduj, jak se hrany postupně nasycují a jak poslední iterace potřebuje jinou trasu než ty „přímočaré“:</p>
+
+  <div class="viz" id="viz-simple"></div>
+
+  <details class="try">
+    <summary>Zkus sám: po třetí iteraci je $|f| = 13$ a všechny tři „přímé“ cesty ($s{\to}u{\to}t$, $s{\to}v{\to}t$, $s{\to}w{\to}t$) mají nasycenou hranu. Najdi v reziduálním grafu ještě jednu cestu $s \to t$.</summary>
+    <div class="inner">
+      <p>Z $s$ má rezervu už jen $s \to v$ ($5 &lt; 7$). Z $v$ je hrana $v \to t$ nasycená, ale vede odtud hrana $v \to u$ s rezervou $2$ — a z $u$… hrana $u \to t$ má rezervu $6 - 5 = 1$. Cesta $s \to v \to u \to t$ s $\gamma = \min\{2, 2, 1\} = 1$. Po ní je $|f| = 14$ a z $s$ sice ještě vede $s \to v$ (rezerva $1$), ale z $v$ už se dál nikam nedostaneš ($v \to t$ nasycená, $v \to u$ vede k nasycené $u \to t$ a zpětné hrany vracejí jen do už prozkoumaných vrcholů) — stop.</p>
+    </div>
+  </details>
+
+  <p>Stojí za to vidět, <em>kolik</em> tok stojí na volbě cest: čtyři iterace s $\gamma = 5, 5, 3, 1$. Slide na závěr poznamenává, že množina $A = \{s, u, v\}$ určuje <em>minimum capacity cut</em> — co to znamená a proč zaručuje, že $14$ je opravdu maximum, je obsah [L4.4].</p>
+
+  <!-- ===== SEKCE 3: BĚH NA ZKOUŠKOVÉ SÍTI ===== -->
+  <h2>Hlavní číslo: běh na zkouškové síti (25. 5. 2026)</h2>
+
+  <p>Teď zkouškové zadání. Síť i startovní tok $|f| = 9$ známe z <a href="l4-1.html">[L4.1]</a>, reziduální graf a první cestu z <a href="l4-2.html">[L4.2]</a>. Iterace 1 je tedy hotová — pokračujeme, dokud to jde.</p>
+
+  <details class="try">
+    <summary>Zkus sám (iterace 2): po augmentaci $T_1 \to T_4 \to T_5 \to T_8$ o $\gamma = 4$ je $f_{14} = 4$, $f_{45} = 4$, $f_{58} = 8$. Najdi další augmentující cestu a její $\gamma$.</summary>
+    <div class="inner">
+      <p>Z $T_1$ vede v $G_f$ pořád jen $T_1 \to T_4$ (rezerva $7 - 4 = 3$). Hrana $T_5 \to T_8$ se nasytila, takže stará trasa už neprojde. Možnosti z $T_4$: krátká cesta $T_1 \to T_4 \to T_7 \to T_8$ s $\gamma = \min\{3,\ 1,\ 4 - 1\} = 1$, nebo delší $T_1 \to T_4 \to T_5 \to T_3 \to T_6 \to T_8$ přes zpětnou hranu $T_5 \to T_3$ s $\gamma = 3$. Obě jsou správně — vzorové řešení bere tu krátkou ($\gamma = 1$).</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám (iterace 3): po iteraci 2 je $f_{14} = 5$, $f_{47} = 1$, $f_{78} = 2$. Existuje ještě čistě dopředná cesta (všude $f &lt; u$)? A znamená její neexistence konec?</summary>
+    <div class="inner">
+      <p>Dopředně se z $T_1$ dostaneš jen do $T_4$ (rezerva $2$) a dál do $T_5$ (rezerva $4$) — ale $T_5 \to T_8$ je nasycená a $T_4 \to T_7$ taky. Čistě dopředná cesta <strong>neexistuje</strong>. Konec to ale neznamená: z $T_5$ vede <strong>zpětná</strong> hrana $T_5 \to T_3$ (kapacita $f_{35} - l_{35} = 4 - 1 = 3$) a z $T_3$ dopředně $T_3 \to T_6 \to T_8$. Cesta $T_1 \to T_4 \to T_5 \to T_3 \to T_6 \to T_8$, $\gamma = \min\{2, 4, 3, 6, 3\} = 2$.</p>
+    </div>
+  </details>
+
+  <p>Celý běh (popisek hrany $= l, f, u$, hodnoty se v každém kroku aktualizují):</p>
+
+  <div class="viz" id="viz-examrun"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „když nevidím dopřednou cestu, jsem hotov“</div>
+    <p>Zastavovací podmínka je <strong>žádná cesta $s \to t$ v reziduálním grafu $G_f$</strong> — tedy včetně zpětných hran. Kdo po iteraci 2 hledal jen dopředné cesty s $f &lt; u$, skončil na $|f| = 14$ a dvě jednotky toku zahodil: iterace 3 vede přes zpětnou hranu $T_5 \to T_3$ a teprve po ní je tok $16$ maximální. Korektní zdůvodnění konce zní: <em>všechny hrany ze zdroje jsou nasycené, takže z $T_1$ v $G_f$ nevede žádná hrana</em> — to vylučuje dopředné i zpětné pokračování najednou.</p>
+  </div>
+
+  <!-- ===== SEKCE 4: KONEČNOST A SLOŽITOST ===== -->
+  <h2>Skončí to? A jak rychle? (slidy 17–18)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: kapacity i dolní meze jsou celá čísla a startovní tok taky. Kolik iterací může Ford-Fulkerson nejvýš udělat?</summary>
+    <div class="inner">
+      <p>Každá iterace zvedne $|f|$ o $\gamma$, a $\gamma$ je při celočíselných datech celé číslo $\ge 1$ (minimum z celočíselných rezerv $u - f$ a $f - l$, které jsou na cestě kladné). Hodnota toku je shora omezená (třeba součtem kapacit hran ze zdroje, viz mez z <a href="l4-1.html#takeaways">[L4.1]</a>), takže iterací je nejvýš $F$ = hodnota maximálního toku. Na zkouškové síti: start $9$, maximum $16$ — nejvýš $7$ iterací, nám stačily $3$, protože $\gamma$ byla větší než $1$.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 17 — konečnost (část Integrality), 1:1</div>
+    <p><em>If all capacities are integers, $\gamma$ in 3) of the Ford-Fulkerson algorithm is always an integer. Since there is a maximum flow of finite value, the algorithm terminates after a finite number of steps.</em></p>
+  </div>
+
+  <div class="box">
+    <div class="box-title">Slide 18 — Ford-Fulkerson Algorithm - Time Complexity, 1:1</div>
+    <p><em>To find an augmenting path takes $\mathcal{O}(|E|)$ time.</em></p>
+    <p><em><strong>For integer capacities, each iteration increases the flow by at least 1.</strong> Let $U$ be the highest edge capacity. The maximum number of iterations is equal to the volume of maximum flow $F = |E| \cdot U$ which is equal to the capacity of the minimum cut. Alg. complexity is $\mathcal{O}(|E| \cdot F) = \mathcal{O}(|E|^2 \cdot U)$.</em></p>
+    <p><em><strong>For non-integer capacities</strong> and non-integer flow the algorithm <strong>might not terminate at all</strong> [Korte Vygen] Chapter Flows, Exercise 2.</em></p>
+    <p><em><strong>Edmonds and Karp [1972]:</strong> When choosing the augmenting path, if we always choose the <strong>shortest one</strong> (e.g., by Breadth First Search), time complexity is $\mathcal{O}(|E|^2 \cdot |V|)$.</em></p>
+  </div>
+
+  <p>Česky a s drobným upřesněním: iterací je nejvýš $F$ (hodnota maximálního toku) a $F$ je nejvýš $|E| \cdot U$ — hrubě odhadnuto přes kapacity hran; každá iterace stojí $\mathcal{O}(|E|)$, dohromady $\mathcal{O}(|E| \cdot F) = \mathcal{O}(|E|^2 \cdot U)$. To je <strong>pseudopolynomiální</strong> mez — roste s velikostí kapacit $U$, ne jen s velikostí grafu. A není to planý strach: na následující síti (protipříklad ze slidu 18, za $U$ dosazujeme $100$) umí zlá volba cest protáhnout běh na $2U$ iterací:</p>
+
+  <div class="viz" id="viz-zigzag"></div>
+
+  <details class="try">
+    <summary>Zkus sám: čím se zigzag liší od rozumného běhu? A jaká jednoduchá změna v kroku 2 ho vyloučí?</summary>
+    <div class="inner">
+      <p>Zigzag pokaždé prochází hranou $u \to v$ s kapacitou $1$ (jednou dopředně, jednou zpětně), takže $\gamma = 1$ — a tok roste po kapkách. Rozumný běh vede obě cesty mimo ni a má hotovo za dvě iterace s $\gamma = U$. Léčba: v kroku 2 vybírat <strong>nejkratší</strong> augmentující cestu (BFS v $G_f$) — to je <strong>Edmonds-Karp</strong>; cesty $s{\to}u{\to}t$ a $s{\to}v{\to}t$ (2 hrany) pak vyhrají nad zigzagem (3 hrany) a obecně platí mez $\mathcal{O}(|E|^2 \cdot |V|)$, nezávislá na kapacitách.</p>
+    </div>
+  </details>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.3</div>
+    <ul>
+      <li><strong>Ford-Fulkerson = smyčka kolem augmentace:</strong> 1. sežeň přípustný tok ($f \equiv 0$ při $l \equiv 0$, u zkoušky zadán; jinak [L4.7]), 2. najdi augmentující cestu (<a href="l4-2.html#takeaways">[L4.2]</a>), 3. pošli $\gamma$ a aktualizuj — $+\gamma$ na dopředných, $-\gamma$ na zpětných hranách — a zpět na 2.</li>
+      <li><strong>Konec:</strong> v reziduálním grafu už není cesta $s \to t$ (typicky: všechny hrany ze zdroje nasycené). Tok je pak maximální; zdůvodnění řezem a min-cut v [L4.4].</li>
+      <li><strong>Zkouškový běh 25. 5. 2026:</strong> start $|f| = 9$; ① $T_1{\to}T_4{\to}T_5{\to}T_8$, $\gamma = 4$; ② $T_1{\to}T_4{\to}T_7{\to}T_8$, $\gamma = 1$; ③ $T_1{\to}T_4{\to}T_5{\to}T_3{\to}T_6{\to}T_8$ přes zpětnou $T_5{\to}T_3$, $\gamma = 2$; výsledek $|f| = 16$.</li>
+      <li><strong>Složitost:</strong> celočíselné kapacity → $\gamma \ge 1$ → nejvýš $F$ iterací po $\mathcal{O}(|E|)$, tj. $\mathcal{O}(|E| \cdot F) = \mathcal{O}(|E|^2 \cdot U)$ — pseudopolynomiální (zigzag $2U$ iterací); neceločíselné kapacity: nemusí skončit vůbec. <strong>Edmonds-Karp</strong> (vždy nejkratší cesta, BFS) → $\mathcal{O}(|E|^2 \cdot |V|)$.</li>
+      <li>U zkoušky vypiš <strong>každou iteraci</strong>: cestu, výpočet $\gamma$ jako minimum rezerv ($u - f$ dopředné, $f - l$ zpětné) a změněné toky.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-ffrun">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Ford-Fulkerson Algorithm (zkouška 25. 5. 2026)</strong>
+      <span class="task-src">zdroj: zkouška KO 25.05.2026 = task bank #21 (zadání EN 1:1; čtení špatně čitelných diagonál sítě dle [L4.1])</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, 1:1)</span>
+        <p>a) Using Ford-Fulkerson alg. solve the maximum flow problem for the graph in the upper left corner (arc label is $l_e, f_e, u_e$, i.e., minimum capacity, feasible flow, maximum capacity). The source is $T_1$, the sink is $T_8$. Show the augmenting path in each iteration.</p>
+        <p>b) Determine the minimum capacity cut.</p>
+      </div>
+
+      <div class="viz" id="viz-t01net"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Zkoušková síť (12 hran, tři s dolní mezí $l &gt; 0$) se zadaným startovním přípustným tokem $|f| = 9$ — krok 1 algoritmu je tedy darovaný. Část a) chce běh Ford-Fulkersona s <em>vypsanou augmentující cestou v každé iteraci</em>; část b) minimální řez — ten patří do [L4.4], kde úloha pokračuje jako FOTO checkpoint celé kapitoly. Tady řešíme a).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — smyčka algoritmu, zastavovací podmínka, zápis iterací (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-2.html#takeaways">[L4.2]</a> — reziduální graf, augmentující cesta, $\gamma$ (a pozor na zpětnou kapacitu $f - l$).</li>
+        <li><a href="l4-1.html#takeaways">[L4.1]</a> — čtení popisku $(l_e, f_e, u_e)$ a hodnota $|f|$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>V každé iteraci: (1) projdi v duchu reziduální graf od $T_1$ (které hrany mají $u - f &gt; 0$, které zpětné mají $f - l &gt; 0$); (2) jakmile dosáhneš $T_8$, vypiš cestu a $\gamma$ = minimum rezerv; (3) aktualizuj toky a hodnotu $|f|$. Klíčové pozorování: z $T_1$ vede po celou dobu jediná reziduální hrana $T_1 \to T_4$ (zbylé dvě hrany ze zdroje jsou nasycené od začátku) — všechno se odehrává za $T_4$. Konec nastane, až se nasytí i $T_1 \to T_4$.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p>Startovní tok: $|f| = f_{12} + f_{13} + f_{14} = 4 + 5 + 0 = 9$. Běh (vzorové řešení banky #21; v iteraci 3 je $T_5 \to T_3$ zpětná reziduální hrana původní hrany $T_3 \to T_5$):</p>
+          <table>
+            <thead><tr><th>Iter.</th><th>Augmentující cesta v $G_f$</th><th>$\gamma$</th><th>Změněné toky</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>$T_1 \to T_4 \to T_5 \to T_8$</td><td>$\min\{7, 8, 4\} = 4$</td><td>$f_{14} = 4$, $f_{45} = 4$, $f_{58} = 8$</td></tr>
+              <tr><td>2</td><td>$T_1 \to T_4 \to T_7 \to T_8$</td><td>$\min\{3, 1, 3\} = 1$</td><td>$f_{14} = 5$, $f_{47} = 1$, $f_{78} = 2$</td></tr>
+              <tr><td>3</td><td>$T_1 \to T_4 \to T_5 \to T_3 \to T_6 \to T_8$</td><td>$\min\{2, 4, 3, 6, 3\} = 2$</td><td>$f_{14} = 7$, $f_{45} = 6$, $f_{35} = 2$, $f_{36} = 2$, $f_{68} = 6$</td></tr>
+            </tbody>
+          </table>
+          <p>V iteraci 3 je třetí člen minima zpětná rezerva $f_{35} - l_{35} = 4 - 1 = 3$ (ne $4$!). Hodnota toku po třech augmentacích:
+          $$|f| = 9 + 4 + 1 + 2 = 16.$$</p>
+          <p>Výsledné toky (vše v mezích $l \le f \le u$):</p>
+          <table>
+            <thead><tr><th>hrana</th><th>12</th><th>13</th><th>14</th><th>26</th><th>36</th><th>35</th><th>37</th><th>45</th><th>47</th><th>68</th><th>58</th><th>78</th></tr></thead>
+            <tbody><tr><td>$f$</td><td>4</td><td>5</td><td>7</td><td>4</td><td>2</td><td>2</td><td>1</td><td>6</td><td>1</td><td>6</td><td>8</td><td>2</td></tr></tbody>
+          </table>
+          <p><strong>Proč už žádná augmentující cesta není:</strong> po třetí augmentaci jsou všechny hrany ze zdroje nasycené ($f_{12} = u_{12} = 4$, $f_{13} = u_{13} = 5$, $f_{14} = u_{14} = 7$), takže z $T_1$ nevede v reziduálním grafu žádná hrana, $T_8$ je nedosažitelný a algoritmus končí. Podle kritéria maximality z <a href="l4-2.html#takeaways">[L4.2]</a> je tok $|f| = 16$ maximální. <em>(Jiná pořadí cest jsou také správně — třeba v iteraci 2 delší cesta s $\gamma = 3$; maximum vyjde vždy $16$, jen jiným počtem iterací. U zkoušky každou iteraci vypiš.)</em></p>
+          <p><strong>Část b)</strong> — minimální řez — dořešíme v [L4.4]: vyjde přímo z množiny vrcholů označených v posledním (neúspěšném) značkování.</p>
+          <p><em>Pozn. ke zdrojům: dochovaný rukopisný přepis téhož zadání čte špatně čitelné indexy uzlů jinak (např. hrany $T_2 \to T_5$, $T_4 \to T_6$, $T_6 \to T_7$) a dochází k maximu $15$; držíme se konzistentního čtení banky #21 zavedeného v [L4.1] (diagonály $T_3{\to}T_7 = (0,1,1)$, $T_4{\to}T_5 = (0,0,8)$), které dává $16$.</em></p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-worstcase">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>How many iterations? (worst case vs. Edmonds-Karp)</strong>
+      <span class="task-src">zdroj: síť = protipříklad ze slidu 18 (04_Flows); EN znění otázek VLASTNÍ (přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (vlastní, EN; síť dle slidu 18)</span>
+        <p>Consider the network with nodes $s, u, v, t$ and arcs $s \to u$, $s \to v$, $u \to t$, $v \to t$, each with $l = 0$ and capacity $U$, and the arc $u \to v$ with $l = 0$ and capacity $1$. The initial flow is zero and $U$ is a large integer.</p>
+        <ol>
+          <li>Exhibit a sequence of augmenting path choices for which the Ford-Fulkerson algorithm performs $2U$ iterations.</li>
+          <li>Exhibit a choice that finishes in 2 iterations.</li>
+          <li>State the general bound on the number of iterations and the running time of Ford-Fulkerson for integer capacities, and explain how Edmonds and Karp choose the augmenting path and what bound this gives.</li>
+        </ol>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Protipříklad ze slidu 18 — čtyři „tlusté“ hrany s kapacitou $U$ a jedna „tenká“ příčka $u \to v$ s kapacitou $1$. Máme ukázat, že počet iterací Ford-Fulkersona závisí na volbě cest: stejná síť snese běh za $2$ iterace i za $2U$ iterací.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — smyčka algoritmu, meze $\mathcal{O}(|E| \cdot F)$ a Edmonds-Karp (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-2.html#takeaways">[L4.2]</a> — zpětná hrana v reziduálním grafu (zigzag ji potřebuje).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(i) Jak donutit $\gamma = 1$ v každé iteraci? Cesta musí obsahovat příčku $u \to v$ — jednou dopředně, podruhé zpětně, aby se kapacita příčky pořád „resetovala“. (ii) Které dvě cesty se příčce vyhnou úplně? (iii) Porovnej délky cest: zigzag má 3 hrany, přímé cesty 2 — co z toho plyne pro pravidlo „ber nejkratší“?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Střídej cesty $P_1 = s \to u \to v \to t$ a $P_2 = s \to v \to u \to t$, kde $P_2$ prochází příčku $u \to v$ <strong>zpětně</strong>. Na $P_1$ je $\gamma = \min\{U - f_{su},\ 1 - f_{uv},\ U - f_{vt}\} = 1$ (příčka). Augmentací se příčka nasytí ($f_{uv} = 1$). Na $P_2$ je $\gamma = \min\{U - f_{sv},\ f_{uv} - 0,\ U - f_{ut}\} = 1$ (zpětná rezerva příčky) a augmentace ji zase vyprázdní ($f_{uv} = 0$). Každá iterace zvedne $|f|$ přesně o $1$ a maximum je $F = 2U$ (víc se přes $\{s\}$ nevejde: $U + U$) — celkem $2U$ iterací. Běh prvních iterací je proklikatelný ve výkladu výše.</p>
+          <p><strong>(ii)</strong> Cesty $s \to u \to t$ ($\gamma = U$) a $s \to v \to t$ ($\gamma = U$): po dvou iteracích $|f| = 2U$, všechny hrany ze zdroje nasycené → stop. Tok je stejný, práce tisíckrát menší.</p>
+          <p><strong>(iii)</strong> Pro celočíselné kapacity zvedne každá iterace tok aspoň o $1$, takže iterací je nejvýš $F$; nalezení cesty stojí $\mathcal{O}(|E|)$, celkem $\mathcal{O}(|E| \cdot F) = \mathcal{O}(|E|^2 \cdot U)$ — pseudopolynomiálně (slide 18; pro neceločíselné kapacity nemusí algoritmus skončit vůbec). <strong>Edmonds a Karp [1972]:</strong> v kroku 2 vždy vybrat <strong>nejkratší</strong> augmentující cestu (počtem hran, tj. BFS v reziduálním grafu) — pak je složitost $\mathcal{O}(|E|^2 \cdot |V|)$ nezávisle na velikosti kapacit. Tady BFS najde dvouhranové cesty $s{\to}u{\to}t$, $s{\to}v{\to}t$ dřív než tříhranový zigzag, takže zlý běh vůbec nenastane.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L4.3">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k4/l4-2.html"><span class="dir">← Předchozí</span> L4.2 · Reziduální graf a augmentující cesta</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.4 · Řez a věta max-flow/min-cut [FOTO])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Rozcvička: běh FF na malé síti ze slidu 13 (popisek = l, f, u)
+// Pozn.: přepis slidu uvádí prostřední hranu jako u→v, ale popsaný běh
+// (4. cesta s→v→u→t zvyšuje tok na této hraně a výsledek je |f| = 14)
+// je konzistentní jen s orientací v→u — kreslíme v→u (přiznáno v caption).
+KOViz.stepper(document.getElementById('viz-simple'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'s', x:80,  y:180, sub:'zdroj'},
+      {id:'u', x:280, y:60},
+      {id:'v', x:330, y:180},
+      {id:'w', x:280, y:300},
+      {id:'t', x:560, y:180, sub:'stok'},
+    ],
+    edges: [
+      {from:'s', to:'u', label:'0,0,5'},
+      {from:'s', to:'v', label:'0,0,7'},
+      {from:'s', to:'w', label:'0,0,3'},
+      {from:'v', to:'u', label:'0,0,2'},
+      {from:'w', to:'v', label:'0,0,4'},
+      {from:'u', to:'t', label:'0,0,6'},
+      {from:'v', to:'t', label:'0,0,5'},
+      {from:'w', to:'t', label:'0,0,8'},
+    ],
+  },
+  frames: [
+    {desc:'Krok 1: l ≡ 0, takže startovní přípustný tok je f ≡ 0, |f| = 0. Popisek hrany = l, f, u.',
+     nodes:{s:'hl'}, edges:{}, subs:{s:'|f| = 0'}},
+    {desc:'Iterace 1: cesta s→u→t, γ = min{5, 6} = 5.',
+     nodes:{s:'hl', u:'hl', t:'hl'},
+     edges:{'s->u':'hl','u->t':'hl'},
+     labels:{'s->u':'0,5,5','u->t':'0,5,6'},
+     subs:{s:'|f| = 5'}},
+    {desc:'Iterace 2: cesta s→v→t, γ = min{7, 5} = 5. Hrana s→u už je nasycená.',
+     nodes:{s:'hl', v:'hl', t:'hl'},
+     edges:{'s->v':'hl','v->t':'hl','s->u':'good','u->t':'good'},
+     labels:{'s->u':'0,5,5','u->t':'0,5,6','s->v':'0,5,7','v->t':'0,5,5'},
+     subs:{s:'|f| = 10'}},
+    {desc:'Iterace 3: cesta s→w→t, γ = min{3, 8} = 3. Nasycené jsou už s→u, v→t i s→w.',
+     nodes:{s:'hl', w:'hl', t:'hl'},
+     edges:{'s->w':'hl','w->t':'hl','s->u':'good','u->t':'good','s->v':'good','v->t':'good'},
+     labels:{'s->u':'0,5,5','u->t':'0,5,6','s->v':'0,5,7','v->t':'0,5,5','s->w':'0,3,3','w->t':'0,3,8'},
+     subs:{s:'|f| = 13'}},
+    {desc:'Iterace 4: přímé cesty došly — ale s→v má rezervu 2 a přes v→u (rezerva 2) a u→t (rezerva 1) vede cesta s→v→u→t, γ = min{2, 2, 1} = 1.',
+     nodes:{s:'hl', v:'hl', u:'hl', t:'hl'},
+     edges:{'s->v':'hl','v->u':'hl','u->t':'hl','s->u':'good','s->w':'good','v->t':'good','w->t':'good'},
+     labels:{'s->u':'0,5,5','u->t':'0,6,6','s->v':'0,6,7','v->t':'0,5,5','s->w':'0,3,3','w->t':'0,3,8','v->u':'0,1,2'},
+     subs:{s:'|f| = 14'}},
+    {desc:'Stop: z s vede v G_f už jen s→v (rezerva 1), ale z v se k t nedostaneš (v→t nasycená, za v→u čeká nasycená u→t). Žádná augmentující cesta → |f| = 14 je maximum. Slide: A = {s, u, v} určuje minimum capacity cut → L4.4.',
+     nodes:{s:'good', u:'good', v:'good', t:'good', w:'good'},
+     edges:{'s->u':'good','u->t':'good','s->v':'good','v->t':'good','s->w':'good','w->t':'good','v->u':'good'},
+     labels:{'s->u':'0,5,5','u->t':'0,6,6','s->v':'0,6,7','v->t':'0,5,5','s->w':'0,3,3','w->t':'0,3,8','v->u':'0,1,2'},
+     subs:{s:'|f| = 14 = max'}},
+  ],
+  caption: 'Běh Ford-Fulkersona na síti ze slidu 13: γ = 5, 5, 3, 1, výsledek |f| = 14. (Přepis slidu uvádí prostřední hranu jako u→v; popsaný průběh i výsledek ale odpovídají orientaci v→u, kreslíme tedy v→u — rozpor přepisu přiznán.)',
+});
+
+// 2 — Hlavní běh: zkoušková síť 25. 5. 2026 (= task bank #21), start |f| = 9
+KOViz.stepper(document.getElementById('viz-examrun'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'T1', x:60,  y:180, label:'T₁', sub:'zdroj'},
+      {id:'T2', x:220, y:55,  label:'T₂'},
+      {id:'T3', x:220, y:180, label:'T₃'},
+      {id:'T4', x:220, y:305, label:'T₄'},
+      {id:'T6', x:420, y:55,  label:'T₆'},
+      {id:'T5', x:420, y:180, label:'T₅'},
+      {id:'T7', x:420, y:305, label:'T₇'},
+      {id:'T8', x:580, y:180, label:'T₈', sub:'stok'},
+    ],
+    edges: [
+      {from:'T1', to:'T2', label:'0,4,4'},
+      {from:'T1', to:'T3', label:'2,5,5'},
+      {from:'T1', to:'T4', label:'0,0,7'},
+      {from:'T2', to:'T6', label:'0,4,7'},
+      {from:'T3', to:'T6', label:'0,0,6'},
+      {from:'T3', to:'T5', label:'1,4,4'},
+      {from:'T3', to:'T7', label:'0,1,1', curve:0.35},
+      {from:'T4', to:'T5', label:'0,0,8', curve:-0.35},
+      {from:'T4', to:'T7', label:'0,0,1'},
+      {from:'T6', to:'T8', label:'0,4,7'},
+      {from:'T5', to:'T8', label:'0,4,8'},
+      {from:'T7', to:'T8', label:'1,1,4'},
+    ],
+  },
+  frames: [
+    {desc:'Start: zadaný přípustný tok |f| = 9 (ověřen v L4.1). Hrany T₁→T₂ a T₁→T₃ jsou nasycené — z T₁ vede v G_f jediná hrana T₁→T₄.',
+     nodes:{T1:'hl'},
+     edges:{'T1->T2':'bad','T1->T3':'bad'},
+     subs:{T1:'|f| = 9'}},
+    {desc:'Iterace 1 (z L4.2): cesta T₁→T₄→T₅→T₈, samé dopředné hrany, γ = min{7 − 0, 8 − 0, 8 − 4} = 4.',
+     nodes:{T1:'hl', T4:'hl', T5:'hl', T8:'hl'},
+     edges:{'T1->T4':'hl','T4->T5':'hl','T5->T8':'hl'},
+     subs:{T1:'|f| = 9'}},
+    {desc:'Po iteraci 1: f₁₄ = 4, f₄₅ = 4, f₅₈ = 8 → |f| = 13. Hrana T₅→T₈ se nasytila.',
+     nodes:{T1:'good', T4:'good', T5:'good', T8:'good'},
+     edges:{'T1->T4':'good','T4->T5':'good','T5->T8':'good'},
+     labels:{'T1->T4':'0,4,7','T4->T5':'0,4,8','T5->T8':'0,8,8'},
+     subs:{T1:'|f| = 13'}},
+    {desc:'Iterace 2: stará trasa neprojde (T₅→T₈ nasycená). Cesta T₁→T₄→T₇→T₈, γ = min{7 − 4, 1 − 0, 4 − 1} = 1.',
+     nodes:{T1:'hl', T4:'hl', T7:'hl', T8:'hl'},
+     edges:{'T1->T4':'hl','T4->T7':'hl','T7->T8':'hl'},
+     labels:{'T1->T4':'0,4,7','T4->T5':'0,4,8','T5->T8':'0,8,8'},
+     subs:{T1:'|f| = 13'}},
+    {desc:'Po iteraci 2: f₁₄ = 5, f₄₇ = 1, f₇₈ = 2 → |f| = 14. Nasycené: T₅→T₈, T₄→T₇ (a pořád T₁→T₂, T₁→T₃).',
+     nodes:{T1:'good', T4:'good', T7:'good', T8:'good'},
+     edges:{'T1->T4':'good','T4->T7':'good','T7->T8':'good'},
+     labels:{'T1->T4':'0,5,7','T4->T5':'0,4,8','T5->T8':'0,8,8','T4->T7':'0,1,1','T7->T8':'1,2,4'},
+     subs:{T1:'|f| = 14'}},
+    {desc:'Iterace 3: čistě dopředná cesta už NEEXISTUJE. Přes ZPĚTNOU hranu T₅→T₃ (kapacita f₃₅ − l₃₅ = 4 − 1 = 3) vede cesta T₁→T₄→T₅→T₃→T₆→T₈, γ = min{2, 4, 3, 6, 3} = 2.',
+     nodes:{T1:'hl', T4:'hl', T5:'hl', T3:'hl', T6:'hl', T8:'hl'},
+     edges:{'T1->T4':'hl','T4->T5':'hl','T3->T5':'hl','T3->T6':'hl','T6->T8':'hl'},
+     labels:{'T1->T4':'0,5,7','T4->T5':'0,4,8','T5->T8':'0,8,8','T4->T7':'0,1,1','T7->T8':'1,2,4'},
+     subs:{T1:'|f| = 14', T5:'bwd → T₃'}},
+    {desc:'Po iteraci 3: f₁₄ = 7, f₄₅ = 6, f₃₅ = 4 − 2 = 2 (zpětná hrana UBÍRÁ), f₃₆ = 2, f₆₈ = 6 → |f| = 16.',
+     nodes:{T1:'good', T4:'good', T5:'good', T3:'good', T6:'good', T8:'good'},
+     edges:{'T1->T4':'good','T4->T5':'good','T3->T5':'good','T3->T6':'good','T6->T8':'good'},
+     labels:{'T1->T4':'0,7,7','T4->T5':'0,6,8','T5->T8':'0,8,8','T4->T7':'0,1,1','T7->T8':'1,2,4','T3->T5':'1,2,4','T3->T6':'0,2,6','T6->T8':'0,6,7'},
+     subs:{T1:'|f| = 16'}},
+    {desc:'Stop: všechny hrany ze zdroje jsou nasycené (4 = 4, 5 = 5, 7 = 7) → z T₁ nevede v G_f žádná hrana → žádná augmentující cesta → |f| = 16 je MAXIMÁLNÍ (kritérium z L4.2). Minimální řez z posledního značkování → L4.4.',
+     nodes:{T1:'hl', T8:'hl'},
+     edges:{'T1->T2':'bad','T1->T3':'bad','T1->T4':'bad'},
+     labels:{'T1->T4':'0,7,7','T4->T5':'0,6,8','T5->T8':'0,8,8','T4->T7':'0,1,1','T7->T8':'1,2,4','T3->T5':'1,2,4','T3->T6':'0,2,6','T6->T8':'0,6,7'},
+     subs:{T1:'|f| = 16 = max'}},
+  ],
+  caption: 'Vzorový běh Ford-Fulkersona na zkouškové síti (25. 5. 2026 = banka #21): start 9, iterace γ = 4, 1, 2, maximum |f| = 16. Iterace 3 jde přes zpětnou hranu T₅→T₃ — tok na T₃→T₅ klesne ze 4 na 2.',
+});
+
+// 3 — Zigzag: protipříklad ze slidu 18 (U = 100), zlá vs. chytrá volba cest
+KOViz.stepper(document.getElementById('viz-zigzag'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'s', x:90,  y:180, sub:'zdroj'},
+      {id:'u', x:310, y:60},
+      {id:'v', x:310, y:300},
+      {id:'t', x:530, y:180, sub:'stok'},
+    ],
+    edges: [
+      {from:'s', to:'u', label:'0,0,100'},
+      {from:'s', to:'v', label:'0,0,100'},
+      {from:'u', to:'v', label:'0,0,1'},
+      {from:'u', to:'t', label:'0,0,100'},
+      {from:'v', to:'t', label:'0,0,100'},
+    ],
+  },
+  frames: [
+    {desc:'Síť ze slidu 18 s U = 100: čtyři hrany kapacity 100 a příčka u→v kapacity 1. Start f ≡ 0.',
+     nodes:{}, edges:{}, subs:{s:'|f| = 0'}},
+    {desc:'Zlá volba, iterace 1: s→u→v→t přes příčku, γ = min{100, 1, 100} = 1. Příčka se nasytí.',
+     nodes:{s:'hl', u:'hl', v:'hl', t:'hl'},
+     edges:{'s->u':'hl','u->v':'hl','v->t':'hl'},
+     labels:{'s->u':'0,1,100','u->v':'0,1,1','v->t':'0,1,100'},
+     subs:{s:'|f| = 1'}},
+    {desc:'Zlá volba, iterace 2: s→v→u→t přes příčku ZPĚTNĚ (f − l = 1), γ = 1. Příčka se zase vyprázdní — jsme tam, kde na začátku, jen o 2 jednotky výš.',
+     nodes:{s:'hl', v:'hl', u:'hl', t:'hl'},
+     edges:{'s->v':'hl','u->v':'hl','u->t':'hl'},
+     labels:{'s->u':'0,1,100','u->v':'0,0,1','v->t':'0,1,100','s->v':'0,1,100','u->t':'0,1,100'},
+     subs:{s:'|f| = 2'}},
+    {desc:'A znovu: s→u→v→t, γ = 1… Každá dvojice iterací přidá 2 → na maximum F = 200 je potřeba 2U = 200 iterací.',
+     nodes:{s:'hl', u:'hl', v:'hl', t:'hl'},
+     edges:{'s->u':'hl','u->v':'hl','v->t':'hl'},
+     labels:{'s->u':'0,2,100','u->v':'0,1,1','v->t':'0,2,100','s->v':'0,1,100','u->t':'0,1,100'},
+     subs:{s:'|f| = 3'}},
+    {desc:'Chytrá volba (běh od nuly): s→u→t s γ = 100 a s→v→t s γ = 100 → hotovo za 2 iterace, |f| = 200. Edmonds-Karp (BFS, nejkratší cesta) by zigzag nikdy nezvolil — dvouhranové cesty vyhrají nad tříhranovou.',
+     nodes:{s:'good', u:'good', v:'good', t:'good'},
+     edges:{'s->u':'good','u->t':'good','s->v':'good','v->t':'good'},
+     labels:{'s->u':'0,100,100','u->t':'0,100,100','s->v':'0,100,100','v->t':'0,100,100','u->v':'0,0,1'},
+     subs:{s:'|f| = 200 = max'}},
+  ],
+  caption: 'Protipříklad ze slidu 18 (za obecné U dosazeno 100): zlá volba cest střídá příčku u→v dopředně a zpětně s γ = 1 → 2U iterací; chytrá volba skončí za 2. Proto Edmonds-Karp: vždy nejkratší cesta (BFS v G_f).',
+});
+
+// 4 — T01: zkoušková síť se startovním tokem (popisek = l, f, u)
+KOViz.graph(document.getElementById('viz-t01net'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'T1', x:60,  y:180, label:'T₁', sub:'zdroj'},
+    {id:'T2', x:220, y:55,  label:'T₂'},
+    {id:'T3', x:220, y:180, label:'T₃'},
+    {id:'T4', x:220, y:305, label:'T₄'},
+    {id:'T6', x:420, y:55,  label:'T₆'},
+    {id:'T5', x:420, y:180, label:'T₅'},
+    {id:'T7', x:420, y:305, label:'T₇'},
+    {id:'T8', x:580, y:180, label:'T₈', sub:'stok'},
+  ],
+  edges: [
+    {from:'T1', to:'T2', label:'0,4,4'},
+    {from:'T1', to:'T3', label:'2,5,5'},
+    {from:'T1', to:'T4', label:'0,0,7'},
+    {from:'T2', to:'T6', label:'0,4,7'},
+    {from:'T3', to:'T6', label:'0,0,6'},
+    {from:'T3', to:'T5', label:'1,4,4'},
+    {from:'T3', to:'T7', label:'0,1,1', curve:0.35},
+    {from:'T4', to:'T5', label:'0,0,8', curve:-0.35},
+    {from:'T4', to:'T7', label:'0,0,1'},
+    {from:'T6', to:'T8', label:'0,4,7'},
+    {from:'T5', to:'T8', label:'0,4,8'},
+    {from:'T7', to:'T8', label:'1,1,4'},
+  ],
+  caption: 'Úloha T01: zkoušková síť 25. 5. 2026 (= banka #21) se zadaným přípustným tokem |f| = 9; popisek hrany = l(e), f(e), u(e). Čtení diagonál dle [L4.1].',
+});
+</script>
+</body>
+</html>

@@ -180,7 +180,7 @@
   <!-- ===== SEKCE 6: ZKOUŠKOVÁ SÍŤ ===== -->
   <h2>Zkoušková síť z 25. 5. 2026 — naučit se ji číst</h2>
 
-  <p>Zkouškové zadání Ford-Fulkersona (25. 5. 2026) dává síť, kde každá hrana nese trojici $(l_e, f_e, u_e)$ — <em>minimum capacity, feasible flow, maximum capacity</em>. Samotný běh algoritmu přijde až v [L4.3] a řez v [L4.4]; dnes síť „jen“ přečteme brýlemi téhle lekce: je zadané $f$ opravdu přípustný tok a jakou má hodnotu?</p>
+  <p>Zkouškové zadání Ford-Fulkersona (25. 5. 2026) dává síť, kde každá hrana nese trojici $(l_e, f_e, u_e)$ — <em>minimum capacity, feasible flow, maximum capacity</em>. Samotný běh algoritmu přijde až v <a href="l4-3.html">[L4.3]</a> a řez v [L4.4]; dnes síť „jen“ přečteme brýlemi téhle lekce: je zadané $f$ opravdu přípustný tok a jakou má hodnotu?</p>
 
   <div class="viz" id="viz-exam"></div>
 
@@ -230,7 +230,7 @@
         <p>Edge list — $(l_e, f_e, u_e)$: $T_1{\to}T_2$: $0,4,4$; $T_1{\to}T_3$: $2,5,5$; $T_1{\to}T_4$: $0,0,7$; $T_2{\to}T_6$: $0,4,7$; $T_3{\to}T_6$: $0,0,6$; $T_3{\to}T_5$: $1,4,4$; $T_3{\to}T_7$: $0,1,1$; $T_4{\to}T_5$: $0,0,8$; $T_4{\to}T_7$: $0,0,1$; $T_6{\to}T_8$: $0,4,7$; $T_5{\to}T_8$: $0,4,8$; $T_7{\to}T_8$: $1,1,4$. <em>(Síť je nakreslená výše ve výkladu.)</em></p>
       </div>
 
-      <p><em>Originální otázky a), b) vyřešíme až v [L4.3] a [L4.4] — dnes na síti procvičíme přesně to, co umí tahle lekce. Otázky (i)–(iii) jsou naše vlastní:</em></p>
+      <p><em>Originální otázky a), b) vyřešíme až v <a href="l4-3.html">[L4.3]</a> a [L4.4] — dnes na síti procvičíme přesně to, co umí tahle lekce. Otázky (i)–(iii) jsou naše vlastní:</em></p>
       <ol>
         <li>Verify that the prescribed $f$ is a <strong>feasible flow</strong>.</li>
         <li>Compute the flow value $|f|$.</li>
@@ -267,7 +267,7 @@
           Kontrola u stoku: $f_{68} + f_{58} + f_{78} = 4 + 4 + 1 = 9$ ✓ (Kirchhoff funguje).</p>
           <p><strong>(iii) Horní mez:</strong> všechen tok musí odtéct hranami $\delta^+(T_1)$, takže
           $$|f| \le u_{12} + u_{13} + u_{14} = 4 + 5 + 7 = 16.$$
-          Stejný argument u stoku: $|f| \le u_{68} + u_{58} + u_{78} = 7 + 8 + 4 = 19$. Těsnější je mez u zdroje, $16$. (To jsou jen dvě nejjednodušší „hranice“ ze slidu 8 — $A = \{T_1\}$ a $A = V \setminus \{T_8\}$; obecné řezy v [L4.4]. A spoiler: Ford-Fulkerson v [L4.3] dožene tok z 9 právě na 16, takže mez u zdroje je zde dokonce dosažená.)</p>
+          Stejný argument u stoku: $|f| \le u_{68} + u_{58} + u_{78} = 7 + 8 + 4 = 19$. Těsnější je mez u zdroje, $16$. (To jsou jen dvě nejjednodušší „hranice“ ze slidu 8 — $A = \{T_1\}$ a $A = V \setminus \{T_8\}$; obecné řezy v [L4.4]. A spoiler: Ford-Fulkerson v <a href="l4-3.html">[L4.3]</a> dožene tok z 9 právě na 16, takže mez u zdroje je zde dokonce dosažená.)</p>
         </div>
       </details>
     </div>
