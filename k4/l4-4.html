@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L4.4 · Řez a věta max-flow/min-cut [FOTO] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k4">K4 · Toky a řezy</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L4.4</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L4.4</span> Kapitola K4 — Toky a řezy (Slot 4) · <strong>[MUST]</strong> · FOTO checkpoint kapitoly
+  </p>
+  <h1>Řez a věta max-flow/min-cut [FOTO]</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Minimální řez a jeho rovnost s maximálním tokem.</strong> Řez je „hrdlo“ sítě dané množinou vrcholů $A$ ($s \in A$, $t \notin A$) s kapacitou $C(A) = \sum_{e \in \delta^+(A)} u(e) - \sum_{e \in \delta^-(A)} l(e)$. Každý řez shora omezuje každý tok — a Ford-Fulkersonova věta říká, že <strong>maximální tok = minimální řez</strong>. Min řez navíc dostaneš zadarmo: tvoří ho vrcholy označené v posledním (neúspěšném) značkování.
+  </div>
+
+  <p>V <a href="l4-3.html#takeaways">[L4.3] Ford-Fulkerson: iterativní augmentace (běh)</a> jsme na zkouškové síti z 25. 5. 2026 dotáhli tok na $|f| = 16$ a skončili, protože už neexistovala augmentující cesta. Zkouškové zadání ale pokračuje: „<em>b) Determine the minimum capacity cut.</em>“ Dnes zjistíš, co to je, proč je to <strong>certifikát maximality</strong> — a že na konci běhu ho máš vlastně už v ruce. Lekce končí FOTO checkpointem celé kapitoly.</p>
+
+  <!-- ===== SEKCE 1: CO JE ŘEZ ===== -->
+  <h2>Řez: hrdlo sítě (slide 15)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: chceš kamarádovi dokázat, že přes zkouškovou síť víc než 16 prostě nepoteče — bez přehrávání celého běhu algoritmu. Jaký nejstručnější argument tě napadá?</summary>
+    <div class="inner">
+      <p>Ukázat <strong>hrdlo</strong>: množinu hran, přes kterou musí projít všechno, co teče z $T_1$ do $T_8$, a jejíž celková propustnost je $16$. Tady se nabízejí rovnou hrany ze zdroje: $u_{12} + u_{13} + u_{14} = 4 + 5 + 7 = 16$ — každá jednotka toku zdroj opouští některou z nich, takže $|f| \le 16$. A protože tok hodnoty $16$ existuje (našli jsme ho), je maximální. Tomuhle hrdlu se říká <strong>řez</strong>.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Slide 15 — Minimum Cut Problem (definice), 1:1</div>
+    <p><em><strong>Cut — given by edge set $\delta(A)$ given by vertex set $A$.</strong> The cut in $G$ is an edge set $\delta(A) = \delta^+(A) \cup \delta^-(A)$ with $s \in A$ and $t \in V(G) \setminus A$ (i.e. the cut separates nodes $s$ and $t$). The <strong>minimum cut</strong> is the cut of minimum capacity $C(A) = \sum_{e \in \delta^+(A)} u(e) - \sum_{e \in \delta^-(A)} l(e)$.</em></p>
+  </div>
+
+  <p>Česky: <strong>cut (řez)</strong> vybereš tak, že vybereš <em>množinu vrcholů</em> $A$ obsahující zdroj, ale ne stok. Řez pak tvoří hrany, které hranici $A$ překračují: $\delta^+(A)$ ven z $A$, $\delta^-(A)$ dovnitř. Hrany s oběma konci uvnitř (nebo oběma vně) do řezu nepatří. Kapacita řezu sčítá horní meze výstupních hran a <strong>odečítá dolní meze vstupních</strong>:</p>
+
+  <div class="viz" id="viz-cutanatomy"></div>
+
+  <details class="try">
+    <summary>Zkus sám: proč se $l(e)$ vstupních hran v kapacitě řezu <em>odečítá</em>? (Vzpomeň si, co dolní mez vynucuje pro každý přípustný tok.)</summary>
+    <div class="inner">
+      <p>Vstupní hrana $e \in \delta^-(A)$ musí v každém přípustném toku nést aspoň $f(e) \ge l(e)$ — tedy aspoň $l(e)$ jednotek se <em>vrací</em> dovnitř $A$ a o to méně může být čistý odtok z $A$ směrem k $t$. Hrdlo $A$ tak reálně propustí nejvýš „všechno ven na maximum, minus co se povinně vrací“: $\sum_{\delta^+} u - \sum_{\delta^-} l$. Při $l \equiv 0$ se člen ztrácí a kapacita řezu je prostě součet kapacit výstupních hran.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2: KAŽDÝ ŘEZ JE STROP ===== -->
+  <h2>Každý řez je strop pro každý tok</h2>
+
+  <details class="try">
+    <summary>Zkus sám: z <a href="l4-1.html#takeaways">[L4.1]</a> víš, že hodnotu toku lze měřit na libovolné množině $A \ni s$, $t \notin A$: $\;|f| = \sum_{e \in \delta^+(A)} f(e) - \sum_{e \in \delta^-(A)} f(e)$. Dosaď meze $l \le f \le u$ a uvidíš, co z toho vypadne.</summary>
+    <div class="inner">
+      <p>Na výstupních hranách zvětši $f(e)$ na $u(e)$, na vstupních zmenši $f(e)$ na $l(e)$ — obojí pravou stranu jen zvedne:
+      $$|f| = \sum_{e \in \delta^+(A)} f(e) - \sum_{e \in \delta^-(A)} f(e) \;\le\; \sum_{e \in \delta^+(A)} u(e) - \sum_{e \in \delta^-(A)} l(e) = C(A).$$
+      Tedy <strong>každý přípustný tok ≤ kapacita každého řezu</strong> (slabá dualita). Speciálně: maximální tok ≤ minimální řez.</p>
+    </div>
+  </details>
+
+  <p>Tohle už jsi mimochodem jednou použil: „meze“ $16$ a $19$ z <a href="l4-1.html#takeaways">[L4.1]</a> nebyly nic jiného než kapacity dvou konkrétních řezů zkouškové sítě — zdrojového $A = \{T_1\}$ ($4+5+7 = 16$) a stokového $A = V \setminus \{T_8\}$ ($7+8+4 = 19$). Slabá dualita říká: <em>kterýkoli</em> řez, který napíšeš, je platný strop. Otázka dne zní: dotkne se nejlepší tok nejlepšího stropu?</p>
+
+  <details class="try">
+    <summary>Zkus sám: kdy v odhadu výše nastane <em>rovnost</em> $|f| = C(A)$?</summary>
+    <div class="inner">
+      <p>Přesně tehdy, když ani jedno zaokrouhlení nic nezměnilo: $f(e) = u(e)$ na <strong>všech</strong> výstupních hranách ($\delta^+(A)$ nasycené) a $f(e) = l(e)$ na <strong>všech</strong> vstupních ($\delta^-(A)$ na dolní mezi). Pokud takovou dvojici (tok, řez) najdeš, je tok automaticky maximální a řez minimální — nic lepšího se mezi strop a podlahu nevejde.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 3: VĚTA A KDE VZÍT MIN ŘEZ ===== -->
+  <h2>Věta max-flow/min-cut — a kde tu rovnost vzít (slide 15)</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 15 — Ford and Fulkerson [1956], 1:1</div>
+    <p><em>The value of the maximum flow from $s$ to $t$ is equal to the capacity of the <strong>minimum cut</strong>, i.e.,</em>
+    $$\sum_{e \in \delta^+(A)} f(e) - \sum_{e \in \delta^-(A)} f(e) = \sum_{e \in \delta^+(A)} u(e) - \sum_{e \in \delta^-(A)} l(e).$$</p>
+    <p><em>This property follows from LP duality. When the labeling procedure stops, since there is no augmenting path, the minimum cut is given by the labeled vertices (the minimum cut is equal to the set of edges that do not allow further labeling). Therefore, $f(e) = u(e)$ holds for all $e \in \delta^+(A)$ and $f(e) = l(e)$ holds for all $e \in \delta^-(A)$.</em></p>
+  </div>
+
+  <p>Slidy se odvolávají na LP dualitu (max-flow LP znáš z <a href="l4-1.html">[L4.1]</a>), ale druhá půlka boxu skrývá <strong>konstruktivní argument</strong>, který u zkoušky reálně použiješ. Rozbal si ho sám:</p>
+
+  <details class="try">
+    <summary>Zkus sám: Ford-Fulkerson skončil — značkování z <a href="l4-2.html#takeaways">[L4.2]</a> nedosáhlo $t$. Vezmi $A$ = množinu označených vrcholů. Proč je každá hrana $e \in \delta^+(A)$ nasycená a každá $e \in \delta^-(A)$ na dolní mezi?</summary>
+    <div class="inner">
+      <p>Kdyby výstupní hrana $e$ z označeného $v_i$ do neoznačeného $v_j$ měla $f(e) &lt; u(e)$, pravidlo 2 značkování by $v_j$ označilo — spor s tím, že značkování skončilo. Stejně tak kdyby vstupní hrana z neoznačeného $v_i$ do označeného $v_j$ měla $f(e) &gt; l(e)$, pravidlo 3 označí $v_i$. Takže po zastavení: $f = u$ na celém $\delta^+(A)$ a $f = l$ na celém $\delta^-(A)$ — přesně podmínka rovnosti z minulé sekce. Proto $|f| = C(A)$, tok je maximální a $A$ určuje minimální řez. (A protože $s$ je označený vždy a $t$ označený není — jinak by existovala augmentující cesta — je $A$ opravdu řez.)</p>
+    </div>
+  </details>
+
+  <p>Tím je věta dokázaná „přes algoritmus“: slabá dualita dává $\le$ a poslední značkování vyrábí dvojici s rovností. Prakticky to znamená recept na zkouškové b):</p>
+
+  <div class="box">
+    <div class="box-title"><img src="../assets/icons/list-checks.svg" class="ico" alt="">Recept: minimální řez po skončení Ford-Fulkersona</div>
+    <ol>
+      <li>Doběhni Ford-Fulkerson <a href="l4-3.html#takeaways">[L4.3]</a> — poslední pokus o značkování selže.</li>
+      <li>$A$ = vrcholy, které poslední značkování <strong>stihlo označit</strong> (vždy aspoň $\{s\}$).</li>
+      <li>Min řez $= \delta(A)$; vypiš $\delta^+(A)$ (a případné $\delta^-(A)$) a spočti $C(A) = \sum_{\delta^+} u - \sum_{\delta^-} l$.</li>
+      <li><strong>Kontrola:</strong> musí vyjít $C(A) = |f|$. Když nevyjde, je chyba v běhu nebo ve čtení hran.</li>
+    </ol>
+  </div>
+
+  <h2>Dvakrát naživo: malá síť a zkoušková síť</h2>
+
+  <p>Nejdřív malá síť ze slidu 13 — běh skončil v <a href="l4-3.html">[L4.3]</a> na $|f| = 14$ a slide tvrdí: „<em>set $A = \{s, u, v\}$ determines the minimum capacity cut</em>“. Proklikej si, jak k té množině dojde poslední značkování:</p>
+
+  <div class="viz" id="viz-smallcut"></div>
+
+  <p>A teď hlavní číslo — zkoušková síť 25. 5. 2026 po skončení běhu z <a href="l4-3.html">[L4.3]</a> ($|f| = 16$):</p>
+
+  <div class="viz" id="viz-examcut"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „minimální řez = nasycené hrany“</div>
+    <p>Na hranách min řezu sice platí $f = u$, ale <strong>obráceně to neplatí</strong>: nasycených hran bývá víc, než kolik jich řez tvoří. Ve zkouškové síti je na konci nasyceno šest hran ($T_1{\to}T_2$, $T_1{\to}T_3$, $T_1{\to}T_4$, $T_3{\to}T_7$, $T_4{\to}T_7$, $T_5{\to}T_8$ — součet kapacit $26$), ale minimální řez tvoří jen tři z nich s $C(A) = 16$. Řez je <strong>vždy $\delta(A)$ pro nějakou množinu vrcholů $A$</strong> — vypiš $A$ z posledního značkování, nehledej ho „očima“ podle nasycenosti. A nezapomeň na druhou past: u sítí s $l &gt; 0$ se dolní meze vstupních hran <strong>odečítají</strong>.</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.4</div>
+    <ul>
+      <li><strong>Řez (cut):</strong> množina vrcholů $A$, $s \in A$, $t \notin A$; hrany řezu $\delta(A) = \delta^+(A) \cup \delta^-(A)$; kapacita $C(A) = \sum_{e \in \delta^+(A)} u(e) - \sum_{e \in \delta^-(A)} l(e)$ — dolní meze vstupních hran se <strong>odečítají</strong>.</li>
+      <li><strong>Slabá dualita:</strong> $|f| \le C(A)$ pro každý tok a každý řez (rovnost z <a href="l4-1.html#takeaways">[L4.1]</a> + meze $l \le f \le u$). Rovnost ⟺ $f = u$ na celém $\delta^+(A)$ a $f = l$ na celém $\delta^-(A)$.</li>
+      <li><strong>Max-flow = min-cut</strong> (Ford a Fulkerson 1956; slidy přes LP dualitu, konstruktivně přes poslední značkování).</li>
+      <li><strong>Min řez prakticky:</strong> $A$ = vrcholy označené v posledním (neúspěšném) značkování <a href="l4-3.html#takeaways">[L4.3]</a>; kontrola $C(A) = |f|$. Zkouška 25. 5. 2026: $A = \{T_1\}$, řez $\{(T_1,T_2), (T_1,T_3), (T_1,T_4)\}$, $C(A) = 4 + 5 + 7 = 16 = |f|$.</li>
+      <li><strong>Pozor:</strong> nasycená hrana ≠ hrana min řezu; řez vždy zapisuj přes množinu $A$.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 [FOTO] ===== -->
+  <div class="task" id="t-mincut">
+    <div class="task-head foto">
+      <span class="task-id">T01</span>
+      <strong>Ford-Fulkerson Algorithm + minimum capacity cut (zkouška 25. 5. 2026)</strong>
+      <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
+      <span class="task-src">zdroj: zkouška KO 25.05.2026 = task bank #21 (zadání EN 1:1; čtení špatně čitelných diagonál dle <a href="l4-1.html">[L4.1]</a>); část a) řešena v <a href="l4-3.html#t-ffrun">[L4.3] T01</a>, zde se uzavírá částí b)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, 1:1)</span>
+        <p>a) Using Ford-Fulkerson alg. solve the maximum flow problem for the graph in the upper left corner (arc label is $l_e, f_e, u_e$, i.e., minimum capacity, feasible flow, maximum capacity). The source is $T_1$, the sink is $T_8$. Show the augmenting path in each iteration.</p>
+        <p>b) Determine the minimum capacity cut.</p>
+      </div>
+
+      <div class="viz" id="viz-t01net"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Kompletní zkoušková úloha slotu 4: běh Ford-Fulkersona s vypsanými iteracemi (část a) a minimální řez (část b). Část a) jsme vyřešili v <a href="l4-3.html#t-ffrun">[L4.3] T01</a>; tady úlohu uzavíráme částí b) — a jako FOTO checkpoint ji píšeš celou.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice řezu, $C(A)$, recept „$A$ = označené vrcholy“ (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-3.html#takeaways">[L4.3]</a> — celý běh: iterace, $\gamma$, zastavení.</li>
+        <li><a href="l4-2.html#takeaways">[L4.2]</a> — značkovací procedura a reziduální graf.</li>
+        <li><a href="l4-1.html#takeaways">[L4.1]</a> — čtení popisku $(l_e, f_e, u_e)$ a hodnota $|f|$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Po skončení běhu z části a) spusť značkování ještě jednou a sleduj, kam se dostane. Tady je to rychlé: všechny tři hrany ze zdroje jsou nasycené, takže pravidlo 2 nic neoznačí, a do $T_1$ žádná hrana nevede, takže ani pravidlo 3. Označený zůstane jen zdroj. Pak už jen vypiš $\delta^+(A)$, $\delta^-(A)$ a spočti kapacitu — a zkontroluj, že vyšla rovná $|f|$ z části a).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>a)</strong> (podrobně v <a href="l4-3.html#t-ffrun">[L4.3] T01</a>) Start $|f| = 9$; iterace ① $T_1{\to}T_4{\to}T_5{\to}T_8$, $\gamma = 4$; ② $T_1{\to}T_4{\to}T_7{\to}T_8$, $\gamma = 1$; ③ $T_1{\to}T_4{\to}T_5{\to}T_3{\to}T_6{\to}T_8$ přes zpětnou hranu $T_5 \to T_3$, $\gamma = 2$. Výsledek $|f| = 9 + 4 + 1 + 2 = 16$; pak jsou všechny hrany ze zdroje nasycené a augmentující cesta neexistuje.</p>
+          <p><strong>b)</strong> Řez je určen množinou $A$ s $T_1 \in A$, $T_8 \notin A$; pro sítě s dolními mezemi je jeho kapacita
+          $$C(A) = \sum_{e \in \delta^+(A)} u(e) - \sum_{e \in \delta^-(A)} l(e).$$
+          Poslední (neúspěšné) značkování označí jen zdroj — z $T_1$ nevede v reziduálním grafu žádná hrana ($f_{12} = u_{12} = 4$, $f_{13} = u_{13} = 5$, $f_{14} = u_{14} = 7$). Tedy
+          $$A = \{T_1\}, \qquad \delta^+(A) = \{(T_1, T_2),\ (T_1, T_3),\ (T_1, T_4)\}, \qquad \delta^-(A) = \emptyset,$$
+          $$C(A) = 4 + 5 + 7 - 0 = 16.$$
+          Minimální řez je zdrojový řez $\{(T_1, T_2), (T_1, T_3), (T_1, T_4)\}$ s kapacitou $16$ — rovnou hodnotě maximálního toku z části a), což je zároveň kontrola správnosti (max-flow = min-cut).</p>
+        </div>
+      </details>
+
+      <div class="box foto">
+        <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+        <p>Vyřeš celou úlohu (a) i (b) NA PAPÍR bez koukání do řešení — přesně takhle padla 25. 5. 2026 — a pošli mi fotku. Zkontroluju: u a) každou iteraci (cesta, výpočet $\gamma$ jako minimum rezerv, změněné toky — zejména zpětnou hranu $T_5 \to T_3$ s rezervou $f - l = 3$) a zdůvodnění konce; u b) že řez zapisuješ přes množinu $A$ z posledního značkování, vypsané hrany $\delta^+(A)$ a kontrolu $C(A) = |f| = 16$.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-gasoline">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Blocking of Gasoline Supply (interpretace min řezu)</strong>
+      <span class="task-src">zdroj: 04_Flows slide 16 (Example Flow.cut.blocking, EN 1:1); řešení VLASTNÍ — slidy ho neuvádějí (přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN, 1:1 — slide 16)</span>
+        <p>An adversary has a tank located at one node $t$ and the gasoline supply pipeline denoted by directed graph $G(E, V)$. Gasoline supply node is denoted by $s$. Let pipe $e$ has minimum throughput $l(e)$ and maximum throughput $u(e)$. We may decrease $u(e)$ by $k(e) \in \langle 0, u(e) - l(e) \rangle$, but in such case we loose $k(e)$ soldiers.</p>
+        <p>We want to isolate the tank from the gasoline supply while losing a minimum number of soldiers.</p>
+        <p>a) Consider $l(e) = 0$ and determine the minimal effort required to isolate the tank from a gasoline.<br>
+        b) How the problem changes when we consider non-zero minimum throughput<br>
+        c) Consider several supply nodes denoted by the set $S \subset V$ such that $t \notin S$.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Modelovací úloha na <em>význam</em> minimálního řezu: „odříznout“ cisternu od zásobování znamená srazit propustnost nějakého hrdla na nulu a každá ubraná jednotka kapacity stojí jednoho vojáka. Tři varianty: bez dolních mezí, s dolními mezemi, více zdrojů.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — řez $\delta(A)$, kapacita $C(A)$, max-flow = min-cut (<a href="#takeaways">takeaways</a>).</li>
+        <li><a href="l4-1.html#takeaways">[L4.1]</a> — co vynucuje dolní mez $l(e)$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(i) Kdy je cisterna izolovaná? Když po snížení kapacit je maximální tok $s \to t$ nulový. (ii) Jakou množinu hran se vyplatí „uzavírat“? Promysli, že snižovat kapacitu hrany, která netvoří s ostatními řez, je vyhozený voják. (iii) U b): na kolik nejméně jde srazit kapacita hrany? A co z toho plyne pro hrany s $l(e) &gt; 0$? (iv) U c): jak víc zdrojů převést na jeden — vzpomeň na trik s pomocným vrcholem.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — slidy řešení neuvádějí)</summary>
+        <div class="inner">
+          <p><strong>a)</strong> Vyber libovolný řez $A$ ($s \in A$, $t \notin A$) a sraz na nulu všechny výstupní hrany: $k(e) = u(e)$ pro $e \in \delta^+(A)$. Cena $= \sum_{e \in \delta^+(A)} u(e) = C(A)$ (při $l \equiv 0$) a tok je nulový — hodnota toku měřená na $A$ je $\le 0$ a zároveň $\ge 0$. Naopak každé úspěšné zablokování nějaký řez vynulovat <em>musí</em>: kdyby po snížení měl každý řez kladnou kapacitu, byl by podle věty max-flow/min-cut kladný i maximální tok. Vynulování řezu $A$ stojí aspoň $C(A) \ge C_{\min}$. <strong>Minimální počet ztracených vojáků = kapacita minimálního řezu = hodnota maximálního toku</strong> — spočteš ji Ford-Fulkersonem <a href="l4-3.html#takeaways">[L4.3]</a> a řez odečteš z posledního značkování.</p>
+          <p><strong>b)</strong> Dvě změny. <em>Cena:</em> hranu jde srazit nejvýš o $u(e) - l(e)$ (na dolní mez), takže uzavření řezu $A$ stojí $\sum_{e \in \delta^+(A)} (u(e) - l(e))$ — hledáš minimální řez v síti s kapacitami $u(e) - l(e)$. <em>Proveditelnost:</em> i po maximálním snížení teče hranou pořád aspoň $l(e)$; nejlepší dosažitelná kapacita řezu $A$ je $\sum_{e \in \delta^+(A)} l(e) - \sum_{e \in \delta^-(A)} l(e)$. Úplná izolace je tedy možná, jen pokud existuje řez, kde tahle hodnota je $\le 0$ (typicky: všechny výstupní hrany řezu mají $l(e) = 0$); jinak nenulové zásobování garantované dolními mezemi nezastavíš.</p>
+          <p><strong>c)</strong> Standardní trik se super-zdrojem: přidej nový vrchol $s'$ a hrany $s' \to v$ pro každé $v \in S$ s kapacitou $u = \infty$ (ty „přestřihnout“ nejde — stály by nekonečno vojáků). Minimální řez oddělující $s'$ od $t$ v rozšířené síti nikdy neobsahuje hranu $s' \to v$, takže odpovídá řezu $A \supseteq S$, $t \notin A$ v původní síti — tedy hrdlu, které odřízne cisternu od <em>všech</em> zdrojů najednou. Dál jako v a).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L4.4">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k4/l4-3.html"><span class="dir">← Předchozí</span> L4.3 · Ford-Fulkerson: iterativní augmentace (běh)</a>
+    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.5 · Modelování přiřazení jako tok (vrstvená síť) [FOTO])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Anatomie řezu: VLASTNÍ mini-síť s dolní mezí (popisek hrany = l, u)
+KOViz.graph(document.getElementById('viz-cutanatomy'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s', x:80,  y:180, cls:'hl', sub:'A'},
+    {id:'a', x:250, y:75,  cls:'hl', sub:'A'},
+    {id:'b', x:250, y:285, cls:'hl', sub:'A'},
+    {id:'c', x:430, y:75},
+    {id:'d', x:430, y:285},
+    {id:'t', x:565, y:180, sub:'stok'},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'0,4'},
+    {from:'s', to:'b', label:'0,3'},
+    {from:'a', to:'b', label:'0,2'},
+    {from:'a', to:'c', label:'1,5', cls:'hl'},
+    {from:'b', to:'d', label:'0,2', cls:'hl'},
+    {from:'c', to:'b', label:'1,2', cls:'bad', dashed:true, curve:0.18},
+    {from:'c', to:'t', label:'0,6'},
+    {from:'d', to:'t', label:'0,4'},
+  ],
+  caption: 'Anatomie řezu (vlastní ilustrační síť, popisek hrany = l(e), u(e)): A = {s, a, b}. Výstupní hrany δ⁺(A) = {a→c, b→d} (plné zvýrazněné), vstupní δ⁻(A) = {c→b} (čárkovaná). Hrany uvnitř A (s→a, s→b, a→b) do řezu nepatří. C(A) = (5 + 2) − 1 = 6.',
+});
+
+// 2 — Malá síť ze slidu 13: poslední značkování → A = {s, u, v}, řez C = 14
+// Konečný stav běhu z L4.3 (|f| = 14); orientace prostřední hrany v→u dle L4.3 (rozpor přepisu přiznán tam).
+KOViz.stepper(document.getElementById('viz-smallcut'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'s', x:80,  y:180, sub:'zdroj'},
+      {id:'u', x:280, y:60},
+      {id:'v', x:330, y:180},
+      {id:'w', x:280, y:300},
+      {id:'t', x:560, y:180, sub:'stok'},
+    ],
+    edges: [
+      {from:'s', to:'u', label:'0,5,5'},
+      {from:'s', to:'v', label:'0,6,7'},
+      {from:'s', to:'w', label:'0,3,3'},
+      {from:'v', to:'u', label:'0,1,2'},
+      {from:'w', to:'v', label:'0,0,4'},
+      {from:'u', to:'t', label:'0,6,6'},
+      {from:'v', to:'t', label:'0,5,5'},
+      {from:'w', to:'t', label:'0,3,8'},
+    ],
+  },
+  frames: [
+    {desc:'Konec běhu z L4.3: |f| = 14, augmentující cesta neexistuje. Spustíme značkování naposledy: m_s = TRUE, ostatní FALSE.',
+     nodes:{s:'hl'}, edges:{}, subs:{s:'TRUE'}},
+    {desc:'Pravidlo 2 (dopředně, f < u): s→u má 5 = 5 ✗, s→w má 3 = 3 ✗, ale s→v má 6 < 7 ✓ → m_v = TRUE.',
+     nodes:{s:'hl', v:'hl'},
+     edges:{'s->v':'hl', 's->u':'bad', 's->w':'bad'},
+     subs:{s:'TRUE', v:'TRUE'}},
+    {desc:'Z v: v→t má 5 = 5 ✗, ale v→u má 1 < 2 ✓ → m_u = TRUE. Pravidlo 3 (zpětně, f > l): do v vede w→v s f = 0 = l ✗ — w neoznačíme.',
+     nodes:{s:'hl', v:'hl', u:'hl'},
+     edges:{'s->v':'hl', 'v->u':'hl', 's->u':'bad', 's->w':'bad', 'v->t':'bad'},
+     subs:{s:'TRUE', v:'TRUE', u:'TRUE'}},
+    {desc:'Z u: u→t má 6 = 6 ✗. Žádný další vrchol označit nejde a t je FALSE → žádná augmentující cesta. Označené vrcholy: A = {s, u, v} — přesně množina ze slidu 13.',
+     nodes:{s:'hl', v:'hl', u:'hl'},
+     edges:{'s->u':'bad', 's->w':'bad', 'v->t':'bad', 'u->t':'bad'},
+     subs:{s:'A', u:'A', v:'A', w:'FALSE', t:'FALSE'}},
+    {desc:'Řez: δ⁺(A) = {s→w, u→t, v→t} — všechny nasycené (3 = 3, 6 = 6, 5 = 5); δ⁻(A) = {w→v} s f = 0 = l. C(A) = 3 + 6 + 5 − 0 = 14 = |f|. Tok 14 je maximální a řez minimální.',
+     nodes:{s:'good', u:'good', v:'good'},
+     edges:{'s->w':'hl', 'u->t':'hl', 'v->t':'hl', 'w->v':'bad'},
+     subs:{s:'A', u:'A', v:'A', t:'C(A) = 14'}},
+  ],
+  caption: 'Poslední značkování na síti ze slidu 13 (konečný tok |f| = 14 z L4.3): označí se A = {s, u, v}, min řez = {s→w, u→t, v→t} s kapacitou 14. Slide 13: „set A = {s, u, v} determines the minimum capacity cut.“',
+});
+
+// 3 — Zkoušková síť 25. 5. 2026 po skončení FF (|f| = 16): poslední značkování → A = {T1}, řez C = 16
+KOViz.stepper(document.getElementById('viz-examcut'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'T1', x:60,  y:180, label:'T₁', sub:'zdroj'},
+      {id:'T2', x:220, y:55,  label:'T₂'},
+      {id:'T3', x:220, y:180, label:'T₃'},
+      {id:'T4', x:220, y:305, label:'T₄'},
+      {id:'T6', x:420, y:55,  label:'T₆'},
+      {id:'T5', x:420, y:180, label:'T₅'},
+      {id:'T7', x:420, y:305, label:'T₇'},
+      {id:'T8', x:580, y:180, label:'T₈', sub:'stok'},
+    ],
+    edges: [
+      {from:'T1', to:'T2', label:'0,4,4'},
+      {from:'T1', to:'T3', label:'2,5,5'},
+      {from:'T1', to:'T4', label:'0,7,7'},
+      {from:'T2', to:'T6', label:'0,4,7'},
+      {from:'T3', to:'T6', label:'0,2,6'},
+      {from:'T3', to:'T5', label:'1,2,4'},
+      {from:'T3', to:'T7', label:'0,1,1', curve:0.35},
+      {from:'T4', to:'T5', label:'0,6,8', curve:-0.35},
+      {from:'T4', to:'T7', label:'0,1,1'},
+      {from:'T6', to:'T8', label:'0,6,7'},
+      {from:'T5', to:'T8', label:'0,8,8'},
+      {from:'T7', to:'T8', label:'1,2,4'},
+    ],
+  },
+  frames: [
+    {desc:'Konečný tok z L4.3: |f| = 16 (popisek = l, f, u). Poslední značkování: m_{T₁} = TRUE, ostatní FALSE.',
+     nodes:{T1:'hl'}, edges:{}, subs:{T1:'TRUE'}},
+    {desc:'Pravidlo 2: T₁→T₂ má 4 = 4 ✗, T₁→T₃ má 5 = 5 ✗, T₁→T₄ má 7 = 7 ✗ — všechny hrany ze zdroje nasycené. Pravidlo 3: do T₁ žádná hrana nevede. Nikoho dalšího označit nejde → stop, A = {T₁}.',
+     nodes:{T1:'hl'},
+     edges:{'T1->T2':'bad', 'T1->T3':'bad', 'T1->T4':'bad'},
+     subs:{T1:'A = {T₁}'}},
+    {desc:'Min řez: δ⁺(A) = {T₁→T₂, T₁→T₃, T₁→T₄}, δ⁻(A) = ∅. C(A) = 4 + 5 + 7 − 0 = 16 = |f| ✓. Tok 16 je maximální, řez minimální.',
+     nodes:{T1:'good', T8:'hl'},
+     edges:{'T1->T2':'hl', 'T1->T3':'hl', 'T1->T4':'hl'},
+     subs:{T1:'A', T8:'C(A) = 16'}},
+    {desc:'Kontrast (polopravda): nasycené jsou i T₃→T₇ (1 = 1), T₄→T₇ (1 = 1) a T₅→T₈ (8 = 8) — celkem 6 nasycených hran se součtem kapacit 26. Min řez ale tvoří jen δ⁺(A) pro A z posledního značkování: 3 hrany, C(A) = 16.',
+     nodes:{T1:'good'},
+     edges:{'T1->T2':'hl', 'T1->T3':'hl', 'T1->T4':'hl', 'T3->T7':'bad', 'T4->T7':'bad', 'T5->T8':'bad'},
+     subs:{T1:'A', T8:'C(A) = 16'}},
+  ],
+  caption: 'Zkoušková síť 25. 5. 2026 (= banka #21) po skončení Ford-Fulkersona (|f| = 16): poslední značkování označí jen T₁ → minimální řez {T₁→T₂, T₁→T₃, T₁→T₄} s kapacitou 4 + 5 + 7 = 16. Červeně ve 4. kroku: nasycené hrany, které v řezu NEJSOU.',
+});
+
+// 4 — T01: zkoušková síť se ZADANÝM startovním tokem (popisek = l, f, u), čtení diagonál dle [L4.1]
+KOViz.graph(document.getElementById('viz-t01net'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'T1', x:60,  y:180, label:'T₁', sub:'zdroj'},
+    {id:'T2', x:220, y:55,  label:'T₂'},
+    {id:'T3', x:220, y:180, label:'T₃'},
+    {id:'T4', x:220, y:305, label:'T₄'},
+    {id:'T6', x:420, y:55,  label:'T₆'},
+    {id:'T5', x:420, y:180, label:'T₅'},
+    {id:'T7', x:420, y:305, label:'T₇'},
+    {id:'T8', x:580, y:180, label:'T₈', sub:'stok'},
+  ],
+  edges: [
+    {from:'T1', to:'T2', label:'0,4,4'},
+    {from:'T1', to:'T3', label:'2,5,5'},
+    {from:'T1', to:'T4', label:'0,0,7'},
+    {from:'T2', to:'T6', label:'0,4,7'},
+    {from:'T3', to:'T6', label:'0,0,6'},
+    {from:'T3', to:'T5', label:'1,4,4'},
+    {from:'T3', to:'T7', label:'0,1,1', curve:0.35},
+    {from:'T4', to:'T5', label:'0,0,8', curve:-0.35},
+    {from:'T4', to:'T7', label:'0,0,1'},
+    {from:'T6', to:'T8', label:'0,4,7'},
+    {from:'T5', to:'T8', label:'0,4,8'},
+    {from:'T7', to:'T8', label:'1,1,4'},
+  ],
+  caption: 'Úloha T01: zkoušková síť 25. 5. 2026 (= banka #21) se zadaným přípustným tokem |f| = 9; popisek hrany = l(e), f(e), u(e). Čtení diagonál dle [L4.1].',
+});
+</script>
+</body>
+</html>

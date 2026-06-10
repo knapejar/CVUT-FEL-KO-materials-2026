@@ -80,7 +80,7 @@
     </div>
   </details>
 
-  <p>Stojí za to vidět, <em>kolik</em> tok stojí na volbě cest: čtyři iterace s $\gamma = 5, 5, 3, 1$. Slide na závěr poznamenává, že množina $A = \{s, u, v\}$ určuje <em>minimum capacity cut</em> — co to znamená a proč zaručuje, že $14$ je opravdu maximum, je obsah [L4.4].</p>
+  <p>Stojí za to vidět, <em>kolik</em> tok stojí na volbě cest: čtyři iterace s $\gamma = 5, 5, 3, 1$. Slide na závěr poznamenává, že množina $A = \{s, u, v\}$ určuje <em>minimum capacity cut</em> — co to znamená a proč zaručuje, že $14$ je opravdu maximum, je obsah <a href="l4-4.html">[L4.4]</a>.</p>
 
   <!-- ===== SEKCE 3: BĚH NA ZKOUŠKOVÉ SÍTI ===== -->
   <h2>Hlavní číslo: běh na zkouškové síti (25. 5. 2026)</h2>
@@ -149,7 +149,7 @@
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.3</div>
     <ul>
       <li><strong>Ford-Fulkerson = smyčka kolem augmentace:</strong> 1. sežeň přípustný tok ($f \equiv 0$ při $l \equiv 0$, u zkoušky zadán; jinak [L4.7]), 2. najdi augmentující cestu (<a href="l4-2.html#takeaways">[L4.2]</a>), 3. pošli $\gamma$ a aktualizuj — $+\gamma$ na dopředných, $-\gamma$ na zpětných hranách — a zpět na 2.</li>
-      <li><strong>Konec:</strong> v reziduálním grafu už není cesta $s \to t$ (typicky: všechny hrany ze zdroje nasycené). Tok je pak maximální; zdůvodnění řezem a min-cut v [L4.4].</li>
+      <li><strong>Konec:</strong> v reziduálním grafu už není cesta $s \to t$ (typicky: všechny hrany ze zdroje nasycené). Tok je pak maximální; zdůvodnění řezem a min-cut v <a href="l4-4.html">[L4.4]</a>.</li>
       <li><strong>Zkouškový běh 25. 5. 2026:</strong> start $|f| = 9$; ① $T_1{\to}T_4{\to}T_5{\to}T_8$, $\gamma = 4$; ② $T_1{\to}T_4{\to}T_7{\to}T_8$, $\gamma = 1$; ③ $T_1{\to}T_4{\to}T_5{\to}T_3{\to}T_6{\to}T_8$ přes zpětnou $T_5{\to}T_3$, $\gamma = 2$; výsledek $|f| = 16$.</li>
       <li><strong>Složitost:</strong> celočíselné kapacity → $\gamma \ge 1$ → nejvýš $F$ iterací po $\mathcal{O}(|E|)$, tj. $\mathcal{O}(|E| \cdot F) = \mathcal{O}(|E|^2 \cdot U)$ — pseudopolynomiální (zigzag $2U$ iterací); neceločíselné kapacity: nemusí skončit vůbec. <strong>Edmonds-Karp</strong> (vždy nejkratší cesta, BFS) → $\mathcal{O}(|E|^2 \cdot |V|)$.</li>
       <li>U zkoušky vypiš <strong>každou iteraci</strong>: cestu, výpočet $\gamma$ jako minimum rezerv ($u - f$ dopředné, $f - l$ zpětné) a změněné toky.</li>
@@ -173,7 +173,7 @@
       <div class="viz" id="viz-t01net"></div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Zkoušková síť (12 hran, tři s dolní mezí $l &gt; 0$) se zadaným startovním přípustným tokem $|f| = 9$ — krok 1 algoritmu je tedy darovaný. Část a) chce běh Ford-Fulkersona s <em>vypsanou augmentující cestou v každé iteraci</em>; část b) minimální řez — ten patří do [L4.4], kde úloha pokračuje jako FOTO checkpoint celé kapitoly. Tady řešíme a).</p>
+      <p>Zkoušková síť (12 hran, tři s dolní mezí $l &gt; 0$) se zadaným startovním přípustným tokem $|f| = 9$ — krok 1 algoritmu je tedy darovaný. Část a) chce běh Ford-Fulkersona s <em>vypsanou augmentující cestou v každé iteraci</em>; část b) minimální řez — ten patří do <a href="l4-4.html#t-mincut">[L4.4]</a>, kde úloha pokračuje jako FOTO checkpoint celé kapitoly. Tady řešíme a).</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -205,7 +205,7 @@
             <tbody><tr><td>$f$</td><td>4</td><td>5</td><td>7</td><td>4</td><td>2</td><td>2</td><td>1</td><td>6</td><td>1</td><td>6</td><td>8</td><td>2</td></tr></tbody>
           </table>
           <p><strong>Proč už žádná augmentující cesta není:</strong> po třetí augmentaci jsou všechny hrany ze zdroje nasycené ($f_{12} = u_{12} = 4$, $f_{13} = u_{13} = 5$, $f_{14} = u_{14} = 7$), takže z $T_1$ nevede v reziduálním grafu žádná hrana, $T_8$ je nedosažitelný a algoritmus končí. Podle kritéria maximality z <a href="l4-2.html#takeaways">[L4.2]</a> je tok $|f| = 16$ maximální. <em>(Jiná pořadí cest jsou také správně — třeba v iteraci 2 delší cesta s $\gamma = 3$; maximum vyjde vždy $16$, jen jiným počtem iterací. U zkoušky každou iteraci vypiš.)</em></p>
-          <p><strong>Část b)</strong> — minimální řez — dořešíme v [L4.4]: vyjde přímo z množiny vrcholů označených v posledním (neúspěšném) značkování.</p>
+          <p><strong>Část b)</strong> — minimální řez — dořešíme v <a href="l4-4.html#t-mincut">[L4.4]</a>: vyjde přímo z množiny vrcholů označených v posledním (neúspěšném) značkování.</p>
           <p><em>Pozn. ke zdrojům: dochovaný rukopisný přepis téhož zadání čte špatně čitelné indexy uzlů jinak (např. hrany $T_2 \to T_5$, $T_4 \to T_6$, $T_6 \to T_7$) a dochází k maximu $15$; držíme se konzistentního čtení banky #21 zavedeného v [L4.1] (diagonály $T_3{\to}T_7 = (0,1,1)$, $T_4{\to}T_5 = (0,0,8)$), které dává $16$.</em></p>
         </div>
       </details>
@@ -259,7 +259,7 @@
 
   <div class="pager">
     <a href="../k4/l4-2.html"><span class="dir">← Předchozí</span> L4.2 · Reziduální graf a augmentující cesta</a>
-    <a class="next" href="../index.html#k4"><span class="dir">Další →</span> Pokračování se připravuje (L4.4 · Řez a věta max-flow/min-cut [FOTO])</a>
+    <a class="next" href="../k4/l4-4.html"><span class="dir">Další →</span> L4.4 · Řez a věta max-flow/min-cut [FOTO]</a>
   </div>
 
 </div>

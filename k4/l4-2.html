@@ -209,7 +209,7 @@
     <p><em>The flow from $s$ to $t$ is the <strong>maximum</strong> if and only if there is no augmenting path.</em></p>
   </div>
 
-  <p>Směr „maximální ⇒ žádná cesta“ je snadný (cesta by tok zvedla o $\gamma &gt; 0$). Opačný směr dokáže až řez: množina označených vrcholů v posledním, neúspěšném značkování vytvoří minimální řez — to je obsah [L4.4]. V <a href="l4-3.html">[L4.3]</a> zatím kritérium použijeme jako zastavovací podmínku Ford-Fulkersona.</p>
+  <p>Směr „maximální ⇒ žádná cesta“ je snadný (cesta by tok zvedla o $\gamma &gt; 0$). Opačný směr dokáže až řez: množina označených vrcholů v posledním, neúspěšném značkování vytvoří minimální řez — to je obsah <a href="l4-4.html">[L4.4]</a>. V <a href="l4-3.html">[L4.3]</a> zatím kritérium použijeme jako zastavovací podmínku Ford-Fulkersona.</p>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
   <div class="box takeaways" id="takeaways">
@@ -220,7 +220,7 @@
       <li><strong>Reziduální graf</strong> $G_f$: dopředná hrana s $u_f = u - f$, zpětná s $u_f = f - l$, nulové se vynechají. Augmentující cesta = <strong>obyčejná orientovaná cesta $s \to t$ v $G_f$</strong>, $\gamma$ = minimum $u_f$ podél ní.</li>
       <li><strong>Augmentace</strong>: $+\gamma$ na dopředných, $-\gamma$ na zpětných hranách — zachová přípustnost i Kirchhoffa a zvedne $|f|$ o $\gamma$.</li>
       <li>Pozor: zpětná kapacita je $f - l$, <strong>ne</strong> $f$ — při $l &gt; 0$ může zpětná hrana chybět i při kladném toku (na zkouškové síti $T_8 \to T_7$).</li>
-      <li>Hledání cesty = <strong>značkování</strong> (vlna dosažitelnosti z $s$ v $G_f$; krok 2 = dopředné, krok 3 = zpětné hrany). Tok je maximální ⟺ augmentující cesta neexistuje — zastavovací podmínka <a href="l4-3.html">[L4.3]</a>, důkaz řezem [L4.4].</li>
+      <li>Hledání cesty = <strong>značkování</strong> (vlna dosažitelnosti z $s$ v $G_f$; krok 2 = dopředné, krok 3 = zpětné hrany). Tok je maximální ⟺ augmentující cesta neexistuje — zastavovací podmínka <a href="l4-3.html">[L4.3]</a>, důkaz řezem <a href="l4-4.html">[L4.4]</a>.</li>
     </ul>
   </div>
 
