@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.6 · Split vrcholu (cena na vrcholu → na hraně) — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.6</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.6</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>Split vrcholu (cena na vrcholu → na hraně)</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Vrchol s cenou rozdělíme na dvojici $v_1$ (vstup) a $v_2$ (výstup) spojenou hranou, která cenu vrcholu nese: všechny hrany <em>do</em> $v$ teď vedou do $v_1$, všechny hrany <em>z</em> $v$ vycházejí z $v_2$. Úloha s cenami na vrcholech se tím změní na obyčejnou úlohu s cenami na hranách — a může na ni Dijkstra.
+  </div>
+
+  <p>Prerekvizity: <a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a>. Dijkstra (a vlastně celá kapitola zatím) zná ceny jen na <em>hranách</em>. Dnes se naučíme jediný, ale velmi užitečný modelovací trik, kterým mu podstrčíme i ceny na <em>vrcholech</em>.</p>
+
+  <!-- ===== VÝKLAD ===== -->
+  <h2>Když platíš i za vrcholy</h2>
+  <p>Slide 5 přednášky („Similar Problems“) zavádí variantu <strong>node-weighted shortest path</strong> (nejkratší cesta s váhami na vrcholech): váhy mohou sedět na vrcholech, nebo na vrcholech <em>i</em> hranách, a <em>váha cesty je součet vah hran a vah vrcholů podél cesty</em>. Prakticky: mýto na každé křižovatce, zdržení v každém uzlu sítě, poplatek za každé překladiště — platí se nejen za přesun, ale i za průchod místem.</p>
+
+  <div class="viz" id="viz-orig"></div>
+
+  <details class="try">
+    <summary>Zkus sám: najdi v grafu výše nejkratší cestu $s \to t$ nejdřív jen podle vah hran a pak podle vah hran <em>i vrcholů</em>. Vyjde stejná?</summary>
+    <div class="inner">
+      <p>Jen podle hran vyhrává horní cesta přes $a$: $2 + 2 = 4 &lt; 3 + 3 = 6$.</p>
+      <p>S vrcholy je to naopak. Přes $a$: hrany $4$ + vrcholy $w(s) + w(a) + w(t) = 1 + 5 + 2 = 8$, celkem $\mathbf{12}$. Přes $b$: hrany $6$ + vrcholy $1 + 1 + 2 = 4$, celkem $\mathbf{10}$ — nejkratší je dolní cesta přes $b$.</p>
+      <p>Ceny vrcholů tedy umí rozhodnutí <strong>převrátit</strong> — ignorovat je nelze a Dijkstra z <a href="l2-4.html#takeaways">[L2.4]</a>, jak ho známe, s nimi neumí pracovat. Potřebujeme je do grafu „zabudovat“.</p>
+    </div>
+  </details>
+
+  <h2>Trik: rozdělit vrchol</h2>
+
+  <details class="try">
+    <summary>Zkus sám: napadá tě úprava grafu, po které ceny vrcholů „uvidí“ i algoritmus, který zná jen ceny hran?</summary>
+    <div class="inner">
+      <p>První přirozený nápad: <em>přičti $w(v)$ ke každé hraně vstupující do $v$</em>. Každá cesta projde vrcholem $v$ právě jednou a právě jednou vstupní hranou, takže se $w(v)$ započítá správně jednou. Skoro to funguje — až na start: vrchol $s$ na cestě žádnou vstupní hranou nemá, takže $w(s)$ nezaplatíš nikdy (a u symetrické varianty „přičti k výstupním“ zase vypadne $w(t)$). Pro porovnání všech $s$–$t$ cest je to jen společná konstanta, ale výsledná hodnota je špatně a sčítání dvou informací do jedné váhy je nepřehledné.</p>
+      <p>Přednáška proto používá čistší standard: <strong>cenu vrcholu nechat na vlastní hraně</strong>. Vrchol rozdělíme.</p>
+    </div>
+  </details>
+
+  <p>Trik ze slidu 5 — <strong>node splitting</strong> (rozdělení/split vrcholu) — má tři pravidla:</p>
+  <ol>
+    <li><strong>Nahraď</strong> každý vrchol $v$ původního grafu <strong>dvojicí vrcholů</strong> $v_1$ a $v_2$ a spoj je hranou $v_1 \to v_2$ s váhou rovnou váze vrcholu $v$.</li>
+    <li>Hrana, která do $v$ <strong>vstupovala</strong>, nyní vstupuje do $v_1$.</li>
+    <li>Hrana, která z $v$ <strong>vycházela</strong>, nyní vychází z $v_2$.</li>
+  </ol>
+  <p>Lokálně to vypadá takhle (okolí jednoho vrcholu $v$ s cenou $5$; sousedé $a, b, c, d$ se splitují úplně stejně, tady je necháváme vcelku kvůli přehlednosti):</p>
+
+  <div class="viz" id="viz-gadget-before"></div>
+  <div class="viz" id="viz-gadget-after"></div>
+
+  <p>Projít vrcholem $v$ teď <em>nejde jinak</em> než po hraně $v_1 \to v_2$ — z $v_1$ žádná jiná hrana nevede. Kdo vrcholem projde, cenu $w(v)$ zaplatí; kdo neprojde, neplatí nic. Přesně sémantika „váha vrcholů podél cesty“.</p>
+
+  <h2>Celý graf po splitu</h2>
+  <p>Takhle dopadne split celého grafu z úvodu (modré hrany jsou nové — nesou ceny vrcholů):</p>
+
+  <div class="viz" id="viz-split-ex"></div>
+
+  <details class="try">
+    <summary>Zkus sám: jaká je v novém grafu váha nejkratší cesty $s_1 \to t_2$? Souhlasí s ručním výpočtem z první try-otázky?</summary>
+    <div class="inner">
+      <p>Přes $b$: $s_1 \xrightarrow{1} s_2 \xrightarrow{3} b_1 \xrightarrow{1} b_2 \xrightarrow{3} t_1 \xrightarrow{2} t_2$, váha $1+3+1+3+2 = \mathbf{10}$. Přes $a$: $1+2+5+2+2 = \mathbf{12}$.</p>
+      <p>Souhlasí: stejné hodnoty jako „hrany + vrcholy“ v původním grafu, vítězí cesta přes $b$. Každá hodnota původní úlohy teď sedí na právě jedné hraně — nic se neztratilo, nic nepřibylo. A protože jsou všechny váhy nezáporné, najde tuhle cestu Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a>; výslednou cestu v původním grafu přečteš prostě smazáním indexů: $s_1 s_2 b_1 b_2 t_1 t_2 \to s\!-\!b\!-\!t$.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: původní graf měl $n$ vrcholů a $m$ hran. Kolik má graf po splitu? Zpomalí se tím Dijkstra?</summary>
+    <div class="inner">
+      <p>Každý vrchol se zdvojí a přibude jedna hrana na vrchol: nový graf má $2n$ vrcholů a $m + n$ hran. Dijkstra v $O(n^2)$ <a href="l2-4.html#takeaways">[L2.4]</a> tedy běží v $O((2n)^2) = O(4n^2)$ — konstanta, řádově se nic nemění.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: směr a konce nesmíš zaměnit</div>
+    <ul>
+      <li><strong>Vstupy do $v_1$, výstupy z $v_2$</strong> — ne naopak. Při prohození by hrana $v_1 \to v_2$ nebyla průchozí součástí cesty (do $v_1$ by nic nevedlo, resp. cesta by cenu obešla) a graf by se rozpadl.</li>
+      <li><strong>Hledej cestu $s_1 \to t_2$.</strong> Definice ze slidu počítá váhy <em>všech</em> vrcholů podél cesty, včetně koncových — start v $s_2$ nebo cíl v $t_1$ by ceny $w(s)$, $w(t)$ vynechal. (Pozorování navíc: pokud konkrétní úloha za koncové vrcholy <em>neplatí</em>, můžeš to zařídit právě volbou $s_2 \to t_1$.)</li>
+    </ul>
+  </div>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">K čemu to bude</div>
+    <p>Split vrcholu je půlka zkouškové úlohy <em>Dangerous adventure</em> [L2.8] — tam sedí „ceny“ (pravděpodobnosti přežití) na hranách <em>i</em> vrcholech. Druhou půlku, převod součinu pravděpodobností na součet přes $-\log$, přidá příští lekce [L2.7].</p>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.6</div>
+    <ul>
+      <li><strong>Split vrcholu:</strong> $v \to v_1, v_2$ + hrana $v_1 \to v_2$ s váhou $w(v)$; hrany vstupující do $v$ vedou do $v_1$, hrany vycházející z $v$ vycházejí z $v_2$.</li>
+      <li>Hledá se cesta $s_1 \to t_2$: cesty si odpovídají 1:1 a váha (hrany + vrcholy) se přesně zachová — výsledek přečteš smazáním indexů.</li>
+      <li>Nový graf má $2n$ vrcholů a $m + n$ hran — asymptotika Dijkstry se nemění; nezáporné ceny hran i vrcholů dají nezáporné váhy, takže Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> funguje.</li>
+      <li>Ve zkouškové úloze Dangerous adventure [L2.8] se split kombinuje s transformací $-\log$ [L2.7].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA ===== -->
+  <div class="task" id="t-split">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Similar Problems: node-weighted shortest path</strong>
+      <span class="task-src">zdroj: task bank #18 (studijní úloha [P] ze slidu 5, 3_SPT_KO.pdf)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>When the nodes are weighted, or both nodes and edges are weighted, the weight of the path is the sum of the edges and the nodes weights along this path. This can be transformed to the weighted edges case as follows:</p>
+        <ul>
+          <li>Replace every node $v$ from the original graph by the pair of nodes $v_1$ and $v_2$ and connect them by an edge with weight equal to the weight of node $v$.</li>
+          <li>the edge entering node $v$ now enters $v_1$,</li>
+          <li>the edge leaving node $v$ now leaves $v_2$.</li>
+        </ul>
+        <p>Study task: formulate the resulting ordinary edge-weighted shortest-path instance.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Studijní úloha z banky: samotný trik (tři pravidla splitu) je v zadání darovaný. Tvoje práce je převod <strong>dotáhnout do formální instance</strong> obyčejné úlohy o nejkratší cestě — tj. přesně zapsat, jaký graf, jaké váhy a mezi kterými vrcholy předáš algoritmu. U ústní zkoušky se navíc hodí umět říct, <em>proč</em> převod funguje.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — pravidla splitu a korespondence cest.</li>
+        <li><a href="l2-1.html#takeaways">[L2.1] Záporné váhy ano, záporné cykly ne</a> — jak vypadá instance shortest path (digraf, váhy $c$, vrcholy $s, t$).</li>
+        <li><a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a> — kdo výslednou instanci vyřeší a za jakých podmínek.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>„Formulovat instanci“ = odpovědět na čtyři otázky: <em>Jaká je množina vrcholů? Jaká je množina hran a jejich váhy? Odkud? Kam?</em> Kontrola správnosti: každý kus dat původní úlohy (váha každé hrany, váha každého vrcholu) musí v nové instanci sedět na <strong>právě jedné</strong> hraně — a každá $s$–$t$ cesta původního grafu musí mít v novém grafu protějšek se stejnou váhou (a naopak, žádné nové cesty nesmí vzniknout).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Vstup původní úlohy:</strong> digraf $G$, váhy hran $c : E(G) \to \mathbb{R}$ (pokud jsou váhy jen na vrcholech, polož $c \equiv 0$), váhy vrcholů $w : V(G) \to \mathbb{R}$, vrcholy $s, t \in V(G)$; $n = |V(G)|$, $m = |E(G)|$.</p>
+          <p><strong>Výsledná instance</strong> (digraf $G'$, váhy $c'$, počáteční a koncový vrchol):</p>
+          <p>$$V(G') = \{\, v_1, v_2 : v \in V(G) \,\} \qquad (2n \text{ vrcholů}),$$</p>
+          <p>$$E(G') = \underbrace{\{\, (v_1, v_2) : v \in V(G) \,\}}_{\text{hrany vrcholů}} \;\cup\; \underbrace{\{\, (u_2, v_1) : (u, v) \in E(G) \,\}}_{\text{původní hrany}} \qquad (n + m \text{ hran}),$$</p>
+          <p>$$c'(v_1, v_2) = w(v), \qquad c'(u_2, v_1) = c(u, v),$$</p>
+          <p>a hledá se nejkratší cesta z $\,s_1$ do $\,t_2$ v $G'$ s váhami $c'$.</p>
+          <p><strong>Proč to odpovídá.</strong> Z vrcholu $v_1$ vede jediná hrana, a to $(v_1, v_2)$ — každá cesta v $G'$ proto střídá „hrany vrcholů“ a „původní hrany“: $s_1, s_2, x_1, x_2, \dots, t_1, t_2$. Smazáním indexů z ní vznikne $s$–$t$ cesta v $G$ a naopak každá $s$–$t$ cesta v $G$ se tímto střídáním jednoznačně zvedne do $G'$ — korespondence je 1:1. Váhy si odpovídají přesně: cesta v $G'$ posbírá $c(u,v)$ za každou hranu cesty a $w(v)$ za každý vrchol podél ní (včetně $s$ a $t$ díky hranám $(s_1,s_2)$ a $(t_1,t_2)$), což je přesně definice váhy node-weighted cesty. Nejkratší cesty si tedy odpovídají i s hodnotou.</p>
+          <p><strong>Kdo to vyřeší.</strong> Jsou-li $c \ge 0$ a $w \ge 0$, jsou i váhy $c'$ nezáporné a instanci vyřeší Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> v čase $O((2n)^2) = O(n^2)$.</p>
+          <p>Konkrétní provedení převodu vidíš na dvojici obrázků ve výkladu (graf z úvodu → graf po splitu): nejkratší cesta $s_1 \to t_2$ má váhu $10$ a po smazání indexů dává $s\!-\!b\!-\!t$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L2.6">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l2-5.html"><span class="dir">← Předchozí</span> L2.5 · Pořadí expanze a tie-breaking — Edge costs assignment [FOTO]</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.7 · Transformace součinu na součet: −log)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Motivační graf: váhy na hranách I vrcholech
+KOViz.graph(document.getElementById('viz-orig'), {
+  directed: true,
+  w: 640, h: 340,
+  nodes: [
+    {id:'s', x:80,  y:170, sub:'w(s) = 1'},
+    {id:'a', x:320, y:60,  sub:'w(a) = 5'},
+    {id:'b', x:320, y:255, sub:'w(b) = 1'},
+    {id:'t', x:560, y:170, sub:'w(t) = 2'},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'2'},
+    {from:'a', to:'t', label:'2'},
+    {from:'s', to:'b', label:'3'},
+    {from:'b', to:'t', label:'3'},
+  ],
+  caption: 'Node-weighted shortest path: váha cesty = součet vah hran + vah vrcholů podél cesty (w(v) pod vrcholy).',
+});
+
+// 2a — Lokální pohled: okolí vrcholu v PŘED splitem
+KOViz.graph(document.getElementById('viz-gadget-before'), {
+  directed: true,
+  w: 640, h: 300,
+  nodes: [
+    {id:'a', x:110, y:70},
+    {id:'b', x:110, y:225},
+    {id:'v', x:320, y:148, sub:'w(v) = 5'},
+    {id:'c', x:530, y:70},
+    {id:'d', x:530, y:225},
+  ],
+  edges: [
+    {from:'a', to:'v', label:'2'},
+    {from:'b', to:'v', label:'4'},
+    {from:'v', to:'c', label:'1'},
+    {from:'v', to:'d', label:'7'},
+  ],
+  caption: 'PŘED: vrchol v nese cenu 5 (sousedé kvůli přehlednosti nesplitnutí).',
+});
+
+// 2b — Lokální pohled: okolí vrcholu v PO splitu
+KOViz.graph(document.getElementById('viz-gadget-after'), {
+  directed: true,
+  w: 640, h: 300,
+  nodes: [
+    {id:'a',  x:75,  y:70},
+    {id:'b',  x:75,  y:225},
+    {id:'v1', x:285, y:148, label:'v₁'},
+    {id:'v2', x:425, y:148, label:'v₂'},
+    {id:'c',  x:575, y:70},
+    {id:'d',  x:575, y:225},
+  ],
+  edges: [
+    {from:'a',  to:'v1', label:'2'},
+    {from:'b',  to:'v1', label:'4'},
+    {from:'v1', to:'v2', label:'5', cls:'hl'},
+    {from:'v2', to:'c',  label:'1'},
+    {from:'v2', to:'d',  label:'7'},
+  ],
+  caption: 'PO: vstupy vedou do v₁, výstupy z v₂; cenu vrcholu nese nová (modrá) hrana v₁ → v₂.',
+});
+
+// 3 — Celý graf z úvodu po splitu
+KOViz.graph(document.getElementById('viz-split-ex'), {
+  directed: true,
+  w: 640, h: 360,
+  nodes: [
+    {id:'s1', x:50,  y:180, label:'s₁'},
+    {id:'s2', x:145, y:180, label:'s₂'},
+    {id:'a1', x:255, y:70,  label:'a₁'},
+    {id:'a2', x:385, y:70,  label:'a₂'},
+    {id:'b1', x:255, y:290, label:'b₁'},
+    {id:'b2', x:385, y:290, label:'b₂'},
+    {id:'t1', x:495, y:180, label:'t₁'},
+    {id:'t2', x:590, y:180, label:'t₂'},
+  ],
+  edges: [
+    {from:'s1', to:'s2', label:'1', cls:'hl'},
+    {from:'s2', to:'a1', label:'2'},
+    {from:'a1', to:'a2', label:'5', cls:'hl'},
+    {from:'a2', to:'t1', label:'2'},
+    {from:'s2', to:'b1', label:'3'},
+    {from:'b1', to:'b2', label:'1', cls:'hl'},
+    {from:'b2', to:'t1', label:'3'},
+    {from:'t1', to:'t2', label:'2', cls:'hl'},
+  ],
+  caption: 'Graf z úvodu po splitu: 8 vrcholů (2n), 8 hran (m + n = 4 + 4). Modré hrany nesou ceny vrcholů; hledá se cesta s₁ → t₂.',
+});
+</script>
+</body>
+</html>
