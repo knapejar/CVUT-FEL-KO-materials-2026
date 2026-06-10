@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L3.13 · Ekvivalence definic stromu [NICE] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k3">K3 · Důkaz / teorie</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L3.13</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L3.13</span> Kapitola K3 — Důkaz / teorie (Slot 3) · <strong>[NICE]</strong> · téma ústní (odložitelné)
+  </p>
+  <h1>Ekvivalence definic stromu [NICE]</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Sedm ekvivalentních charakterizací stromu</strong> (slide 61) a jejich důkaz <strong>kruhem implikací</strong> (slide 62) — motorem celého důkazu je počítadlo $n = m + p$ pro lesy.
+  </div>
+
+  <p>Z <a href="../k0/l0-4.html#takeaways">[L0.4] Strom, kostra, les, DAG</a> znáš definici: <strong>tree</strong> (strom) = souvislý graf bez kružnice, a jako fakty jsme tam přijali „strom má $n-1$ hran“ a „mezi každou dvojicí vrcholů vede právě jedna cesta“. Dnes všechny tyhle tváře stromu <em>dokážeme</em> — je to méně častá, ale férová otázka k ústní (na slidech 61–62 je plný důkaz). Bonus: dva fakty z důkazu („hrana na kružnici jde smazat bez ztráty souvislosti“, „hrana uvnitř komponenty uzavře kružnici“) jsi už mlčky používal u MST i u <a href="l3-9.html#takeaways">[L3.9] double-tree</a>.</p>
+
+  <!-- ===== SEKCE 1: SLIDE 61 ===== -->
+  <h2>Sedm tváří stromu (slide 61)</h2>
+
+  <div class="box">
+    <div class="box-title">Slide 61 — Undirected Graph - Tree (equivalent statements), 1:1</div>
+    <p><em>Let $G$ be an undirected graph with $n$ nodes, then the following statements are equivalent:</em></p>
+    <ul>
+      <li><em>(a) $G$ is a tree.</em></li>
+      <li><em>(b) $G$ has $n - 1$ edges and no circuit.</em></li>
+      <li><em>(c) $G$ has $n - 1$ edges and is connected.</em></li>
+      <li><em>(d) $G$ is connected and while removing any edge it will not be connected anymore.</em></li>
+      <li><em>(e) $G$ is a minimal graph which has $\delta(X) \ne \emptyset$ for all $\emptyset \ne X \subset V(G)$</em></li>
+      <li><em>(f) $G$ is circuit-free and the addition of any edge creates a circuit.</em></li>
+      <li><em>(g) $G$ contains a unique path between any pair of vertices.</em></li>
+    </ul>
+  </div>
+
+  <p>Většinu tvrzení přečteš rovnou: (d) říká „<strong>minimálně souvislý</strong>“ (každá hrana je nepostradatelná), (f) říká „<strong>maximálně acyklický</strong>“ (žádná hrana se už nevejde). Jediný nový zápis je $\delta(X)$ v (e): zobecnění okolí vrcholu $\delta(v)$ z <a href="../k0/l0-2.html#takeaways">[L0.2]</a> na množinu vrcholů — <strong>řez</strong> (cut)
+  $$\delta(X) = \{\,\{u,v\} \in E(G) : u \in X,\ v \notin X\,\}$$
+  = hrany s právě jedním koncem v $X$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: přečti (e) „lidsky“. Co znamená „$\delta(X) \ne \emptyset$ pro každou neprázdnou vlastní $X \subset V(G)$“ — a co k tomu přidává slovo „minimal“?</summary>
+    <div class="inner">
+      <p>„Každý řez je neprázdný“ je jen jiný způsob, jak říct <strong>souvislost</strong>: kdyby pro nějakou $X$ bylo $\delta(X) = \emptyset$, nevede z $X$ ven žádná hrana a vrcholy v $X$ se s těmi venku nikdy nepropojí. A naopak: je-li graf nesouvislý, vezmi za $X$ jednu komponentu — její řez je prázdný. Slovo <em>minimal</em> pak říká, že po smazání <em>kterékoli</em> hrany už tahle vlastnost neplatí. Takže (e) je vlastně (d) převlečené do jazyka řezů.</p>
+    </div>
+  </details>
+
+  <p>Prohlédni si všech sedm tváří na jednom stromě ($n = 6$):</p>
+
+  <div class="viz" id="viz-faces"></div>
+
+  <!-- ===== SEKCE 2: POLOPRAVDA ===== -->
+  <h2>Pozor na polopravdu: „$n-1$ hran = strom“</h2>
+
+  <p>V (b) i (c) má počet hran $n-1$ vždy <em>parťáka</em> (bez kružnice / souvislost). Není to zbytečná opatrnost?</p>
+
+  <details class="try">
+    <summary>Zkus sám: najdi graf s $n = 6$ vrcholy a $m = 5 = n-1$ hranami, který NENÍ strom.</summary>
+    <div class="inner">
+      <p>Trojúhelník + oddělená cesta: $\{A,B,C\}$ spojené do kružnice (3 hrany) a vedle cesta $D$–$E$–$F$ (2 hrany). Celkem $m = 5 = n - 1$, ale graf je nesouvislý <em>a zároveň</em> obsahuje kružnici. „Hrana navíc“ promrhaná na kružnici přesně odpovídá „chybějící hraně“ mezi komponentami.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-fake"></div>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda</div>
+    <p>„Graf s $n-1$ hranami je strom“ — <strong>NE</strong>. Počet hran $n-1$ dělá strom až ve dvojici s <em>jednou</em> další vlastností: + bez kružnice = (b), nebo + souvislost = (c). Samotné $n-1$ hran připouští „kružnice tady, díra jinde“ (viz obrázek). U ústní na tohle zdůvodnění dojde.</p>
+  </div>
+
+  <!-- ===== SEKCE 3: STRATEGIE ===== -->
+  <h2>Strategie důkazu: kruh místo 42 šipek</h2>
+
+  <details class="try">
+    <summary>Zkus sám: ekvivalence 7 tvrzení znamená 7·6 = 42 implikací „cokoli ⇒ cokoli“. Kolik jich opravdu musíme dokázat ručně?</summary>
+    <div class="inner">
+      <p>Stačí <strong>7</strong> — uzavřený kruh $(a) \Rightarrow (g) \Rightarrow (e) \Rightarrow (d) \Rightarrow (f) \Rightarrow (b) \Rightarrow (c) \Rightarrow (a)$. Z libovolného tvrzení se pak do libovolného jiného „dojede po kruhu“ řetězením implikací. Přesně takhle je postavený slide 62.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-circle"></div>
+
+  <p>Plán: nejdřív si pořídíme počítadlo $n = m + p$ (pohání tři implikace), pak kruh objedeme.</p>
+
+  <!-- ===== SEKCE 4: LEMMA n = m + p ===== -->
+  <h2>Motor důkazu: les má $n = m + p$</h2>
+
+  <p>Slide 62 se dvakrát odvolává na fakt (znáš ho jako poznatek z <a href="../k0/l0-4.html#takeaways">[L0.4]</a>, teď ho dokážeme): <em>„for a forest with $n$ nodes, $m$ edges and $p$ connected components $n = m + p$. (The proof is a trivial induction on $m$)“</em> (1:1).</p>
+
+  <details class="try">
+    <summary>Zkus sám: báze indukce $m = 0$. Kolik komponent má les bez hran?</summary>
+    <div class="inner">
+      <p>Každý vrchol je sám svojí komponentou: $p = n$, tedy $n = 0 + n$. ✓</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: indukční krok — do lesa přidám hranu $\{u,v\}$ tak, aby výsledek byl pořád les. Proč musí $u$ a $v$ ležet v různých komponentách? A co to udělá s $p$?</summary>
+    <div class="inner">
+      <p>Kdyby $u, v$ ležely v téže komponentě, existuje mezi nimi cesta $P$ a $P + \{u,v\}$ uzavře <strong>kružnici</strong> — výsledek by nebyl les. Takže hrana lesa vždy spojuje dvě různé komponenty a slije je v jednu: $m$ vzroste o 1, $p$ klesne o 1, součet $m + p$ se nezmění. Z báze $m + p = n$ to platí pořád.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-nmp"></div>
+
+  <p>Důsledek pro náš protipříklad výše: les s $m = n - 1$ hranami má $p = n - m = 1$ komponentu, tedy <em>je</em> souvislý. Trojúhelník + cesta se z toho vykroutil jen tím, že není les.</p>
+
+  <!-- ===== SEKCE 5: a => g ===== -->
+  <h2>$(a) \Rightarrow (g)$: dvě cesty = kružnice</h2>
+
+  <p>Slide 62 (1:1): <em>„(a) $\Rightarrow$ (g): follows from the fact that the union of two distinct paths with the same endpoints contains a circuit.“</em> Rozbalíme:</p>
+
+  <details class="try">
+    <summary>Zkus sám: strom je souvislý — aspoň jedna cesta mezi $u$ a $v$ tedy existuje. Proč nemůžou existovat dvě různé?</summary>
+    <div class="inner">
+      <p>Sporem: nechť $P_1 \ne P_2$ jsou dvě různé cesty z $u$ do $v$. Jdi po obou současně od $u$: v nějakém vrcholu $r$ se poprvé rozvětví (existuje, jinak by byly stejné) a protože obě končí ve $v$, v nějakém prvním vrcholu $s$ se zase potkají. Úsek $P_1[r,s]$ + úsek $P_2[s,r]$ je uzavřený a vnitřně disjunktní — <strong>kružnice</strong>. Strom ale kružnici nemá (definice (a) z <a href="../k0/l0-4.html#takeaways">[L0.4]</a>) → spor. Cesta je tedy právě jedna: (g).</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-twopaths"></div>
+
+  <!-- ===== SEKCE 6: g => e => d ===== -->
+  <h2>$(g) \Rightarrow (e) \Rightarrow (d)$: jazyk řezů</h2>
+
+  <p>Slide 62 tu důkaz <em>nerozepisuje</em>: <em>„(g) $\Rightarrow$ (e) $\Rightarrow$ (d): see [1] page 17 Proposition 2.3.“</em> (odkaz na učebnici Korte–Vygen). Náčrt níže je <strong>vlastní doplněk</strong> (přiznáno) — pro ústní bohatě stačí.</p>
+
+  <p><strong>$(g) \Rightarrow (e)$:</strong> Jednoznačné cesty ⟹ souvislost ⟹ každý řez neprázdný (cesta z $u \in X$ do $v \notin X$ musí někde řez překročit) — to je vlastnost z (e). Zbývá <em>minimalita</em>:</p>
+
+  <details class="try">
+    <summary>Zkus sám: smažu libovolnou hranu $e = \{u,v\}$. Najdi množinu $X$, jejíž řez se tím vyprázdní. (Nápověda: hrana $e$ je sama o sobě cesta z $u$ do $v$…)</summary>
+    <div class="inner">
+      <p>Hrana $e$ je cesta $u$–$v$; podle (g) je to <em>jediná</em> cesta mezi $u$ a $v$. V $G - e$ už tedy žádná $u$–$v$ cesta není. Vezmi $X$ = {vrcholy dosažitelné z $u$ v $G - e$}: platí $u \in X$, $v \notin X$ a žádná hrana $G - e$ z $X$ nevede ven (jinak by se dalo dosáhnout dál), takže $\delta_{G-e}(X) = \emptyset$. Žádná hrana se nedá postrádat → $G$ je minimální: (e).</p>
+    </div>
+  </details>
+
+  <p><strong>$(e) \Rightarrow (d)$:</strong> už víme (try v sekci 1), že „všechny řezy neprázdné“ ⟺ souvislost. (e) tedy říká: $G$ je souvislý a po smazání kterékoli hrany souvislost padne — což je doslova (d).</p>
+
+  <!-- ===== SEKCE 7: d => f ===== -->
+  <h2>$(d) \Rightarrow (f)$: „trivial“ — rozepsáno</h2>
+
+  <p>Slide 62 (1:1): <em>„(d) $\Rightarrow$ (f): trivial.“</em> (f) má dvě půlky — zkus obě:</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč graf splňující (d) nemůže obsahovat kružnici?</summary>
+    <div class="inner">
+      <p>Kdyby obsahoval kružnici $C$, smaž libovolnou její hranu $e \in C$: každá cesta, která $e$ používala, se vyhne po zbytku kružnice („<strong>objížďka</strong>“) — graf zůstane souvislý. To popírá (d) („while removing any edge it will not be connected anymore“). Takže kružnice není.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: proč přidání libovolné nové hrany $\{u,v\}$ kružnici vytvoří?</summary>
+    <div class="inner">
+      <p>(d) garantuje souvislost, takže mezi $u$ a $v$ už nějaká cesta $P$ vede. $P + \{u,v\}$ je kružnice. Obě půlky (f) platí. ✓</p>
+    </div>
+  </details>
+
+  <p>Všimni si: <strong>objížďkový argument</strong> („hrana na kružnici jde smazat bez ztráty souvislosti“) za chvíli pohání i mašinu v $(c) \Rightarrow (a)$ — a znáš ho z důkazu, že MST je strom (<a href="../k0/l0-5.html#takeaways">[L0.5]</a>, <a href="l3-8b.html#takeaways">[L3.8b]</a>).</p>
+
+  <!-- ===== SEKCE 8: f => b => c ===== -->
+  <h2>$(f) \Rightarrow (b) \Rightarrow (c)$: počítadlo poprvé</h2>
+
+  <p>Slide 62 (1:1): <em>„(f) $\Rightarrow$ (b) $\Rightarrow$ (c): follows from the fact that for a forest with $n$ nodes, $m$ edges and $p$ connected components $n = m + p$.“</em></p>
+
+  <details class="try">
+    <summary>Zkus sám ($(f) \Rightarrow (b)$): $G$ je bez kružnice a každá přidaná hrana kružnici vytvoří. Proč musí být $G$ souvislý? A kolik má pak hran?</summary>
+    <div class="inner">
+      <p>Sporem: kdyby měl $G$ aspoň dvě komponenty, přidej hranu $\{u,v\}$ mezi nimi. Kružnice přes novou hranu by potřebovala <em>jinou</em> cestu $u$–$v$ — ta ale mezi komponentami neexistuje. Nová hrana tedy kružnici nevytvoří → spor s (f). Takže $p = 1$ a počítadlo dá $n = m + 1$, tj. $m = n - 1$. Spolu s „circuit-free“ je to přesně (b).</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám ($(b) \Rightarrow (c)$): $G$ má $n-1$ hran a žádnou kružnici. Dopočítej souvislost.</summary>
+    <div class="inner">
+      <p>Bez kružnice = les → platí $n = m + p = (n-1) + p$, tedy $p = 1$: souvislý. Spolu s $m = n-1$ je to (c). ✓</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 9: c => a ===== -->
+  <h2>$(c) \Rightarrow (a)$: mašina na ničení kružnic</h2>
+
+  <p>Poslední šipka uzavírá kruh. Slide 62 (1:1): <em>„(c) $\Rightarrow$ (a): $G$ is connected with $n - 1$. As long as there are any circuits in $G$, we destroy them by deleting any edge of the circuit. Suppose we have deleted $k$ circuits, the resulting graph $G'$ is a tree (contains no circuit and is connected) and has $m = n - 1 - k$ edges. So $n = m + p = n - 1 - k + 1$, implying $k = 0$.“</em></p>
+
+  <details class="try">
+    <summary>Zkus sám: proč mašina nikdy neztratí souvislost? A proč z $k = 0$ plyne, že $G$ je strom?</summary>
+    <div class="inner">
+      <p>Maže se vždy hrana <em>ležící na kružnici</em> — objížďkový argument ze sekce $(d) \Rightarrow (f)$ říká, že souvislost přežije. Výsledek $G'$ je souvislý a bez kružnice = strom, a podle počítadla má $n - 1$ hran. Začínali jsme ale s $n-1$ hranami a každé zničení kružnice jednu hranu stálo: $n - 1 - k = n - 1 \Rightarrow k = 0$. Mašina tedy neměla co ničit — $G$ byl bez kružnice už na začátku, a protože je souvislý, je to strom: (a). Kruh je uzavřen. ∎</p>
+    </div>
+  </details>
+
+  <p>Mašina v akci (schválně na grafu s $m = n + 1$ hranami, ať je co ničit — poslední krok říká, proč s $m = n-1$ nezničí nic):</p>
+
+  <div class="viz" id="viz-machine"></div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.13</div>
+    <ul>
+      <li><strong>Sedm ekvivalentních charakterizací stromu</strong> (slide 61): strom ⟺ $n-1$ hran + bez kružnice ⟺ $n-1$ hran + souvislý ⟺ minimálně souvislý ⟺ minimální graf s $\delta(X) \ne \emptyset$ pro každý řez ⟺ maximálně acyklický ⟺ právě jedna cesta mezi každou dvojicí vrcholů.</li>
+      <li>Důkaz = <strong>kruh 7 implikací</strong> $(a) \Rightarrow (g) \Rightarrow (e) \Rightarrow (d) \Rightarrow (f) \Rightarrow (b) \Rightarrow (c) \Rightarrow (a)$ — ekvivalenci netřeba dokazovat po dvojicích (slide 62).</li>
+      <li><strong>Motor:</strong> les s $n$ vrcholy, $m$ hranami a $p$ komponentami má $n = m + p$ (indukce dle $m$: hrana lesa vždy slije dvě komponenty).</li>
+      <li>Dva opakovaně použité fakty: hrana <em>na kružnici</em> jde smazat bez ztráty souvislosti (objížďka); hrana <em>uvnitř komponenty</em> kružnici uzavře.</li>
+      <li>Polopravda: „$n-1$ hran ⇒ strom“ neplatí (trojúhelník + cesta) — vždy je nutný parťák: souvislost, nebo acykličnost.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-treeequiv">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Tree — equivalent statements (důkaz k ústní)</strong>
+      <span class="task-src">zdroj: 01_Basic_KO slidy 61–62 (tvrzení a důkaz 1:1; pokyn „prove“ vlastní formulace — přiznáno)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>Let $G$ be an undirected graph with $n$ nodes, then the following statements are equivalent:</p>
+        <p>(a) $G$ is a tree. (b) $G$ has $n - 1$ edges and no circuit. (c) $G$ has $n - 1$ edges and is connected. (d) $G$ is connected and while removing any edge it will not be connected anymore. (e) $G$ is a minimal graph which has $\delta(X) \ne \emptyset$ for all $\emptyset \ne X \subset V(G)$. (f) $G$ is circuit-free and the addition of any edge creates a circuit. (g) $G$ contains a unique path between any pair of vertices.</p>
+        <p><em>(Vlastní pokyn k procvičení — přiznáno:)</em> Prove that the statements are equivalent.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Věta ze slidu 61: sedm tvrzení o neorientovaném grafu, která jsou všechna ekvivalentní (každé z nich může sloužit jako definice stromu). Úkol: dokázat ekvivalenci — tj. zorganizovat implikace tak, aby se z každého tvrzení dalo dojít ke každému.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li><a href="../k0/l0-4.html#takeaways">[L0.4] Strom, kostra, les, DAG</a> — definice strom/les, fakt $n = m + p$,</li>
+        <li><a href="../k0/l0-3.html#takeaways">[L0.3] Sled, tah, cesta, kružnice</a> — co je circuit/cesta,</li>
+        <li><a href="../k0/l0-2.html#takeaways">[L0.2] Okolí vrcholu</a> — značení $\delta$, zde zobecněné na řez $\delta(X)$,</li>
+        <li>tato lekce — kruh implikací a počítadlo $n = m+p$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Nedokazuj 42 dvojic — postav <strong>uzavřený kruh</strong> $(a) \Rightarrow (g) \Rightarrow (e) \Rightarrow (d) \Rightarrow (f) \Rightarrow (b) \Rightarrow (c) \Rightarrow (a)$. Dopředu si připrav lemma $n = m + p$ pro lesy (indukce dle $m$) — pohání šipky $(f) \Rightarrow (b) \Rightarrow (c)$ i $(c) \Rightarrow (a)$. Dvě malá kopací kolečka: „dvě různé cesty se stejnými konci ⟹ kružnice“ a „hrana na kružnici jde smazat bez ztráty souvislosti“.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Lemma (slide 62, 1:1):</strong> <em>for a forest with $n$ nodes, $m$ edges and $p$ connected components $n = m + p$. (The proof is a trivial induction on $m$.)</em> — Indukce: $m=0$ dává $p=n$; přidávaná hrana lesa musí spojovat dvě různé komponenty (jinak by s cestou mezi svými konci uzavřela kružnici), takže $m \mathbin{+}{=} 1$, $p \mathbin{-}{=} 1$ a součet $m+p$ se zachovává.</p>
+
+          <p><strong>$(a) \Rightarrow (g)$</strong> (slide 62: <em>„follows from the fact that the union of two distinct paths with the same endpoints contains a circuit“</em>): Souvislost dává aspoň jednu cestu mezi každou dvojicí. Kdyby $P_1 \ne P_2$ vedly obě z $u$ do $v$, úsek mezi prvním rozvětvením $r$ a prvním opětovným setkáním $s$ tvoří kružnici — spor s acykličností stromu. Cesta je právě jedna.</p>
+
+          <p><strong>$(g) \Rightarrow (e) \Rightarrow (d)$</strong> (slide 62 odkazuje na <em>[1] page 17 Proposition 2.3</em>; náčrt vlastní — přiznáno): Z (g) plyne souvislost, a souvislost ⟺ $\delta(X) \ne \emptyset$ pro každou $\emptyset \ne X \subset V$ (cesta z $X$ ven musí řez překročit; obráceně prázdný řez = odříznutá množina). Minimalita: hrana $e=\{u,v\}$ je podle (g) jedinou $u$–$v$ cestou, takže v $G-e$ má množina vrcholů dosažitelných z $u$ prázdný řez → žádnou hranu nelze postrádat: (e). A (e) přeloženo z jazyka řezů: $G$ souvislý a $G - e$ nesouvislý pro každé $e$ — doslova (d).</p>
+
+          <p><strong>$(d) \Rightarrow (f)$</strong> (slide 62: <em>„trivial“</em>): Kružnice by dovolila smazat svou hranu bez ztráty souvislosti (objížďka po zbytku kružnice) — spor s (d); a přidání $\{u,v\}$ k existující $u$–$v$ cestě (souvislost) kružnici uzavře.</p>
+
+          <p><strong>$(f) \Rightarrow (b) \Rightarrow (c)$</strong> (slide 62: přes lemma): Z (f): kdyby $G$ měl dvě komponenty, hrana mezi nimi by žádnou kružnici nevytvořila (chybí druhá cesta) — spor; tedy $p=1$ a lemma dá $m = n-1$: to je (b). Z (b): les s $m = n-1$ má $p = n - m = 1$, tedy souvislý: (c).</p>
+
+          <p><strong>$(c) \Rightarrow (a)$</strong> (slide 62, 1:1): <em>„$G$ is connected with $n-1$. As long as there are any circuits in $G$, we destroy them by deleting any edge of the circuit. Suppose we have deleted $k$ circuits, the resulting graph $G'$ is a tree (contains no circuit and is connected) and has $m = n - 1 - k$ edges. So $n = m + p = n - 1 - k + 1$, implying $k = 0$.“</em> — Mazání hrany kružnice souvislost zachová (objížďka), výsledek je souvislý a bez kružnice = strom, podle lemmatu má $n-1$ hran; protože jsme začali s $n-1$ hranami a každé smazání jednu stálo, je $k=0$: $G$ kružnici nikdy neměl a je to strom. Kruh je uzavřen, všech 7 tvrzení je ekvivalentních. ∎</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-nmp">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Počítadlo $n = m + p$ v akci (drill)</strong>
+      <span class="task-src">zdroj: VLASTNÍ úloha (přiznáno) — drill lemmatu ze slidu 62</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN — vlastní, přiznáno)</span>
+        <p>Let $G$ be an undirected graph with $12$ nodes and $8$ edges. (i) Assume $G$ contains no circuit. How many connected components does $G$ have? (ii) Can a graph with $12$ nodes and $8$ edges be connected? (iii) A connected graph $H$ has $12$ nodes and $11$ edges. Prove that $H$ is a tree.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Tři rychlé otázky na vztah mezi počtem vrcholů, hran a komponent: (i) spočítat komponenty lesa, (ii) rozhodnout, zda málo hran dovolí souvislost, (iii) aplikovat implikaci $(c) \Rightarrow (a)$.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>tato lekce — lemma $n = m + p$ a implikace $(c) \Rightarrow (a)$,</li>
+        <li><a href="../k0/l0-4.html#takeaways">[L0.4]</a> — definice les/strom/komponenta.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>(i) Bez kružnice = les → dosaď do počítadla. (ii) Kolik hran souvislost minimálně potřebuje? Vyjdi z toho, že souvislý graf obsahuje kostru. (iii) Tohle je přesně premisa (c) — stačí citovat kruh, nebo zopakovat mašinu na ničení kružnic.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(i)</strong> Les: $n = m + p \Rightarrow p = 12 - 8 = 4$ komponenty.</p>
+          <p><strong>(ii)</strong> Ne. Souvislý graf na $n$ vrcholech obsahuje kostru (<a href="../k0/l0-4.html#takeaways">[L0.4]</a>), tedy aspoň $n - 1 = 11$ hran; $8 &lt; 11$. (Alternativně: mašina z $(c)\Rightarrow(a)$ by z něj smazáním $k \ge 0$ hran udělala strom s $8 - k \le 8 &lt; 11$ hranami — spor s lemmatem.)</p>
+          <p><strong>(iii)</strong> $H$ je souvislý a má $n - 1 = 11$ hran → splňuje (c). Podle ekvivalence ze slidu 61 (implikace $(c) \Rightarrow (a)$, slide 62) je $H$ strom. Rozepsáno: ničíme-li kružnice mazáním jejich hran, souvislost se zachová a výsledný strom má podle lemmatu $11$ hran — takže jsme nesmazali nic ($k=0$) a $H$ byl bez kružnice od začátku. ∎</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L3.13">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k3/l3-12.html"><span class="dir">← Předchozí</span> L3.12 · Teorie ILP/TUM (ústní opora)</a>
+    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.14 · k-OPT local search [NICE])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// Pozn.: uzly NEsdílet mezi KOViz voláními (každé volání má vlastní pole) — viz STAV.md.
+
+// ===== Viz 1: sedm tváří na jednom stromě (n=6) =====
+KOViz.stepper(document.getElementById('viz-faces'), {
+  graph: {
+    nodes: [
+      {id:'A', x:110, y:80},  {id:'B', x:110, y:280},
+      {id:'C', x:280, y:180}, {id:'D', x:430, y:80},
+      {id:'E', x:430, y:280}, {id:'F', x:560, y:180},
+    ],
+    edges: [
+      {from:'A', to:'C'}, {from:'B', to:'C'}, {from:'C', to:'D'},
+      {from:'D', to:'F'}, {from:'E', to:'F'},
+      {from:'A', to:'B', dashed:true, cls:'dim', label:'+e'},
+    ],
+    caption: 'Strom T na n = 6 vrcholech; čárkovaná hrana {A,B} do T nepatří (poslouží u tvrzení (f)).',
+  },
+  frames: [
+    {desc:'(a) T je strom: souvislý a bez kružnice — definice z [L0.4]. Projdi si na něm zbylých šest tváří.'},
+    {desc:'(b) + (c): spočítej hrany — m = 5 = n − 1. K tomu (b) přidává „žádná kružnice“, (c) přidává „souvislost“; obojí tu platí.',
+     edges:{'A->C':'good','B->C':'good','C->D':'good','D->F':'good','E->F':'good'},
+     labels:{'A->C':'1','B->C':'2','C->D':'3','D->F':'4','E->F':'5'}},
+    {desc:'(d) minimálně souvislý: smaž KTEROUKOLI hranu, třeba {C,D} — strom se rozpadne na dvě komponenty {A,B,C} a {D,E,F}. Žádná hrana není postradatelná.',
+     edges:{'C->D':'bad'},
+     nodes:{A:'hl', B:'hl', C:'hl'}},
+    {desc:'(f) maximálně acyklický: přidej KTEROUKOLI novou hranu, třeba {A,B} — s cestou A–C–B okamžitě uzavře kružnici A–C–B–A.',
+     edges:{'A->B':'hl', 'A->C':'hl', 'B->C':'hl'}},
+    {desc:'(g) jednoznačné cesty: mezi A a E vede právě jedna cesta A–C–D–F–E. Zkus najít druhou — bez čárkované hrany to nejde.',
+     edges:{'A->C':'hl','C->D':'hl','D->F':'hl','E->F':'hl'},
+     nodes:{A:'hl', E:'hl'}},
+    {desc:'(e) minimální graf s δ(X) ≠ ∅: každý řez je neprázdný — třeba X = {A,B,C} má v řezu hranu {C,D} (zvýrazněna). „Minimální“ = po smazání kterékoli hrany se nějaký řez vyprázdní (tady právě ten zvýrazněný).',
+     nodes:{A:'hl', B:'hl', C:'hl'},
+     edges:{'C->D':'good'}},
+  ],
+});
+
+// ===== Viz 2: protipříklad „n−1 hran ≠ strom“ =====
+KOViz.graph(document.getElementById('viz-fake'), {
+  nodes: [
+    {id:'A', x:150, y:70},  {id:'B', x:60,  y:230}, {id:'C', x:250, y:230},
+    {id:'D', x:380, y:200}, {id:'E', x:480, y:90},  {id:'F', x:580, y:200},
+  ],
+  edges: [
+    {from:'A', to:'B', cls:'bad'}, {from:'B', to:'C', cls:'bad'}, {from:'C', to:'A', cls:'bad'},
+    {from:'D', to:'E'}, {from:'E', to:'F'},
+  ],
+  caption: 'n = 6, m = 5 = n − 1, a přesto žádný strom: kružnice A–B–C (červeně) „promrhala“ hranu, která chybí mezi komponentami. Tvrzení (b) i (c) padají — n − 1 hran potřebuje parťáka.',
+});
+
+// ===== Viz 3: kruh implikací (slide 62) =====
+KOViz.graph(document.getElementById('viz-circle'), {
+  directed: true,
+  nodes: [
+    {id:'a', x:320, y:45,  label:'(a)', sub:'strom'},
+    {id:'g', x:500, y:100, label:'(g)', sub:'jednoznačné cesty'},
+    {id:'e', x:548, y:222, label:'(e)', sub:'min. s δ(X)≠∅'},
+    {id:'d', x:420, y:321, label:'(d)', sub:'minimálně souvislý'},
+    {id:'f', x:220, y:321, label:'(f)', sub:'maximálně acyklický'},
+    {id:'b', x:92,  y:222, label:'(b)', sub:'n−1 hran, bez kružnice'},
+    {id:'c', x:140, y:100, label:'(c)', sub:'n−1 hran, souvislý'},
+  ],
+  edges: [
+    {from:'a', to:'g', label:'2 cesty ⇒ kružnice'},
+    {from:'g', to:'e', label:'[1] str. 17'},
+    {from:'e', to:'d', label:'[1] str. 17'},
+    {from:'d', to:'f', label:'„trivial“'},
+    {from:'f', to:'b', label:'n = m + p'},
+    {from:'b', to:'c', label:'n = m + p'},
+    {from:'c', to:'a', label:'mašina + n = m + p'},
+  ],
+  caption: 'Kruh implikací ze slidu 62: 7 šipek stačí na všech 42 dvojic — z každého tvrzení se ke každému dojede po kruhu. U šipek je nástroj, který je pohání.',
+});
+
+// ===== Viz 4: počítadlo n = m + p (indukce dle m) =====
+KOViz.stepper(document.getElementById('viz-nmp'), {
+  graph: {
+    nodes: [
+      {id:'A', x:90,  y:110}, {id:'B', x:230, y:60},
+      {id:'C', x:370, y:60},  {id:'D', x:520, y:110},
+      {id:'E', x:160, y:290}, {id:'F', x:450, y:290},
+    ],
+    edges: [
+      {from:'A', to:'B', cls:'dim'}, {from:'C', to:'D', cls:'dim'},
+      {from:'B', to:'C', cls:'dim'}, {from:'E', to:'F', cls:'dim'},
+      {from:'A', to:'C', cls:'dim', dashed:true, label:'?', curve:-0.25},
+    ],
+    caption: 'Stavba lesa hranu po hraně: n = 6 je pořád stejné, m roste, p klesá — součet m + p drží na n.',
+  },
+  frames: [
+    {desc:'Báze indukce m = 0: žádné hrany, každý vrchol je sám svou komponentou. n = 6, m = 0, p = 6 → n = m + p. ✓',
+     subs:{A:'K₁', B:'K₂', C:'K₃', D:'K₄', E:'K₅', F:'K₆'}},
+    {desc:'Přidej {A,B}: konce leží v RŮZNÝCH komponentách (jinak by vznikla kružnice) → komponenty se slijí. m = 1, p = 5; m + p = 6. ✓',
+     edges:{'A->B':'good'},
+     subs:{A:'K₁', B:'K₁', C:'K₂', D:'K₃', E:'K₄', F:'K₅'}},
+    {desc:'Přidej {C,D}: zase dvě různé komponenty → slití. m = 2, p = 4; m + p = 6. ✓',
+     edges:{'A->B':'good', 'C->D':'good'},
+     subs:{A:'K₁', B:'K₁', C:'K₂', D:'K₂', E:'K₃', F:'K₄'}},
+    {desc:'Přidej {B,C}: slije K₁ = {A,B} a K₂ = {C,D} do jedné. m = 3, p = 3; m + p = 6. ✓',
+     edges:{'A->B':'good', 'C->D':'good', 'B->C':'good'},
+     subs:{A:'K₁', B:'K₁', C:'K₁', D:'K₁', E:'K₂', F:'K₃'}},
+    {desc:'Přidej {E,F}: m = 4, p = 2; m + p = 6. ✓ Les hotov — každá hrana lesa snížila p přesně o 1.',
+     edges:{'A->B':'good', 'C->D':'good', 'B->C':'good', 'E->F':'good'},
+     subs:{A:'K₁', B:'K₁', C:'K₁', D:'K₁', E:'K₂', F:'K₂'}},
+    {desc:'POZOR: hrana {A,C} spojuje vrcholy TÉŽE komponenty K₁ → s cestou A–B–C uzavře kružnici a graf přestane být les. Proto v lese hrana VŽDY slévá dvě komponenty — a indukce n = m + p drží.',
+     edges:{'A->B':'good', 'C->D':'good', 'B->C':'good', 'E->F':'good', 'A->C':'bad'},
+     subs:{A:'K₁', B:'K₁', C:'K₁', D:'K₁', E:'K₂', F:'K₂'}},
+  ],
+});
+
+// ===== Viz 5: (a) => (g) — dvě cesty dají kružnici =====
+KOViz.stepper(document.getElementById('viz-twopaths'), {
+  graph: {
+    nodes: [
+      {id:'u', x:80,  y:180}, {id:'x', x:240, y:80},
+      {id:'y', x:400, y:80},  {id:'v', x:560, y:180},
+      {id:'p', x:240, y:280}, {id:'q', x:400, y:280},
+    ],
+    edges: [
+      {from:'u', to:'x'}, {from:'x', to:'y'}, {from:'y', to:'v'},
+      {from:'u', to:'p'}, {from:'p', to:'q'}, {from:'q', to:'v'},
+    ],
+    caption: 'Kdyby mezi u a v vedly dvě různé cesty, jejich sjednocení obsahuje kružnici — strom je proto mít nemůže.',
+  },
+  frames: [
+    {desc:'Sporem: nechť mezi u a v existují DVĚ různé cesty — P₁ = u,x,y,v (nahoře) a P₂ = u,p,q,v (dole).',
+     edges:{'u->x':'hl', 'x->y':'hl', 'y->v':'hl', 'u->p':'good', 'p->q':'good', 'q->v':'good'},
+     nodes:{u:'hl', v:'hl'}},
+    {desc:'Sjednocení P₁ ∪ P₂ obsahuje kružnici u–x–y–v–q–p–u (slide 62: „the union of two distinct paths with the same endpoints contains a circuit“). Obecně cesty mohou kus sdílet — kružnici pak uzavře úsek mezi prvním rozvětvením a prvním opětovným setkáním.',
+     edges:{'u->x':'hl', 'x->y':'hl', 'y->v':'hl', 'u->p':'hl', 'p->q':'hl', 'q->v':'hl'},
+     nodes:{u:'hl', v:'hl'}},
+    {desc:'Strom je bez kružnice → SPOR. Mezi u a v tedy vede nejvýš jedna cesta; aspoň jedna existuje díky souvislosti → právě jedna: tvrzení (g). ∎',
+     edges:{'u->x':'good', 'x->y':'good', 'y->v':'good', 'u->p':'dim', 'p->q':'dim', 'q->v':'dim'},
+     nodes:{u:'good', v:'good'}},
+  ],
+});
+
+// ===== Viz 6: (c) => (a) — mašina na ničení kružnic =====
+KOViz.stepper(document.getElementById('viz-machine'), {
+  graph: {
+    nodes: [
+      {id:'A', x:120, y:90},  {id:'B', x:320, y:50},
+      {id:'C', x:520, y:90},  {id:'D', x:430, y:290},
+      {id:'E', x:200, y:290},
+    ],
+    edges: [
+      {from:'A', to:'B'}, {from:'B', to:'C'}, {from:'C', to:'D'},
+      {from:'D', to:'E'}, {from:'E', to:'A'}, {from:'B', to:'D'},
+    ],
+    caption: 'Mašina na ničení kružnic: dokud existuje kružnice, smaž libovolnou její hranu. Souvislost přežije (objížďka), každé zničení stojí jednu hranu.',
+  },
+  frames: [
+    {desc:'Vstup: souvislý graf, n = 5, m = 6 (schválně víc než n − 1 = 4, ať má mašina co ničit).'},
+    {desc:'Kružnice nalezena: B–C–D–B. Smažeme libovolnou její hranu — třeba {B,D}.',
+     edges:{'B->C':'hl', 'C->D':'hl', 'B->D':'hl'}},
+    {desc:'{B,D} smazána (k = 1, m = 5). Souvislost drží: kdo chtěl jít B→D, jede objížďkou B–C–D po zbytku kružnice.',
+     edges:{'B->D':'dim', 'B->C':'good', 'C->D':'good'}},
+    {desc:'Další kružnice: A–B–C–D–E–A. Smažeme třeba {E,A}.',
+     edges:{'B->D':'dim', 'A->B':'hl', 'B->C':'hl', 'C->D':'hl', 'D->E':'hl', 'E->A':'hl'}},
+    {desc:'{E,A} smazána (k = 2, m = 4). Žádná kružnice nezbyla, souvislost drží → G′ je strom a podle počítadla má n − 1 = 4 hran. Obecně: m′ = m − k.',
+     edges:{'B->D':'dim', 'E->A':'dim', 'A->B':'good', 'B->C':'good', 'C->D':'good', 'D->E':'good'}},
+    {desc:'Teď premisa (c): start s m = n − 1. Mašina skončí stromem s m′ = n − 1 − k hranami, ale strom jich podle lemmatu má n − 1 → k = 0. Mašina neměla co ničit: G byl bez kružnice už na vstupu, a protože je souvislý, je to strom — (a). ∎',
+     edges:{'B->D':'dim', 'E->A':'dim', 'A->B':'good', 'B->C':'good', 'C->D':'good', 'D->E':'good'}},
+  ],
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
