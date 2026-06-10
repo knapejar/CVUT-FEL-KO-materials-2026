@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.14 · Sousednost a prostorová omezení — Toys [FOTO] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.14</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.14</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Sousednost a prostorová omezení — Toys [FOTO]</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Prostorové vztahy v řadě pozic — „hned vlevo“, „hned vedle“, „ne na kraji“ — se zapisují <strong>posunem indexu</strong> přiřazovacích binárek: $x_{1,j} = x_{2,j+1}$, zákaz pozice = vynulovaná binárka, a „vedle $t_5$ NEBO $t_6$“ implikací do součtu sousedních binárek.
+  </div>
+
+  <p>Prerekvizity: <a href="l1-2.html#takeaways">[L1.2] Přiřazovací struktura</a>, <a href="l1-3.html#takeaways">[L1.3] Modelování logiky</a>, <a href="l1-4.html#takeaways">[L1.4] big-M</a>, <a href="../k0/l0-6.html#takeaways">[L0.6] Párování a perfektní párování</a>. Nosná úloha je zkoušková <strong>Toys assignment</strong> (termín 09.07.2021): hračky $t_1, \dots, t_n$ rozházené po pokoji se ukládají do <em>řady</em> boxů $b_1, \dots, b_n$ u zdi — a právě ta řada (box $b_j$ je vlevo od $b_{j+1}$) dává smysl slovům „vlevo“, „vedle“ a „na kraji“.</p>
+
+  <!-- ===== KOSTRA ===== -->
+  <h2>Kostra: přiřazení hraček do boxů</h2>
+  <p>Data: vzdálenost hračky $t_i$ k boxu $b_j$ je konstanta $d_{ij} \ge 0$. Elementární rozhodnutí: <em>která hračka skončí ve kterém boxu?</em></p>
+  $$x_{ij} \in \{0,1\}, \qquad i, j \in 1 \dots n, \qquad x_{ij} = 1 \iff \text{hračka } t_i \text{ je v boxu } b_j.$$
+
+  <details class="try">
+    <summary>Zkus sám: podmínky (i) „each box contains exactly one toy and each toy is stored in one box“ a kritérium (ii) „total distance minimized“ jsou čistá <a href="l1-2.html#takeaways">[L1.2]</a>. Napiš je.</summary>
+    <div class="inner">
+      <p>Oboustranná přiřazovací struktura — každý řádek i sloupec matice $x$ má součet 1:</p>
+      $$\sum_{j=1}^{n} x_{ij} = 1 \quad \forall i \in 1 \dots n, \qquad\qquad \sum_{i=1}^{n} x_{ij} = 1 \quad \forall j \in 1 \dots n,$$
+      <p>a kritérium je lineární součet konstanta × binárka:</p>
+      $$\min\; z = \sum_{i=1}^{n} \sum_{j=1}^{n} d_{ij}\, x_{ij}.$$
+      <p>Tohle je <strong>assignment problem</strong> (přiřazovací problém) v čisté podobě — zapamatuj si ho, na konci lekce se k němu vrátíme jako ke grafové úloze.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-row"></div>
+
+  <!-- ===== POLOHA JE INDEX ===== -->
+  <h2>Nová věc: poloha v řadě = index boxu</h2>
+  <p>Podmínka (iii): <em>„toy $t_1$ is assigned to the box immediately left to the box where $t_2$ is assigned“</em>. Klíčový postřeh: boxy jsou očíslované <strong>podle polohy</strong> — $b_j$ je hned vlevo od $b_{j+1}$. Prostorový vztah dvou hraček je tedy vztah <em>indexů</em> jejich boxů.</p>
+
+  <details class="try">
+    <summary>Zkus sám: jak svázat binárky $x_{1,\cdot}$ a $x_{2,\cdot}$, aby $t_1$ byla hned vlevo od $t_2$?</summary>
+    <div class="inner">
+      <p>„$t_2$ v boxu $b_{j+1}$ ⟺ $t_1$ v boxu $b_j$“ — události se musí trefit do <em>posunutých</em> indexů. Nejkratší zápis je rovnost binárek s posunem:</p>
+      $$x_{1,j} = x_{2,j+1} \qquad \forall j \in 1 \dots n-1.$$
+      <p>Stejně dobře funguje implikace $x_{1,j} \le x_{2,j+1}$ (spolu s řádkovými součty vystřelí přesně jednou) — rovnost je ale na písemce obvyklý a bezpečný zápis (přesně takhle je ve vzorovém řešení).</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: stačí to? Najdi přiřazení, které všechny rovnosti $x_{1,j} = x_{2,j+1}$ splní, a přitom $t_1$ vlevo od $t_2$ NENÍ.</summary>
+    <div class="inner">
+      <p>Polož $t_1$ do <strong>posledního</strong> boxu: $x_{1,n} = 1$. Pak $x_{1,j} = 0$ pro $j \le n-1$, takže všechny rovnosti říkají jen $x_{2,j+1} = 0$ — a $t_2$ tedy skončí v $b_1$. Všechny rovnosti platí, ale $t_1$ je na pravém kraji a $t_2$ na levém („přetečení“ přes okraj řady). Musíš okraj explicitně zakázat:</p>
+      $$x_{1,n} = 0 \qquad (\text{a tím i } x_{2,1} = 0 \text{ — plyne z rovností a řádkových součtů; klidně napiš obě}).$$
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „posun indexu stačí“</div>
+    <p>Každé omezení s posunutým indexem ($j+1$, $j-1$) má <strong>okrajový problém</strong>: pro $j = n$ index $j+1$ neexistuje, pro $j = 1$ neexistuje $j-1$. Samotné rovnosti/nerovnosti přes $j \in 1 \dots n-1$ nechají krajní binárky volné — a solver díru najde. Vždy se ptej: <em>co se děje na krajích řady?</em> Buď chybějící členy ber jako nulu, nebo krajní pozici explicitně vynuluj ($x_{1,n} = 0$).</p>
+  </div>
+
+  <div class="viz" id="viz-shift"></div>
+
+  <details class="try">
+    <summary>Zkus sám (předkrm na <a href="l1-15.html">[L1.15]</a>): šlo by (iii) zapsat přes „číslo boxu hračky $t_i$“ jako jedno číslo?</summary>
+    <div class="inner">
+      <p>Ano — číslo boxu hračky $t_i$ je lineární výraz $\sum_j j \cdot x_{ij}$ (právě jeden sčítanec je nenulový). Podmínka (iii) pak je jediná rovnost:</p>
+      $$\sum_{j=1}^{n} j \cdot x_{2,j} = \sum_{j=1}^{n} j \cdot x_{1,j} + 1.$$
+      <p>Elegantní — ale pozor: pro (v) „hned vedle“ bys potřeboval $|{\rm pozice}_4 - {\rm pozice}_5| = 1$ <em>nebo</em> $|{\rm pozice}_4 - {\rm pozice}_6| = 1$, a absolutní hodnota <em>rovná se</em> je sama o sobě disjunkce — zápis se rozpadne. Posun indexů je tady praktičtější. Systematicky se „výrazům z indexovaných binárek“ věnuje příští lekce <a href="l1-15.html">[L1.15]</a>.</p>
+    </div>
+  </details>
+
+  <!-- ===== ZAKAZ KRAJU ===== -->
+  <h2>Zákaz krajních pozic</h2>
+  <p>Podmínka (iv): <em>„neither $t_5$ nor $t_6$ can be assigned to $b_1$ or $b_n$“</em>.</p>
+
+  <details class="try">
+    <summary>Zkus sám: tohle je nejlevnější podmínka celé úlohy. Napiš ji.</summary>
+    <div class="inner">
+      <p>Zakázaná volba = fixace binárky na nulu (<a href="l1-3.html#takeaways">[L1.3]</a>):</p>
+      $$x_{5,1} = x_{5,n} = x_{6,1} = x_{6,n} = 0.$$
+      <p>Žádná logika, žádné big-M — čtyři proměnné prostě škrtneš. (Grafově řečeno: z úplného bipartitního grafu hračky–boxy odebereš čtyři hrany; hned se to bude hodit.)</p>
+    </div>
+  </details>
+
+  <!-- ===== DISJUNKCE ===== -->
+  <h2>Disjunkce: „vedle $t_5$ NEBO $t_6$“</h2>
+  <p>Podmínka (v): <em>„$t_4$ is in the box immediately next to $t_5$ or $t_6$“</em>. „Immediately next“ = box o jedna vlevo, nebo o jedna vpravo — a k tomu volba svědka ($t_5$, nebo $t_6$). Vypadá to na ošklivou disjunkci; uvidíš, že má jednořádkové řešení.</p>
+
+  <details class="try">
+    <summary>Zkus sám: nejdřív jen „$t_4$ hned vedle $t_5$“. Když je $t_4$ v boxu $b_j$, co musí platit?</summary>
+    <div class="inner">
+      <p>Pak $t_5$ sedí v $b_{j-1}$, nebo v $b_{j+1}$ — implikace „binárka ⟹ aspoň jedna z binárek“. Univerzální recept z <a href="l1-3.html#takeaways">[L1.3]</a> (zakázaný řádek: $x_{4,j}=1$ a oba sousedi 0) dá:</p>
+      $$x_{4,j} \;\le\; x_{5,j-1} + x_{5,j+1} \qquad \forall j \in 1 \dots n.$$
+      <p>Pro $x_{4,j} = 0$ omezení nic nechce; pro $x_{4,j} = 1$ vynutí jedničku u souseda. Žádné big-M — pravá strana je součet binárek, sama je „dost velká“.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: a teď přidej „… NEBO $t_6$“. A nezapomeň na okraje řady.</summary>
+    <div class="inner">
+      <p>NEBO mezi svědky = další sčítance na pravé straně (čím víc povolených svědků, tím volnější implikace):</p>
+      $$x_{4,j} \;\le\; x_{5,j-1} + x_{5,j+1} + x_{6,j-1} + x_{6,j+1} \qquad \forall j \in 1 \dots n,$$
+      <p>kde <strong>členy s neplatným indexem</strong> ($j-1 = 0$, $j+1 = n+1$) <strong>bereš jako nulu</strong> — tedy pro $j=1$ zůstanou jen členy $x_{\cdot,2}$, pro $j=n$ jen $x_{\cdot,n-1}$. To je přesně vzorové řešení z banku. Okraje tady fungují samy: $t_4$ v $b_1$ prostě potřebuje svědka v $b_2$.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-neigh"></div>
+
+  <details class="try">
+    <summary>Zkus sám: obecná zbraň na „NEBO mezi omezeními“ je big-M disjunkce <a href="l1-4.html#takeaways">[L1.4]</a>. Jak by vypadala tady — a proč je horší?</summary>
+    <div class="inner">
+      <p>(v) je disjunkce <strong>čtyř</strong> scénářů: $t_4$ hned vlevo od $t_5$ / vpravo od $t_5$ / vlevo od $t_6$ / vpravo od $t_6$. Čtyři scénáře vybereš dvěma selektorovými binárkami $y_1, y_2 \in \{0,1\}$ a tři nevybrané systémy vypneš přes $M$ — takhle to (s drobnými otazníky hodnotitele) stojí v reálné písemce z 09.07.2021:</p>
+      $$\begin{aligned}
+      y_2 M + y_1 M + x_{4,j} &\ge x_{5,j+1} \\
+      y_2 M + (1-y_1) M + x_{4,j} &\ge x_{5,j-1} \\
+      (1-y_2) M + y_1 M + x_{4,j} &\ge x_{6,j+1} \\
+      (1-y_2) M + (1-y_1) M + x_{4,j} &\ge x_{6,j-1}
+      \end{aligned} \qquad \forall j$$
+      <p>Čti první řádek pro $y_1 = y_2 = 0$: $x_{5,j+1} \le x_{4,j}$ pro všechna $j$, tedy „kdekoli je $t_5$, hned vlevo od ní sedí $t_4$“ — scénář aktivní. Pro ostatní volby $(y_1, y_2)$ ho člen $M$ vypne. Protože vše jsou binárky, stačí $M = 1$ — a velikost big-M vždy zdůvodni (<a href="l1-4.html#takeaways">[L1.4]</a>). Okraje tu nezlobí jen díky (iv): $t_5$, $t_6$ nikdy nesedí v $b_1$ ani $b_n$, takže posunuté indexy pokryjí všechny jejich možné pozice.</p>
+      <p><strong>Verdikt:</strong> funguje to, ale je to 4× víc nerovností, dvě proměnné navíc, kvantifikátor a okraje k pohlídání — hodnotitel u téhle verze nechal otazníky a strhl body. Jednořádková součtová implikace je kratší a bezpečnější. Big-M disjunkci si šetři na případy, kdy NEBO spojuje <em>obecné nerovnosti</em>, ne binárky.</p>
+    </div>
+  </details>
+
+  <!-- ===== MOST DO K4 ===== -->
+  <h2>Most do K4: přiřazení = perfektní párování</h2>
+  <p>Část (b) zadání říká: zahoď (iii) a (v) a <em>„formalize the problem as an assignment problem (i.e., minimum weight perfect matching in complete bipartite graph whose sets have the same cardinality)“</em>. Vzpomeň na <a href="../k0/l0-6.html#takeaways">[L0.6]</a>: tam jsme si přesně tohle propojení slíbili.</p>
+
+  <details class="try">
+    <summary>Zkus sám: jak vypadá graf? Co jsou vrcholy, hrany, váhy — a kam se poděje podmínka (iv)?</summary>
+    <div class="inner">
+      <p>Bipartitní graf $G = (T \cup B, E)$: nalevo hračky, napravo boxy, hrana $(t_i, b_j)$ s váhou $w(t_i, b_j) = d_{ij}$ pro každé <em>povolené</em> přiřazení. Perfektní párování vybere ke každé hračce právě jeden box a naopak — to je přesně dvojice součtových podmínek (i); minimalizace váhy párování = kritérium (ii).</p>
+      <p>Podmínka (iv) zůstává v platnosti (zadání škrtá jen (iii) a (v)) — a grafově je triviální: čtyři hrany prostě <strong>odebereš</strong>: $(t_5,b_1), (t_5,b_n), (t_6,b_1), (t_6,b_n) \notin E$. Pokud odpověď musí stát na <em>úplném</em> $K_{n,n}$, necháš je tam s prohibitivní váhou $w = M$ (dost velkou, aby do optima nikdy nevstoupily).</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-match"></div>
+
+  <p>Tohle je klasický <strong>assignment problem</strong> (přiřazovací problém) a je řešitelný <strong>polynomiálně</strong>. Jak přesně — min-cost flow formulace a výpočet — je látka kapitoly K4 (lekce [L4.12]); dnes stačí umět <em>převod</em>: ILP (i)+(ii) ⟷ minimum weight perfect matching v $K_{n,n}$, zákazy pozic ⟷ odebrané hrany.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.14</div>
+    <ul>
+      <li><strong>Poloha v řadě = index boxu.</strong> „$t_1$ hned vlevo od $t_2$“ = rovnost binárek s posunutým indexem: $x_{1,j} = x_{2,j+1}$ $\forall j \in 1 \dots n-1$ — plus <strong>okrajová pojistka</strong> $x_{1,n} = 0$ (a $x_{2,1} = 0$). Každý posun indexu zkontroluj na krajích řady, jinak řešení „přeteče“.</li>
+      <li><strong>Zákaz pozice = vynulovaná binárka</strong> <a href="l1-3.html#takeaways">[L1.3]</a>: $x_{5,1} = x_{5,n} = x_{6,1} = x_{6,n} = 0$. Grafově: odebrané hrany.</li>
+      <li><strong>„Hned vedle $t_5$ nebo $t_6$“ = implikace do součtu sousedů:</strong> $x_{4,j} \le x_{5,j-1} + x_{5,j+1} + x_{6,j-1} + x_{6,j+1}$ $\forall j$ (neplatné indexy = 0). Big-M netřeba — pravá strana je součet binárek. Obecná alternativa: disjunkce čtyř systémů přes selektorové binárky $y_1, y_2$ a big-M <a href="l1-4.html#takeaways">[L1.4]</a> (tady stačí $M=1$), ale je delší a náchylnější k chybám.</li>
+      <li><strong>Assignment ILP = minimum weight perfect matching</strong> v $K_{n,n}$ <a href="../k0/l0-6.html#takeaways">[L0.6]</a>: hračky ∪ boxy, váhy $d_{ij}$, zakázaná přiřazení = odebrané hrany (nebo váha $M$ při úplném grafu). Výpočet přes toky až v K4 [L4.12].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA ===== -->
+  <div class="task" id="t-toys">
+    <div class="task-head foto">
+      <span class="task-id">T01</span>
+      <strong>Toys Assignment</strong>
+      <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
+      <span class="task-src">zdroj: zkouška KO, termín 09.07.2021 (bank T02a)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“There is a set of toys $T = \{t_1, t_2, \ldots, t_n\}$ scattered all around the room. By one of the walls, there is a row of boxes $B = \{b_1, b_2, \ldots, b_n\}$, where box $b_i$ is located left to $b_{i+1}$ for all $i \in \{1, 2, \ldots, n-1\}$. Distance of toy $t_i$ to box $b_j$ is $d_{i,j} \in \mathbb{R}_0^+ \quad \forall t_i \in T, b_j \in B$.</p>
+        <p>(a) Your goal is to design an ILP model to organize the toys to the boxes such that: (i) each box contains exactly one toy and each toy is stored in one box, (ii) the total distance between the toys and their assigned boxes is minimized, (iii) toy $t_1$ is assigned to the box immediately left to the box where $t_2$ is assigned, (iv) neither $t_5$ nor $t_6$ can be assigned to $b_1$ or $b_n$, (v) $t_4$ is in the box immediately next to $t_5$ or $t_6$.</p>
+        <p>(b) Disregard constraints (iii) and (v). Then, formalize the problem as an assignment problem (i.e., minimum weight perfect matching in complete bipartite graph whose sets have the same cardinality).”</p>
+      </div>
+
+      <div class="box foto">
+        <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+        <p>Tuhle úlohu vyřeš celou <strong>NA PAPÍR</strong> — od prázdného listu, bez koukání do lekce ani do řešení, ideálně na čas (na zkoušce zhruba 15–20 minut; úloha byla za 4.75 bodu). Pak mi pošli fotku — zkontroluju ti ji a vytknu chyby přesně jako hodnotitel.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>$n$ hraček a řada $n$ boxů u zdi ($b_j$ je vlevo od $b_{j+1}$); vzdálenosti $d_{ij}$ jsou data. Část (a): postav ILP — (i) bijekce hračky↔boxy, (ii) minimalizuj součet vzdáleností, (iii) $t_1$ hned vlevo od $t_2$, (iv) $t_5$ a $t_6$ nesmí na kraje ($b_1$, $b_n$), (v) $t_4$ hned vedle $t_5$ nebo $t_6$. Část (b): bez (iii) a (v) úlohu zformuluj jako assignment problem — minimum weight perfect matching v úplném bipartitním grafu se stejně velkými partitami.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — posun indexu pro „hned vlevo/vedle“, okrajové pojistky, zákaz pozic, disjunkce svědků součtem.</li>
+        <li><a href="l1-2.html#takeaways">[L1.2] Přiřazovací struktura</a> — binárky $x_{ij}$ a oba součty $=1$.</li>
+        <li><a href="l1-3.html#takeaways">[L1.3] Modelování logiky</a> — implikace „binárka ⟹ aspoň jedna z binárek“, fixace na 0.</li>
+        <li><a href="l1-4.html#takeaways">[L1.4] big-M</a> — jen pokud zvolíš disjunkční variantu (v) se selektory $y_1, y_2$.</li>
+        <li><a href="../k0/l0-6.html#takeaways">[L0.6] Párování</a> — perfect matching a jeho čtení jako přiřazení (část b).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Kostra je čistá [L1.2]: binárka hračka × box, dva součty, lineární kritérium. Pak ber podmínky po jedné a každou přelož na <em>indexy</em>: (iii) je posun o $+1$ — kterým směrem, a co se stane na kraji řady ($j = n$)? (iv) jsou čtyři škrtnuté proměnné. U (v) si nejdřív napiš implikaci „$t_4$ v $b_j$ ⟹ soused obsahuje svědka“ jen pro $t_5$, pak rozšiř NEBO o $t_6$ — a rozmysli, co s členy $x_{\cdot,0}$ a $x_{\cdot,n+1}$. V části (b) se ptej: které ILP podmínky jsou „matching zadarmo“ (i)+(ii), která se promítne do <em>množiny hran</em> (iv) — a proč (iv) pořád platí, když zadání škrtá jen (iii) a (v)?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>(a) ILP model.</strong> Proměnné: $x_{ij} \in \{0,1\}$ $\forall i, j \in 1 \dots n$, $x_{ij} = 1$ ⟺ hračka $t_i$ je v boxu $b_j$. Parametry: $d_{ij} \in \mathbb{R}_0^+$, $n \in \mathbb{Z}^+$.</p>
+          <p><strong>(ii) Kritérium:</strong></p>
+          $$\min\; z = \sum_{i=1}^{n} \sum_{j=1}^{n} d_{ij}\, x_{ij}.$$
+          <p><strong>(i) Každý box právě jedna hračka, každá hračka právě jeden box:</strong></p>
+          $$\sum_{i=1}^{n} x_{ij} = 1 \quad \forall j \in 1 \dots n, \qquad\qquad \sum_{j=1}^{n} x_{ij} = 1 \quad \forall i \in 1 \dots n.$$
+          <p><strong>(iii) $t_1$ hned vlevo od $t_2$</strong> — posun indexu + okrajová pojistka:</p>
+          $$x_{1,j} = x_{2,j+1} \quad \forall j \in 1 \dots n-1, \qquad x_{1,n} = 0, \qquad x_{2,1} = 0.$$
+          <p>(Bez $x_{1,n} = 0$ by prošlo $t_1$ v $b_n$ a $t_2$ v $b_1$ — všechny rovnosti by platily vacuózně.)</p>
+          <p><strong>(iv) $t_5, t_6$ ne na krajích:</strong></p>
+          $$x_{5,1} = x_{5,n} = x_{6,1} = x_{6,n} = 0.$$
+          <p><strong>(v) $t_4$ hned vedle $t_5$ nebo $t_6$</strong> — implikace do součtu sousedních binárek:</p>
+          $$x_{4,j} \;\le\; x_{5,j-1} + x_{5,j+1} + x_{6,j-1} + x_{6,j+1} \quad \forall j \in 1 \dots n,$$
+          <p>kde členy s neplatným indexem ($j - 1 = 0$, $j + 1 = n + 1$) se berou jako nula. Pro $x_{4,j} = 1$ musí mít aspoň jeden sousední box $t_5$ nebo $t_6$; pro $x_{4,j} = 0$ omezení nic nevynucuje.</p>
+          <p><em>Alternativa (v) přes big-M disjunkci <a href="l1-4.html#takeaways">[L1.4]</a>:</em> selektory $y_1, y_2 \in \{0,1\}$ vyberou jeden ze čtyř scénářů (vlevo/vpravo × $t_5$/$t_6$) a zbylé tři vypne $M$ (zde stačí $M = 1$, vše jsou binárky):</p>
+          $$\begin{aligned}
+          y_2 M + y_1 M + x_{4,j} &\ge x_{5,j+1} \\
+          y_2 M + (1-y_1) M + x_{4,j} &\ge x_{5,j-1} \\
+          (1-y_2) M + y_1 M + x_{4,j} &\ge x_{6,j+1} \\
+          (1-y_2) M + (1-y_1) M + x_{4,j} &\ge x_{6,j-1}
+          \end{aligned} \qquad \forall j \in 1 \dots n.$$
+          <p>Funguje (okraje kryje (iv)), ale součtová verze je kratší a na písemce bezpečnější.</p>
+          <p><strong>(b) Assignment problem / minimum weight perfect matching.</strong> Bipartitní graf $G = (T \cup B, E)$; pro každé povolené přiřazení hrana $(t_i, b_j)$ s váhou $w(t_i, b_j) = d_{ij}$. Podmínka (iv) <em>zůstává</em> (škrtnuty jsou jen (iii) a (v)) a promítne se do množiny hran:</p>
+          $$(t_5, b_1),\; (t_5, b_n),\; (t_6, b_1),\; (t_6, b_n) \;\notin\; E,$$
+          <p>nebo — má-li odpověď stát na úplném $K_{n,n}$ — tyto čtyři hrany dostanou prohibitivní váhu $w = M$ (dost velkou, aby do optima nevstoupily). Perfektní párování vybírá právě jednu hranu u každé hračky i každého boxu, je tedy přesně bijekce hračky↔boxy; minimalizace váhy párování minimalizuje celkovou vzdálenost při respektování (iv). Úloha je řešitelná polynomiálně — výpočet přes min-cost flow v K4 [L4.12].</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.14">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-13.html"><span class="dir">← Předchozí</span> L1.13 · Worst-case omezení přes kombinace</a>
+    <a class="next" href="l1-15.html"><span class="dir">Další →</span> L1.15 · Časově/pozičně indexované proměnné</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Řada boxů s jedním přípustným uložením (n = 6)
+KOViz.graph(document.getElementById('viz-row'), {
+  h: 150,
+  directed: false,
+  nodes: [
+    {id: 'b1', x: 80,  y: 70, label: 'b₁', sub: 't₁'},
+    {id: 'b2', x: 176, y: 70, label: 'b₂', sub: 't₂'},
+    {id: 'b3', x: 272, y: 70, label: 'b₃', sub: 't₄'},
+    {id: 'b4', x: 368, y: 70, label: 'b₄', sub: 't₅'},
+    {id: 'b5', x: 464, y: 70, label: 'b₅', sub: 't₆'},
+    {id: 'b6', x: 560, y: 70, label: 'b₆', sub: 't₃'},
+  ],
+  edges: [
+    {from: 'b1', to: 'b2', cls: 'hl',   label: '(iii)'},
+    {from: 'b2', to: 'b3', cls: 'dim'},
+    {from: 'b3', to: 'b4', cls: 'good', label: '(v)'},
+    {from: 'b4', to: 'b5', cls: 'dim'},
+    {from: 'b5', to: 'b6', cls: 'dim'},
+  ],
+  caption: 'Řada boxů u zdi (b₁ vlevo od b₂, …) a jedno přípustné uložení pro n = 6: t₁ hned vlevo od t₂ (iii, modře), t₄ hned vedle t₅ (v, zeleně) a t₅, t₆ se vyhýbají krajním boxům b₁, b₆ (iv).'
+});
+
+// Posun indexu: x_{1,j} = x_{2,j+1} + okrajové nuly
+KOViz.graph(document.getElementById('viz-shift'), {
+  h: 320,
+  directed: false,
+  nodes: [
+    {id: 'a1', x: 80,  y: 70, label: 'b₁', sub: 'x₁,₁'},
+    {id: 'a2', x: 176, y: 70, label: 'b₂', sub: 'x₁,₂'},
+    {id: 'a3', x: 272, y: 70, label: 'b₃', sub: 'x₁,₃'},
+    {id: 'a4', x: 368, y: 70, label: 'b₄', sub: 'x₁,₄'},
+    {id: 'a5', x: 464, y: 70, label: 'b₅', sub: 'x₁,₅'},
+    {id: 'a6', x: 560, y: 70, label: 'b₆', sub: 'x₁,₆ = 0', cls: 'bad'},
+    {id: 'c1', x: 80,  y: 235, label: 'b₁', sub: 'x₂,₁ = 0', cls: 'bad'},
+    {id: 'c2', x: 176, y: 235, label: 'b₂', sub: 'x₂,₂'},
+    {id: 'c3', x: 272, y: 235, label: 'b₃', sub: 'x₂,₃'},
+    {id: 'c4', x: 368, y: 235, label: 'b₄', sub: 'x₂,₄'},
+    {id: 'c5', x: 464, y: 235, label: 'b₅', sub: 'x₂,₅'},
+    {id: 'c6', x: 560, y: 235, label: 'b₆', sub: 'x₂,₆'},
+  ],
+  edges: [
+    {from: 'a1', to: 'c2', cls: 'hl', label: '='},
+    {from: 'a2', to: 'c3', cls: 'hl', label: '='},
+    {from: 'a3', to: 'c4', cls: 'hl', label: '='},
+    {from: 'a4', to: 'c5', cls: 'hl', label: '='},
+    {from: 'a5', to: 'c6', cls: 'hl', label: '='},
+  ],
+  caption: 'Podmínka (iii) jako posun indexu: horní řada = kde smí být t₁ (binárky x₁,ⱼ), dolní řada = kde smí být t₂. Rovnosti x₁,ⱼ = x₂,ⱼ₊₁ svazují posunuté dvojice; červené krajní binárky x₁,₆ a x₂,₁ musíš vynulovat sám — jinak řešení „přeteče“ přes okraj (t₁ v b₆, t₂ v b₁).'
+});
+
+// Podmínka (v): t4 v b3 potřebuje svědka v sousedním boxu
+KOViz.graph(document.getElementById('viz-neigh'), {
+  h: 150,
+  directed: true,
+  nodes: [
+    {id: 'n1', x: 80,  y: 70, label: 'b₁'},
+    {id: 'n2', x: 176, y: 70, label: 'b₂', sub: 't₅ či t₆?', cls: 'good'},
+    {id: 'n3', x: 272, y: 70, label: 'b₃', sub: 't₄', cls: 'hl'},
+    {id: 'n4', x: 368, y: 70, label: 'b₄', sub: 't₅ či t₆?', cls: 'good'},
+    {id: 'n5', x: 464, y: 70, label: 'b₅'},
+    {id: 'n6', x: 560, y: 70, label: 'b₆'},
+  ],
+  edges: [
+    {from: 'n3', to: 'n2', cls: 'good'},
+    {from: 'n3', to: 'n4', cls: 'good'},
+    {from: 'n1', to: 'n2', cls: 'dim', undirected: true},
+    {from: 'n4', to: 'n5', cls: 'dim', undirected: true},
+    {from: 'n5', to: 'n6', cls: 'dim', undirected: true},
+  ],
+  caption: 'Když x₄,₃ = 1 (t₄ v boxu b₃), musí být aspoň jedna z binárek x₅,₂, x₆,₂, x₅,₄, x₆,₄ rovna 1: x₄,₃ ≤ x₅,₂ + x₅,₄ + x₆,₂ + x₆,₄. Pro krajní j = 1 nebo j = n z pravé strany členy s neplatným indexem prostě vypadnou.'
+});
+
+// Most do K4: assignment = perfect matching v K(6,6) bez zakázaných hran
+(function () {
+  const ys = [38, 93, 148, 203, 258, 313];
+  const nodes = [];
+  for (let i = 1; i <= 6; i++) nodes.push({id: 't' + i, x: 180, y: ys[i-1], label: 't' + '₁₂₃₄₅₆'[i-1]});
+  for (let j = 1; j <= 6; j++) nodes.push({id: 'b' + j, x: 460, y: ys[j-1], label: 'b' + '₁₂₃₄₅₆'[j-1]});
+  const matchOf = {1: 1, 2: 2, 3: 6, 4: 3, 5: 4, 6: 5};       // jedno perfektní párování
+  const forbidden = {'5,1': 1, '5,6': 1, '6,1': 1, '6,6': 1};  // hrany škrtnuté podmínkou (iv)
+  const dim = [], top = [];
+  for (let i = 1; i <= 6; i++) for (let j = 1; j <= 6; j++) {
+    if (forbidden[i + ',' + j]) top.push({from: 't' + i, to: 'b' + j, cls: 'bad', dashed: true});
+    else if (matchOf[i] === j)  top.push({from: 't' + i, to: 'b' + j, cls: 'good'});
+    else dim.push({from: 't' + i, to: 'b' + j, cls: 'dim'});
+  }
+  KOViz.graph(document.getElementById('viz-match'), {
+    directed: false,
+    nodes: nodes,
+    edges: dim.concat(top),
+    caption: 'Část (b) pro n = 6: bipartitní graf hračky ∪ boxy, váha hrany (tᵢ, bⱼ) je dᵢⱼ. Přiřazení (i) = perfektní párování (zeleně jedno z nich), kritérium (ii) = minimální váha párování. Podmínka (iv) stále platí — čtyři červené čárkované hrany z grafu odeber (nebo jim na úplném K₆,₆ dej prohibitivní váhu M).'
+  });
+})();
+</script>
+</body>
+</html>
