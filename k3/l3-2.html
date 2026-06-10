@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L3.2 · Důkaz korektnosti Dijkstry [FOTO] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k3">K3 · Důkaz / teorie</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L3.2</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L3.2</span> Kapitola K3 — Důkaz / teorie (Slot 3) · <strong>[MUST]</strong> · ŽEBŘÍČEK #2 · <strong>[FOTO]</strong>
+  </p>
+  <h1>Důkaz korektnosti Dijkstry</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    <strong>Indukce přes uzavíranou množinu $R$</strong>: invariant „v okamžiku zařazení vrcholu $v$ do $R$ je jeho značka už skutečná nejkratší vzdálenost“ — a klíčový krok důkazu, který stojí a padá s <em>nezáporností hran</em>.
+  </div>
+
+  <p><em>Correctness of Dijkstra</em> je žebříček důkazů #2: prokazatelně padla minimálně ve dvou termínech (02.06.2021 a zkoušky 2023) a zadává se vždy stejně — pseudokód + „Prove the correctness“. <strong>Běh</strong> Dijkstry už umíš z <a href="../k2/l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a> a nebudeme ho vykládat znovu: vyber neuzavřený vrchol s nejmenší značkou, uzavři, relaxuj odchozí hrany <a href="../k2/l2-3.html#takeaways">[L2.3]</a>. Dnes jde o otázku <strong>PROČ</strong> to funguje — tedy o důkaz, který v písemce odevzdáš celý, na papír, vlastní rukou.</p>
+
+  <!-- ===== SEKCE 1: CO PŘESNĚ TVRDÍME ===== -->
+  <h2>Co přesně dokazujeme</h2>
+
+  <details class="try">
+    <summary>Zkus sám: zformuluj <em>přesně</em>, co znamená „Dijkstra je korektní“. Co má platit, až algoritmus skončí?</summary>
+    <div class="inner">
+      <p>Po skončení má pro <em>každý</em> vrchol $v$ platit $l(v) = \mathrm{dist}(v)$, kde $\mathrm{dist}(v)$ je skutečná délka nejkratší cesty $s \to v$ (a $l(v) = \infty$ právě pro nedosažitelné vrcholy). Vektor $p$ má navíc kódovat strom nejkratších cest.</p>
+      <p>Přímo „po skončení“ se to ale dokazuje špatně. Trik (a jediná nová věc téhle lekce): dokážeme <strong>silnější průběžné tvrzení</strong> — invariant, který platí po celou dobu běhu. Silnější tvrzení se indukcí často dokazuje <em>snáz</em>, protože máš silnější indukční předpoklad.</p>
+    </div>
+  </details>
+
+  <p>Domluvme značení podle vzorového řešení (banka úloh): $D(v)$ je <strong>aktuální Dijkstrova značka</strong> (v pseudokódu $l(v)$ — přeznačení jen odlišuje „co tvrdí algoritmus“ od pravdy), $\mathrm{dist}(v)$ je <strong>skutečná nejkratší vzdálenost</strong> z $s$ do $v$ a $R$ je množina <strong>uzavřených</strong> (finalized) vrcholů. Pro $v \notin R$ je $D(v)$ definované, ale jen pracovní (tentative) <a href="../k2/l2-4.html#takeaways">[L2.4]</a>.</p>
+
+  <div class="box">
+    <div class="box-title">Invariant (= indukční tvrzení)</div>
+    $$\forall u \in R: \quad D(u) = \mathrm{dist}(u).$$
+    <p>Dokazujeme <strong>indukcí přes velikost $R$</strong>: každá iterace while-cyklu přidá do $R$ právě jeden vrchol, takže „indukce přes $|R|$“ = „indukce přes iterace algoritmu“. Když invariant přežije všechny iterace, na konci je $R = V(G)$ a všechny značky jsou správně — přesně korektnost.</p>
+  </div>
+
+  <!-- ===== SEKCE 2: BÁZE ===== -->
+  <h2>Báze indukce: $|R| = 1$</h2>
+
+  <p>První iterace vybere vrchol s nejmenší značkou — po inicializaci je to $s$ (jediný s $l = 0$, ostatní $\infty$).</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč je $D(s) = 0$ správně, tedy proč $\mathrm{dist}(s) = 0$? (Není to <em>úplně</em> zadarmo — jeden předpoklad už tady tiše pracuje.)</summary>
+    <div class="inner">
+      <p>Prázdná cesta z $s$ do $s$ má délku $0$, takže $\mathrm{dist}(s) \le 0$. A kratší to být nemůže, protože <strong>všechny váhy jsou nezáporné</strong> — každý sled má délku $\ge 0$. Tady poprvé (a zatím nenápadně) vstupuje předpoklad $c : E(G) \to \mathbb{R}^+_0$: kdyby přes $s$ vedl záporný cyklus, bylo by „$\mathrm{dist}(s) = -\infty$“ a báze by spadla hned <a href="../k2/l2-1.html#takeaways">[L2.1]</a>.</p>
+    </div>
+  </details>
+
+  <p>Báze hotova: $D(s) = 0 = \mathrm{dist}(s)$, invariant pro $R = \{s\}$ platí.</p>
+
+  <!-- ===== SEKCE 3: INDUKČNÍ KROK — SNADNÝ SMĚR ===== -->
+  <h2>Indukční krok — snadný směr: $\mathrm{dist}(v) \le D(v)$</h2>
+
+  <p>Indukční předpoklad: invariant platí, všechny vrcholy v $R$ mají správné vzdálenosti. Algoritmus teď vybírá <strong>nejlepšího kandidáta</strong></p>
+  $$v \in V \setminus R, \qquad D(v) = \min_{z \in V \setminus R} D(z)$$
+  <p>a chce ho uzavřít. Musíme dokázat, že $D(v) = \mathrm{dist}(v)$. Rovnost rozdělíme na dvě nerovnosti — jedna je skoro zadarmo, druhá je jádro důkazu.</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč platí $\mathrm{dist}(v) \le D(v)$? (Odkud se vůbec konečná hodnota $D(v)$ vzala?)</summary>
+    <div class="inner">
+      <p>Konečná značka vzniká <em>jedině</em> relaxací: někdy dříve se uzavíral nějaký vrchol $x \in R$ a vnitřní smyčka nastavila $D(v) := D(x) + c(x,v)$, $p(v) := x$. Po řetízku předchůdců $p$ zpátky až do $s$ to znamená, že $D(v)$ je délka <strong>skutečného existujícího sledu</strong> $s \to \cdots \to x \to v$ <a href="../k2/l2-3.html#takeaways">[L2.3]</a>. Nejkratší cesta nemůže být delší než nějaký konkrétní sled, tedy $\mathrm{dist}(v) \le D(v)$.</p>
+      <p><em>(Okrajový případ $D(v) = \infty$: pak mají $\infty$ všechny vrcholy mimo $R$. Všechny hrany vedoucí z $R$ ven už ale relaxovány byly — kdyby nějaká existovala, její konec by měl konečnou značku. Žádná tedy neexistuje, vrcholy mimo $R$ jsou nedosažitelné a $\mathrm{dist} = \infty = D$ sedí. Banka i slidy tento případ přecházejí mlčky; u písemky stačí věta v závorce.)</em></p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 4: TĚŽKÝ SMĚR — SPOR ===== -->
+  <h2>Těžký směr: žádná kratší cesta neexistuje</h2>
+
+  <p>Zbývá $D(v) \le \mathrm{dist}(v)$, tedy: <em>žádná</em> cesta $s \to v$ není kratší než $D(v)$. Důkaz povedeme <strong>sporem</strong>: předpokládejme, že existuje $s$–$v$ cesta $P$ s</p>
+  $$|P| &lt; D(v).$$
+
+  <details class="try">
+    <summary>Zkus sám: cesta $P$ začíná v $s \in R$ a končí ve $v \notin R$. Co z toho geometricky plyne? (Hledáme na $P$ jeden konkrétní vrchol, o kterém půjde něco říct.)</summary>
+    <div class="inner">
+      <p>$P$ musí někde <strong>poprvé opustit množinu $R$</strong>. Označme $y$ <strong>první vrchol na $P$, který neleží v $R$</strong>, a $x$ jeho předchůdce na $P$. Z definice „první“ plyne $x \in R$ — a na $x$ se proto vztahuje indukční předpoklad: $D(x) = \mathrm{dist}(x)$. (Klidně může být $y = v$, pokud $P$ vede až do $v$ celou dobu uvnitř $R$ — argument níže funguje beze změny.)</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: co víme o značce $D(y)$? (Vzpomeň si, co přesně udělala vnitřní smyčka v iteraci, kdy se uzavíral $x$.)</summary>
+    <div class="inner">
+      <p>Když byl $x$ přidán do $R$, vnitřní smyčka otestovala <em>všechny</em> jeho odchozí hrany do neuzavřených vrcholů — tedy i hranu $(x,y)$. Po této relaxaci platí (a značky už nikdy nerostou, takže platí pořád):</p>
+      $$D(y) \;\le\; D(x) + c(x,y) \;=\; \mathrm{dist}(x) + c(x,y) \;\le\; |P[s,x]| + c(x,y) \;=\; |P[s,y]|,$$
+      <p>kde $P[s,x]$ je úsek cesty $P$ od $s$ do $x$. Prostřední nerovnost: $P[s,x]$ je <em>nějaká</em> $s$–$x$ cesta, takže není kratší než $\mathrm{dist}(x)$. Slovy: <strong>značka prvního vrcholu za hranicí $R$ není horší než délka $P$ až k němu.</strong></p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: teď přijde JEDINÝ krok, kde se použije nezápornost vah. Jak souvisí $|P[s,y]|$ s celkovou délkou $|P|$?</summary>
+    <div class="inner">
+      <p>Zbytek cesty $P$ od $y$ do $v$ se skládá z hran s váhami $c \ge 0$, takže má délku $\ge 0$ a</p>
+      $$|P[s,y]| \;\le\; |P|.$$
+      <p>To je <strong>celé</strong> — jediné místo důkazu, kde nezápornost vstupuje, a přesně to místo, které záporná hrana zboří (viz níže). Složením řetízku:</p>
+      $$D(y) \;\le\; |P[s,y]| \;\le\; |P| \;&lt;\; D(v).$$
+    </div>
+  </details>
+
+  <p>A to je spor: $y \notin R$ byl také kandidát na uzavření, ale má <strong>ostře menší značku</strong> než $v$ — algoritmus by tedy nevybral $v$, vybral by $y$ (nebo někoho ještě lepšího). To odporuje volbě $v$ jako minima. Kratší cesta $P$ tedy neexistuje, $D(v) = \mathrm{dist}(v)$, invariant platí i pro $R \cup \{v\}$ a indukce je hotová. $\blacksquare$</p>
+
+  <p>Celý argument si přehraj krok za krokem na schématu (zelené vrcholy = $R$, červeně = hypotetická kratší cesta $P$):</p>
+
+  <div class="viz" id="viz-proof"></div>
+
+  <!-- ===== SEKCE 5: KDE PŘESNĚ JE POTŘEBA NEZÁPORNOST ===== -->
+  <h2>Kde přesně důkaz potřebuje nezáporné hrany</h2>
+
+  <p>Vrať se k protipříkladu z <a href="../k2/l2-4.html#takeaways">[L2.4]</a> a podívej se na něj <em>očima důkazu</em>:</p>
+
+  <div class="viz" id="viz-neg"></div>
+
+  <details class="try">
+    <summary>Zkus sám: ve druhé iteraci Dijkstra uzavírá $v = a$ s $D(a) = 1$. Dosaď do důkazu cestu $P = s \to b \to a$ (délka $2 - 2 = 0$) a najdi přesně tu nerovnost, která spadne.</summary>
+    <div class="inner">
+      <p>Cesta $P$ má $|P| = 0 &lt; 1 = D(a)$, takže podle důkazu by měl existovat spor. Projdi řetízek: první vrchol mimo $R = \{s\}$ na $P$ je $y = b$, předchůdce $x = s$. Odhad značky funguje: $D(b) \le \mathrm{dist}(s) + c(s,b) = 2 = |P[s,b]|$. Jenže další krok</p>
+      $$|P[s,y]| \le |P| \qquad \text{by znamenalo} \qquad 2 \le 0 \;—\; \text{NEPLATÍ.}$$
+      <p>Zbytek cesty ($b \to a$ s váhou $-2$) má <em>zápornou</em> délku, takže prefix je <em>delší</em> než celá cesta. Spor se nekoná, $D(b) = 2$ je klidně větší než $D(a) = 1$, Dijkstra s čistým svědomím uzavře $a$ se špatnou hodnotou — a hranu $(b,a)$ už nikdy neotestuje, protože vnitřní smyčka jede jen přes $w \notin R$ <a href="../k2/l2-4.html#takeaways">[L2.4]</a>.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy u tohoto důkazu</div>
+    <ul>
+      <li><strong>„Nezápornost se použije všude, tak ji stačí někde zmínit.“</strong> NE — v důkazu má přesně dvě adresy: $\mathrm{dist}(s)=0$ v bázi a hlavně $|P[s,y]| \le |P|$ (zbytek cesty neumí délku snížit). U zkoušky ji VYZNAČ přesně tam; bez ní celý spor nefunguje a existuje protipříklad výše.</li>
+      <li><strong>„Invariant platí pro všechny značky.“</strong> NE — jen pro vrcholy <em>v $R$</em>. Značky na hranici jsou pracovní odhady a smí ještě klesat <a href="../k2/l2-4.html#takeaways">[L2.4]</a>; důkaz s tím počítá (nerovnost $D(y) \le \dots$ klesáním jen zesílí).</li>
+      <li><strong>„Záporná hrana vadí relaxaci.“</strong> NE — samotná relaxace záporné váhy nevadí <a href="../k2/l2-3.html#takeaways">[L2.3]</a>; padá <em>strategie pořadí</em> „nejmenší značka = hotovo“. Proto se zápornými hranami (bez záporných cyklů) funguje label-correcting Bellman-Ford <a href="../k2/l2-12.html#takeaways">[L2.12]</a>, jehož důkaz korektnosti čeká v [L3.7].</li>
+    </ul>
+  </div>
+
+  <!-- ===== SEKCE 6: VERZE ZE SLIDŮ ===== -->
+  <h2>Tentýž krok očima Bellmanovy rovnice (verze ze slidů)</h2>
+
+  <p>Slidy (03_SPT_KO, slide 18–19) vedou indukční krok bez explicitního sporu — ukazují, že pro uzavíraného kandidáta $v$ platí Bellmanova rovnice <a href="../k2/l2-2.html#takeaways">[L2.2]</a> $\;l(s,v) = \min_{k \ne v} \{\,l(s,k) + c(k,v)\,\}$, rozborem možných předchůdců $k$ na dva případy (EN 1:1):</p>
+  <ul>
+    <li><em>„for <strong>predecessors</strong> $k \in R$, since $l(s,k)$ is optimal and Bellmans equation for these nodes was calculated in the internal loop (all $e \in E^+(R)$ were tested)“</em> — $E^+(R)$ jsou hrany vedoucí z $R$ ven; každá byla relaxována při uzavírání svého počátku.</li>
+    <li><em>„for <strong>predecessors</strong> $k \notin R$, since the value of $l(v)$ can not be improved by the path going through $k \notin R$ because $l(v) \le l(k \notin R)$ and the $c(k,v)$ are nonnegative.“</em> Slide dodává: $l(k \notin R)$ sice může v dalších iteracích ještě klesnout, ale přičítáním nezáporných délek se nikdy nedostane pod $l(v) = \min_{i \in V \setminus R} l(i)$.</li>
+    </ul>
+
+  <details class="try">
+    <summary>Zkus sám: najdi, kde se ty dva případy schovávají v důkazu sporem, který jsme právě udělali.</summary>
+    <div class="inner">
+      <p>Je to <strong>tentýž argument v jiném kabátě</strong>. Případ „$k \in R$“ = naše relaxace hrany $(x,y)$ na hranici (všechny hrany z $R$ ven byly otestovány — proto víme $D(y) \le \mathrm{dist}(x) + c(x,y)$). Případ „$k \notin R$“ = naše nezápornost + minimalita $v$ (cesta procházející vrcholem mimo $R$ nese už aspoň $l(v)$ a nezáporné hrany nic neslevují — přesně řetízek $D(y) \le |P| &lt; D(v)$ obrácený do sporu). U zkoušky si vyber <em>jednu</em> verzi a doveď ji do konce; verze sporem z banky je vzorové řešení a hůř se v ní něco zamlčí.</p>
+    </div>
+  </details>
+
+  <p>Indukční kostru „invariant + rostoucí množina / počet iterací“ si zapamatuj — stejné schéma použijeme u korektnosti Bellman-Forda [L3.7], jen invariant poběží přes počet průchodů („po $k$ průchodech je $l(w)$ nejvýš délka nejkratšího sledu o $\le k$ hranách“).</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.2</div>
+    <ul>
+      <li><strong>Tvrzení = invariant:</strong> $\forall u \in R: D(u) = \mathrm{dist}(u)$ — v okamžiku zařazení do $R$ je značka definitivně správná. Dokazuje se <strong>indukcí přes $|R|$</strong> (= přes iterace); báze $D(s) = 0 = \mathrm{dist}(s)$.</li>
+      <li><strong>Krok sporem:</strong> kratší cesta $P$ do uzavíraného $v$ by musela poprvé opustit $R$ ve vrcholu $y$; relaxace hrany $(x,y)$ při uzavírání $x \in R$ dává $D(y) \le |P[s,y]| \le |P| &lt; D(v)$ — spor s volbou $v$ jako minima mimo $R$.</li>
+      <li><strong>Nezápornost hran</strong> je potřeba přesně v $|P[s,y]| \le |P|$ (zbytek cesty nemůže délku snížit). Záporná hrana argument zboří — protipříklad $s,a,b$ s hranou $-2$ <a href="../k2/l2-4.html#takeaways">[L2.4]</a>.</li>
+      <li>Ekvivalentní podání ze slidů: pro $v$ platí Bellmanova rovnice <a href="../k2/l2-2.html#takeaways">[L2.2]</a> — předchůdci $k \in R$ pokryti relaxacemi $E^+(R)$, předchůdci $k \notin R$ nepomohou ($l(v) \le l(k)$, $c \ge 0$).</li>
+      <li>Stejné indukční schéma (invariant přes rostoucí množinu / počet iterací) znovu použijeme u Bellman-Forda [L3.7].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 [FOTO] ===== -->
+  <div class="task" id="t-dijkstra">
+    <div class="task-head foto">
+      <span class="task-id">T01</span>
+      <strong>Correctness of Dijkstra's Algorithm</strong>
+      <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
+      <span class="task-src">zdroj: zkouška 02.06.2021 a zkoušky 2023 (EN 1:1, znění shodné s bankou #10); řešení dle banky #10, doplňky (případ ∞, vektor $p$) vlastní — přiznáno</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>Prove the correctness of Dijkstra's Algorithm.</p>
+        <p><strong>Input:</strong> digraph $G$, weights $c : E(G) \to \mathbb{R}_0^+$ and node $s \in V(G)$.</p>
+        <p><strong>Output:</strong> Vectors $l$ and $p$. For $v \in V(G)$, $l(v)$ is the length of the shortest path from $s$ and $p(v)$ is the previous node in the path. If $v$ is unreachable from $s$, $l(v) = \infty$ and $p(v)$ is undefined.</p>
+        <pre style="white-space:pre-wrap">l(s) := 0; l(v) := ∞ for v ≠ s; R := ∅;
+while R ≠ V(G) do
+    Find v ∈ V(G) \ R such that l(v) = min_{w∈V(G)\R} l(w);
+    R := R ∪ {v};
+    // calculate l(w) for all nodes on border of R
+    for w ∈ V(G) \ R such that (v, w) ∈ E(G) do
+        if l(w) > l(v) + c(v, w) then
+            l(w) := l(v) + c(v, w); p(w) := v;
+        end
+    end
+end</pre>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Čistě důkazová úloha: je dán pseudokód Dijkstry (tentýž, co znáš z <a href="../k2/l2-4.html#takeaways">[L2.4]</a>) a máš dokázat, že po skončení je $l(v)$ skutečně délka nejkratší cesty z $s$ pro každý vrchol (s konvencí $\infty$ pro nedosažitelné). Žádná čísla, žádný konkrétní graf — odevzdává se text důkazu.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — invariant a indukce přes $R$, dva odhady na $D(y)$, role nezápornosti.</li>
+        <li><a href="../k2/l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a> — význam $R$, hranice, expanze; co dělá vnitřní smyčka.</li>
+        <li><a href="../k2/l2-3.html#takeaways">[L2.3] Relaxace hrany</a> — značky vznikají relaxacemi a nikdy nerostou.</li>
+        <li><a href="../k2/l2-2.html#takeaways">[L2.2] Bellmanův princip optimality</a> — pokud chceš alternativní podání přes Bellmanovu rovnici.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Nezačínej psát nerovnosti — začni <em>strukturou</em>: (1) zaveď značení $D$ / $\mathrm{dist}$ / $R$, (2) vyslov invariant, (3) řekni „indukce přes $|R|$“, (4) báze, (5) krok. V kroku rozděl rovnost na snadný směr ($D(v)$ je délka skutečného sledu) a spor (kratší cesta $P$ → první vrchol $y$ mimo $R$ → dva odhady na $D(y)$). Hlídej si dvě věci, na které se u tabule ptají: <em>kde přesně</em> se použila nezápornost a <em>proč</em> byla hrana $(x,y)$ vůbec někdy relaxována.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (dle vzorového řešení banky #10)</summary>
+        <div class="inner">
+          <p><strong>Značení.</strong> $D(v)$ = aktuální Dijkstrova značka (v pseudokódu $l(v)$), definovaná pro každý vrchol; pro $v \notin R$ je jen pracovní. $\mathrm{dist}(v)$ = skutečná nejkratší vzdálenost z $s$ do $v$. $R$ = množina uzavřených (finalized) vrcholů.</p>
+
+          <p><strong>Invariant.</strong> Dokážeme indukcí přes velikost $R$:</p>
+          $$\forall u \in R: \quad D(u) = \mathrm{dist}(u).$$
+
+          <p><strong>Báze.</strong> Prvním vybraným vrcholem je $s$ a $D(s) = 0 = \mathrm{dist}(s)$ (váhy jsou nezáporné, takže žádný sled nemá zápornou délku a prázdná cesta délky $0$ je nejkratší).</p>
+
+          <p><strong>Indukční krok.</strong> Nechť invariant platí a algoritmus vybírá</p>
+          $$v \in V \setminus R, \qquad D(v) = \min_{z \in V \setminus R} D(z).$$
+          <p>Protože $D(v)$ je délka nějakého známého sledu $s \to v$ (vznikla řetězem relaxací, sled rekonstruuje vektor $p$), platí</p>
+          $$\mathrm{dist}(v) \le D(v).$$
+          <p>Zbývá ukázat, že kratší cesta neexistuje. <strong>Pro spor</strong> nechť existuje $s$–$v$ cesta $P$ s $|P| &lt; D(v)$. Nechť $y$ je <strong>první vrchol na $P$ s $y \notin R$</strong> a $x$ jeho předchůdce na $P$; pak $x \in R$. Z indukčního předpokladu</p>
+          $$D(x) = \mathrm{dist}(x) \le |P[s,x]|.$$
+          <p>Když se $x$ uzavíral, hrana $(x,y)$ byla relaxována, a protože značky už jen klesají,</p>
+          $$D(y) \le D(x) + c(x,y) \le |P[s,x]| + c(x,y) = |P[s,y]|.$$
+          <p>Všechny váhy jsou <strong>nezáporné</strong>, takže úsek $P$ od $y$ do $v$ má délku $\ge 0$ a</p>
+          $$|P[s,y]| \le |P|.$$
+          <p>Dohromady</p>
+          $$D(y) \le |P[s,y]| \le |P| &lt; D(v).$$
+          <p>Jenže $y \notin R$, takže $y$ byl také dostupný kandidát — to je <strong>spor</strong> s volbou $v$ jako vrcholu s minimální značkou mimo $R$. Žádná cesta kratší než $D(v)$ tedy neexistuje a</p>
+          $$D(v) = \mathrm{dist}(v).$$
+          <p>Invariant zůstává zachován i po $R := R \cup \{v\}$ a indukcí je Dijkstrův algoritmus korektní. $\blacksquare$</p>
+
+          <p><strong>Doplňky pro úplnost (vlastní, banka je neuvádí — u písemky stačí věta):</strong></p>
+          <ul>
+            <li><em>Nedosažitelné vrcholy:</em> pokud je vybírané minimum $D(v) = \infty$, mají $\infty$ všechny vrcholy mimo $R$. Všechny hrany z $R$ ven už byly relaxovány, takže žádná hrana z $R$ ven nevede — vrcholy mimo $R$ jsou z $s$ nedosažitelné a $D = \infty = \mathrm{dist}$ odpovídá specifikaci výstupu.</li>
+            <li><em>Případ $y = v$:</em> argument funguje beze změny ($D(v) \le |P| &lt; D(v)$ je spor přímo).</li>
+            <li><em>Vektor $p$:</em> $p(v)$ je vrchol, jehož relaxace dala finální $D(v)$; protože $D(p(v)) + c(p(v),v) = D(v)$ a obě značky jsou po uzavření správné vzdálenosti, hrana $(p(v), v)$ leží na nejkratší cestě — couváním po $p$ se složí nejkratší cesta / strom nejkratších cest <a href="../k2/l2-3.html#takeaways">[L2.3]</a>.</li>
+          </ul>
+
+          <p><strong>Krátká zkoušková odpověď (kostra, kterou rozepíšeš):</strong> ① značení $D/\mathrm{dist}/R$; ② invariant $\forall u \in R: D(u)=\mathrm{dist}(u)$, indukce přes $|R|$; ③ báze $D(s)=0$; ④ $\mathrm{dist}(v) \le D(v)$ ($D(v)$ = délka skutečného sledu); ⑤ spor: $P$ kratší → první $y \notin R$, předchůdce $x \in R$ → relaxace $(x,y)$ → $D(y) \le |P[s,y]| \stackrel{c \ge 0}{\le} |P| &lt; D(v)$ → spor s minimalitou $v$; ⑥ závěr. Nezápornost <u>výslovně</u> vyznač v kroku ⑤.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="box foto">
+    <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+    <p>Tenhle důkaz napiš celý NA PAPÍR (bez koukání do řešení i do lekce — u zkoušky ho taky píšeš zpaměti) a pošli mi fotku. Zkontroluju strukturu (invariant → báze → krok → spor), úplnost řetízku nerovností a hlavně to, jestli jsi správně vyznačil(a), kde se používá nezápornost hran.</p>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L3.2">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k3/l3-1.html"><span class="dir">← Předchozí</span> L3.1 · Co je aproximační algoritmus a faktor r</a>
+    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.3 · Hamiltonovská kružnice a NP-úplnost)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// 1 — Stepper: indukční krok důkazu na schématu (R zeleně, hypotetická kratší cesta P červeně)
+KOViz.stepper(document.getElementById('viz-proof'), {
+  graph: {
+    directed: true,
+    nodes: [
+      {id:'s', x:70,  y:180},
+      {id:'a', x:210, y:80},
+      {id:'b', x:190, y:265},
+      {id:'x', x:340, y:255},
+      {id:'y', x:475, y:300},
+      {id:'v', x:555, y:150},
+    ],
+    edges: [
+      {from:'s', to:'a'},
+      {from:'a', to:'v'},
+      {from:'s', to:'b'},
+      {from:'b', to:'x'},
+      {from:'x', to:'y', label:'c(x,y)'},
+      {from:'y', to:'v', dashed:true, curve:0.25, label:'zbytek P'},
+    ],
+    caption: 'Schéma indukčního kroku. Zelené vrcholy = uzavřená množina R (s, a, b, x), plné šipky = hrany, čárkovaná šipka = úsek hypotetické cesty P (může mít víc hran a vrcholů).',
+  },
+  frames: [
+    {desc:'Indukční předpoklad: všechny vrcholy v R (zeleně) už mají správnou vzdálenost, D(u) = dist(u). Vrcholy mimo R (y, v) mají jen pracovní značky.',
+     nodes:{s:'good', a:'good', b:'good', x:'good'},
+     subs:{s:'D=0 ✓', a:'dist ✓', b:'dist ✓', x:'dist ✓', v:'D(v)', y:'D(y)'}},
+    {desc:'Dijkstra vybírá kandidáta v: nejmenší značku mimo R. Hodnota D(v) vznikla dřívější relaxací hrany z R (tady a→v), takže D(v) je délka skutečného sledu s→a→v — proto dist(v) ≤ D(v).',
+     nodes:{s:'good', a:'good', b:'good', x:'good', v:'hl'},
+     edges:{'s->a':'hl', 'a->v':'hl'},
+     subs:{s:'D=0 ✓', a:'dist ✓', b:'dist ✓', x:'dist ✓', v:'D(v) = min mimo R', y:'D(y) ≥ D(v)'}},
+    {desc:'PRO SPOR: ať existuje cesta P do v s |P| &lt; D(v) (červeně): s→b→x→y→⋯→v. Ukážeme, že taková cesta nemůže existovat.',
+     nodes:{s:'good', a:'good', b:'good', x:'good', v:'hl'},
+     edges:{'s->b':'bad', 'b->x':'bad', 'x->y':'bad', 'y->v':'bad'},
+     subs:{s:'D=0 ✓', a:'dist ✓', b:'dist ✓', x:'dist ✓', v:'D(v) > |P| ?', y:'D(y)'}},
+    {desc:'P začíná v s ∈ R a končí ve v ∉ R, takže někde R poprvé opustí. Označ y = PRVNÍ vrchol cesty P mimo R; jeho předchůdce x na P pak nutně leží v R (a platí pro něj indukční předpoklad).',
+     nodes:{s:'good', a:'good', b:'good', x:'good', v:'hl', y:'bad'},
+     edges:{'s->b':'bad', 'b->x':'bad', 'x->y':'bad', 'y->v':'bad'},
+     subs:{s:'D=0 ✓', a:'dist ✓', b:'dist ✓', x:'dist ✓ (předchůdce)', v:'D(v) > |P| ?', y:'první mimo R'}},
+    {desc:'Když se x uzavíral, vnitřní smyčka relaxovala hranu (x,y) → D(y) ≤ D(x)+c(x,y) = dist(x)+c(x,y) ≤ |P[s,y]|. (Značky už jen klesají, nerovnost platí dodnes.)',
+     nodes:{s:'good', a:'good', b:'good', x:'good', v:'hl', y:'bad'},
+     edges:{'s->b':'bad', 'b->x':'bad', 'x->y':'hl', 'y->v':'bad'},
+     subs:{s:'D=0 ✓', a:'dist ✓', b:'dist ✓', x:'dist ✓', v:'D(v) > |P| ?', y:'D(y) ≤ |P[s,y]|'}},
+    {desc:'NEZÁPORNOST HRAN: zbytek P z y do v má délku ≥ 0, takže |P[s,y]| ≤ |P|. Řetízek: D(y) ≤ |P[s,y]| ≤ |P| &lt; D(v).',
+     nodes:{s:'good', a:'good', b:'good', x:'good', v:'hl', y:'bad'},
+     edges:{'s->b':'bad', 'b->x':'bad', 'x->y':'bad', 'y->v':'hl'},
+     subs:{s:'D=0 ✓', a:'dist ✓', b:'dist ✓', x:'dist ✓', v:'D(v)', y:'D(y) < D(v) ?!'}},
+    {desc:'SPOR: y leží mimo R a má ostře menší značku než v — Dijkstra by tedy vybral y, ne v. Kratší cesta P neexistuje → D(v) = dist(v) a v se právem uzavírá: R := R ∪ {v}. Invariant přežil, indukce hotova.',
+     nodes:{s:'good', a:'good', b:'good', x:'good', v:'good'},
+     edges:{'s->a':'good', 'a->v':'good'},
+     subs:{s:'D=0 ✓', a:'dist ✓', b:'dist ✓', x:'dist ✓', v:'dist ✓', y:'D(y)'}},
+  ],
+});
+
+// 2 — Statický protipříklad: záporná hrana zboří krok |P[s,y]| ≤ |P| (graf z L2.4)
+KOViz.graph(document.getElementById('viz-neg'), {
+  directed: true,
+  nodes: [
+    {id:'s', x:100, y:180, cls:'good', sub:'D=0 ✓'},
+    {id:'a', x:430, y:80,  cls:'hl',  sub:'uzavírá se s D(a)=1'},
+    {id:'b', x:430, y:280, sub:'D(b)=2'},
+  ],
+  edges: [
+    {from:'s', to:'a', label:'1'},
+    {from:'s', to:'b', label:'2'},
+    {from:'b', to:'a', label:'−2', cls:'bad'},
+  ],
+  caption: 'Protipříklad z [L2.4] očima důkazu: R = {s}, Dijkstra uzavírá v = a s D(a) = 1. Cesta P = s→b→a má |P| = 0 < 1, první vrchol mimo R je y = b s |P[s,b]| = 2. Nerovnost |P[s,y]| ≤ |P| by chtěla 2 ≤ 0 — záporná hrana (červeně) ji zboří a spor se nekoná. Správně je dist(a) = 0, Dijkstra vrátí 1.',
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
