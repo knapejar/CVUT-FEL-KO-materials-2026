@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.15 · Skalování vah a zachování nejkratší cesty — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.15</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.15</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>Skalování vah a zachování nejkratší cesty</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Co udělá úprava všech vah s nejkratší cestou: <strong>posun o $+h$ ji obecně NEzachová</strong> (cena cesty vzroste o $h \cdot$ <em>počet hran</em>, takže znevýhodní cesty s více hranami), zatímco <strong>násobení kladnou konstantou $k$ ji zachová</strong> (cena každé cesty se škáluje stejným faktorem).
+  </div>
+
+  <p>Celou kapitolu řešíme, jak algoritmy snášejí záporné váhy: pro Dijkstru jsou zakázané území <a href="l2-4.html#takeaways">[L2.4]</a>, Bellman-Ford je zvládne, ale za cenu $\mathcal{O}(nm)$ <a href="l2-12.html#takeaways">[L2.12]</a>. Na písemce se proto pravidelně objevuje lákavá myšlenka: <em>„Tak ty záporné váhy prostě odstraníme — ke všem přičteme dostatečně velké $h$ a pustíme Dijkstru.“</em> Přesně tohle zkoumá dochovaná zkoušková podotázka (úloha T01 níže). Tahle lekce je o tom, <strong>kdy úprava vah nejkratší cestu zachová a kdy ji potichu rozbije</strong>.</p>
+
+  <!-- ===== SEKCE 1: POSUN +h ===== -->
+  <h2>Posun všech vah o $+h$</h2>
+
+  <details class="try">
+    <summary>Zkus sám: ke všem vahám přičteš $h \ge |\min_{e} c(e)|$ — váhy jsou rázem nezáporné a Dijkstra smí běžet. Dostaneš ale nejkratší cestu <em>původního</em> grafu? Rozepiš si, co se stane s cenou jedné konkrétní cesty.</summary>
+    <div class="inner">
+      <p>Cesta $P$ je posloupnost hran <a href="../k0/l0-1.html#takeaways">[L0.1]</a> a její cena je součet vah. Po posunu:</p>
+      $$c'(P) = \sum_{e \in P} \big(c(e) + h\big) = c(P) + h \cdot |P|,$$
+      <p>kde $|P|$ je <strong>počet hran</strong> cesty. Každá cesta tedy nedostane stejný příplatek — dostane $h$ <em>za každou svou hranu</em>. Cesta o třech hranách zdraží o $3h$, přímá hrana jen o $h$. Pořadí cest podle ceny se proto může přehodit: posun systematicky znevýhodňuje cesty s více hranami. <strong>Nejkratší cesta se obecně NEzachová.</strong></p>
+    </div>
+  </details>
+
+  <p>Konkrétní protipříklad (silně souvislý, se zápornými vahami — přesně ve formátu, jaký chce zkouška): minimum vah je $-3$, vezmi tedy $h = 3$.</p>
+
+  <div class="viz" id="viz-g"></div>
+  <div class="viz" id="viz-gh"></div>
+
+  <details class="try">
+    <summary>Zkus sám: spočítej obě $s \to t$ cesty v $G$ i v $G'$. Která vyhraje kde?</summary>
+    <div class="inner">
+      <p>V $G$: cesta $s \to a \to t$ stojí $-2 + (-2) = -4$, přímá hrana $s \to t$ stojí $-3$. Vyhrává <strong>$s \to a \to t$</strong> ($-4 &lt; -3$).</p>
+      <p>V $G'$ (vše $+3$): cesta $s \to a \to t$ stojí $1 + 1 = 2$, přímá hrana $0$. Vyhrává <strong>$s \to t$</strong> ($0 &lt; 2$). Sedí to s formulkou: dvouhranná cesta zdražila o $2h = 6$ (z $-4$ na $2$), jednohranná jen o $h = 3$ (z $-3$ na $0$).</p>
+      <p>Nejkratší cesta v $G'$ tedy <em>neodpovídá</em> nejkratší cestě v $G$ — „vylepšený“ graf vrátí špatnou odpověď na původní otázku.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: najdi chybu. Dochovaná zkoušková odpověď tvrdila opak — „SPT computation is decided by the weight difference between pairs of edges: $c(e_i) - c(e_j) = d$; after adding $h$ we get $c(e_i) + h - (c(e_j) + h) = d$, the same difference — therefore SPT of $G$ corresponds to SPT of $G'$.“ Kde je díra v argumentu?</summary>
+    <div class="inner">
+      <p>O nejkratší cestě nerozhodují <em>rozdíly dvojic hran</em>, ale <strong>součty vah podél celých cest</strong> — a porovnávané cesty mohou mít <em>různý počet hran</em>. V rozdílu cen dvou cest se $h$ nezkrátí jednou, přibyde $|P_1|$-krát na jedné a $|P_2|$-krát na druhé straně:</p>
+      $$c'(P_1) - c'(P_2) = c(P_1) - c(P_2) + h\,\big(|P_1| - |P_2|\big).$$
+      <p>Zkrátí se jen pro $|P_1| = |P_2|$. V protipříkladu výše: $|P_1| - |P_2| = 2 - 1 = 1$, takže rozdíl cen se posunul o $h = 3$ — z $-4 - (-3) = -1$ na $2 - 0 = 2$, a vítěz se přehodil. (Zkoušející si chybu odpovědi pohlídal — na okraji je červeně připsáno „What about negative cycles?“ a opravná skica trojúhelníkového protipříkladu.)</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Kdy posun $+h$ přece jen projde</div>
+    <ul>
+      <li><strong>Všechny porovnávané cesty mají stejný počet hran.</strong> Pak je příplatek $h \cdot |P|$ všude stejný a pořadí se nemění. Příklad z TSP (kapitola K3): všechny hamiltonovské kružnice na $n$ vrcholech mají přesně $n$ hran — slide TSP doslova říká, že přičtením konstanty $h$ ke každé hraně se kritérium zvedne o $n \cdot h$ (a instance se stane metrickou).</li>
+      <li><strong>Posun „po vrcholech“ (potenciály).</strong> Johnsonův algoritmus (zmíněný u Floyda <a href="l2-14.html">[L2.14]</a>) přeznačkuje $c'(u,v) = c(u,v) + h(u) - h(v)$ s vhodnou funkcí $h$ na vrcholech: podél <em>každé</em> $s \to t$ cesty se vnitřní členy teleskopicky vyruší a cena vzroste o stejných $h(s) - h(t)$ — nezávisle na počtu hran. To je korektní cesta, jak se zbavit záporných vah; paušální $+h$ na hranu korektní není.</li>
+    </ul>
+  </div>
+
+  <!-- ===== SEKCE 2: NÁSOBENÍ ×k ===== -->
+  <h2>Násobení všech vah konstantou $k &gt; 0$</h2>
+
+  <details class="try">
+    <summary>Zkus sám: a co když všechny váhy vynásobíme $k &gt; 0$? Rozepiš cenu cesty stejně jako u posunu.</summary>
+    <div class="inner">
+      <p>$$c'(P) = \sum_{e \in P} k \cdot c(e) = k \cdot c(P).$$</p>
+      <p>Cena <em>každé</em> cesty se násobí stejným faktorem — žádný člen závislý na počtu hran. Pro $k &gt; 0$ tedy platí $c(P_1) &lt; c(P_2) \iff k\,c(P_1) &lt; k\,c(P_2)$: pořadí cest se zachová, <strong>nejkratší cesta zůstane nejkratší</strong> a její délka se vynásobí $k$ (tj. $\min_P k\,c(P) = k \min_P c(P)$).</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-mul"></div>
+
+  <details class="try">
+    <summary>Zkus sám: ladí to s Bellmanovou rovnicí <a href="l2-2.html#takeaways">[L2.2]</a>?</summary>
+    <div class="inner">
+      <p>Ano. Když vzdálenosti $l(s,\cdot)$ splňují $l(s,w) = \min_v \{ l(s,v) + c(v,w) \}$, vynásob obě strany $k &gt; 0$: protože kladná konstanta se protáhne přes minimum, dostaneš $k\,l(s,w) = \min_v \{ k\,l(s,v) + k\,c(v,w) \}$ — funkce $k \cdot l$ splňuje Bellmanovu rovnici grafu s vahami $k \cdot c$. Stejný argument „monotónní transformace zachová argmin“ jsme už použili u $-\log$ převodu <a href="l2-7.html#takeaways">[L2.7]</a> (tam jsme díky němu směli ignorovat základ logaritmu — změna základu je právě přenásobení všech vah kladnou konstantou).</p>
+      <p>Bonus: i <em>definovanost</em> úlohy se zachová — cyklus má po vynásobení $k &gt; 0$ stejné znaménko, takže záporné cykly nevzniknou ani nezmizí <a href="l2-1.html#takeaways">[L2.1]</a>. Posun $+h$ naopak záporné cykly „vyléčí“ — což je samo o sobě podezřelé: v $G$ se záporným cyklem nejkratší cesta ani nemusí být rozumně definovaná, v $G'$ už ano, takže si <em>nemohou</em> odpovídat.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: co pokazí $k = -1$? A $k = 0$?</summary>
+    <div class="inner">
+      <p>$k = -1$ otočí všechny nerovnosti: minimum se stane maximem. To není vada, ale <strong>trik</strong> — přesně takhle jsme hledali <em>nejdelší</em> cesty Floydem <a href="l2-14.html#takeaways">[L2.14]</a> i v DAGu <a href="l2-13.html#takeaways">[L2.13]</a>. „Zachování nejkratší cesty“ ale neplatí: nejkratší cesta v $-c$ je nejdelší v $c$.</p>
+      <p>$k = 0$ vše zploští na nulu — každá cesta je „nejkratší“, informace je pryč. Proto formulace v takeaways vždy zní <strong>$k &gt; 0$</strong>.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečná polopravda</div>
+    <ul>
+      <li><strong>„Záporné váhy posunu o $+h$ do nezáporna a pustím Dijkstru.“</strong> NE — posun přidá $h \cdot |P|$, cesty s více hranami zdraží víc a vítěz se může přehodit (protipříklad výše). Korektní řešení záporných vah: Bellman-Ford <a href="l2-12.html#takeaways">[L2.12]</a>, v DAGu topologický průchod <a href="l2-13.html#takeaways">[L2.13]</a>, all-pairs Floyd <a href="l2-14.html#takeaways">[L2.14]</a>.</li>
+      <li>Jediné bezpečné plošné škálování je <strong>násobení $k &gt; 0$</strong>. A pozor na tichý předpoklad: úvaha porovnává <em>ceny cest</em> — nejlevnější cesta nemusí mít nejméně hran; o vztahu Dijkstry a počtu hran je hned další lekce [L2.16].</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.15</div>
+    <ul>
+      <li><strong>Posun všech vah o $+h$ NEzachová nejkratší cestu:</strong> $c'(P) = c(P) + h \cdot |P|$ — cena roste úměrně <em>počtu hran</em> cesty, delší cesta dostane víc $+h$. Protipříklad: dvě $s \to t$ cesty s různým počtem hran (zde $-4$ vs. $-3$ → po $+3$: $2$ vs. $0$).</li>
+      <li><strong>Násobení všech vah $k$, $k &gt; 0$, zachová nejkratší cestu:</strong> $c'(P) = k \cdot c(P)$ — každá cesta se škáluje stejně, argmin se nemění a délka nejkratší cesty se násobí $k$. Záporné cykly nevzniknou ani nezmizí.</li>
+      <li>$k = -1$ prohodí min/max (trik na nejdelší cesty <a href="l2-14.html#takeaways">[L2.14]</a>), $k \le 0$ tedy nejkratší cestu nezachovává.</li>
+      <li>Posun $+h$ je v pořádku jen výjimečně: když všechny porovnávané cesty mají stejný počet hran (TSP kružnice — kapitola K3), nebo jako teleskopický posun přes potenciály vrcholů (Johnson).</li>
+      <li>Toto je typická zkoušková podotázka „dokaž, nebo vyvrať protipříkladem“ — důkaz = rozpis $c'(P)$, protipříklad = malý graf se dvěma cestami různé délky (v počtu hran).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-shift">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Increasing every edge weight by h</strong>
+      <span class="task-src">zdroj: zkouška KO_21_06_2021 — podotázka 3 úlohy „Handling negative cycles in the graph“ (historicke_zadani_testu.md ř. 1305–1311, shodně testu_2 ř. 914–920), EN 1:1; celá čtyřdílná úloha je [FOTO] checkpoint lekce [L2.18]; řešení vlastní (dochovaná studentská odpověď „yes“ je chybná, viz c))</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>Consider having a strongly connected graph $G$, with a set of edges $E$, and with arbitrary edge weights from $\mathbb{Z}$; $c(e)$ denotes the weight of edge $e$.</p>
+        <p>3. Consider an integer $h$, $h \geq |\min_{e \in E} c(e)|$. Consider graph $G'$, which is identical to $G$, but every edge weight is increased by $h$. Does the shortest path between any two vertices in $G'$ correspond to the shortest path between the same vertices in $G$? If yes, explain why; if no, give a counterexample of graphs $G$ and $G'$.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Silně souvislý graf s celočíselnými (i zápornými) vahami. Zvolí se celé $h$ aspoň tak velké jako absolutní hodnota nejmenší váhy — tedy přesně tolik, aby v $G'$ byly všechny váhy nezáporné. Otázka: odpovídají nejkratší cesty v $G'$ nejkratším cestám v $G$? Formát odpovědi je předepsaný: <em>ano + vysvětlení</em>, nebo <em>ne + protipříklad</em> (konkrétní dvojice $G$, $G'$).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — rozpis $c'(P) = c(P) + h \cdot |P|$ a hotový protipříklad.</li>
+        <li><a href="../k0/l0-1.html#takeaways">[L0.1] Co je graf</a> — cesta a její cena jako součet vah hran.</li>
+        <li><a href="l2-1.html#takeaways">[L2.1] Záporné váhy ano, záporné cykly ne</a> — kontrola, že protipříklad má nejkratší cesty definované.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Volba $h \ge |\min c(e)|$ prozrazuje motivaci: udělat váhy nezáporné kvůli Dijkstrovi. Neptej se „změní se délky?“ (ty se změní vždy), ale „změní se <em>vítěz</em>?“ — rozepiš cenu cesty po posunu a všimni si členu závislého na počtu hran. Jakmile ho vidíš, protipříklad se staví sám: dvě konkurenční cesty, jedna krátká v hranách a jedna dlouhá, s cenami tak těsnými, aby je příplatek přehodil. Nezapomeň na požadavky zadání: graf má být <strong>silně souvislý</strong> (přidej zpáteční hranu) a bez záporného cyklu, ať jsou nejkratší cesty v $G$ definované. Pozor: dochovaná studentská odpověď (psala „yes“ s argumentem přes rozdíly dvojic hran) je chybná — viz try-otázka „najdi chybu“ v lekci.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní)</summary>
+        <div class="inner">
+          <p><strong>Odpověď: NE</strong>, nejkratší cesty si obecně neodpovídají.</p>
+          <p><strong>Důvod.</strong> Pro každou cestu $P$ platí $c'(P) = c(P) + h \cdot |P|$, kde $|P|$ je počet hran. Příplatek není konstantní — závisí na počtu hran, takže porovnání dvou cest s $|P_1| \ne |P_2|$ se může přehodit: $c'(P_1) - c'(P_2) = c(P_1) - c(P_2) + h(|P_1| - |P_2|)$.</p>
+          <p><strong>Protipříklad.</strong> $G$ = graf z lekce: vrcholy $\{s, a, t\}$, hrany $c(s,a) = -2$, $c(a,t) = -2$, $c(s,t) = -3$, $c(t,s) = 10$ (zpáteční hrana zajišťuje silnou souvislost; všechny cykly jsou kladné: $s{\to}a{\to}t{\to}s = 6$, $s{\to}t{\to}s = 7$, takže nejkratší cesty v $G$ jsou definované <a href="l2-1.html#takeaways">[L2.1]</a>). Minimum vah je $-3$, zvol $h = 3 \ge |-3|$; v $G'$ pak $c'(s,a) = c'(a,t) = 1$, $c'(s,t) = 0$, $c'(t,s) = 13$.</p>
+          <ul>
+            <li>V $G$: $c(s{\to}a{\to}t) = -4 \;&lt;\; c(s{\to}t) = -3$ → nejkratší $s \to t$ cesta je $s \to a \to t$.</li>
+            <li>V $G'$: $c'(s{\to}a{\to}t) = 2 \;&gt;\; c'(s{\to}t) = 0$ → nejkratší je přímá hrana $s \to t$.</li>
+          </ul>
+          <p>Nejkratší cesta v $G'$ tedy neodpovídá nejkratší cestě v $G$. $\blacksquare$</p>
+          <p><strong>Poznámka navíc</strong> (stojí za zmínku u ústní): kdyby $G$ obsahoval záporný cyklus, je otázka rozbitá ještě dřív — v $G$ pak nejkratší cesta není rozumně definovaná (resp. její hledání je NP-těžké), zatímco v $G'$ s nezápornými vahami definovaná je; ani pak si „odpovídat“ nemohou. Přesně na to mířila červená poznámka zkoušejícího „What about negative cycles?“ u dochované (chybné) odpovědi „yes“.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-scale">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Výrok: zvýšení cen hran k-krát</strong>
+      <span class="task-src">zdroj: studentský souhrn (testy/ko_souhrn.md ř. 488) — zkoušková úloha „5 výroků“, dochován jen CZ přepis jednoho výroku (EN originál se nedochoval); celá pětice výroků je úloha lekce [L2.18]; řešení vlastní</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (přepis CZ 1:1 ze souhrnu — EN originál se nedochoval)</span>
+        <p>5 výroků a říct zda platí nebo ne. Pokud platí, dokázat, pokud ne, udělat protipříklad. Výroky typu „když zvýšíme cenu hrany v grafu o násobek $k$, délka nejkratší cesty se také zvýší $k$-krát“ […]</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Formát „dokaž, nebo vyvrať protipříkladem“. Přepis výroku je bohužel dvojznačný: (i) <em>všechny</em> ceny hran se vynásobí $k$ („cenu hran v grafu“), nebo (ii) vynásobí se cena <em>jedné</em> hrany. Na písemce rozhodne přesné EN znění — zde vyřešíme obě čtení (a u obou předpokládáme, že nejkratší cesta je definovaná, tj. bez záporných cyklů).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — $c'(P) = k \cdot c(P)$ a chování pro $k \le 0$.</li>
+        <li><a href="l2-2.html#takeaways">[L2.2] Bellmanův princip + rovnice</a> — škálování vzdáleností $k \cdot l$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>U čtení (i) rozepiš cenu libovolné cesty po vynásobení — chybí tam jakýkoliv člen závislý na počtu hran (srovnej s posunem $+h$!), zbývá ošetřit znaménko $k$. U čtení (ii) hledej nejlacinější možný protipříklad: stačí, aby zdražená hrana na nejkratší cestě vůbec neležela?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní)</summary>
+        <div class="inner">
+          <p><strong>Čtení (i): všechny váhy ×$k$, $k &gt; 0$ — výrok PLATÍ.</strong> Důkaz: množina cest $s \to t$ se nemění a pro každou platí $c'(P) = k \cdot c(P)$. Pro $k &gt; 0$ kladná konstanta projde přes minimum: $\min_P c'(P) = k \cdot \min_P c(P)$ — délka nejkratší cesty se zvýší přesně $k$-krát a optimum se realizuje toutéž cestou (argmin se zachová). $\blacksquare$</p>
+          <p>Doplnit meze platnosti se na „5 výroků“ vyplácí: pro $k = 0$ jsou všechny cesty nulové, pro $k &lt; 0$ se min a max prohodí (trik ×$(-1)$ na nejdelší cesty <a href="l2-14.html#takeaways">[L2.14]</a>) — tam výrok neplatí. A drobnost: „zvýší se $k$-krát“ u záporné délky znamená vynásobí se $k$ (např. $-4 \mapsto -8$ pro $k=2$) — číselně se tedy „sníží“; matematicky je výrok o $\min_P k\,c(P) = k \min_P c(P)$ v pořádku.</p>
+          <p><strong>Čtení (ii): jen jedna hrana ×$k$ — výrok NEPLATÍ.</strong> Protipříklad: graf z lekce ($c(s,a) = c(a,t) = -2$, $c(s,t) = -3$, $c(t,s) = 10$), nejkratší $s \to t$ cesta je $s \to a \to t$ s délkou $-4$. Vynásob $k = 2$ pouze hranu $(t,s)$: $10 \mapsto 20$. Hrana na žádné $s \to t$ cestě neleží, takže nejkratší cesta i její délka $-4$ zůstávají — délka se nezvýšila $k$-krát. (A i hrana <em>na</em> nejkratší cestě výrok vyvrací: ×$2$ na hraně $(s,a)$ dá cestu $-4-2=-6 \ne 2 \cdot (-4) = -8$, protože se škáluje jen jeden sčítanec.)</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L2.15">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k2/l2-14.html"><span class="dir">← Předchozí</span> L2.14 · Floyd-Warshall (all-pairs) + nejdelší cesty</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.16 · Dijkstra a počet hran cesty)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// Společná geometrie: trojúhelník s, a, t + zpáteční hrana t→s (silná souvislost)
+const NODES = [
+  { id: 's', x: 120, y: 200 },
+  { id: 'a', x: 320, y: 70  },
+  { id: 't', x: 520, y: 200 },
+];
+
+// G — původní váhy; nejkratší s→t cesta je s→a→t (−4 < −3)
+KOViz.graph(document.getElementById('viz-g'), {
+  directed: true, w: 640, h: 300, nodeR: 20,
+  nodes: NODES,
+  edges: [
+    { from: 's', to: 'a', label: '−2', cls: 'hl' },
+    { from: 'a', to: 't', label: '−2', cls: 'hl' },
+    { from: 's', to: 't', label: '−3' },
+    { from: 't', to: 's', label: '10', curve: 0.55 },
+  ],
+  caption: 'G (instance vlastní): nejkratší cesta s→t je s→a→t s cenou −4 (modře); přímá hrana stojí −3. Zpáteční hrana (t,s) drží silnou souvislost; všechny cykly jsou kladné, vzdálenosti definované.',
+});
+
+// G' — všechny váhy +3; vítěz se přehodí na přímou hranu (0 < 2)
+KOViz.graph(document.getElementById('viz-gh'), {
+  directed: true, w: 640, h: 300, nodeR: 20,
+  nodes: NODES,
+  edges: [
+    { from: 's', to: 'a', label: '1', cls: 'bad' },
+    { from: 'a', to: 't', label: '1', cls: 'bad' },
+    { from: 's', to: 't', label: '0', cls: 'hl' },
+    { from: 't', to: 's', label: '13', curve: 0.55 },
+  ],
+  caption: 'G′ = G s vahami +3 (h = |−3|): dvouhranná cesta zdražila o 6 na cenu 2 (červeně), přímá jen o 3 na cenu 0 — nejkratší je nyní s→t (modře). Posun +h nejkratší cestu nezachoval.',
+});
+
+// G×2 — všechny váhy ×2; vítěz zůstává s→a→t (−8 < −6)
+KOViz.graph(document.getElementById('viz-mul'), {
+  directed: true, w: 640, h: 300, nodeR: 20,
+  nodes: NODES,
+  edges: [
+    { from: 's', to: 'a', label: '−4', cls: 'hl' },
+    { from: 'a', to: 't', label: '−4', cls: 'hl' },
+    { from: 's', to: 't', label: '−6' },
+    { from: 't', to: 's', label: '20', curve: 0.55 },
+  ],
+  caption: 'Tentýž graf s vahami ×2 (k = 2): ceny cest s→a→t a s→t jsou −8 a −6 — obě přesně dvojnásobné, vítěz se nemění. Násobení k > 0 nejkratší cestu zachová a její délku násobí k.',
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
