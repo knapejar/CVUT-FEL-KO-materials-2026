@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L3.1 · Co je aproximační algoritmus a faktor r — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k3">K3 · Důkaz / teorie</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L3.1</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L3.1</span> Kapitola K3 — Důkaz / teorie (Slot 3) · <strong>[MUST]</strong>
+  </p>
+  <h1>Co je aproximační algoritmus a faktor r</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Definice <strong>r-aproximačního algoritmu</strong>: algoritmus, který pro <em>každou</em> instanci vrátí řešení nejvýš $r$-krát horší než optimum — u minimalizace $J^A(I) \le r \cdot J^*(I)$, u maximalizace $J^A(I) \ge \tfrac{1}{r} \cdot J^*(I)$, vždy $r \ge 1$.
+  </div>
+
+  <p>Vítej v kapitole důkazů. Slot 3 písemky padá v ~95 % termínů a žebříček nejpravděpodobnějších důkazů pro 15. 6. zní: <em>Christofides 3/2</em> [L3.10], <em>korektnost Dijkstry</em> [L3.2], <em>neexistence r-aproximace TSP</em> [L3.6], <em>korektnost Bellman-Forda</em> [L3.7]. Tři ze čtyř položek mluví o „aproximaci“ a „faktoru“ — a všechny důkazy faktorů v této kapitole jsou jen řetízky nerovností kolem jedné definice. Tu definici si dnes postavíme; je to jediná nová věc téhle lekce a společný jazyk celé K3.</p>
+
+  <!-- ===== SEKCE 1: KDYŽ JE OPTIMUM MIMO DOSAH ===== -->
+  <h2>Když je optimum mimo dosah</h2>
+
+  <p>Zatím jsme měli štěstí: nejkratší cesty řeší Dijkstra <a href="../k2/l2-4.html#takeaways">[L2.4]</a> přesně a v polynomiálním čase. Jenže už v K2 jsme zahlédli druhý břeh — nejdelší cesta je NP-těžká <a href="../k2/l2-17.html#takeaways">[L2.17]</a> a stejně na tom je obchodní cestující (<strong>TSP</strong>, traveling salesman problem: najdi nejlevnější okruh přes všechna města; pořádně ho zavedeme v [L3.4] a [L3.5]). U takových problémů přesný polynomiální algoritmus nejspíš neexistuje (pokud $P \ne NP$).</p>
+
+  <details class="try">
+    <summary>Zkus sám: máš NP-těžký minimalizační problém a instanci s 10 000 městy, kterou je potřeba vyřešit do večera. <em>Něco</em> musíš obětovat. Co a jaké máš možnosti?</summary>
+    <div class="inner">
+      <p>Trojici „přesně + rychle + pro každý vstup“ najednou mít nemůžeš. Obětovat můžeš:</p>
+      <ul>
+        <li><strong>rychlost</strong> — exaktní výpočet (ILP solver, branch &amp; bound) a čekání, klidně exponenciálně dlouhé;</li>
+        <li><strong>optimalitu</strong> — rychlý algoritmus, který vrátí „dost dobré“ řešení.</li>
+      </ul>
+      <p>Druhá cesta je v praxi nejčastější. Okamžitě ale vyvstává otázka: co přesně znamená „dost dobré“? Bez záruky se může rychlý algoritmus na zákeřném vstupu trefit <em>libovolně</em> mimo.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: jakou formu by měl mít „slib kvality“, aby k něčemu byl? Zkus vymyslet, <em>vůči čemu</em> a <em>jak</em> kvalitu vráceného řešení měřit.</summary>
+    <div class="inner">
+      <p>Jediný rozumný etalon je <strong>optimum</strong> dané instance. A měřit absolutně („budu mimo nejvýš o 7“) se ukáže jako nesmysl — instanci stačí přeškálovat a absolutní chyba uteče (přesně o tom je úloha T01 dole). Zbývá měřit <strong>poměrem</strong>: „vrátím nejvýš dvakrát tolik, co optimum.“ Poměr přežije škálování a dává slibu smysl pro malé i obří instance. Přesně tohle formalizuje aproximační faktor $r$.</p>
+    </div>
+  </details>
+
+  <p>Domluvme značení (převzaté ze slidů): $I$ je instance problému, $J$ kriteriální funkce, $J^*(I)$ hodnota kritéria <strong>optimálního</strong> řešení instance $I$ a $J^A(I)$ hodnota kritéria řešení, které na instanci $I$ vrátí algoritmus $A$. (Slidy o TSP píší místo $J^*$ zkratku $\mathrm{OPT}(K_n,c)$ — je to totéž.)</p>
+
+  <!-- ===== SEKCE 2: DEFINICE ===== -->
+  <h2>Definice r-aproximace</h2>
+
+  <details class="try">
+    <summary>Zkus sám: zapiš formálně „algoritmus $A$ vrátí na minimalizačním problému vždy řešení nejvýš dvakrát horší než optimum“.</summary>
+    <div class="inner">
+      <p>$$J^A(I) \le 2 \cdot J^*(I) \quad \text{pro VŠECHNY instance } I.$$</p>
+      <p>Dvě věci jsou v zápisu zásadní: nerovnost svazuje výstup algoritmu s optimem <em>poměrem</em> a kvantifikátor „pro všechny instance“ z toho dělá <strong>worst-case záruku</strong> — žádná instance, ani ta nejzákeřnější, nesmí slib porušit. Obecné $r$ místo dvojky dá definici níže.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Definice: r-aproximační algoritmus (minimalizace)</div>
+    <p>Algoritmus $A$ pro <strong>minimalizaci</strong> kriteriální funkce $J$ je <strong>r-aproximační</strong> (r-approximation algorithm), existuje-li číslo $r \ge 1$ takové, že</p>
+    $$J^A(I) \;\le\; r \cdot J^*(I) \qquad \text{pro všechny instance } I \text{ problému.}$$
+    <p>Slidy definují explicitně zrcadlovou verzi pro <strong>maximalizaci</strong> (05_Knapsack, slide 6, EN 1:1): <em>„Algorithm $A$ for objective function $J$ maximization is called $r$-approximation if there exists a number $r \ge 1$ such that $J^A(I) \ge \frac{1}{r} J^*(I)$ for all instances $I$ of this problem.“</em> Minimalizační verzi slidy používají implicitně — kapitola o TSP říká „double-tree je 2-aproximace“ a dokazuje přesně nerovnost $c(E(H)) \le 2 \cdot \mathrm{OPT}$ [L3.9].</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: proč je u maximalizace podmínka $J^A(I) \ge \frac{1}{r} J^*(I)$, a ne třeba $J^A(I) \le r \cdot J^*(I)$?</summary>
+    <div class="inner">
+      <p>Záruka musí hlídat tu stranu, kterou algoritmus může pokazit. U <em>minimalizace</em> platí $J^A(I) \ge J^*(I)$ vždy zadarmo (pod optimum se dostat nejde — plyne přímo z definice optima); pokazit jde jen směr <em>nahoru</em>, proto omezujeme shora. U <em>maximalizace</em> je to zrcadlově: $J^A(I) \le J^*(I)$ platí zadarmo a pokazit jde jen směr <em>dolů</em> — podmínka $J^A \le r \cdot J^*$ by tedy byla splněna automaticky (třeba i algoritmem, který vrátí prázdné řešení s $J^A = 0$!) a nezaručovala by vůbec nic. Smysluplná záruka je „aspoň $\frac{1}{r}$ optima“, tedy zdola.</p>
+      <p>Konvence $r \ge 1$ v obou směrech je pohodlná: $r$ vždy čteme jako „nejvýš $r$-krát horší než optimum“ a <strong>$r = 1$ znamená exaktní algoritmus</strong>, ať minimalizujeme nebo maximalizujeme.</p>
+    </div>
+  </details>
+
+  <p>Obě definice dohromady říkají: hodnota $J^A(I)$ je uvězněná v <strong>pásu kolem optima</strong>. U minimalizace v pásu $[\,J^*(I),\; r \cdot J^*(I)\,]$, u maximalizace v pásu $[\,\tfrac{1}{r} J^*(I),\; J^*(I)\,]$:</p>
+
+  <div class="viz" id="viz-min"></div>
+  <div class="viz" id="viz-max"></div>
+
+  <!-- ===== SEKCE 3: WORST CASE ===== -->
+  <h2>„Pro všechny instance“ — faktor je worst-case záruka</h2>
+
+  <p>Slidy to zdůrazňují výslovně (05_Knapsack, slide 7, EN 1:1): <em>„An approximation algorithm guarantees, that even in the worst case, the value of the objective function will be proportional to the optimum value. The frequency of the worst case is not considered by the approximation algorithm.“</em> Faktor tedy neříká nic o typickém ani průměrném chování — je to strop pro nejhorší možný vstup, bez ohledu na to, jak vzácný takový vstup je.</p>
+
+  <details class="try">
+    <summary>Zkus sám: algoritmus $A$ na jedné testovací instanci minimalizačního problému vrátil řešení s $J^A = 14$, zatímco optimum je $J^* = 10$. (1) Je $A$ 1,4-aproximační? (2) A může být $A$ 1,2-aproximační?</summary>
+    <div class="inner">
+      <p><strong>(1) Nevíme.</strong> Jedno pozorování dává poměr $14/10 = 1{,}4$ na <em>jedné</em> instanci — definice ale kvantifikuje přes <em>všechny</em> instance. Klidně někde existuje instance s poměrem $3$, a pak $A$ není ani 2-aproximační. Faktor se nedá „změřit experimentem“, musí se <strong>dokázat</strong> pro každou instanci.</p>
+      <p><strong>(2) Ne — a tady jedno pozorování stačí.</strong> Naše instance porušuje $J^A \le 1{,}2 \cdot J^*$ (je $14 &gt; 12$), takže slib „1,2-aproximace“ je vyvrácen protipříkladem. Všimni si asymetrie kvantifikátoru: <em>dokázat</em> faktor znamená zvládnout všechny instance, <em>vyvrátit</em> ho umí jediná. Stejnou logiku „dokaž ∀ / vyvrať jedním protipříkladem“ známe z úloh o výrocích <a href="../k2/l2-18.html#takeaways">[L2.18]</a>.</p>
+    </div>
+  </details>
+
+  <p>Místo faktoru $r$ se někdy používá <strong>relativní odchylka od optima</strong> $\epsilon$ (relative deviation), svázaná vztahem $r = 1 + \epsilon$: třeba „2-aproximace“ je totéž co „relativní odchylka nejvýš $100\,\%$“. Slide k tomu dodává provokativní otázku — proč je při poměrové záruce <em>nesmyslné</em> udávat absolutní chybu? To je úloha T01.</p>
+
+  <!-- ===== SEKCE 4: HEURISTIKA vs. APROXIMACE ===== -->
+  <h2>Heuristika ≠ aproximační algoritmus</h2>
+
+  <p>Ne každý rychlý a rozumně vypadající algoritmus je aproximační. Příklad ze slidů: <strong>nearest neighbor</strong> (nejbližší soused) pro TSP — začni v libovolném městě a vždy jdi do nejbližšího dosud nenavštíveného. Přirozený nápad, $\mathcal{O}(n^2)$, často funguje slušně… a slide 23 k němu suše poznamenává: <em>„This is <strong>not</strong> an approximation algorithm.“</em> Žádné $r$ pro něj neplatí — existují vstupy, na kterých je poměr $J^A/J^*$ libovolně velký (co přesně tahle věta znamená a jak by se dokazovala, rozebereme v úloze T02). Algoritmus bez dokázaného faktoru se nazývá <strong>heuristika</strong> (heuristic) — může být užitečný, ale nic neslibuje; další heuristikou tohoto typu je k-OPT local search [L3.14].</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
+    <ul>
+      <li><strong>„Vrací skoro optimální řešení, takže je to aproximační algoritmus.“</strong> NE — aproximační algoritmus je jen ten s <em>dokázanou</em> worst-case zárukou $r$ pro všechny instance. Heuristika (nearest neighbor, k-OPT) žádnou záruku nemá, ať se v experimentech chová sebelíp.</li>
+      <li><strong>„Faktor 2 znamená, že výsledky bývají zhruba dvakrát horší.“</strong> NE — $r$ je strop pro nejhorší případ; o četnosti špatných případů ani o průměru neříká nic. Typicky bývá výsledek mnohem blíž optimu.</li>
+      <li><strong>„U maximalizace: $J^A \le r \cdot J^*$.“</strong> NE — to platí zadarmo (nad optimum se dostat nejde) a nezaručuje nic. Správně zdola: $J^A \ge \frac{1}{r} J^*$. Směr nerovnosti si vždy zkontroluj proti tomu, kterým směrem může algoritmus „kazit“.</li>
+      <li><strong>„Když má problém aproximaci v jedné variantě, má ji i obecně.“</strong> NE — faktor je vlastnost dvojice (algoritmus, problém). Metrický TSP má 2-aproximaci [L3.9] i 3/2-aproximaci [L3.10], ale obecný TSP nemá žádnou r-aproximaci, pokud $P \ne NP$ [L3.6].</li>
+    </ul>
+  </div>
+
+  <!-- ===== SEKCE 5: JAK SE FAKTOR DOKAZUJE ===== -->
+  <h2>Jak se faktor dokazuje — mapa zbytku kapitoly</h2>
+
+  <details class="try">
+    <summary>Zkus sám: chceš dokázat $J^A(I) \le 2 \cdot J^*(I)$ pro všechny instance. V čem je hlavní zádrhel a jak ho obejít?</summary>
+    <div class="inner">
+      <p>Zádrhel: hodnotu $J^*(I)$ <strong>neznáš</strong> — kdybys ji uměl pro každou instanci spočítat, nepotřebuješ aproximaci. Porovnávat $J^A$ přímo s $J^*$ tedy nejde.</p>
+      <p>Obejití: najdi <strong>mez</strong> $B(I)$, kterou spočítat či odhadnout umíš, a vlož ji mezi obě strany. U minimalizace potřebuješ <em>dolní mez optima</em> $B(I) \le J^*(I)$ a ukážeš $J^A(I) \le r \cdot B(I)$; řetízek pak dá
+      $$J^A(I) \;\le\; r \cdot B(I) \;\le\; r \cdot J^*(I).$$
+      U maximalizace zrcadlově: <em>horní mez</em> $B(I) \ge J^*(I)$ a $J^A(I) \ge \frac{1}{r} B(I)$.</p>
+    </div>
+  </details>
+
+  <p>Tohle „sendvičování“ přes mez je celé tajemství důkazů faktorů a uvidíš ho v K3 třikrát:</p>
+  <ul>
+    <li><strong>Double-tree pro metrický TSP</strong> [L3.9]: dolní mez = cena minimální kostry, $c(\mathrm{MST}) \le \mathrm{OPT}$ [L3.8b]. Celý důkaz faktoru 2 je pak jediný řetízek ze slidu 25: $2\,\mathrm{OPT} \ge 2\,c(E(T)) = c(E(L)) \ge c(E(H))$.</li>
+    <li><strong>Christofides</strong> [L3.10]: stejná kostra + chytřejší druhá mez $c(M) \le \mathrm{OPT}/2$ pro párování — dohromady faktor $\tfrac{3}{2}$.</li>
+    <li><strong>Knapsack 2-aproximace</strong> [L3.11] (maximalizace): horní mez optima ze zlomkového batohu, $\sum_{i=1}^{h} c_i \ge J^*$.</li>
+  </ul>
+  <p>Až tedy v dalších lekcích uvidíš nerovnost typu $c(\mathrm{MST}) \le \mathrm{OPT}$, věz, že to není ornament — je to nosný trám, bez kterého se faktor s neznámým optimem vůbec nedá svázat. A ještě jedna výstraha dopředu: existence aproximace není samozřejmost. Pro <em>obecný</em> (nemetrický) TSP dokážeme [L3.6], že žádný polynomiální r-aproximační algoritmus neexistuje (pokud $P \ne NP$) — i „vzdát se optimality“ je někdy příliš ambiciózní plán.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.1</div>
+    <ul>
+      <li><strong>r-aproximace, $r \ge 1$:</strong> minimalizace $J^A(I) \le r \cdot J^*(I)$, maximalizace $J^A(I) \ge \frac{1}{r} J^*(I)$ — <em>pro všechny instance</em> $I$. Druhá strana pásu je zadarmo (optimum překonat nejde).</li>
+      <li>$r = 1$ je exaktní algoritmus; $r = 2$ znamená „nejvýš dvakrát horší než optimum“ (resp. „aspoň polovina optima“). Alternativní zápis: relativní odchylka $\epsilon$, $r = 1 + \epsilon$.</li>
+      <li><strong>$r$ je worst-case záruka:</strong> o průměrném chování neříká nic; jeden běh faktor nedokáže (kvantifikátor ∀), ale jediný protipříklad ho vyvrátí.</li>
+      <li><strong>Dokázat faktor = ohraničit $J^A$ vůči $J^*$ přes vypočitatelnou mez:</strong> u minimalizace dolní mez $B \le J^*$ a $J^A \le r \cdot B$ (TSP: $c(\mathrm{MST}) \le \mathrm{OPT}$ [L3.8b]), u maximalizace horní mez $B \ge J^*$ a $J^A \ge B/r$ (knapsack [L3.11]).</li>
+      <li><strong>Heuristika bez dokázané záruky není aproximační algoritmus</strong> — nearest neighbor pro TSP není r-aproximace pro žádné $r$; a obecný TSP dokonce žádnou r-aproximaci nepřipouští, pokud $P \ne NP$ [L3.6].</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-abserr">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Relativní odchylka ε vs. absolutní chyba</strong>
+      <span class="task-src">zdroj: prezentace/05_Knapsack.md, slide 7 (EN 1:1) — otázka je na slidu bez odpovědi, řešení vlastní</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>Notes about approximation algorithms:</p>
+        <ul>
+          <li>An approximation algorithm guarantees, that even in the worst case, the value of the objective function will be proportional to the optimum value. The frequency of the worst case is not considered by the approximation algorithm.</li>
+          <li>$\epsilon$, the relative deviation from the optimum, is sometimes used instead of the asymptotic performance ratio $r$, so that $r = 1 + \epsilon$.</li>
+          <li>In this case, it is meaningless to state the absolute error. Why?</li>
+        </ul>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Slide shrnuje, že aproximační záruka je poměrová a worst-case, zavádí přepis $r = 1 + \epsilon$ (např. $r = 2 \Leftrightarrow \epsilon = 1$, tj. odchylka do 100 %) a ptá se: proč nemá smysl slibovat <em>absolutní</em> chybu, tedy záruku tvaru $|J^A(I) - J^*(I)| \le E$ pro nějakou konstantu $E$?</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice r-aproximace a kvantifikátor „pro všechny instance“.</li>
+        <li><a href="../k2/l2-15.html#takeaways">[L2.15] Skalování vah</a> — vynásobení všech vah konstantou $k &gt; 0$ přenásobí kritérium každého řešení touž konstantou (tam pro ceny cest; argument je obecný).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Vezmi libovolnou instanci a vyrob z ní novou tak, aby se <em>poměry</em> kritérií řešení nezměnily, ale <em>rozdíly</em> nafoukly. Co udělá s kritérii vynásobení všech vstupních cen konstantou $k$? Pak otoč směr: co by záruka s absolutní chybou $E$ znamenala na instanci, jejíž ceny naopak $k$-krát zmenšíš (nebo ekvivalentně: na celočíselné instanci nafouknuté $k$-krát)?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní)</summary>
+        <div class="inner">
+          <p><strong>1) Poměrová záruka žádnou absolutní chybu neimplikuje — škálování ji nafoukne libovolně.</strong> Vezmi instanci $I$, na níž má algoritmus nenulovou relativní odchylku, tedy $J^A(I) = (1+\delta) J^*(I)$ pro nějaké $\delta \in (0, \epsilon]$ (minimalizace; pro maximalizaci zrcadlově). Vyrob instanci $I_k$ vynásobením všech cen konstantou $k &gt; 0$: kritérium <em>každého</em> řešení se přenásobí $k$ (týž argument jako u násobení vah cest v <a href="../k2/l2-15.html#takeaways">[L2.15]</a>), takže množina optimálních řešení se nezmění a $J^*(I_k) = k \, J^*(I)$. Algoritmus porovnávající jen hodnoty kritéria se na $I_k$ rozhoduje stejně jako na $I$ a vrátí totéž řešení s $J^A(I_k) = k \, J^A(I)$. Relativní odchylka zůstala $\delta$ — záruka $r = 1+\epsilon$ platí dál — ale absolutní chyba je
+          $$J^A(I_k) - J^*(I_k) = k \cdot \delta \cdot J^*(I) \;\xrightarrow{\;k \to \infty\;}\; \infty.$$
+          Žádná konstanta $E$ tedy nemůže absolutní chybu omezit „pro všechny instance“: údaj o absolutní chybě k poměrové záruce nic nepřidává a sám o sobě neobstojí.</p>
+          <p><strong>2) Bonus — absolutní záruka by byla podezřele silná.</strong> Kdyby nějaký polynomiální algoritmus pro problém s celočíselnými cenami garantoval $J^*(I) - J^A(I) \le E$ (např. knapsack, maximalizace), stačilo by instanci nafouknout: vynásob všechny ceny $k = E+1$. Na nafouknuté instanci je každý rozdíl kritérií dvou řešení násobkem $E+1$, takže „chyba nejvýš $E$“ vynucuje chybu $0$ — algoritmus by nafouknutou (a po přepočtu i původní) instanci řešil <em>optimálně</em> v polynomiálním čase. Pro NP-těžké problémy by to znamenalo $P = NP$. Absolutní chyba proto není jen „neinformativní“, jako pevná záruka je pro NP-těžké problémy rovnou nedosažitelná.</p>
+          <p><strong>Shrnutí pro písemku:</strong> kritérium se škáluje spolu se vstupem; škálováním instance lze absolutní chybu libovolně zvětšit (a požadavek absolutní chyby naopak „vyžehlit“ na požadavek optimality). Jediná škálovatelně smysluplná míra kvality je poměr $J^A/J^*$, tedy $r$, resp. $\epsilon = r - 1$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-nn">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>„Nearest neighbor is not an approximation algorithm“ — co to přesně tvrdí?</strong>
+      <span class="task-src">zdroj: prezentace/06_TSP.md, slide 23 (EN 1:1); otázka pod čarou i řešení vlastní (slide výrok jen konstatuje)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN — slide 23; doplňující otázka vlastní)</span>
+        <pre style="white-space:pre-wrap">Input:  An instance (K_n, c) of metric TSP.
+Output: Hamiltonian circuit H.
+
+Choose arbitrary node v_[1] ∈ V(K_n);
+for i := 2 to n do
+    choose v_[i] ∈ V(K_n) \ {v_[1], ..., v_[i-1]} such that c({v_[i-1], v_[i]})
+      is minimal;
+end
+Hamiltonian circuit H is defined by the sequence {v_[1], ..., v_[n], v_[1]};</pre>
+        <ul>
+          <li>The nearest unvisited city is chosen in each step</li>
+          <li>This is <strong>not</strong> an approximation algorithm</li>
+          <li>Time complexity is $\mathcal{O}(n^2)$</li>
+        </ul>
+        <p><em>(Doplňující otázka, vlastní:)</em> State formally what the claim “this is not an approximation algorithm” means, and describe what a proof of this claim would have to show.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Nearest neighbor staví okruh hladově: z aktuálního města vždy do nejbližšího nenavštíveného, nakonec zpět do startu. (Detaily TSP tu nepotřebuješ — $K_n$ je úplný graf na $n$ městech, okruh přes všechna města zavedeme v [L3.3]/[L3.4]; tahle úloha je čistě o kvantifikátorech definice z této lekce.) Slide tvrdí, že tento algoritmus <em>není</em> aproximační. Úkol: přeložit výrok do formálního jazyka definice a říct, jak by se dokazoval.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice r-aproximace (minimalizace) a její negace.</li>
+        <li><a href="../k2/l2-18.html#takeaways">[L2.18] Důkaz vs. protipříklad</a> — jak se zachází s kvantifikátory ∀/∃ při dokazování a vyvracení.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Napiš si, co znamená „NN <em>je</em> r-aproximace pro nějaké $r$“ — dostaneš výrok se dvěma kvantifikátory ($\exists r$, $\forall I$). Pak ho zneguj krok za krokem (negace prohazuje ∃ a ∀). Nakonec si rozmysli: stačí k důkazu jedna konkrétní instance? Jedna pro každé $r$? Nekonečná rodina?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní)</summary>
+        <div class="inner">
+          <p><strong>Formalizace.</strong> „NN je aproximační algoritmus“ znamená podle definice (TSP minimalizuje):</p>
+          $$\exists\, r \ge 1 \;\; \forall I:\quad J^{NN}(I) \le r \cdot J^*(I).$$
+          <p>Výrok slidu je negace, a negace prohodí kvantifikátory:</p>
+          $$\forall\, r \ge 1 \;\; \exists\, I_r:\quad J^{NN}(I_r) &gt; r \cdot J^*(I_r).$$
+          <p>Slovy: <strong>ať zvolíš jakkoli velký faktor $r$, existuje instance, na které ho nearest neighbor poruší</strong> — poměr $J^{NN}/J^*$ není shora omezen žádnou konstantou.</p>
+          <p><strong>Co musí důkaz ukázat.</strong> Jedna konkrétní instance nestačí — ta by vyvrátila jen jedno konkrétní $r$ (např. poměr $3$ na jedné instanci vylučuje $r = 2$, ale ne $r = 5$). Důkaz musí dodat <strong>rodinu instancí</strong> $\{I_r\}$ parametrizovanou tak, aby poměr $J^{NN}(I_r)/J^*(I_r)$ rostl nade všechny meze (typicky posloupnost instancí rostoucí velikosti, na nichž poměr roste např. logaritmicky s $n$ — konstrukce takové rodiny je nad rámec slidů, slide 23 výrok jen konstatuje). U hladového pravidla je zdroj potíží intuitivně vidět: lokálně nejlevnější krok může algoritmus zavléct do kouta, odkud se vrací přes velmi drahé hrany, a tenhle efekt lze konstrukcí instance stupňovat.</p>
+          <p><strong>Pozor na rozdíl rolí:</strong> dokázat, že algoritmus aproximační <em>je</em>, znamená zvládnout $\forall I$ (řetízek nerovností přes mez — uvidíš u double-tree [L3.9] a Christofidese [L3.10]); dokázat, že <em>není</em>, znamená vyrábět protipříklady, pro každé $r$ jeden. Srovnej s neexistencí r-aproximace pro obecný TSP [L3.6] — tam je tvrzení ještě silnější: žádný <em>polynomiální</em> algoritmus (nejen NN) nemůže být r-aproximační pro žádné $r$, pokud $P \ne NP$.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L3.1">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k2/l2-18.html"><span class="dir">← Předchozí</span> L2.18 · VYVRCHOLENÍ: Teorie záporných cyklů / 5 výroků [FOTO]</a>
+    <a class="next" href="../index.html#k3"><span class="dir">Další →</span> Pokračování se připravuje (L3.2 · Důkaz korektnosti Dijkstry [FOTO])</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// 1 — Pás povolených hodnot pro 2-aproximaci MINIMALIZACE: J* ≤ Jᴬ ≤ 2·J*
+KOViz.fnPlot(document.getElementById('viz-min'), {
+  xmax: 5, ymax: 10, xstep: 1, ystep: 2,
+  xlabel: 'J*', ylabel: 'Jᴬ',
+  segments: [
+    { x1: 0, y1: 0, x2: 5, y2: 10, label: 'Jᴬ = 2·J*  (strop záruky)', labelAt: 0.40, labelDx: 10, labelDy: -6 },
+    { x1: 0, y1: 0, x2: 5, y2: 5,  label: 'Jᴬ = J*  (optimum)',        labelAt: 0.62, labelDx: 10, labelDy: 18 },
+  ],
+  points: [
+    { x: 2,   y: 2.6, label: '✓', dx: 9,  dy: 4 },
+    { x: 3.5, y: 5.6, label: '✓', dx: 9,  dy: 4 },
+    { x: 4.5, y: 4.9, label: '✓', dx: 9,  dy: 10 },
+    { x: 3,   y: 8.4, label: '✗ porušuje faktor 2', dx: -36, dy: -12 },
+  ],
+  caption: 'Minimalizace, faktor r = 2: každá instance I (bod s x-ovou souřadnicí J*(I)) musí skončit v pásu mezi přímkami Jᴬ = J* (pod optimum to nejde nikdy) a Jᴬ = 2·J* (worst-case strop). Bod nad stropem = protipříklad, který faktor 2 vyvrací. Záruka je poměrová — v absolutních číslech se pás s rostoucím optimem rozevírá.',
+});
+
+// 2 — Pás povolených hodnot pro 2-aproximaci MAXIMALIZACE: J*/2 ≤ Jᴬ ≤ J*
+KOViz.fnPlot(document.getElementById('viz-max'), {
+  xmax: 10, ymax: 10, xstep: 2, ystep: 2,
+  xlabel: 'J*', ylabel: 'Jᴬ',
+  segments: [
+    { x1: 0, y1: 0, x2: 10, y2: 10, label: 'Jᴬ = J*  (optimum)',          labelAt: 0.55, labelDx: -160, labelDy: -8 },
+    { x1: 0, y1: 0, x2: 10, y2: 5,  label: 'Jᴬ = J*/2  (podlaha záruky)', labelAt: 0.25, labelDx: 8, labelDy: 18 },
+  ],
+  points: [
+    { x: 4, y: 3.4, label: '✓', dx: 9, dy: 2 },
+    { x: 7, y: 6.4, label: '✓', dx: 11, dy: 6 },
+    { x: 9, y: 1.5, label: '✗ porušuje faktor 2', dx: -150, dy: 4 },
+  ],
+  caption: 'Maximalizace, faktor r = 2 (tj. Jᴬ ≥ ½·J*): pás je zrcadlově POD optimem — nad J* se dostat nejde, záruka hlídá podlahu J*/2. Bod pod podlahou = protipříklad.',
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
