@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L1.12 · Implikace mezi skupinami — Loot [FOTO] — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k1">K1 · ILP modelování</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L1.12</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L1.12</span> Kapitola K1 — ILP modelování (Slot 1) · <strong>[MUST]</strong>
+  </p>
+  <h1>Implikace mezi skupinami — Loot [FOTO]</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Implikace povýšená z jednotlivých binárek <a href="l1-3.html#takeaways">[L1.3]</a> na <em>celé skupiny</em> rozhodnutí: „veze-li se cokoli ze skupiny 4, musí se vézt i něco ze skupiny 3“ — přes indikátorové binárky a big-M <a href="l1-4.html#takeaways">[L1.4]</a>; k tomu „aspoň jeden ze skupiny“ jako $\sum \ge 1$.
+  </div>
+
+  <p>Prerekvizity: <a href="l1-3.html#takeaways">[L1.3] Modelování logiky</a>, <a href="l1-4.html#takeaways">[L1.4] big-M</a>, <a href="l1-8.html#takeaways">[L1.8] Omezení rozptylu</a>. Nosná úloha této lekce je ostrá zkoušková <strong>Loot distribution</strong> (zkouška 2023): Alibaba a jeho $k$ mužů rozdělují $n$ pokladů ze čtyř skupin. Dvě podmínky zadání jsou <em>logika mezi skupinami</em> — a přesně ty se dnes naučíš. Zbytek modelu jsou techniky, které už máš.</p>
+
+  <!-- ===== KOSTRA ===== -->
+  <h2>Kostra modelu: kdo nese co</h2>
+  <p>Základní rozhodnutí úlohy je „muž $j$ nese poklad $t_i$“. To je klasická přiřazovací struktura <a href="l1-2.html#takeaways">[L1.2]</a>: binární proměnné</p>
+  $$m_i^j \in \{0,1\}, \qquad i \in \{1,\dots,n\},\; j \in \{1,\dots,k\},$$
+  <p>kde $m_i^j = 1$ ⟺ muž $j$ odnese poklad $t_i$. (Značení $m_i^j$ drží ruční řešení zkoušky 2023.)</p>
+
+  <details class="try">
+    <summary>Zkus sám: v <a href="l1-2.html#takeaways">[L1.2]</a> bylo „každý objekt právě jednou“: $\sum_j x_{ij} = 1$. Platí to tady taky? Co se stane, když omezení vynecháš úplně?</summary>
+    <div class="inner">
+      <p><strong>Rovnost je tu špatně</strong> — nikdo neříká, že se musí odnést <em>všechny</em> poklady (těžké a laciné kusy se klidně nechají v hrobce; kritérium chce jen maximální cenu odneseného). Správně je <strong>nejvýš jednou</strong>:</p>
+      $$\sum_{j=1}^{k} m_i^j \le 1 \qquad \forall i \in \{1,\dots,n\}.$$
+      <p>A vynechat to nejde: bez omezení by mohl tentýž poklad „nést“ víc mužů najednou a v kritériu $\max \sum_j \sum_i p_i\, m_i^j$ by se jeho cena <strong>započítala vícekrát</strong> — solver by toho okamžitě zneužil.</p>
+    </div>
+  </details>
+
+  <p>Druhý kus kostry je <strong>nosnost</strong> (capacity): muž $j$ unese nejvýš $u_j$, tedy pro každého muže rozpočtové omezení <a href="l1-1.html#takeaways">[L1.1]</a> přes váhy:</p>
+  $$\sum_{i=1}^{n} w_i\, m_i^j \le u_j \qquad \forall j \in \{1,\dots,k\}.$$
+
+  <div class="viz" id="viz-model"></div>
+
+  <details class="try">
+    <summary>Zkus sám: zadání pořád mluví o „hideouts“ (skrýších). Kde jsou v modelu?</summary>
+    <div class="inner">
+      <p><strong>Nikde — a to je správně.</strong> Zadání říká „to <em>any</em> of his hideouts“: žádná podmínka nerozlišuje, do <em>které</em> skrýše co putuje. Skrýše jsou kulisa navíc; model je nepotřebuje. Umět v zadání rozpoznat informaci, která žádné omezení negeneruje, je zkoušková dovednost — neztrácej čas modelováním kulis.</p>
+    </div>
+  </details>
+
+  <!-- ===== SKUPINY = DATA ===== -->
+  <h2>Příslušnost do skupiny jsou data, ne proměnná</h2>
+  <p>Každý poklad patří do jedné ze skupin $G = \{1,2,3,4\}$ a zadání skupinu $g_i$ <em>dává</em>. Ruční řešení 2023 si proto <strong>předpočítalo binární konstanty</strong></p>
+  $$q_{i,g} = \begin{cases}1 & g_i = g,\\ 0 & \text{jinak,}\end{cases} \qquad i \in \{1,\dots,n\},\; g \in G.$$
+
+  <details class="try">
+    <summary>Zkus sám: výraz $q_{i,4} \cdot m_i^j$ vypadá jako součin — smí tohle do lineárního modelu?</summary>
+    <div class="inner">
+      <p>Smí. $q_{i,4}$ je <strong>konstanta</strong> (číslo známé předem, ne proměnná), takže $q_{i,4} \cdot m_i^j$ je <em>konstanta × proměnná</em> — přesně to, z čeho se lineární výrazy skládají. Zakázaný je jen součin <em>dvou proměnných</em>. Díky tomu umíš lineárně „vyfiltrovat“ skupinu: součet $\sum_j \sum_i q_{i,4}\, m_i^j$ počítá jen odnesené poklady skupiny 4.</p>
+    </div>
+  </details>
+
+  <p>Označme si pro skupinu $g$ <strong>počet odnesených kusů</strong> (jen zkratka zápisu, ne nová proměnná):</p>
+  $$S_g \;=\; \sum_{j=1}^{k} \sum_{i=1}^{n} q_{i,g}\, m_i^j.$$
+
+  <details class="try">
+    <summary>Zkus sám: podmínka (a) chce „aspoň jeden poklad ze skupiny 1 a aspoň jeden ze skupiny 2“. Jak to zapíšeš přes $S_g$?</summary>
+    <div class="inner">
+      <p>„Aspoň jeden ze skupiny“ = OR přes všechny binárky skupiny — a OR už znáš z <a href="l1-3.html#takeaways">[L1.3]</a> jako $\sum \ge 1$. Tady tedy rovnou:</p>
+      $$S_1 \ge 1, \qquad S_2 \ge 1.$$
+      <p>Žádná pomocná proměnná, žádné big-M. „Aspoň jeden z mnoha“ je v ILP ta levná strana logiky. A protože jde o „any of his hideouts“ i „any of the men“, sčítá se přes <em>všechny</em> muže $j$ — je jedno, kdo to ponese.</p>
+    </div>
+  </details>
+
+  <!-- ===== IMPLIKACE MEZI SKUPINAMI ===== -->
+  <h2>Implikace mezi skupinami: „skupina 4 jen se skupinou 3“</h2>
+  <p>Podmínka (b): <em>„transport any treasure from group 4 <strong>only if</strong> at least some treasure from group 3 is being transported“</em>. Přeloženo do řeči součtů:</p>
+  $$\big(S_4 \ge 1\big) \;\Longrightarrow\; \big(S_3 \ge 1\big).$$
+
+  <details class="try">
+    <summary>Zkus sám: v <a href="l1-3.html#takeaways">[L1.3]</a> byla implikace $x \Rightarrow y$ hotová jedinou nerovností $y \ge x$. Můžeš sem napsat $S_3 \ge S_4$ a mít hotovo?</summary>
+    <div class="inner">
+      <p><strong>Nemůžeš!</strong> Trik $y \ge x$ stojí na tom, že $x, y \in \{0,1\}$. Tady jsou ale obě strany <em>součty</em> — celá čísla klidně 0 až $n$. Nerovnost $S_3 \ge S_4$ říká „skupiny 3 se veze aspoň tolik kusů co skupiny 4“ — to je <strong>mnohem přísnější</strong> podmínka než zadání. Příklad: odnést 5 pokladů skupiny 4 a 1 poklad skupiny 3 zadání povoluje („at least some treasure from group 3“), ale $S_3 \ge S_4$ by to zakázalo ($1 \ge 5$ neplatí) — a uřízl by sis přípustná (možná optimální!) řešení.</p>
+      <p>Implikace tu není mezi <em>proměnnými</em>, ale mezi <em>událostmi</em> „$S_4 \ge 1$“ a „$S_3 \ge 1$“. Události nejdřív musíš <strong>zhmotnit do binárek</strong>.</p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda: „implikace = $y \ge x$, vždycky“</div>
+    <p>$y \ge x$ je implikace jen mezi <strong>binárkami</strong>. Jakmile jsou strany implikace tvrzení o <em>součtech/skupinách</em> („něco ze skupiny 4 se veze“), napsat nerovnost přímo mezi součty ($S_3 \ge S_4$) model <strong>zpřísní</strong> — vyžaduješ počet kusů, ne existenci. Správný postup: každou stranu nejdřív převést na indikátorovou binárku přes big-M <a href="l1-4.html#takeaways">[L1.4]</a> a teprve mezi binárkami použít $y \ge x$ z <a href="l1-3.html#takeaways">[L1.3]</a>.</p>
+  </div>
+
+  <p>Zaveď tedy <strong>indikátory skupin</strong> $\delta_3, \delta_4 \in \{0,1\}$ (ruční řešení 2023 jim říkalo $trans_3, trans_4$) s významem „ze skupiny se něco veze“. Otázka za všechny body: <em>kterým směrem</em> musíš binárku k součtu přivázat?</p>
+
+  <details class="try">
+    <summary>Zkus sám: plná ekvivalence „$\delta_g = 1 \iff S_g \ge 1$“ potřebuje dvě vazby. Pro implikaci $(S_4 \ge 1) \Rightarrow (S_3 \ge 1)$ ale stačí z každé strany jen jedna. Která — a proč právě ta?</summary>
+    <div class="inner">
+      <p>Rozmysli, co která strana implikace potřebuje <em>vynutit</em>:</p>
+      <ul>
+        <li><strong>Levá strana (předpoklad)</strong>: jakmile se veze cokoli ze skupiny 4, musí se $\delta_4$ <em>zvednout na 1</em> — tedy „$S_4 \ge 1 \Rightarrow \delta_4 = 1$“. To je big-M vazba
+        $$S_4 \le M \cdot \delta_4$$
+        (pro $\delta_4 = 0$ vynucuje $S_4 = 0$; pro $\delta_4 = 1$ nic neomezuje). Opačný směr „$\delta_4 = 1 \Rightarrow S_4 \ge 1$“ <em>nepotřebuješ</em>: kdyby solver nastavil $\delta_4 = 1$ zbytečně, jen by si přidal povinnost vézt skupinu 3 — nikdy si tím nepomůže, tak to neudělá.</li>
+        <li><strong>Pravá strana (závěr)</strong>: jakmile $\delta_3 = 1$, musí se skupina 3 <em>opravdu vézt</em> — tedy „$\delta_3 = 1 \Rightarrow S_3 \ge 1$“:
+        $$\delta_3 \le S_3.$$
+        Opačná vazba ($S_3 \le M\delta_3$) je tu zase zbytečná: vézt skupinu 3 „navíc“ při $\delta_3 = 0$ nikdy neporuší zadání.</li>
+      </ul>
+      <p>A mezi binárkami už klasicky <a href="l1-3.html#takeaways">[L1.3]</a>: $\delta_4 \Rightarrow \delta_3$, tedy</p>
+      $$\delta_4 \le \delta_3.$$
+      <p>Řetěz dohromady: $S_4 \ge 1 \Rightarrow \delta_4 = 1 \Rightarrow \delta_3 = 1 \Rightarrow S_3 \ge 1$. ✓</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: jak velké musí být $M$ ve vazbě $S_4 \le M\delta_4$?</summary>
+    <div class="inner">
+      <p>Při $\delta_4 = 1$ musí být nerovnost splnitelná pro <em>každou</em> dosažitelnou hodnotu $S_4$. Maximum $S_4$ je počet pokladů skupiny 4, tedy $M = \sum_i q_{i,4}$ (hrubší, ale vždy bezpečná volba je $M = n$). Jako vždy u big-M <a href="l1-4.html#takeaways">[L1.4]</a>: dost velké, aby „vypnuté“ omezení nic neřezalo, ale ne nesmyslně obří.</p>
+    </div>
+  </details>
+
+  <h2>Elegantní zkratka: big-M bez binárky</h2>
+  <p>U téhle konkrétní implikace se dá ušetřit celý indikátorový aparát. Podívej se na jedinou nerovnost:</p>
+  $$S_4 \;\le\; M \cdot S_3, \qquad M = \textstyle\sum_i q_{i,4}.$$
+
+  <details class="try">
+    <summary>Zkus sám: proč tohle funguje, i když $S_3$ není binárka? Co se stane pro $S_3 = 0$ a co pro $S_3 \ge 1$?</summary>
+    <div class="inner">
+      <p>$S_3$ je <strong>nezáporný celočíselný součet</strong> — umí jen hodnoty $0, 1, 2, \dots$ A to stačí:</p>
+      <ul>
+        <li>$S_3 = 0$: nerovnost dá $S_4 \le 0$, tedy <strong>nic ze skupiny 4 se neveze</strong> — přesně kontrapozice implikace;</li>
+        <li>$S_3 \ge 1$: pravá strana je aspoň $M$ = maximum dosažitelného $S_4$, nerovnost <strong>nic neomezuje</strong>.</li>
+      </ul>
+      <p>Roli binárního přepínače tu sehrál sám součet $S_3$ — big-M trik <a href="l1-4.html#takeaways">[L1.4]</a> s „přepínačem zadarmo“. Na zkoušce jsou správně obě varianty (indikátory i zkratka); zkratka je rychlejší na napsání a má méně míst, kde udělat chybu.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-gate"></div>
+
+  <!-- ===== ZBYTEK ===== -->
+  <h2>Zbytek úlohy už znáš</h2>
+  <p>Podmínka (c) — „maximal difference in the total prices transported by the individual men is at most $P_{max}$“ — je doslova rozptyl max−min přes jednu pevnou množinu hodnot z <a href="l1-8.html#takeaways">[L1.8]</a>: hodnoty jsou ceny nákladů jednotlivých mužů $P_j = \sum_i p_i\, m_i^j$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: kolik je „total price transported by man $j$“, když muž $j$ nenese vůbec nic? Počítá se do rozdílu?</summary>
+    <div class="inner">
+      <p>$P_j = \sum_i p_i \cdot 0 = 0$ — a <strong>počítá se</strong>: zadání mluví o „individual men“, tedy o všech $k$ mužích. Konstrukce z <a href="l1-8.html#takeaways">[L1.8]</a> ($P^{+} \ge P_j$, $P^{-} \le P_j$ pro všechna $j$, $P^{+} - P^{-} \le P_{max}$) to zachytí sama od sebe, protože nerovnosti běží přes všechny muže včetně prázdných. Prakticky to znamená: jakmile jeden muž nese hodně a jiný nic, rozdíl je celý náklad toho prvního.</p>
+    </div>
+  </details>
+
+  <p>Kritérium (d) je prostá maximalizace ceny odneseného <a href="l1-1.html#takeaways">[L1.1]</a> — díky omezení „každý poklad nejvýš jednou“ bez dvojího započtení. Celý model poskládáš v úloze T01 níže.</p>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.12</div>
+    <ul>
+      <li><strong>Příslušnost do skupin = předpočítané konstanty</strong> $q_{i,g} \in \{0,1\}$ (ne proměnné!). Součin $q_{i,g} \cdot m_i^j$ je lineární (konstanta × proměnná) a umí „vyfiltrovat“ skupinu: $S_g = \sum_j \sum_i q_{i,g}\, m_i^j$ = počet odnesených kusů skupiny $g$.</li>
+      <li><strong>„Aspoň jeden ze skupiny“:</strong> $S_g \ge 1$ — OR přes mnoho binárek je obyčejný součet, žádné big-M.</li>
+      <li><strong>Implikace mezi skupinami NENÍ $y \ge x$ na součtech:</strong> $S_3 \ge S_4$ vyžaduje <em>počet</em>, ne <em>existenci</em> — zpřísňuje model. Správně přes indikátory $\delta_4, \delta_3 \in \{0,1\}$: $S_4 \le M\delta_4$, $\;\delta_3 \le S_3$, $\;\delta_4 \le \delta_3$ <a href="l1-3.html#takeaways">[L1.3]</a>+<a href="l1-4.html#takeaways">[L1.4]</a>.</li>
+      <li><strong>Z vazby binárka↔součet stačí jen směr, který implikace potřebuje:</strong> předpoklad tlačí indikátor nahoru ($S \le M\delta$), závěr tlačí součet nahoru ($\delta \le S$). Druhé směry solver nikdy nezneužije.</li>
+      <li><strong>Zkratka bez binárky:</strong> $S_4 \le M \cdot S_3$ — funguje, protože $S_3$ je nezáporné celé číslo ($S_3 = 0 \Rightarrow S_4 = 0$, $S_3 \ge 1 \Rightarrow$ volno). $M$ = počet pokladů skupiny 4.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA ===== -->
+  <div class="task" id="t-loot">
+    <div class="task-head foto">
+      <span class="task-id">T01</span>
+      <strong>Loot distribution</strong>
+      <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
+      <span class="task-src">zdroj: zkouška KO 2023 (T04)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Alibaba and his $k$ men have raided an ancient tomb. Inside, there were $n$ treasures $T = \{t_1, \ldots, t_n\}$. Each treasure $t_i$ has some weight $w_i \in \mathbb{R}^+$ and price $p_i \in \mathbb{R}^+$. Each treasure belongs to one of four groups $G = \{1, 2, 3, 4\}$, where $g_i \in G$ denotes the group of treasure $t_i$. Each of Alibaba's $k$ men will move part of the loot to one of the Alibaba's hideouts. The maximal weight that man $j \in \{1, 2, \ldots, k\}$ can carry is $u_j \in \mathbb{R}^+$.</p>
+        <p>Alibaba wants to:</p>
+        <p>a) transport at least one treasure from group 1 and at least one treasure from group 2 to any of his hideouts;</p>
+        <p>b) transport any treasure from group 4 only if at least some treasure from group 3 is being transported to any of the hideouts;</p>
+        <p>c) distribute the loot such that the maximal difference in the total prices transported by the individual men is at most $P_{\max} \ge \max_i\{p_i\} - \min_i\{p_i\}$;</p>
+        <p>d) maximize the total price of the transferred treasures.</p>
+        <p>Design an ILP model to solve the given loot distribution problem.”</p>
+      </div>
+
+      <div class="box foto">
+        <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
+        <p>Tuhle úlohu vyřeš celou <strong>NA PAPÍR</strong> — od prázdného listu, bez koukání do lekce ani do řešení, ideálně na čas (na zkoušce zhruba 15–20 minut). Pak mi pošli fotku — zkontroluju ti ji a vytknu chyby přesně jako hodnotitel.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>$n$ pokladů (váha $w_i$, cena $p_i$, skupina $g_i \in \{1,2,3,4\}$ — vše dané), $k$ mužů s nosnostmi $u_j$. Rozhoduješ, <em>kdo odnese co</em> (něco smí zůstat v hrobce). Čtyři požadavky: (a) veze se aspoň jeden kus ze skupiny 1 a aspoň jeden ze skupiny 2; (b) skupina 4 smí jet jen tehdy, jede-li i něco ze skupiny 3; (c) rozdíl cen nákladů mezi muži nejvýš $P_{max}$ (daný parametr; nerovnost $P_{max} \ge \max_i\{p_i\} - \min_i\{p_i\}$ je vlastnost dat, ne tvoje omezení); (d) maximalizuj cenu odneseného. Skrýše („hideouts“) jsou kulisa — žádná podmínka je nerozlišuje, v modelu se neobjeví.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — konstanty $q_{i,g}$, „aspoň jeden ze skupiny“ ($S_g \ge 1$), implikace mezi skupinami (indikátory / zkratka $S_4 \le M S_3$).</li>
+        <li><a href="l1-2.html#takeaways">[L1.2] Přiřazovací struktura</a> — proměnné $m_i^j$ a součtové omezení (tady „nejvýš jednou“).</li>
+        <li><a href="l1-1.html#takeaways">[L1.1] Rozpočtové omezení</a> — nosnost mužů.</li>
+        <li><a href="l1-3.html#takeaways">[L1.3]</a> + <a href="l1-4.html#takeaways">[L1.4]</a> — implikace binárek a big-M vazby.</li>
+        <li><a href="l1-8.html#takeaways">[L1.8] Omezení rozptylu</a> — rozdíl max−min cen nákladů ≤ $P_{max}$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Postupuj jako u Wedding planu <a href="l1-9.html">[L1.9]</a>: rozsekej zadání na věty a každé přiřaď techniku. Kostra: jaké je elementární rozhodnutí? (muž × poklad → binárka; rovnost, nebo „nejvýš jednou“?) Pak věta po větě: (a) je levná strana logiky ($\sum \ge 1$), (b) je implikace mezi <em>událostmi o součtech</em> — pozor, ať ji nenapíšeš jako nerovnost mezi součty; rozmysli, kterým směrem vázat indikátory. U (c) si ujasni, čí hodnoty porovnáváš (cena nákladu <em>každého</em> muže — i prázdného) a použij pomocné $P^{+}, P^{-}$. Nezapomeň na nosnosti — jsou schované v úvodním odstavci, ne v seznamu (a)–(d).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Data (předpočítaná):</strong> $q_{i,g} = 1$, pokud $g_i = g$, jinak $0$; $\;M = \sum_{i} q_{i,4}$ (počet pokladů skupiny 4).</p>
+          <p><strong>Proměnné:</strong></p>
+          $$m_i^j \in \{0,1\} \;\; \forall i, \forall j \;\;(\text{muž } j \text{ nese } t_i), \qquad \delta_3, \delta_4 \in \{0,1\}, \qquad P^{+}, P^{-} \in \mathbb{R}.$$
+          <p><strong>Kostra — každý poklad nejvýš jednou a nosnosti:</strong></p>
+          $$\sum_{j=1}^{k} m_i^j \le 1 \quad \forall i, \qquad\qquad \sum_{i=1}^{n} w_i\, m_i^j \le u_j \quad \forall j.$$
+          <p><strong>(a) aspoň jeden ze skupiny 1 a aspoň jeden ze skupiny 2:</strong> (zkratka $S_g = \sum_j \sum_i q_{i,g}\, m_i^j$)</p>
+          $$S_1 \ge 1, \qquad S_2 \ge 1.$$
+          <p><strong>(b) skupina 4 jen se skupinou 3</strong> — indikátorová varianta:</p>
+          $$S_4 \le M\,\delta_4, \qquad \delta_3 \le S_3, \qquad \delta_4 \le \delta_3.$$
+          <p>Řetěz: veze-li se cokoli ze 4, pak $\delta_4 = 1$ → $\delta_3 = 1$ → $S_3 \ge 1$. <em>Ekvivalentní úsporná varianta (taky plný počet bodů):</em> jediná nerovnost $S_4 \le M \cdot S_3$.</p>
+          <p><strong>(c) rozdíl cen nákladů ≤ $P_{max}$</strong> — konstrukce z <a href="l1-8.html#takeaways">[L1.8]</a> nad hodnotami $P_j = \sum_i p_i\, m_i^j$:</p>
+          $$P^{+} \ge \sum_{i=1}^{n} p_i\, m_i^j \quad \forall j, \qquad P^{-} \le \sum_{i=1}^{n} p_i\, m_i^j \quad \forall j, \qquad P^{+} - P^{-} \le P_{max}.$$
+          <p>Nerovnosti běží přes všechny muže — muž bez nákladu přispívá hodnotou $0$, takže $P^{-} \le 0$, a rozdíl ho korektně zahrne. Pro omezení „rozptyl ≤“ jsou jednostranné meze $P^{+}, P^{-}$ přesně to pravé (viz <a href="l1-8.html#takeaways">[L1.8]</a>).</p>
+          <p><strong>(d) kritérium:</strong></p>
+          $$\max \; \sum_{j=1}^{k} \sum_{i=1}^{n} p_i\, m_i^j.$$
+          <p>Dvojí započtení nehrozí — každý poklad nese nejvýš jeden muž. Tím je model kompletní: binárky $m_i^j$, dva indikátory, dvě spojité pomocné proměnné a samá lineární omezení.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L1.12">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="l1-11.html"><span class="dir">← Předchozí</span> L1.11 · Poměrová a max-z-více podmínka</a>
+    <a class="next" href="l1-13.html"><span class="dir">Další →</span> L1.13 · Worst-case omezení přes kombinace</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// Kostra modelu: poklady (se skupinami) → muži; šipka = m_i^j = 1
+KOViz.graph(document.getElementById('viz-model'), {
+  directed: true,
+  nodes: [
+    {id: 't1', x: 130, y: 40,  label: 't₁', sub: 'g₁ = 1'},
+    {id: 't2', x: 130, y: 95,  label: 't₂', sub: 'g₂ = 1', cls: 'good'},
+    {id: 't3', x: 130, y: 150, label: 't₃', sub: 'g₃ = 2', cls: 'good'},
+    {id: 't4', x: 130, y: 205, label: 't₄', sub: 'g₄ = 3', cls: 'good'},
+    {id: 't5', x: 130, y: 260, label: 't₅', sub: 'g₅ = 4'},
+    {id: 't6', x: 130, y: 315, label: 't₆', sub: 'g₆ = 4', cls: 'good'},
+    {id: 'm1', x: 510, y: 110, label: 'j=1', sub: 'nosnost u₁', cls: 'hl'},
+    {id: 'm2', x: 510, y: 250, label: 'j=2', sub: 'nosnost u₂', cls: 'hl'},
+  ],
+  edges: [
+    {from: 't2', to: 'm1', cls: 'good', label: 'm₂¹ = 1'},
+    {from: 't3', to: 'm1', cls: 'good', label: 'm₃¹ = 1'},
+    {from: 't4', to: 'm2', cls: 'good', label: 'm₄² = 1'},
+    {from: 't6', to: 'm2', cls: 'good', label: 'm₆² = 1'},
+  ],
+  caption: 'Přípustné rozhodnutí m<sub>i</sub><sup>j</sup> (šipka = muž j odnese poklad t<sub>i</sub>; t₁ a t₅ zůstávají v hrobce). Každý poklad má nejvýš jednu šipku (Σ<sub>j</sub> m<sub>i</sub><sup>j</sup> ≤ 1). Podmínka (a): jede t₂ ze skupiny 1 i t₃ ze skupiny 2. Podmínka (b): t₆ ze skupiny 4 smí jet jen proto, že jede i t₄ ze skupiny 3.'
+});
+
+// Implikace mezi skupinami jako jediná nerovnost S4 ≤ M·S3
+KOViz.lpRegion(document.getElementById('viz-gate'), {
+  xmax: 3, ymax: 4, integer: true,
+  xlabel: 'S₃', ylabel: 'S₄',
+  constraints: [
+    {a: -4, b: 1, c: 0, label: 'S₄ = M·S₃ (M = 4)', labelAt: 0.6, labelDx: 10, labelDy: 2},
+  ],
+  caption: 'Přípustné dvojice (S₃, S₄) pod jedinou nerovností S₄ ≤ M·S₃: sloupec S₃ = 0 dovoluje jen S₄ = 0 (nic ze skupiny 4), jakmile S₃ ≥ 1, je S₄ volné až do počtu kusů skupiny 4. Přesně chování implikace „(S₄ ≥ 1) ⟹ (S₃ ≥ 1)“ — roli přepínače hraje sám nezáporný celočíselný součet S₃.'
+});
+</script>
+</body>
+</html>
