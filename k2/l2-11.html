@@ -157,7 +157,7 @@
     <div class="task-body">
       <div class="assignment">
         <span class="lbl">Assignment (original, EN)</span>
-        <p>“In a network $G$ we associate two numbers with each arc: its length $c_{ij} \in \mathbb{R}$ and its traversal time $\tau_{ij} \in \mathbb{Z}_0^+$. We would like to determine a shortest-length path from the source node $s$ to the sink node $t$ with the additional constraint that the traversal time of the path does not exceed $\tau$.</p>
+        <p>“In a network $G$ we associate two numbers with each arc: its length $\ell_e \in \mathbb{R}$ and its traversal time $\tau_{ij} \in \mathbb{Z}_0^+$. We would like to determine a shortest-length path from the source node $s$ to the sink node $t$ with the additional constraint that the traversal time of the path does not exceed $\tau$.</p>
         <p>a) Formulate this problem as a shortest path problem (hint: use time expansion of the network).</p>
         <p>b) Does the path necessarily exist if the network $G$ is strongly connected?”</p>
       </div>
@@ -185,7 +185,7 @@
           <p>$$\big((i,k),\ (j,\, k + \tau_{ij})\big) \in E(H) \quad \text{s cenou } c_{ij}.$$</p>
           <p>Pak řešíme obyčejný problém nejkratší cesty z $(s, 0)$ do <em>libovolného</em> z vrcholů $(t, k)$, $k = 0, \ldots, T$. Ekvivalentně: přidáme umělý cíl $t^*$ a nulové hrany $(t,k) \to t^*$ pro $k = 0, \ldots, T$ a hledáme nejkratší cestu $(s,0) \to t^*$. Každá cesta v $H$ odpovídá cestě v $G$ se stejnou délkou a dobou průchodu $\le T$ a naopak — hrany porušující limit v $H$ neexistují. Velikost: $|V(H)| = n(T+1) + 1$, $|E(H)| \le m(T+1) + (T+1)$.</p>
           <p><em>Poznámka (čekací hrany):</em> místo mnoha kopií cíle $(t,k)$ lze přidat čekací hrany $(v,k) \to (v, k+1)$ s cenou $0$ a hledat cestu jen z $(s,0)$ do $(t,T)$. Tyto hrany pouze převádějí podmínku „příchod nejpozději v čase $T$“ na „příchod přesně v čase $T$“.</p>
-          <p><strong>(b) Existence: NE.</strong> Silná souvislost nezaručuje přípustnost při časovém limitu. Protipříklad: $s \to t$ s dobou průchodu $10$, $t \to s$ s dobou průchodu $10$, limit $T = 5$. Graf je silně souvislý, ale žádná $s$–$t$ cesta limit nesplní. (Takhle stručně — „it doesn't necessarily exist, it's possible that all paths violate the constraint of not exceeding $\tau$“ — to stálo v dochovaném studentském řešení a bylo uznáno ✓.)</p>
+          <p><strong>(b) Existence: NE.</strong> Silná souvislost nezaručuje přípustnost při časovém limitu. Protipříklad: $s \to t$ s dobou průchodu $10$, $t \to s$ s dobou průchodu $10$, limit $T = 5$. Graf je silně souvislý, ale žádná $s$–$t$ cesta limit nesplní. (Takhle stručně — „it doesn't necessarily exist, its possible that all paths violate the constraint of not exceeding $\tau$“ — to stálo v dochovaném studentském řešení a bylo uznáno ✓.)</p>
         </div>
       </details>
     </div>
@@ -196,7 +196,7 @@
   </label>
 
   <div class="pager">
-    <a href="../k2/l2-10.html"><span class="dir">← Předchozí</span> L2.10 · Stavový automat jako graf</a>
+    <a href="l2-10.html"><span class="dir">← Předchozí</span> L2.10 · Stavový automat jako graf</a>
     <a class="next" href="l2-12.html"><span class="dir">Další →</span> L2.12 · Bellman-Fordův algoritmus + detekce záporného cyklu (běh)</a>
   </div>
 
