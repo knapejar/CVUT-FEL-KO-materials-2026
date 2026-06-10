@@ -29,7 +29,7 @@
   <p class="lesson-meta">
     <span class="chip">L5.0</span> Kapitola K5 — Rozvrhování (Slot 5) · <strong>[MUST]</strong> · FOTO checkpoint kapitoly
   </p>
-  <h1>Rozvrhování přes toky (P|pmtn,r<sub>j</sub>,d̃<sub>j</sub>|)</h1>
+  <h1>Rozvrhování přes toky ($P \mid \mathrm{pmtn}, r_j, \tilde{d}_j \mid$)</h1>
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
@@ -40,7 +40,7 @@
 
   <div class="box info">
     <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Zadání problému (slide 5, 04_Flows — EN 1:1)</div>
-    <p>“Consider a $P \mid pmtn, r_j, \widetilde{d_j} \mid -$ problem — we have $n$ <strong>tasks</strong> which we want to assign to $R$ <strong>identical resources</strong> (processors). Each task has its own <strong>processing time</strong> $p_j$, <strong>release date</strong> $r_j$ and <strong>deadline</strong> $\widetilde{d_j}$. <strong>Preemption</strong> is allowed (including migration from one resource to another).”</p>
+    <p>“Consider a $P \mid pmtn, r_j, \widetilde{d_j} \mid -$ problem - we have $n$ <strong>tasks</strong> which we want to assign to $R$ <strong>identical resources</strong> (processors). Each task has its own <strong>processing time</strong> $p_j$, <strong>release date</strong> $r_j$ and <strong>deadline</strong> $\widetilde{d_j}$. <strong>Preemption</strong> is allowed (including migration from one resource to another).”</p>
     <p><strong>Goal:</strong> “Assign all tasks to processors so that every processor will execute no more than one task at a moment and no task will be executed simultaneously on more than one processor. This can be solved as a Maximum flow problem.”</p>
   </div>
 
@@ -142,7 +142,7 @@
   </ol>
 
   <h2>Co odevzdat u zkoušky</h2>
-  <p>U zadání „Formulate as Maximum flow problem“ odevzdej pět věcí (srovnej se čtyřmi věcmi z [L4.5] — přibyly intervaly):</p>
+  <p>U zadání “Formulate as Maximum flow problem” odevzdej pět věcí (srovnej se čtyřmi věcmi z [L4.5] — přibyly intervaly):</p>
   <ol>
     <li><strong>Body a intervaly:</strong> seřazené sjednocení $\{r_j\} \cup \{\tilde{d}_j\}$ → intervaly $I_{x,y}$ (vypiš je).</li>
     <li><strong>Vrcholy a hrany:</strong> $s \to T_j \to I_{x,y} \to t$; prostřední hrany jen pro $\langle x,y\rangle \subseteq \langle r_j, \tilde{d}_j\rangle$.</li>
