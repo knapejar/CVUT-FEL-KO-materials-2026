@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L6.1 · CSP a arc consistency — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k6">K6 · CSP / AC-3</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L6.1</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L6.1</span> Kapitola K6 — CSP / Arc Consistency (Slot 6) · <strong>[MUST]</strong>
+  </p>
+  <h1>CSP a arc consistency</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Trojice $(X, D, C)$ definující <strong>constraint satisfaction problem</strong> (problém splňování omezení) a pojem <strong>arc consistency</strong> (hranová konzistence): kdy je orientovaná hrana $(x_i, x_j)$ grafu omezení konzistentní.
+  </div>
+
+  <p>Poslední slotová kapitola. Slot 6 padá zhruba v polovině zkoušek a když padne, vypadá takhle (zkouška 02.06.2021, znovu doložena 1.&nbsp;6.&nbsp;2026):</p>
+
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/flag.svg" class="ico" alt="">Ukázka zkouškového zadání (EN, 1:1)</div>
+    <p>“Reduce the domains to be arc consistent. Record the steps of the algorithm (the queue content prior to the revision of each arc).”</p>
+  </div>
+
+  <p>Je to nejmechaničtější úloha celé zkoušky — žádný důkaz, žádný nápad, jen pečlivé oditerování algoritmu AC-3. Kapitola K6 ji rozkládá na tři kroky: dnes <strong>pojmy</strong> (co je CSP a kdy je hrana konzistentní), v [L6.2] <strong>procedura REVISE</strong> (jak nekonzistenci opravit škrtáním hodnot) a v [L6.3] <strong>algoritmus AC-3</strong> s frontou hran — tam si přesně tohle zadání celé propočítáš.</p>
+
+  <!-- ===== CO JE CSP ===== -->
+  <h2>Co je CSP</h2>
+  <p>Začni mini-hlavolamem ze slidů: dvě neznámé $x$ a $y$, každá smí nabývat hodnot $\{3, 4, 5\}$, a dvě podmínky: $x \ge y$ a $y &gt; 3$.</p>
+
+  <details class="try">
+    <summary>Zkus sám: vypiš všechna řešení mini-hlavolamu. Z čeho se hlavolam skládá — pojmenuj jeho tři stavební kameny.</summary>
+    <div class="inner">
+      <p>Řešení jsou dvojice splňující obě podmínky: $(x,y) \in \{(4,4),\ (5,4),\ (5,5)\}$. A stavební kameny: <strong>proměnné</strong> ($x$, $y$), jejich <strong>domény</strong> — konečné množiny povolených hodnot ($\{3,4,5\}$) — a <strong>omezení</strong> ($x \ge y$, $y &gt; 3$). Přesně tahle trojice definuje CSP.</p>
+    </div>
+  </details>
+
+  <p>Formálně (slide 17, EN 1:1): <em>“<strong>Constraint Satisfaction Problem (CSP)</strong> is defined by the triplet $(X, D, C)$, where $X = \{x_1, \ldots, x_n\}$ is a finite set of variables, $D = \{D_1, \ldots, D_n\}$ is a finite set of domains of variables, $C = \{C_1, \ldots, C_t\}$ is a finite set of constraints.”</em> Doména $D_i$ je <strong>konečná</strong> množina všech možných hodnot $x_i$; omezení $C_i$ je dvojice $(S_i, R_i)$, kde $S_i \subseteq X$ a $R_i$ je <strong>relace</strong> nad proměnnými z $S_i$ (tj. množina povolených kombinací hodnot). <strong>Solution</strong> (řešení) je <em>úplné přiřazení</em> hodnot z domén všem proměnným takové, že jsou splněna <strong>všechna</strong> omezení — je to rozhodovací problém a obecně je <strong>NP-úplný</strong>. (Varianta s účelovou funkcí $f(X)$ se jmenuje <strong>CSOP</strong> — constraint satisfaction optimization problem; u zkoušky Slotu 6 se nepotkává, řeší se čistá feasibilita.)</p>
+
+  <h2>Propagace: jak řešiče s doménami pracují</h2>
+  <p>Jak by ses hlavolamu zhostil bez zkoušení všech $3 \times 3 = 9$ kombinací? Klíčová operace constraint programmingu je <strong>propagation</strong> (propagace omezení): omezení se použije na <em>škrtání hodnot z domén</em>, které nemohou být v žádném řešení.</p>
+
+  <details class="try">
+    <summary>Zkus sám: které hodnoty můžeš z domén $D_x = D_y = \{3,4,5\}$ škrtnout jen úvahou nad jednotlivými omezeními — bez vyjmenování řešení?</summary>
+    <div class="inner">
+      <p>Z $y &gt; 3$ plyne, že $y = 3$ nemůže být v žádném řešení → $D_y = \{4, 5\}$. A teď s novou doménou $y$: pro $x = 3$ neexistuje žádné $y \in \{4,5\}$ s $x \ge y$ → $D_x = \{4, 5\}$. Víc už žádné omezení samo o sobě neškrtne — projdi si to v krokovači níže.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-prop"></div>
+
+  <details class="try">
+    <summary>Zkus sám: po propagaci zbylo $x \in \{4,5\}$, $y \in \{4,5\}$. Znamená to, že každá kombinace zbylých hodnot je řešení?</summary>
+    <div class="inner">
+      <p>Ne — $x = 4$, $y = 5$ porušuje $x \ge y$, a přitom obě hodnoty v doménách přežily (každá má jiného „partnera“, se kterým funguje). Slide 22 to říká přesně: <em>“propagation alone is not enough — the product of the domains (including infeasible $x = 4$, $y = 5$) is a superset of the solution”</em>. Kartézský součin zredukovaných domén je jen <strong>nadmnožina</strong> množiny řešení; zbytek dořeší prohledávání (search) s větvením. Pro zkouškovou úlohu Slotu 6 je ale podstatný právě jen ten propagační krok — a k němu potřebujeme přesné lokální kritérium, <em>kdy</em> se smí hodnota škrtnout. To kritérium je arc consistency.</p>
+    </div>
+  </details>
+
+  <!-- ===== GRAF OMEZENÍ ===== -->
+  <h2>Binární CSP a graf omezení</h2>
+  <p>Hranová konzistence se definuje pro <strong>binární CSP</strong> — každé omezení je binární relace, tj. váže <em>dvojici</em> proměnných ($x_1 = x_2$, $x \ge y$, …). To není omezující: obecný ($n$-ární) CSP lze na binární převést (slide 25). Binární CSP se reprezentuje <strong>digrafem</strong> (orientovaným grafem) $G$:</p>
+  <ul>
+    <li>uzly jsou <strong>proměnné</strong>,</li>
+    <li>existuje-li omezení nad $x_i, x_j$, jsou uzly $x_i, x_j$ propojeny <strong>orientovanými hranami</strong> $(x_i, x_j)$ <em>a</em> $(x_j, x_i)$ — <strong>oběma směry</strong>.</li>
+  </ul>
+
+  <details class="try">
+    <summary>Zkus sám: vezmi instanci z přednášky — $x_1, x_2, x_3$ s doménami $\{1,2,3\}$ a omezeními $x_1 = x_2$ a $x_2 + 1 = x_3$. Kolik orientovaných hran bude mít její graf omezení?</summary>
+    <div class="inner">
+      <p>Čtyři: každé ze dvou omezení dává <strong>dvě</strong> orientované hrany. $x_1 = x_2$ dává $(x_1, x_2)$ a $(x_2, x_1)$; $x_2 + 1 = x_3$ dává $(x_2, x_3)$ a $(x_3, x_2)$. Mezi $x_1$ a $x_3$ žádné omezení není, tedy ani hrana. (A kdyby mezi jednou dvojicí proměnných bylo omezení víc, hrany jsou pořád jen dvě — jedna na každý směr.)</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-digraph"></div>
+
+  <p>Proč zrovna <em>orientované</em> hrany, když omezení samo žádný směr nemá? Protože směr hrany říká, <strong>čí doménu touto hranou kontrolujeme</strong> — a hned uvidíš, že výsledek kontroly na směru závisí.</p>
+
+  <!-- ===== ARC CONSISTENCY ===== -->
+  <h2>Hranová konzistence (arc consistency)</h2>
+
+  <details class="try">
+    <summary>Zkus sám: v instanci výše vezmi omezení $x_2 + 1 = x_3$ a domény $D_2 = D_3 = \{1,2,3\}$. Pro které hodnoty $a \in D_2$ existuje partner $b \in D_3$ tak, aby dvojice $x_2 = a$, $x_3 = b$ omezení splnila? A obráceně — pro které hodnoty $b \in D_3$ existuje partner v $D_2$?</summary>
+    <div class="inner">
+      <p>Partner pro $a \in D_2$ musí být $b = a + 1$: pro $a = 1$ je to $b = 2$ ✓, pro $a = 2$ je to $b = 3$ ✓, ale pro $a = 3$ by muselo být $b = 4 \notin D_3$ ✗. Hodnota $3$ v $D_2$ tedy <em>nemá podporu</em>. Obráceně partner pro $b \in D_3$ je $a = b - 1$: pro $b = 2, 3$ existuje ✓, pro $b = 1$ by muselo být $a = 0 \notin D_2$ ✗ — bez podpory je hodnota $1$ v $D_3$. Hodnota bez partnera nemůže být v žádném řešení.</p>
+    </div>
+  </details>
+
+  <p>Přesně tohle „mít partnera“ je celá definice (slide 25, EN 1:1):</p>
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/book-open.svg" class="ico" alt="">Definice (slide 25, EN 1:1)</div>
+    <p>“Arc $(x_i, x_j)$ is <strong>Arc Consistent (AC)</strong> iff <strong>for each value</strong> $a \in D_i$ <strong>there exists</strong> $b \in D_j$ such that the assignment $x_i = a$, $x_j = b$ meets <strong>all</strong> binary constraints for the variables $x_i, x_j$. A <strong>CSP is Arc Consistent</strong> iff all arcs are arc consistent.”</p>
+  </div>
+  <p>Hodnotě $b$, která s $a$ splní omezení, se říká <strong>support</strong> (podpora). Slovy: hrana $(x_i, x_j)$ je konzistentní, když <em>každá</em> hodnota v doméně počátečního uzlu $x_i$ má v doméně koncového uzlu $x_j$ aspoň jednu podporu. V try-otázce výše jsi tedy zjistil, že hrana $(x_2, x_3)$ <strong>není</strong> AC (hodnota $3 \in D_2$ je bez podpory) a hrana $(x_3, x_2)$ také ne (hodnota $1 \in D_3$). Pozor na čtení: hrana $(x_i, x_j)$ mluví o hodnotách v $D_i$ — <strong>kontroluje se doména ocasu hrany</strong>, doména hlavy jen dodává podpory.</p>
+
+  <p>A teď klíčová jemnost. Slide 25 (EN 1:1): <em>“AC is <strong>oriented</strong> — AC of arc $(x_i, x_j)$ does not imply AC of arc $(x_j, x_i)$.”</em> Prohlédni si tři příklady s omezením $x_1 \le x_2$ (po vzoru slidu 25; konkrétní domény jsou vlastní volba — slide je má jen v obrázku):</p>
+
+  <div class="viz" id="viz-ac3ex"></div>
+
+  <details class="try">
+    <summary>Zkus sám (před přepnutím na 2. krok ve vizualizaci): rozhodni u každé ze tří dvojic, které z hran $(x_1, x_2)$ a $(x_2, x_1)$ jsou AC.</summary>
+    <div class="inner">
+      <p>① $D_1 = \{2,3\}$, $D_2 = \{1,2\}$: hrana $(x_1,x_2)$ není AC — $a = 3$ nemá v $D_2$ podporu $b \ge 3$; hrana $(x_2,x_1)$ není AC — $b = 1$ nemá podporu $a \le 1$. <strong>Žádná hrana AC.</strong><br>
+      ② $D_1 = \{2,3\}$, $D_2 = \{1,3\}$: $(x_1,x_2)$ AC — $2 \le 3$ ✓ i $3 \le 3$ ✓; $(x_2,x_1)$ není AC — $b = 1$ je bez podpory. <strong>Jen $(x_1,x_2)$ AC</strong> — tady vidíš orientovanost naživo.<br>
+      ③ $D_1 = \{1,2\}$, $D_2 = \{2,3\}$: každé $a \in \{1,2\}$ má podporu $b = 2$; každé $b \in \{2,3\}$ má podporu $a = 1$. <strong>Obě hrany AC.</strong></p>
+    </div>
+  </details>
+
+  <p>Celý <strong>CSP je arc consistent</strong>, právě když jsou AC <em>všechny</em> hrany jeho grafu — v příkladu výše tedy jen instance ③. Zkouškové zadání „reduce the domains to be arc consistent“ chce přesně tohle: škrtat hodnoty bez podpory tak dlouho, až jsou všechny hrany AC. Jak škrtat systematicky (procedura REVISE) se naučíš v [L6.2] a jak u toho nezešílet z opakovaných kontrol (fronta algoritmu AC-3) v [L6.3].</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: dvě klasické chyby u hranové konzistence</div>
+    <ul>
+      <li><strong>Jedno omezení = DVĚ hrany a konzistence je orientovaná.</strong> Zkontrolovat jen $(x_i, x_j)$ a prohlásit omezení za „vyřízené“ je špatně — $(x_j, x_i)$ může být nekonzistentní dál (příklad ② výše). U zkoušky se iniciální fronta plní <em>všemi</em> orientovanými hranami, oběma směry každého omezení.</li>
+      <li><strong>Čti směr rovnice pozorně.</strong> U omezení $x_2 = x_3 + 1$ je podpora hodnoty $a \in D_2$ rovna $b = a - 1$, kdežto podpora hodnoty $b \in D_3$ je $a = b + 1$ — prohození směru zrcadlově obrátí, které hodnoty se škrtají. Přesně tahle záměna je vidět i v dochovaném ručním řešení zkoušky 02.06.2021 (viz T02).</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L6.1</div>
+    <ul>
+      <li><strong>CSP $= (X, D, C)$:</strong> konečná množina proměnných, konečné domény, omezení = relace (povolené kombinace). Řešení = úplné přiřazení splňující všechna omezení; rozhodovací, NP-úplný problém.</li>
+      <li><strong>Binární CSP ↔ digraf:</strong> uzly = proměnné; každé omezení nad $\{x_i, x_j\}$ dává orientované hrany $(x_i, x_j)$ <em>i</em> $(x_j, x_i)$ — v OBOU směrech.</li>
+      <li><strong>Hrana $(x_i, x_j)$ je arc consistent</strong> ⟺ každá hodnota $a \in D_i$ má v $D_j$ aspoň jednu podporu $b$ splňující všechna binární omezení mezi $x_i, x_j$. Kontroluje se doména <em>ocasu</em> hrany. CSP je AC ⟺ všechny hrany jsou AC.</li>
+      <li><strong>AC je orientovaná:</strong> konzistence $(x_i, x_j)$ neimplikuje konzistenci $(x_j, x_i)$.</li>
+      <li><strong>Propagace filtruje domény, ale nestačí:</strong> kartézský součin zredukovaných domén je jen nadmnožina množiny řešení.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-accheck">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Které hrany jsou arc consistent?</strong>
+      <span class="task-src">zdroj: prezentace 08_CP, slide 27 (instance 1:1; instrukce vlastní)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“CSP with variables and domains: $x_1 \in \{1, 2, 3\},\ x_2 \in \{1, 2, 3\},\ x_3 \in \{2, 3\}$ and constraints $x_1 &gt; x_2,\ x_2 \ne x_3,\ x_2 + x_3 &gt; 4$.”</p>
+        <p><em>(Instrukce vlastní — na slidu instance pokračuje aplikací procedury REVISE, tu potkáš v [L6.2]:)</em> Draw the constraint digraph. For each arc decide whether it is arc consistent with respect to the initial domains; for every inconsistent arc list the value(s) without support. Is the CSP arc consistent?</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Tři proměnné s doménami, tři binární omezení — pozor, <em>dvě</em> z nich ($x_2 \ne x_3$ a $x_2 + x_3 &gt; 4$) váží <strong>stejnou dvojici</strong> proměnných. Úkol: nakreslit graf omezení a u každé orientované hrany rozhodnout konzistenci (zatím nic neškrtáme — jen kontrolujeme).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — definice AC, podpora, graf omezení (oba směry!).</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Nejdřív hrany: kolik jich bude, když dvě omezení sdílejí dvojici $\{x_2, x_3\}$? Pak mechanicky: pro hranu $(x_i, x_j)$ projdi <em>každou</em> hodnotu $a \in D_i$ a hledej podporu $b \in D_j$ — ta musí splnit <strong>všechna</strong> omezení mezi $x_i$ a $x_j$ <em>najednou</em> (definice říká „all binary constraints“). Nezapomeň na oba směry každé dvojice.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení</summary>
+        <div class="inner">
+          <p><strong>Graf.</strong> Omezení jsou mezi dvojicemi $\{x_1, x_2\}$ a $\{x_2, x_3\}$ → hrany $(x_1, x_2), (x_2, x_1), (x_2, x_3), (x_3, x_2)$ — <strong>čtyři</strong>, i když omezení jsou tři: obě omezení nad $\{x_2, x_3\}$ sdílejí tutéž dvojici hran a podpora musí splnit obě současně.</p>
+          <div class="viz" id="viz-t01"></div>
+          <p><strong>Kontrola hran</strong> (podporu hledáme pro každou hodnotu ocasu):</p>
+          <ul>
+            <li>$(x_1, x_2)$, omezení $x_1 &gt; x_2$: $a{=}1$ potřebuje $b &lt; 1$ — žádné ✗; $a{=}2 \to b{=}1$ ✓; $a{=}3 \to b{=}1$ ✓. <strong>Není AC</strong>, bez podpory hodnota $1 \in D_1$.</li>
+            <li>$(x_2, x_1)$: $a{=}1 \to b{=}2$ ✓; $a{=}2 \to b{=}3$ ✓; $a{=}3$ potřebuje $b &gt; 3$ — žádné ✗. <strong>Není AC</strong>, bez podpory $3 \in D_2$.</li>
+            <li>$(x_2, x_3)$, obě omezení najednou ($b \ne a$ a $a + b &gt; 4$): $a{=}1$: $b{=}2$ dá součet $3$ ✗, $b{=}3$ dá $4 \not&gt; 4$ ✗ → bez podpory; $a{=}2 \to b{=}3$ ($2 \ne 3$, $5 &gt; 4$) ✓; $a{=}3 \to b{=}2$ ✓. <strong>Není AC</strong>, bez podpory $1 \in D_2$.</li>
+            <li>$(x_3, x_2)$: $a{=}2 \to b{=}3$ ✓; $a{=}3 \to b{=}2$ ✓. <strong>AC.</strong></li>
+          </ul>
+          <p><strong>CSP arc consistent není</strong> — tři hrany ze čtyř jsou nekonzistentní. (Kontrola proti slidu 27: tabulka revizí tam začíná škrtnutím hodnoty $1$ z $D_1$ na hraně $(x_1, x_2)$ a u zbylých hran uvádí stavy non-AC / non-AC / AC — sedí. Jak se z téhle diagnózy stane škrtání, je obsah [L6.2].)</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-examcheck">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Zkoušková instance: graf a první diagnóza</strong>
+      <span class="task-src">zdroj: zkouška KO 02.06.2021 (doložena 1. 6. 2026); zadání 1:1, dnešní instrukce vlastní</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Let us consider the CSP problem given by:</p>
+        <ul>
+          <li>variables $X = \{x_1, x_2, x_3\}$;</li>
+          <li>constraints $x_1 = x_2$, $x_2 = x_3 + 1$</li>
+          <li>domains $D_1 = \{1, 2\}$, $D_2 = \{1, 2\}$, $D_3 = \{1, 2\}$.</li>
+        </ul>
+        <p>Reduce the domains to be arc consistent.</p>
+        <p>Record the steps of the algorithm (the queue content prior to the revision of each arc).”</p>
+      </div>
+
+      <p><em>Dnešní (vlastní) instrukce — plné zkouškové řešení s frontou tě čeká v [L6.3]; tady udělej první krok:</em> (i) nakresli graf omezení, (ii) u každé hrany rozhodni, zda je vůči počátečním doménám AC, (iii) u nekonzistentních hran vypiš hodnoty bez podpory.</p>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Zkoušková instance Slotu 6: tři proměnné, všechny domény $\{1,2\}$, omezení $x_1 = x_2$ a $x_2 = x_3 + 1$. Originál chce celý běh AC-3 se záznamem fronty; dnes děláme jen diagnózu konzistence — přesně tu, kterou AC-3 v [L6.3] zmechanizuje.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — graf omezení a definice AC.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Dvě omezení → kolik hran? U rovnosti $x_1 = x_2$ je podpora hodnoty $a$ prostě $b = a$. U $x_2 = x_3 + 1$ si <em>pro každý směr</em> hrany nejdřív napiš vzorec podpory ($b$ jako funkci $a$) — a teprve pak dosazuj; tady se nejsnáz chybuje (viz danger box výše).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — originál řeší celý běh AC-3, viz [L6.3])</summary>
+        <div class="inner">
+          <p><strong>(i) Graf:</strong> hrany $(x_1, x_2), (x_2, x_1)$ pro $x_1 = x_2$ a $(x_2, x_3), (x_3, x_2)$ pro $x_2 = x_3 + 1$ — celkem 4.</p>
+          <div class="viz" id="viz-t02"></div>
+          <p><strong>(ii)+(iii) Diagnóza</strong> (omezení čteme doslovně: $x_2 = x_3 + 1$):</p>
+          <ul>
+            <li>$(x_1, x_2)$: podpora $b = a$; $1 \to 1$ ✓, $2 \to 2$ ✓ → <strong>AC</strong>.</li>
+            <li>$(x_2, x_1)$: symetricky → <strong>AC</strong>.</li>
+            <li>$(x_2, x_3)$: podpora hodnoty $a \in D_2$ je $b = a - 1$; $a{=}1$ potřebuje $b = 0 \notin D_3$ ✗, $a{=}2 \to b = 1$ ✓ → <strong>není AC</strong>, bez podpory $1 \in D_2$.</li>
+            <li>$(x_3, x_2)$: podpora hodnoty $a \in D_3$ je $b = a + 1$; $a{=}1 \to b = 2$ ✓, $a{=}2$ potřebuje $b = 3 \notin D_2$ ✗ → <strong>není AC</strong>, bez podpory $2 \in D_3$.</li>
+          </ul>
+          <p>CSP tedy AC není; škrtat se budou hodnoty $1$ z $D_2$ a $2$ z $D_3$ (a rovnost $x_1 = x_2$ pak strhne i doménu $D_1$ — jak přesně a v jakém pořadí, to je běh AC-3 v [L6.3]).</p>
+          <p><em>Poznámka k dochovanému ručnímu řešení:</em> sken zkoušky škrtá zrcadlové hodnoty ($x_2 = 2$, $x_3 = 1$, $x_1 = 2$; zůstane $x_1 = x_2 = 1$, $x_3 = 2$) — to odpovídá čtení $x_3 = x_2 + 1$, zatímco tištěné zadání říká $x_2 = x_3 + 1$. Na metodě se nemění nic, jen se role hodnot $1$ a $2$ prohodí. U zkoušky čti směr rovnice dvakrát — a klidně si k hraně rovnou napiš vzorec podpory.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L6.1">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k5/l5-14.html"><span class="dir">← Předchozí</span> L5.14 · Referenční tabulka: problém → algoritmus (tahák)</a>
+    <a class="next" href="../index.html#k6"><span class="dir">Další →</span> Pokračování se připravuje (L6.2 · REVISE a redukce domén)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script src="../assets/js/app.js"></script>
+<script>
+// 1 — Propagace na mini-hlavolamu (slidy 19–22): x ≥ y, y > 3
+KOViz.stepper(document.getElementById('viz-prop'), {
+  graph: {
+    directed: false,
+    w: 640, h: 250,
+    nodes: [
+      {id:'x', x:220, y:110, sub:'{3, 4, 5}'},
+      {id:'y', x:420, y:110, sub:'{3, 4, 5}'},
+    ],
+    edges: [
+      {from:'x', to:'y', label:'x ≥ y'},
+    ],
+  },
+  frames: [
+    {desc:'Zadání (slide 19): x ∈ {3,4,5}, y ∈ {3,4,5}, omezení x ≥ y a y > 3. Unární omezení y > 3 do grafu nekreslíme — týká se jen uzlu y.',
+     nodes:{}, edges:{},
+     subs:{x:'{3, 4, 5}', y:'{3, 4, 5}'}},
+    {desc:'Krok 1 (slide 20): propaguj y > 3 — hodnota y = 3 nemůže být v žádném řešení, škrtni. y ∈ {4, 5}.',
+     nodes:{y:'hl'}, edges:{},
+     subs:{x:'{3, 4, 5}', y:'{4, 5}'}},
+    {desc:'Krok 2 (slide 21): propaguj x ≥ y — pro x = 3 neexistuje žádné y ∈ {4,5} s x ≥ y, škrtni. x ∈ {4, 5}.',
+     nodes:{x:'hl'}, edges:{'x->y':'hl'},
+     subs:{x:'{4, 5}', y:'{4, 5}'}},
+    {desc:'Krok 3 (slide 22): „propagation alone is not enough“ — produkt domén pořád obsahuje nepřípustnou kombinaci x = 4, y = 5. Je to jen NADMNOŽINA řešení; zbytek by dořešilo prohledávání. Nás bude dál zajímat samotné filtrování.',
+     nodes:{x:'good', y:'good'}, edges:{},
+     subs:{x:'{4, 5}', y:'{4, 5}'}},
+  ],
+  caption: 'Propagace omezení filtruje domény (slidy 19–22). Řešení jsou (4,4), (5,4), (5,5) — kombinace (4,5) v produktu domén přežila.',
+});
+
+// 2 — Graf omezení instance z přednášky (slide 29: x1 = x2, x2 + 1 = x3, domény {1,2,3})
+KOViz.graph(document.getElementById('viz-digraph'), {
+  directed: true,
+  w: 640, h: 250,
+  nodes: [
+    {id:'x1', x:120, y:110, label:'x₁', sub:'{1, 2, 3}'},
+    {id:'x2', x:320, y:110, label:'x₂', sub:'{1, 2, 3}'},
+    {id:'x3', x:520, y:110, label:'x₃', sub:'{1, 2, 3}'},
+  ],
+  edges: [
+    {from:'x1', to:'x2', curve:0.3, label:'(x₁,x₂)'},
+    {from:'x2', to:'x1', curve:0.3, label:'(x₂,x₁)'},
+    {from:'x2', to:'x3', curve:0.3, label:'(x₂,x₃)'},
+    {from:'x3', to:'x2', curve:0.3, label:'(x₃,x₂)'},
+  ],
+  caption: 'Graf omezení instance z přednášky (slide 29): omezení x₁ = x₂ (levá dvojice hran) a x₂ + 1 = x₃ (pravá dvojice). Každé omezení = DVĚ orientované hrany; mezi x₁ a x₃ omezení není → žádná hrana.',
+});
+
+// 3 — Tři příklady AC pro x1 ≤ x2 (po vzoru slidu 25; domény vlastní volba)
+KOViz.stepper(document.getElementById('viz-ac3ex'), {
+  graph: {
+    directed: true,
+    w: 640, h: 360,
+    nodes: [
+      {id:'a1', x:150, y:50,  label:'x₁', sub:'{2, 3}'},
+      {id:'b1', x:430, y:50,  label:'x₂', sub:'{1, 2}'},
+      {id:'a2', x:150, y:175, label:'x₁', sub:'{2, 3}'},
+      {id:'b2', x:430, y:175, label:'x₂', sub:'{1, 3}'},
+      {id:'a3', x:150, y:300, label:'x₁', sub:'{1, 2}'},
+      {id:'b3', x:430, y:300, label:'x₂', sub:'{2, 3}'},
+    ],
+    edges: [
+      {from:'a1', to:'b1', curve:0.25, label:'(x₁,x₂)'},
+      {from:'b1', to:'a1', curve:0.25},
+      {from:'a2', to:'b2', curve:0.25, label:'(x₁,x₂)'},
+      {from:'b2', to:'a2', curve:0.25},
+      {from:'a3', to:'b3', curve:0.25, label:'(x₁,x₂)'},
+      {from:'b3', to:'a3', curve:0.25},
+    ],
+  },
+  frames: [
+    {desc:'Tři instance ①②③ (shora dolů), všechny s jediným omezením x₁ ≤ x₂, jen s jinými doménami. Rozhodni u každé: které z hran (x₁,x₂) a (x₂,x₁) jsou AC? (Horní oblouk = (x₁,x₂), dolní = (x₂,x₁).)',
+     nodes:{}, edges:{}},
+    {desc:'Řešení: ① žádná hrana AC (3 ∈ D₁ nemá podporu ≥ 3; 1 ∈ D₂ nemá podporu ≤ 1). ② jen (x₁,x₂) AC — orientovanost naživo: (x₂,x₁) kazí hodnota 1 ∈ D₂. ③ obě hrany AC → tahle instance je arc consistent celá.',
+     nodes:{},
+     edges:{'a1->b1':'bad', 'b1->a1':'bad', 'a2->b2':'good', 'b2->a2':'bad', 'a3->b3':'good', 'b3->a3':'good'}},
+  ],
+  caption: 'Tři příklady pro x₁ ≤ x₂ (po vzoru slidu 25 — „no arc is AC / only (x₁,x₂) is AC / both arcs are AC“; domény vlastní volba). Zelená = AC, červená = non-AC.',
+});
+
+// 4 — T01: graf omezení instance slidu 27
+KOViz.graph(document.getElementById('viz-t01'), {
+  directed: true,
+  w: 640, h: 250,
+  nodes: [
+    {id:'x1', x:120, y:110, label:'x₁', sub:'{1, 2, 3}'},
+    {id:'x2', x:320, y:110, label:'x₂', sub:'{1, 2, 3}'},
+    {id:'x3', x:520, y:110, label:'x₃', sub:'{2, 3}'},
+  ],
+  edges: [
+    {from:'x1', to:'x2', curve:0.3, label:'x₁ > x₂'},
+    {from:'x2', to:'x1', curve:0.3},
+    {from:'x2', to:'x3', curve:0.3, label:'x₂ ≠ x₃, x₂+x₃ > 4'},
+    {from:'x3', to:'x2', curve:0.3},
+  ],
+  caption: 'T01: 3 omezení, ale jen 4 hrany — obě omezení nad {x₂, x₃} sdílejí stejnou dvojici hran (podpora musí splnit obě najednou).',
+});
+
+// 5 — T02: graf omezení zkouškové instance 02.06.2021
+KOViz.graph(document.getElementById('viz-t02'), {
+  directed: true,
+  w: 640, h: 250,
+  nodes: [
+    {id:'x1', x:120, y:110, label:'x₁', sub:'{1, 2}'},
+    {id:'x2', x:320, y:110, label:'x₂', sub:'{1, 2}'},
+    {id:'x3', x:520, y:110, label:'x₃', sub:'{1, 2}'},
+  ],
+  edges: [
+    {from:'x1', to:'x2', curve:0.3, label:'x₁ = x₂'},
+    {from:'x2', to:'x1', curve:0.3},
+    {from:'x2', to:'x3', curve:0.3, label:'x₂ = x₃ + 1'},
+    {from:'x3', to:'x2', curve:0.3},
+  ],
+  caption: 'T02: graf omezení zkouškové instance — 2 omezení → 4 orientované hrany; mezi x₁ a x₃ hrana není.',
+});
+</script>
+</body>
+</html>
