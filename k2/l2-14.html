@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.14 · Floyd-Warshall (all-pairs) + nejdelší cesty — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.14</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.14</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[NICE]</strong> <em>(při časové tísni odložitelná)</em>
+  </p>
+  <h1>Floyd-Warshall (all-pairs) + nejdelší cesty</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    Místo vektoru vzdáleností z jednoho zdroje celá <strong>matice vzdáleností mezi všemi dvojicemi</strong> vrcholů najednou: Floydův algoritmus iteruje přes <strong>mezilehlý vrchol $k$</strong> — $l^k_{ij} = \min\{l^{k-1}_{ij},\ l^{k-1}_{ik} + l^{k-1}_{kj}\}$, celkem $\mathcal{O}(n^3)$.
+  </div>
+
+  <p>Všechny dosavadní algoritmy — Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a>, Bellman-Ford <a href="l2-12.html#takeaways">[L2.12]</a>, průchod DAGem <a href="l2-13.html#takeaways">[L2.13]</a> — řeší variantu <em>single-source</em>: vektor $l(\cdot)$ vzdáleností z jednoho zdroje $s$. Už v <a href="l2-1.html">[L2.1]</a> ale padla i varianta <strong>all-pairs</strong> (mezi všemi dvojicemi) — tu potřebuješ např. pro lokační úlohy („kam postavit hasičskou stanici?“, slide 47) nebo pro hledání nejkratšího cyklu v grafu.</p>
+
+  <details class="try">
+    <summary>Zkus sám: jak spočítat vzdálenosti mezi <em>všemi</em> dvojicemi tím, co už umíš? S jakou složitostí?</summary>
+    <div class="inner">
+      <p>Pusť single-source algoritmus z každého vrcholu: $n\times$ Dijkstra dá $\mathcal{O}(n \cdot n^2) = \mathcal{O}(n^3)$ — ale jen pro $c \ge 0$ <a href="l2-4.html#takeaways">[L2.4]</a>. Se zápornými hranami $n\times$ Bellman-Ford: $\mathcal{O}(n \cdot nm)$, pro husté grafy ($m \approx n^2$) až $\mathcal{O}(n^4)$.</p>
+      <p>Floyd zvládne totéž v $\mathcal{O}(n^3)$ <strong>i se zápornými hranami</strong> (bez záporných cyklů <a href="l2-1.html#takeaways">[L2.1]</a>) — a s pseudokódem o třech řádcích smyček.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 1 ===== -->
+  <h2>Nápad: povolené mezilehlé vrcholy</h2>
+
+  <details class="try">
+    <summary>Zkus sám: Bellman-Ford „rostl“ přes počet hran cesty (intuice $k$-tého průchodu <a href="l2-12.html#takeaways">[L2.12]</a>). Přes jaký jiný parametr by mohla růst dynamika pro všechny dvojice?</summary>
+    <div class="inner">
+      <p>Očísluj vrcholy $1, \ldots, n$ a omezuj, <strong>kudy</strong> smí cesta vést: $l^k_{ij}$ = délka nejkratší cesty $i \to j$, která smí jako <em>mezilehlé</em> (vnitřní) vrcholy použít jen vrcholy z množiny $\{1, \ldots, k\}$. Pro $k=0$ nejsou povoleny žádné mezilehlé vrcholy — zbývají přímé hrany, takže $l^0$ = matice vah. Pro $k=n$ je povoleno všechno — $l^n$ je hledaná matice vzdáleností.</p>
+      <p>A přechod $k-1 \to k$? Nejkratší cesta s povolenými $\{1,\ldots,k\}$ buď vrchol $k$ <em>nepoužije</em> (pak je to rovnou $l^{k-1}_{ij}$), nebo ho použije <strong>právě jednou</strong> — a rozpadne se na úsek $i \to k$ a úsek $k \to j$, oba jen přes $\{1,\ldots,k-1\}$.</p>
+    </div>
+  </details>
+
+  <div class="box">
+    <div class="box-title">Floyd Algorithm — slide 44, 1:1</div>
+    <ul>
+      <li>initialize matrix $l^0$ by the weights of the edges</li>
+      <li>computes the sequence of matrices $l^0, l^1, l^2, \cdots, l^k, \cdots, l^n$ where:
+        <ul><li>$l^k_{ij}$ is the length of the shortest path from $i$ to $j$ such that with the exception of $i, j$ it goes only through nodes from the set $\{1, 2, \cdots k\}$</li></ul></li>
+      <li>one can easily compute matrix $l^k$ from matrix $l^{k-1}$:
+        $$l^k_{ij} = \min\{l^{k-1}_{ij},\ l^{k-1}_{ik} + l^{k-1}_{kj}\}$$</li>
+    </ul>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: proč smíme předpokládat, že cesta použije vrchol $k$ nejvýš jednou? A nerozbije se rekurence tím, že matici přepisujeme „na místě“?</summary>
+    <div class="inner">
+      <p><strong>Nejvýš jednou:</strong> kdyby sled prošel vrcholem $k$ dvakrát, obsahuje mezi oběma návštěvami cyklus přes $k$. Bez záporných cyklů má ten cyklus délku $\ge 0$, takže jeho vystřižení sled nezhorší <a href="l2-1.html#takeaways">[L2.1]</a> — minimum se vždy realizuje i bez opakování.</p>
+      <p><strong>Přepis na místě:</strong> pseudokód níže nedrží dvě matice, přepisuje jedinou. To je v pořádku, protože položky, které iterace $k$ čte ($l_{ik}$ a $l_{kj}$), se v ní samy nemění: $l_{ik} \le l_{ik} + l_{kk} = l_{ik} + 0$ (a stejně pro $l_{kj}$) — řádek a sloupec $k$ jsou v iteraci $k$ stabilní.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 2 ===== -->
+  <h2>Algoritmus</h2>
+
+  <div class="box">
+    <div class="box-title">Floyd Algorithm [1962] (Warshall [1962]) — slide 43, 1:1</div>
+    <p><strong>Input:</strong> a digraph $G$ free of negative cycles and weights $c : E(G) \to \mathbb{R}$.<br>
+    <strong>Output:</strong> matrices $l$ and $p$, where $l_{ij}$ is the length of the shortest path from $i$ to $j$, $p_{ij}$ is the last but one node on such a path (if it exists).</p>
+    <pre><code>l_ij := c((i, j)) for all (i, j) ∈ E(G);
+l_ij := ∞ for all (i, j) ∉ E(G) where i ≠ j;
+l_ii := 0 for all i;
+p_ij := i for all (i, j);
+for k := 1 to n do                  // for all k check if l_ij improves
+    for i := 1 to n do
+        for j := 1 to n do
+            if l_ij &gt; l_ik + l_kj then
+                l_ij := l_ik + l_kj; p_ij := p_kj;
+            end
+        end
+    end
+end</code></pre>
+  </div>
+
+  <p>Vnitřní <code>if</code> je stará známá relaxace <a href="l2-3.html#takeaways">[L2.3]</a> — jen místo hrany $(v,w)$ relaxujeme „zkratku přes $k$“ a místo jednoho vektoru $l(\cdot)$ opravujeme celou matici. Floyd je <strong>label-correcting</strong> <a href="l2-4.html">[L2.4]</a>: všechny položky jsou dočasné až do konce běhu.</p>
+
+  <details class="try">
+    <summary>Zkus sám: proč se při zlepšení nastavuje $p_{ij} := p_{kj}$, a ne třeba $p_{ij} := k$?</summary>
+    <div class="inner">
+      <p>$p_{ij}$ má být <em>předposlední vrchol</em> cesty $i \to j$ (výstupní specifikace). Nová cesta je $i \rightsquigarrow k \rightsquigarrow j$ — končí stejně jako úsek $k \rightsquigarrow j$, a jeho předposlední vrchol známe: $p_{kj}$. Vrchol $k$ je jen <em>někde uvnitř</em>, předposlední být nemusí. (Inicializace $p_{ij} := i$ sedí: přímá hrana $(i,j)$ má předposlední vrchol $i$.) Cestu pak rekonstruuješ couváním po řádku… pozor, po <strong>sloupcích</strong>: $j$, $p_{ij}$, $p_{i,p_{ij}}$, … až dojdeš do $i$ — stejné couvání jako u vektoru $p(\cdot)$ <a href="l2-3.html#takeaways">[L2.3]</a>, jen v řádku $i$ matice.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 3 ===== -->
+  <h2>Běh krok za krokem</h2>
+
+  <p>Malý digraf se zápornou hranou a cykly (Dijkstra by se spálil, DAG-průchod nelze spustit — graf má cykly). Sleduj, jak se s rostoucím $k$ „otevírají“ nové zkratky:</p>
+
+  <div class="viz" id="viz-run"></div>
+
+  <details class="try">
+    <summary>Zkus sám: proč se sloupec 1 (cesty <em>do</em> vrcholu 1) zlepšil až v poslední iteraci $k=4$?</summary>
+    <div class="inner">
+      <p>Do vrcholu 1 vede jediná hrana — $(4,1)$. Každá cesta do 1 tedy končí přes mezilehlý vrchol 4, a ten se „povolil“ až v iteraci $k=4$. Pořadí číslování vrcholů ovlivňuje <em>kdy</em> se která hodnota objeví, ne výsledek — $l^n$ vyjde stejně pro libovolné očíslování.</p>
+    </div>
+  </details>
+
+  <!-- ===== SEKCE 4 ===== -->
+  <h2>Složitost, záporné cykly a minimální cyklus</h2>
+
+  <div class="box">
+    <div class="box-title">Floyd Algorithm — Complexity and Properties — slide 45, 1:1</div>
+    <p>The best known algorithm for <strong>All Pairs Shortest Path</strong> problem without negative cycles.</p>
+    <ul>
+      <li>Time complexity $\mathcal{O}(n^3)$.</li>
+      <li>A graph contains a <strong>negative cycle</strong> iff (i.e. if and only if) there exists $i$ such that $l_{ii} &lt; 0$.</li>
+      <li>By a small modification of the algorithm, where $l^0_{ii}$ is set to $\infty$, one can find the nonnegative <strong>minimal weight cycle</strong> — see the diagonal in the next example. Then the value of $l^n_{ii}$ should not be interpreted as a distance.</li>
+    </ul>
+    <p><strong>Johnson's Algorithm</strong> is better suited for the sparse graphs — uses Dijkstra and Bellman-Ford, complexity $\mathcal{O}(|V| \cdot |E| \cdot \log |V|)$ (in the simplest case).</p>
+  </div>
+
+  <details class="try">
+    <summary>Zkus sám: proč $l_{ii} &lt; 0$ právě tehdy, když graf má záporný cyklus?</summary>
+    <div class="inner">
+      <p>($\Leftarrow$) Záporný cyklus prochází nějakým vrcholem $i$ a jeho mezilehlé vrcholy jsou nějaká podmnožina $\{1,\ldots,n\}$ — po poslední iteraci je tedy $l_{ii} \le$ délka cyklu $&lt; 0$ (start na diagonále byl $0$ a relaxace hodnoty jen snižují).</p>
+      <p>($\Rightarrow$) Hodnota $l_{ii} &lt; 0$ vznikla skládáním hran — popisuje uzavřený sled z $i$ do $i$ se zápornou délkou, a ten musí obsahovat záporný cyklus <a href="l2-1.html#takeaways">[L2.1]</a>. Stejný „lakmusový papírek“ jako $n$-tý průchod Bellman-Forda <a href="l2-12.html#takeaways">[L2.12]</a>, tady zadarmo na diagonále. Pozor ale: když $l_{ii} &lt; 0$ nastane, <em>žádná</em> z hodnot $l$ už nejsou vzdálenosti — se záporným cyklem nejkratší cesty nejsou definované.</p>
+    </div>
+  </details>
+
+  <p>Trik s diagonálou $l^0_{ii} := \infty$ stojí za zapamatování — přesně tohle chtěla písemka („z výsledku vyčíst minimální cyklus“, viz úloha T02). Diagonála pak místo nul obsahuje délky <strong>nejkratších cyklů</strong> přes jednotlivé vrcholy. Příklad ze slidu 46 (s touto modifikací):</p>
+
+  <div class="viz" id="viz-s46"></div>
+
+  <p>Matice ze slidu 46, 1:1 — vlevo inicializace ($\infty$ i na diagonále!), uprostřed výsledné $l$, vpravo $p$:</p>
+
+  $$
+  l^0 = \begin{pmatrix}
+  \infty & 3 & \infty & \infty & 4 \\
+  \infty & \infty & \infty & 2 & 2 \\
+  \infty & -5 & \infty & \infty & \infty \\
+  \infty & \infty & 4 & \infty & \infty \\
+  6 & -2 & 6 & 0 & \infty
+  \end{pmatrix}
+  \qquad
+  l = \begin{pmatrix}
+  10 & 2 & 8 & 4 & 4 \\
+  8 & 0 & 6 & 2 & 2 \\
+  3 & -5 & 1 & -3 & -3 \\
+  7 & -1 & 4 & 1 & 1 \\
+  6 & -2 & 4 & 0 & 0
+  \end{pmatrix}
+  \qquad
+  p = \begin{pmatrix}
+  5 & 5 & 4 & 5 & 1 \\
+  5 & 5 & 4 & 2 & 2 \\
+  5 & 3 & 4 & 2 & 2 \\
+  5 & 3 & 4 & 2 & 2 \\
+  5 & 5 & 4 & 5 & 2
+  \end{pmatrix}
+  $$
+
+  <details class="try">
+    <summary>Zkus sám: přečti z diagonály $l$ nejkratší cyklus v grafu. Přes který vrchol vede a kudy?</summary>
+    <div class="inner">
+      <p>Diagonála je $(10, 0, 1, 1, 0)$ — minimum $0$ u vrcholů 2 a 5: nejkratší cyklus má délku $0$ a je to $2 \to 5 \to 2$ ($2 + (-2) = 0$). Rekonstrukce přes $p$: $p_{22} = 5$ → cyklus končí hranou $(5,2)$; $p_{25} = 2$ → úsek $2 \to 5$ je přímá hrana. Hodnoty $1$ u vrcholů 3 a 4 patří cyklu $4 \to 3 \to 2 \to 4$ ($4 - 5 + 2 = 1$), hodnota $10$ u vrcholu 1 cyklu $1 \to 5 \to 1$. A protipóly: kdyby na diagonále vyšlo záporné číslo, máš v grafu záporný cyklus.</p>
+      <p><em>(Studentská poznámka z testu 2014: „Hlavní je dát v tý úvodní matici pro Floyda na diagonálu nekonečna místo nul, pak člověk rovnou vyřeší i otázku b.“ — přesně tenhle trik.)</em></p>
+    </div>
+  </details>
+
+  <p>K čemu se celá matice hodí, ukazuje hned další slide (47, Location of Fire Station): stanici postav do vrcholu $i$ minimalizujícího $\max_j l_{ij}$ — bez all-pairs matice se minimax lokační úloha řeší těžko. A poznámka ke zkoušce: na rozdíl od Dijkstry a Bellman-Forda (důkazy v kapitole K3) se <strong>korektnost Floyda na slidech plně nedokazuje</strong> — uč se hlavně <em>běh</em> (matice po iteracích), ne důkaz.</p>
+
+  <!-- ===== SEKCE 5 ===== -->
+  <h2>Nejdelší cesty: vynásob váhy −1</h2>
+
+  <details class="try">
+    <summary>Zkus sám: písemka chce <em>nejdelší</em> cesty mezi všemi dvojicemi. Jak na to s Floydem — a kdy to smíš udělat?</summary>
+    <div class="inner">
+      <p>Stejný trik jako u DAGu <a href="l2-13.html#takeaways">[L2.13]</a>: <strong>vynásob všechny váhy $-1$</strong>, pusť Floyda beze změny a výsledek vynásob $-1$ zpátky ($q_{ij} = -l_{ij}$). Maximum v $c$ je minimum v $-c$.</p>
+      <p>Smíš to, jen když negovaný graf splní vstupní podmínku Floyda („free of negative cycles“) — tedy když původní graf <strong>nemá kladný cyklus</strong>. Kolem kladného cyklu by se dala délka „nabalovat“ donekonečna a nejdelší <em>cesta</em> (bez opakování vrcholů) se stává NP-těžkým problémem (podrobně v lekci [L2.17]). Záporné cykly v původním grafu naopak nevadí — po negaci jsou kladné.</p>
+      <p>Ze studentského souhrnu (přepis): <em>„Varianta pre najdlhšiu cestu = ceny hrán vynásobíš $-1$ a klasicky pokračuješ.“</em></p>
+    </div>
+  </details>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: tři polopravdy kolem Floyda</div>
+    <ul>
+      <li><strong>„Na diagonálu patří vždycky 0.“</strong> Jen když chceš vzdálenosti. Když máš z výsledku číst <strong>minimální cyklus</strong>, inicializuj $l^0_{ii} := \infty$ — a pak naopak $l^n_{ii}$ <em>není</em> vzdálenost (slide 45). Přečti si zadání, kterou variantu chce.</li>
+      <li><strong>„×(−1) pro nejdelší cesty funguje vždy.“</strong> Jen bez kladných cyklů v původním grafu — jinak negace vyrobí záporné cykly, vstupní podmínka Floyda padá a nejdelší cesta je NP-těžká [L2.17].</li>
+      <li><strong>„Vyšlo $l_{ii} &lt; 0$, ostatní hodnoty ale platí.“</strong> Neplatí — záporný cyklus znehodnocuje všechny dvojice, které přes něj dosáhnou <a href="l2-1.html#takeaways">[L2.1]</a>; Floyd ho umí <em>detekovat</em>, ne obejít.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.14</div>
+    <ul>
+      <li><strong>Floyd-Warshall (all-pairs SP):</strong> $l^k_{ij} = \min\{l^{k-1}_{ij},\ l^{k-1}_{ik} + l^{k-1}_{kj}\}$ pro $k = 1, \ldots, n$; $l^k_{ij}$ = nejkratší cesta $i \to j$ s mezilehlými vrcholy jen z $\{1,\ldots,k\}$. Tři vnořené smyčky, $\mathcal{O}(n^3)$, záporné hrany nevadí (vstup: bez záporných cyklů).</li>
+      <li><strong>Inicializace:</strong> $l^0_{ij} = c((i,j))$ na hranách, $\infty$ mimo hrany, $0$ na diagonále; $p_{ij} := i$. Při zlepšení $p_{ij} := p_{kj}$ (předposlední vrchol úseku $k \rightsquigarrow j$).</li>
+      <li><strong>Diagonála:</strong> $l_{ii} &lt; 0$ ⟺ graf má záporný cyklus. Varianta $l^0_{ii} := \infty$ najde <strong>minimální (nezáporný) cyklus</strong> — pak $l^n_{ii}$ není vzdálenost.</li>
+      <li><strong>Nejdelší cesty:</strong> váhy ×$(-1)$ → Floyd → výsledek ×$(-1)$; legální jen bez kladných cyklů v původním grafu (jinak NP-těžké, [L2.17]).</li>
+      <li>Floyd na slidech <em>není</em> plně dokázán — zkouškově je to běh (matice po iteracích), ne důkaz.</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-floyd-longest">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Longest paths (all-to-all, Floyd)</strong>
+      <span class="task-src">zdroj: teoreticky_test_final.md strana 3 (EN 1:1 vč. grafu); týž typ úlohy hlásí banka #13 a přepisy testů 2011/12, 2013/14 („graf o 4 uzlech… výsledek byly 4 matice“); řešení vlastní (zdroj řešení nemá)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>Using Floyd's algorithm calculate square matrix $q$, where $q_{ij}$ is the length of the <strong>longest path</strong> from vertex $i$ to vertex $j$ (you do not need to calculate matrix of predecessors $p$). Indicate the steps of the algorithm (values of matrix $l$ for 4 iterations of the main loop).</p>
+      </div>
+
+      <div class="viz" id="viz-t01"></div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Digraf o 4 vrcholech (i se zápornými hranami) a chce se matice <em>nejdelších</em> cest mezi všemi dvojicemi. Odevzdat se mají mezivýsledky: matice $l$ po každé ze 4 iterací hlavní smyčky (matici $p$ zadání výslovně odpouští).</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — inicializace, rekurence $l^k_{ij}$, trik ×$(-1)$ pro nejdelší cesty.</li>
+        <li><a href="l2-1.html#takeaways">[L2.1] Záporné váhy ano, záporné cykly ne</a> — kontrola cyklů před spuštěním.</li>
+        <li><a href="l2-13.html#takeaways">[L2.13] SP v DAG</a> — trik ×$(-1)$ už známe z nejdelších cest v DAGu.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Nejdřív legálnost: najdi všechny cykly grafu a ověř, že žádný není <em>kladný</em> (jinak ×$(-1)$ vyrobí záporné cykly a Floyd nesmí běžet). Pak otoč znaménka vah, sestav $l^0$ (diagonála $0$ — zadání chce délky cest, ne cyklů) a poctivě veď 4 iterace: v iteraci $k$ zkoušej pro každou dvojici $(i,j)$ zkratku $l_{ik} + l_{kj}$. Prakticky: nekonečna se kombinují na nekonečno, takže stačí projít konečné položky sloupce $k$ a řádku $k$. Nakonec $q = -l^4$ — a rozmysli si, co znamená $\infty$ v $l$ pro $q$.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní)</summary>
+        <div class="inner">
+          <p><strong>Kontrola cyklů.</strong> Jediný cyklus grafu je $T_1 \to T_2 \to T_1$ s délkou $2 + (-4) = -2 &lt; 0$ — kladný cyklus neexistuje, trik ×$(-1)$ je legální (po negaci má cyklus délku $+2 \ge 0$).</p>
+          <p><strong>Negace vah a inicializace.</strong> Hrany negovaného grafu: $(T_1,T_2) = -2$, $(T_2,T_1) = 4$, $(T_2,T_3) = -1$, $(T_3,T_4) = 1$, $(T_1,T_4) = -2$. Diagonála $0$, jinde $\infty$:</p>
+          $$
+          l^0 = \begin{pmatrix} 0 & -2 & \infty & -2 \\ 4 & 0 & -1 & \infty \\ \infty & \infty & 0 & 1 \\ \infty & \infty & \infty & 0 \end{pmatrix}
+          $$
+          <p><strong>Iterace</strong> (v každé jen konečné kombinace $l_{ik} + l_{kj}$; zlepšení tučně):</p>
+          <p>$k=1$: jediná konečná položka sloupce 1 mimo diagonálu je $l_{21} = 4$; zkratky $2 \to 1 \to j$: $l_{24} = \min\{\infty,\ 4 + (-2)\} = \mathbf{2}$ (a $l_{22}$: $4 - 2 = 2 \not&lt; 0$).</p>
+          $$
+          l^1 = \begin{pmatrix} 0 & -2 & \infty & -2 \\ 4 & 0 & -1 & \mathbf{2} \\ \infty & \infty & 0 & 1 \\ \infty & \infty & \infty & 0 \end{pmatrix}
+          $$
+          <p>$k=2$: zkratky přes $T_2$ z řádku 1: $l_{13} = \min\{\infty,\ -2 + (-1)\} = \mathbf{-3}$; dále $l_{11}$: $-2 + 4 = 2 \not&lt; 0$, $l_{14}$: $-2 + 2 = 0 \not&lt; -2$.</p>
+          $$
+          l^2 = \begin{pmatrix} 0 & -2 & \mathbf{-3} & -2 \\ 4 & 0 & -1 & 2 \\ \infty & \infty & 0 & 1 \\ \infty & \infty & \infty & 0 \end{pmatrix}
+          $$
+          <p>$k=3$: zkratky přes $T_3$ (sloupec 3: $-3, -1$; řádek 3: $l_{34} = 1$): $l_{24} = \min\{2,\ -1 + 1\} = \mathbf{0}$; $l_{14}$: $-3 + 1 = -2$ — <em>remíza</em> s dosavadní hodnotou, ostrý test ($&gt;$) nic nemění.</p>
+          $$
+          l^3 = \begin{pmatrix} 0 & -2 & -3 & -2 \\ 4 & 0 & -1 & \mathbf{0} \\ \infty & \infty & 0 & 1 \\ \infty & \infty & \infty & 0 \end{pmatrix}
+          $$
+          <p>$k=4$: z $T_4$ nevede žádná hrana → celý řádek 4 je $\infty$ (mimo diagonálu) a žádná zkratka $l_{i4} + l_{4j}$ není konečná: $l^4 = l^3$.</p>
+          <p><strong>Zpětná negace</strong> $q_{ij} = -l^4_{ij}$ (pro $l = \infty$ cesta $i \to j$ neexistuje — značíme „—“, nikoliv $-\infty$ jako délku):</p>
+          $$
+          q = \begin{pmatrix} 0 & 2 & 3 & 2 \\ -4 & 0 & 1 & 0 \\ \text{—} & \text{—} & 0 & -1 \\ \text{—} & \text{—} & \text{—} & 0 \end{pmatrix}
+          $$
+          <p><strong>Kontrola</strong> vyčerpáním cest: $q_{14}$: přímo $2$, nebo $T_1 \to T_2 \to T_3 \to T_4 = 2 + 1 - 1 = 2$ — shodně $2$ ✓; $q_{24}$: $T_2 \to T_3 \to T_4 = 0$ vs. $T_2 \to T_1 \to T_4 = -2$ → $0$ ✓; $q_{13} = 2 + 1 = 3$ ✓. Diagonála $q_{ii} = 0$ = prázdná cesta (kdyby tě zajímal nejdelší <em>cyklus</em>, použiješ variantu $l^0_{ii} := \infty$ na negovaném grafu — vyšlo by $q_{11} = q_{22} = -2$, cyklus $T_1 \to T_2 \to T_1$).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <p>Krokovaný běh řešení T01 (pozor, spoiler — nejdřív si veď matice sám na papír):</p>
+  <div class="viz" id="viz-t01run"></div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-floyd-cycle">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Floyd — minimální cyklus z diagonály</strong>
+      <span class="task-src">zdroj: zkouška 31.5.2011 („Floyd, nalézt nenulový minimální cyklus“ — dochován jen CZ titulek, obrázek ne) + přepisy testů 2011/12, 2013/14 („z toho jsme měli vyčíst minimální kružnici“); EN znění rekonstrukce vlastní, instance = příklad ze slidu 46 (matice 1:1 ze slidu), řešení vlastní</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (EN — vlastní rekonstrukce, originál se nedochoval)</span>
+        <p>Consider the digraph from slide 46 (drawn above in this lesson). Run Floyd's algorithm with the modified initialization $l^0_{ii} := \infty$. (a) Give the initialization of matrices $l$ and $p$. (b) From the resulting matrices read the minimum weight cycle and the minimum <em>nonzero</em> weight cycle; reconstruct the cycles using matrix $p$.</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Běh Floyda ve variantě „hledám cyklus“: na diagonále inicializace nejsou nuly, ale $\infty$. Z výsledné diagonály se má vyčíst nejlevnější cyklus (a nejlevnější s nenulovou váhou — formulace „nenulový“ z dochovaného titulku připouští obě čtení, vyřešíme obě) a přes matici $p$ ho zrekonstruovat.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — varianta $l^0_{ii} := \infty$ (slide 45), čtení matice $p$ couváním po sloupcích.</li>
+        <li><a href="l2-1.html#takeaways">[L2.1]</a> — co by znamenalo záporné číslo na diagonále.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>S $l^0_{ii} = \infty$ se diagonální položka může zaplnit jen „oklikou“ $i \rightsquigarrow k \rightsquigarrow i$ — tedy skutečným cyklem; $l_{ii}$ je po doběhu délka nejkratšího cyklu přes vrchol $i$. Minimální cyklus grafu = minimum diagonály. Rekonstrukce: $p_{ii}$ dá poslední hranu cyklu, pak couvej v řádku $i$: $p_{i,p_{ii}}$ atd., dokud se nevrátíš do $i$. Pamatuj, že $l^n_{ii}$ teď <em>není</em> vzdálenost (slide 45).</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní; matice $l$, $p$ převzaty 1:1 ze slidu 46)</summary>
+        <div class="inner">
+          <p><strong>(a) Inicializace:</strong> $l^0$ přesně jak je uvedeno u slidu 46 výše — váhy hran, $\infty$ mimo hrany <em>a $\infty$ i na diagonále</em>; $p_{ij} := i$ pro všechna $(i,j)$.</p>
+          <p><strong>(b) Čtení diagonály</strong> výsledné matice $l$ (viz výše): $\operatorname{diag}(l) = (10,\ 0,\ 1,\ 1,\ 0)$. Záporné číslo na diagonále není → graf nemá záporný cyklus a hodnoty jsou délky nejkratších cyklů přes jednotlivé vrcholy.</p>
+          <ul>
+            <li><strong>Minimální cyklus:</strong> váha $0$ (vrcholy 2 a 5). Rekonstrukce z řádku 2: $p_{22} = 5$ → poslední hrana $(5,2)$; $p_{25} = 2$ → úsek $2 \to 5$ je přímá hrana. Cyklus $2 \to 5 \to 2$, váha $2 + (-2) = 0$ ✓.</li>
+            <li><strong>Minimální nenulový cyklus:</strong> váha $1$ (vrcholy 3 a 4). Z řádku 4: $p_{44} = 2$ → poslední hrana $(2,4)$; $p_{42} = 3$ → před ní hrana $(3,2)$; $p_{43} = 4$ → úsek $4 \to 3$ je přímá hrana. Cyklus $4 \to 3 \to 2 \to 4$, váha $4 + (-5) + 2 = 1$ ✓ (z řádku 3 vyjde tentýž cyklus posunutý: $3 \to 2 \to 4 \to 3$).</li>
+            <li>Pro úplnost vrchol 1: $l_{11} = 10$ = cyklus $1 \to 5 \to 1$ ($4 + 6$) — nejdražší „nejlevnější cyklus přes vrchol“.</li>
+          </ul>
+          <p><strong>Pozor na interpretaci:</strong> $l_{55} = 0$ neznamená „vzdálenost z 5 do 5 je nula“ ve smyslu prázdné cesty — s touto inicializací je to délka skutečného cyklu $5 \to 2 \to 5$. Přesně proto slide 45 varuje, že $l^n_{ii}$ se nemá číst jako vzdálenost.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <label class="done-toggle" data-lesson-id="L2.14">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k2/l2-13.html"><span class="dir">← Předchozí</span> L2.13 · SP v DAG v O(V+E)</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.15 · Skalování vah a zachování nejkratší cesty)</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// ---- pomocník: HTML tabulka matice do popisku stepperu (KaTeX se v dynamickém obsahu nerenderuje) ----
+function fwMat(name, rows, hl, labels) {
+  hl = hl || [];
+  const n = rows.length;
+  const lab = labels || rows.map((_, i) => String(i + 1));
+  let s = '<table style="width:auto;display:inline-table;vertical-align:middle;margin:8px 16px 2px 0;font-size:13px;line-height:1.25">';
+  s += '<tr><th style="padding:2px 8px;text-align:center">' + name + '</th>';
+  for (let j = 0; j < n; j++) s += '<th style="padding:2px 8px;text-align:center">' + lab[j] + '</th>';
+  s += '</tr>';
+  for (let i = 0; i < n; i++) {
+    s += '<tr><th style="padding:2px 8px;text-align:center">' + lab[i] + '</th>';
+    for (let j = 0; j < n; j++) {
+      const v = rows[i][j];
+      const isHl = hl.some(c => c[0] === i + 1 && c[1] === j + 1);
+      s += '<td style="padding:2px 8px;text-align:center;min-width:30px;background:none">'
+        + (isHl ? '<strong style="color:var(--accent)">' + v + '</strong>' : v) + '</td>';
+    }
+    s += '</tr>';
+  }
+  return s + '</table>';
+}
+const INF = '∞';
+
+// ---- Běh Floyda na vlastním 4-uzlovém příkladu ----
+const FW4 = {
+  directed: true, w: 640, h: 360, nodeR: 20,
+  nodes: [
+    { id: '1', x: 140, y: 80,  label: '1' },
+    { id: '2', x: 500, y: 80,  label: '2' },
+    { id: '3', x: 500, y: 290, label: '3' },
+    { id: '4', x: 140, y: 290, label: '4' },
+  ],
+  edges: [
+    { from: '1', to: '2', label: '2' },
+    { from: '2', to: '3', label: '−1' },
+    { from: '1', to: '3', label: '4', curve: 0.6 },
+    { from: '2', to: '4', label: '5', curve: 0.6 },
+    { from: '3', to: '4', label: '3' },
+    { from: '4', to: '1', label: '1' },
+  ],
+};
+KOViz.stepper(document.getElementById('viz-run'), {
+  graph: FW4,
+  frames: [
+    {
+      desc: 'Inicializace (k=0): l⁰ = matice vah — c((i,j)) na hranách, ∞ mimo hrany, 0 na diagonále; p⁰<sub>ij</sub> = i. Řádek = odkud, sloupec = kam. Graf má cykly (1→2→3→4→1 délky 5 aj.), ale žádný záporný — vstupní podmínka splněna.<br>'
+        + fwMat('l⁰', [['0','2','4',INF],[INF,'0','−1','5'],[INF,INF,'0','3'],['1',INF,INF,'0']]),
+    },
+    {
+      nodes: { 1: 'hl' },
+      desc: 'k=1: cesty nově smí procházet vrcholem 1. Do vrcholu 1 vede jen hrana (4,1) → zlepšit se může jen řádek 4: l₄₂ ← l₄₁+l₁₂ = 1+2 = 3 (p₄₂ ← p₁₂ = 1), l₄₃ ← 1+4 = 5 (p₄₃ ← 1).<br>'
+        + fwMat('l¹', [['0','2','4',INF],[INF,'0','−1','5'],[INF,INF,'0','3'],['1','3','5','0']], [[4,2],[4,3]]),
+    },
+    {
+      nodes: { 2: 'hl' },
+      desc: 'k=2: přes vrchol 2. l₁₃ ← l₁₂+l₂₃ = 2+(−1) = 1 — záporná hrana podlezla přímou hranu 4 (p₁₃ ← p₂₃ = 2); l₁₄ ← 2+5 = 7; l₄₃ ← 3+(−1) = 2.<br>'
+        + fwMat('l²', [['0','2','1','7'],[INF,'0','−1','5'],[INF,INF,'0','3'],['1','3','2','0']], [[1,3],[1,4],[4,3]]),
+    },
+    {
+      nodes: { 3: 'hl' },
+      desc: 'k=3: přes vrchol 3 — a díky l² i přes dvojici {2,3} najednou: l₁₄ ← l₁₃+l₃₄ = 1+3 = 4 (cesta 1→2→3→4); l₂₄ ← −1+3 = 2.<br>'
+        + fwMat('l³', [['0','2','1','4'],[INF,'0','−1','2'],[INF,INF,'0','3'],['1','3','2','0']], [[1,4],[2,4]]),
+    },
+    {
+      nodes: { 4: 'hl' },
+      desc: 'k=4: vrchol 4 konečně zpřístupní jedinou hranu „zpět“ (4,1) — zaplní se sloupec 1: l₂₁ ← l₂₄+l₄₁ = 2+1 = 3, l₃₁ ← 3+1 = 4, l₃₂ ← l₃₄+l₄₂ = 3+3 = 6 (p₃₂ ← p₄₂ = 1).<br>'
+        + fwMat('l⁴', [['0','2','1','4'],['3','0','−1','2'],['4','6','0','3'],['1','3','2','0']], [[2,1],[3,1],[3,2]]),
+    },
+    {
+      nodes: { 1: 'good', 2: 'good', 3: 'good', 4: 'good' },
+      desc: 'Hotovo: l = l⁴ je matice vzdáleností všech dvojic, p matice předposledních vrcholů. Čtení p couváním v řádku 3 pro cestu 3→2: p₃₂ = 1 → poslední hrana (1,2); p₃₁ = 4 → před ní (4,1); p₃₄ = 3 → úsek 3→4 je hrana. Cesta 3→4→1→2, délka 3+1+2 = 6 ✓.<br>'
+        + fwMat('l', [['0','2','1','4'],['3','0','−1','2'],['4','6','0','3'],['1','3','2','0']])
+        + fwMat('p', [['1','1','2','3'],['4','2','2','3'],['4','1','3','3'],['4','1','2','4']]),
+    },
+  ],
+  caption: 'Běh Floydova algoritmu (instance vlastní, ilustrační). V iteraci k se zvýrazněný vrchol „povolí“ jako mezilehlý; modře položky zlepšené v daném kroku.',
+});
+
+// ---- Graf ze slidu 46 (k matici minimálních cyklů) ----
+KOViz.graph(document.getElementById('viz-s46'), {
+  directed: true, w: 640, h: 360, nodeR: 20,
+  nodes: [
+    { id: '1', x: 80,  y: 110, label: '1' },
+    { id: '2', x: 340, y: 60,  label: '2' },
+    { id: '3', x: 570, y: 200, label: '3' },
+    { id: '4', x: 380, y: 320, label: '4' },
+    { id: '5', x: 230, y: 220, label: '5' },
+  ],
+  edges: [
+    { from: '1', to: '2', label: '3' },
+    { from: '1', to: '5', label: '4', curve: 0.45 },
+    { from: '5', to: '1', label: '6', curve: 0.45 },
+    { from: '2', to: '4', label: '2' },
+    { from: '2', to: '5', label: '2', curve: 0.5 },
+    { from: '5', to: '2', label: '−2', curve: 0.5 },
+    { from: '3', to: '2', label: '−5' },
+    { from: '4', to: '3', label: '4' },
+    { from: '5', to: '3', label: '6' },
+    { from: '5', to: '4', label: '0' },
+  ],
+  caption: 'Graf příkladu ze slidu 46 (hrany a váhy dle matice l⁰ z přepisu slidu; rozmístění vrcholů vlastní). Pět vrcholů, 10 hran, dva 2-cykly 1⇄5 a 2⇄5.',
+});
+
+// ---- T01: graf zadání (teoreticky_test_final, strana 3) ----
+const TG = {
+  directed: true, w: 640, h: 360, nodeR: 22,
+  nodes: [
+    { id: 'T1', x: 150, y: 90,  label: 'T₁' },
+    { id: 'T2', x: 470, y: 90,  label: 'T₂' },
+    { id: 'T3', x: 470, y: 280, label: 'T₃' },
+    { id: 'T4', x: 150, y: 280, label: 'T₄' },
+  ],
+  edges: [
+    { from: 'T1', to: 'T2', label: '2',  curve: 0.45 },
+    { from: 'T2', to: 'T1', label: '−4', curve: 0.45 },
+    { from: 'T2', to: 'T3', label: '1' },
+    { from: 'T3', to: 'T4', label: '−1' },
+    { from: 'T1', to: 'T4', label: '2' },
+  ],
+};
+KOViz.graph(document.getElementById('viz-t01'), Object.assign({}, TG, {
+  caption: 'Graf úlohy T01 (přepis zadání: 4 vrcholy T₁–T₄, hrany T₁→T₂ (2), T₂→T₁ (−4), T₂→T₃ (1), T₃→T₄ (−1), T₁→T₄ (2)).',
+}));
+
+// ---- T01: stepper řešení na negovaném grafu ----
+const TGN = Object.assign({}, TG, {
+  edges: [
+    { from: 'T1', to: 'T2', label: '−2', curve: 0.45 },
+    { from: 'T2', to: 'T1', label: '4',  curve: 0.45 },
+    { from: 'T2', to: 'T3', label: '−1' },
+    { from: 'T3', to: 'T4', label: '1' },
+    { from: 'T1', to: 'T4', label: '−2' },
+  ],
+});
+const TL = ['T₁', 'T₂', 'T₃', 'T₄'];
+KOViz.stepper(document.getElementById('viz-t01run'), {
+  graph: TGN,
+  frames: [
+    {
+      desc: 'Nejdelší cesty → váhy ×(−1) (na obrázku už negované) a Floyd na nejkratší. Legálnost: jediný cyklus T₁→T₂→T₁ má původně 2−4 = −2, po negaci +2 ≥ 0 — žádný záporný cyklus. Inicializace: diagonála 0, mimo hrany ∞.<br>'
+        + fwMat('l⁰', [['0','−2',INF,'−2'],['4','0','−1',INF],[INF,INF,'0','1'],[INF,INF,INF,'0']], [], TL),
+    },
+    {
+      nodes: { T1: 'hl' },
+      desc: 'k=1 (přes T₁): jediná konečná položka sloupce 1 je l₂₁ = 4 → zkoušíme jen řádek 2: l₂₄ ← 4+(−2) = 2; l₂₂: 4+(−2) = 2 ≥ 0, diagonálu nezlepší.<br>'
+        + fwMat('l¹', [['0','−2',INF,'−2'],['4','0','−1','2'],[INF,INF,'0','1'],[INF,INF,INF,'0']], [[2,4]], TL),
+    },
+    {
+      nodes: { T2: 'hl' },
+      desc: 'k=2 (přes T₂): z řádku 1 (l₁₂ = −2): l₁₃ ← −2+(−1) = −3; l₁₄: −2+2 = 0, stávající −2 je lepší; l₁₁: −2+4 = 2 ≥ 0.<br>'
+        + fwMat('l²', [['0','−2','−3','−2'],['4','0','−1','2'],[INF,INF,'0','1'],[INF,INF,INF,'0']], [[1,3]], TL),
+    },
+    {
+      nodes: { T3: 'hl' },
+      desc: 'k=3 (přes T₃): l₂₄ ← l₂₃+l₃₄ = −1+1 = 0. Pozor remíza: l₁₄ by přes T₃ vyšlo −3+1 = −2 = stávající hodnota — ostrý test (&gt;) nechá matici (i p) beze změny.<br>'
+        + fwMat('l³', [['0','−2','−3','−2'],['4','0','−1','0'],[INF,INF,'0','1'],[INF,INF,INF,'0']], [[2,4]], TL),
+    },
+    {
+      nodes: { T4: 'hl' },
+      desc: 'k=4 (přes T₄): z T₄ nevede žádná hrana → řádek 4 je mimo diagonálu samé ∞ a žádná zkratka l<sub>i4</sub>+l<sub>4j</sub> není konečná. Nic se nemění: l⁴ = l³. (Čtvrtou matici na písemce stejně vypiš!)<br>'
+        + fwMat('l⁴', [['0','−2','−3','−2'],['4','0','−1','0'],[INF,INF,'0','1'],[INF,INF,INF,'0']], [], TL),
+    },
+    {
+      nodes: { T1: 'good', T2: 'good', T3: 'good', T4: 'good' },
+      desc: 'Zpětná negace q = −l⁴ = matice nejdelších cest („—“ = cesta neexistuje, ne −∞). Kontrola: q₁₄ = 2 (přímo i přes T₂,T₃: 2+1−1 = 2 — proto ta remíza), q₂₄ = 0 (T₂→T₃→T₄ = 1−1).<br>'
+        + fwMat('q', [['0','2','3','2'],['−4','0','1','0'],['—','—','0','−1'],['—','—','—','0']], [], TL),
+    },
+  ],
+  caption: 'Běh řešení T01 na negovaném grafu (váhy ×(−1)); modře položky zlepšené v daném kroku, q = −l⁴.',
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>

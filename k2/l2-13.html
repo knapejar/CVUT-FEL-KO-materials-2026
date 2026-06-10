@@ -155,7 +155,7 @@ end</code></pre>
     <ul>
       <li><strong>„Prostě projdu vrcholy, jak jsou očíslované v zadání.“</strong> Vstup algoritmu chce vrcholy <em>už topologicky seřazené</em> — seřazení je součást práce (taky $\mathcal{O}(|V|+|E|)$, <a href="../k0/l0-4.html#takeaways">[L0.4]</a>). Na písemce nejdřív najdi/zdůvodni topologické pořadí (klidně graf překresli na přímku), pak teprve relaxuj.</li>
       <li><strong>„Funguje to i s pár cykly, když nejsou záporné.“</strong> Nefunguje — s jediným orientovaným cyklem topologické uspořádání vůbec neexistuje (Proposition) a algoritmus nelze ani spustit. Pak je na řadě Bellman-Ford <a href="l2-12.html#takeaways">[L2.12]</a> (či Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> pro $c \ge 0$).</li>
-      <li><strong>„Nejdelší cesta se najde snadno.“</strong> Jen v DAGu! V obecném grafu s kladnými vahami je to NP-těžký problém (lekce [L2.17]); trik ×$(-1)$ tam vyrobí záporné cykly. Pro all-pairs variantu nejdelších cest viz Floyd [L2.14].</li>
+      <li><strong>„Nejdelší cesta se najde snadno.“</strong> Jen v DAGu! V obecném grafu s kladnými vahami je to NP-těžký problém (lekce [L2.17]); trik ×$(-1)$ tam vyrobí záporné cykly. Pro all-pairs variantu nejdelších cest viz Floyd <a href="l2-14.html">[L2.14]</a>.</li>
     </ul>
   </div>
 
@@ -240,7 +240,7 @@ end</code></pre>
 
   <div class="pager">
     <a href="../k2/l2-12.html"><span class="dir">← Předchozí</span> L2.12 · Bellman-Fordův algoritmus + detekce záporného cyklu (běh)</a>
-    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.14 · Floyd-Warshall (all-pairs) + nejdelší cesty [NICE])</a>
+    <a class="next" href="../k2/l2-14.html"><span class="dir">Další →</span> L2.14 · Floyd-Warshall (all-pairs) + nejdelší cesty</a>
   </div>
 
 </div>

@@ -148,7 +148,7 @@
         <li><strong>Dijkstra</strong> [L2.4]: vyhodnocuje rovnice „od nejbližších vrcholů“ (potřebuje nezáporné váhy),</li>
         <li><strong>Bellman-Ford</strong> <a href="l2-12.html">[L2.12]</a>: vyhodnocuje je opakovaně po vrstvách „nejvýše $k$ hran“ (zvládne záporné váhy),</li>
         <li><strong>SP v DAG</strong> <a href="l2-13.html">[L2.13]</a>: vyhodnocí je v topologickém pořadí jedním průchodem,</li>
-        <li><strong>Floyd-Warshall</strong> [L2.14]: řeší rovnice pro všechny dvojice najednou.</li>
+        <li><strong>Floyd-Warshall</strong> <a href="l2-14.html">[L2.14]</a>: řeší rovnice pro všechny dvojice najednou.</li>
       </ul>
       <p>Společný elementární krok všech čtyř — porovnání $l(w)$ s $l(v) + c(v,w)$ pro jednu hranu — se jmenuje <strong>relaxace hrany</strong> a je to přesně téma příští lekce [L2.3].</p>
     </div>
@@ -169,7 +169,7 @@
       <li><strong>Optimal substructure:</strong> nejkratší cesta se skládá z nejkratších segmentů — obsahuje-li nejkratší $s$–$w$ cesta vrchol $v$, je $l(s,w) = l(s,v) + l(v,w)$.</li>
       <li><strong>Bellmanův princip optimality</strong> (přesná verze): je-li $P^k$ nejkratší $s$–$w$ cesta s nejvýše $k$ hranami a $e=(v,w)$ její poslední hrana, pak $P^{k-1}[s,v]$ je nejkratší $s$–$v$ cesta s nejvýše $k-1$ hranami. Důkaz sporem; předpoklad „bez záporných cyklů“ je potřeba jen v případě, kdy kratší objížďka prochází přes $w$.</li>
       <li><strong>Bellmanova rovnice:</strong> $l(s,w) = \min_{v \ne w}\{\,l(s,v) + c(v,w)\,\}$ — platí v grafu bez záporného cyklu; „$\le$“ je trojúhelníková nerovnost, „$=$“ dosahuje předchůdce na nejkratší cestě.</li>
-      <li>Tato vlastnost je důvod, proč fungují Dijkstra [L2.4], Bellman-Ford <a href="l2-12.html">[L2.12]</a>, SP v DAG <a href="l2-13.html">[L2.13]</a> i Floyd [L2.14] — všechny jsou strategie řešení Bellmanovy rovnice; jejich společný lokální krok je relaxace hrany [L2.3].</li>
+      <li>Tato vlastnost je důvod, proč fungují Dijkstra [L2.4], Bellman-Ford <a href="l2-12.html">[L2.12]</a>, SP v DAG <a href="l2-13.html">[L2.13]</a> i Floyd <a href="l2-14.html">[L2.14]</a> — všechny jsou strategie řešení Bellmanovy rovnice; jejich společný lokální krok je relaxace hrany [L2.3].</li>
     </ul>
   </div>
 

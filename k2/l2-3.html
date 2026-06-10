@@ -118,7 +118,7 @@ end</code></pre>
         <li><strong>Dijkstra</strong> [L2.4] volí pořadí chytře — vždy expanduje vrchol s nejmenší značkou (potřebuje k tomu nezáporné váhy),</li>
         <li><strong>Bellman-Ford</strong> <a href="l2-12.html">[L2.12]</a> nic nevymýšlí — relaxuje všechny hrany pořád dokola (zvládne i záporné váhy),</li>
         <li><strong>SP v DAG</strong> <a href="l2-13.html">[L2.13]</a> relaxuje hrany v topologickém pořadí — každou právě jednou,</li>
-        <li><strong>Floyd-Warshall</strong> [L2.14] dělá týž porovnávací krok pro všechny dvojice vrcholů najednou.</li>
+        <li><strong>Floyd-Warshall</strong> <a href="l2-14.html">[L2.14]</a> dělá týž porovnávací krok pro všechny dvojice vrcholů najednou.</li>
       </ul>
       <p>Až je v dalších lekcích uvidíš, hledej v pseudokódu vždy stejné jádro — tenhle <code>if</code>.</p>
     </div>
@@ -139,7 +139,7 @@ end</code></pre>
       <li><strong>Relaxace hrany $(v,w)$:</strong> <code>if l(w) &gt; l(v) + c(v,w) then l(w) := l(v) + c(v,w); p(w) := v</code>. Inicializace: $l(s) = 0$, $l(v) = \infty$ jinak.</li>
       <li>Udržujeme <strong>dva vektory</strong>: značky $l(\cdot)$ (pracovní horní odhady vzdáleností) a předchůdce $p(\cdot)$ — couváním po $p$ zrekonstruuješ nejkratší cestu; hrany $(p(v),v)$ tvoří strom nejkratších cest (SPT).</li>
       <li>Relaxace vyplývá přímo z Bellmanovy rovnice <a href="l2-2.html#takeaways">[L2.2]</a> — je to její „lokální krok“: značky klesají shora ke vzdálenostem a když už žádná hrana relaxovat nejde, Bellmanova rovnice platí a $l$ = vzdálenosti.</li>
-      <li>Relaxace je <strong>společné jádro</strong> Dijkstry [L2.4], Bellman-Forda <a href="l2-12.html">[L2.12]</a>, SP v DAG <a href="l2-13.html">[L2.13]</a> i Floyda [L2.14] — algoritmy se liší jen strategií <em>pořadí</em> relaxací (a na pořadí záleží: viz úloha T01).</li>
+      <li>Relaxace je <strong>společné jádro</strong> Dijkstry [L2.4], Bellman-Forda <a href="l2-12.html">[L2.12]</a>, SP v DAG <a href="l2-13.html">[L2.13]</a> i Floyda <a href="l2-14.html">[L2.14]</a> — algoritmy se liší jen strategií <em>pořadí</em> relaxací (a na pořadí záleží: viz úloha T01).</li>
     </ul>
   </div>
 

@@ -113,7 +113,7 @@ end</code></pre>
   </div>
 
   <h2>Label-setting vs. label-correcting, složitost</h2>
-  <p>Dijkstra je tzv. <strong>label-setting algoritmus</strong> (slide 20): v každé iteraci se jedna značka $l(v)$ stane trvalou (optimální). Naproti tomu <strong>label-correcting algoritmy</strong> (např. Bellman-Ford <a href="l2-12.html">[L2.12]</a> nebo Floyd [L2.14]) považují všechny značky za dočasné až do úplně posledního kroku, kdy se trvalými stanou všechny najednou — přesně jak sliboval výhled v <a href="l2-3.html#takeaways">[L2.3]</a>.</p>
+  <p>Dijkstra je tzv. <strong>label-setting algoritmus</strong> (slide 20): v každé iteraci se jedna značka $l(v)$ stane trvalou (optimální). Naproti tomu <strong>label-correcting algoritmy</strong> (např. Bellman-Ford <a href="l2-12.html">[L2.12]</a> nebo Floyd <a href="l2-14.html">[L2.14]</a>) považují všechny značky za dočasné až do úplně posledního kroku, kdy se trvalými stanou všechny najednou — přesně jak sliboval výhled v <a href="l2-3.html#takeaways">[L2.3]</a>.</p>
   <p><strong>Časová složitost</strong> Dijkstry je $\mathcal{O}(n^2)$, resp. $\mathcal{O}(m + n \log n)$ s prioritní frontou (datová struktura, která umí rychle vydávat minimum; $n = |V(G)|$, $m = |E(G)|$). Pro speciální grafy existují i lineární algoritmy — mj. pro DAGy, kde pořadí relaxací dostaneme zadarmo z topologického uspořádání <a href="l2-13.html">[L2.13]</a>.</p>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
