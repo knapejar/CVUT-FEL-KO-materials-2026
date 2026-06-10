@@ -85,7 +85,7 @@
     <li><strong>Split křižovatek</strong> <a href="l2-6.html#takeaways">[L2.6]</a>: $v \to v_1, v_2$; nová hrana $v_1 \to v_2$ nese přežití banditů $1 - b_v$; vstupy do $v_1$, výstupy z $v_2$. Teď sedí všechny pravděpodobnosti na hranách.</li>
     <li><strong>Transformace</strong> <a href="l2-7.html#takeaways">[L2.7]</a>: každé hraně dej váhu $c(e) := -\log p(e)$, kde $p(e)$ je její pravděpodobnost přežití — váhy jsou nezáporné.</li>
     <li><strong>Dijkstra</strong> <a href="l2-4.html#takeaways">[L2.4]</a> z $s$ do $t$ (proč tentokrát $s$ a $t$ nesplitujeme — viz try níže).</li>
-    <li><strong>Zpětný převod:</strong> přežití optimální cesty $S = b^{-l(t)}$ (základ $b$ = ten, kterým jsi logaritmoval) a odpověď na otázku zadání $P(\text{smrt}) = 1 - S$.</li>
+    <li><strong>Zpětný převod:</strong> přežití optimální cesty $S = b^{-l(t)}$ a odpověď na otázku zadání $P(\text{smrt}) = 1 - S$. Pozor na kolizi značek: zde $b$ je <em>základ logaritmu</em> (ten, kterým jsi logaritmoval) — nesouvisí s pravděpodobností banditů $b_i$; a $l(t)$ je <em>vzdálenost</em> vrácená Dijkstrou <a href="l2-4.html#takeaways">[L2.4]</a> — nesouvisí se lvy $l_j$.</li>
   </ol>
 
   <details class="try">
@@ -125,7 +125,7 @@
   <p>Odpověď pro dobrodruha: jdi $s \to c \to t$; přežiješ s pravděpodobností $S = 2^{-l(t)} = 2^{-3} = 0{,}125$ a zemřeš s pravděpodobností $1 - 0{,}125 = 0{,}875$. (Ano, i optimální trasa je dost vražedná — ale pořád 4× lepší než přes $a$.)</p>
 
   <h2>Elegantnější zápis: složit bandity do vstupních hran</h2>
-  <p>Vzorové řešení z banky úloh split vůbec nekreslí — využije poznámku z <a href="l2-6.html#takeaways">[L2.6]</a>, že cenu vrcholu lze <strong>složit do jeho vstupních hran</strong>, když $s$ a $t$ žádnou cenu nenesou. Jeden krok $u \to v$ znamená přežít spoj <em>a</em> bandity v cílovém vrcholu, takže s $b_s = b_t = 0$ stačí každé <em>původní</em> hraně dát rovnou váhu</p>
+  <p>Vzorové řešení z banky úloh split vůbec nekreslí — využije poznámku z <a href="l2-6.html#takeaways">[L2.6]</a>, že cenu vrcholu lze <strong>složit do jeho vstupních hran</strong>, když $s$ a $t$ žádnou cenu nenesou. Jeden krok $u \to v$ znamená přežít spoj i bandity v cílovém vrcholu, takže s $b_s = b_t = 0$ stačí každé <em>původní</em> hraně dát rovnou váhu</p>
   <p>$$c'(u,v) := -\log\bigl((1 - l_{uv})(1 - b_v)\bigr) = -\log(1 - l_{uv}) - \log(1 - b_v).$$</p>
   <p>Funguje to, protože každá $s$–$t$ cesta vstoupí do každé navštívené křižovatky právě jednou (právě jednou tedy zaplatí její bandity), do $s$ nevstupuje nikdy a vstup do $t$ je s $b_t = 0$ zadarmo. Graf se nezvětší — žádné nové vrcholy ani hrany.</p>
 
@@ -140,7 +140,7 @@
 
   <div class="box info">
     <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Složitost na míru zadání: $O(|E| \log |V|)$</div>
-    <p>Zadání výslovně chce složitost $O(|E| \times \log |V|)$. To je Dijkstra s <strong>prioritní frontou implementovanou binární haldou</strong> (binary heap): každá z $O(|E|)$ relaxací stojí $O(\log |V|)$ operaci v haldě. (V <a href="l2-4.html#takeaways">[L2.4]</a> jsme uváděli $O(n^2)$ a $O(m + n\log n)$ — binární halda je třetí, na zkoušce nejcitovanější varianta.) Split graf nezkazí: má nejvýš $2|V| + 2$ vrcholů a $|E| + |V|$ hran, asymptotika se nemění; složení do vstupních hran graf nemění vůbec. Důkaz, proč Dijkstra na nezáporných vahách funguje, patří do kapitoly K3 — tady stačí, že náš převod jeho předpoklad splňuje.</p>
+    <p>Zadání výslovně chce složitost $O(|E| \times \log |V|)$. To je Dijkstra s <strong>prioritní frontou implementovanou binární haldou</strong> (binary heap): každá z $O(|E|)$ relaxací stojí jednu operaci haldy, tj. $O(\log |V|)$. (V <a href="l2-4.html#takeaways">[L2.4]</a> jsme uváděli $O(n^2)$ a $O(m + n\log n)$ — binární halda je třetí, na zkoušce nejcitovanější varianta.) Split graf nezkazí: má nejvýš $2|V| + 2$ vrcholů a $|E| + |V|$ hran, asymptotika se nemění; složení do vstupních hran graf nemění vůbec. Důkaz, proč Dijkstra na nezáporných vahách funguje, patří do kapitoly K3 — tady stačí, že náš převod jeho předpoklad splňuje.</p>
   </div>
 
   <div class="box danger">
@@ -181,7 +181,7 @@
 
       <div class="box foto">
         <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
-        <p>Tuhle úlohu vyřeš celou <strong>NA PAPÍR</strong> — od prázdného listu, bez koukání do lekce ani do řešení, ideálně na čas (na zkoušce na ni budeš mít zhruba 15–20 minut). Napiš převod (vzorce + zdůvodnění nezápornosti), algoritmus se složitostí a zpětný výpočet pravděpodobnosti přežití. Pak mi pošli fotku — zkontroluju ti ji a vytknu chyby přesně jako hodnotitel.</p>
+        <p>Tuhle úlohu vyřeš celou <strong>NA PAPÍR</strong> — od prázdného listu, bez koukání do lekce ani do řešení, ideálně na čas (orientačně ~15–20 minut — přesný limit zkoušky doložený není, ale při 6 úlohách na test víc mít nebudeš). Napiš převod (vzorce + zdůvodnění nezápornosti), algoritmus se složitostí a zpětný výpočet pravděpodobnosti přežití. Pak mi pošli fotku — zkontroluju ti ji a vytknu chyby přesně jako hodnotitel.</p>
       </div>
 
       <h4>a) Co je v zadání?</h4>
