@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stav je cena (Knapsack DP) — immersive video · KO Hitovky</title>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #11141d;
+    --text: #e8eaf0;
+    --muted: #8b93a7;
+    --accent: #ffb000;
+    --border: #232a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; overflow: hidden;
+  }
+  #topbar {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; font-size: 13px; color: var(--muted);
+  }
+  #topbar a { color: var(--muted); text-decoration: none; }
+  #topbar a:hover { color: var(--accent); }
+  #topbar .title { color: var(--text); font-weight: 700; }
+  #topbar .badge {
+    font-size: 11px; color: var(--bg); background: var(--accent);
+    border-radius: 10px; padding: 2px 9px; font-weight: 700;
+  }
+  #stagewrap {
+    flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
+    min-height: 0; padding: 0 16px;
+  }
+  #stage {
+    position: relative;
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #0b0e16; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+  }
+  #stage canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  #subtitle {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 26px 4% 16px;
+    background: linear-gradient(to top, rgba(5,7,12,0.88) 0%, rgba(5,7,12,0.55) 65%, transparent 100%);
+    text-align: center; pointer-events: none;
+    font-size: clamp(15px, 2.6vw, 30px); font-weight: 700; line-height: 1.4;
+    color: #fff;
+  }
+  #subtitle .m {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    color: #7dd3fc;
+  }
+  #subtitle .hl {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    padding: 0 4px; border-radius: 5px;
+  }
+  #subtitle .c1 { background: rgba(125,211,252,0.15); color: #7dd3fc; }
+  #subtitle .c2 { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+  #subtitle .c3 { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+  #subtitle .c4 { background: rgba(52,211,153,0.15);  color: #4ade80; }
+  #subtitle .c5 { background: rgba(244,114,182,0.16); color: #f9a8d4; }
+  #subtitle .c6 { background: rgba(251,146,60,0.17);  color: #fdba74; }
+  #subtitle .c7 { background: rgba(147,197,253,0.16); color: #93c5fd; }
+  #subtitle .c8 { background: rgba(253,224,71,0.14);  color: #fde047; }
+  #subtitle .c9 { background: rgba(226,232,240,0.13); color: #e2e8f0; }
+  .kw { position: relative; display: inline-block; white-space: nowrap; }
+  .kw .wb { opacity: 0.42; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+  .kw .wf {
+    position: absolute; left: 0; top: 0; width: 0%;
+    overflow: hidden; white-space: nowrap;
+    text-shadow: 0 0 16px rgba(255,176,0,0.85), 0 2px 10px rgba(0,0,0,0.95);
+  }
+  .kw .wf, .kw .wf * { color: #ffd34d !important; }
+  #bigplay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(5,7,12,0.55); cursor: pointer; z-index: 5;
+    flex-direction: column; gap: 18px;
+  }
+  #bigplay.hidden { display: none; }
+  #bigplay .pbtn {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--accent); color: #1a1200;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; box-shadow: 0 0 60px rgba(255,176,0,0.45);
+    transition: transform .15s;
+  }
+  #bigplay:hover .pbtn { transform: scale(1.08); }
+  #bigplay .hint { color: var(--text); font-size: 15px; font-weight: 600; text-shadow: 0 2px 8px #000; }
+  #bigplay .hint small { display: block; color: var(--muted); font-weight: 400; margin-top: 6px; }
+  #controls {
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 4px 16px;
+  }
+  #controls button {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    width: 42px; height: 42px; border-radius: 50%; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: border-color .15s, color .15s;
+  }
+  #controls button:hover { border-color: var(--accent); color: var(--accent); }
+  #seek {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 6px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--p, 0%), #2a3040 var(--p, 0%));
+    border-radius: 3px; outline: none; cursor: pointer;
+  }
+  #seek::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px rgba(255,176,0,0.6); cursor: pointer;
+  }
+  #seek::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; border: none;
+    background: var(--accent); cursor: pointer;
+  }
+  .time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 44px; text-align: center; }
+  @media (max-height: 560px) { #topbar { display: none; } }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="pisnicky.html">← Zpěvník</a>
+  <span class="title">Stav je cena (Knapsack DP)</span>
+  <span class="badge">IMMERSIVE VIDEO 🕺</span>
+  <span style="margin-left:auto">mezerník = play/pauza · ←/→ = ±5 s · R = od začátku</span>
+</div>
+
+<div id="stagewrap">
+  <div id="stage">
+    <div id="subtitle"></div>
+    <div id="bigplay">
+      <div class="pbtn">▶</div>
+      <div class="hint">Knapsack DP přes ceny — tabulka, backtrack &amp; Dantzig<small>2 min 51 s · zpívaná videolekce</small></div>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btnPlay" title="Play / pauza">▶</button>
+  <button id="btnRestart" title="Od začátku">⟲</button>
+  <span class="time" id="tCur">0:00</span>
+  <input type="range" id="seek" min="0" max="171.5" step="0.01" value="0">
+  <span class="time" id="tDur">2:51</span>
+</div>
+
+<audio id="player" src="audio/pseudopolynom-dp-pres-ceny.mp3" preload="auto"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
+<script>
+(async function () {
+'use strict';
+
+// ════════════════════════════════════════════════════════════════════
+// 0) helpers
+// ════════════════════════════════════════════════════════════════════
+const C = {
+  gold: 0xffb000, goldHi: 0xffd34d, green: 0x4ade80, pink: 0xf472b6,
+  cyan: 0x7dd3fc, violet: 0xa78bfa, white: 0xffffff, red: 0xef4444,
+  dim: 0x37415a, muted: 0x8b93a7, card: 0x141927,
+};
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - clamp01(t), 3);
+const ph = (t, a, b) => clamp01((t - a) / (b - a));
+
+// ════════════════════════════════════════════════════════════════════
+// 1) INSTANCE + DP (ručně ověřená tabulka)
+//    položky: c=(2,3,4), w=(3,4,5) · W=8 · C=Σc=9
+//    odpověď: max k s x(k,3) ≤ 8 → k=6 (položky 1+3, váha 8)
+// ════════════════════════════════════════════════════════════════════
+const ITEMS = [
+  { c: 2, w: 3, col: 0x7dd3fc }, { c: 3, w: 4, col: 0xf472b6 }, { c: 4, w: 5, col: 0x4ade80 },
+];
+const W = 8, CSUM = 9;
+const INF = Infinity;
+const X = [ // X[j][k], j=0..3, k=0..9
+  [0, INF, INF, INF, INF, INF, INF, INF, INF, INF],
+  [0, INF, 3, INF, INF, INF, INF, INF, INF, INF],
+  [0, INF, 3, 4, INF, 7, INF, INF, INF, INF],
+  [0, INF, 3, 4, 5, 7, 8, 9, INF, 12],
+];
+const BTRACK = [ // backtrack (k=6, j=3): vzal 3 → (2,2) nech → (2,1) vzal 1 → (0,0)
+  { k: 6, j: 3, take: true }, { k: 2, j: 2, take: false }, { k: 2, j: 1, take: true }, { k: 0, j: 0, take: false },
+];
+const fmtX = v => v === INF ? '∞' : String(v);
+
+// word-anchor sady pro 3 refrény (z whisper -ml 1 -sow)
+const ANCH = [
+  { min: 30.96, nech: 32.23, xkj1: 33.70, pridej: 35.80, minusC: 37.32, plus: 39.32, vaha: 40.97, konci: 44.58, vem: 45.20, nej: 45.60, w: 48.86, onc: 51.04, pseudo: 52.42, dp: 56.65 },
+  { min: 77.06, nech: 78.28, xkj1: 79.67, pridej: 81.69, minusC: 83.45, plus: 85.60, vaha: 87.13, konci: 90.51, vem: 91.24, nej: 91.68, w: 94.86, onc: 97.06, pseudo: 98.28, dp: 102.76 },
+  { min: 126.64, nech: 128.27, xkj1: 129.43, pridej: 131.70, minusC: 133.43, plus: 135.84, vaha: 137.20, konci: 140.40, vem: 141.00, nej: 141.60, w: 144.86, onc: 147.00, pseudo: 148.40, dp: 152.70 },
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 2) PIXI + particles
+// ════════════════════════════════════════════════════════════════════
+const app = new PIXI.Application({ width: 1280, height: 720, antialias: true, background: 0x0b0e16 });
+document.getElementById('stage').appendChild(app.view);
+const sceneLayer = new PIXI.Container();
+const fxLayer = new PIXI.Container();
+app.stage.addChild(sceneLayer, fxLayer);
+const dotG = new PIXI.Graphics();
+dotG.beginFill(0xffffff, 1).drawCircle(0, 0, 32).endFill();
+const dotTex = app.renderer.generateTexture(dotG);
+const parts = [];
+function burst(x, y, tint, count = 18, speed = 220, size = 0.1) {
+  for (let i = 0; i < count; i++) {
+    const p = new PIXI.Sprite(dotTex);
+    p.anchor.set(0.5); p.x = x; p.y = y; p.tint = tint;
+    p.blendMode = PIXI.BLEND_MODES.ADD;
+    const a = Math.random() * 6.283, v = speed * (0.3 + Math.random() * 0.8);
+    p._vx = Math.cos(a) * v; p._vy = Math.sin(a) * v;
+    p._life = 0.6 + Math.random() * 0.7; p._t = 0;
+    p.scale.set(size * (0.5 + Math.random()));
+    fxLayer.addChild(p); parts.push(p);
+  }
+}
+app.ticker.add(() => {
+  const dt = app.ticker.deltaMS / 1000;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p._t += dt; p.x += p._vx * dt; p.y += p._vy * dt;
+    p._vy += 240 * dt; p.alpha = clamp01(1 - p._t / p._life);
+    if (p._t > p._life) { fxLayer.removeChild(p); p.destroy(); parts.splice(i, 1); }
+  }
+});
+function txt(str, size, color, weight = '800', family = "'Segoe UI', system-ui, sans-serif") {
+  const t = new PIXI.Text(str, {
+    fontFamily: family, fontSize: size, fill: color, fontWeight: weight,
+    align: 'center', dropShadow: true, dropShadowColor: 0x000000,
+    dropShadowBlur: 8, dropShadowAlpha: 0.6, dropShadowDistance: 2,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  return t;
+}
+const MATH = "'Cambria Math', Cambria, Georgia, serif";
+
+// disco pozadí — pulzy na funk beat
+function buildDisco(c) {
+  const g = new PIXI.Graphics(); c.addChildAt(g, 0);
+  function render(t, energy = 0.5) {
+    g.clear();
+    const beat = Math.max(0, Math.sin(t * 7.2)); // ~115 bpm feel
+    const cols = [0x7dd3fc, 0xf472b6, 0x4ade80, 0xa78bfa, 0xffb000];
+    for (let i = 0; i < 5; i++) {
+      const x = 130 + i * 255, y = 56 + 18 * Math.sin(t * 1.3 + i * 1.7);
+      g.beginFill(cols[i], 0.05 + 0.08 * beat * energy);
+      g.drawCircle(x, y + 600 * ((i % 2) ? 1 : 0.02), 60 + 40 * beat * energy);
+      g.endFill();
+    }
+  }
+  return { render };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 3) DP TABULKA + BATOH + POLOŽKY (sdílené renderery)
+// ════════════════════════════════════════════════════════════════════
+const TX0 = 620, TY0 = 128, CW = 112, RH = 41;
+const cellPos = (k, j) => ({ x: TX0 + j * CW + CW / 2, y: TY0 + k * RH + RH / 2 });
+
+function buildTable(c) {
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const cellT = [];
+  for (let k = 0; k <= 9; k++) {
+    const row = [];
+    for (let j = 0; j <= 3; j++) {
+      const t = txt('', 19, 0xffffff, '800', MATH);
+      const P = cellPos(k, j); t.x = P.x; t.y = P.y; c.addChild(t);
+      row.push(t);
+    }
+    cellT.push(row);
+    const kl = txt('k=' + k, 16, C.gold, '800', MATH);
+    kl.x = TX0 - 36; kl.y = TY0 + k * RH + RH / 2; c.addChild(kl);
+  }
+  for (let j = 0; j <= 3; j++) {
+    const h = txt(j === 0 ? 'j=0' : 'j=' + j, 18, j === 0 ? C.muted : 0xffffff, '900', MATH);
+    h.x = TX0 + j * CW + CW / 2; h.y = TY0 - 24;
+    if (j > 0) h.style.fill = ITEMS[j - 1].col;
+    c.addChild(h);
+  }
+  const axis = txt('k = CENA (stav!)', 20, C.gold, '900', MATH);
+  axis.x = TX0 - 36; axis.y = TY0 - 54; axis.rotation = 0; c.addChild(axis);
+  // render: revealT(k,j) → čas odhalení buňky; hot {k,j,col}; scanRow; goldRow
+  function render(t, o = {}) {
+    g.clear();
+    // mřížka
+    for (let k = 0; k <= 9; k++) for (let j = 0; j <= 3; j++) {
+      const rv = o.revealT ? ph(t, o.revealT(k, j), o.revealT(k, j) + 0.3) : 1;
+      const P = cellPos(k, j);
+      const isHot = o.hot && o.hot.some(h => h.k === k && h.j === j);
+      const hotCol = isHot ? o.hot.find(h => h.k === k && h.j === j).col : null;
+      const isScan = o.scanRow === k && j === 3;
+      const isGold = o.goldCells && o.goldCells.some(gc => gc.k === k && gc.j === j);
+      let fill = 0x10141f, line = 0x2a3346;
+      if (isHot) { fill = 0x0b2235; line = hotCol; }
+      if (isScan) { fill = X[3][k] !== INF && X[3][k] <= W ? 0x14532d : 0x3a1620; line = X[3][k] !== INF && X[3][k] <= W ? C.green : C.red; }
+      if (isGold) { fill = 0x4a3608; line = C.goldHi; }
+      g.lineStyle(isHot || isScan || isGold ? 3 : 1.5, line, rv);
+      g.beginFill(fill, 0.92 * rv);
+      g.drawRect(TX0 + j * CW + 3, TY0 + k * RH + 2, CW - 6, RH - 4);
+      g.endFill();
+      const ct = cellT[k][j];
+      ct.alpha = rv;
+      ct.text = fmtX(X[j][k]);
+      ct.style.fill = X[j][k] === INF ? 0x4a5572 : (isGold ? C.goldHi : (X[j][k] === 0 ? C.green : 0xffffff));
+      // s(k,j) badge
+      if (o.sBadges && j > 0 && X[j][k] !== INF && k > 0) {
+        const took = X[j][k] !== X[j - 1][k];
+        const ba = ph(t, o.sBadges, o.sBadges + 0.5);
+        if (ba > 0) {
+          g.lineStyle(0);
+          g.beginFill(took ? C.green : C.muted, 0.85 * ba);
+          g.drawCircle(TX0 + j * CW + CW - 14, TY0 + k * RH + 11, 7);
+          g.endFill();
+        }
+      }
+    }
+    // šipky rekurence (hot arrows): {fromK, fromJ, toK, toJ, col, p}
+    if (o.arrows) for (const ar of o.arrows) {
+      const A = cellPos(ar.fromK, ar.fromJ), B = cellPos(ar.toK, ar.toJ);
+      const p2 = ar.p === undefined ? 1 : ar.p;
+      if (p2 <= 0) continue;
+      g.lineStyle(5, ar.col, 0.95);
+      const ex = lerp(A.x + 30, B.x - 30, easeOut(p2)), ey = lerp(A.y, B.y, easeOut(p2));
+      g.moveTo(A.x + 30, A.y); g.lineTo(ex, ey);
+      const dx = B.x - A.x, dy = B.y - A.y, l = Math.hypot(dx, dy);
+      g.lineStyle(0); g.beginFill(ar.col, 0.95);
+      const hs = 12;
+      g.moveTo(ex, ey);
+      g.lineTo(ex - dx / l * hs - dy / l * hs * 0.55, ey - dy / l * hs + dx / l * hs * 0.55);
+      g.lineTo(ex - dx / l * hs + dy / l * hs * 0.55, ey - dy / l * hs - dx / l * hs * 0.55);
+      g.closePath().endFill();
+    }
+  }
+  return { render };
+}
+
+function buildPack(c) {
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const wl = txt('W = 8', 24, C.cyan, '900', MATH); wl.x = 250; wl.y = 235; c.addChild(wl);
+  const itemT = ITEMS.map((it, i) => {
+    const t = txt(`c=${it.c}\nw=${it.w}`, 17, 0x0b0e16, '900', MATH);
+    c.addChild(t); return t;
+  });
+  // itemPos(i) může scéna přemapovat (hop do batohu)
+  function render(t, o = {}) {
+    g.clear();
+    // batoh
+    const bx = 250, by = 330;
+    const bounce = o.bounce ? 6 * Math.max(0, Math.sin(t * 7.2)) : 0;
+    g.lineStyle(4, 0x9a6a3a, 1);
+    g.beginFill(0x7a4f24, 0.95);
+    g.drawRoundedRect(bx - 85, by - 70 - bounce, 170, 150, 26);
+    g.endFill();
+    g.beginFill(0x9a6a3a, 0.95);
+    g.drawRoundedRect(bx - 60, by - 96 - bounce, 120, 40, 14);
+    g.endFill();
+    g.lineStyle(5, 0x5b3a1a, 1);
+    g.moveTo(bx - 45, by - 60 - bounce); g.quadraticCurveTo(bx, by - 110 - bounce, bx + 45, by - 60 - bounce);
+    wl.y = 235 - bounce;
+    // položky
+    ITEMS.forEach((it, i) => {
+      const P = o.itemPos ? o.itemPos(i) : { x: 130 + i * 120, y: 560 };
+      if (!P) { itemT[i].alpha = 0; return; }
+      const wob = o.groove ? 3 * Math.sin(t * 4 + i * 2) : 0;
+      g.lineStyle(3, P.hl ? C.red : 0x0b0e16, 1);
+      g.beginFill(it.col, 0.95);
+      g.drawRoundedRect(P.x - 42, P.y - 32 + wob, 84, 64, 12);
+      g.endFill();
+      itemT[i].alpha = 1;
+      itemT[i].x = P.x; itemT[i].y = P.y + wob;
+    });
+  }
+  return { render };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 4) SCÉNY
+// ════════════════════════════════════════════════════════════════════
+const scenes = [];
+function scene(t0, t1, build) {
+  const s = { t0, t1, st: null };
+  s.init = () => { s.st = build(); sceneLayer.addChild(s.st.c); };
+  s.update = (lt) => s.st && s.st.update(lt);
+  s.destroy = () => { if (s.st) { sceneLayer.removeChild(s.st.c); s.st.c.destroy({ children: true }); s.st = null; } };
+  scenes.push(s);
+  return s;
+}
+function caption(c, str, color = C.gold, y = 44, size = 26) {
+  const t = txt(str, size, color, '800');
+  t.x = 640; t.y = y; c.addChild(t);
+  return t;
+}
+
+// ── INTRO [0 – 13.5] ──
+scene(0, 13.5, () => {
+  const c = new PIXI.Container();
+  const disco = buildDisco(c);
+  const pack = buildPack(c);
+  const t1 = txt('KNAPSACK DP', 92, C.gold, '900'); t1.x = 640; t1.y = 170; t1.alpha = 0;
+  const t2 = txt('🕺 STAV JE CENA, ne kapacita 🕺', 36, C.pink, '900'); t2.x = 640; t2.y = 262; t2.alpha = 0;
+  const t3 = txt('x(k,j) = nejmenší váha pro cenu k z prvních j položek', 24, C.cyan, '700', MATH); t3.x = 640; t3.y = 322; t3.alpha = 0;
+  c.addChild(t1, t2, t3);
+  const fired = new Set();
+  return { c, update(lt) {
+    disco.render(lt, 1);
+    pack.render(lt, { bounce: true, groove: true, itemPos: i => ({ x: 850 + i * 130, y: 560 }) });
+    t1.alpha = easeOut(ph(lt, 0.5, 1.6));
+    t1.scale.set(lerp(1.4, 1, easeOut(ph(lt, 0.5, 1.8))) * (1 + 0.05 * Math.max(0, Math.sin(lt * 7.2))));
+    t2.alpha = easeOut(ph(lt, 3.2, 4.2));
+    t3.alpha = easeOut(ph(lt, 6.5, 7.5));
+    if (lt > 0.6 && !fired.has('t')) { fired.add('t'); burst(640, 170, C.gold, 32, 320, 0.14); }
+    if (lt > 3.3 && !fired.has('p')) { fired.add('p'); burst(640, 262, C.pink, 24, 260, 0.12); }
+  } };
+});
+
+// ── VERSE 1 [13.5 – 30.96]: stav je CENA + definice ──
+scene(13.5, 30.96, () => {
+  const c = new PIXI.Container();
+  const disco = buildDisco(c);
+  const pack = buildPack(c);
+  const table = buildTable(c);
+  const cap = caption(c, 'tenhle batoh je JINÝ než ze školy…', C.pink);
+  const capX = txt('stav = KAPACITA', 36, C.muted, '900', MATH); capX.x = 330; capX.y = 480; capX.alpha = 0; c.addChild(capX);
+  const capOK = txt('stav = CENA k', 42, C.gold, '900', MATH); capOK.x = 330; capOK.y = 560; capOK.alpha = 0; c.addChild(capOK);
+  const xg = new PIXI.Graphics(); c.addChild(xg);
+  const defK = txt('řádky = cena k', 22, C.gold, '800', MATH); defK.x = 420; defK.y = 250; defK.alpha = 0; c.addChild(defK);
+  const defJ = txt('sloupce = prefix položek j', 22, C.cyan, '800', MATH); defJ.x = 840; defJ.y = 80; defJ.alpha = 0; c.addChild(defJ);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 13.5;
+    disco.render(lt, 0.6);
+    pack.render(lt, { groove: true, itemPos: i => ({ x: 130 + i * 120, y: 620 }) });
+    // tabulka jen skeleton (∞ everywhere reveal po 23.5)
+    table.render(lt, { revealT: (k, j) => 23.5 + (k * 4 + j) * 0.07 });
+    xg.clear();
+    // „kapacita“ škrtnutá přesně na slovo (20.43)
+    capX.alpha = lt > 19.9 ? 1 : 0;
+    if (lt > 20.43) {
+      const p = easeOut(ph(lt, 20.43, 21.2));
+      xg.lineStyle(7, C.red, 0.95);
+      xg.moveTo(330 - 150 * p, 480 - 26 * p); xg.lineTo(330 + 150 * p, 480 + 26 * p);
+      if (!fired.has('x')) { fired.add('x'); burst(330, 480, C.red, 22, 260, 0.11); }
+    }
+    // „cena“ zlatě (22.12)
+    capOK.alpha = lt > 22.12 ? 1 : 0;
+    capOK.scale.set(lerp(1.6, 1, easeOut(ph(lt, 22.12, 22.7))));
+    if (lt > 22.2 && !fired.has('c')) { fired.add('c'); burst(330, 560, C.gold, 26, 280, 0.12); }
+    // definice x(k,j): šipky na osy přesně na slova
+    defK.alpha = lt > 26.09 ? 1 : 0;   // „cenu k poskládat“
+    defJ.alpha = lt > 27.30 ? 1 : 0;   // „prvních j položek“
+    if (lt > 26.15 && !fired.has('dk')) { fired.add('dk'); burst(420, 250, C.gold, 14, 180, 0.09); }
+    if (lt > 27.36 && !fired.has('dj')) { fired.add('dj'); burst(840, 80, C.cyan, 14, 180, 0.09); }
+    if (lt < 19.48) cap.text = 'tenhle batoh je JINÝ než ze školy…';
+    else if (lt < 23.14) { cap.text = 'stav NENÍ kapacita — stav je CENA!'; cap.style.fill = C.gold; }
+    else { cap.text = 'x(k,j) = nejmenší váha, jak cenu k poskládat z prvních j položek'; cap.style.fill = C.cyan; }
+  } };
+});
+
+// ── CHORUS factory: živá rekurence v tabulce, každé slovo = event ──
+// variant 0: plnění tabulky · 1: demo na řádku k=6 · 2: full groove
+function chorusScene(t0, t1, an, variant) {
+  scene(t0, t1, () => {
+    const c = new PIXI.Container();
+    const disco = buildDisco(c);
+    const pack = buildPack(c);
+    const table = buildTable(c);
+    const cap = caption(c, '');
+    const fNech = txt('NECH TO BÝT: x(k, j−1)', 26, 0xfbbf24, '900', MATH); fNech.x = 300; fNech.y = 120; fNech.alpha = 0; c.addChild(fNech);
+    const fPridej = txt('PŘIDEJ j: x(k−cⱼ, j−1) + wⱼ', 26, C.violet, '900', MATH); fPridej.x = 300; fPridej.y = 175; fPridej.alpha = 0; c.addChild(fPridej);
+    const fW = txt('odpověď: max k s x(k,n) ≤ W', 24, C.green, '900', MATH); fW.x = 300; fW.y = 470; fW.alpha = 0; c.addChild(fW);
+    const fOnc = txt('O(n·C)', 46, C.pink, '900', MATH); fOnc.x = 300; fOnc.y = 540; fOnc.alpha = 0; c.addChild(fOnc);
+    const fPseudo = txt('PSEUDOPOLYNOM', 30, 0x93c5fd, '900'); fPseudo.x = 300; fPseudo.y = 600; fPseudo.alpha = 0; c.addChild(fPseudo);
+    const fired = new Set();
+    return { c, update(lt0) {
+      const lt = lt0 + t0;
+      disco.render(lt, 1);
+      pack.render(lt, { groove: true, bounce: lt > an.dp, itemPos: i => ({ x: 130 + i * 120, y: 640 }) });
+      // ── eventy na slova ──
+      const hot = [], arrows = [];
+      let scanRow, goldCells;
+      // „minimum ze dvou“ → obě zdrojové buňky pulznou
+      const demoK = 6, demoJ = 3; // x(6,3) = min(x(6,2)=∞, x(2,2)+5=8)
+      if (lt > an.min && lt < an.plus + 4) {
+        if (lt > an.nech) { hot.push({ k: demoK, j: demoJ - 1, col: 0xfbbf24 }); arrows.push({ fromK: demoK, fromJ: demoJ - 1, toK: demoK, toJ: demoJ, col: 0xfbbf24, p: ph(lt, an.nech, an.nech + 0.5) }); }
+        if (lt > an.pridej) { hot.push({ k: demoK - ITEMS[2].c, j: demoJ - 1, col: C.violet }); arrows.push({ fromK: demoK - ITEMS[2].c, fromJ: demoJ - 1, toK: demoK, toJ: demoJ, col: C.violet, p: ph(lt, an.pridej, an.pridej + 0.5) }); }
+        if (lt > an.plus) hot.push({ k: demoK, j: demoJ, col: C.green });
+      }
+      // scan odspodu na „na konci vem největší k” → k=6 zlatě na „dvojité vé“
+      if (lt > an.konci && lt < an.onc) {
+        const sp = ph(lt, an.konci, an.w);
+        scanRow = 9 - Math.min(3, Math.floor(sp * 4)); // 9,8,7 → pak zlatá
+      }
+      if (lt > an.w) goldCells = [{ k: 6, j: 3 }];
+      table.render(lt, {
+        revealT: variant === 0
+          ? (k, j) => j === 0 ? t0 - 1 : (j === 1 ? an.min + 0.3 + k * 0.12 : (j === 2 ? an.minusC + 0.4 + k * 0.1 : an.vaha + 0.6 + k * 0.1))
+          : () => t0 - 1,
+        hot, arrows, scanRow, goldCells,
+      });
+      // formule na slova
+      fNech.alpha = lt > an.nech ? 1 : 0;
+      fPridej.alpha = lt > an.pridej ? 1 : 0;
+      fW.alpha = lt > an.vem ? 1 : 0;
+      fOnc.alpha = lt > an.onc ? 1 : 0;
+      fPseudo.alpha = lt > an.pseudo ? 1 : 0;
+      fOnc.scale.set(lerp(1.7, 1, easeOut(ph(lt, an.onc, an.onc + 0.5))) * (1 + 0.04 * Math.sin(lt * 7.2)));
+      [['n', an.nech, fNech, 0xfbbf24], ['p', an.pridej, fPridej, C.violet], ['w', an.vem, fW, C.green], ['o', an.onc, fOnc, C.pink], ['s', an.pseudo, fPseudo, 0x93c5fd]].forEach(([k2, at, el, col]) => {
+        if (lt > at && !fired.has(k2)) { fired.add(k2); burst(el.x, el.y, col, 20, 240, 0.11); }
+      });
+      if (lt > an.w + 0.05 && !fired.has('gold')) {
+        fired.add('gold');
+        const P = cellPos(6, 3);
+        burst(P.x, P.y, C.goldHi, 30, 300, 0.13);
+      }
+      if (lt > an.dp && !fired.has('dp')) { fired.add('dp'); burst(640, 360, C.gold, 36, 340, 0.14); }
+      // caption
+      if (lt < an.konci) { cap.text = 'rekurence: min( nech být , přidej j )'; cap.style.fill = 0xffffff; }
+      else if (lt < an.onc) { cap.text = `skenuj odspodu: x(k,3) ≤ W=8?  →  k=6 (váha přesně 8)`; cap.style.fill = C.green; }
+      else { cap.text = 'C = Σc = 9 řádků · n sloupců → O(n·C), pseudopolynom'; cap.style.fill = C.pink; }
+    } };
+  });
+}
+chorusScene(30.96, 58.7, ANCH[0], 0);
+
+// ── VERSE 2 [58.7 – 77.06]: init, s(k,j), BACKTRACK ──
+scene(58.7, 77.06, () => {
+  const c = new PIXI.Container();
+  const disco = buildDisco(c);
+  const pack = buildPack(c);
+  const table = buildTable(c);
+  const cap = caption(c, '');
+  const infRain = [];
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 58.7;
+    disco.render(lt, 0.7);
+    // backtrack stav
+    let goldCells = [], arrows = [];
+    const steps = [69.5, 73.0, 74.9, 76.3]; // (6,3)→(2,2)→(2,1)→(0,0) na slova
+    let nSteps = 0;
+    for (let i = 0; i < 4; i++) if (lt > steps[i]) nSteps = i + 1;
+    for (let i = 0; i < nSteps; i++) goldCells.push({ k: BTRACK[i].k, j: BTRACK[i].j });
+    for (let i = 1; i < nSteps; i++) {
+      arrows.push({ fromK: BTRACK[i].k, fromJ: BTRACK[i].j, toK: BTRACK[i - 1].k, toJ: BTRACK[i - 1].j, col: C.goldHi, p: ph(lt, steps[i], steps[i] + 0.4) });
+    }
+    // hot na x(0,0) při „nula nula je nula“
+    const hot = [];
+    if (lt > 58.9 && lt < 62.3) hot.push({ k: 0, j: 0, col: C.green });
+    table.render(lt, { hot, goldCells, arrows, sBadges: lt > 65.64 ? 65.64 : undefined });
+    // ∞ déšť na „nekonečno“ (62.53)
+    if (lt > 62.53 && lt < 64.6 && Math.random() < 0.3 && infRain.length < 26) {
+      const it = txt('∞', 22, 0x4a5572, '800', MATH);
+      it.x = 600 + Math.random() * 460; it.y = 100;
+      it._vy = 120 + Math.random() * 140; c.addChild(it); infRain.push(it);
+    }
+    for (const r of infRain) { r.y += r._vy * app.ticker.deltaMS / 1000; r.alpha = Math.max(0, 1 - (r.y - 100) / 480); }
+    // batoh + hop položek při backtracku
+    const hop3 = ph(lt, 72.48, 73.3);   // „položka j je v batohu“ → item 3
+    const hop1 = ph(lt, 74.88, 75.7);   // couvej → item 1
+    pack.render(lt, {
+      groove: true,
+      itemPos: i => {
+        if (i === 2 && hop3 > 0) return hop3 >= 1 ? null : { x: lerp(370, 250, hop3), y: lerp(640, 330, hop3) - 160 * Math.sin(hop3 * Math.PI) };
+        if (i === 0 && hop1 > 0) return hop1 >= 1 ? null : { x: lerp(130, 250, hop1), y: lerp(640, 330, hop1) - 160 * Math.sin(hop1 * Math.PI) };
+        return { x: 130 + i * 120, y: 640 };
+      },
+    });
+    if (hop3 >= 1 && !fired.has('h3')) { fired.add('h3'); burst(250, 330, ITEMS[2].col, 20, 240, 0.11); }
+    if (hop1 >= 1 && !fired.has('h1')) { fired.add('h1'); burst(250, 330, ITEMS[0].col, 20, 240, 0.11); }
+    if (lt > 59.0 && !fired.has('z')) { fired.add('z'); const P = cellPos(0, 0); burst(P.x, P.y, C.green, 16, 200, 0.1); }
+    if (lt < 65.64) { cap.text = 'INIT: x(0,0) = 0 · všechno ostatní ∞'; cap.style.fill = C.green; }
+    else if (lt < 69.4) { cap.text = 's(k,j) = vzal jsem j? (zelená tečka) — mapa pro rekonstrukci'; cap.style.fill = 0x93c5fd; }
+    else { cap.text = 'BACKTRACK: s=1 → polož j do batohu, sniž k o cⱼ — couvej!'; cap.style.fill = C.goldHi; }
+  } };
+});
+
+chorusScene(77.06, 104.74, ANCH[1], 1);
+
+// ── BRIDGE [104.74 – 126.64]: DANTZIG — greedy + 2-aproximace ──
+scene(104.74, 126.64, () => {
+  const c = new PIXI.Container();
+  const disco = buildDisco(c);
+  const cap = caption(c, 'BONUS: Dantzigův greedy', C.goldHi);
+  const g = new PIXI.Graphics(); c.addChild(g);
+  // položky s ratio
+  const ratios = ITEMS.map((it, i) => ({ i, r: it.c / it.w })); // 0.67, 0.75, 0.8
+  const sorted = [2, 1, 0]; // podle c/w klesající
+  const itemT = ITEMS.map((it, i) => {
+    const t = txt(`c=${it.c} w=${it.w}\nc/w=${(it.c / it.w).toFixed(2)}`, 17, 0x0b0e16, '900', MATH);
+    c.addChild(t); return t;
+  });
+  const hLab = txt('h = první, co se NEVEJDE', 28, C.red, '900'); hLab.x = 640; hLab.y = 470; hLab.alpha = 0; c.addChild(hLab);
+  const cmp = txt('max( prefix = 4 ,  cₕ = 3 ) = 4', 30, C.cyan, '900', MATH); cmp.x = 640; cmp.y = 530; cmp.alpha = 0; c.addChild(cmp);
+  const stamp = txt('≥ OPT / 2', 64, C.green, '900', MATH); stamp.x = 640; stamp.y = 614; stamp.alpha = 0; stamp.rotation = -0.04; c.addChild(stamp);
+  const check = txt('(OPT = 6 → záruka 3 · máme 4 ✓)', 22, C.muted, '700', MATH); check.x = 980; check.y = 614; check.alpha = 0; c.addChild(check);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 104.74;
+    disco.render(lt, 0.8);
+    g.clear();
+    // kapacitní bar W=8
+    const BX = 340, BW = 600, BY = 330, BH = 70;
+    g.lineStyle(3, C.cyan, 1);
+    g.beginFill(0x10141f, 0.9);
+    g.drawRoundedRect(BX, BY, BW, BH, 12);
+    g.endFill();
+    // řazení podle c/w na „seřaď podle c lomeno w“ (110.32)
+    const sortP = easeOut(ph(lt, 110.32, 111.9));
+    ITEMS.forEach((it, i) => {
+      const i0 = i, i1 = sorted.indexOf(i);
+      const x = lerp(280 + i0 * 240, 280 + i1 * 240, sortP);
+      let y = 170;
+      // greedy: item3 vpluje do baru (112.0), item2 zkusí a nevejde se (115.17)
+      let hl = false;
+      if (i === 2) {
+        const p = ph(lt, 112.0, 113.0);
+        if (p > 0) { const fx = lerp(x, BX + (5 / 8) * BW / 2, p); const fy = lerp(y, BY + BH / 2, p); drawItem(fx, fy, it, i, false, p < 1 ? 1 : 0); if (p >= 1) { g.lineStyle(0); g.beginFill(it.col, 0.9); g.drawRoundedRect(BX + 3, BY + 5, (5 / 8) * BW - 6, BH - 10, 8); g.endFill(); itemT[i].alpha = 1; itemT[i].x = BX + (5 / 8) * BW / 2; itemT[i].y = BY + BH / 2; } if (p >= 1 && !fired.has('g3')) { fired.add('g3'); burst(BX + 200, BY + BH / 2, it.col, 16, 200, 0.1); } return; }
+      }
+      if (i === 1) {
+        const p = ph(lt, 113.37, 115.17);
+        if (p > 0 && lt < 119.0) {
+          const shake = lt > 115.17 ? 8 * Math.sin(lt * 30) * clamp01(1 - (lt - 115.17)) : 0;
+          const fx = lerp(x, BX + (5 / 8) * BW + 100, Math.min(1, p)) + shake;
+          const fy = lerp(y, BY + BH / 2, Math.min(1, p));
+          hl = lt > 115.17;
+          drawItem(fx, fy, it, i, hl, 1);
+          if (lt > 115.2 && !fired.has('hh')) { fired.add('hh'); burst(fx, fy, C.red, 24, 260, 0.12); }
+          return;
+        }
+        if (lt >= 119.0) { drawItem(900, 170, it, i, true, 1); return; }
+      }
+      drawItem(x, y, it, i, hl, 1);
+    });
+    function drawItem(x, y, it, i, hl, a) {
+      g.lineStyle(3, hl ? C.red : 0x0b0e16, a);
+      g.beginFill(it.col, 0.95 * a);
+      g.drawRoundedRect(x - 60, y - 36, 120, 72, 12);
+      g.endFill();
+      itemT[i].alpha = a; itemT[i].x = x; itemT[i].y = y;
+    }
+    // zbytek baru = nevyužité 3/8
+    hLab.alpha = lt > 115.17 ? 1 : 0;
+    cmp.alpha = lt > 115.7 ? easeOut(ph(lt, 115.7, 116.6)) : 0;   // „vezmi lepší“
+    stamp.alpha = lt > 121.74 ? 1 : 0;                             // „polovina optima“
+    stamp.scale.set(lerp(1.8, 1, easeOut(ph(lt, 121.74, 122.4))) * (1 + 0.03 * Math.sin(lt * 6)));
+    check.alpha = lt > 123.7 ? easeOut(ph(lt, 123.7, 124.6)) : 0;
+    if (lt > 121.8 && !fired.has('st')) { fired.add('st'); burst(640, 614, C.green, 34, 320, 0.14); }
+    if (lt < 110.32) cap.text = 'BONUS: Dantzigův greedy pro fajnšmekry';
+    else if (lt < 112.39) { cap.text = 'seřaď podle c/w: 0.80 → 0.75 → 0.67'; cap.style.fill = 0xfde047; }
+    else if (lt < 115.7) { cap.text = 'plň, dokud to jde… položka 2 už se NEVEJDE → to je h'; cap.style.fill = C.red; }
+    else { cap.text = 'lepší z {prefix před h} a {h samotná} ≥ OPT/2'; cap.style.fill = C.green; }
+  } };
+});
+
+chorusScene(126.64, 154.68, ANCH[2], 2);
+
+// ── OUTRO [154.68 – 172]: echo rekurence ──
+scene(154.68, 172, () => {
+  const c = new PIXI.Container();
+  const disco = buildDisco(c);
+  const table = buildTable(c);
+  const e1 = txt('min( x(k, j−1) ,', 38, 0xfbbf24, '900', MATH); e1.x = 420; e1.y = 90; e1.alpha = 0;
+  const e2 = txt('x(k−cⱼ, j−1) + wⱼ )', 38, C.violet, '900', MATH); e2.x = 880; e2.y = 90; e2.alpha = 0;
+  const fin = txt('Hotovo. Vyplň tabulku na papír — L7.2 · 2-aprox L3.11', 21, C.muted, '600'); fin.x = 640; fin.y = 660; fin.alpha = 0;
+  c.addChild(e1, e2, fin);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 154.68;
+    disco.render(lt, 0.9);
+    const beat = Math.sin(lt * 7.2);
+    e1.alpha = lt > 155.3 ? 0.55 + 0.45 * Math.max(0, beat) : 0;
+    e2.alpha = lt > 156.6 ? 0.55 + 0.45 * Math.max(0, -beat) : 0;
+    table.render(lt, { goldCells: [{ k: 6, j: 3 }] });
+    fin.alpha = easeOut(ph(lt, 160, 161.5));
+    if (lt > 155.4 && !fired.has('1')) { fired.add('1'); burst(420, 90, 0xfbbf24, 18, 220, 0.1); }
+    if (lt > 156.7 && !fired.has('2')) { fired.add('2'); burst(880, 90, C.violet, 18, 220, 0.1); }
+  } };
+});
+
+// ════════════════════════════════════════════════════════════════════
+// 5) TITULKY — řádky 1:1 jako sekce „Zpívej“ ve zpěvníku
+// ════════════════════════════════════════════════════════════════════
+const SUNG = [[0,0.16],[0.16,0.2],[0.2,3.08],[3.08,5.48],[5.48,6.44],[6.44,9.8],[9.8,11.72],[11.72,12.68],[12.68,15.56],[15.56,16.52],[16.52,19.48],[19.48,19.9],[19.9,20.43],[20.43,21.49],[21.49,21.91],[21.91,22.12],[22.12,22.55],[22.55,23.14],[23.14,23.32],[23.32,23.51],[23.51,24.47],[24.47,25.14],[25.14,25.43],[25.43,25.62],[25.62,26.09],[26.09,27.18],[27.18,27.18],[27.18,27.3],[27.3,28],[28,28.18],[28.18,29.09],[29.09,29.45],[29.45,29.55],[29.55,29.73],[29.73,30.01],[30.01,30.96],[30.96,31.56],[31.56,31.73],[31.73,32.23],[32.23,32.57],[32.57,32.74],[32.74,33.14],[33.14,33.42],[33.42,33.7],[33.7,34.41],[34.41,35.36],[35.36,35.8],[35.8,36.58],[36.58,36.84],[36.84,37.32],[37.32,38.55],[38.55,38.79],[38.79,39.32],[39.32,40.97],[40.97,43.02],[43.02,43.43],[43.43,44.28],[44.28,44.58],[44.58,45.2],[45.2,45.6],[45.6,47.1],[47.1,47.44],[47.44,47.54],[47.54,48.14],[48.14,48.86],[48.86,49.7],[49.7,50.59],[50.59,51.04],[51.04,52.17],[52.17,52.42],[52.42,54.28],[54.28,54.28],[54.28,54.96],[54.96,56.65],[56.65,58.31],[58.31,58.7],[58.7,59.7],[59.7,60.4],[60.4,60.7],[60.7,61.7],[61.7,62.53],[62.53,64.24],[64.24,64.51],[64.51,65.64],[65.64,66.74],[66.74,66.94],[66.94,67.44],[67.44,67.64],[67.64,67.84],[67.84,68.06],[68.06,69.01],[69.01,69.4],[69.4,69.92],[69.92,70.32],[70.32,70.73],[70.73,70.78],[70.78,70.96],[70.96,71.32],[71.32,72.04],[72.04,72.15],[72.15,72.37],[72.37,72.48],[72.48,73.38],[73.38,74.14],[74.14,74.76],[74.76,74.88],[74.88,75.63],[75.63,76],[76,76.25],[76.25,77.06],[77.06,77.63],[77.63,77.8],[77.8,78.28],[78.28,78.64],[78.64,78.78],[78.78,79.18],[79.18,79.42],[79.42,79.67],[79.67,80.31],[80.31,81.19],[81.19,81.69],[81.69,82.57],[82.57,82.9],[82.9,82.9],[82.9,83.45],[83.45,84.77],[84.77,85.04],[85.04,85.6],[85.6,87.13],[87.13,89.04],[89.04,89.42],[89.42,90.22],[90.22,90.51],[90.51,91.24],[91.24,91.68],[91.68,93.27],[93.27,93.48],[93.48,93.57],[93.57,94.15],[94.15,94.86],[94.86,95.78],[95.78,96.66],[96.66,97.06],[97.06,98.06],[98.06,98.28],[98.28,100.32],[100.32,101.02],[101.02,102.76],[102.76,104.19],[104.19,104.74],[104.74,106.17],[106.17,107.03],[107.03,108.16],[108.16,110.2],[110.2,110.32],[110.32,110.64],[110.64,111.17],[111.17,111.9],[111.9,111.9],[111.9,112.06],[112.06,112.39],[112.39,113.37],[113.37,114.87],[114.87,115.02],[115.02,115.17],[115.17,115.7],[115.7,116.29],[116.29,116.98],[116.98,117.09],[117.09,117.9],[117.9,118.04],[118.04,118.16],[118.16,119.2],[119.2,120.38],[120.38,121.74],[121.74,122.84],[122.84,123.7],[123.7,125.89],[125.89,126.64],[126.64,127.45],[127.45,127.68],[127.68,128.27],[128.27,128.49],[128.49,128.6],[128.6,128.84],[128.84,129.16],[129.16,129.43],[129.43,130.17],[130.17,131.19],[131.19,131.7],[131.7,132.56],[132.56,132.84],[132.84,133.43],[133.43,134.92],[134.92,135.22],[135.22,135.84],[135.84,137.19],[137.19,138.87],[138.87,139.21],[139.21,139.9],[139.9,139.9],[139.9,140.21],[140.21,140.99],[140.99,141.46],[141.46,143.21],[143.21,143.4],[143.4,143.49],[143.49,144.05],[144.05,144.74],[144.74,145.63],[145.63,146.53],[146.53,146.97],[146.97,148.11],[148.11,148.38],[148.38,150.34],[150.34,151],[151,152.65],[152.65,154.45],[154.45,154.68],[154.68,154.74],[154.74,158.4],[158.4,159.54],[159.54,162.65],[162.65,164.78],[164.78,168.55],[168.55,169.68],[169.68,169.87],[169.87,169.93],[169.93,170.08],[170.08,170.19],[170.19,170.38],[170.38,170.52]];
+const H = (cls, s) => `<span class="hl ${cls}">${s}</span>`;
+const CHL1 = `Minimum ze dvou: NECH TO BÝT — ${H('c2', 'x(k, j−1)')},`;
+const CHL2 = `nebo PŘIDEJ ${H('c1', 'j')}: ${H('c3', 'x(k − c<sub>j</sub>)')}, plus váha ${H('c3', 'w<sub>j</sub>')}!`;
+const CHL3 = `Na konci vem největší ${H('c1', 'k')} s váhou nejvýš ${H('c4', 'W')} —`;
+const CHL4 = `${H('c5', 'O(n·C)')} — pseudopolynom — ${H('c6', 'DP')} přes ceny, jé!`;
+const LINES = [
+  [13.5, 19.48, `Tenhle batoh je jiný, než ho znáš ze školy:`],
+  [19.48, 23.14, `stav NENÍ kapacita — stav je CENA, holky!`],
+  [23.14, 27.18, `${H('c1', 'x(k,j)')}: nejmenší váha, jak cenu ${H('c1', 'k')} poskládat`],
+  [27.18, 30.96, `z prvních ${H('c1', 'j')} položek — tak se to má počítat!`],
+  [30.96, 35.36, CHL1],
+  [35.36, 44.28, CHL2],
+  [44.28, 50.3, CHL3],
+  [50.3, 58.7, CHL4],
+  [58.7, 65.64, `Nula nula je nula, jinak nekonečno na startu,`],
+  [65.64, 69.4, `rozhodnutí si piš do ${H('c7', 's(k,j)')} — neztratíš mapu.`],
+  [69.4, 74.76, `Zpátky pak: když ${H('c7', 's')} je jedna, položka ${H('c1', 'j')} je v batohu,`],
+  [74.76, 77.06, `sniž ${H('c1', 'k')} o ${H('c8', 'c<sub>j</sub>')} — a couvej až k prologu!`],
+  [77.06, 81.19, CHL1],
+  [81.19, 90.22, CHL2],
+  [90.22, 96.3, CHL3],
+  [96.3, 104.74, CHL4],
+  [104.74, 111.9, `Bonus pro fajnšmekry: seřaď podle ${H('c8', 'c / w')},`],
+  [111.9, 115.7, `${H('c9', 'h')} je PRVNÍ položka, co se nevejde —`],
+  [115.7, 119.2, `vezmi LEPŠÍ z prefixu a ${H('c9', 'h')} samotné:`],
+  [119.2, 126.64, `dvojková aproximace — polovina optima jistá je!`],
+  [126.64, 131.19, CHL1],
+  [131.19, 139.9, CHL2],
+  [139.9, 146.3, CHL3],
+  [146.3, 154.68, CHL4],
+  [154.68, 162.0, `Minimum ze dvou… nebo přidej ${H('c1', 'j')}…`],
+  [162.0, 170.5, `Minimum ze dvou… nebo přidej ${H('c1', 'j')}…`],
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 6) PLAYER / KARAOKE / CONTROLS
+// ════════════════════════════════════════════════════════════════════
+const player = document.getElementById('player');
+const subEl = document.getElementById('subtitle');
+const bigplay = document.getElementById('bigplay');
+const btnPlay = document.getElementById('btnPlay');
+const btnRestart = document.getElementById('btnRestart');
+const seek = document.getElementById('seek');
+const tCur = document.getElementById('tCur');
+const tDur = document.getElementById('tDur');
+
+let curScene = null, lastLocal = -1, curLine = -1;
+let lineWords = [];
+function tokenize(html) {
+  const out = []; let cur = ''; let inTag = false;
+  for (const ch of html) {
+    if (ch === '<') inTag = true;
+    else if (ch === '>') inTag = false;
+    if (ch === ' ' && !inTag) { if (cur) out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+function buildKaraokeLine(li) {
+  const [a, b, html] = LINES[li];
+  const tokens = tokenize(html);
+  const ww = SUNG.filter(w => w[0] >= a - 0.06 && w[0] < b && w[1] > w[0]);
+  const pick = (i) => {
+    if (!ww.length) {
+      const step = (b - a) / tokens.length;
+      return [a + step * i, a + step * (i + 1)];
+    }
+    const wi = tokens.length === 1 ? 0 : Math.round(i * (ww.length - 1) / (tokens.length - 1));
+    return ww[wi];
+  };
+  subEl.innerHTML = tokens.map(tok =>
+    `<span class="kw"><span class="wb">${tok}</span><span class="wf">${tok}</span></span>`).join(' ');
+  const els = [...subEl.querySelectorAll('.kw')];
+  lineWords = tokens.map((tok, i) => {
+    const [t0, t1] = pick(i);
+    return { t0, t1: Math.max(t1, t0 + 0.12), wf: els[i] ? els[i].querySelector('.wf') : null };
+  });
+}
+function tick() {
+  const t = player.currentTime;
+  const s = scenes.find(sc => t >= sc.t0 && t < sc.t1) || scenes[scenes.length - 1];
+  if (s !== curScene) { curScene && curScene.destroy(); curScene = s; s.init(); lastLocal = -1; }
+  const localT = t - s.t0;
+  if (localT < lastLocal - 0.05) { s.destroy(); s.init(); }
+  s.update(localT);
+  lastLocal = localT;
+  const li = LINES.findIndex(([a, b]) => t >= a && t < b);
+  if (li !== curLine) {
+    curLine = li;
+    if (li >= 0) buildKaraokeLine(li);
+    else { subEl.innerHTML = ''; lineWords = []; }
+    subEl.style.opacity = li >= 0 ? 1 : 0;
+  }
+  for (let i = 0; i < lineWords.length; i++) {
+    const w = lineWords[i];
+    if (!w.wf) continue;
+    const nextStart = i + 1 < lineWords.length ? lineWords[i + 1].t0 : w.t1;
+    let p;
+    if (t >= Math.max(w.t1, nextStart)) p = 1;
+    else p = clamp01((t - w.t0) / (w.t1 - w.t0));
+    w.wf.style.width = (p * 100).toFixed(1) + '%';
+  }
+  if (!seekDragging) {
+    seek.value = t;
+    seek.style.setProperty('--p', (t / (player.duration || 171.5) * 100) + '%');
+  }
+  tCur.textContent = fmtTime(t);
+  requestAnimationFrame(tick);
+}
+function fmtTime(t) { t = Math.max(0, t || 0); return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`; }
+
+let seekDragging = false;
+seek.addEventListener('input', () => {
+  seekDragging = true;
+  player.currentTime = +seek.value;
+  seek.style.setProperty('--p', (+seek.value / (player.duration || 171.5) * 100) + '%');
+});
+seek.addEventListener('change', () => { seekDragging = false; });
+function togglePlay() { if (player.paused) player.play(); else player.pause(); }
+player.addEventListener('play', () => { btnPlay.textContent = '⏸'; bigplay.classList.add('hidden'); });
+player.addEventListener('pause', () => { btnPlay.textContent = '▶'; if (player.currentTime < 0.05 || player.ended) bigplay.classList.remove('hidden'); });
+player.addEventListener('ended', () => { bigplay.classList.remove('hidden'); bigplay.querySelector('.hint').innerHTML = 'Ještě jednou?<small>R = od začátku</small>'; });
+player.addEventListener('loadedmetadata', () => {
+  seek.max = player.duration;
+  tDur.textContent = fmtTime(player.duration);
+});
+btnPlay.addEventListener('click', togglePlay);
+btnRestart.addEventListener('click', () => { player.currentTime = 0; player.play(); });
+bigplay.addEventListener('click', () => { player.play(); });
+document.getElementById('stage').addEventListener('click', (e) => {
+  if (e.target.closest('#bigplay')) return;
+  togglePlay();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  else if (e.code === 'ArrowRight') player.currentTime = Math.min(player.duration || 171, player.currentTime + 5);
+  else if (e.code === 'ArrowLeft') player.currentTime = Math.max(0, player.currentTime - 5);
+  else if (e.key === 'r' || e.key === 'R' || e.code === 'Home') { player.currentTime = 0; player.play(); }
+});
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
