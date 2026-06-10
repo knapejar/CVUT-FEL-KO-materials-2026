@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L2.10 · Stavový automat jako graf — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="../index.html" title="Zpět odkud jsem přišel">
+      <img src="../assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="../index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <a href="../index.html#k2">K2 · Nejkratší cesty</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">L2.10</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <p class="lesson-meta">
+    <span class="chip">L2.10</span> Kapitola K2 — Nejkratší cesty (Slot 2) · <strong>[MUST]</strong>
+  </p>
+  <h1>Stavový automat jako graf</h1>
+
+  <div class="one-new-thing">
+    <span class="lbl">Jedna nová věc</span>
+    V <a href="l2-9.html#takeaways">[L2.9]</a> byl stav jediné číslo (rok, hodina). Dnes stav = <strong>celá konfigurace úlohy</strong> (kolik vody je v které nádobě, kdo stojí na kterém břehu…) a hrana = <strong>povolený tah</strong> s cenou. Graf nedostaneš — vygeneruješ ho z pravidel a pak na něj pustíš Dijkstru.
+  </div>
+
+  <p>Recept <em>stav — přechod — cena</em> z <a href="l2-9.html#takeaways">[L2.9]</a> zůstává v platnosti. Mění se odpověď na první otázku: u pana Dow Jonese stačil jako stav rok, u řidiče autobusu hodina. Hlavolamy z přednášky — slidy je vedou pod hlavičkou <em>SPT.automaton</em> — potřebují víc: stav je celý „snímek“ situace. Ukážeme si to na odměřování vody (slide 26, zkouška 24.&nbsp;5.&nbsp;2011) a na převádění lidí přes most (slide 27).</p>
+
+  <!-- ===== VODA ===== -->
+  <h2>Odměřování vody: co všechno musí být ve stavu</h2>
+  <p>Stojíš u jezera s prázdnou 3litrovou a prázdnou 5litrovou lahví. Úkol: mít <strong>přesně 4 litry ve větší lahvi</strong>. Žádné rysky, žádné odhadování — povolené jsou jen tři druhy manipulací: <em>napustit</em> láhev z jezera po okraj, <em>vylít</em> láhev celou do jezera, <em>přelít</em> z jedné lahve do druhé (přeléváš, dokud se zdrojová nevyprázdní, nebo cílová nenaplní). Anglický originál zadání je v úloze T01 níže.</p>
+
+  <details class="try">
+    <summary>Zkus sám: recept začíná otázkou „co je stav?“. Jaká nejmenší informace tady určuje, co všechno můžeš udělat dál?</summary>
+    <div class="inner">
+      <p>Dvojice $(x, y)$: $x \in \{0, \ldots, 3\}$ litrů v trojce, $y \in \{0, \ldots, 5\}$ litrů v pětce. Jedno číslo nestačí — které manipulace jsou povolené i jak dopadne přelití závisí na <em>obou</em> obsazích (jezero je nekonečné, to si pamatovat nemusíme). Stavů je nanejvýš $4 \cdot 6 = 24$ — konečně malý <strong>stavový prostor</strong> (state space).</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: vypiš všechny tahy, které jdou udělat ze stavu $(3, 2)$.</summary>
+    <div class="inner">
+      <p>Čtyři: napustit pětku $\to (3,5)$, vylít trojku $\to (0,2)$, vylít pětku $\to (3,0)$, přelít trojku do pětky (vejdou se všechny 3 litry) $\to (0,5)$. Napustit trojku ani přelít z pětky do trojky nejde — trojka je plná. Obecný stav má až 6 odchozích hran: 2× napustit, 2× vylít, 2× přelít.</p>
+    </div>
+  </details>
+
+  <div class="viz" id="viz-ops"></div>
+
+  <details class="try">
+    <summary>Zkus sám: co je start a co cíl? Pozor, cíl je záludnější, než vypadá.</summary>
+    <div class="inner">
+      <p>Start $s = (0,0)$. Cíl ale není jeden vrchol: „4 litry ve větší lahvi“ splňuje <strong>každý</strong> stav s $y = 4$, tedy množina $\{(0,4), (1,4), (2,4), (3,4)\}$. Hledáme nejkratší cestu z $s$ do <em>nejbližšího</em> z nich — buď spočítáme vzdálenosti do všech a vezmeme minimum, nebo elegantně přidáme <strong>super-cíl</strong> $t$ a hranu s cenou $0$ z každého cílového stavu do $t$. (Které cílové stavy jsou vůbec dosažitelné, předem nevíme — ukáže to až prohledávání.)</p>
+    </div>
+  </details>
+
+  <p>Tomu, co jsme právě postavili, se říká <strong>stavový automat</strong> (state automaton): množina stavů + pravidla přechodů. Zásadní rozdíl proti <a href="l2-9.html#takeaways">[L2.9]</a>: graf není v zadání ani „schovaný“ v časové ose. <strong>Vyrábí se z pravidel</strong> — hranu poznáš tak, že na stav aplikuješ povolený tah. Vrcholy grafu jsou <em>všechny dosažitelné stavy</em> a které to jsou, zjistíš až průchodem.</p>
+
+  <!-- ===== VÁHY ===== -->
+  <h2>Stejný automat, různé váhy</h2>
+  <p>Zadání ze slidu 26 chce postupně tři různé věci — a všechny tři se řeší na <em>témže</em> grafu, jen s jinými cenami hran:</p>
+
+  <details class="try">
+    <summary>Zkus sám: jaké váhy zvolíš pro „nejmenší počet manipulací“?</summary>
+    <div class="inner">
+      <p>Každá manipulace je jeden tah → $c(e) = 1$ pro všechny hrany. Délka cesty = počet manipulací.</p>
+    </div>
+  </details>
+
+  <details class="try">
+    <summary>Zkus sám: a pro „nejméně přemístěné vody“ a „nejméně vody vylité zpět do jezera“?</summary>
+    <div class="inner">
+      <p>Cena hrany = objem vody, kterou daný tah přemístí (napuštění $3-x$ resp. $5-y$ litrů, vylití $x$ resp. $y$, přelití přelitý objem). Pro třetí otázku platí cenu jen hrany „vylít do jezera“ ($x$ resp. $y$ litrů), všechno ostatní má cenu $0$. Nuly nevadí — Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> chce jen $c \ge 0$, ne $c &gt; 0$.</p>
+    </div>
+  </details>
+
+  <table>
+    <tr><th>Otázka</th><th>Cena hrany (tahu)</th><th>Algoritmus</th></tr>
+    <tr><td>min. počet manipulací</td><td>$1$ za každý tah</td><td>Dijkstra; při jednotkových vahách zavírá stavy po „vlnách“ podle počtu tahů — tomu se říká <strong>prohledávání do šířky</strong> (breadth-first search, BFS)</td></tr>
+    <tr><td>min. přemístěná voda</td><td>objem přemístěný tahem</td><td>Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> (váhy $\ge 0$)</td></tr>
+    <tr><td>min. voda vylitá do jezera</td><td>objem jen u „vylít“, jinak $0$</td><td>Dijkstra (nulové váhy jsou povolené)</td></tr>
+  </table>
+
+  <!-- ===== BĚH ===== -->
+  <h2>Běh: vlna stavovým prostorem</h2>
+
+  <details class="try">
+    <summary>Zkus sám (na papír, než pustíš krokování): najdi posloupnost manipulací, která skončí se 4 litry v pětce. Kolik tahů potřebuješ nejméně?</summary>
+    <div class="inner">
+      <p>Jde to na <strong>6 tahů</strong>: napustit pětku $(0,5)$, přelít do trojky $(3,2)$, vylít trojku $(0,2)$, přelít zbytek do trojky $(2,0)$, napustit pětku $(2,5)$, dolít trojku $(3,4)$. Že méně tahů nestačí, ukáže běh níže — vlna dorazí k prvnímu cílovému stavu přesně v 6. vrstvě.</p>
+    </div>
+  </details>
+
+  <p>Pusť si běh pro jednotkové váhy. Dijkstra s cenami $1$ zavírá stavy přesně po vrstvách „dosažitelné na $k$ tahů“ — sleduj, jak se vlna šíří a jak se stavový prostor <em>teprve při běhu</em> vynořuje z pravidel:</p>
+
+  <div class="viz" id="viz-bfs"></div>
+
+  <p>Stejný princip poběží i v příští lekci [L2.11] — časově expandovaná síť je také stavový automat, jen se stavem „(kde jsem, kolik je hodin)“.</p>
+
+  <div class="box danger">
+    <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: tři pasti stavových automatů</div>
+    <ul>
+      <li><strong>Stav nese méně, než musí.</strong> U mostu (úloha T02) nestačí pamatovat si, kdo už přešel — bez polohy baterky model dovolí přejít potmě. Test z <a href="l2-9.html#takeaways">[L2.9]</a> zpřísni: „určuje stav <em>přesnou množinu povolených tahů</em>?“ Když ne, něco do stavu chybí.</li>
+      <li><strong>Cíl je množina stavů.</strong> Odpověď je minimum přes všechny cílové stavy (nebo vzdálenost do super-cíle). Kdo si vybere jen jeden cílový stav, může minout kratší řešení končící v jiném.</li>
+      <li><strong>Stavová exploze.</strong> Dvě lahve = $24$ stavů, pohoda. Most se $4$ lidmi = $2^4 \cdot 2 = 32$ stavů, s $n$ lidmi $2^n \cdot 2$ — formulace je pořád korektní, ale graf roste <em>exponenciálně</em> s počtem „věcí ve stavu“. U zkoušky velikost stavového prostoru vždy vyčísli.</li>
+    </ul>
+  </div>
+
+  <!-- ===== KEY TAKEAWAYS ===== -->
+  <div class="box takeaways" id="takeaways">
+    <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.10</div>
+    <ul>
+      <li><strong>Stav = úplná konfigurace problému</strong> (obsahy obou nádob; kdo je na kterém břehu <em>a kde je baterka</em>). Test: stav musí určovat přesnou množinu povolených tahů.</li>
+      <li><strong>Hrany se generují z pravidel</strong> (povolené tahy s cenou), graf nikdo nedá seznamem — dosažitelné stavy odhalí až prohledávání.</li>
+      <li><strong>Cíl bývá množina stavů</strong> → minimum přes cíle, nebo super-cíl $t$ napojený hranami s cenou $0$.</li>
+      <li><strong>Stejný automat, různé váhy = různé otázky</strong> (počet tahů / čas / objem). Váhy $\ge 0$ → Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a>; jednotkové váhy = vlna po vrstvách (BFS).</li>
+      <li><strong>Velikost stavového prostoru vyčísli</strong> — roste exponenciálně s počtem složek stavu ($2^n \cdot 2$ u mostu).</li>
+    </ul>
+  </div>
+
+  <!-- ===== ÚLOHA T01 ===== -->
+  <div class="task" id="t-water">
+    <div class="task-head">
+      <span class="task-id">T01</span>
+      <strong>Measurement of Water Level</strong>
+      <span class="task-src">zdroj: slide 26, 3_SPT_KO.pdf = banka #14 (vedena jako Unsolved — řešení vlastní); táž úloha „Odměřování vody“ u zkoušky 24. 5. 2011 (dochována jen jako sken)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“You are on the bank of the lake and you have one 3-liter bottle and one 5-liter bottle. Both bottles are empty and your task is to have exactly 4 liters in the bigger bottle. You have no other equipment to measure the water level.</p>
+        <p>(a) Represent the problem by the graph.</p>
+        <p>(b) Set-up suitable weights and formulate the shortest path problem to find</p>
+        <ul>
+          <li>solution with the minimum number of manipulations,</li>
+          <li>solution with the minimum amount of manipulated water,</li>
+          <li>solution with the minimum amount of water poured back in the lake.</li>
+        </ul>
+        <p>(c) During some manipulations you have to be very careful - for example when one bottle is filled completely but the other one does not become empty. Find the solution which minimizes the number of such manipulations.</p>
+        <p>(d) Is it possible to have 5 liters while using 4-liter and 6-liter bottles?”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Hlavolam s přeléváním: 3l a 5l láhev, obě prázdné, cíl 4 litry v pětce. Části (a) a (b) jsou přesně látka této lekce (reprezentace grafem + tři volby vah), (c) přidává čtvrtou volbu vah pro „opatrné“ manipulace a (d) je rychlá otázka na jinou dvojici objemů — pozor, odpověď není graf, ale argument.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — stav $(x,y)$, tahy jako hrany, cíl jako množina stavů, volby vah.</li>
+        <li><a href="l2-9.html#takeaways">[L2.9] Modelování reálné úlohy jako SP</a> — recept stav–přechod–cena a korespondence řešení ↔ cesta.</li>
+        <li><a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a> — předpoklad $c \ge 0$.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Projdi recept: co je stav, kolik jich nejvýš je, jaké tahy z obecného stavu vedou? Kde je start a co všechno je cíl? Pro každou odrážku v (b) si polož otázku „kolik tenhle konkrétní tah <em>stojí</em>?“ — graf se nemění, mění se jen $c(e)$. V (c) nejdřív přesně popiš, který tah je „opatrný“, a teprve pak mu dej cenu. V (d) hledej <strong>invariant</strong>: vlastnost, kterou žádný tah nepokazí, a kterou cíl porušuje.</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — banka úlohu řešenou nemá; optima ověřena strojovým prohledáním celého stavového prostoru)</summary>
+        <div class="inner">
+          <p><strong>(a) Graf.</strong> Vrcholy = stavy $(x, y)$, $x \in \{0,\ldots,3\}$, $y \in \{0,\ldots,5\}$ (nejvýše 24). Hrany = manipulace: napustit ($(x,y) \to (3,y)$, resp. $(x,5)$), vylít ($\to (0,y)$, resp. $(x,0)$), přelít z trojky do pětky $\to (x - m,\, y + m)$ s $m = \min(x,\, 5 - y)$ a symetricky zpět. Start $s = (0,0)$; cílová množina $\{(x, 4)\}$, napojená hranami s cenou $0$ na super-cíl $t$. Z 24 stavů je dosažitelných 16 a mají dohromady 58 hran; z cílů jsou dosažitelné jen $(3,4)$ a $(0,4)$ — viz krokovaný běh ve výkladu.</p>
+          <p><strong>(b) Tři volby vah</strong> (graf je pořád stejný):</p>
+          <ul>
+            <li><em>Minimum manipulací:</em> $c(e) = 1$. Optimum je <strong>6 tahů</strong>: $(0,0) \xrightarrow{+5} (0,5) \xrightarrow{5 \to 3} (3,2) \xrightarrow{-3} (0,2) \xrightarrow{5 \to 3} (2,0) \xrightarrow{+5} (2,5) \xrightarrow{5 \to 3} (3,4)$.</li>
+            <li><em>Minimum přemístěné vody:</em> $c(e) =$ objem přemístěný tahem. Optimální je tatáž cesta: $5 + 3 + 3 + 2 + 5 + 1 = \mathbf{19}$ litrů.</li>
+            <li><em>Minimum vody vylité do jezera:</em> $c(e) =$ objem jen u tahů „vylít“, jinak $0$. Optimum <strong>3 litry</strong> (jediné vylití $(3,2) \to (0,2)$ na téže cestě). Nula nejde: bez vylévání voda v lahvích nikdy neubývá a dosažitelných je jen 8 stavů $\{(0,0), (3,0), (0,5), (3,5), (0,3), (3,2), (3,3), (1,5)\}$ — žádný s $y = 4$.</li>
+          </ul>
+          <p><strong>(c) Opatrné manipulace.</strong> Zadání je vymezuje příkladem; přirozené čtení: <em>přelití, při kterém se cílová láhev naplní po okraj, ale zdrojová se nevyprázdní</em> — musíš hlídat hladinu, abys nepřelil (modelovací volba, kterou u zkoušky napiš explicitně). Dej $c(e) = 1$ těmto přelitím a $0$ všem ostatním tahům → Dijkstra s vahami $0/1$. Optimum je <strong>1 opatrná manipulace</strong>, např. $(0,0) \xrightarrow{+3} (3,0) \xrightarrow{3 \to 5} (0,3) \xrightarrow{+3} (3,3) \xrightarrow{3 \to 5} (1,5)^{\,!} \xrightarrow{-5} (1,0) \xrightarrow{3 \to 5} (0,1) \xrightarrow{+3} (3,1) \xrightarrow{3 \to 5} (0,4)$ — opatrné je jen přelití $(3,3) \to (1,5)$. Stojí to ale 8 tahů; šestitahová cesta z (b) má opatrná přelití dvě ($(0,5) \to (3,2)$ a $(2,5) \to (3,4)$) — různé váhy, různí vítězové.</p>
+          <p><strong>(d) Lahve 4 l a 6 l → 5 litrů?</strong> <strong>Ne.</strong> Invariant: oba obsahy zůstávají sudé. Na začátku $(0,0)$ sudé; napuštění dá 4 nebo 6, vylití 0, a přelitý objem $m = \min(x,\, 6 - y)$ (resp. $\min(y,\, 4 - x)$) je rozdíl/minimum sudých čísel, tedy sudý. Stav s 5 litry je lichý → nedosažitelný. (Obecně: dosažitelné objemy jsou násobky $\gcd$ objemů lahví, zde $\gcd(4,6) = 2$.)</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- ===== ÚLOHA T02 ===== -->
+  <div class="task" id="t-bridge">
+    <div class="task-head">
+      <span class="task-id">T02</span>
+      <strong>Bridge and Torch Problem</strong>
+      <span class="task-src">zdroj: slide 27, 3_SPT_KO.pdf = banka #15 (studijní úloha [P], vedena jako Unsolved — řešení vlastní)</span>
+    </div>
+    <div class="task-body">
+      <div class="assignment">
+        <span class="lbl">Assignment (original, EN)</span>
+        <p>“Homework - Formulate the shortest path problem:</p>
+        <p>Four people come to a river in the night. There is a narrow bridge, but it can only hold two people at a time. They have one torch and, because it's night, the torch has to be used when crossing the bridge. One person can cross the bridge in 1 minute, one person in 2 minutes, one person in 5 minutes, and another person in 9 minutes. When two people cross the bridge together, they must move at the slower person's pace. The question is, can they all get across the bridge in 16 minutes or less?”</p>
+      </div>
+
+      <h4>a) Co je v zadání?</h4>
+      <p>Klasický hlavolam: čtyři lidé s časy 1, 2, 5 a 9 minut, most unese dva, baterka je jedna a přes most musí s každým přechodem — takže se s ní musí i vracet. Úkol: formulovat jako problém nejkratší cesty a rozhodnout, zda existuje plán do 16 minut.</p>
+
+      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <ul>
+        <li>Tato lekce — stav jako konfigurace, hrany generované tahy, vyčíslení stavového prostoru.</li>
+        <li><a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a> — váhy (časy) jsou kladné.</li>
+      </ul>
+
+      <h4>c) Jak nad úlohou uvažovat?</h4>
+      <p>Co je stav? „Kdo už je na druhém břehu“ je málo — promysli, proč (kdo se může vrátit a s čím?). Co je tah a kolik stojí, když jdou dva? Kolik má automat stavů? A než pustíš Dijkstru, zkus plán vymyslet ručně: intuice „nejrychlejší dělá převozníka a vodí ostatní“ — spočítej ji; jde to líp?</p>
+
+      <details class="solution">
+        <summary>d) Úplné řešení (vlastní — banka úlohu řešenou nemá)</summary>
+        <div class="inner">
+          <p><strong>Graf.</strong> Stav $= (S, b)$, kde $S \subseteq \{1, 2, 5, 9\}$ je množina lidí na výchozím břehu a $b \in \{\text{L}, \text{R}\}$ je poloha baterky. Bez $b$ to nejde: tahy zpět smí dělat jen někdo na břehu s baterkou. Stavů je $2^4 \cdot 2 = 32$. Hrany: je-li $b = \text{L}$, vyber jednoho nebo dva lidi z $S$ a pošli je tam — cena $= \max$ jejich časů, baterka se přepne na R; je-li $b = \text{R}$, vyber jednoho nebo dva z doplňku $S$ a pošli je zpět (s baterkou), cena opět $\max$. Start $s = (\{1,2,5,9\}, \text{L})$, cíl $t = (\emptyset, \text{R})$ — tady je cíl výjimečně jediný stav. Otázka zadání = „je délka nejkratší $s$–$t$ cesty $\le 16$?“; časy jsou kladné → Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a>.</p>
+          <p><strong>Odpověď: ano, přesně 16 minut.</strong> Převozník dá jen 18: $\{1,9\}$ tam (9), 1 zpět (1), $\{1,5\}$ tam (5), 1 zpět (1), $\{1,2\}$ tam (2). Trik je poslat <em>dva nejpomalejší spolu</em>, aby se devítka a pětka neplatily zvlášť: $\{1,2\}$ tam (2), 1 zpět (1), $\{5,9\}$ tam (9), 2 zpět (2), $\{1,2\}$ tam (2) — celkem $2+1+9+2+2 = 16$. Dijkstra tuhle cestu najde sama (a zaručí, že méně než 16 nejde); cesta je na obrázku pod úlohou.</p>
+          <p><strong>Vyčíslení (patří k formulaci):</strong> $|V| = 2^n \cdot 2$, z každého stavu vede nejvýše $\binom{k}{1} + \binom{k}{2}$ tahů ($k$ = počet lidí na břehu s baterkou), tedy $|E| = O(2^n n^2)$ — pro $n = 4$ směšné, obecně exponenciální (past č. 3 z výkladu).</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <div class="viz" id="viz-bridge"></div>
+
+  <label class="done-toggle" data-lesson-id="L2.10">
+    <input type="checkbox"> Lekci mám hotovou
+  </label>
+
+  <div class="pager">
+    <a href="../k2/l2-9.html"><span class="dir">← Předchozí</span> L2.9 · Modelování reálné úlohy jako SP (DAG / stavový prostor)</a>
+    <a class="next" href="../index.html#k2"><span class="dir">Další →</span> Pokračování se připravuje (L2.11 · Časově expandovaná síť (constrained SP))</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="../assets/js/viz.js"></script>
+<script>
+// ---- Gadget: tahy ze stavu (3,2) ----
+KOViz.graph(document.getElementById('viz-ops'), {
+  directed: true,
+  w: 640, h: 360, nodeR: 21,
+  nodes: [
+    { id: 'c32', x: 320, y: 180, label: '3,2', cls: 'hl' },
+    { id: 't35', x: 320, y: 58,  label: '3,5' },
+    { id: 't05', x: 560, y: 180, label: '0,5' },
+    { id: 't30', x: 320, y: 302, label: '3,0' },
+    { id: 't02', x: 80,  y: 180, label: '0,2' },
+  ],
+  edges: [
+    { from: 'c32', to: 't35', label: 'napusť pětku (+3 l)' },
+    { from: 'c32', to: 't05', label: 'přelij 3→5 (3 l)' },
+    { from: 'c32', to: 't30', label: 'vylij pětku (−2 l)' },
+    { from: 'c32', to: 't02', label: 'vylij trojku (−3 l)' },
+  ],
+  caption: 'Hrany se generují z pravidel: čtyři povolené tahy ze stavu (3,2). Zbylé dva typy tahů (napustit trojku, přelít 5→3) tady nejdou — trojka je plná.',
+});
+
+// ---- Stepper: vlna (BFS) stavovým prostorem odměřování vody ----
+// Rozložení po vrstvách = vzdálenost (počet tahů) od startu (0,0).
+const WN = [
+  ['s00', 50,  170, '0,0', 'start'],
+  ['s30', 175, 100, '3,0', ''], ['s05', 175, 250, '0,5', ''],
+  ['s35', 300, 50,  '3,5', ''], ['s03', 300, 150, '0,3', ''], ['s32', 300, 260, '3,2', ''],
+  ['s33', 425, 150, '3,3', ''], ['s02', 425, 260, '0,2', ''],
+  ['s15', 550, 150, '1,5', ''], ['s20', 550, 260, '2,0', ''],
+  ['s10', 675, 150, '1,0', ''], ['s25', 675, 260, '2,5', ''],
+  ['s01', 800, 150, '0,1', ''], ['s34', 800, 260, '3,4', 'cíl'],
+  ['s31', 920, 150, '3,1', ''], ['s04', 920, 260, '0,4', 'cíl'],
+];
+// hrany, po kterých vlna stav poprvé objevila (BFS strom)
+const WE = [
+  ['s00','s30','+3'], ['s00','s05','+5'],
+  ['s30','s35','+5'], ['s30','s03','3→5'], ['s05','s32','5→3'],
+  ['s03','s33','+3'], ['s32','s02','−3'],
+  ['s33','s15','3→5'], ['s02','s20','5→3'],
+  ['s15','s10','−5'], ['s20','s25','+5'],
+  ['s10','s01','3→5'], ['s25','s34','5→3'],
+  ['s01','s31','+3'], ['s34','s04','−3'],
+];
+const wLayers = [
+  ['s00'],
+  ['s30','s05'],
+  ['s35','s03','s32'],
+  ['s33','s02'],
+  ['s15','s20'],
+  ['s10','s25'],
+  ['s01','s34'],
+  ['s31','s04'],
+];
+function waveFrame(k) { // absolutní stav: vrstvy < k zavřené, vrstva k čerstvá
+  const nodes = {}, edges = {};
+  for (let d = 0; d <= k; d++) wLayers[d].forEach(id => { nodes[id] = (d === k) ? 'hl' : 'good'; });
+  WE.forEach(([a, b]) => {
+    const db = wLayers.findIndex(L => L.includes(b));
+    if (db < k) edges[a + '->' + b] = 'good';
+    else if (db === k) edges[a + '->' + b] = 'hl';
+  });
+  return { nodes, edges };
+}
+const wDescs = [
+  'Vlna 0: start (0,0). Z pravidel jdou jen dva tahy — napustit trojku, nebo napustit pětku.',
+  'Vlna 1 (po 1 tahu): objeveny stavy (3,0) a (0,5). Tahy „vylít“ vedou zpět do (0,0) — nic nového.',
+  'Vlna 2: z (3,0) napuštěním pětky (3,5) a přelitím (0,3); z (0,5) přelitím do trojky (3,2). Ostatní tahy vedou do už objevených stavů.',
+  'Vlna 3: nové jsou (3,3) (z (0,3) napustit trojku) a (0,2) (z (3,2) vylít trojku). Stav (3,5) už nic nového nepřidá.',
+  'Vlna 4: (3,3) přelitím dá (1,5) — pětka se naplní a v trojce zbude litr; (0,2) přelitím dá (2,0).',
+  'Vlna 5: (1,5) vylitím pětky dá (1,0); (2,0) napuštěním pětky dá (2,5).',
+  'Vlna 6: z (2,5) přelitím do trojky vznikne (3,4) — <strong>cíl objeven po 6 tazích</strong>; tady může prohledávání skončit. (Druhý nový stav: (0,1).)',
+  'Vlna 7 (pro úplnost): (3,1) a druhý cílový stav (0,4) — na 7 tahů. Celkem 16 dosažitelných stavů z 24 možných.',
+  'Výsledek: nejmenší počet manipulací je <strong>6</strong> — zvýrazněná cesta (0,0)→(0,5)→(3,2)→(0,2)→(2,0)→(2,5)→(3,4): napustit pětku, přelít, vylít trojku, přelít, napustit pětku, dolít trojku.',
+];
+const optPath = ['s00','s05','s32','s02','s20','s25','s34'];
+const wFrames = [];
+for (let k = 0; k < 8; k++) { const f = waveFrame(k); f.desc = wDescs[k]; wFrames.push(f); }
+(function () { // závěrečný frame: optimální cesta
+  const nodes = {}, edges = {};
+  optPath.forEach(id => nodes[id] = 'hl');
+  WE.forEach(([a, b]) => {
+    const i = optPath.indexOf(a);
+    edges[a + '->' + b] = (i >= 0 && optPath[i + 1] === b) ? 'hl' : 'dim';
+  });
+  wFrames.push({ nodes, edges, desc: wDescs[8] });
+})();
+KOViz.stepper(document.getElementById('viz-bfs'), {
+  graph: {
+    directed: true, w: 960, h: 320, nodeR: 17,
+    nodes: WN.map(([id, x, y, label, sub]) => ({ id, x, y, label, sub })),
+    edges: WE.map(([from, to, label]) => ({ from, to, label })),
+  },
+  frames: wFrames,
+  caption: 'Vlna (Dijkstra s jednotkovými vahami = BFS) stavovým prostorem odměřování vody. Kvůli čitelnosti kreslíme jen hrany, po kterých vlna každý stav poprvé objevila (BFS strom); celý dosažitelný prostor má 16 stavů a 58 orientovaných hran — zbylé hrany vedou jen do stavů objevených dříve. Popisky: +3/+5 = napuštění lahve z jezera, −3/−5 = vylití do jezera, 3→5/5→3 = přelití.',
+});
+
+// ---- Most a baterka: optimální cesta stavovým automatem (SPOILER k T02) ----
+KOViz.graph(document.getElementById('viz-bridge'), {
+  directed: true,
+  w: 960, h: 250, nodeR: 24,
+  nodes: [
+    { id: 'b0', x: 70,  y: 120, label: '1259', sub: 'baterka L' },
+    { id: 'b1', x: 235, y: 120, label: '59',   sub: 'baterka R' },
+    { id: 'b2', x: 400, y: 120, label: '159',  sub: 'baterka L' },
+    { id: 'b3', x: 565, y: 120, label: '1',    sub: 'baterka R' },
+    { id: 'b4', x: 725, y: 120, label: '12',   sub: 'baterka L' },
+    { id: 'b5', x: 885, y: 120, label: '∅',    sub: 'baterka R', cls: 'good' },
+  ],
+  edges: [
+    { from: 'b0', to: 'b1', label: '1+2 tam · 2', cls: 'good' },
+    { from: 'b1', to: 'b2', label: '1 zpět · 1', cls: 'good' },
+    { from: 'b2', to: 'b3', label: '5+9 tam · 9', cls: 'good' },
+    { from: 'b3', to: 'b4', label: '2 zpět · 2', cls: 'good' },
+    { from: 'b4', to: 'b5', label: '1+2 tam · 2', cls: 'good' },
+  ],
+  caption: 'SPOILER k řešení T02 (proto je obrázek až za ním): optimální cesta stavovým automatem mostu — v kroužku je množina S (kdo je ještě na výchozím břehu), pod ním poloha baterky. Délka 2+1+9+2+2 = 16 minut. Celý automat má 2⁴ · 2 = 32 stavů; tady kreslíme jen vítěznou cestu.',
+});
+</script>
+<script src="../assets/js/app.js"></script>
+</body>
+</html>
