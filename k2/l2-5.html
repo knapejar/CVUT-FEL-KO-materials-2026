@@ -85,7 +85,7 @@
   <ol>
     <li><strong>Pořadí → značky.</strong> Pořadí expanze znamená ostře rostoucí posloupnost značek (remízy nesmí nastat): $0 = l(v_1) &lt; l(v_2) &lt; \dots$ Zvol konkrétní malá čísla, např. $0, 1, 2, 3, \dots$ — strop na cenu cesty hlídej u cílového vrcholu.</li>
     <li><strong>Značky → stromové hrany.</strong> Každou značku musí někdo „doručit“: pro každý vrchol $w$ vyber hranu $(v, w)$ z dříve uzavřeného $v$ a nastav $c(v,w) = l(w) - l(v)$. To budou hrany stromu nejkratších cest — vektor $p$ musí odpovídat požadované cestě.</li>
-    <li><strong>Zbylé hrany nesmí škodit.</strong> Každá další hrana, kterou běh testuje, nesmí žádnou značku podlézt <em>ani remizovat</em> (remíza při relaxaci by mohla změnit $p$, remíza značek výběr). Nastav ji dost velkou a ověř celý běh.</li>
+    <li><strong>Zbylé hrany nesmí škodit.</strong> Každá další hrana, kterou běh testuje, nesmí žádnou značku podlézt <em>ani remizovat</em> (remíza při relaxaci znamená, že požadované $p$ není vynucené — ostrý test z <a href="l2-3.html#takeaways">[L2.3]</a> při rovnosti nechá stát dřívější $p$ a na nespecifikovaný tie-breaking se nelze spolehnout; remíza značek rozbije jednoznačnost výběru). Nastav ji dost velkou a ověř celý běh.</li>
     <li><strong>Volné hrany.</strong> Hrany, jejichž relaxace se nikdy neprovede (vedou do vrcholu uzavřeného dřív, než se expanduje jejich začátek), můžeš měnit libovolně — to je v úloze druhá otázka.</li>
   </ol>
 
@@ -114,7 +114,7 @@
       <span class="task-id">T01</span>
       <strong>Edge costs assignment</strong>
       <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
-      <span class="task-src">zdroj: zkouška KO 25.05.2026 (7 b.); dříve 02.06.2021; bank #12. Pozn.: přepisy zkoušek uvádějí u hrany mezi $d$ a $t$ orientaci $t \to d$, ale banka i oficiální odpověď (volné jsou jen $a \to d$ a $c \to d$) odpovídají orientaci $d \to t$ — graf níže ji přebírá z banky.</span>
+      <span class="task-src">zdroj: zkouška KO 25.05.2026 (7 b.); dříve 02.06.2021; bank #12. Pozn.: oba přepisy kreslí hranu mezi $d$ a $t$ jako $t \to d$, jejich ruční odpovědi se ale liší: 25.05.2026 uvádí volné jen $a \to d$ a $c \to d$ (odpovídá orientaci $d \to t$), 02.06.2021 navíc i hranu $d$–$t$ (konzistentní s $t \to d$). Graf i odpověď níže přebíráme z banky (#12), která má orientaci $d \to t$.</span>
     </div>
     <div class="task-body">
       <div class="viz" id="viz-task"></div>
@@ -221,7 +221,7 @@ KOViz.stepper(document.getElementById('viz-free'), {
     ],
   },
   frames: [
-    {desc:'It 1: uzavři s (0). Relaxuj (s,a): l(a):=1, p(a):=s; (s,b): l(b):=4, p(b):=s. Zelená = uzavřeno (v R), žlutá = právě expandovaný vrchol.',
+    {desc:'It 1: uzavři s (0). Relaxuj (s,a): l(a):=1, p(a):=s; (s,b): l(b):=4, p(b):=s. Zelená = uzavřeno (v R), modrá = právě expandovaný vrchol.',
      nodes:{s:'hl'},
      edges:{'s->a':'hl', 's->b':'hl'},
      subs:{s:'l=0', a:'l=1, p=s', b:'l=4, p=s', c:'l=∞'}},
