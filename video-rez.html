@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Řez (max flow = min cut) — immersive video · KO Hitovky</title>
+<style>
+  :root {
+    --bg: #07090f;
+    --panel: #11141d;
+    --text: #e8eaf0;
+    --muted: #8b93a7;
+    --accent: #ffb000;
+    --border: #232a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    display: flex; flex-direction: column; align-items: center;
+    min-height: 100vh; overflow: hidden;
+  }
+  #topbar {
+    width: 100%; display: flex; align-items: center; gap: 12px;
+    padding: 10px 18px; font-size: 13px; color: var(--muted);
+  }
+  #topbar a { color: var(--muted); text-decoration: none; }
+  #topbar a:hover { color: var(--accent); }
+  #topbar .title { color: var(--text); font-weight: 700; }
+  #topbar .badge {
+    font-size: 11px; color: var(--bg); background: var(--accent);
+    border-radius: 10px; padding: 2px 9px; font-weight: 700;
+  }
+  #stagewrap {
+    flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
+    min-height: 0; padding: 0 16px;
+  }
+  #stage {
+    position: relative;
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    aspect-ratio: 16 / 9;
+    background: #0b0e16; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+  }
+  #stage canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+  #subtitle {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 26px 4% 16px;
+    background: linear-gradient(to top, rgba(5,7,12,0.88) 0%, rgba(5,7,12,0.55) 65%, transparent 100%);
+    text-align: center; pointer-events: none;
+    font-size: clamp(14px, 2.4vw, 28px); font-weight: 700; line-height: 1.4;
+    color: #fff;
+  }
+  #subtitle .m {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    color: #7dd3fc;
+  }
+  #subtitle .hl {
+    font-family: 'Cambria Math', Cambria, Georgia, serif; font-style: italic;
+    padding: 0 4px; border-radius: 5px;
+  }
+  #subtitle .c1 { background: rgba(125,211,252,0.15); color: #7dd3fc; }
+  #subtitle .c2 { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+  #subtitle .c3 { background: rgba(167,139,250,0.18); color: #c4b5fd; }
+  #subtitle .c4 { background: rgba(52,211,153,0.15);  color: #4ade80; }
+  #subtitle .c5 { background: rgba(244,114,182,0.16); color: #f9a8d4; }
+  #subtitle .c6 { background: rgba(251,146,60,0.17);  color: #fdba74; }
+  .kw { position: relative; display: inline-block; white-space: nowrap; }
+  .kw .wb { opacity: 0.42; text-shadow: 0 2px 10px rgba(0,0,0,0.9); }
+  .kw .wf {
+    position: absolute; left: 0; top: 0; width: 0%;
+    overflow: hidden; white-space: nowrap;
+    text-shadow: 0 0 16px rgba(255,176,0,0.85), 0 2px 10px rgba(0,0,0,0.95);
+  }
+  .kw .wf, .kw .wf * { color: #ffd34d !important; }
+  #bigplay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(5,7,12,0.55); cursor: pointer; z-index: 5;
+    flex-direction: column; gap: 18px;
+  }
+  #bigplay.hidden { display: none; }
+  #bigplay .pbtn {
+    width: 110px; height: 110px; border-radius: 50%;
+    background: var(--accent); color: #1a1200;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 44px; box-shadow: 0 0 60px rgba(255,176,0,0.45);
+    transition: transform .15s;
+  }
+  #bigplay:hover .pbtn { transform: scale(1.08); }
+  #bigplay .hint { color: var(--text); font-size: 15px; font-weight: 600; text-shadow: 0 2px 8px #000; }
+  #bigplay .hint small { display: block; color: var(--muted); font-weight: 400; margin-top: 6px; }
+  #controls {
+    width: min(96vw, calc((100vh - 150px) * 16 / 9));
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 4px 16px;
+  }
+  #controls button {
+    background: var(--panel); border: 1px solid var(--border); color: var(--text);
+    width: 42px; height: 42px; border-radius: 50%; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: border-color .15s, color .15s;
+  }
+  #controls button:hover { border-color: var(--accent); color: var(--accent); }
+  #seek {
+    flex: 1; -webkit-appearance: none; appearance: none; height: 6px;
+    background: linear-gradient(to right, var(--accent) 0%, var(--accent) var(--p, 0%), #2a3040 var(--p, 0%));
+    border-radius: 3px; outline: none; cursor: pointer;
+  }
+  #seek::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 10px rgba(255,176,0,0.6); cursor: pointer;
+  }
+  #seek::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; border: none;
+    background: var(--accent); cursor: pointer;
+  }
+  .time { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 44px; text-align: center; }
+  @media (max-height: 560px) { #topbar { display: none; } }
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <a href="pisnicky.html">← Zpěvník</a>
+  <span class="title">Řez (max flow = min cut)</span>
+  <span class="badge">IMMERSIVE VIDEO 🛰</span>
+  <span style="margin-left:auto">mezerník = play/pauza · ←/→ = ±5 s · R = od začátku</span>
+</div>
+
+<div id="stagewrap">
+  <div id="stage">
+    <div id="subtitle"></div>
+    <div id="bigplay">
+      <div class="pbtn">▶</div>
+      <div class="hint">Max-flow = min-cut ve studenoválečném war roomu 🛰<small>2 min 47 s · zpívaná videolekce · každé slovo = neon</small></div>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="btnPlay" title="Play / pauza">▶</button>
+  <button id="btnRestart" title="Od začátku">⟲</button>
+  <span class="time" id="tCur">0:00</span>
+  <input type="range" id="seek" min="0" max="167.6" step="0.01" value="0">
+  <span class="time" id="tDur">2:47</span>
+</div>
+
+<audio id="player" src="audio/ford-fulkerson-1956.mp3" preload="auto"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/pixi.js@7.4.3/dist/pixi.min.js"></script>
+<script>
+(async function () {
+'use strict';
+
+// ════════════════════════════════════════════════════════════════════
+// 0) helpers
+// ════════════════════════════════════════════════════════════════════
+const C = {
+  neonC: 0x39d7ff, neonM: 0xff3da6, neonG: 0x53ff9a, neonY: 0xffe34d,
+  gold: 0xffb000, goldHi: 0xffd34d, red: 0xff3b3b, violet: 0xa78bfa,
+  grid: 0x2a1d52, dark: 0x0a0716, steel: 0x9fb0c8, muted: 0x8b93a7,
+  green: 0x4ade80, crt: 0x53ff9a,
+};
+const clamp01 = v => Math.max(0, Math.min(1, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const easeOut = t => 1 - Math.pow(1 - clamp01(t), 3);
+const ph = (t, a, b) => clamp01((t - a) / (b - a));
+
+// ════════════════════════════════════════════════════════════════════
+// 1) SÍŤ S DOLNÍMI MEZEMI (ručně ověřená) + kotvy refrénů
+//    max tok = min řez = 7;  A = {s,a}: C(A) = (4+5) − 2 = 7
+// ════════════════════════════════════════════════════════════════════
+const N = {
+  s: { x: 225, y: 360 }, a: { x: 565, y: 232 },
+  b: { x: 565, y: 498 }, t: { x: 1010, y: 360 },
+};
+const E = [
+  { a: 's', b: 'a', l: 0, u: 6, f: 3 },
+  { a: 's', b: 'b', l: 0, u: 4, f: 4 },  // VEN z A, plná
+  { a: 'a', b: 't', l: 0, u: 5, f: 5 },  // VEN z A, plná
+  { a: 'b', b: 't', l: 0, u: 5, f: 2 },
+  { a: 'b', b: 'a', l: 2, u: 3, f: 2 },  // DOVNITŘ do A, na dolní mezi!
+];
+const OUT_IDX = [1, 2], IN_IDX = [4];
+const ANCH = [
+  { kap: 44.58, ven: 45.91, scit: 46.74, dol: 48.58, dov: 50.68, ode: 52.78, tok: 54.54, rov: 57.33, rez: 58.52, ford: 60.42, rok: 62.66 },
+  { kap: 90.02, ven: 91.51, scit: 92.44, dol: 94.52, dov: 96.66, ode: 98.76, tok: 100.12, rov: 102.90, rez: 104.08, ford: 105.98, rok: 108.20 },
+  { kap: 132.28, ven: 133.85, scit: 134.83, dol: 137.02, dov: 139.00, ode: 140.60, tok: 142.02, rov: 143.80, rez: 145.30, ford: 147.28, rok: 149.80 },
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 2) PIXI + particles + SHAKE + NEON WORD BUS (každé slovo = neon!)
+// ════════════════════════════════════════════════════════════════════
+const app = new PIXI.Application({ width: 1280, height: 720, antialias: true, background: 0x0a0716 });
+document.getElementById('stage').appendChild(app.view);
+const sceneLayer = new PIXI.Container();
+const fxLayer = new PIXI.Container();
+app.stage.addChild(sceneLayer, fxLayer);
+let SHAKE = 0;
+const dotG = new PIXI.Graphics();
+dotG.beginFill(0xffffff, 1).drawCircle(0, 0, 32).endFill();
+const dotTex = app.renderer.generateTexture(dotG);
+const parts = [];
+function burst(x, y, tint, count = 18, speed = 220, size = 0.1) {
+  for (let i = 0; i < count; i++) {
+    const p = new PIXI.Sprite(dotTex);
+    p.anchor.set(0.5); p.x = x; p.y = y; p.tint = tint;
+    p.blendMode = PIXI.BLEND_MODES.ADD;
+    const a = Math.random() * 6.283, v = speed * (0.3 + Math.random() * 0.8);
+    p._vx = Math.cos(a) * v; p._vy = Math.sin(a) * v;
+    p._life = 0.6 + Math.random() * 0.7; p._t = 0;
+    p.scale.set(size * (0.5 + Math.random()));
+    fxLayer.addChild(p); parts.push(p);
+  }
+}
+// NEON WORD: každé zazpívané slovo blikne jako neonový štít (flicker zářivky)
+const neons = [];
+let neonSlot = 0;
+function spawnNeon(word, caps) {
+  const plain = word.replace(/<[^>]*>/g, '').replace(/[„“…—]/g, '').trim();
+  if (!plain) return;
+  const big = caps || /!$/.test(plain);
+  const palette = big ? ['#ffffff', '#ff3da6'] : (neonSlot % 2 ? ['#bff3ff', '#39d7ff'] : ['#ffe9fb', '#ff3da6']);
+  const t = new PIXI.Text(plain.toUpperCase(), {
+    fontFamily: "'Segoe UI', system-ui, sans-serif",
+    fontSize: big ? 44 : 24, fontWeight: '900',
+    fill: palette, stroke: 0x12041f, strokeThickness: big ? 7 : 4,
+    dropShadow: true, dropShadowColor: big ? 0xff3da6 : 0x39d7ff,
+    dropShadowBlur: 16, dropShadowDistance: 0,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  neonSlot = (neonSlot + 1) % 6;
+  t.x = big ? 640 : 150 + neonSlot * 195 + (Math.random() - 0.5) * 46;
+  t.y = big ? 540 : 660;
+  t._vy = big ? -95 : -62 - Math.random() * 30;
+  t._life = big ? 1.5 : 1.15; t._t = 0; t._big = big;
+  fxLayer.addChild(t); neons.push(t);
+  burst(t.x, t.y, big ? C.neonM : C.neonC, big ? 18 : 6, big ? 220 : 100, big ? 0.1 : 0.05);
+  if (big) SHAKE = Math.max(SHAKE, 8);
+}
+app.ticker.add(() => {
+  const dt = app.ticker.deltaMS / 1000;
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i];
+    p._t += dt; p.x += p._vx * dt; p.y += p._vy * dt;
+    p._vy += 200 * dt; p.alpha = clamp01(1 - p._t / p._life);
+    if (p._t > p._life) { fxLayer.removeChild(p); p.destroy(); parts.splice(i, 1); }
+  }
+  for (let i = neons.length - 1; i >= 0; i--) {
+    const n = neons[i];
+    n._t += dt; n.y += n._vy * dt; n._vy *= 0.985;
+    const k = n._t / n._life;
+    // flicker zapínání jako stará zářivka
+    n.alpha = k < 0.22 ? (Math.random() < 0.45 ? 0.15 : 1) * (k / 0.22) : 1 - ph(k, 0.5, 1);
+    if (n._t > n._life) { fxLayer.removeChild(n); n.destroy(); neons.splice(i, 1); }
+  }
+  if (SHAKE > 0.1) {
+    sceneLayer.x = (Math.random() - 0.5) * SHAKE;
+    sceneLayer.y = (Math.random() - 0.5) * SHAKE;
+    SHAKE *= Math.pow(0.0018, dt);
+  } else { sceneLayer.x = 0; sceneLayer.y = 0; }
+});
+function txt(str, size, color, weight = '800', family = "'Segoe UI', system-ui, sans-serif") {
+  const t = new PIXI.Text(str, {
+    fontFamily: family, fontSize: size, fill: color, fontWeight: weight,
+    align: 'center', dropShadow: true, dropShadowColor: 0x000000,
+    dropShadowBlur: 8, dropShadowAlpha: 0.6, dropShadowDistance: 2,
+  });
+  t.anchor.set(0.5); t.resolution = 2;
+  return t;
+}
+const MATH = "'Cambria Math', Cambria, Georgia, serif";
+
+// PD foto přehrady (min cut IRL) — viz assets/img/CREDITS.txt
+let damTex = null;
+try { damTex = await PIXI.Assets.load('assets/img/dam.jpg'); } catch (e) { console.warn('dam load failed', e); }
+
+// ════════════════════════════════════════════════════════════════════
+// 3) WAR ROOM + SÍŤOVÁ TABULE + OPONA + CRT TERMINÁL
+// ════════════════════════════════════════════════════════════════════
+function buildRoom(c) {
+  const g = new PIXI.Graphics(); c.addChildAt(g, 0);
+  const west = txt('WEST  ⟶', 20, C.neonC, '900'); west.x = 130; west.y = 96; c.addChild(west);
+  const east = txt('⟶  EAST', 20, C.neonM, '900'); east.x = 1150; east.y = 96; c.addChild(east);
+  function render(t, o = {}) {
+    g.clear();
+    // pozadí
+    g.beginFill(0x0a0716, 1).drawRect(0, 0, 1280, 720).endFill();
+    g.beginFill(0x150b2e, 1).drawRect(0, 0, 1280, 130).endFill();
+    // neonová podlahová mřížka (perspektiva)
+    g.lineStyle(2, C.grid, 0.8);
+    for (let i = 0; i <= 12; i++) {
+      const x = i * 1280 / 12;
+      g.moveTo(x, 720); g.lineTo(640 + (x - 640) * 0.25, 560);
+    }
+    for (let i = 0; i < 5; i++) {
+      const yy = 560 + Math.pow(i / 4, 1.6) * 160;
+      g.moveTo(0, yy); g.lineTo(1280, yy);
+    }
+    // horizont glow
+    g.beginFill(C.neonM, 0.06).drawRect(0, 540, 1280, 30).endFill();
+    // radar v rohu
+    const rx = 96, ry = 622, rr = 56;
+    g.lineStyle(2, C.neonG, 0.7);
+    g.drawCircle(rx, ry, rr); g.drawCircle(rx, ry, rr * 0.62); g.drawCircle(rx, ry, rr * 0.3);
+    const swp = t * 1.6;
+    g.lineStyle(0);
+    g.beginFill(C.neonG, 0.25);
+    g.moveTo(rx, ry);
+    g.arc(rx, ry, rr, swp, swp + 0.6);
+    g.closePath().endFill();
+    // blip = easter egg tečka
+    g.beginFill(C.neonG, 0.5 + 0.5 * Math.sin(t * 3)).drawCircle(rx + 24, ry - 18, 3).endFill();
+    // scanlines (jemné)
+    g.lineStyle(1, 0x000000, 0.18);
+    const off = (t * 40) % 8;
+    for (let y = -8 + off; y < 720; y += 8) { g.moveTo(0, y); g.lineTo(1280, y); }
+  }
+  return { render };
+}
+function buildBoard(c) {
+  const g = new PIXI.Graphics(); c.addChild(g);
+  const labT = {};
+  for (const [id, P] of Object.entries(N)) {
+    labT[id] = txt(id, 24, 0x0b0e16, '900'); labT[id].x = P.x; labT[id].y = P.y; c.addChild(labT[id]);
+  }
+  const eT = E.map((e, i) => {
+    const A = N[e.a], B = N[e.b];
+    const mx = (A.x + B.x) / 2, my = (A.y + B.y) / 2;
+    const dx = B.x - A.x, dy = B.y - A.y, l2 = Math.hypot(dx, dy);
+    const tt = txt('', 19, C.steel, '800', MATH);
+    tt.x = mx - dy / l2 * 26; tt.y = my + dx / l2 * 26;
+    c.addChild(tt); return tt;
+  });
+  function render(t, o = {}) {
+    g.clear();
+    // hrany + tok
+    E.forEach((e, i) => {
+      const A = N[e.a], B = N[e.b];
+      const isOut = OUT_IDX.includes(i), isIn = IN_IDX.includes(i);
+      let col = 0x4a3f73, wd = 4, al = 0.95;
+      if (o.outHL && isOut && t > o.outHL) { col = C.neonC; wd = 6; }
+      if (o.inHL && isIn && t > o.inHL) { col = C.red; wd = 6; }
+      if (o.deadHL && o.deadHL.includes(i)) { col = C.red; wd = 5; al = 0.5 + 0.4 * Math.sin(t * 8); }
+      g.lineStyle(wd, col, al);
+      g.moveTo(A.x, A.y); g.lineTo(B.x, B.y);
+      // šipka
+      const ux = (B.x - A.x) / Math.hypot(B.x - A.x, B.y - A.y), uy = (B.y - A.y) / Math.hypot(B.x - A.x, B.y - A.y);
+      const hx = B.x - ux * 36, hy = B.y - uy * 36, hs = 13;
+      g.lineStyle(0); g.beginFill(col, al);
+      g.moveTo(hx, hy);
+      g.lineTo(hx - ux * hs - uy * hs * 0.55, hy - uy * hs + ux * hs * 0.55);
+      g.lineTo(hx - ux * hs + uy * hs * 0.55, hy - uy * hs - ux * hs * 0.55);
+      g.closePath().endFill();
+      // tok = neonové částice (rychlost ∝ f)
+      if (o.flow && e.f > 0) {
+        const cnt = e.f;
+        for (let k2 = 0; k2 < cnt; k2++) {
+          const p = ((t * 0.12 * e.f + k2 / cnt) % 1);
+          g.beginFill(C.neonY, 0.9);
+          g.drawCircle(lerp(A.x, B.x, p), lerp(A.y, B.y, p), 4.5);
+          g.endFill();
+        }
+      }
+      // popisky f/u + dolní mez
+      eT[i].text = (o.showF ? `${e.f}/` : '') + `${e.u}` + (e.l > 0 ? `  l=${e.l}` : '');
+      eT[i].style.fill = isIn ? 0xff9a9a : (isOut ? 0xbff3ff : C.steel);
+    });
+    // uzly
+    for (const [id, P] of Object.entries(N)) {
+      const inA = id === 's' || id === 'a';
+      const marked = o.markA && (id === 's' ? t > o.markA : (id === 'a' ? t > o.markA + 1.2 : false));
+      g.lineStyle(0);
+      if (marked || (o.glowA && inA)) g.beginFill(C.goldHi, 0.16 + 0.08 * Math.sin(t * 4)).drawCircle(P.x, P.y, 44).endFill();
+      g.beginFill(0x0a0716, 1).drawCircle(P.x, P.y, 25).endFill();
+      g.beginFill(marked || (o.glowA && inA) ? C.goldHi : (id === 's' ? C.neonC : (id === 't' ? C.neonM : C.steel)), 1).drawCircle(P.x, P.y, 20).endFill();
+    }
+    // OPONA = min řez (zubatá neonová čára oddělující {s,a})
+    if (o.curtain > 0) {
+      const cp = o.curtain;
+      g.lineStyle(7, o.curtainGold ? C.goldHi : C.neonM, 0.9 * cp);
+      const pts = [[860, 96], [800, 200], [840, 300], [760, 400], [800, 500], [700, 600], [730, 660]];
+      g.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length * cp; i++) {
+        if (!pts[i]) break;
+        g.lineTo(pts[i][0], pts[i][1]);
+      }
+    }
+  }
+  return { render };
+}
+// CRT terminál (bridge + razítko 1956)
+function buildCRT(c) {
+  const wrap = new PIXI.Container(); wrap.alpha = 0; c.addChild(wrap);
+  const g = new PIXI.Graphics(); wrap.addChild(g);
+  g.lineStyle(4, 0x3a4a3f, 1);
+  g.beginFill(0x06140a, 0.96);
+  g.drawRoundedRect(240, 150, 800, 360, 16);
+  g.endFill();
+  g.lineStyle(2, 0x53ff9a, 0.25);
+  for (let y = 160; y < 505; y += 6) { g.moveTo(244, y); g.lineTo(1036, y); }
+  const lines = [];
+  for (let i = 0; i < 5; i++) {
+    const t = new PIXI.Text('', { fontFamily: 'Consolas, monospace', fontSize: 26, fill: 0x53ff9a, fontWeight: '700' });
+    t.x = 280; t.y = 190 + i * 56; t.resolution = 2; wrap.addChild(t); lines.push(t);
+  }
+  function render(t, o = {}) {
+    wrap.alpha = o.on ? easeOut(ph(t, o.on, o.on + 0.5)) : 0;
+    if (!o.on) return;
+    const msgs = o.msgs || [];
+    msgs.forEach(([at, s], i) => {
+      if (i >= lines.length) return;
+      const n = Math.floor(ph(t, at, at + Math.max(0.8, s.length * 0.045)) * s.length);
+      lines[i].text = n > 0 ? '> ' + s.slice(0, n) + (n < s.length ? '█' : '') : '';
+    });
+  }
+  return { render };
+}
+
+// ════════════════════════════════════════════════════════════════════
+// 4) SCÉNY
+// ════════════════════════════════════════════════════════════════════
+const scenes = [];
+function scene(t0, t1, build) {
+  const s = { t0, t1, st: null };
+  s.init = () => { s.st = build(); sceneLayer.addChild(s.st.c); };
+  s.update = (lt) => s.st && s.st.update(lt);
+  s.destroy = () => { if (s.st) { sceneLayer.removeChild(s.st.c); s.st.c.destroy({ children: true }); s.st = null; } };
+  scenes.push(s);
+  return s;
+}
+function caption(c, str, color = C.neonY, y = 42, size = 25) {
+  const t = txt(str, size, color, '800');
+  t.x = 640; t.y = y; c.addChild(t);
+  return t;
+}
+
+// ── INTRO [0 – 25]: war room boot ──
+scene(0, 25.0, () => {
+  const c = new PIXI.Container();
+  const room = buildRoom(c);
+  const board = buildBoard(c);
+  const t1 = txt('ŘEZ', 140, 0xffffff, '900'); t1.x = 640; t1.y = 230; t1.alpha = 0; c.addChild(t1);
+  const t2 = txt('MAX FLOW = MIN CUT', 44, C.neonM, '900'); t2.x = 640; t2.y = 330; t2.alpha = 0; c.addChild(t2);
+  const t3 = txt('studená válka, 1955: kudy přestřihnout síť? 🛰', 24, C.muted, '700'); t3.x = 640; t3.y = 392; t3.alpha = 0; c.addChild(t3);
+  const fired = new Set();
+  return { c, update(lt) {
+    room.render(lt);
+    board.render(lt, { flow: lt > 12, showF: false });
+    // neon flicker titulu
+    const f1 = ph(lt, 1.5, 2.6);
+    t1.alpha = f1 < 1 ? (Math.random() < 0.4 ? 0.2 : 1) * f1 : 1;
+    t2.alpha = easeOut(ph(lt, 4.5, 5.5));
+    t3.alpha = easeOut(ph(lt, 8.0, 9.0));
+    t1.style.dropShadow = true; t1.style.dropShadowColor = 0x39d7ff; t1.style.dropShadowBlur = 18; t1.style.dropShadowDistance = 0;
+    if (lt > 1.6 && !fired.has('a')) { fired.add('a'); SHAKE = 10; burst(640, 230, C.neonC, 30, 300, 0.13); }
+    if (lt > 4.6 && !fired.has('b')) { fired.add('b'); burst(640, 330, C.neonM, 22, 250, 0.11); }
+    const hide = easeOut(ph(lt, 21, 23.5));
+    t1.alpha *= (1 - hide); t2.alpha *= (1 - hide); t3.alpha *= (1 - hide);
+  } };
+});
+
+// ── VERSE 1 [25 – 44.58]: dva tábory + δ⁺/δ⁻ + MINUS warning ──
+scene(25.0, 44.58, () => {
+  const c = new PIXI.Container();
+  const room = buildRoom(c);
+  const board = buildBoard(c);
+  const cap = caption(c, '');
+  const dPlus = txt('δ⁺(A) — VEN', 30, C.neonC, '900', MATH); dPlus.x = 320; dPlus.y = 120; dPlus.alpha = 0; c.addChild(dPlus);
+  const dMinus = txt('δ⁻(A) — DOVNITŘ', 30, C.red, '900', MATH); dMinus.x = 960; dMinus.y = 120; dMinus.alpha = 0; c.addChild(dMinus);
+  const warn = txt('⚠ POZOR NA TEN MINUS ⚠', 44, C.red, '900'); warn.x = 640; warn.y = 560; warn.alpha = 0; c.addChild(warn);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 25.0;
+    room.render(lt);
+    board.render(lt, {
+      flow: true, showF: false,
+      glowA: lt > 26.0,
+      curtain: easeOut(ph(lt, 32.9, 34.4)),     // „řez, δ(A)“
+      outHL: lt > 34.6 ? 34.6 : 0,               // „hrany ven“
+      inHL: lt > 36.17 ? 36.17 : 0,              // „hrany dovnitř“
+    });
+    dPlus.alpha = lt > 37.81 ? 1 : 0;            // „delta plus“
+    dMinus.alpha = lt > 39.26 ? 1 : 0;           // „delta minus“
+    warn.alpha = lt > 43.77 ? (0.7 + 0.3 * Math.sin(lt * 9)) : 0;
+    warn.scale.set(lerp(1.6, 1, easeOut(ph(lt, 43.77, 44.2))));
+    if (lt > 37.85 && !fired.has('p')) { fired.add('p'); burst(320, 120, C.neonC, 18, 220, 0.1); }
+    if (lt > 39.3 && !fired.has('m')) { fired.add('m'); burst(960, 120, C.red, 18, 220, 0.1); }
+    if (lt > 43.8 && !fired.has('w')) { fired.add('w'); SHAKE = 9; burst(640, 560, C.red, 26, 280, 0.12); }
+    if (lt < 29.58) { cap.text = 'rozděl vrcholy: s ∈ A (zlatá zóna)'; cap.style.fill = C.goldHi; }
+    else if (lt < 34.6) { cap.text = 't zůstává venku — mezi nimi ŘEZ δ(A) (železná opona)'; cap.style.fill = C.neonM; }
+    else if (lt < 40.02) { cap.text = 'δ⁺(A) = hrany ven · δ⁻(A) = hrany dovnitř'; cap.style.fill = 0xffffff; }
+    else { cap.text = 'kapacita řezu? jeden záludný MINUS…'; cap.style.fill = C.red; }
+  } };
+});
+
+// ── CHORUS factory: počítadlo C(A), nůžky, 1956 razítko, přehrada ──
+function chorusScene(t0, t1, an) {
+  scene(t0, t1, () => {
+    const c = new PIXI.Container();
+    const room = buildRoom(c);
+    const board = buildBoard(c);
+    const cap = caption(c, '');
+    const plus1 = txt('+4', 34, C.neonC, '900', MATH); plus1.alpha = 0; c.addChild(plus1);
+    const plus2 = txt('+5', 34, C.neonC, '900', MATH); plus2.alpha = 0; c.addChild(plus2);
+    const minus1 = txt('−2', 44, C.red, '900', MATH); minus1.alpha = 0; c.addChild(minus1);
+    const total = txt('', 44, 0xffffff, '900', MATH); total.x = 640; total.y = 120; total.alpha = 0; c.addChild(total);
+    const eq = txt('max tok = min řez = 7', 40, C.neonY, '900', MATH); eq.x = 640; eq.y = 560; eq.alpha = 0; c.addChild(eq);
+    const stamp = txt('1956', 96, 0xffffff, '900'); stamp.x = 640; stamp.y = 350; stamp.alpha = 0; stamp.rotation = -0.08; c.addChild(stamp);
+    const ff = txt('FORD ★ FULKERSON', 30, C.neonM, '900'); ff.x = 640; ff.y = 268; ff.alpha = 0; c.addChild(ff);
+    // PD foto přehrady — „min cut IRL“
+    let damW = null;
+    if (damTex) {
+      damW = new PIXI.Container(); damW.x = 1105; damW.y = 565; damW.alpha = 0; c.addChild(damW);
+      const fg = new PIXI.Graphics();
+      fg.lineStyle(5, C.neonC, 1); fg.beginFill(0x0a0716, 1); fg.drawRoundedRect(-95, -78, 190, 156, 8); fg.endFill();
+      damW.addChild(fg);
+      const spr = new PIXI.Sprite(damTex); spr.anchor.set(0.5); spr.width = 178; spr.height = 124; spr.y = -8; damW.addChild(spr);
+      const lab = txt('min cut IRL', 16, C.neonC, '800'); lab.y = 62; damW.addChild(lab);
+    }
+    const fired = new Set();
+    return { c, update(lt0) {
+      const lt = lt0 + t0;
+      room.render(lt);
+      board.render(lt, {
+        flow: true, showF: false, glowA: true,
+        curtain: 1,
+        outHL: lt > an.ven ? an.ven : 0,
+        inHL: lt > an.dov ? an.dov : 0,
+        curtainGold: lt > an.rez,
+      });
+      // +4/+5 letí od hran k počítadlu (na „ven“/„sčítají“)
+      const fly = (el, from, p2) => { el.alpha = p2 > 0 && p2 < 1 ? 1 : (p2 >= 1 ? 0.9 : 0); el.x = lerp(from.x, 640, easeOut(p2)); el.y = lerp(from.y, 120, easeOut(p2)); };
+      fly(plus1, { x: 395, y: 430 }, ph(lt, an.scit, an.scit + 0.8));
+      fly(plus2, { x: 790, y: 295 }, ph(lt, an.scit + 0.3, an.scit + 1.1));
+      fly(minus1, { x: 565, y: 365 }, ph(lt, an.ode, an.ode + 0.8));
+      if (lt > an.scit + 1.0) { total.alpha = 1; total.text = lt > an.ode + 0.7 ? 'C(A) = 9 − 2 = 7' : 'Σu(δ⁺) = 9'; }
+      total.scale.set(lerp(1.4, 1, easeOut(ph(lt, an.ode + 0.7, an.ode + 1.1))));
+      if (lt > an.scit + 1.05 && !fired.has('t1')) { fired.add('t1'); burst(640, 120, C.neonC, 18, 220, 0.1); }
+      if (lt > an.ode + 0.75 && !fired.has('t2')) { fired.add('t2'); SHAKE = 8; burst(640, 120, C.red, 24, 260, 0.12); }
+      // rovnice na „tok se rovná řezu“
+      eq.alpha = lt > an.rov ? 1 : 0;
+      eq.scale.set(lerp(1.5, 1, easeOut(ph(lt, an.rov, an.rov + 0.5))));
+      if (lt > an.rov + 0.05 && !fired.has('eq')) { fired.add('eq'); burst(640, 560, C.neonY, 24, 260, 0.12); }
+      // FORD ★ FULKERSON + razítko 1956
+      ff.alpha = lt > an.ford ? 1 : 0;
+      stamp.alpha = lt > an.rok ? 1 : 0;
+      stamp.scale.set(lerp(2.4, 1, easeOut(ph(lt, an.rok, an.rok + 0.4))));
+      if (lt > an.rok + 0.02 && !fired.has('st')) { fired.add('st'); SHAKE = 14; burst(640, 350, 0xffffff, 40, 360, 0.15); }
+      // přehrada
+      if (damW) {
+        damW.alpha = lt > an.kap && lt < an.ford ? easeOut(ph(lt, an.kap, an.kap + 0.6)) : Math.max(0, damW.alpha - 0.04);
+        damW.rotation = 0.03 * Math.sin(lt * 2);
+      }
+      if (lt < an.dol) { cap.text = '✂ kapacity hran VEN: 4 + 5'; cap.style.fill = C.neonC; }
+      else if (lt < an.tok) { cap.text = 'dolní meze hran DOVNITŘ se ODEČTOU: −2'; cap.style.fill = C.red; }
+      else if (lt < an.ford) { cap.text = 'duality věta: hodnota max toku = kapacita min řezu'; cap.style.fill = C.neonY; }
+      else { cap.text = 'Ford & Fulkerson, 1956 — narozeno ve studené válce'; cap.style.fill = 0xffffff; }
+    } };
+  });
+}
+chorusScene(44.58, 67.0, ANCH[0]);
+
+// ── VERSE 2 [67 – 90.02]: LABELING čte min řez ──
+scene(67.0, 90.02, () => {
+  const c = new PIXI.Container();
+  const room = buildRoom(c);
+  const board = buildBoard(c);
+  const cap = caption(c, '');
+  const fu = txt('f = u ✓ (plné)', 28, C.neonC, '900', MATH); fu.x = 320; fu.y = 120; fu.alpha = 0; c.addChild(fu);
+  const fl = txt('f = l ✓ (na dolní mezi)', 28, C.red, '900', MATH); fl.x = 940; fl.y = 120; fl.alpha = 0; c.addChild(fl);
+  const cut7 = txt('C(A) = 7 = |f|  →  MIN ŘEZ ✓', 36, C.goldHi, '900', MATH); cut7.x = 640; cut7.y = 560; cut7.alpha = 0; c.addChild(cut7);
+  const fired = new Set();
+  return { c, update(lt0) {
+    const lt = lt0 + 67.0;
+    room.render(lt);
+    board.render(lt, {
+      flow: true, showF: true,
+      markA: 68.0,                                  // labeling: s pak a
+      deadHL: lt > 71.0 && lt < 75.3 ? [1, 2, 4] : null, // plné/dolní hrany blokují
+      curtain: lt > 75.26 ? easeOut(ph(lt, 75.26, 76.2)) : 0,
+      curtainGold: lt > 87.46,
+      outHL: lt > 80.34 ? 80.34 : 0,
+      inHL: lt > 83.8 ? 83.8 : 0,
+      glowA: lt > 75.26,
+    });
+    fu.alpha = lt > 82.91 ? 1 : 0;                  // „f se rovná u“
+    fl.alpha = lt > 86.54 ? 1 : 0;                  // „dolní mezi“
+    cut7.alpha = lt > 87.46 ? 1 : 0;                // „minimální řez tu máš“
+    cut7.scale.set(lerp(1.5, 1, easeOut(ph(lt, 87.46, 88.0))));
+    if (lt > 82.95 && !fired.has('fu')) { fired.add('fu'); burst(320, 120, C.neonC, 16, 200, 0.1); }
+    if (lt > 86.6 && !fired.has('fl')) { fired.add('fl'); burst(940, 120, C.red, 16, 200, 0.1); }
+    if (lt > 87.5 && !fired.has('c7')) { fired.add('c7'); SHAKE = 10; burst(640, 560, C.goldHi, 30, 300, 0.13); }
+    if (lt < 75.26) { cap.text = 'pusť LABELING: s→a jde (3<6) … ale dál NIC (plné/na mezi)'; cap.style.fill = 0xffffff; }
+    else if (lt < 80.34) { cap.text = 'označkované = {s, a} = A — t zůstal bez značky'; cap.style.fill = C.goldHi; }
+    else { cap.text = 'kontrola: ven plné (f=u), dovnitř na mezi (f=l)'; cap.style.fill = C.neonC; }
+  } };
+});
+
+chorusScene(90.02, 111.7, ANCH[1]);
+
+// ── BRIDGE [111.7 – 132.28]: CRT šepot — integral flow theorem ──
+scene(111.7, 132.28, () => {
+  const c = new PIXI.Container();
+  const room = buildRoom(c);
+  const crt = buildCRT(c);
+  const cap = caption(c, 'PŘÍSNĚ TAJNÉ // CELOČÍSELNOST', C.crt, 42, 24);
+  return { c, update(lt0) {
+    const lt = lt0 + 111.7;
+    room.render(lt);
+    crt.render(lt, {
+      on: 112.0,
+      msgs: [
+        [112.2, 'CELOČÍSELNÉ KAPACITY…'],
+        [116.4, 'CELOČÍSELNÝ MAX TOK EXISTUJE'],
+        [123.4, 'DANTZIG & FULKERSON'],
+        [128.1, 'INTEGRAL FLOW THEOREM ∎'],
+      ],
+    });
+  } };
+});
+
+chorusScene(132.28, 153.28, ANCH[2]);
+
+// ── OUTRO [153.28 – 168]: neon dohasíná ──
+scene(153.28, 168, () => {
+  const c = new PIXI.Container();
+  const room = buildRoom(c);
+  const board = buildBoard(c);
+  const f1 = txt('C(A) = Σu(δ⁺) − Σl(δ⁻)', 44, 0xffffff, '900', MATH); f1.x = 640; f1.y = 200; f1.alpha = 0; c.addChild(f1);
+  const f2 = txt('max tok = min řez · Ford & Fulkerson 1956', 26, C.neonM, '800'); f2.x = 640; f2.y = 268; f2.alpha = 0; c.addChild(f2);
+  const f3 = txt('Hotovo. Spočítej řez na papír — L4.4', 20, C.muted, '700'); f3.x = 640; f3.y = 322; f3.alpha = 0; c.addChild(f3);
+  return { c, update(lt0) {
+    const lt = lt0 + 153.28;
+    room.render(lt);
+    board.render(lt, { flow: true, showF: true, glowA: true, curtain: 1, curtainGold: true });
+    f1.alpha = easeOut(ph(lt, 154.5, 156));
+    f2.alpha = easeOut(ph(lt, 157, 158.5));
+    f3.alpha = easeOut(ph(lt, 160, 161.5));
+  } };
+});
+
+// ════════════════════════════════════════════════════════════════════
+// 5) TITULKY — řádky 1:1 jako sekce „Zpívej“ ve zpěvníku
+// ════════════════════════════════════════════════════════════════════
+const SUNG = [[0,0.93],[0.93,10],[10,23.67],[23.67,27.59],[27.59,29.58],[29.58,29.58],[29.58,29.7],[29.7,30.91],[30.91,31.58],[31.58,31.73],[31.73,32.33],[32.33,32.93],[32.93,33.54],[33.54,34.42],[34.42,34.6],[34.6,35.12],[35.12,35.65],[35.65,36.17],[36.17,37.08],[37.08,37.81],[37.81,38.39],[38.39,38.53],[38.53,39.26],[39.26,40.02],[40.02,41.19],[41.19,41.94],[41.94,42.48],[42.48,43.16],[43.16,43.43],[43.43,43.77],[43.77,44.58],[44.58,45.91],[45.91,46.41],[46.41,46.74],[46.74,48.58],[48.58,49.84],[49.84,50.68],[50.68,52.36],[52.36,52.78],[52.78,54.54],[54.54,56.46],[56.46,56.98],[56.98,57.33],[57.33,58.42],[58.42,58.42],[58.42,58.52],[58.52,59.86],[59.86,60.42],[60.42,61.06],[61.06,61.22],[61.22,62.66],[62.66,65.94],[65.94,67.49],[67.49,70.01],[70.01,72.56],[72.56,72.69],[72.69,72.82],[72.82,73.87],[73.87,74.27],[74.27,75.26],[75.26,76.51],[76.51,77.18],[77.18,77.96],[77.96,78.48],[78.48,79.1],[79.1,80.34],[80.34,80.95],[80.95,81.32],[81.32,81.82],[81.82,82.48],[82.48,82.62],[82.62,82.91],[82.91,83.8],[83.8,84.76],[84.76,86.36],[86.36,86.54],[86.54,87.08],[87.08,87.46],[87.46,87.46],[87.46,88.74],[88.74,89.2],[89.2,89.44],[89.44,90.02],[90.02,91.51],[91.51,92.07],[92.07,92.44],[92.44,94.52],[94.52,95.8],[95.8,96.66],[96.66,98.42],[98.42,98.76],[98.76,100.12],[100.12,102.03],[102.03,102.55],[102.55,102.9],[102.9,103.98],[103.98,104.08],[104.08,105.42],[105.42,105.98],[105.98,106.61],[106.61,106.76],[106.76,108.2],[108.2,111.7],[111.7,114.59],[114.59,116.28],[116.28,116.28],[116.28,117.26],[117.26,118.03],[118.03,118.28],[118.28,123.34],[123.34,125.1],[125.1,125.38],[125.38,128.06],[128.06,129.83],[129.83,130.71],[130.71,132.28],[132.28,133.85],[133.85,134.44],[134.44,134.83],[134.83,137.02],[137.02,137.77],[137.77,138.27],[138.27,139.32],[139.32,139.86],[139.86,142.02],[142.02,143.34],[143.34,143.7],[143.7,143.94],[143.94,144.68],[144.68,145.08],[145.08,145.28],[145.28,145.28],[145.28,146.71],[146.71,147.28],[147.28,147.85],[147.85,147.99],[147.99,149.28],[149.28,153.28],[153.28,153.28],[153.28,153.89],[153.89,154.28],[154.28,155.28],[155.28,155.28],[155.28,155.28],[155.28,155.28],[155.28,155.6],[155.6,155.82],[155.82,156.28],[156.28,156.28],[156.28,156.28],[156.28,156.76],[156.76,156.89],[156.89,157.28],[157.28,157.94],[157.94,158.19],[158.19,158.35],[158.35,159.28],[159.28,159.48],[159.48,159.62],[159.62,159.89],[159.89,159.96],[159.96,160.28],[160.28,160.76],[160.76,160.89],[160.89,161.28],[161.28,161.6],[161.6,161.72],[161.72,161.8],[161.8,162.28],[162.28,162.89],[162.89,163.28],[163.28,163.6],[163.6,163.71],[163.71,163.8],[163.8,164.28],[164.28,164.6],[164.6,164.81],[164.81,165.28],[165.28,165.28],[165.28,165.28],[165.28,165.76],[165.76,165.88],[165.88,166.28],[166.28,166.28],[166.28,196.26]];
+const H = (cls, s) => `<span class="hl ${cls}">${s}</span>`;
+const CH1L = `Kapacity VEN se sčítají,`;
+const CH2L = `dolní meze DOVNITŘ se ODEČTOU!`;
+const CH3L = `Maximální tok se rovná minimálnímu řezu —`;
+const CH4L = `Ford a Fulkerson, devatenáct set padesát šest!`;
+const LINES = [
+  [25.0, 29.58, `Rozděl vrcholy na dva tábory: ${H('c6', 's ∈ A')},`],
+  [29.58, 34.6, `${H('c6', 't')} zůstává venku — a mezi nimi řez, ${H('c1', 'δ(A)')}.`],
+  [34.6, 40.02, `Hrany ven, hrany dovnitř — ${H('c2', 'δ⁺')} a ${H('c2', 'δ⁻')},`],
+  [40.02, 44.58, `kapacita řezu? Teď pozor na ten minus:`],
+  [44.58, 48.58, CH1L], [48.58, 54.54, CH2L], [54.54, 60.42, CH3L], [60.42, 65.94, CH4L],
+  [69.5, 75.26, `Když labeling skončí a ${H('c6', 't')} zůstane bez značky,`],
+  [75.26, 80.34, `označkované vrcholy tvoří ${H('c6', 'A')} — bez hádky.`],
+  [80.34, 83.8, `Hrany ven jsou plné: ${H('c4', 'f = u')},`],
+  [83.8, 90.02, `hrany dovnitř na dolní mezi — minimální řez tu máš!`],
+  [90.02, 94.52, CH1L], [94.52, 100.12, CH2L], [100.12, 105.98, CH3L], [105.98, 111.7, CH4L],
+  [111.7, 123.34, `Celočíselné kapacity… celočíselný maximální tok existuje…`],
+  [123.34, 132.28, `Dantzig a Fulkerson… integral flow theorem…`],
+  [132.28, 137.02, CH1L], [137.02, 142.02, CH2L], [142.02, 147.28, CH3L], [147.28, 153.28, CH4L],
+];
+
+// ════════════════════════════════════════════════════════════════════
+// 6) PLAYER / KARAOKE + NEON WORD BUS / CONTROLS
+// ════════════════════════════════════════════════════════════════════
+const player = document.getElementById('player');
+const subEl = document.getElementById('subtitle');
+const bigplay = document.getElementById('bigplay');
+const btnPlay = document.getElementById('btnPlay');
+const btnRestart = document.getElementById('btnRestart');
+const seek = document.getElementById('seek');
+const tCur = document.getElementById('tCur');
+const tDur = document.getElementById('tDur');
+
+let curScene = null, lastLocal = -1, curLine = -1, lastT = 0;
+let lineWords = [];
+function tokenize(html) {
+  const out = []; let cur = ''; let inTag = false;
+  for (const ch of html) {
+    if (ch === '<') inTag = true;
+    else if (ch === '>') inTag = false;
+    if (ch === ' ' && !inTag) { if (cur) out.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+function isCapsToken(tok) {
+  const plain = tok.replace(/<[^>]*>/g, '');
+  const letters = plain.replace(/[^a-zA-ZáčďéěíňóřšťúůýžÁČĎÉĚÍŇÓŘŠŤÚŮÝŽ]/g, '');
+  return letters.length >= 2 && letters === letters.toUpperCase();
+}
+function buildKaraokeLine(li) {
+  const [a, b, html] = LINES[li];
+  const tokens = tokenize(html);
+  const ww = SUNG.filter(w => w[0] >= a - 0.06 && w[0] < b && w[1] > w[0]);
+  const pick = (i) => {
+    if (!ww.length) {
+      const step = (b - a) / tokens.length;
+      return [a + step * i, a + step * (i + 1)];
+    }
+    const wi = tokens.length === 1 ? 0 : Math.round(i * (ww.length - 1) / (tokens.length - 1));
+    return ww[wi];
+  };
+  subEl.innerHTML = tokens.map(tok =>
+    `<span class="kw"><span class="wb">${tok}</span><span class="wf">${tok}</span></span>`).join(' ');
+  const els = [...subEl.querySelectorAll('.kw')];
+  lineWords = tokens.map((tok, i) => {
+    const [t0, t1] = pick(i);
+    return { t0, t1: Math.max(t1, t0 + 0.12), wf: els[i] ? els[i].querySelector('.wf') : null, tok, caps: isCapsToken(tok) };
+  });
+}
+function tick() {
+  const t = player.currentTime;
+  const s = scenes.find(sc => t >= sc.t0 && t < sc.t1) || scenes[scenes.length - 1];
+  if (s !== curScene) { curScene && curScene.destroy(); curScene = s; s.init(); lastLocal = -1; }
+  const localT = t - s.t0;
+  if (localT < lastLocal - 0.05) { s.destroy(); s.init(); }
+  s.update(localT);
+  lastLocal = localT;
+  const li = LINES.findIndex(([a, b]) => t >= a && t < b);
+  if (li !== curLine) {
+    curLine = li;
+    if (li >= 0) buildKaraokeLine(li);
+    else { subEl.innerHTML = ''; lineWords = []; }
+    subEl.style.opacity = li >= 0 ? 1 : 0;
+  }
+  // NEON WORD BUS — každé slovo blikne jako neon přesně v t0
+  if (!player.paused && t > lastT && t - lastT < 0.5) {
+    for (const w of lineWords) {
+      if (w.t0 > lastT && w.t0 <= t) spawnNeon(w.tok, w.caps);
+    }
+  }
+  lastT = t;
+  for (let i = 0; i < lineWords.length; i++) {
+    const w = lineWords[i];
+    if (!w.wf) continue;
+    const nextStart = i + 1 < lineWords.length ? lineWords[i + 1].t0 : w.t1;
+    let p;
+    if (t >= Math.max(w.t1, nextStart)) p = 1;
+    else p = clamp01((t - w.t0) / (w.t1 - w.t0));
+    w.wf.style.width = (p * 100).toFixed(1) + '%';
+  }
+  if (!seekDragging) {
+    seek.value = t;
+    seek.style.setProperty('--p', (t / (player.duration || 167.6) * 100) + '%');
+  }
+  tCur.textContent = fmtTime(t);
+  requestAnimationFrame(tick);
+}
+function fmtTime(t) { t = Math.max(0, t || 0); return `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`; }
+
+let seekDragging = false;
+seek.addEventListener('input', () => {
+  seekDragging = true;
+  player.currentTime = +seek.value;
+  seek.style.setProperty('--p', (+seek.value / (player.duration || 167.6) * 100) + '%');
+});
+seek.addEventListener('change', () => { seekDragging = false; });
+function togglePlay() { if (player.paused) player.play(); else player.pause(); }
+player.addEventListener('play', () => { btnPlay.textContent = '⏸'; bigplay.classList.add('hidden'); });
+player.addEventListener('pause', () => { btnPlay.textContent = '▶'; if (player.currentTime < 0.05 || player.ended) bigplay.classList.remove('hidden'); });
+player.addEventListener('ended', () => { bigplay.classList.remove('hidden'); bigplay.querySelector('.hint').innerHTML = 'Ještě jednou?<small>R = od začátku</small>'; });
+player.addEventListener('loadedmetadata', () => {
+  seek.max = player.duration;
+  tDur.textContent = fmtTime(player.duration);
+});
+btnPlay.addEventListener('click', togglePlay);
+btnRestart.addEventListener('click', () => { player.currentTime = 0; player.play(); });
+bigplay.addEventListener('click', () => { player.play(); });
+document.getElementById('stage').addEventListener('click', (e) => {
+  if (e.target.closest('#bigplay')) return;
+  togglePlay();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+  else if (e.code === 'ArrowRight') player.currentTime = Math.min(player.duration || 167, player.currentTime + 5);
+  else if (e.code === 'ArrowLeft') player.currentTime = Math.max(0, player.currentTime - 5);
+  else if (e.key === 'r' || e.key === 'R' || e.code === 'Home') { player.currentTime = 0; player.play(); }
+});
+requestAnimationFrame(tick);
+})();
+</script>
+
+</body>
+</html>
