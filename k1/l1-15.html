@@ -45,7 +45,7 @@
   <details class="try">
     <summary>Zkus sám: jak z času udělat „pozice“, na které jde přiřazovat? A jak pak zapsat „akce $i$ nastane <em>právě jednou</em>“?</summary>
     <div class="inner">
-      <p>Čas <strong>diskretizuješ</strong>: povolené okamžiky jsou $t \in \{0, 1, \ldots, UB\}$ pro nějaký horizont $UB$. Každý okamžik je „přihrádka“ a rozhoduješ binárkou</p>
+      <p>Čas <strong>diskretizuješ</strong>: povolené okamžiky jsou $t \in \{0, 1, \ldots, UB-1\}$ pro nějaký horizont $UB$ (poslední start musí stihnout proběhnout do $UB$). Každý okamžik je „přihrádka“ a rozhoduješ binárkou</p>
       $$x_{i,t} \in \{0,1\}, \qquad x_{i,t} = 1 \iff \text{akce } i \text{ nastane v čase } t.$$
       <p>„Akce $i$ nastane právě jednou“ je pak řádkový součet, úplně stejný trik jako $\sum_j x_{ij} = 1$ v <a href="l1-2.html#takeaways">[L1.2]</a>:</p>
       $$\sum_{t} x_{i,t} = 1 \qquad \forall i.$$
@@ -55,7 +55,7 @@
 
   <!-- ===== CTENI CASU ===== -->
   <h2>Čtení času z binárek</h2>
-  <p>Mám binárky $x_{i,0}, x_{i,1}, \ldots, x_{i,UB}$ a chci s časem startu <em>počítat</em> — třeba říct „úloha $j$ startuje aspoň o $L$ později než úloha $i$“.</p>
+  <p>Mám binárky $x_{i,0}, x_{i,1}, \ldots, x_{i,UB-1}$ a chci s časem startu <em>počítat</em> — třeba říct „úloha $j$ startuje aspoň o $L$ později než úloha $i$“.</p>
 
   <details class="try">
     <summary>Zkus sám: napiš start $s_i$ úlohy $i$ jako lineární výraz z binárek. (V <a href="l1-14.html#takeaways">[L1.14]</a> jsme stejně četli „číslo boxu hračky“.)</summary>
@@ -109,7 +109,7 @@
     <p>$\sum_i x_{i,\tau} \le 1$ zakazuje jen <strong>společné starty</strong>. Úloha s $p_i &gt; 1$ ale blokuje zdroj po celé okno $[s_i,\, s_i + p_i)$ — kolizi proto hlídej součtem přes okna startů $k \in \{\tau - p_i + 1, \ldots, \tau\}$ (ořezaná zdola nulou), ne jediným sloupcem. U akcí délky 1 obě verze splývají.</p>
   </div>
 
-  <p>Cena za celou techniku: model má $n \cdot UB + 1$ proměnných — diskretizaci času platíš počtem binárek (proto se volí co nejtěsnější horizont $UB$). Krokuj si všechny tři myšlenky na tabulce binárek výše: řádkový součet, čtení startu, okno zdroje.</p>
+  <p>Cena za celou techniku: model má $n \cdot UB$ binárek (time-indexed model v K5 k nim přidá ještě jednu spojitou proměnnou $C_{max}$, celkem tedy $n \cdot UB + 1$) — diskretizaci času platíš počtem binárek (proto se volí co nejtěsnější horizont $UB$). Krokuj si všechny tři myšlenky na tabulce binárek výše: řádkový součet, čtení startu, okno zdroje.</p>
 
   <!-- ===== POZICE ===== -->
   <h2>Pozice místo času: tentýž trik bez hodin</h2>
@@ -147,11 +147,11 @@
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L1.15</div>
     <ul>
-      <li><strong>Časově/pozičně indexovaná binárka:</strong> $x_{i,t} = 1 \iff$ akce $i$ nastane v čase/pozici $t$. Je to přiřazovací struktura <a href="l1-2.html#takeaways">[L1.2]</a>, kde druhý index je diskretizovaný čas (horizont $t \in \{0, \ldots, UB\}$) nebo pozice.</li>
+      <li><strong>Časově/pozičně indexovaná binárka:</strong> $x_{i,t} = 1 \iff$ akce $i$ nastane v čase/pozici $t$. Je to přiřazovací struktura <a href="l1-2.html#takeaways">[L1.2]</a>, kde druhý index je diskretizovaný čas (horizont $t \in \{0, \ldots, UB-1\}$) nebo pozice.</li>
       <li><strong>„Začíná právě jednou“:</strong> $\sum_t x_{i,t} = 1$; <strong>čtení času:</strong> $s_i = \sum_t t \cdot x_{i,t}$ — funguje <em>jen</em> spolu s „právě jednou“. Pak jsou vztahy startů lineární: $s_i + L \le s_j$.</li>
       <li><strong>Kolize/zdroj:</strong> v čase $\tau$ běží nanejvýš jedna úloha — sčítej <em>okna</em> startů $\sum_i \sum_{k=\max(0,\tau-p_i+1)}^{\tau} x_{i,k} \le 1$, ne jen společné starty (sloupec $\sum_i x_{i,\tau} \le 1$ stačí jen pro akce délky 1).</li>
       <li><strong>Pozice = čas bez hodin:</strong> tentýž aparát pro pořadí v řadě, políčka šachovnice ($x_s + x_{s'} \le 1$ pro útočné dvojice, zakázané pole $x_s = 0$) i mřížku; kombinace čas × pozice dá $x_{i,c,t}$ (Penguins on ice).</li>
-      <li>Naplno se technika použije v rozvrhování — <strong>time-indexed model $PS1|temp|C_{max}$</strong> v K5 ($n \cdot UB + 1$ proměnných) — a u TSP; tady stačí umět tabulku binárek postavit a přečíst.</li>
+      <li>Naplno se technika použije v rozvrhování — <strong>time-indexed model $PS1|temp|C_{max}$</strong> v K5 ($n \cdot UB$ binárek + 1 proměnná $C_{max}$) — a u TSP; tady stačí umět tabulku binárek postavit a přečíst.</li>
     </ul>
   </div>
 
@@ -205,7 +205,7 @@
           <p><strong>Detekce vstupu</strong> — $e_{i,c,t} = x_{i,c,t} \wedge \neg x_{i,c,t-1}$, linearizace AND z <a href="l1-3.html#takeaways">[L1.3]</a>, pro $t = 1, \ldots, T_{max}$:</p>
           $$e_{i,c,t} \ge x_{i,c,t} - x_{i,c,t-1}, \qquad e_{i,c,t} \le x_{i,c,t}, \qquad e_{i,c,t} \le 1 - x_{i,c,t-1} \qquad \forall i \in P, \forall c \in C.$$
           <p>Trojice nerovností vynutí $e_{i,c,t} = 1 \iff (x_{i,c,t-1}, x_{i,c,t}) = (0,1)$: čekání na kře vstup nevytváří, návrat po odchodu by vytvořil druhý vstup.</p>
-          <p><strong>Potápění ker</strong> — každá kra smí být vstoupena celkem nanejvýš jednou:</p>
+          <p><strong>Potápění ker</strong> — na každou kru se smí vstoupit celkem nanejvýš jednou:</p>
           $$\sum_{i \in P} \sum_{t \in \mathcal{T}} e_{i,c,t} \;\le\; 1 \qquad \forall c \in C.$$
           <p>Tím je pokryto všechno, co potopení znamená: čekání je dovoleno (není to nový vstup), návrat na opuštěnou kru zakázán (druhý vstup), vstup jiného tučňáka na použitou kru zakázán (taky druhý vstup).</p>
           <p><strong>Velikost modelu:</strong> $O(n \cdot w h \cdot T_{max})$ binárek — typická cena časové indexace; horizont $T_{max}$ je naštěstí dán zadáním.</p>
@@ -345,7 +345,7 @@
         nodes: { g11: 'hl', g33: 'good' }, subs: subs({ g11: 'A', g33: 'B' }) },
       { desc: 't = 1: oba se posunuli na 4-souseda (pohybové omezení x<sub>i,c,0</sub> ≤ x<sub>i,c,1</sub> + Σ x<sub>i,d,1</sub>). Opuštěné kry (1,1) a (3,3) se potopily — vstoupit na ně podruhé už nejde. Nové vstupy: e<sub>A,(2,1),1</sub> = e<sub>B,(2,3),1</sub> = 1.',
         nodes: { g21: 'hl', g23: 'good', g11: 'bad', g33: 'bad' }, subs: subs({ g21: 'A', g23: 'B' }) },
-      { desc: 't = 2 = T<sub>max</sub>: A stojí na cíli (3,1), B na cíli (1,3) — cílové fixace x<sub>A,(3,1),2</sub> = x<sub>B,(1,3),2</sub> = 1 platí. Každá kra byla vstoupena nanejvýš jednou: Σ<sub>i</sub> Σ<sub>t</sub> e<sub>i,c,t</sub> ≤ 1 pro každou buňku c.',
+      { desc: 't = 2 = T<sub>max</sub>: A stojí na cíli (3,1), B na cíli (1,3) — cílové fixace x<sub>A,(3,1),2</sub> = x<sub>B,(1,3),2</sub> = 1 platí. Na každou kru se vstoupilo nanejvýš jednou: Σ<sub>i</sub> Σ<sub>t</sub> e<sub>i,c,t</sub> ≤ 1 pro každou buňku c.',
         nodes: { g31: 'hl', g13: 'good', g11: 'bad', g21: 'bad', g33: 'bad', g23: 'bad' }, subs: subs({ g31: 'A', g13: 'B' }) },
     ],
   });
