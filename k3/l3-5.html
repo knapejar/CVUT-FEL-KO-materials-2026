@@ -33,7 +33,7 @@
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
-    <strong>Konstrukce TSP instance z grafu pro HC</strong>: zúplni graf a dej hranám ceny 1 (hrana byla v $G$), resp. 2 (nebyla) — pak HC v $G$ existuje ⟺ optimum TSP $= n$. A protože váhy jsou jen $\{1,2\}$, je TSP NP-těžký dokonce <em>silně</em>: žádný pseudopolynomiální algoritmus (pokud $P \ne NP$).
+    <strong>Konstrukce TSP instance z grafu pro HC</strong>: zúplni graf a dej hranám ceny 1 (hrana byla v&nbsp;$G$), resp. 2 (nebyla) — pak HC v&nbsp;$G$ existuje ⟺ optimum TSP $= n$. A protože váhy jsou jen $\{1,2\}$, je TSP NP-těžký dokonce <em>silně</em>: žádný pseudopolynomiální algoritmus (pokud $P \ne NP$).
   </div>
 
   <p>V <a href="l3-3.html#takeaways">[L3.3] Hamiltonovská kružnice a NP-úplnost</a> jsme si připravili zdroj těžkosti (HC je NP-úplný) a v „předkrmu“ sis dokonce zkusil(a) vymyslet převod na TSP. V <a href="l3-4.html#takeaways">[L3.4]</a> už TSP umíme formálně i jako ILP. Dnes ten převod proměníme v <strong>úplný důkaz</strong> — první hotovou redukci téhle kapitoly. Stejná konstrukce se zostřenými vahami pak v <a href="l3-6.html">[L3.6]</a> zabije i všechny r-aproximace (žebříčkový důkaz #3) — dnešek je její „tréninková verze“, na které pochopíš každý krok.</p>
@@ -47,7 +47,7 @@
     <p>Slide k tomu říká, jak na to (EN 1:1): <em>„We show that the TSP is NP-hard even when restricted to instances where all distances are 1 or 2 using polynomial transformation from the HC problem.“</em></p>
   </div>
 
-  <p>Slovo <strong>silně (strongly)</strong> si necháme na konec lekce — nejdřív poctivě provedeme samotnou redukci HC → TSP. Plán z [L3.3]: vezmeme <em>libovolnou</em> instanci HC (obecný neorientovaný graf $G$ s $n$ vrcholy) a v polynomiálním čase z ní vyrobíme instanci TSP tak, aby <strong>hodnota optima</strong> prozradila odpověď HC.</p>
+  <p>Slovo <strong>silně (strongly)</strong> si necháme na konec lekce — nejdřív poctivě provedeme samotnou redukci HC → TSP. Plán z [L3.3]: vezmeme <em>libovolnou</em> instanci HC (obecný neorientovaný graf $G$ s&nbsp;$n$ vrcholy) a v polynomiálním čase z ní vyrobíme instanci TSP tak, aby <strong>hodnota optima</strong> prozradila odpověď HC.</p>
 
   <details class="try">
     <summary>Zkus sám (opáčko předkrmu z [L3.3]): TSP potřebuje úplný graf $K_n$ s cenami hran <a href="l3-4.html#takeaways">[L3.4]</a>, ale $G$ úplný není. Jak ceny nastavíš?</summary>
@@ -70,14 +70,14 @@
   </details>
 
   <!-- ===== SEKCE 2: EKVIVALENCE ===== -->
-  <h2>Klíčové tvrzení: HC v $G$ ⟺ optimum TSP $= n$</h2>
+  <h2>Klíčové tvrzení: HC v&nbsp;$G$ ⟺ optimum TSP $= n$</h2>
 
   <p>Slide 18 (EN 1:1): <em>„$G$ has a Hamiltonian circuit iff optimal TSP solution is equal to $n$.“</em> To je srdce důkazu — a „iff“ znamená, že musíme zvládnout <strong>oba směry</strong>. Rozložíme si je na tři malé krůčky.</p>
 
   <details class="try">
-    <summary>Zkus sám (krok 1 — dolní mez): kolik <em>nejméně</em> stojí úplně každý Hamiltonovský okruh v naší instanci? Nezávisle na tom, jak vypadá $G$.</summary>
+    <summary>Zkus sám (krok 1 — dolní mez): kolik <em>nejméně</em> stojí úplně každý Hamiltonovský okruh v&nbsp;naší instanci? Nezávisle na tom, jak vypadá $G$.</summary>
     <div class="inner">
-      <p>Každý Hamiltonovský okruh v $K_n$ má <strong>přesně $n$ hran</strong> ($n$ měst, z každého právě jednou vyjedeš <a href="l3-4.html#takeaways">[L3.4]</a>) a každá hrana stojí aspoň 1. Takže <em>každý</em> okruh stojí aspoň $n$:
+      <p>Každý Hamiltonovský okruh v&nbsp;$K_n$ má <strong>přesně $n$ hran</strong> ($n$ měst, z každého právě jednou vyjedeš <a href="l3-4.html#takeaways">[L3.4]</a>) a každá hrana stojí aspoň 1. Takže <em>každý</em> okruh stojí aspoň $n$:
       $$\mathrm{OPT} \ge n.$$
       Tahle lacino vypadající nerovnost je půlka celé ekvivalence — bez ní by „optimum $= n$“ nic neznamenalo.</p>
     </div>
@@ -86,14 +86,14 @@
   <details class="try">
     <summary>Zkus sám (krok 2 — směr ⇒): nechť $G$ Hamiltonovskou kružnici <em>má</em>. Proč je pak optimum přesně $n$?</summary>
     <div class="inner">
-      <p>Hamiltonovská kružnice v $G$ používá jen hrany $E(G)$ — a ty mají v naší instanci cenu 1. Tentýž okruh tedy existuje i v $K_n$ a stojí $n \cdot 1 = n$. Máme okruh za $n$, takže $\mathrm{OPT} \le n$; spolu s krokem 1 ($\mathrm{OPT} \ge n$) dostáváme $\mathrm{OPT} = n$. ✓</p>
+      <p>Hamiltonovská kružnice v&nbsp;$G$ používá jen hrany $E(G)$ — a ty mají v naší instanci cenu 1. Tentýž okruh tedy existuje i v $K_n$ a stojí $n \cdot 1 = n$. Máme okruh za $n$, takže $\mathrm{OPT} \le n$; spolu s krokem 1 ($\mathrm{OPT} \ge n$) dostáváme $\mathrm{OPT} = n$. ✓</p>
     </div>
   </details>
 
   <details class="try">
-    <summary>Zkus sám (krok 3 — směr ⇐, ten se zapomíná!): nechť optimum TSP je $n$. Co všechno víš o optimálním okruhu — a proč z toho plyne HC v $G$?</summary>
+    <summary>Zkus sám (krok 3 — směr ⇐, ten se zapomíná!): nechť optimum TSP je $n$. Co všechno víš o optimálním okruhu — a proč z toho plyne HC v&nbsp;$G$?</summary>
     <div class="inner">
-      <p>Optimální okruh má $n$ hran a stojí dohromady $n$. Kdyby <em>jediná</em> z jeho hran měla cenu 2, stál by aspoň $(n-1) \cdot 1 + 2 = n + 1 &gt; n$ — spor. Takže všechny jeho hrany mají cenu 1, tedy všechny <strong>leží v $E(G)$</strong>. Okruh z hran $G$ procházející všemi vrcholy právě jednou — to je přesně Hamiltonovská kružnice v $G$. ✓</p>
+      <p>Optimální okruh má $n$ hran a stojí dohromady $n$. Kdyby <em>jediná</em> z jeho hran měla cenu 2, stál by aspoň $(n-1) \cdot 1 + 2 = n + 1 &gt; n$ — spor. Takže všechny jeho hrany mají cenu 1, tedy všechny <strong>leží v&nbsp;$E(G)$</strong>. Okruh z hran $G$ procházející všemi vrcholy právě jednou — to je přesně Hamiltonovská kružnice v&nbsp;$G$. ✓</p>
       <p>Ekvivalence je hotová: $G$ má HC ⟺ $\mathrm{OPT} = n$. Všimni si kontrapozice směru ⇐: když $G$ HC <strong>nemá</strong>, musí každý okruh použít aspoň jednu dvojkovou hranu, takže $\mathrm{OPT} \ge n + 1$. Mezi ANO a NE instancemi vzniká <strong>mezera</strong> $n$ vs. $n+1$ — žádná hodnota mezi tím nenastane.</p>
     </div>
   </details>
@@ -108,7 +108,7 @@
   <details class="try">
     <summary>Zkus sám: představ si, že má kamarádka polynomiální algoritmus na TSP. Sestav z něj polynomiální rozhodovač HC — krok za krokem.</summary>
     <div class="inner">
-      <p>Pro vstupní graf $G$ s $n$ vrcholy:</p>
+      <p>Pro vstupní graf $G$ s&nbsp;$n$ vrcholy:</p>
       <ol>
         <li>Sestav TSP instanci $(K_n, c)$ s cenami 1/2 podle $E(G)$ — čas $O(n^2)$.</li>
         <li>Spusť kamarádčin algoritmus → dostaneš $\mathrm{OPT}$ — polynomiální čas.</li>
@@ -169,8 +169,8 @@
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.5</div>
     <ul>
-      <li><strong>Konstrukce (slide 18):</strong> z grafu $G$ pro HC vyrob úplný graf $K_n$; $c(\{i,j\}) = 1$ pokud $\{i,j\} \in E(G)$, jinak $2$. Převod je $O(n^2)$, nic neřeší, jen přepisuje.</li>
-      <li><strong>Ekvivalence:</strong> HC v $G$ existuje ⟺ optimum TSP $= n$. (⇒: HC = okruh ze samých jedniček; ⇐: okruh má $n$ hran ceny $\ge 1$, jediná dvojka by dala $\ge n+1$.) Bez HC je $\mathrm{OPT} \ge n+1$ — mezi ANO a NE je mezera.</li>
+      <li><strong>Konstrukce (slide 18):</strong> z&nbsp;grafu $G$ pro HC vyrob úplný graf $K_n$; $c(\{i,j\}) = 1$ pokud $\{i,j\} \in E(G)$, jinak $2$. Převod je $O(n^2)$, nic neřeší, jen přepisuje.</li>
+      <li><strong>Ekvivalence:</strong> HC v&nbsp;$G$ existuje ⟺ optimum TSP $= n$. (⇒: HC = okruh ze samých jedniček; ⇐: okruh má $n$ hran ceny $\ge 1$, jediná dvojka by dala $\ge n+1$.) Bez HC je $\mathrm{OPT} \ge n+1$ — mezi ANO a NE je mezera.</li>
       <li><strong>Silně NP-těžký (slide 17):</strong> restrikce $L_p$ na instance s $largest(I) \le p(size(I))$ je NP-těžká. U TSP: ceny $\in \{1,2\}$, $largest(I) = 2 \le n$ → TSP je silně NP-těžký → <strong>žádný pseudopolynomiální algoritmus, pokud $P \ne NP$</strong>. Kontrast: knapsack silně NP-těžký není (DP $O(nC)$, <a href="../k7/l7-1.html">[L7.1]</a>).</li>
       <li><strong>Stejná šablona, jiné ceny:</strong> nahradíš-li 2 hodnotou $2 + (r-1)n$, mezera se roztáhne tak, že ji rozezná i r-aproximace — to je důkaz neexistence r-aproximace v <a href="l3-6.html">[L3.6]</a>.</li>
     </ul>
@@ -206,16 +206,16 @@
         <summary>d) Úplné řešení</summary>
         <div class="inner">
           <p><strong>(1) Definice (slide 17).</strong> For a polynomial $p$ let $L_p$ be the restriction of $L$ to such instances $I$ that consist of nonnegative integers with $\mathit{largest}(I) \le p(\mathit{size}(I))$. $L$ is <strong>strongly NP-hard</strong> if there is a polynomial $p$ such that $L_p$ is NP-hard. If $L$ is strongly NP-hard, then $L$ cannot be solved by a pseudopolynomial time algorithm unless $P = NP$.</p>
-          <p><strong>(2) Konstrukce (slide 18).</strong> Ukážeme, že TSP je NP-těžký už při restrikci na instance se vzdálenostmi 1 a 2, polynomiální transformací z problému HC. Nechť $G$ je neorientovaný graf s $n$ vrcholy, v němž chceme rozhodnout existenci Hamiltonovské kružnice. Sestavíme instanci TSP: každý vrchol $G$ odpovídá jednomu vrcholu úplného grafu $K_n$ a cena hrany $\{i,j\}$ v $K_n$ je
+          <p><strong>(2) Konstrukce (slide 18).</strong> Ukážeme, že TSP je NP-těžký už při restrikci na instance se vzdálenostmi 1 a 2, polynomiální transformací z problému HC. Nechť $G$ je neorientovaný graf s&nbsp;$n$ vrcholy, v němž chceme rozhodnout existenci Hamiltonovské kružnice. Sestavíme instanci TSP: každý vrchol $G$ odpovídá jednomu vrcholu úplného grafu $K_n$ a cena hrany $\{i,j\}$ v $K_n$ je
           $$c(\{i,j\}) = \begin{cases} 1 & \text{if } \{i,j\} \in E(G); \\ 2 & \text{if } \{i,j\} \notin E(G). \end{cases}$$
           Převod jen ohodnotí $\binom{n}{2}$ dvojic — čas $O(n^2)$, polynomiální.</p>
           <p><strong>(3) Ekvivalence.</strong> Tvrdíme: $G$ má Hamiltonovskou kružnici ⟺ optimum TSP $= n$.</p>
           <ul>
-            <li><em>Dolní mez:</em> každý Hamiltonovský okruh v $K_n$ má přesně $n$ hran a každá stojí $\ge 1$, takže $\mathrm{OPT} \ge n$.</li>
-            <li><em>(⇒)</em> Má-li $G$ Hamiltonovskou kružnici, tentýž okruh v $K_n$ používá jen hrany ceny 1 a stojí $n$. Tedy $\mathrm{OPT} \le n$, a s dolní mezí $\mathrm{OPT} = n$.</li>
-            <li><em>(⇐)</em> Je-li $\mathrm{OPT} = n$, optimální okruh nesmí obsahovat žádnou hranu ceny 2 (jinak by stál $\ge (n-1) + 2 = n+1$). Všechny jeho hrany tedy leží v $E(G)$ a tvoří Hamiltonovskou kružnici v $G$. (Kontrapozicí: nemá-li $G$ HC, je $\mathrm{OPT} \ge n+1$.)</li>
+            <li><em>Dolní mez:</em> každý Hamiltonovský okruh v&nbsp;$K_n$ má přesně $n$ hran a každá stojí $\ge 1$, takže $\mathrm{OPT} \ge n$.</li>
+            <li><em>(⇒)</em> Má-li $G$ Hamiltonovskou kružnici, tentýž okruh v&nbsp;$K_n$ používá jen hrany ceny 1 a stojí $n$. Tedy $\mathrm{OPT} \le n$, a s dolní mezí $\mathrm{OPT} = n$.</li>
+            <li><em>(⇐)</em> Je-li $\mathrm{OPT} = n$, optimální okruh nesmí obsahovat žádnou hranu ceny 2 (jinak by stál $\ge (n-1) + 2 = n+1$). Všechny jeho hrany tedy leží v&nbsp;$E(G)$ a tvoří Hamiltonovskou kružnici v&nbsp;$G$. (Kontrapozicí: nemá-li $G$ HC, je $\mathrm{OPT} \ge n+1$.)</li>
           </ul>
-          <p><strong>(4) Závěr.</strong> Polynomiální algoritmus pro TSP by přes tuto transformaci rozhodl NP-úplný problém HC v polynomiálním čase (spočti $\mathrm{OPT}$ a porovnej s $n$), tedy by platilo $P = NP$ — TSP je NP-těžký. Naše instance navíc obsahují jen čísla 1 a 2: $\mathit{largest}(I) = 2 \le n = p(\mathit{size}(I))$, takže NP-těžká je už restrikce $L_p$ s $c(e) \in \{1,2\}$ — TSP je <strong>silně NP-těžký</strong>. Proto TSP nemůže být řešen pseudopolynomiálním algoritmem, pokud $P \ne NP$. $\blacksquare$</p>
+          <p><strong>(4) Závěr.</strong> Polynomiální algoritmus pro TSP by přes tuto transformaci rozhodl NP-úplný problém HC v&nbsp;polynomiálním čase (spočti $\mathrm{OPT}$ a porovnej s $n$), tedy by platilo $P = NP$ — TSP je NP-těžký. Naše instance navíc obsahují jen čísla 1 a 2: $\mathit{largest}(I) = 2 \le n = p(\mathit{size}(I))$, takže NP-těžká je už restrikce $L_p$ s $c(e) \in \{1,2\}$ — TSP je <strong>silně NP-těžký</strong>. Proto TSP nemůže být řešen pseudopolynomiálním algoritmem, pokud $P \ne NP$. $\blacksquare$</p>
         </div>
       </details>
     </div>
