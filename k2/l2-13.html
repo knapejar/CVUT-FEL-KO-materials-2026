@@ -64,7 +64,7 @@
   <details class="try">
     <summary>Zkus sám: najdi topologické uspořádání grafu výše. Je jednoznačné?</summary>
     <div class="inner">
-      <p>Postupné odebírání vrcholů s nulovým in-degree <a href="../k0/l0-4.html#takeaways">[L0.4]</a>: na začátku je bez vstupní hrany jen $s$. Po odebrání $s$ jen $b$ (do $a$ pořád vede $b \to a$), po $b$ jen $a$, pak $d$, $c$, $e$. Vyjde $s, b, a, d, c, e$ — a protože v každém kroku byl kandidát právě jeden, je uspořádání <strong>jednoznačné</strong> (obecně být nemusí, viz úloha v <a href="../k0/l0-4.html#takeaways">[L0.4]</a>).</p>
+      <p>Postupné odebírání vrcholů s nulovým in-degree <a href="../k0/l0-4.html#takeaways">[L0.4]</a>: na začátku je bez vstupní hrany jen $s$. Po odebrání $s$ jen $b$ (do $a$ pořád vede $b \to a$), po $b$ jen $a$, po $a$ jen $d$. Jenže do $c$ vedou hrany $(a,c)$ i $(d,c)$ a do $e$ jen $(d,e)$ — po odebrání $d$ tak <strong>současně</strong> ztratí poslední vstupní hranu jak $c$, tak $e$ (mezi $c$ a $e$ žádná hrana není). V&nbsp;tomhle kroku jsou tedy kandidáti dva, takže uspořádání <strong>jednoznačné není</strong>: platné je $s, b, a, d, c, e$ i $s, b, a, d, e, c$ (výsledné značky $l$, $p$ ale vyjdou stejně; obecně nejednoznačnost čekáme, viz úloha v <a href="../k0/l0-4.html#takeaways">[L0.4]</a>).</p>
       <p>Teď „Consequence“ ze slidu: srovnej vrcholy v tomhle pořadí na přímku a všechny hrany potečou zleva doprava — uvidíš to na vizualizaci běhu níže.</p>
     </div>
   </details>
@@ -146,7 +146,7 @@ end</code></pre>
     <summary>Zkus sám: jak stejným algoritmem najít v DAGu <em>nejdelší</em> cestu z $v_1$?</summary>
     <div class="inner">
       <p>Dvě rovnocenné cesty: <strong>(i)</strong> vynásob všechny váhy $-1$ a pusť algoritmus beze změny — graf zůstal DAG a záporné váhy mu nevadí; nejkratší cesta v $-c$ je nejdelší v $c$. <strong>(ii)</strong> Přepiš algoritmus přímo na maximum: inicializuj $l(v_i) := -\infty$ a otoč test na $l(v_i) &lt; l(v_j) + c(v_j, v_i)$.</p>
-      <p>V <em>obecném</em> grafu je nejdelší cesta těžký problém (přes kladné cykly se „nabaluje“ délka — podrobně v lekci <a href="l2-17.html">[L2.17]</a>); v DAGu žádný cyklus není, a tak je nejdelší cesta stejně snadná jako nejkratší. Přesně to jsme už použili u investic pana Dow Jonese <a href="l2-9.html#takeaways">[L2.9]</a>: maximalizace zhodnocení byla nejdelší cesta v DAGu let.</p>
+      <p>V <em>obecném</em> grafu je nejdelší (prostá) cesta NP-těžká (souvisí s hamiltonovskou cestou — podrobně v lekci <a href="l2-17.html">[L2.17]</a>); povolením opakování vrcholů by se navíc přes kladné cykly délka nabalovala donekonečna. V DAGu žádný cyklus není, a tak je nejdelší cesta stejně snadná jako nejkratší. Přesně to jsme už použili u investic pana Dow Jonese <a href="l2-9.html#takeaways">[L2.9]</a>: maximalizace zhodnocení byla nejdelší cesta v DAGu let.</p>
     </div>
   </details>
 
@@ -289,10 +289,10 @@ const GLINE = {
     { from: 'b', to: 'a', label: '−2' },
     { from: 'a', to: 'd', label: '3' },
     { from: 'd', to: 'c', label: '−1' },
-    { from: 's', to: 'a', label: '3', curve: -2.2 },
-    { from: 'b', to: 'd', label: '2', curve: -2.2 },
-    { from: 'a', to: 'c', label: '1', curve: -2.2 },
-    { from: 'd', to: 'e', label: '1', curve: -2.2 },
+    { from: 's', to: 'a', label: '3', curve: -1.0 },
+    { from: 'b', to: 'd', label: '2', curve: -1.0 },
+    { from: 'a', to: 'c', label: '1', curve: -1.0 },
+    { from: 'd', to: 'e', label: '1', curve: -1.0 },
   ],
 };
 KOViz.stepper(document.getElementById('viz-run'), {
