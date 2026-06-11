@@ -33,10 +33,10 @@
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
-    <strong>Trojúhelníková nerovnost</strong> $c(\{i,j\}) + c(\{j,k\}) \ge c(\{k,i\})$ definuje <strong>metrický TSP</strong> — a umožňuje <strong>shortcutting</strong>: přeskočení už navštívených vrcholů v uzavřeném sledu cenu <em>nikdy nezvýší</em>.
+    <strong>Trojúhelníková nerovnost</strong> $c(\{i,j\}) + c(\{j,k\}) \ge c(\{k,i\})$ definuje <strong>metrický TSP</strong> — a umožňuje <strong>shortcutting</strong>: přeskočení už navštívených vrcholů v&nbsp;uzavřeném sledu cenu <em>nikdy nezvýší</em>.
   </div>
 
-  <p>V <a href="l3-6.html#takeaways">[L3.6] Neexistence r-aproximace pro obecný TSP</a> jsme dokázali, že obecný TSP nejde aproximovat s žádnou zárukou (pokud $P \ne NP$). Slíbená záchrana se jmenuje <strong>metric TSP</strong> (metrický TSP). Dnešní lekce ho definuje a vytěží z definice první nástroj — <strong>shortcutting</strong> (zkracování přes opakované vrcholy). Je to jeden ze tří stavebních kamenů, ze kterých pak složíme double-tree <a href="l3-9.html">[L3.9]</a> i Christofidese <a href="l3-10.html">[L3.10]</a>; zbylé dva přijdou v <a href="l3-8b.html#takeaways">[L3.8b]</a> (dolní mez) a <a href="l3-8c.html#takeaways">[L3.8c]</a> (Eulerovský tah).</p>
+  <p>V&nbsp;<a href="l3-6.html#takeaways">[L3.6] Neexistence r-aproximace pro obecný TSP</a> jsme dokázali, že obecný TSP nejde aproximovat s&nbsp;žádnou zárukou (pokud $P \ne NP$). Slíbená záchrana se jmenuje <strong>metric TSP</strong> (metrický TSP). Dnešní lekce ho definuje a vytěží z&nbsp;definice první nástroj — <strong>shortcutting</strong> (zkracování přes opakované vrcholy). Je to jeden ze tří stavebních kamenů, ze kterých pak složíme double-tree <a href="l3-9.html">[L3.9]</a> i Christofidese <a href="l3-10.html">[L3.10]</a>; zbylé dva přijdou v <a href="l3-8b.html#takeaways">[L3.8b]</a> (dolní mez) a <a href="l3-8c.html#takeaways">[L3.8c]</a> (Eulerovský tah).</p>
 
   <!-- ===== SEKCE 1: DEFINICE ===== -->
   <h2>Co přesně zabilo aproximace — a jak to zakázat</h2>
@@ -44,11 +44,11 @@
   <details class="try">
     <summary>Zkus sám: prohlédni si zabijáckou instanci z <a href="l3-6.html#takeaways">[L3.6]</a> — hrany grafu $G$ stojí $1$, ostatní $2 + (r-1)n$. Čím se tahle „mapa“ liší od skutečných vzdáleností mezi městy? Najdi trojici měst, kde se chová nereálně.</summary>
     <div class="inner">
-      <p>Vezmi města $i, k$ spojená drahou hranou a libovolné mezilehlé $j$ spojené s oběma levně. Pak <strong>oklika přes $j$ stojí $1 + 1 = 2$, zatímco přímá hrana $2 + (r-1)n$</strong> — oklika je řádově levnější než přímé spojení. U vzdáleností na mapě to nejde: přímé spojení nikdy není delší než zajížďka přes třetí město. Přesně tahle vlastnost reálných vzdáleností se jmenuje <strong>trojúhelníková nerovnost</strong> — a zabijácké instance ji porušují. Zákaz takových instancí je tedy přirozená (a prakticky všudypřítomná) restrikce.</p>
+      <p>Vezmi města $i, k$ spojená drahou hranou a libovolné mezilehlé $j$ spojené s&nbsp;oběma levně. Pak <strong>oklika přes $j$ stojí $1 + 1 = 2$, zatímco přímá hrana $2 + (r-1)n$</strong> — oklika je řádově levnější než přímé spojení. U vzdáleností na mapě to nejde: přímé spojení nikdy není delší než zajížďka přes třetí město. Přesně tahle vlastnost reálných vzdáleností se jmenuje <strong>trojúhelníková nerovnost</strong> — a zabijácké instance ji porušují. Zákaz takových instancí je tedy přirozená (a prakticky všudypřítomná) restrikce.</p>
     </div>
   </details>
 
-  <p>Slide 22 (EN 1:1): <em>„In most common applications the distances of the <strong>TSP</strong> satisfies the triangle inequality.“</em></p>
+  <p>Slide 22 (EN 1:1): <em>„In most common applications the distances of the <strong>TSP</strong> satisfy the triangle inequality.“</em></p>
 
   <div class="box">
     <div class="box-title">Metric TSP (slide 22, 1:1)</div>
@@ -63,8 +63,8 @@
   <details class="try">
     <summary>Zkus sám: trojúhelníkovou nerovnost jsi v učebnici už dvakrát potkal — kde? A v čem je dnešní použití jiné?</summary>
     <div class="inner">
-      <p>V <a href="../k2/l2-1.html#takeaways">[L2.1]</a> jako <em>větu</em> o nejkratších vzdálenostech: $l(i,j) \le l(i,k) + l(k,j)$ platí v každém grafu bez záporného cyklu — je to <strong>dokázaná vlastnost funkce $\mathrm{dist}$</strong>, zadarmo. A v <a href="l3-7.html#takeaways">[L3.7]</a> na ní stála detekce záporného cyklu Bellman-Fordem.</p>
-      <p>Dnes je role obrácená: trojúhelníková nerovnost je <strong>předpoklad o vstupních cenách $c$</strong>, který instance buď splňuje, nebo ne. Ekvivalentní čtení: instance je metrická právě tehdy, když je přímá hrana $\{i,k\}$ nejkratší cestou mezi $i$ a $k$ — ceny $c$ se rovnají vlastní metrice vzdáleností.</p>
+      <p>V&nbsp;<a href="../k2/l2-1.html#takeaways">[L2.1]</a> jako <em>větu</em> o&nbsp;nejkratších vzdálenostech: $l(i,j) \le l(i,k) + l(k,j)$ platí v&nbsp;každém grafu bez záporného cyklu — je to <strong>dokázaná vlastnost funkce $\mathrm{dist}$</strong>, zadarmo. A v&nbsp;<a href="l3-7.html#takeaways">[L3.7]</a> na ní stála detekce záporného cyklu Bellman-Fordem.</p>
+      <p>Dnes je role obrácená: trojúhelníková nerovnost je <strong>předpoklad o vstupních cenách $c$</strong>, který instance buď splňuje, nebo ne. Ekvivalentní čtení: instance je metrická právě tehdy, když je přímá hrana $\{i,k\}$ nejkratší cestou mezi $i$ a&nbsp;$k$ — ceny $c$ se rovnají vlastní metrice vzdáleností.</p>
     </div>
   </details>
 
@@ -72,7 +72,7 @@
   <h2>Metrický ≠ snadný</h2>
 
   <details class="try">
-    <summary>Zkus sám: zachránili jsme se restrikcí z těžkosti? Vrať se k důkazu silné NP-těžkosti TSP <a href="l3-5.html#takeaways">[L3.5]</a> — instance tam měly váhy $1$ a $2$. Splňují trojúhelníkovou nerovnost?</summary>
+    <summary>Zkus sám: zachránili jsme se restrikcí z&nbsp;těžkosti? Vrať se k&nbsp;důkazu silné NP-těžkosti TSP <a href="l3-5.html#takeaways">[L3.5]</a> — instance tam měly váhy $1$ a $2$. Splňují trojúhelníkovou nerovnost?</summary>
     <div class="inner">
       <p>Ano. Nejhorší případ: dvě nejlevnější hrany proti nejdražší, $1 + 1 \ge 2$ — platí (a všechny ostatní kombinace tím spíš: $1+2 \ge 2$, $2+2 \ge 2$, …). Celý důkaz z <a href="l3-5.html#takeaways">[L3.5]</a> tedy běží <em>uvnitř</em> metrických instancí beze změny — <strong>metrický TSP je pořád silně NP-těžký</strong>. Restrikce nezachránila optimální řešení v polynomiálním čase; zachrání (až) aproximace.</p>
     </div>
@@ -80,7 +80,7 @@
 
   <div class="box">
     <div class="box-title">Slide 22 (1:1) — složitost metrického TSP</div>
-    <p><em>„The <strong>metric TSP</strong> is strongly NP-hard. Can be proved in the same way as the complexity of <strong>TSP</strong> because weights 1 and 2 preserve the triangle inequality. Therefore the psudopolynomial algs do not exist.“</em> <span style="color:var(--muted)">(překlep „psudopolynomial“ je v originálu)</span></p>
+    <p><em>„The <strong>metric TSP</strong> is strongly NP-hard. Can be proved in the same way as the complexity of <strong>TSP</strong> because weights 1 and 2 preserve the triangle inequality. Therefore the pseudopolynomial algs do not exist.“</em></p>
     <p><em>„But approximation algorithms do exist.“</em></p>
   </div>
 
@@ -181,7 +181,7 @@
   <!-- ===== SEKCE 6: VÝHLED ===== -->
   <h2>K čemu to bude: plán na příští lekce</h2>
 
-  <p>Shortcutting je <strong>poslední krok</strong> obou aproximačních algoritmů: vyrobí z laciného uzavřeného sledu přípustný Hamiltonovský okruh, <em>aniž by pokazil cenu</em> — v řetízcích důkazů obstará nerovnost $c(E(L)) \ge c(E(H))$. Zbývá umět sled lacino <em>vyrobit</em> (Eulerovský tah nad zdvojenou kostrou, <a href="l3-8c.html#takeaways">[L3.8c]</a>) a cenu sledu svázat s neznámým $\mathrm{OPT}$ (dolní mez $\mathrm{OPT} \ge c(\mathrm{MST})$, <a href="l3-8b.html#takeaways">[L3.8b]</a> — hned další lekce). Pak už faktory 2 <a href="l3-9.html">[L3.9]</a> a 3/2 <a href="l3-10.html">[L3.10]</a> vypadnou složením tří nerovností.</p>
+  <p>Shortcutting je <strong>poslední krok</strong> obou aproximačních algoritmů: vyrobí z&nbsp;laciného uzavřeného sledu přípustný Hamiltonovský okruh, <em>aniž by pokazil cenu</em> — v&nbsp;řetízcích důkazů obstará nerovnost $c(E(L)) \ge c(E(H))$. Zbývá umět sled lacino <em>vyrobit</em> (Eulerovský tah nad zdvojenou kostrou, <a href="l3-8c.html#takeaways">[L3.8c]</a>) a cenu sledu svázat s neznámým $\mathrm{OPT}$ (dolní mez $\mathrm{OPT} \ge c(\mathrm{MST})$, <a href="l3-8b.html#takeaways">[L3.8b]</a> — hned další lekce). Pak už faktory 2 <a href="l3-9.html">[L3.9]</a> a 3/2 <a href="l3-10.html">[L3.10]</a> vypadnou složením tří nerovností.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
