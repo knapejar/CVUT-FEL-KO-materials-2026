@@ -436,7 +436,7 @@ Oba doložené termíny 2026 ji drží; vzorek je malý (3 termíny 2026, z toho
   - Floyd — nejdelší cesty, 4 iterace (teor-s3-floyd-longest, teoreticky_test_final).
   - Floyd — matice l a p po iteracích, čtení min cyklu (souhrn-floyd-longest-paths).
 
-### L2.15 — Skalování vah a zachování nejkratší cesty [MUST]
+### L2.15 — Škálování vah a zachování nejkratší cesty [MUST]
 - **Jedna nová věc:** Co posun (+h) a co násobení (×k) vah dělá s nejkratší cestou.
 - **Key takeaways:**
   - **Posun všech vah o +h NEzachová** nejkratší cestu — protože cena cesty roste úměrně **počtu hran** [L0.2] na cestě (delší cesta dostane víc +h). Protipříklad: dvě s→t cesty různého počtu hran.
@@ -461,7 +461,7 @@ Oba doložené termíny 2026 ji drží; vzorek je malý (3 termíny 2026, z toho
 
 ### L2.18 — VYVRCHOLENÍ: Teorie záporných cyklů / 5 výroků [FOTO] [MUST]
 - **Jedna nová věc:** Složení mikro-výsledků [L2.15]–[L2.17] do souhrnné argumentační úlohy.
-- **Key takeaways:** Každý výrok rozhodni důkazem nebo protipříkladem; opírej se o skalování [L2.15], počet hran [L2.16] a složitost nejdelší cesty [L2.17].
+- **Key takeaways:** Každý výrok rozhodni důkazem nebo protipříkladem; opírej se o škálování [L2.15], počet hran [L2.16] a složitost nejdelší cesty [L2.17].
 - **Prerekvizity:** [L2.15], [L2.16], [L2.17], [L2.12]
 - **Úlohy:**
   - **Handling negative cycles** [FOTO] (T20, KO_21_06_2021).
