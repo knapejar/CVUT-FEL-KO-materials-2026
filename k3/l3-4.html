@@ -33,10 +33,10 @@
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
-    <strong>ILP model okruhu</strong>: binárky $x_{i,j}$ („$i$ je v okruhu těsně před $j$“) + „enter once / leave once“ — a hlavně <strong>jak zabránit podtrasám</strong> (sub-tours): pomocné proměnné $s_i$ („čas vstupu do $i$“) s big-M podmínkou, v literatuře známé jako MTZ.
+    <strong>ILP model okruhu</strong>: binárky $x_{i,j}$ („$i$ je v&nbsp;okruhu těsně před $j$“) + „enter once / leave once“ — a hlavně <strong>jak zabránit podtrasám</strong> (sub-tours): pomocné proměnné $s_i$ („čas vstupu do $i$“) s big-M podmínkou, v literatuře známé jako MTZ.
   </div>
 
-  <p>V <a href="l3-3.html#takeaways">[L3.3] Hamiltonovská kružnice a NP-úplnost</a> jsme viděli, že okruh přes všechna města je těžký problém — ale taky že NP-úplnost neznamená „prakticky neřešitelné“: konkrétní instance TSP se optimálně řeší přes ILP. Dnes ten ILP model postavíme. Uvidíš, že „snadná“ část modelu (každé město právě jednou) nestačí a nejzajímavější je právě boj s <strong>podtrasami</strong> — řešeními rozpadlými na několik menších okruhů. To je přesně modelovací dovednost, kterou zkouší úloha banky T11 i zkouškové téma „TSP s time windows“.</p>
+  <p>V&nbsp;<a href="l3-3.html#takeaways">[L3.3] Hamiltonovská kružnice a NP-úplnost</a> jsme viděli, že okruh přes všechna města je těžký problém — ale taky že NP-úplnost neznamená „prakticky neřešitelné“: konkrétní instance TSP se optimálně řeší přes ILP. Dnes ten ILP model postavíme. Uvidíš, že „snadná“ část modelu (každé město právě jednou) nestačí a nejzajímavější je právě boj s <strong>podtrasami</strong> — řešeními rozpadlými na několik menších okruhů. To je přesně modelovací dovednost, kterou zkouší úloha banky T11 i zkouškové téma „TSP s time windows“.</p>
 
   <!-- ===== SEKCE 1: TSP FORMÁLNĚ ===== -->
   <h2>TSP formálně</h2>
@@ -94,7 +94,7 @@
 
   <div class="viz" id="viz-subtour"></div>
 
-  <p>A pozor — nejde o kosmetickou vadu. Dva malé okruhy bývají <em>levnější</em> než jeden velký (ušetříš drahé „přejezdy“ mezi skupinami měst), takže optimum děravého modelu bude typicky právě podtrasové. Model musíme doplnit o <strong>subtour elimination</strong> — eliminaci podtras.</p>
+  <p>A pozor — nejde o&nbsp;kosmetickou vadu. Dva malé okruhy bývají <em>levnější</em> než jeden velký (ušetříš drahé „přejezdy“ mezi skupinami měst), takže optimum děravého modelu bude typicky právě podtrasové. Model musíme doplnit o <strong>subtour elimination</strong> — eliminaci podtras.</p>
 
   <!-- ===== SEKCE 3: MTZ ===== -->
   <h2>Eliminace podtras: čas vstupu $s_i$ (MTZ)</h2>
@@ -114,14 +114,14 @@
 
   <p>Čti ji jako přepínač <a href="../k1/l1-4.html#takeaways">[L1.4] big-M</a>:</p>
   <ul>
-    <li>$x_{i,j} = 1$ (hrana v okruhu): podmínka zní $s_i + c_{i,j} \le s_j$ — do $j$ vstoupíš aspoň o dobu jízdy později než do $i$.</li>
+    <li>$x_{i,j} = 1$ (hrana v&nbsp;okruhu): podmínka zní $s_i + c_{i,j} \le s_j$ — do $j$ vstoupíš aspoň o dobu jízdy později než do $i$.</li>
     <li>$x_{i,j} = 0$ (hrana mimo okruh): podmínka zní $s_i + c_{i,j} - M \le s_j$ — pro velké $M$ je splněna vždy, tedy <em>vypnutá</em>.</li>
   </ul>
 
   <details class="try">
     <summary>Zkus sám: proč podmínka běží jen přes $j \in 2..n$? Co by se stalo, kdybychom ji napsali i pro $j = 1$?</summary>
     <div class="inner">
-      <p>Model by se stal <strong>nesplnitelným i pro správné okruhy</strong>! Sečti podmínky podél celého okruhu $1 \to v_2 \to \cdots \to v_n \to 1$ (všechny hrany mají $x = 1$, takže $s_i + c_{i,j} \le s_j$): proměnné $s$ se po obvodu vykrátí a zbyde $\sum_{\text{okruh}} c_{i,j} \le 0$ — spor s kladnými cenami. Proto se hrana <em>vstupující do města 1</em> z podmínky vynechává ($j \ge 2$): město 1 je „depo“, kde se hodinky smí přetočit. Každý jiný vrchol takové privilegium nemá.</p>
+      <p>Model by se stal <strong>nesplnitelným i pro správné okruhy</strong>! Sečti podmínky podél celého okruhu $1 \to v_2 \to \cdots \to v_n \to 1$ (všechny hrany mají $x = 1$, takže $s_i + c_{i,j} \le s_j$): proměnné $s$ se po obvodu vykrátí a zbyde $\sum_{\text{okruh}} c_{i,j} \le 0$ — spor s kladnými cenami. Proto se hrana <em>vstupující do města 1</em> z&nbsp;podmínky vynechává ($j \ge 2$): město 1 je „depo“, kde se hodinky smí přetočit. Každý jiný vrchol takové privilegium nemá.</p>
     </div>
   </details>
 
@@ -159,14 +159,14 @@
   <details class="try">
     <summary>Zkus sám: jak velké musí být $M$? (Vzpomeň na zásadu z <a href="../k1/l1-4.html#takeaways">[L1.4]</a>: dost velké, aby nic neořízlo — ale ne zbytečně.)</summary>
     <div class="inner">
-      <p>Vypnutá podmínka ($x_{i,j}=0$) zní $s_i + c_{i,j} - M \le s_j$; nesmí nic zakazovat pro žádné rozumné hodnoty $s$. Časy podél okruhu nepřesáhnou součet všech ujetých cen, takže bezpečně stačí např. $M \ge \max_{i,j} c_{i,j} + $ (horní mez na $s$), konkrétně třeba $M = n \cdot \max_{i,j} c_{i,j}$ nebo $M = \sum_{i,j} c_{i,j}$. Příliš malé $M$ by <em>ořízlo přípustné okruhy</em> (model by lhal), zbytečně velké $M$ zhoršuje LP relaxaci a numeriku — přesně dilema z [L1.4].</p>
+      <p>Vypnutá podmínka ($x_{i,j}=0$) zní $s_i + c_{i,j} - M \le s_j$; nesmí nic zakazovat pro žádné rozumné hodnoty $s$. Časy podél okruhu nepřesáhnou součet všech ujetých cen, takže bezpečně stačí např. $M$ rovné součtu maxima ceny a horní meze na $s$, konkrétně třeba $M = n \cdot \max_{i,j} c_{i,j}$ nebo $M = \sum_{i,j} c_{i,j}$. Příliš malé $M$ by <em>ořízlo přípustné okruhy</em> (model by lhal), zbytečně velké $M$ zhoršuje LP relaxaci a numeriku — přesně dilema z [L1.4].</p>
     </div>
   </details>
 
   <div class="box">
     <div class="box-title">Poznámka ke jménu „MTZ“</div>
-    <p>Podmínkám tohoto typu se v literatuře říká <strong>MTZ subtour elimination</strong> podle autorů (Miller, Tucker, Zemlin, 1960). Slidy kurzu jméno neuvádějí — používají variantu s „časem vstupu“ $s_i$ a big-M a říkají jí <em>cycle indivisibility</em>. Počítej s oběma názvy. <em>(Dovysvětlení jména je vlastní doplněk nad rámec slidů.)</em></p>
-    <p>Spočítej si velikost modelu: $n^2$ binárek $x_{i,j}$, $n$ spojitých $s_i$, a omezení $O(n^2)$ — celý model je <strong>polynomiálně velký</strong>. To neodporuje NP-těžkosti TSP: ILP samo je NP-těžké <a href="../k0/l0-7.html#takeaways">[L0.7]</a>, jen jsme těžkost přestěhovali do řešení ILP (B&amp;B).</p>
+    <p>Podmínkám tohoto typu se v&nbsp;literatuře říká <strong>MTZ subtour elimination</strong> podle autorů (Miller, Tucker, Zemlin, 1960). Slidy kurzu jméno neuvádějí — používají variantu s „časem vstupu“ $s_i$ a big-M a říkají jí <em>cycle indivisibility</em>. Počítej s oběma názvy. <em>(Dovysvětlení jména je vlastní doplněk nad rámec slidů.)</em></p>
+    <p>Spočítej si velikost modelu: $n^2$ binárek $x_{i,j}$, $n$ spojitých $s_i$, a omezení $O(n^2)$ — celý model je <strong>polynomiálně velký</strong>. To neodporuje NP-těžkosti TSP: ILP samo je NP-těžké <a href="../k0/l0-7.html#takeaways">[L0.7]</a>, jen jsme těžkost přestěhovali do řešení ILP (B&amp;B <a href="../k5/l5-5.html#takeaways">[L5.5]</a>).</p>
   </div>
 
   <!-- ===== SEKCE 4: MNOŽINOVÁ ALTERNATIVA + LAZY ===== -->
@@ -183,7 +183,7 @@
   <details class="try">
     <summary>Zkus sám: kolik podmínek typu (4) model má? Spočítej pro $n = 10$.</summary>
     <div class="inner">
-      <p>Jedna podmínka pro každou neprázdnou vlastní podmnožinu $S \subset V$: celkem $2^n - 2$. Pro $n = 10$ to je $1022$ podmínek (cv10 uvádí přesně tohle číslo) — a pro $n = 50$ už $\approx 10^{15}$. <strong>Exponenciálně mnoho</strong> — takhle naplno model nikdy nevypíšeš. MTZ vyhrává kompaktností ($O(n^2)$); množinová verze ale jde použít chytře…</p>
+      <p>Jedna podmínka pro každou neprázdnou vlastní podmnožinu $S \subset V$: celkem $2^n - 2$. Pro $n = 10$ to je $1022$ podmínek (cv10 uvádí pro $n=10$ hodnotu 1022, ve zdroji zapsanou s překlepem jako $2^{n-2}$; korektní počet neprázdných vlastních podmnožin je $2^n - 2 = 1022$) — a pro $n = 50$ už $\approx 10^{15}$. <strong>Exponenciálně mnoho</strong> — takhle naplno model nikdy nevypíšeš. MTZ vyhrává kompaktností ($O(n^2)$); množinová verze ale jde použít chytře…</p>
     </div>
   </details>
 
@@ -193,13 +193,13 @@
 
   <div class="box info">
     <div class="box-title">Kde se to potkává s praxí</div>
-    <p>Moderní solvery (Gurobi) na to mají <strong>callbacky</strong>: tvoje funkce se zavolá při každém nalezeném celočíselném řešení (událost <code>MIPSOL</code>), zkontroluje podtrasy a případně přidá <code>addLazy(...)</code> / <code>cbLazy(...)</code>. Detailní kód (Java/Python/C++) je v cv10 — u písemky ho nepotřebuješ, ale princip „přidávej porušená omezení za běhu“ se hodí umět vysvětlit. Mimochodem stejné líné schéma stojí za rekordními vyřešenými instancemi z [L3.3] (24 978 měst).</p>
+    <p>Moderní solvery (Gurobi) na to mají <strong>callbacky</strong>: tvoje funkce se zavolá při každém nalezeném celočíselném řešení (událost <code>MIPSOL</code>), zkontroluje podtrasy a případně přidá <code>addLazy(...)</code> / <code>cbLazy(...)</code>. Detailní kód (Java/Python/C++) je v&nbsp;cv10 — u&nbsp;písemky ho nepotřebuješ, ale princip „přidávej porušená omezení za běhu“ se hodí umět vysvětlit. Líné generování subtour-elimination podmínek je standardní součástí moderních exaktních TSP řešičů (Concorde apod.), které stojí za rekordy z [L3.3].</p>
   </div>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: časté chyby v TSP modelu</div>
     <ul>
-      <li><strong>„Enter once + leave once stačí.“</strong> NE — připouští podtrasy (dva oddělené okruhy je splní taky). Subtour elimination je povinná část modelu; bez ní u zkoušky přijdeš o podstatu úlohy.</li>
+      <li><strong>„Enter once + leave once stačí.“</strong> NE — připouští podtrasy (dva oddělené okruhy je splní taky). Subtour elimination je povinná část modelu; bez ní u&nbsp;zkoušky přijdeš o&nbsp;podstatu úlohy.</li>
       <li><strong>Zapomenuté $x_{i,i} = 0$</strong> — smyčka „$i$ před $i$“ jinak lacino splní oba součty.</li>
       <li><strong>MTZ napsané i pro $j = 1$</strong> — model je pak nesplnitelný pro každý okruh (součet podél okruhu dá $\sum c \le 0$). Vstup do města 1 podmínku mít nesmí.</li>
       <li><strong>$M$ příliš malé</strong> — vypnutá podmínka začne ořezávat přípustné okruhy a model lže; $M$ zbytečně obří zase kazí relaxaci a numeriku <a href="../k1/l1-4.html#takeaways">[L1.4]</a>.</li>
@@ -284,7 +284,7 @@
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
-        <li>Tato lekce (T01) — základní model s MTZ.</li>
+        <li>Úloha&nbsp;T01 v&nbsp;této lekci — základní model s&nbsp;MTZ.</li>
         <li><a href="../k1/l1-15.html#takeaways">[L1.15] Časově/pozičně indexované proměnné</a> — srovnání: tam byl čas diskrétní index proměnné, tady je čas spojitá <em>hodnota</em> proměnné $s_i$.</li>
       </ul>
 
@@ -299,7 +299,7 @@
           $$a_j \le s_j \le b_j \qquad j \in 2..n \qquad \text{(time windows)}.$$</p>
           <p><strong>Proč to stačí:</strong> MTZ podmínka $s_i + c_{i,j} - (1-x_{i,j}) M \le s_j$ pro hrany okruhu vynucuje $s_j \ge s_i + c_{i,j}$ — vstup do $j$ nejdřív po dojezdu. Protože je to <em>nerovnost</em>, smí být $s_j$ i později než dojezd: to přesně modeluje povolené <strong>čekání</strong> (přijedu před otevřením okna $a_j$ a počkám). Okno pak ohraničí $s_j$ z obou stran. V základním modelu byly $s_i$ jen „pomocné hodinky“ na zabití podtras a jejich konkrétní hodnoty nikoho nezajímaly; tady dostaly fyzikální význam, proto musíme přibít start $s_1 = 0$.</p>
           <p><strong>Volba $M$:</strong> musí pokrýt největší možný rozdíl $s_i + c_{i,j} - s_j$, např. $M = \max_j b_j + \max_{i,j} c_{i,j}$ (vypnutá podmínka pak nikdy neořezává).</p>
-          <p><em>Subtilita (k ústní):</em> návrat do města 1 žádnou MTZ podmínku nemá ($j \ge 2$), takže „deadline návratu do depa“ tenhle model nehlídá; kdyby ho zadání chtělo, přidala by se zvláštní proměnná $s_{n+1}$ pro čas návratu s podmínkou $s_i + c_{i,1} - (1-x_{i,1})M \le s_{n+1}$ a oknem na $s_{n+1}$. Pozor také: s okny už nemusí být optimum „okruh bez čekání“ — účelová funkce pořád minimalizuje jen součet dob jízdy.</p>
+          <p><em>Subtilita (k&nbsp;ústní):</em> návrat do města 1 žádnou MTZ podmínku nemá ($j \ge 2$), takže „deadline návratu do depa“ tenhle model nehlídá; kdyby ho zadání chtělo, přidala by se zvláštní proměnná $s_{n+1}$ pro čas návratu s podmínkou $s_i + c_{i,1} - (1-x_{i,1})M \le s_{n+1}$ a oknem na $s_{n+1}$. Pozor také: s&nbsp;okny už nemusí být optimum „okruh bez čekání“ — účelová funkce pořád minimalizuje jen součet dob jízdy.</p>
         </div>
       </details>
     </div>
@@ -330,7 +330,7 @@
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — sekce „Alternativa: množinové podmínky a lazy constraints“.</li>
-        <li><a href="../k0/l0-7.html#takeaways">[L0.7] Branch &amp; Bound</a> — lazy podmínky se přidávají při nalezení celočíselného řešení během větvení.</li>
+        <li><a href="../k5/l5-5.html#takeaways">[L5.5] Branch &amp; Bound</a> — lazy podmínky se přidávají při nalezení celočíselného řešení během větvení.</li>
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
@@ -342,7 +342,7 @@
           <p><strong>(a)</strong> Podtrasa na vrcholech $S$ ($S \ne V$) je orientovaný cyklus, který uvnitř $S$ použije přesně $|S|$ hran. Podmínka (4) ale uvnitř $S$ povoluje nejvýš $|S|-1$ hran — cyklus uvnitř vlastní podmnožiny tedy zakazuje. Cv10 (EN 1:1): <em>„having a subset of vertices with $|S|$ edges if $S \ne V$ means that there are subtours in the solution, for instance if $S = \{1,2,3\}$ then $\sum_{i,j \in S : i \ne j} x_{i,j} = 3 > |S|-1$.“</em> Hlavnímu okruhu přes všechna města podmínky nevadí: do žádné vlastní podmnožiny $S$ se nevejde celý — vždy z ní aspoň jednou „vyjede“, takže uvnitř $S$ má nejvýš $|S|-1$ hran.</p>
           <p><strong>(b)</strong> Podmínka (4) existuje pro každou neprázdnou vlastní podmnožinu $S \subset V$ — je jich $2^n - 2$, tedy exponenciálně mnoho (cv10: pro $n = 10$ to je 1022 podmínek). Explicitně vypsat je pro větší $n$ nelze.</p>
           <p><strong>(c)</strong> Líné generování (dle cv10): na začátku formuluj model jen s podmínkami (2), (3) a (5). Pokaždé, když B&amp;B najde nové <em>celočíselné</em> řešení, najdi v něm cyklus; nechť $S$ je množina jeho vrcholů. Je-li $|S| < n$ (řešení obsahuje podtrasu), přidej do modelu odpovídající podmínku (4) — tím toto řešení vyloučíš z dalšího prohledávání. Podmínky se přidávají, dokud řešením není cyklus délky $n$. V Gurobi se to dělá callbackem volaným při události „nalezeno celočíselné řešení“ (<code>MIPSOL</code>) přes <code>addLazy</code>/<code>cbLazy</code>. $\blacksquare$</p>
-          <p><em>Srovnání s MTZ (k ústní):</em> MTZ = kompaktní model $O(n^2)$, který napíšeš celý předem (a u písemky na papír); množinové podmínky = exponenciální rodina generovaná líně, v praxi často efektivnější. Obě verze jsou „subtour elimination“.</p>
+          <p><em>Srovnání s&nbsp;MTZ (k&nbsp;ústní):</em> MTZ = kompaktní model $O(n^2)$, který napíšeš celý předem (a u&nbsp;písemky na papír); množinové podmínky = exponenciální rodina generovaná líně, v praxi často efektivnější. Obě verze jsou „subtour elimination“.</p>
         </div>
       </details>
     </div>
@@ -466,7 +466,7 @@ KOViz.stepper(document.getElementById('viz-lazy'), {
   frames: [
     {desc:'KROK 0: vyřeš model jen s podmínkami (2), (3), (5) — bez subtour elimination. Solver najde levné celočíselné řešení: dva okruhy 1→2→3→1 a 4→5→6→4 (cena 4 + 5 = 9 < 15 za velký okruh).',
      edges:{'1->2':'hl', '2->3':'hl', '3->1':'hl', '4->5':'hl', '5->6':'hl', '6->4':'hl'}},
-    {desc:'KROK 1: v nalezeném řešení najdi cyklus → třeba S = {4, 5, 6}. Je |S| = 3 < n = 6 → podtrasa! Přidej do modelu líné omezení (4) pro S: x₄₅ + x₅₆ + x₆₄ + (opačné hrany) ≤ |S| − 1 = 2. Aktuální řešení ho porušuje (součet 3) → je vyloučeno z dalšího hledání.',
+    {desc:'KROK 1: v nalezeném řešení najdi cyklus → třeba S = {4, 5, 6}. Je |S| = 3 < n = 6 → podtrasa! Přidej do modelu líné omezení (4) pro S: x₄₅ + x₅₆ + x₆₄ + (opačné hrany x₅₄, x₆₅, x₄₆ jsou v tomto řešení 0) ≤ |S| − 1 = 2. Aktuální řešení ho porušuje (součet 3) → je vyloučeno z dalšího hledání.',
      edges:{'4->5':'bad', '5->6':'bad', '6->4':'bad'},
      nodes:{'4':'bad', '5':'bad', '6':'bad'}},
     {desc:'KROK 2: řeš znovu (B&B pokračuje). Další celočíselné řešení už triádu {4,5,6} objet nesmí; analogicky by se příště zakázala {1,2,3}. Nakonec solver vrátí okruh 1→2→3→4→5→6→1 délky n = 6 → žádná podtrasa, HOTOVO (cena 15 je optimum doplněného modelu).',
