@@ -68,10 +68,10 @@ end</code></pre>
     <p>“The revision of $(x_k, x_m)$ does not change the arc consistency of $(x_m, x_k)$.”</p>
   </div>
 
-  <p>Čtení po řádcích: fronta $Q$ startuje jako <strong>všechny orientované hrany</strong> grafu omezení (z <a href="../k6/l6-1.html">[L6.1] CSP a arc consistency</a>: jedno binární omezení = dvě orientované hrany). V každé otočce smyčky se z fronty vybere a odebere hrana $(x_k, x_m)$ a zavolá se na ni <a href="../k6/l6-2.html">[L6.2] REVISE</a>$(D_k, D_m, C)$ — reviduje se tedy <strong>doména ocasu $D_k$</strong>. Zajímavé to je, jen když REVISE něco smazalo (<code>deleted</code> $= 1$):</p>
+  <p>Čtení po řádcích: fronta $Q$ startuje jako <strong>všechny orientované hrany</strong> grafu omezení (z <a href="../k6/l6-1.html">[L6.1] CSP a arc consistency</a>: jedno binární omezení = dvě orientované hrany). V každé otočce smyčky se z fronty vybere a odebere hrana $(x_k, x_m)$ a zavolá se na ni <a href="../k6/l6-2.html">[L6.2] REVISE</a>$(D_k, D_m, C)$ — reviduje se tedy <strong>doména počátku $D_k$</strong>. Zajímavé to je, jen když REVISE něco smazalo (<code>deleted</code> $= 1$):</p>
 
   <details class="try">
-    <summary>Zkus sám: proč se do fronty vrací právě hrany $(x_i, x_k)$ — tedy hrany <em>do</em> ocasu $x_k$ — a proč se vynechává ta s $i = m$? Obojí jsi vlastně odvodil už v [L6.2].</summary>
+    <summary>Zkus sám: proč se do fronty vrací právě hrany $(x_i, x_k)$ — tedy hrany <em>do</em> počátku $x_k$ — a proč se vynechává ta s $i = m$? Obojí jsi vlastně odvodil už v [L6.2].</summary>
     <div class="inner">
       <p>Zmenšila se $D_k$ — a ta je <em>zásobárnou podpor</em> právě pro hrany $(x_i, x_k)$, které do $x_k$ vedou; jen ty se škrtem mohly pokazit (<a href="../k6/l6-2.html#takeaways">[L6.2] takeaways</a>). Hrana $(x_m, x_k)$ — protisměrka právě revidovaného omezení — se ale pokazit nemohla: smazaná hodnota $a \in D_k$ neměla v $D_m$ <em>žádného</em> partnera, takže nebyla podporou ničeho v $D_m$ (poslední věta slidu 28). Proto podmínka $i \ne m$. A pozor na zápis $Q := Q \cup \{\dots\}$ — fronta je <strong>množina</strong>: hrana, která už ve frontě čeká, se podruhé nepřidává.</p>
     </div>
@@ -194,7 +194,7 @@ end</code></pre>
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — pseudokód AC-3, pravidlo znovuzařazení, zkouškový formát zápisu.</li>
-        <li><a href="../k6/l6-2.html#takeaways">[L6.2] REVISE a redukce domén</a> — mechanika škrtání (mění se jen ocas).</li>
+        <li><a href="../k6/l6-2.html#takeaways">[L6.2] REVISE a redukce domén</a> — mechanika škrtání (mění se jen počátek).</li>
         <li><a href="../k6/l6-1.html#takeaways">[L6.1] CSP a arc consistency</a> — graf omezení (1 omezení = 2 hrany), vzorce podpor.</li>
       </ul>
 

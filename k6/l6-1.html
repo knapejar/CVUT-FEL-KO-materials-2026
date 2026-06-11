@@ -118,7 +118,7 @@
     <div class="box-title"><img src="../assets/icons/book-open.svg" class="ico" alt="">Definice (slide 25, EN 1:1)</div>
     <p>“Arc $(x_i, x_j)$ is <strong>Arc Consistent (AC)</strong> iff <strong>for each value</strong> $a \in D_i$ <strong>there exists</strong> $b \in D_j$ such that the assignment $x_i = a$, $x_j = b$ meets <strong>all</strong> binary constraints for the variables $x_i, x_j$. A <strong>CSP is Arc Consistent</strong> iff all arcs are arc consistent.”</p>
   </div>
-  <p>Hodnotě $b$, která s $a$ splní omezení, se říká <strong>support</strong> (podpora). Slovy: hrana $(x_i, x_j)$ je konzistentní, když <em>každá</em> hodnota v doméně počátečního uzlu $x_i$ má v doméně koncového uzlu $x_j$ aspoň jednu podporu. V try-otázce výše jsi tedy zjistil, že hrana $(x_2, x_3)$ <strong>není</strong> AC (hodnota $3 \in D_2$ je bez podpory) a hrana $(x_3, x_2)$ také ne (hodnota $1 \in D_3$). Pozor na čtení: hrana $(x_i, x_j)$ mluví o hodnotách v $D_i$ — <strong>kontroluje se doména ocasu hrany</strong>, doména hlavy jen dodává podpory.</p>
+  <p>Hodnotě $b$, která s $a$ splní omezení, se říká <strong>support</strong> (podpora). Slovy: hrana $(x_i, x_j)$ je konzistentní, když <em>každá</em> hodnota v doméně počátečního uzlu $x_i$ má v doméně koncového uzlu $x_j$ aspoň jednu podporu. V try-otázce výše jsi tedy zjistil, že hrana $(x_2, x_3)$ <strong>není</strong> AC (hodnota $3 \in D_2$ je bez podpory) a hrana $(x_3, x_2)$ také ne (hodnota $1 \in D_3$). Pozor na čtení: hrana $(x_i, x_j)$ mluví o hodnotách v $D_i$ — <strong>kontroluje se doména počátku hrany</strong> (tail — ta první proměnná dvojice, $x_i$), zatímco doména konce (head, $x_j$) jen dodává podpory.</p>
 
   <p>A teď klíčová jemnost. Slide 25 (EN 1:1): <em>“AC is <strong>oriented</strong> — AC of arc $(x_i, x_j)$ does not imply AC of arc $(x_j, x_i)$.”</em> Prohlédni si tři příklady s omezením $x_1 \le x_2$ (po vzoru slidu 25; konkrétní domény jsou vlastní volba — slide je má jen v obrázku):</p>
 
@@ -149,7 +149,7 @@
     <ul>
       <li><strong>CSP $= (X, D, C)$:</strong> konečná množina proměnných, konečné domény, omezení = relace (povolené kombinace). Řešení = úplné přiřazení splňující všechna omezení; rozhodovací, NP-úplný problém.</li>
       <li><strong>Binární CSP ↔ digraf:</strong> uzly = proměnné; každé omezení nad $\{x_i, x_j\}$ dává orientované hrany $(x_i, x_j)$ <em>i</em> $(x_j, x_i)$ — v OBOU směrech.</li>
-      <li><strong>Hrana $(x_i, x_j)$ je arc consistent</strong> ⟺ každá hodnota $a \in D_i$ má v $D_j$ aspoň jednu podporu $b$ splňující všechna binární omezení mezi $x_i, x_j$. Kontroluje se doména <em>ocasu</em> hrany. CSP je AC ⟺ všechny hrany jsou AC.</li>
+      <li><strong>Hrana $(x_i, x_j)$ je arc consistent</strong> ⟺ každá hodnota $a \in D_i$ má v $D_j$ aspoň jednu podporu $b$ splňující všechna binární omezení mezi $x_i, x_j$. Kontroluje se doména <em>počátku</em> hrany (té první ve dvojici). CSP je AC ⟺ všechny hrany jsou AC.</li>
       <li><strong>AC je orientovaná:</strong> konzistence $(x_i, x_j)$ neimplikuje konzistenci $(x_j, x_i)$.</li>
       <li><strong>Propagace filtruje domény, ale nestačí:</strong> kartézský součin zredukovaných domén je jen nadmnožina množiny řešení.</li>
     </ul>
@@ -185,7 +185,7 @@
         <div class="inner">
           <p><strong>Graf.</strong> Omezení jsou mezi dvojicemi $\{x_1, x_2\}$ a $\{x_2, x_3\}$ → hrany $(x_1, x_2), (x_2, x_1), (x_2, x_3), (x_3, x_2)$ — <strong>čtyři</strong>, i když omezení jsou tři: obě omezení nad $\{x_2, x_3\}$ sdílejí tutéž dvojici hran a podpora musí splnit obě současně.</p>
           <div class="viz" id="viz-t01"></div>
-          <p><strong>Kontrola hran</strong> (podporu hledáme pro každou hodnotu ocasu):</p>
+          <p><strong>Kontrola hran</strong> (podporu hledáme pro každou hodnotu počátku):</p>
           <ul>
             <li>$(x_1, x_2)$, omezení $x_1 &gt; x_2$: $a{=}1$ potřebuje $b &lt; 1$ — žádné ✗; $a{=}2 \to b{=}1$ ✓; $a{=}3 \to b{=}1$ ✓. <strong>Není AC</strong>, bez podpory hodnota $1 \in D_1$.</li>
             <li>$(x_2, x_1)$: $a{=}1 \to b{=}2$ ✓; $a{=}2 \to b{=}3$ ✓; $a{=}3$ potřebuje $b &gt; 3$ — žádné ✗. <strong>Není AC</strong>, bez podpory $3 \in D_2$.</li>

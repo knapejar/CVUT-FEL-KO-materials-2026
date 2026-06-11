@@ -66,7 +66,7 @@ for a ∈ D_i do
 end</code></pre>
   </div>
 
-  <p>Čtení po řádcích: REVISE dostane <strong>doménu ocasu</strong> $D_i$ (tu, která se bude revidovat), <strong>doménu hlavy</strong> $D_j$ (ta jen dodává podpory) a omezení. Projde každé $a \in D_i$; když pro něj neexistuje podpora $b \in D_j$ splňující <strong>všechna</strong> omezení dvojice $x_i, x_j$ najednou, hodnotu smaže a nastaví <code>deleted := 1</code>. Po doběhnutí je hrana $(x_i, x_j)$ zaručeně AC — a příznak <code>deleted</code> říká, jestli se doména vůbec změnila (k čemu je dobrý, uvidíš za chvíli). Jedno volání REVISE = oprava <strong>jedné orientované hrany</strong>; $D_j$ se nedotkne.</p>
+  <p>Čtení po řádcích: REVISE dostane <strong>doménu počátku</strong> $D_i$ (tail — ta, která se bude revidovat), <strong>doménu konce</strong> $D_j$ (head — ta jen dodává podpory) a omezení. Projde každé $a \in D_i$; když pro něj neexistuje podpora $b \in D_j$ splňující <strong>všechna</strong> omezení dvojice $x_i, x_j$ najednou, hodnotu smaže a nastaví <code>deleted := 1</code>. Po doběhnutí je hrana $(x_i, x_j)$ zaručeně AC — a příznak <code>deleted</code> říká, jestli se doména vůbec změnila (k čemu je dobrý, uvidíš za chvíli). Jedno volání REVISE = oprava <strong>jedné orientované hrany</strong>; $D_j$ se nedotkne.</p>
 
   <div class="viz" id="viz-one"></div>
 
@@ -117,7 +117,7 @@ end</code></pre>
   <details class="try">
     <summary>Zkus sám: REVISE$(D_i, D_j)$ právě smazalo nějaké hodnoty z $D_i$. Kterým hranám grafu se tím <em>mohla</em> pokazit konzistence? Projdi si tři skupiny: hrany <em>z</em> $x_i$ ven, hrany <em>do</em> $x_i$, a hrany, kterých se $x_i$ vůbec netýká.</summary>
     <div class="inner">
-      <p>Hrany bez $x_i$ se nezměnily vůbec. Hrany <em>ven</em> z $x_i$, tj. $(x_i, x_k)$: jejich ocas se <em>zmenšil</em> — hodnoty, které zbyly, mají své podpory v $D_k$ pořád, takže AC se pokazit nemůže (ubyly jen „kontrolované“ hodnoty). Pokazit se mohly jen hrany <strong>do</strong> $x_i$, tj. $(x_k, x_i)$: doména $D_i$ je pro ně <em>zásobárna podpor</em> a ta se právě ztenčila — hodnota $c \in D_k$, jejíž jedinou podporou bylo smazané $a$, je teď bez podpory. Přesně to jsi viděl v příkladu: zmenšení $D_2$ rozbilo hranu $(x_1, x_2)$.</p>
+      <p>Hrany bez $x_i$ se nezměnily vůbec. Hrany <em>ven</em> z $x_i$, tj. $(x_i, x_k)$: jejich počátek se <em>zmenšil</em> — hodnoty, které zbyly, mají své podpory v $D_k$ pořád, takže AC se pokazit nemůže (ubyly jen „kontrolované“ hodnoty). Pokazit se mohly jen hrany <strong>do</strong> $x_i$, tj. $(x_k, x_i)$: doména $D_i$ je pro ně <em>zásobárna podpor</em> a ta se právě ztenčila — hodnota $c \in D_k$, jejíž jedinou podporou bylo smazané $a$, je teď bez podpory. Přesně to jsi viděl v příkladu: zmenšení $D_2$ rozbilo hranu $(x_1, x_2)$.</p>
     </div>
   </details>
 
@@ -126,7 +126,7 @@ end</code></pre>
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: tři klasické chyby u REVISE</div>
     <ul>
-      <li><strong>REVISE mění JEN doménu ocasu $D_i$.</strong> Hlava $D_j$ jen dodává podpory a zůstane netknutá — i když je hrana $(x_j, x_i)$ sebevíc nekonzistentní. Na tu je potřeba samostatné volání REVISE$(D_j, D_i)$.</li>
+      <li><strong>REVISE mění JEN doménu počátku $D_i$.</strong> Konec $D_j$ jen dodává podpory a zůstane netknutý — i když je hrana $(x_j, x_i)$ sebevíc nekonzistentní. Na tu je potřeba samostatné volání REVISE$(D_j, D_i)$.</li>
       <li><strong>Podpora musí splnit VŠECHNA omezení dvojice najednou.</strong> U dvojice $\{x_2, x_3\}$ s omezeními $x_2 \ne x_3$ a $x_2 + x_3 &gt; 4$ nestačí partner pro každé omezení zvlášť — musí to být tentýž $b$.</li>
       <li><strong>Jeden průchod hranami nestačí.</strong> Každá jednotlivá hrana je po své revizi AC, ale pozdější zmenšení domény ji může rozbít zpětně. Reviduj, dokud existuje nekonzistentní hrana — u zkoušky tohle hlídá fronta AC-3 (<a href="../k6/l6-3.html">[L6.3]</a>).</li>
     </ul>
@@ -136,7 +136,7 @@ end</code></pre>
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L6.2</div>
     <ul>
-      <li><strong>REVISE$(D_i, D_j, C)$</strong> smaže z $D_i$ každou hodnotu $a$ bez podpory v $D_j$ (podpora musí splnit <em>všechna</em> omezení dvojice najednou) a vrátí příznak <code>deleted</code> + zmenšenou $D_i$. Po volání je hrana $(x_i, x_j)$ AC; mění se <strong>jen doména ocasu</strong>.</li>
+      <li><strong>REVISE$(D_i, D_j, C)$</strong> smaže z $D_i$ každou hodnotu $a$ bez podpory v $D_j$ (podpora musí splnit <em>všechna</em> omezení dvojice najednou) a vrátí příznak <code>deleted</code> + zmenšenou $D_i$. Po volání je hrana $(x_i, x_j)$ AC; mění se <strong>jen doména počátku</strong>.</li>
       <li><strong>Mazání je bezpečné:</strong> hodnota bez podpory nemůže být v žádném řešení — množina řešení CSP se redukcí domén nemění.</li>
       <li><strong>Zmenšení $D_i$ může rozbít jen hrany $(x_k, x_i)$ směřující do $x_i$</strong> ($D_i$ je jejich zásobárna podpor). Hrany z $x_i$ ven ne — a protisměrka právě revidovaného omezení také ne (slide 28).</li>
       <li><strong>Jeden průchod všemi hranami nestačí</strong> — opravená hrana se může pozdějšími škrty rozbít zpětně. Revidovat se musí, dokud nejsou všechny hrany AC; systematicky (bez „perpetual checking“) to dělá fronta AC-3 v <a href="../k6/l6-3.html">[L6.3]</a>.</li>
@@ -169,7 +169,7 @@ end</code></pre>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
-        <li>Tato lekce — procedura REVISE, „mění se jen ocas“, které hrany se mohly rozbít.</li>
+        <li>Tato lekce — procedura REVISE, „mění se jen počátek“, které hrany se mohly rozbít.</li>
         <li><a href="../k6/l6-1.html">[L6.1] CSP a arc consistency</a> — graf omezení, vzorce podpor pro $x_2 = x_3 + 1$.</li>
       </ul>
 
@@ -274,7 +274,7 @@ KOViz.stepper(document.getElementById('viz-one'), {
     ],
   },
   frames: [
-    {desc:'REVISE(D₂, D₃, C) opravuje hranu (x₂,x₃): projde každé a ∈ D₂ a hledá podporu b = a + 1 v D₃. Doména hlavy D₃ se nezmění, ať se děje cokoliv.',
+    {desc:'REVISE(D₂, D₃, C) opravuje hranu (x₂,x₃): projde každé a ∈ D₂ a hledá podporu b = a + 1 v D₃. Doména konce D₃ se nezmění, ať se děje cokoliv.',
      nodes:{}, edges:{'x2->x3':'hl'},
      subs:{x2:'{1, 2, 3}', x3:'{1, 2, 3}'}},
     {desc:'a = 1: podpora b = 2 ∈ D₃ ✓ — hodnota zůstává. a = 2: podpora b = 3 ∈ D₃ ✓ — zůstává.',
@@ -287,7 +287,7 @@ KOViz.stepper(document.getElementById('viz-one'), {
      nodes:{x2:'good'}, edges:{'x2->x3':'good', 'x3->x2':'bad'},
      subs:{x2:'{1, 2}', x3:'{1, 2, 3}'}},
   ],
-  caption: 'Jedno volání REVISE = oprava jedné orientované hrany. Maže se jen z domény ocasu D₂; D₃ se nedotkne.',
+  caption: 'Jedno volání REVISE = oprava jedné orientované hrany. Maže se jen z domény počátku D₂; D₃ se nedotkne.',
 });
 
 // 2 — Hlavní běh: aplikace REVISE dle slidu 27 (x1 > x2, x2 ≠ x3, x2 + x3 > 4)
