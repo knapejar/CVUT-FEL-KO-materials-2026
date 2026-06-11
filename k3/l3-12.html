@@ -36,7 +36,7 @@
     <strong>Totálně unimodulární matice</strong> (každá čtvercová podmatice má determinant $0$, $+1$ nebo $-1$) + celočíselná pravá strana $b$ ⟹ <strong>všechny vrcholy LP polyedru jsou celočíselné</strong> — a proto ILP se stejnou maticí vyřeší obyčejné LP.
   </div>
 
-  <p>Tahle lekce je <strong>ústní opora</strong>: u písemky se TUM objevuje jako zdůvodňovací krok („proč LP stačí?“), u ústní jako samostatná otázka k teorii ILP. Z <a href="../k0/l0-7.html#takeaways">[L0.7] Co je ILP a LP relaxace</a> víš, že LP relaxace obecně vrací zlomky a zaokrouhlení může skončit nepřípustně i daleko od optima (slide 18). Dnes poznáš <em>výjimku ze třídy</em>: rodinu matic, u kterých LP relaxace <strong>nemůže</strong> vrátit zlomek — a uvidíš, že nejkratší cesty z celé kapitoly K2 do té rodiny patří.</p>
+  <p>Tahle lekce je <strong>ústní opora</strong>: u&nbsp;písemky se TUM objevuje jako zdůvodňovací krok („proč LP stačí?“), u&nbsp;ústní jako samostatná otázka k&nbsp;teorii ILP. Z&nbsp;<a href="../k0/l0-7.html#takeaways">[L0.7] Co je ILP a LP relaxace</a> víš, že LP relaxace obecně vrací zlomky a zaokrouhlení může skončit nepřípustně i daleko od optima (slide 18). Dnes poznáš <em>výjimku ze třídy</em>: rodinu matic, u&nbsp;kterých LP relaxace <strong>nemůže</strong> vrátit zlomek — a uvidíš, že nejkratší cesty z celé kapitoly K2 do té rodiny patří.</p>
 
   <!-- ===== SEKCE 1: ZÁHADA ===== -->
   <h2>Záhada ze slidu 20: LP, které vrací jen nuly a jedničky</h2>
@@ -71,14 +71,14 @@
   <details class="try">
     <summary>Zkus sám: přečti tři skupiny podmínek „lidsky“. Co říká řádek pro $s$, pro $t$ a pro vnitřní vrchol $i$?</summary>
     <div class="inner">
-      <p>Řádek $i$ incidenční matice sečte $+1$ za každou vybranou hranu, která z $i$ <em>vychází</em>, a $-1$ za každou, která do $i$ <em>vchází</em>. Podmínky tedy říkají: z $s$ vyjde o jednu hranu víc, než kolik vejde ($=1$); do $t$ vejde o jednu víc, než vyjde ($=-1$); v každém jiném vrcholu se vstupy a výstupy vyrovnají ($=0$ — přesně věta ze slidu „<em>we enter the node as many times as we leave it</em>“). Vybrané hrany tak tvoří „jednotkový proud“ z $s$ do $t$ — cesta z $s$ do $t$ (případně plus cykly) všechny tři podmínky splňuje.</p>
+      <p>Řádek $i$ incidenční matice sečte $+1$ za každou vybranou hranu, která z&nbsp;$i$ <em>vychází</em>, a $-1$ za každou, která do $i$ <em>vchází</em>. Podmínky tedy říkají: z&nbsp;$s$ vyjde o&nbsp;jednu hranu víc, než kolik vejde ($=1$); do $t$ vejde o&nbsp;jednu víc, než vyjde ($=-1$); v&nbsp;každém jiném vrcholu se vstupy a výstupy vyrovnají ($=0$ — přesně věta ze slidu „<em>we enter the node as many times as we leave it</em>“). Vybrané hrany tak tvoří „jednotkový proud“ z&nbsp;$s$ do $t$ — cesta z&nbsp;$s$ do $t$ (případně plus cykly) všechny tři podmínky splňuje.</p>
     </div>
   </details>
 
   <details class="try">
     <summary>Zkus sám: proč smíme vynechat $x_j \le 1$ (slide: „due to the minimization“)?</summary>
     <div class="inner">
-      <p>Ceny $c_j$ jsou nezáporné a minimalizujeme. Kdyby řešení posílalo po nějaké hraně víc než jednotku (nebo přidávalo cyklus navíc), dá se přebytek odebrat, podmínky zůstanou splněné a cena neklesne pod cenu cesty — optimum tedy nepotřebuje $x_j &gt; 1$. (Stejný duch jako „cyklus s nezápornou cenou si do cesty nepřibalíš“ z <a href="../k2/l2-1.html#takeaways">[L2.1]</a>.)</p>
+      <p>Ceny $c_j$ jsou nezáporné a minimalizujeme. Kdyby řešení posílalo po nějaké hraně víc než jednotku (nebo přidávalo cyklus navíc), dá se přebytek odebrat, podmínky zůstanou splněné a cena neklesne pod cenu cesty — optimum tedy nepotřebuje $x_j &gt; 1$. (Stejný duch jako „cyklus s&nbsp;nezápornou cenou si do cesty nepřibalíš“ z&nbsp;<a href="../k2/l2-1.html#takeaways">[L2.1]</a>.)</p>
     </div>
   </details>
 
@@ -112,7 +112,7 @@
 
   <div class="box">
     <div class="box-title">Slide 21 — Definition: Totally unimodular matrix (1:1)</div>
-    <p><em>Matrix $\mathbf{A} = [a_{ij}]$ of size $m/n$ is <strong>totally unimodular</strong> if the determinant of every square submatrix of matrix $\mathbf{A}$ is equal $0$, $+1$ or $-1$.</em></p>
+    <p><em>Matrix $\mathbf{A} = [a_{ij}]$ of size $m/n$ is <strong>totally unimodular</strong> if the determinant of every square submatrix of matrix $\mathbf{A}$ is equal to $0$, $+1$ or $-1$.</em></p>
     <p><em>Necessary condition: if $\mathbf{A}$ is totally unimodular then $a_{ij} \in \{0, 1, -1\}\ \forall i, j$.</em></p>
   </div>
 
@@ -128,7 +128,7 @@
   <details class="try">
     <summary>Zkus sám: je matice $\begin{pmatrix} 1 &amp; 1 \\ 1 &amp; -1 \end{pmatrix}$ totálně unimodulární? (Všechny prvky jsou $\pm 1$…)</summary>
     <div class="inner">
-      <p>Není: $\det \begin{pmatrix} 1 &amp; 1 \\ 1 &amp; -1 \end{pmatrix} = 1 \cdot (-1) - 1 \cdot 1 = -2$. Nutná podmínka (prvky $0/\pm 1$) tedy <strong>není postačující</strong> — o TUM rozhodují determinanty všech podmatic, ne jen prvky. Tuhle dvojřádkovou matici si zapamatuj, vrátí se jako protipříklad se zlomkovým vrcholem.</p>
+      <p>Není: $\det \begin{pmatrix} 1 &amp; 1 \\ 1 &amp; -1 \end{pmatrix} = 1 \cdot (-1) - 1 \cdot 1 = -2$. Nutná podmínka (prvky $0/\pm 1$) tedy <strong>není postačující</strong> — o&nbsp;TUM rozhodují determinanty všech podmatic, ne jen prvky. Tuhle dvojřádkovou matici si zapamatuj, vrátí se jako protipříklad se&nbsp;zlomkovým vrcholem.</p>
     </div>
   </details>
 
@@ -144,18 +144,18 @@
     <p><em>Unfortunately, the simplex algorithm does not have polynomial complexity. Fortunately, there are polynomial algorithms able to solve the LP problems and to find the vertex in the facet with optimal solutions.</em></p>
   </div>
 
-  <p>Logika důsledku: LP optimum (s lineárním cílem) se vždy nabývá v některém <strong>vrcholu</strong> polyedru. Když jsou všechny vrcholy celočíselné, pak LP relaxace <a href="../k0/l0-7.html#takeaways">[L0.7]</a> vydá celočíselné optimum — a to je zároveň optimum ILP (relaxace dává mez a tady je její řešení přípustné i celočíselně). <strong>ILP = LP</strong>, celočíselnost zadarmo.</p>
+  <p>Logika důsledku: LP optimum (s lineárním cílem) se vždy nabývá v&nbsp;některém <strong>vrcholu</strong> polyedru. Když jsou všechny vrcholy celočíselné, pak LP relaxace <a href="../k0/l0-7.html#takeaways">[L0.7]</a> vydá celočíselné optimum — a to je zároveň optimum ILP (relaxace dává mez a tady je její řešení přípustné i celočíselně). <strong>ILP = LP</strong>, celočíselnost zadarmo.</p>
 
   <details class="try">
-    <summary>Zkus sám: kde se v „řešení soustavy rovnic“ schovává determinant? (Nápověda: jak se počítá vrchol polyedru a co říká Cramerovo pravidlo?)</summary>
+    <summary>Zkus sám: kde se v&nbsp;„řešení soustavy rovnic“ schovává determinant? (Nápověda: jak se počítá vrchol polyedru a co říká Cramerovo pravidlo?)</summary>
     <div class="inner">
-      <p>Vrchol polyedru $\{x : \mathbf{A}x \le b\}$ v $\mathbb{R}^n$ je bod, kde je $n$ lineárně nezávislých podmínek <em>těsných</em> (platí s rovností). Vrchol je tedy řešením čtvercové soustavy $\mathbf{A}_B\, x = b_B$, kde $\mathbf{A}_B$ je čtvercová podmatice $\mathbf{A}$ a $b_B$ příslušný kus pravé strany. <strong>Cramerovo pravidlo:</strong></p>
+      <p>Vrchol polyedru $\{x : \mathbf{A}x \le b\}$ v&nbsp;$\mathbb{R}^n$ je bod, kde je $n$ lineárně nezávislých podmínek <em>těsných</em> (platí s&nbsp;rovností). Vrchol je tedy řešením čtvercové soustavy $\mathbf{A}_B\, x = b_B$, kde $\mathbf{A}_B$ je čtvercová podmatice $\mathbf{A}$ a $b_B$ příslušný kus pravé strany. <strong>Cramerovo pravidlo:</strong></p>
       $$x_i = \frac{\det \mathbf{A}_B^{(i)}}{\det \mathbf{A}_B},$$
-      <p>kde $\mathbf{A}_B^{(i)}$ vznikne nahrazením $i$-tého sloupce vektorem $b_B$. Čitatel je determinant celočíselné matice (prvky $0/\pm1$ a celé $b$) — celé číslo. A jmenovatel? $\mathbf{A}_B$ je čtvercová podmatice TUM matice, takže $\det \mathbf{A}_B \in \{0, \pm 1\}$; u vrcholu je soustava regulární, tedy $\det \mathbf{A}_B = \pm 1$. Celé číslo děleno $\pm 1$ = celé číslo — <strong>každá souřadnice vrcholu je celá</strong>. <em>(Vlastní náčrt důkazu — slidy citují [Schrijver] Theorem 8.1; pro ústní bohatě stačí.)</em> Teď je vidět, proč definice chce $0/\pm1$ pro <em>všechny</em> podmatice: nevíš dopředu, která podmnožina podmínek bude ve vrcholu těsná.</p>
+      <p>kde $\mathbf{A}_B^{(i)}$ vznikne nahrazením $i$-tého sloupce vektorem $b_B$. Čitatel je determinant celočíselné matice (prvky $0/\pm1$ a celé $b$) — celé číslo. A jmenovatel? $\mathbf{A}_B$ je čtvercová podmatice TUM matice, takže $\det \mathbf{A}_B \in \{0, \pm 1\}$; u&nbsp;vrcholu je soustava regulární, tedy $\det \mathbf{A}_B = \pm 1$. Celé číslo děleno $\pm 1$ = celé číslo — <strong>každá souřadnice vrcholu je celá</strong>. <em>(Vlastní náčrt důkazu — slidy citují [Schrijver] Theorem 8.1; pro ústní bohatě stačí.)</em> Teď je vidět, proč definice chce $0/\pm1$ pro <em>všechny</em> podmatice: nevíš dopředu, která podmnožina podmínek bude ve vrcholu těsná.</p>
     </div>
   </details>
 
-  <p>Obrázkem (vlastní mini-instance, přiznáno). Vlevo matice z try výše — řádky $x_1 + x_2 \le 3$ a $x_1 - x_2 \le 0$ obsahují podmatici $\begin{pmatrix} 1 &amp; 1 \\ 1 &amp; -1 \end{pmatrix}$ s determinantem $-2$, a přesně ta vyrábí zlomkový vrchol (Cramer: jmenovatel $-2$). Vpravo TUM matice — vrcholy jen celé:</p>
+  <p>Obrázkem (vlastní mini-instance, přiznáno). Vlevo matice z&nbsp;try výše — řádky $x_1 + x_2 \le 3$ a $x_1 - x_2 \le 0$ obsahují podmatici $\begin{pmatrix} 1 &amp; 1 \\ 1 &amp; -1 \end{pmatrix}$ s&nbsp;determinantem $-2$, a přesně ta vyrábí zlomkový vrchol (Cramer: jmenovatel $-2$). Vpravo TUM matice — vrcholy jen celé:</p>
 
   <div class="viz" id="viz-lp-bad"></div>
   <div class="viz" id="viz-lp-good"></div>
@@ -189,31 +189,31 @@
 
   <div class="viz" id="viz-incid"></div>
 
-  <p><strong>Rozuzlení záhady ze slidu 20.</strong> Matice podmínek nejkratší cesty je incidenční matice $W$ → splňuje 1. postačující podmínku → je TUM. Pravá strana $b = (1, 0, \dots, 0, -1)^T$ je celočíselná. Podle lemmatu jsou všechny vrcholy polyedru celočíselné, LP optimum leží ve vrcholu — proto solver vrací $x_j \in \{0, 1\}$, i když o celočíselnost nikdo nežádal. <em>(Drobnost k poctivosti: lemma je vysloveno pro $\mathbf{A}x \le b$; rovnosti $Wx = b$ a $x \ge 0$ na ten tvar převedeš jako $Wx \le b$, $-Wx \le -b$, $-x \le 0$ — a TUM se při násobení řádků $-1$ a přidání jednotkové matice zachová, viz operace níže.)</em></p>
+  <p><strong>Rozuzlení záhady ze slidu 20.</strong> Matice podmínek nejkratší cesty je incidenční matice $W$ → splňuje 1. postačující podmínku → je TUM. Pravá strana $b = (1, 0, \dots, 0, -1)^T$ je celočíselná. Podle lemmatu jsou všechny vrcholy polyedru celočíselné, LP optimum leží ve vrcholu — proto solver vrací $x_j \in \{0, 1\}$, i když o&nbsp;celočíselnost nikdo nežádal. <em>(Drobnost k&nbsp;poctivosti: lemma je vysloveno pro $\mathbf{A}x \le b$; rovnosti $Wx = b$ a $x \ge 0$ na ten tvar převedeš jako $Wx \le b$, $-Wx \le -b$, $-x \le 0$ — a TUM se při násobení řádků $-1$ a přidání jednotkové matice zachová, viz operace níže.)</em></p>
 
   <p>Zbylé dvě podmínky stačí znát na úrovni „poznám, kdy se hodí“ (obě EN 1:1 zkráceně):</p>
 
   <div class="box">
     <div class="box-title">Slide 24 — 2nd Sufficient Condition: Partitioned Rows (1:1)</div>
     <p><em>Let $\mathbf{A}$ be matrix of size $m/n$ such that: 1. $a_{ij} \in \{0, 1\}$; 2. each column in $\mathbf{A}$ contains at most two entries of value $1$; 3. the rows of $\mathbf{A}$ can be partitioned into two sets $\mathcal{V}_1$ and $\mathcal{V}_2$ such that every column of $\mathbf{A}$ has at most one entry of value $1$ in the rows of $\mathcal{V}_1$ and at most one entry of value $1$ in the rows of $\mathcal{V}_2$. Then the matrix $\mathbf{A}$ is totally unimodular.</em></p>
-    <p><em>Example: bipartite graph related to assignment problem (lecture on Flows).</em> — řádky = vrcholy, rozdělené přesně na dvě partity bipartitního grafu <a href="../k0/l0-6.html">[L0.6]</a>; každá hrana (sloupec) má jeden konec v každé partitě. Proto assignment/bipartitní matching řeší LP celočíselně — detaily v kapitole K4 (<a href="../k4/l4-9.html">[L4.9] Bipartitní matching přes max flow</a>, <a href="../k4/l4-12.html">[L4.12]</a>).</p>
+    <p><em>Example: bipartite graph related to assignment problem (lecture on Flows).</em> — řádky = vrcholy, rozdělené přesně na dvě partity bipartitního grafu <a href="../k0/l0-6.html">[L0.6]</a>; každá hrana (sloupec) má jeden konec v&nbsp;každé partitě. Proto assignment/bipartitní matching řeší LP celočíselně — detaily v&nbsp;kapitole K4 (<a href="../k4/l4-9.html">[L4.9] Bipartitní matching přes max flow</a>, <a href="../k4/l4-12.html">[L4.12]</a>).</p>
   </div>
 
   <div class="box">
     <div class="box-title">Slide 25 — 3rd Sufficient Condition: Consecutive-Ones (1:1)</div>
     <p><strong>Definition (Consecutive-Ones, a.k.a. Interval Matrix):</strong> <em>Matrix $\mathbf{A}$ of size $m/n$ has the consecutive-ones property if: 1. $a_{ij} \in \{0, 1\}$; 2. there exists a permutation of its rows such that for any column $j$, $a_{ij} = a_{kj} = 1$ with $i &lt; k$ implies $a_{lj} = 1$ for $i &lt; l &lt; k$.</em></p>
     <p><strong>Lemma:</strong> <em>The matrix $\mathbf{A}$ with the consecutive-ones property is totally unimodular.</em></p>
-    <p>Lidsky: jedničky v každém sloupci tvoří (po vhodné permutaci řádků) souvislý interval. Typický zdroj: <strong>směny pokrývající po sobě jdoucí bloky</strong> — workforce scheduling ze slidu 26 (řádky = bloky dne, sloupce = směny; směna „Morning+Afternoon“ má jedničky v sousedních řádcích).</p>
+    <p>Lidsky: jedničky v&nbsp;každém sloupci tvoří (po vhodné permutaci řádků) souvislý interval. Typický zdroj: <strong>směny pokrývající po sobě jdoucí bloky</strong> — workforce scheduling ze slidu 26 (řádky = bloky dne, sloupce = směny; směna „Morning+Afternoon“ má jedničky v&nbsp;sousedních řádcích).</p>
   </div>
 
   <details class="try">
     <summary>Zkus sám (otázka ze slidu 26): „What happens when we introduce »split shifts« (breaking the consecutive ones property)?“</summary>
     <div class="inner">
-      <p>Dělená směna (např. „Morning+Night“ s dírou uprostřed) udělá ve svém sloupci jedničky, mezi kterými je nula — a žádná permutace řádků nemusí umět spravit všechny sloupce najednou. Matice pak <strong>může ztratit totální unimodularitu</strong>: LP relaxace smí vrátit zlomkové počty zaměstnanců (např. „2,5 člověka na směně“) a na celočíselné řešení už potřebuješ skutečné ILP (B&amp;B). Záruka „LP stačí“ padá s podmínkou, která ji nesla. <em>(Odpověď vlastní — slide ji nechává jako otázku k zamyšlení.)</em></p>
+      <p>Dělená směna (např. „Morning+Night“ s&nbsp;dírou uprostřed) udělá ve svém sloupci jedničky, mezi kterými je nula — a žádná permutace řádků nemusí umět spravit všechny sloupce najednou. Matice pak <strong>může ztratit totální unimodularitu</strong>: LP relaxace smí vrátit zlomkové počty zaměstnanců (např. „2,5 člověka na směně“) a na celočíselné řešení už potřebuješ skutečné ILP (B&amp;B). Záruka „LP stačí“ padá s&nbsp;podmínkou, která ji nesla. <em>(Odpověď vlastní — slide ji nechává jako otázku k&nbsp;zamyšlení.)</em></p>
     </div>
   </details>
 
-  <p>A nakonec praktický nástroj, který jsme už potřebovali u rozuzlení záhady — <strong>operace zachovávající TUM</strong> (slide 27, EN 1:1): když je $\mathbf{A}$ totálně unimodulární, pak i</p>
+  <p>A nakonec praktický nástroj, který jsme už potřebovali u&nbsp;rozuzlení záhady — <strong>operace zachovávající TUM</strong> (slide 27, EN 1:1): když je $\mathbf{A}$ totálně unimodulární, pak i</p>
   <ol>
     <li><em>every matrix obtained from $\mathbf{A}$ by permuting some rows and/or columns,</em></li>
     <li><em>every matrix obtained from $\mathbf{A}$ by multiplying some rows and/or columns by $-1$,</em></li>
@@ -223,23 +223,23 @@
   </ol>
 
   <!-- ===== SEKCE 5: ÚSTNÍ OPORA ===== -->
-  <h2>Ústní opora: kam TUM patří v mapě ILP teorie</h2>
+  <h2>Ústní opora: kam TUM patří v&nbsp;mapě ILP teorie</h2>
 
-  <p>U ústní se otázky na teorii ILP točí kolem čtyř témat. Tři z nich už máš vyložená jinde — tady jen mapa, nic se nevykládá znovu:</p>
+  <p>U&nbsp;ústní se otázky na teorii ILP točí kolem čtyř témat. Tři z&nbsp;nich už máš vyložená jinde — tady jen mapa, nic se nevykládá znovu:</p>
   <ul>
     <li><strong>Proč vůbec ILP?</strong> Slide 19 (1:1): výhody — <em>„more realistic (it does not make sense to produce 4.3 cars), flexible - e.g. binary variable can be used to model the decision (logical expression), we can formulate NP-hard problems“</em>; nevýhody — <em>„harder to create a model, usually suited to solve the problems with less than 1000 integer variables“</em>.</li>
     <li><strong>Logické výroky binárními proměnnými</strong> (implikace, XOR, AND) → <a href="../k1/l1-3.html#takeaways">[L1.3] Modelování logiky</a>.</li>
     <li><strong>Disjunkce omezení přes big-M</strong> → <a href="../k1/l1-4.html#takeaways">[L1.4] big-M: disjunkce omezení</a>; <strong>navázání binární na spojitou</strong> ($y \le Mx$) → <a href="../k1/l1-5.html#takeaways">[L1.5] Navázání binární (aktivace)</a>.</li>
-    <li><strong>TUM ⟹ celočíselnost</strong> → tato lekce. Kontrast na závěr: model TSP s big-M podmínkami <a href="l3-4.html#takeaways">[L3.4]</a> TUM <strong>není</strong> a být nemůže — kdyby LP relaxace řešila TSP, máme polynomiální algoritmus na silně NP-těžký problém <a href="l3-5.html#takeaways">[L3.5]</a>. TUM je výsada „snadných“ struktur: nejkratší cesty, jednokomoditní toky, bipartitní matching (K4).</li>
+    <li><strong>TUM ⟹ celočíselnost</strong> → tato lekce. Kontrast na závěr: model TSP s&nbsp;big-M podmínkami <a href="l3-4.html#takeaways">[L3.4]</a> TUM <strong>není</strong> a být nemůže — kdyby LP relaxace řešila TSP, máme polynomiální algoritmus na silně NP-těžký problém <a href="l3-5.html#takeaways">[L3.5]</a>. TUM je výsada „snadných“ struktur: nejkratší cesty, jednokomoditní toky, bipartitní matching (K4).</li>
   </ul>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
     <ul>
-      <li><strong>„Matice z prvků $0/\pm1$ je TUM.“</strong> NE — to je jen <em>nutná</em> podmínka. $\begin{pmatrix} 1 &amp; 1 \\ 1 &amp; -1 \end{pmatrix}$ má det $-2$ a vyrábí vrchol $(1{,}5;\ 1{,}5)$.</li>
-      <li><strong>„TUM sama o sobě zaručí celočíselnost.“</strong> NE — lemma potřebuje i <strong>celočíselnou pravou stranu</strong> $b \in \mathbb{Z}^m$ (Cramer: čitatel musí být celý). S $b = (1{,}5)$ vyjde zlomek i u krásné matice.</li>
+      <li><strong>„Matice z&nbsp;prvků $0/\pm1$ je TUM.“</strong> NE — to je jen <em>nutná</em> podmínka. $\begin{pmatrix} 1 &amp; 1 \\ 1 &amp; -1 \end{pmatrix}$ má det $-2$ a vyrábí vrchol $(1{,}5;\ 1{,}5)$.</li>
+      <li><strong>„TUM sama o sobě zaručí celočíselnost.“</strong> NE — lemma potřebuje i <strong>celočíselnou pravou stranu</strong> $b \in \mathbb{Z}^m$ (Cramer: čitatel musí být celý). S&nbsp;$b = (1{,}5)$ vyjde zlomek i u&nbsp;krásné matice.</li>
       <li><strong>„LP relaxace grafových úloh vrací celá čísla vždycky.“</strong> NE — platí pro TUM struktury (SP, jednokomoditní toky, bipartitní matching), ale např. multikomoditní tok <a href="../k4/l4-15.html#takeaways">[L4.15]</a> ani TSP <a href="l3-4.html#takeaways">[L3.4]</a> TUM nejsou a LP tam zlomky vrací.</li>
-      <li><strong>„Když LP vrátí zlomky, prostě zaokrouhlím.“</strong> NE — zaokrouhlení může být nepřípustné i daleko od optima, viz slide 18 v <a href="../k0/l0-7.html#takeaways">[L0.7]</a>.</li>
+      <li><strong>„Když LP vrátí zlomky, prostě zaokrouhlím.“</strong> NE — zaokrouhlení může být nepřípustné i daleko od optima, viz slide 18 v&nbsp;<a href="../k0/l0-7.html#takeaways">[L0.7]</a>.</li>
       <li><strong>„TUM ⟹ polynomiální řešení díky simplexu.“</strong> POZOR — slide 22 výslovně: simplex <em>nemá</em> polynomiální složitost; polynomialitu dávají jiné LP algoritmy (které také najdou vrchol).</li>
     </ul>
   </div>
@@ -249,8 +249,8 @@
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.12</div>
     <ul>
       <li><strong>TUM</strong> (slide 21): každá čtvercová podmatice má $\det \in \{0, +1, -1\}$. Nutná podmínka: prvky $0/\pm1$ ($1\times1$ podmatice) — <strong>není postačující</strong> (protipříklad det $-2$).</li>
-      <li><strong>Lemma</strong> (slide 21–22): $\mathbf{A}$ TUM $+\ b \in \mathbb{Z}^m$ ⟹ každý vrchol $\{x : \mathbf{A}x \le b\}$ je celočíselný ⟹ LP optimum je celočíselné ⟹ <strong>ILP = LP</strong>. Proč: vrchol = řešení těsné čtvercové soustavy, Cramer s jmenovatelem $\det = \pm 1$.</li>
-      <li><strong>3 postačující podmínky:</strong> (1) v každém sloupci nejvýše jeden $+1$ a jeden $-1$ → <strong>incidenční matice digrafu</strong> (SP, toky); (2) 0/1 matice s řádky rozdělitelnými do dvou množin → bipartitní matching/assignment; (3) <strong>consecutive ones</strong> → intervalové směny. Operace zachovávající TUM: permutace, $\times(-1)$, $\mathbf{A}^T$, přidání $\mathbf{I}$.</li>
+      <li><strong>Lemma</strong> (slide 21–22): $\mathbf{A}$ TUM $+\ b \in \mathbb{Z}^m$ ⟹ každý vrchol $\{x : \mathbf{A}x \le b\}$ je celočíselný ⟹ LP optimum je celočíselné ⟹ <strong>ILP = LP</strong>. Proč: vrchol = řešení těsné čtvercové soustavy, Cramer s&nbsp;jmenovatelem $\det = \pm 1$.</li>
+      <li><strong>3 postačující podmínky:</strong> (1) v&nbsp;každém sloupci nejvýše jeden $+1$ a jeden $-1$ → <strong>incidenční matice digrafu</strong> (SP, toky); (2) 0/1 matice s&nbsp;řádky rozdělitelnými do dvou množin → bipartitní matching/assignment; (3) <strong>consecutive ones</strong> → intervalové směny. Operace zachovávající TUM: permutace, $\times(-1)$, $\mathbf{A}^T$, přidání $\mathbf{I}$.</li>
       <li><strong>Rozuzlení slidu 20:</strong> LP formulace nejkratší cesty vrací binární $x_j$, protože $W$ je incidenční (→ TUM) a $b = (1, 0, \dots, -1)$ celočíselné.</li>
       <li>TUM je výsada snadných struktur — TSP/big-M modely <a href="l3-4.html#takeaways">[L3.4]</a> TUM nejsou (jinak by P = NP přes <a href="l3-5.html#takeaways">[L3.5]</a>).</li>
     </ul>
@@ -260,7 +260,7 @@
   <div class="task" id="t-spilp">
     <div class="task-head">
       <span class="task-id">T01</span>
-      <strong>Example ILP2a: Shortest Paths — LP s délkovými proměnnými</strong>
+      <strong>Example ILP2a: Shortest Paths — LP s&nbsp;délkovými proměnnými</strong>
       <span class="task-src">zdroj: banka #4 EN 1:1 (study task ze slidu 8, 02_ILP); řešení dle slidu 8, výklad „proč to kóduje vzdálenosti“ vlastní rozepsání přes [L2.2] (přiznáno)</span>
     </div>
     <div class="task-body">
@@ -280,7 +280,7 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Slide nabízí fyzikální analogii: vrchol = kulička, hrana = provázek délky $c_{ij}$ (symetrická matice $c$), kuličku $v_1$ přidržíš a zbytek necháš viset — napnuté provázky jsou nejkratší cesty. „Viset“ = každý $l_j$ se chce co největší, ale provázek nedovolí víc než $l_i + c_{ij}$. Odtud cíl i podmínky. U vysvětlení dokazuj dvě strany: (i) každé přípustné $l$ má $l_n \le$ délka nejkratší cesty, (ii) hodnoty „skutečné vzdálenosti“ jsou přípustné. Nakonec si rozmysli, proč tady žádné TUM nepotřebuješ.</p>
+      <p>Slide nabízí fyzikální analogii: vrchol = kulička, hrana = provázek délky $c_{ij}$ (symetrická matice $c$), kuličku $v_1$ přidržíš a zbytek necháš viset — napnuté provázky jsou nejkratší cesty. „Viset“ = každý $l_j$ se chce co největší, ale provázek nedovolí víc než $l_i + c_{ij}$. Odtud cíl i podmínky. U&nbsp;vysvětlení dokazuj dvě strany: (i) každé přípustné $l$ má $l_n \le$ délka nejkratší cesty, (ii) hodnoty „skutečné vzdálenosti“ jsou přípustné. Nakonec si rozmysli, proč tady žádné TUM nepotřebuješ.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (model dle slidu 8; zdůvodnění rozepsáno)</summary>
@@ -295,9 +295,9 @@
           \text{variables:} \quad &amp; l_{i \in 1..n} \in \mathbb{R}^+
           \end{aligned}
           $$
-          <p><strong>Proč to kóduje vzdálenosti (vlastní rozepsání).</strong> (i) <em>Horní odhad:</em> vezmi libovolnou cestu $v_1 = u_0, u_1, \dots, u_k = v_n$ a sečti podmínky podél jejích hran: $l_{u_1} \le l_{u_0} + c_{u_0 u_1}$, …, $l_{u_k} \le l_{u_{k-1}} + c_{u_{k-1} u_k}$. Teleskopicky $l_n \le l_1 + \sum c = 0 + $ délka cesty. Platí to pro <em>každou</em> cestu, tedy $l_n \le \operatorname{dist}(v_1, v_n)$ pro každé přípustné $l$. (ii) <em>Dosažitelnost:</em> volba $l_i := \operatorname{dist}(v_1, v_i)$ je přípustná — $l_1 = 0$ a $\operatorname{dist}(v_1, v_j) \le \operatorname{dist}(v_1, v_i) + c_{ij}$ je přesně trojúhelníková nerovnost / Bellmanova rovnice <a href="../k2/l2-2.html#takeaways">[L2.2]</a> (nezáporné $c$, žádné záporné cykly). Maximalizace $l_n$ tedy „napne provázky“ a optimum je rovno $\operatorname{dist}(v_1, v_n)$. Proto <strong>max</strong>, ne min: s minimalizací by se model zhroutil do $l \equiv 0$.</p>
-          <p><strong>Nedosažitelnost:</strong> pokud do $v_n$ žádná cesta nevede (v matici $c$ reprezentováno zakázanými/„nekonečnými“ položkami), není $l_n$ shora omezeno řetězem podmínek z $l_1$ a LP je neomezené — neomezenost signalizuje „unreachable“. <em>(Vlastní poznámka.)</em></p>
-          <p><strong>Vazba na lekci:</strong> tady se celočíselnost vůbec neřeší — proměnné <em>jsou</em> vzdálenosti, žádné 0/1 rozhodování. TUM je potřeba až u hranové formulace ze slidu 20 (T02), kde spojitá $x_j$ mají vyjít binárně. Dvě LP na tutéž úlohu, dva úplně jiné důvody, proč fungují.</p>
+          <p><strong>Proč to kóduje vzdálenosti (vlastní rozepsání).</strong> (i) <em>Horní odhad:</em> vezmi libovolnou cestu $v_1 = u_0, u_1, \dots, u_k = v_n$ a sečti podmínky podél jejích hran: $l_{u_1} \le l_{u_0} + c_{u_0 u_1}$, …, $l_{u_k} \le l_{u_{k-1}} + c_{u_{k-1} u_k}$. Teleskopicky $l_n \le l_1 + \sum c = 0 + $ délka cesty. Platí to pro <em>každou</em> cestu, tedy $l_n \le \operatorname{dist}(v_1, v_n)$ pro každé přípustné $l$. (ii) <em>Dosažitelnost:</em> volba $l_i := \operatorname{dist}(v_1, v_i)$ je přípustná — $l_1 = 0$ a $\operatorname{dist}(v_1, v_j) \le \operatorname{dist}(v_1, v_i) + c_{ij}$ je přesně trojúhelníková nerovnost / Bellmanova rovnice <a href="../k2/l2-2.html#takeaways">[L2.2]</a> (nezáporné $c$, žádné záporné cykly). Maximalizace $l_n$ tedy „napne provázky“ a optimum je rovno $\operatorname{dist}(v_1, v_n)$. Proto <strong>max</strong>, ne min: s&nbsp;minimalizací by se model zhroutil do $l \equiv 0$.</p>
+          <p><strong>Nedosažitelnost:</strong> pokud do $v_n$ žádná cesta nevede (v matici $c$ reprezentováno zakázanými/„nekonečnými“ položkami), není $l_n$ shora omezeno řetězem podmínek z&nbsp;$l_1$ a LP je neomezené — neomezenost signalizuje „unreachable“. <em>(Vlastní poznámka.)</em></p>
+          <p><strong>Vazba na lekci:</strong> tady se celočíselnost vůbec neřeší — proměnné <em>jsou</em> vzdálenosti, žádné 0/1 rozhodování. TUM je potřeba až u&nbsp;hranové formulace ze slidu 20 (T02), kde spojitá $x_j$ mají vyjít binárně. Dvě LP na tutéž úlohu, dva úplně jiné důvody, proč fungují.</p>
         </div>
       </details>
     </div>
@@ -320,7 +320,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Hlavní teoretická otázka lekce v ústním formátu: čtyřkrokový řetěz <em>definice → lemma → ověření podmínky pro $W$ → závěr</em>. Body se ztrácejí typicky na dvou místech: zapomenutá celočíselnost $b$ a tvrzení „prvky $\pm1$ ⟹ TUM“ (to je jen nutná podmínka!).</p>
+      <p>Hlavní teoretická otázka lekce v&nbsp;ústním formátu: čtyřkrokový řetěz <em>definice → lemma → ověření podmínky pro $W$ → závěr</em>. Body se ztrácejí typicky na dvou místech: zapomenutá celočíselnost $b$ a tvrzení „prvky $\pm1$ ⟹ TUM“ (to je jen nutná podmínka!).</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -335,9 +335,9 @@
         <summary>d) Úplné řešení</summary>
         <div class="inner">
           <p><strong>1) Definice (slide 21).</strong> Matice $\mathbf{A}$ je totálně unimodulární, pokud determinant každé její čtvercové podmatice je $0$, $+1$ nebo $-1$. (Nutně pak $a_{ij} \in \{0, \pm 1\}$ — podmatice $1\times1$; obráceně to neplatí, $\det\begin{pmatrix}1 &amp; 1\\ 1 &amp; -1\end{pmatrix} = -2$.)</p>
-          <p><strong>2) Lemma (slide 21).</strong> Je-li $\mathbf{A}$ TUM a $b \in \mathbb{Z}^m$, pak každý vrchol polyedru $\{x : \mathbf{A}x \le b\}$ je celočíselný vektor. Náčrt proč (vlastní; slidy citují [Schrijver] Thm 8.1): vrchol je řešením čtvercové regulární soustavy z těsných podmínek, Cramerovo pravidlo dělí celočíselný determinant determinantem $\pm 1$.</p>
-          <p><strong>3) $W$ je TUM (slide 23).</strong> 1. postačující podmínka: prvky v $\{0, \pm1\}$ a každý sloupec má nejvýše jeden $+1$ a nejvýše jeden $-1$. Sloupec incidenční matice odpovídá hraně $e_j$: obsahuje $+1$ v řádku vrcholu, který hrana opouští, $-1$ v řádku vrcholu, do něhož vstupuje, jinde nuly — tedy <em>přesně</em> jeden $+1$ a jeden $-1$. Podmínka platí ⟹ $W$ je TUM.</p>
-          <p><strong>4) Závěr.</strong> Soustavu $Wx = b$, $x \ge 0$ převedeme na tvar lemmatu: matice $\begin{pmatrix} W \\ -W \\ -\mathbf{I} \end{pmatrix}$ s pravou stranou $(b; -b; 0)$ — vznikla z $W$ násobením řádků $-1$ a přidáním jednotkové matice, což TUM zachovává (slide 27, operace 2 a 5). Pravá strana $b = (1, 0, \dots, 0, -1)^T$ je celočíselná. Podle lemmatu jsou všechny vrcholy přípustného polyedru celočíselné; LP s lineárním cílem nabývá optima ve vrcholu, takže vrácené $x_j$ jsou celá čísla — a díky minimalizaci s $c \ge 0$ konkrétně $0/1$ indikátory hran nejkratší cesty (jednotky navíc by jen zdražovaly). Proto smíme nejkratší cestu řešit jako LP a celočíselnost dostáváme zadarmo. $\blacksquare$</p>
+          <p><strong>2) Lemma (slide 21).</strong> Je-li $\mathbf{A}$ TUM a $b \in \mathbb{Z}^m$, pak každý vrchol polyedru $\{x : \mathbf{A}x \le b\}$ je celočíselný vektor. Náčrt proč (vlastní; slidy citují [Schrijver] Thm 8.1): vrchol je řešením čtvercové regulární soustavy z&nbsp;těsných podmínek, Cramerovo pravidlo dělí celočíselný determinant determinantem $\pm 1$.</p>
+          <p><strong>3) $W$ je TUM (slide 23).</strong> 1. postačující podmínka: prvky v&nbsp;$\{0, \pm1\}$ a každý sloupec má nejvýše jeden $+1$ a nejvýše jeden $-1$. Sloupec incidenční matice odpovídá hraně $e_j$: obsahuje $+1$ v&nbsp;řádku vrcholu, který hrana opouští, $-1$ v&nbsp;řádku vrcholu, do něhož vstupuje, jinde nuly — tedy <em>přesně</em> jeden $+1$ a jeden $-1$. Podmínka platí ⟹ $W$ je TUM.</p>
+          <p><strong>4) Závěr.</strong> Soustavu $Wx = b$, $x \ge 0$ převedeme na tvar lemmatu: matice $\begin{pmatrix} W \\ -W \\ -\mathbf{I} \end{pmatrix}$ s&nbsp;pravou stranou $(b; -b; 0)$ — vznikla z&nbsp;$W$ násobením řádků $-1$ a přidáním jednotkové matice, což TUM zachovává (slide 27, operace 2 a 5). Pravá strana $b = (1, 0, \dots, 0, -1)^T$ je celočíselná. Podle lemmatu jsou všechny vrcholy přípustného polyedru celočíselné; LP s&nbsp;lineárním cílem nabývá optima ve vrcholu, takže vrácené $x_j$ jsou celá čísla — a díky minimalizaci s&nbsp;$c \ge 0$ konkrétně $0/1$ indikátory hran nejkratší cesty (jednotky navíc by jen zdražovaly). Proto smíme nejkratší cestu řešit jako LP a celočíselnost dostáváme zadarmo. $\blacksquare$</p>
           <p><strong>Kontrolní otázka navíc (ústní klasika):</strong> proč stejný trik nefunguje pro TSP model <a href="l3-4.html#takeaways">[L3.4]</a>? Jeho matice (big-M podmínky se $s_i$, koeficienty $M \notin \{0,\pm1\}$) nesplňuje už nutnou podmínku TUM — a fundamentálněji: kdyby LP relaxace řešila TSP přesně, řešili bychom silně NP-těžký problém <a href="l3-5.html#takeaways">[L3.5]</a> polynomiálně.</p>
         </div>
       </details>
