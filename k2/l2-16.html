@@ -36,22 +36,22 @@
     Dijkstra minimalizuje <strong>cenu cesty (součet vah)</strong>, NE <strong>počet hran</strong>. Nejlevnější cesta klidně může mít víc hran než dražší konkurence — a pokud chceš právě nejmenší počet hran, dej všem hranám váhu $1$.
   </div>
 
-  <p>Minulá lekce <a href="l2-15.html#takeaways">[L2.15] Skalování vah</a> skončila varováním: posun vah o $+h$ rozbíjí nejkratší cestu, protože do ceny přimíchá člen $h \cdot |P|$ závislý na <em>počtu hran</em>. Dnes se na ten tichý předpoklad podíváme zpříma. Slovo „nejkratší“ (<strong>shortest path</strong>, nejkratší cesta) totiž v běžné řeči svádí k představě „nejméně kroků“ — a přesně na tuhle záměnu míří dochovaný zkouškový výrok <em>„Dijkstrův algoritmus nalezne vždy nejkratší cestu s nejmenším počtem hran“</em> (úloha T01 níže).</p>
+  <p>Minulá lekce <a href="l2-15.html#takeaways">[L2.15] Skalování vah</a> skončila varováním: posun vah o&nbsp;$+h$ rozbíjí nejkratší cestu, protože do ceny přimíchá člen $h \cdot |P|$ závislý na <em>počtu hran</em>. Dnes se na ten tichý předpoklad podíváme zpříma. Slovo „nejkratší“ (<strong>shortest path</strong>, nejkratší cesta) totiž v běžné řeči svádí k&nbsp;představě „nejméně kroků“ — a přesně na tuhle záměnu míří dochovaný zkouškový výrok <em>„Dijkstrův algoritmus nalezne vždy nejkratší cestu s nejmenším počtem hran“</em> (úloha T01 níže).</p>
 
   <!-- ===== SEKCE 1: CO DIJKSTRA MINIMALIZUJE ===== -->
   <h2>Co Dijkstra vlastně minimalizuje</h2>
 
   <details class="try">
-    <summary>Zkus sám: projdi si v hlavě pseudokód Dijkstry <a href="l2-4.html#takeaways">[L2.4]</a>. Na kterém řádku do výpočtu vstupuje <em>počet hran</em> cesty?</summary>
+    <summary>Zkus sám: projdi si v&nbsp;hlavě pseudokód Dijkstry <a href="l2-4.html#takeaways">[L2.4]</a>. Na kterém řádku do výpočtu vstupuje <em>počet hran</em> cesty?</summary>
     <div class="inner">
-      <p>Na žádném. Jediné porovnání v celém algoritmu je relaxační test <a href="l2-3.html#takeaways">[L2.3]</a>: <code>if l(w) &gt; l(v) + c(v, w)</code> — a výběr vrcholu s nejmenší značkou $l$. Obojí pracuje výhradně se <strong>součty vah</strong>. Kolik hran cesta má, ovlivní nanejvýš to, <em>kolikrát</em> se po cestě sčítalo; jako kritérium se počet hran nikde netestuje, nepenalizuje ani neeviduje. Definice úlohy je stejná <a href="l2-1.html#takeaways">[L2.1]</a>: nejkratší cesta = cesta s nejmenším součtem vah, o počtu hran neříká nic.</p>
+      <p>Na žádném. Jediné porovnání v&nbsp;celém algoritmu je relaxační test <a href="l2-3.html#takeaways">[L2.3]</a>: <code>if l(w) &gt; l(v) + c(v, w)</code> — a výběr vrcholu s&nbsp;nejmenší značkou $l$. Obojí pracuje výhradně se <strong>součty vah</strong>. Kolik hran cesta má, ovlivní nanejvýš to, <em>kolikrát</em> se po cestě sčítalo; jako kritérium se počet hran nikde netestuje, nepenalizuje ani neeviduje. Definice úlohy je stejná <a href="l2-1.html#takeaways">[L2.1]</a>: nejkratší cesta = cesta s&nbsp;nejmenším součtem vah, o&nbsp;počtu hran neříká nic.</p>
     </div>
   </details>
 
   <details class="try">
-    <summary>Zkus sám: navrhni co nejmenší graf s nezápornými vahami, ve kterém má <em>nejlevnější</em> $s \to t$ cesta <em>víc</em> hran než nějaká jiná $s \to t$ cesta.</summary>
+    <summary>Zkus sám: navrhni co nejmenší graf s&nbsp;nezápornými vahami, ve kterém má <em>nejlevnější</em> $s \to t$ cesta <em>víc</em> hran než nějaká jiná $s \to t$ cesta.</summary>
     <div class="inner">
-      <p>Stačí dvě konkurenční cesty: jedna „dlouhá v hranách, ale levná“, druhá „krátká v hranách, ale drahá“. Třeba řetízek tří hran po $1$ (cena $3$) proti přímé hraně s vahou $10$:</p>
+      <p>Stačí dvě konkurenční cesty: jedna „dlouhá v&nbsp;hranách, ale levná“, druhá „krátká v&nbsp;hranách, ale drahá“. Třeba řetízek tří hran po $1$ (cena $3$) proti přímé hraně s&nbsp;vahou $10$:</p>
     </div>
   </details>
 
@@ -61,39 +61,39 @@
 
   <div class="viz" id="viz-run"></div>
 
-  <p>Výsledek <strong>není chyba</strong>. Váhy jsou nezáporné, Dijkstra je tedy korektní <a href="l2-4.html#takeaways">[L2.4]</a> a vrátil přesně to, co slibuje výstupní specifikace slidu 16: cestu s nejmenším <em>součtem vah</em> ($3 &lt; 10$). Že má vítězná cesta zároveň nejvíc hran v celém grafu, algoritmus vůbec „nevidí“. Cena a počet hran jsou <strong>dvě různá kritéria</strong> — a Dijkstra optimalizuje jen to první.</p>
+  <p>Výsledek <strong>není chyba</strong>. Váhy jsou nezáporné, Dijkstra je tedy korektní <a href="l2-4.html#takeaways">[L2.4]</a> a vrátil přesně to, co slibuje výstupní specifikace slidu 16: cestu s&nbsp;nejmenším <em>součtem vah</em> ($3 &lt; 10$). Že má vítězná cesta zároveň nejvíc hran v&nbsp;celém grafu, algoritmus vůbec „nevidí“. Cena a počet hran jsou <strong>dvě různá kritéria</strong> — a Dijkstra optimalizuje jen to první.</p>
 
   <!-- ===== SEKCE 2: KDYŽ CHCI MIN POČET HRAN ===== -->
   <h2>Když opravdu chci nejmenší počet hran</h2>
 
   <details class="try">
-    <summary>Zkus sám: úloha zní „najdi $s \to t$ cestu s nejmenším počtem hran“. Jak ji vyřešíš nástroji, které už máš — bez nového algoritmu?</summary>
+    <summary>Zkus sám: úloha zní „najdi $s \to t$ cestu s&nbsp;nejmenším počtem hran“. Jak ji vyřešíš nástroji, které už máš — bez nového algoritmu?</summary>
     <div class="inner">
       <p>Předefinuj váhy: polož $c(e) := 1$ pro každou hranu. Pak pro každou cestu platí</p>
       $$c(P) = \sum_{e \in P} 1 = |P|,$$
-      <p>cena cesty <em>je</em> její počet hran — a Dijkstra, který minimalizuje cenu, teď minimalizuje přesně počet hran. Jednotkové váhy jsou nezáporné, takže korektnost máme zadarmo. Tenhle speciální běh už známe: Dijkstra s jednotkovými vahami zavírá vrcholy po „vlnách“ podle počtu kroků — je to prohledávání do šířky (BFS) <a href="l2-10.html#takeaways">[L2.10]</a>.</p>
+      <p>cena cesty <em>je</em> její počet hran — a Dijkstra, který minimalizuje cenu, teď minimalizuje přesně počet hran. Jednotkové váhy jsou nezáporné, takže korektnost máme zadarmo. Tenhle speciální běh už známe: Dijkstra s&nbsp;jednotkovými vahami zavírá vrcholy po „vlnách“ podle počtu kroků — je to prohledávání do šířky (BFS) <a href="l2-10.html#takeaways">[L2.10]</a>.</p>
     </div>
   </details>
 
   <div class="viz" id="viz-unit"></div>
 
   <div class="box">
-    <div class="box-title">Spojení s L2.15: posun $+h$ míchá obě kritéria</div>
-    <p>Vzorec z minulé lekce <a href="l2-15.html#takeaways">[L2.15]</a> teď můžeme přečíst nově: po posunu vah o $+h$ je</p>
+    <div class="box-title">Spojení s&nbsp;L2.15: posun $+h$ míchá obě kritéria</div>
+    <p>Vzorec z&nbsp;minulé lekce <a href="l2-15.html#takeaways">[L2.15]</a> teď můžeme přečíst nově: po posunu vah o&nbsp;$+h$ je</p>
     $$c'(P) = \underbrace{c(P)}_{\text{cena}} + h \cdot \underbrace{|P|}_{\text{počet hran}}$$
-    <p>— tedy <strong>směs obou kritérií</strong> s „mixážním knoflíkem“ $h$. Pro $h = 0$ optimalizuješ čistou cenu, pro obrovské $h$ (nebo pro $c \equiv 0$) prakticky čistý počet hran. Proto posun $+h$ nejkratší cestu nezachovává: potichu mění zadání úlohy. A jednotkové váhy z try-otázky výše jsou jen druhý extrém téže rovnice.</p>
+    <p>— tedy <strong>směs obou kritérií</strong> s&nbsp;„mixážním knoflíkem“ $h$. Pro $h = 0$ optimalizuješ čistou cenu, pro obrovské $h$ (nebo pro $c \equiv 0$) prakticky čistý počet hran. Proto posun $+h$ nejkratší cestu nezachovává: potichu mění zadání úlohy. A jednotkové váhy z&nbsp;try-otázky výše jsou jen druhý extrém téže rovnice.</p>
   </div>
 
   <div class="box">
     <div class="box-title">Nuance pro šťouraly: remízy</div>
-    <p>Co když je víc stejně levných nejkratších cest a já bych rád tu s nejméně hranami? Ani to Dijkstra <strong>negarantuje</strong>. Příklad: cesty $s \to a \to b \to t$ ($1+1+1 = 3$, tři hrany) a $s \to c \to t$ ($2+1 = 3$, dvě hrany). Vrcholy $b$ a $c$ mají obě značky $2$ — remíza při výběru minima, kterou pseudokód nijak nerozhoduje <a href="l2-5.html#takeaways">[L2.5]</a>. Expanduje-li $b$ dřív, nastaví $l(t) := 3$, $p(t) := b$; následná relaxace hrany $(c,t)$ s ostrým testem ($3 &gt; 3$ neplatí) už nic nepřepíše — a rekonstrukce z $p$ vrátí cestu o třech hranách, ačkoliv existuje stejně levná dvouhranná. (Graf k tomuhle příkladu je v řešení úlohy T01.)</p>
+    <p>Co když je víc stejně levných nejkratších cest a já bych rád tu s&nbsp;nejméně hranami? Ani to Dijkstra <strong>negarantuje</strong>. Příklad: cesty $s \to a \to b \to t$ ($1+1+1 = 3$, tři hrany) a $s \to c \to t$ ($2+1 = 3$, dvě hrany). Vrcholy $b$ a $c$ mají obě značky $2$ — remíza při výběru minima, kterou pseudokód nijak nerozhoduje <a href="l2-5.html#takeaways">[L2.5]</a>. Expanduje-li $b$ dřív, nastaví $l(t) := 3$, $p(t) := b$; následná relaxace hrany $(c,t)$ s&nbsp;ostrým testem ($3 &gt; 3$ neplatí) už nic nepřepíše — a rekonstrukce z&nbsp;$p$ vrátí cestu o&nbsp;třech hranách, ačkoliv existuje stejně levná dvouhranná. (Graf k&nbsp;tomuhle příkladu je v&nbsp;řešení úlohy T01.)</p>
   </div>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečná polopravda</div>
     <ul>
-      <li><strong>„Nejkratší cesta = cesta s nejméně hranami.“</strong> NE — „nejkratší“ v KO znamená nejmenší <em>součet vah</em>; počet hran je jiné kritérium a optima se mohou lišit (protipříklad výše: cena $3$ na třech hranách porazí cenu $10$ na jedné). Při čtení zadání rozlišuj <em>shortest path</em> (váhy) vs. <em>minimum number of edges / fewest hops</em> (počet hran) — druhé řešíš jednotkovými vahami.</li>
-      <li><strong>„Dijkstra preferuje kratší cesty v počtu hran.“</strong> NE — počet hran do algoritmu nikde nevstupuje; ani mezi stejně levnými cestami není méně hran zaručeno (záleží na tie-breakingu <a href="l2-5.html#takeaways">[L2.5]</a>).</li>
+      <li><strong>„Nejkratší cesta = cesta s nejméně hranami.“</strong> NE — „nejkratší“ v&nbsp;KO znamená nejmenší <em>součet vah</em>; počet hran je jiné kritérium a optima se mohou lišit (protipříklad výše: cena $3$ na třech hranách porazí cenu $10$ na jedné). Při čtení zadání rozlišuj <em>shortest path</em> (váhy) vs. <em>minimum number of edges / fewest hops</em> (počet hran) — druhé řešíš jednotkovými vahami.</li>
+      <li><strong>„Dijkstra preferuje kratší cesty v&nbsp;počtu hran.“</strong> NE — počet hran do algoritmu nikde nevstupuje; ani mezi stejně levnými cestami není méně hran zaručeno (záleží na tie-breakingu <a href="l2-5.html#takeaways">[L2.5]</a>).</li>
     </ul>
   </div>
 
@@ -101,11 +101,11 @@
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.16</div>
     <ul>
-      <li><strong>Dijkstra minimalizuje cenu (součet vah), NE počet hran</strong> — počet hran v pseudokódu nikde nevystupuje. Nejlevnější cesta může mít víc hran než dražší: protipříklad $s{\to}a{\to}b{\to}t$ za $1+1+1=3$ (3 hrany) vs. přímá hrana $s{\to}t$ za $10$ (1 hrana).</li>
+      <li><strong>Dijkstra minimalizuje cenu (součet vah), NE počet hran</strong> — počet hran v&nbsp;pseudokódu nikde nevystupuje. Nejlevnější cesta může mít víc hran než dražší: protipříklad $s{\to}a{\to}b{\to}t$ za $1+1+1=3$ (3 hrany) vs. přímá hrana $s{\to}t$ za $10$ (1 hrana).</li>
       <li><strong>Min počet hran → všem hranám váhu $1$:</strong> pak $c(P) = |P|$ a Dijkstra minimalizuje přesně počet hran (jednotkové váhy = BFS vlna <a href="l2-10.html#takeaways">[L2.10]</a>).</li>
-      <li>Posun vah o $+h$ <a href="l2-15.html#takeaways">[L2.15]</a> dává $c'(P) = c(P) + h\,|P|$ — směs obou kritérií; proto nejkratší cestu nezachovává.</li>
+      <li>Posun vah o&nbsp;$+h$ <a href="l2-15.html#takeaways">[L2.15]</a> dává $c'(P) = c(P) + h\,|P|$ — směs obou kritérií; proto nejkratší cestu nezachovává.</li>
       <li>Ani mezi více stejně levnými cestami Dijkstra nezaručí nejmenší počet hran — rozhodne tie-breaking <a href="l2-5.html#takeaways">[L2.5]</a>.</li>
-      <li>Zkouškový výrok „Dijkstra nalezne vždy nejkratší cestu s nejmenším počtem hran“ <strong>NEPLATÍ</strong> — vyvracej malým protipříkladem se dvěma cestami (levná o více hranách vs. dražší o jedné).</li>
+      <li>Zkouškový výrok „Dijkstra nalezne vždy nejkratší cestu s&nbsp;nejmenším počtem hran“ <strong>NEPLATÍ</strong> — vyvracej malým protipříkladem se dvěma cestami (levná o&nbsp;více hranách vs. dražší o&nbsp;jedné).</li>
     </ul>
   </div>
 
@@ -122,10 +122,10 @@
         <p>5 výroků a říct zda platí nebo ne. Pokud platí, dokázat, pokud ne, udělat protipříklad. Výroky typu […] „Dijkstrův algoritmus nalezne vždy nejkratší cestu s nejmenším počtem hran“)</p>
       </div>
 
-      <h4>a) Co je v zadání?</h4>
-      <p>Formát „dokaž, nebo vyvrať protipříkladem“. Výrok lze číst dvěma způsoby: <em>(i)</em> cesta, kterou Dijkstra vrátí, má nejmenší počet hran <em>mezi všemi</em> $s \to t$ cestami; <em>(ii)</em> mezi všemi <em>stejně levnými</em> nejkratšími cestami vrátí Dijkstra tu s nejmenším počtem hran. Na písemce rozhodne přesné EN znění — zde vyvrátíme obě čtení (a protipříklady volíme s nezápornými vahami, ať je Dijkstra v protipříkladu korektní a debata se vede čistě o počtu hran).</p>
+      <h4>a) Co je v&nbsp;zadání?</h4>
+      <p>Formát „dokaž, nebo vyvrať protipříkladem“. Výrok lze číst dvěma způsoby: <em>(i)</em> cesta, kterou Dijkstra vrátí, má nejmenší počet hran <em>mezi všemi</em> $s \to t$ cestami; <em>(ii)</em> mezi všemi <em>stejně levnými</em> nejkratšími cestami vrátí Dijkstra tu s&nbsp;nejmenším počtem hran. Na písemce rozhodne přesné EN znění — zde vyvrátíme obě čtení (a protipříklady volíme s&nbsp;nezápornými vahami, ať je Dijkstra v&nbsp;protipříkladu korektní a debata se vede čistě o&nbsp;počtu hran).</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — cena vs. počet hran, hotový protipříklad i remízový příklad.</li>
         <li><a href="l2-4.html#takeaways">[L2.4] Dijkstrův algoritmus (běh)</a> — co algoritmus vrací a kdy je korektní.</li>
@@ -133,15 +133,15 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Nejdřív si ujasni, co Dijkstra minimalizuje (jen součet vah — projdi pseudokód). Pak stavěj nejmenší možný protipříklad: dvě konkurenční $s \to t$ cesty, jedna levná s mnoha hranami, druhá drahá s jedinou hranou. Pro čtení (ii) hledej remízu: dvě stejně levné cesty s různým počtem hran a takovou geometrii, aby o $p(t)$ rozhodlo nespecifikované pořadí při výběru minima.</p>
+      <p>Nejdřív si ujasni, co Dijkstra minimalizuje (jen součet vah — projdi pseudokód). Pak stavěj nejmenší možný protipříklad: dvě konkurenční $s \to t$ cesty, jedna levná s&nbsp;mnoha hranami, druhá drahá s&nbsp;jedinou hranou. Pro čtení (ii) hledej remízu: dvě stejně levné cesty s&nbsp;různým počtem hran a takovou geometrii, aby o&nbsp;$p(t)$ rozhodlo nespecifikované pořadí při výběru minima.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní)</summary>
         <div class="inner">
-          <p><strong>Výrok NEPLATÍ</strong> (v žádném z obou čtení).</p>
-          <p><strong>Čtení (i): nalezená cesta nemá nejmenší počet hran ze všech cest.</strong> Protipříklad = graf z lekce: vrcholy $\{s,a,b,t\}$, hrany $c(s,a)=c(a,b)=c(b,t)=1$ a $c(s,t)=10$. Váhy jsou nezáporné, Dijkstra je tedy korektní a vrátí nejlevnější cestu $s \to a \to b \to t$ s cenou $3$ ($&lt; 10$) — viz krokovaný běh v lekci ($l(t)=3$, $p(t)=b$). Cesta s nejmenším počtem hran je ale přímá hrana $s \to t$ (1 hrana vs. 3 hrany). Dijkstra tedy nalezl nejkratší (nejlevnější) cestu, která počet hran <em>nemá</em> nejmenší. $\blacksquare$</p>
-          <p><strong>Čtení (ii): ani mezi stejně levnými cestami není nejmenší počet hran zaručen.</strong> Protipříklad: vrcholy $\{s,a,b,c,t\}$, hrany $c(s,a)=c(a,b)=c(b,t)=1$, $c(s,c)=2$, $c(c,t)=1$ (graf níže, pod řešením). Obě $s \to t$ cesty stojí $3$: $s{\to}a{\to}b{\to}t$ (3 hrany) i $s{\to}c{\to}t$ (2 hrany). Běh: uzavři $s$ ($0$), pak $a$ ($1$); teď mají $b$ i $c$ značku $2$ — <strong>remíza</strong>, kterou pseudokód nerozhoduje <a href="l2-5.html#takeaways">[L2.5]</a>. Zvolí-li implementace $b$, nastaví relaxace $(b,t)$: $l(t):=3$, $p(t):=b$; při následné expanzi $c$ relaxace $(c,t)$ s ostrým testem $3 &gt; 2+1$ neuspěje a $p(t)=b$ zůstane. Rekonstrukce z $p$ vrátí cestu o třech hranách $s{\to}a{\to}b{\to}t$, ačkoliv existuje stejně levná dvouhranná. „Vždy“ tedy neplatí — výsledek závisí na tie-breakingu. $\blacksquare$</p>
-          <p><strong>Poznámka navíc</strong> (hodí se k ústní): výrok se stane pravdivým, omezíme-li ho na <em>jednotkové váhy</em> — pak $c(P)=|P|$, minimalizace ceny je minimalizace počtu hran (BFS <a href="l2-10.html#takeaways">[L2.10]</a>). Obecný recept na „cestu s nejmenším počtem hran“ je proto: přepiš všechny váhy na $1$ a pusť Dijkstru/BFS.</p>
+          <p><strong>Výrok NEPLATÍ</strong> (v&nbsp;žádném z&nbsp;obou čtení).</p>
+          <p><strong>Čtení (i): nalezená cesta nemá nejmenší počet hran ze všech cest.</strong> Protipříklad = graf z&nbsp;lekce: vrcholy $\{s,a,b,t\}$, hrany $c(s,a)=c(a,b)=c(b,t)=1$ a $c(s,t)=10$. Váhy jsou nezáporné, Dijkstra je tedy korektní a vrátí nejlevnější cestu $s \to a \to b \to t$ s&nbsp;cenou $3$ ($&lt; 10$) — viz krokovaný běh v&nbsp;lekci ($l(t)=3$, $p(t)=b$). Cesta s&nbsp;nejmenším počtem hran je ale přímá hrana $s \to t$ (1 hrana vs. 3 hrany). Dijkstra tedy nalezl nejkratší (nejlevnější) cestu, která počet hran <em>nemá</em> nejmenší. $\blacksquare$</p>
+          <p><strong>Čtení (ii): ani mezi stejně levnými cestami není nejmenší počet hran zaručen.</strong> Protipříklad: vrcholy $\{s,a,b,c,t\}$, hrany $c(s,a)=c(a,b)=c(b,t)=1$, $c(s,c)=2$, $c(c,t)=1$ (graf níže, pod řešením). Obě $s \to t$ cesty stojí $3$: $s{\to}a{\to}b{\to}t$ (3 hrany) i $s{\to}c{\to}t$ (2 hrany). Běh: uzavři $s$ ($0$), pak $a$ ($1$); teď mají $b$ i $c$ značku $2$ — <strong>remíza</strong>, kterou pseudokód nerozhoduje <a href="l2-5.html#takeaways">[L2.5]</a>. Zvolí-li implementace $b$, nastaví relaxace $(b,t)$: $l(t):=3$, $p(t):=b$; při následné expanzi $c$ relaxace $(c,t)$ s&nbsp;ostrým testem $3 &gt; 2+1$ neuspěje a $p(t)=b$ zůstane. Rekonstrukce z&nbsp;$p$ vrátí cestu o&nbsp;třech hranách $s{\to}a{\to}b{\to}t$, ačkoliv existuje stejně levná dvouhranná. „Vždy“ tedy neplatí — výsledek závisí na tie-breakingu. $\blacksquare$</p>
+          <p><strong>Poznámka navíc</strong> (hodí se k&nbsp;ústní): výrok se stane pravdivým, omezíme-li ho na <em>jednotkové váhy</em> — pak $c(P)=|P|$, minimalizace ceny je minimalizace počtu hran (BFS <a href="l2-10.html#takeaways">[L2.10]</a>). Obecný recept na „cestu s&nbsp;nejmenším počtem hran“ je proto: přepiš všechny váhy na $1$ a pusť Dijkstru/BFS.</p>
         </div>
       </details>
 
