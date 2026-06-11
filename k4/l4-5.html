@@ -36,7 +36,7 @@
     <strong>Vrstvená síť: $s$ → vrstva → vrstva → $t$, kde kapacity hran kódují omezení úlohy.</strong> Přiřazovací úlohu („kdo koho zastupuje“, „kdo kde sedí“) neřešíš žádným novým algoritmem — <em>postavíš si síť</em> tak, aby přípustné přiřazení = celočíselný tok, a odpověď ANO/NE přečteš z toho, jestli maximální tok <strong>nasytí všechny hrany ze zdroje</strong>.
   </div>
 
-  <p>V <a href="l4-1.html#takeaways">[L4.1]</a>–<a href="l4-4.html#takeaways">[L4.4]</a> jsi síť vždycky dostal nakreslenou v zadání a počítal jsi na ní. Na zkoušce 1. 6. 2026 ale padla úloha „<strong>Residents &amp; council</strong>“ — a v ní žádná síť není. Jen text o klubech, radě města a kvótách. Tvoje práce je síť <em>vyrobit</em>: zvolit vrcholy, hrany a hlavně <strong>kapacity</strong> tak, aby tok přesně odpovídal hledanému přiřazení. To je dnešní (a jediná) nová věc — a rovnou FOTO checkpoint.</p>
+  <p>V <a href="l4-1.html#takeaways">[L4.1]</a>–<a href="l4-4.html#takeaways">[L4.4]</a> jsi síť vždycky dostal nakreslenou v zadání a počítal jsi na ní. Na zkoušce 1.&nbsp;6.&nbsp;2026 ale padla úloha „<strong>Residents &amp; council</strong>“ — a v ní žádná síť není. Jen text o klubech, radě města a kvótách. Tvoje práce je síť <em>vyrobit</em>: zvolit vrcholy, hrany a hlavně <strong>kapacity</strong> tak, aby tok přesně odpovídal hledanému přiřazení. To je dnešní (a jediná) nová věc — a rovnou FOTO checkpoint.</p>
 
   <!-- ===== SEKCE 1: ÚLOHA BEZ SÍTĚ ===== -->
   <h2>Úloha, ve které žádná síť není (slide 19)</h2>
@@ -50,14 +50,14 @@
   <details class="try">
     <summary>Zkus sám: než začneš kreslit — co bude v téhle úloze „jednotka toku“? Co poteče sítí?</summary>
     <div class="inner">
-      <p>Jedna <strong>nominace</strong> (jedno křeslo v radě). Klubů je $l$, každý nominuje právě jednoho člena — sítí má tedy protéct přesně $l$ jednotek, každá po trase „klub → jeho člen → členova věková skupina“. Jakmile víš, co teče, vrstvy se nabídnou samy: zdroj, kluby, rezidenti, věkové skupiny, stok.</p>
+      <p>Jedna <strong>nominace</strong> (jedno křeslo v radě). Klubů je $q$, každý nominuje právě jednoho člena — sítí má tedy protéct přesně $q$ jednotek, každá po trase „klub → jeho člen → členova věková skupina“. Jakmile víš, co teče, vrstvy se nabídnou samy: zdroj, kluby, rezidenti, věkové skupiny, stok.</p>
     </div>
   </details>
 
   <!-- ===== SEKCE 2: KAPACITY KÓDUJÍ OMEZENÍ ===== -->
   <h2>Tři omezení → tři kapacity</h2>
 
-  <p>Celé kouzlo modelování je v tom, že každé slovní omezení přeložíš na <strong>kapacitu jedné hrany</strong>. Projdi si je po jednom (v jednodušší variantě z 1. 6. 2026 jsou místo věkových skupin politické strany $P_k$ a kvóta je jen horní: nejvýš $u_k$ radních ze strany $P_k$):</p>
+  <p>Celé kouzlo modelování je v tom, že každé slovní omezení přeložíš na <strong>kapacitu jedné hrany</strong>. Projdi si je po jednom (v jednodušší variantě z 1.&nbsp;6.&nbsp;2026 jsou místo věkových skupin politické strany $P_k$ a kvóta je jen horní: nejvýš $u_k$ radních ze strany $P_k$):</p>
 
   <details class="try">
     <summary>Zkus sám: „each club must nominate <em>one</em> of its members“ — jak tokem říct, že klub $C_j$ nominuje právě jednoho?</summary>
@@ -162,7 +162,7 @@
       <span class="task-id">T01</span>
       <strong>Residents &amp; council (Problem of Representatives)</strong>
       <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
-      <span class="task-src">zdroj: zkouška KO 01.06.2026 (doložena svědectvím, přesný přepis se nedochoval) ≈ AMO93 Application 6.2 dle ko_souhrn (EN 1:1) + varianta slide 19 (EN 1:1) ≈ test2_2015; řešení dle této lekce</span>
+      <span class="task-src">zdroj: zkouška KO 1.&nbsp;6.&nbsp;2026 (doložena svědectvím, přesný přepis se nedochoval) ≈ AMO93 Application 6.2 dle ko_souhrn (EN 1:1) + varianta slide 19 (EN 1:1) ≈ test2_2015; řešení dle této lekce</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -172,7 +172,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Modelovací úloha slotu 4 z 1. 6. 2026: žádná síť, jen text. Kluby nominují po jednom členovi do rady, každý rezident má právě jednu stranu (resp. věkovou skupinu) a strany mají kvóty — v základní verzi jen horní ($\le u_k$), ve variantě b) navíc dolní (minimum). Máš formulovat max-flow problém a říct, kdy rada existuje.</p>
+      <p>Modelovací úloha slotu 4 z 1.&nbsp;6.&nbsp;2026: žádná síť, jen text. Kluby nominují po jednom členovi do rady, každý rezident má právě jednu stranu (resp. věkovou skupinu) a strany mají kvóty — v základní verzi jen horní ($\le u_k$), ve variantě b) navíc dolní (minimum). Máš formulovat max-flow problém a říct, kdy rada existuje.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -197,13 +197,13 @@
           </ul>
           <p>(Pořadí vrstev volíme $s \to C \to R \to P \to t$: rezidenti musí být <em>uprostřed</em>, protože jen oni mají vztah ke klubům i ke stranám. Ruční náčrt v souhrnu uvádí vrstvy v pořadí $R \to C \to P$ — tam ale členství ve straně nejde vyjádřit hranou z klubového vrcholu; zrcadlově obrácená síť $s \to P \to R \to C \to t$ by naopak fungovala taky. Volba pořadí je naše — přiznáno.)</p>
           <p><strong>Kritérium.</strong> Pro každý tok platí $|f| \le q$ (řez $A = \{s\}$ má kapacitu $q$, <a href="l4-4.html#takeaways">[L4.4]</a>). Rada existuje $\iff$ hodnota maximálního toku je rovna $q$, tj. max tok <strong>nasytí všechny hrany $s \to C_j$</strong>. Kapacity jsou celočíselné, takže existuje celočíselný maximální tok (Integral Flow Theorem, slide 17) — F-F ho rovnou vydá — a nominace přečteš z hran $C_j \to R_i$ s $f = 1$: klub $C_j$ nominuje $R_i$. Kvóty jsou dodrženy, protože do $t$ ze strany $P_k$ proteče nejvýš $u_k$. Pokud max tok $&lt; q$, rada neexistuje a minimální řez (z posledního značkování, <a href="l4-4.html#takeaways">[L4.4]</a>) je certifikát: ukazuje skupinu klubů, jejichž členové se „mačkají“ v příliš malých kvótách. Na příkladu $r = 7$, $q = 4$, $p = 3$: tatáž síť se $4$ klubovými a $3$ stranickými vrcholy; rada existuje $\iff |f_{\max}| = 4$.</p>
-          <p><strong>b) Varianta s minimem i maximem (slide 19).</strong> Jediná změna: hrana $p_k \to t$ dostane <em>dolní mez</em> $l(e) = \min_k$ a horní $u(e) = \max_k$. Tím ale síť přestane mít $l \equiv 0$, takže nulový tok už <strong>není přípustný</strong> a samotné „pusť F-F od nuly“ nestačí: nejdřív je potřeba najít <em>počáteční přípustný tok</em> při nenulových dolních mezích — to je přesně rozhodovací úloha „feasible flow“, kterou řeší následující lekce <a href="l4-6.html#takeaways">[L4.6]</a> a <a href="l4-7.html">[L4.7]</a> (transformace na max flow s nulovými $l$). Odpověď pak zní: přípustné přiřazení existuje $\iff$ existuje přípustný tok v této síti nasycující všechny hrany $s \to k_j$; jinak neexistuje (certifikátem je opět řez).</p>
+          <p><strong>b) Varianta s minimem i maximem (slide 19).</strong> Jediná změna: hrana $P_k \to t$ dostane <em>dolní mez</em> $l_k$ (minimum pro skupinu $k$) a horní mez $u_k$ (maximum). Tím ale síť přestane mít $l \equiv 0$, takže nulový tok už <strong>není přípustný</strong> a samotné „pusť F-F od nuly“ nestačí: nejdřív je potřeba najít <em>počáteční přípustný tok</em> při nenulových dolních mezích — to je přesně rozhodovací úloha „feasible flow“, kterou řeší následující lekce <a href="l4-6.html#takeaways">[L4.6]</a> a <a href="l4-7.html">[L4.7]</a> (transformace na max flow s nulovými $l$). Odpověď pak zní: přípustné přiřazení existuje $\iff$ existuje přípustný tok v této síti nasycující všechny hrany $s \to C_j$; jinak neexistuje (certifikátem je opět řez).</p>
         </div>
       </details>
 
       <div class="box foto">
         <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
-        <p>Vyřeš úlohu NA PAPÍR bez koukání do řešení — přesně tahle formulace padla 1. 6. 2026. Nakresli síť (klidně pro malý příklad $r = 7$, $q = 4$, $p = 3$), ke <strong>každé hraně napiš kapacitu</strong> a nezapomeň na čtyři povinné věci z receptu: vrcholy, hrany+kapacity, kritérium nasycení hran ze zdroje, čtení výsledku z celočíselného toku. Přidej dvě věty k variantě b) (kam patří minimum a proč pak nejde startovat z nulového toku). Pošli mi fotku — zkontroluju ti to.</p>
+        <p>Vyřeš úlohu NA PAPÍR bez koukání do řešení — přesně tahle formulace padla 1.&nbsp;6.&nbsp;2026. Nakresli síť (klidně pro malý příklad $r = 7$, $q = 4$, $p = 3$), ke <strong>každé hraně napiš kapacitu</strong> a nezapomeň na čtyři povinné věci z receptu: vrcholy, hrany+kapacity, kritérium nasycení hran ze zdroje, čtení výsledku z celočíselného toku. Přidej dvě věty k variantě b) (kam patří minimum a proč pak nejde startovat z nulového toku). Pošli mi fotku — zkontroluju ti to.</p>
       </div>
     </div>
   </div>
