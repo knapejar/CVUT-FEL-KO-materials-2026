@@ -36,15 +36,15 @@
     <strong>DP přes dosažitelné zátěže procesorů:</strong> binární stav $x_i(t_1, \ldots, t_R) = 1$ ⟺ prvních $i$ úloh lze rozmístit tak, že stroj $P_v$ je obsazen přesně $\langle 0, t_v\rangle$; rekurence = OR přes stroje, $C^*_{max} = \min_{x_n = 1} \max_v t_v$, rozvrh zrekonstruuješ zpětně. Pseudopolynomiální $\mathcal{O}(n \cdot UB^R)$.
   </div>
 
-  <p>Z <a href="../k5/l5-4.html">[L5.4] McNaughtona</a> víš, že nepreemptivní $P \,||\, C_{max}$ je NP-hard už pro dva stroje — rozhodnout $C_{max} \le \frac{1}{2}\sum p_i$ je přesně <a href="../k1/l1-1.html#t-2partition">[L1.1] 2-Partition</a>. „NP-hard“ ale neznamená „beznadějné“: dnes si postavíme <strong>exaktní</strong> algoritmus — <strong>Rothkopfovo dynamické programování</strong> (slidy 47–50) — který platí daň jinde: jeho čas roste s <em>hodnotou</em> horní meze $UB$, ne jen s počtem úloh. Stejný „pseudopolynomiální“ obchod jsi už viděl u time-indexed ILP <a href="../k5/l5-3.html">[L5.3]</a>. Notaci $P \,||\, C_{max}$ čteš dle <a href="../k5/l5-1.html">[L5.1]</a>: identické paralelní stroje, <strong>nezávislé nepreemptivní</strong> úlohy (prázdná $\beta$: bez precedencí, bez $r_j$, bez preempce), minimalizuj makespan.</p>
+  <p>Z&nbsp;<a href="../k5/l5-4.html">[L5.4] McNaughtona</a> víš, že nepreemptivní $P \,||\, C_{max}$ je NP-hard už pro dva stroje — rozhodnout $C_{max} \le \frac{1}{2}\sum p_i$ je přesně <a href="../k1/l1-1.html#t-2partition">[L1.1] 2-Partition</a>. „NP-hard“ ale neznamená „beznadějné“: dnes si postavíme <strong>exaktní</strong> algoritmus — <strong>Rothkopfovo dynamické programování</strong> (slidy 47–50) — který platí daň jinde: jeho čas roste s <em>hodnotou</em> horní meze $UB$, ne jen s počtem úloh. Stejný „pseudopolynomiální“ obchod jsi už viděl u&nbsp;time-indexed ILP <a href="../k5/l5-3.html">[L5.3]</a>. Notaci $P \,||\, C_{max}$ čteš dle <a href="../k5/l5-1.html">[L5.1]</a>: identické paralelní stroje, <strong>nezávislé nepreemptivní</strong> úlohy (prázdná $\beta$: bez precedencí, bez $r_j$, bez preempce), minimalizuj makespan.</p>
 
   <!-- ===== SEKCE 1: STAV ===== -->
   <h2>Co si stačí pamatovat? Jen zátěže (slide 47)</h2>
 
-  <p>DP stojí a padá s volbou <strong>stavu</strong>. U knapsacku (uvidíš v <a href="../k7/l7-1.html">[L7.1]</a>) je stavem „kapacita“, u Rothkopfa to bude vektor obsazenosti strojů. Proč to stačí?</p>
+  <p>DP stojí a padá s&nbsp;volbou <strong>stavu</strong>. U&nbsp;knapsacku (uvidíš v&nbsp;<a href="../k7/l7-1.html">[L7.1]</a>) je stavem „kapacita“, u&nbsp;Rothkopfa to bude vektor obsazenosti strojů. Proč to stačí?</p>
 
   <details class="try">
-    <summary>Zkus sám: u $P \,||\, C_{max}$ chceš najít celý rozvrh — start časy a stroje. Proč o částečném rozvrhu prvních $i$ úloh stačí vědět jen $R$ čísel: kolik práce už leží na kterém stroji?</summary>
+    <summary>Zkus sám: u&nbsp;$P \,||\, C_{max}$ chceš najít celý rozvrh — start časy a stroje. Proč o&nbsp;částečném rozvrhu prvních $i$ úloh stačí vědět jen $R$ čísel: kolik práce už leží na kterém stroji?</summary>
     <div class="inner">
       <p>V $\beta$ není <em>nic</em>: žádné $r_j$, žádné deadliny, žádné precedence. Úlohy přiřazené jednomu stroji proto můžeš nalepit <strong>těsně za sebe od času 0</strong> — žádná mezera nikdy nepomůže a na pořadí na stroji nezáleží (poslední úloha vždy skončí v čase = součet délek = <strong>zátěž</strong> stroje). Rozvrh je tedy plně určen <em>rozdělením úloh strojům</em> a $C_{max}$ = největší zátěž. A dvě různá rozdělení prvních $i$ úloh se <strong>stejným vektorem zátěží</strong> $(t_1, \ldots, t_R)$ jsou pro budoucnost zaměnitelná — zbylé úlohy „vidí“ jen obsazené intervaly $\langle 0, t_v\rangle$. Přesně to je definice DP stavu.</p>
     </div>
@@ -66,17 +66,17 @@
     </ul>
   </div>
 
-  <p>Pozor na čtení: $x_i$ je <strong>dosažitelnost</strong> (0/1 — „jde to?“), ne žádná „cena“ stavu. Tabulka vrstvy $i$ má $(UB+1)^R$ buněk — pro $R = 2$ je to obyčejná 2D mřížka $(t_1, t_2)$ a přesně tu budeš u zkoušky kreslit.</p>
+  <p>Pozor na čtení: $x_i$ je <strong>dosažitelnost</strong> (0/1 — „jde to?“), ne žádná „cena“ stavu. Tabulka vrstvy $i$ má $(UB+1)^R$ buněk — pro $R = 2$ je to obyčejná 2D mřížka $(t_1, t_2)$ a přesně tu budeš u&nbsp;zkoušky kreslit.</p>
 
   <!-- ===== SEKCE 2: REKURENCE ===== -->
   <h2>Rekurence: OR přes stroje (slide 48)</h2>
 
   <details class="try">
-    <summary>Zkus sám: jak z vrstvy $x_{i-1}$ poznám, že $x_i(t_1, \ldots, t_R) = 1$? (Kam mohla jít úloha $T_i$?)</summary>
+    <summary>Zkus sám: jak z&nbsp;vrstvy $x_{i-1}$ poznám, že $x_i(t_1, \ldots, t_R) = 1$? (Kam mohla jít úloha $T_i$?)</summary>
     <div class="inner">
-      <p>Úloha $T_i$ skončila na <em>některém</em> stroji $v$ — a před jejím přidáním byly zátěže stejné, jen $t_v$ bylo o $p_i$ menší. Tedy:
+      <p>Úloha $T_i$ skončila na <em>některém</em> stroji $v$ — a před jejím přidáním byly zátěže stejné, jen $t_v$ bylo o&nbsp;$p_i$ menší. Tedy:
       $$x_i(t_1, \ldots, t_R) = \bigvee_{v=1}^{R} x_{i-1}(t_1, \ldots, t_v - p_i, \ldots, t_R),$$
-      kde člen s $t_v - p_i &lt; 0$ je automaticky 0 (mimo tabulku). Pro $R = 2$: buňka je 1, pokud o $p_i$ <em>vlevo</em> nebo o $p_i$ <em>dole</em> byla ve vrstvě $i-1$ jednička.</p>
+      kde člen s&nbsp;$t_v - p_i &lt; 0$ je automaticky 0 (mimo tabulku). Pro $R = 2$: buňka je 1, pokud o&nbsp;$p_i$ <em>vlevo</em> nebo o&nbsp;$p_i$ <em>dole</em> byla ve vrstvě $i-1$ jednička.</p>
     </div>
   </details>
 
@@ -99,12 +99,12 @@ Assign tasks T_n, T_{n-1}, ..., T_1 in the reverse direction;
     <p>“Time complexity is $\mathcal{O}(n \cdot UB^R)$.”</p>
   </div>
 
-  <p>Čtení pseudokódu: inicializace = jediná jednička v počátku ($x_0(0,\ldots,0) = 1$ — „nic nepřiřazeno, stroje prázdné“), všude jinde 0. Hlavní smyčka jede <strong>po úlohách</strong> $i = 1 \ldots n$ a pokaždé přepočítá <em>celou</em> mřížku. Na konci se optimum <em>přečte</em> z poslední vrstvy a rozvrh <em>zrekonstruuje</em> odzadu (sekce níže).</p>
+  <p>Čtení pseudokódu: inicializace = jediná jednička v&nbsp;počátku ($x_0(0,\ldots,0) = 1$ — „nic nepřiřazeno, stroje prázdné“), všude jinde 0. Hlavní smyčka jede <strong>po úlohách</strong> $i = 1 \ldots n$ a pokaždé přepočítá <em>celou</em> mřížku. Na konci se optimum <em>přečte</em> z&nbsp;poslední vrstvy a rozvrh <em>zrekonstruuje</em> odzadu (sekce níže).</p>
 
   <details class="try">
-    <summary>Zkus sám (kontrola, která u zkoušky šetří chyby): kde ve vrstvě $i$ můžou jedničky vůbec ležet? (Sečti souřadnice.)</summary>
+    <summary>Zkus sám (kontrola, která u&nbsp;zkoušky šetří chyby): kde ve vrstvě $i$ můžou jedničky vůbec ležet? (Sečti souřadnice.)</summary>
     <div class="inner">
-      <p>Prvních $i$ úloh představuje $P_i = \sum_{j \le i} p_j$ jednotek práce a všechna leží <em>někde</em> — takže každá jednička vrstvy $i$ splňuje $t_1 + \cdots + t_R = P_i$. Pro $R = 2$ leží všechny jedničky na <strong>antidiagonále</strong> $t_1 + t_2 = P_i$ (případně oříznuté hranicí $t_v \le UB$). Jednička mimo diagonálu = chyba v posouvání. Bonus: mřížka je <strong>symetrická</strong> podle výměny strojů ($t_1 \leftrightarrow t_2$) — identické stroje nerozlišíš.</p>
+      <p>Prvních $i$ úloh představuje $P_i = \sum_{j \le i} p_j$ jednotek práce a všechna leží <em>někde</em> — takže každá jednička vrstvy $i$ splňuje $t_1 + \cdots + t_R = P_i$. Pro $R = 2$ leží všechny jedničky na <strong>antidiagonále</strong> $t_1 + t_2 = P_i$ (případně oříznuté hranicí $t_v \le UB$). Jednička mimo diagonálu = chyba v&nbsp;posouvání. Bonus: mřížka je <strong>symetrická</strong> podle výměny strojů ($t_1 \leftrightarrow t_2$) — identické stroje nerozlišíš.</p>
     </div>
   </details>
 
@@ -116,21 +116,21 @@ Assign tasks T_n, T_{n-1}, ..., T_1 in the reverse direction;
   <div class="viz" id="viz-dp49"></div>
 
   <details class="try">
-    <summary>Zkus sám: z poslední vrstvy $x_3$ přečti $C^*_{max}$. Která buňka vyhrává?</summary>
+    <summary>Zkus sám: z&nbsp;poslední vrstvy $x_3$ přečti $C^*_{max}$. Která buňka vyhrává?</summary>
     <div class="inner">
-      <p>$C^*_{max} = \min_{x_3 = 1} \max\{t_1, t_2\}$. Kandidáti: $(5,0) \to 5$, $(4,1) \to 4$, $(3,2) \to 3$, $(2,3) \to 3$, $(1,4) \to 4$, $(0,5) \to 5$. Minimum je $\mathbf{3}$ v buňkách $(3,2)$ a $(2,3)$ — geometricky <strong>buňky diagonály nejblíž ose souměrnosti</strong> $t_1 = t_2$ (nejvyrovnanější rozdělení práce; přesně intuice 2-Partition). Kontrola dolní mezí: $C_{max} \ge \lceil \frac{1}{R}\sum p_i \rceil = \lceil 2{,}5 \rceil = 3$ ✓ optimum.</p>
+      <p>$C^*_{max} = \min_{x_3 = 1} \max\{t_1, t_2\}$. Kandidáti: $(5,0) \to 5$, $(4,1) \to 4$, $(3,2) \to 3$, $(2,3) \to 3$, $(1,4) \to 4$, $(0,5) \to 5$. Minimum je $\mathbf{3}$ v&nbsp;buňkách $(3,2)$ a $(2,3)$ — geometricky <strong>buňky diagonály nejblíž ose souměrnosti</strong> $t_1 = t_2$ (nejvyrovnanější rozdělení práce; přesně intuice 2-Partition). Kontrola dolní mezí: $C_{max} \ge \lceil \frac{1}{R}\sum p_i \rceil = \lceil 2{,}5 \rceil = 3$ ✓ optimum.</p>
     </div>
   </details>
 
   <!-- ===== SEKCE 4: REKONSTRUKCE ===== -->
   <h2>Rekonstrukce rozvrhu: odzadu $T_n, \ldots, T_1$</h2>
 
-  <p>Poslední řádek pseudokódu — “Assign tasks $T_n, T_{n-1}, \ldots, T_1$ in the reverse direction” — je u zkoušky druhá polovina práce: bez Ganttova diagramu nemáš rozvrh, jen číslo.</p>
+  <p>Poslední řádek pseudokódu — “Assign tasks $T_n, T_{n-1}, \ldots, T_1$ in the reverse direction” — je u&nbsp;zkoušky druhá polovina práce: bez Ganttova diagramu nemáš rozvrh, jen číslo.</p>
 
   <details class="try">
-    <summary>Zkus sám: stojíš v optimální buňce $(3,2)$ vrstvy $x_3$. Jak zjistíš, kde běžela úloha $T_3$ ($p_3 = 2$)?</summary>
+    <summary>Zkus sám: stojíš v&nbsp;optimální buňce $(3,2)$ vrstvy $x_3$. Jak zjistíš, kde běžela úloha $T_3$ ($p_3 = 2$)?</summary>
     <div class="inner">
-      <p>Otoč rekurenci: jednička v $(3,2)$ vznikla z <em>nějakého</em> $v$ s $x_2(\ldots, t_v - p_3, \ldots) = 1$. Zkoušej stroje: $v = 1$: $x_2(1, 2) = 1$ ✓ → $T_3$ běžela na $P_1$ a začala v $s_3 = t_1 - p_3 = 1$, tj. $z_3 = 1$, interval $\langle 1, 3\rangle$. Pokračuj ze stavu $(1,2)$ s úlohou $T_2$, atd. až k $T_1$ — skončit musíš v $(0,0)$. (Tady šlo i $v = 2$: $x_2(3,0) = 1$ — rozvrhů s $C_{max} = 3$ je víc, vyber si libovolnou cestu.)</p>
+      <p>Otoč rekurenci: jednička v&nbsp;$(3,2)$ vznikla z&nbsp;<em>nějakého</em> $v$ s&nbsp;$x_2(\ldots, t_v - p_3, \ldots) = 1$. Zkoušej stroje: $v = 1$: $x_2(1, 2) = 1$ ✓ → $T_3$ běžela na $P_1$ a začala v&nbsp;$s_3 = t_1 - p_3 = 1$, tj. $z_3 = 1$, interval $\langle 1, 3\rangle$. Pokračuj ze stavu $(1,2)$ s&nbsp;úlohou $T_2$, atd. až k&nbsp;$T_1$ — skončit musíš v&nbsp;$(0,0)$. (Tady šlo i $v = 2$: $x_2(3,0) = 1$ — rozvrhů s&nbsp;$C_{max} = 3$ je víc, vyber si libovolnou cestu.)</p>
     </div>
   </details>
 
@@ -140,9 +140,9 @@ Assign tasks T_n, T_{n-1}, ..., T_1 in the reverse direction;
   <h2>Pseudopolynom — ale jen pro pevné $R$ (slide 50)</h2>
 
   <details class="try">
-    <summary>Zkus sám: $\mathcal{O}(n \cdot UB^R)$ vypadá jako polynom. Není to spor s NP-těžkostí $P2 \,||\, C_{max}$ (2-Partition, [L1.1])?</summary>
+    <summary>Zkus sám: $\mathcal{O}(n \cdot UB^R)$ vypadá jako polynom. Není to spor s&nbsp;NP-těžkostí $P2 \,||\, C_{max}$ (2-Partition, [L1.1])?</summary>
     <div class="inner">
-      <p>Není. Vstup kóduje číslo $UB$ binárně na $\log_2 UB$ bitech — $UB$ samotné je tedy v délce vstupu <strong>exponenciální</strong>. Algoritmus polynomiální v <em>hodnotách</em> čísel (ne v délce jejich zápisu) je <strong>pseudopolynomiální</strong> — přesně tohle smí u <em>slabě</em> (weakly) NP-těžkých problémů existovat, viz $\mathcal{O}(nW)$ knapsack <a href="../k7/l7-1.html">[L7.1]</a>. A pozor na druhý exponent: $UB^{\mathbf{R}}$ — polynomialita v $UB$ drží jen pro <strong>konstantní</strong> počet strojů.</p>
+      <p>Není. Vstup kóduje číslo $UB$ binárně na $\log_2 UB$ bitech — $UB$ samotné je tedy v&nbsp;délce vstupu <strong>exponenciální</strong>. Algoritmus polynomiální v&nbsp;<em>hodnotách</em> čísel (ne v&nbsp;délce jejich zápisu) je <strong>pseudopolynomiální</strong> — přesně tohle smí u&nbsp;<em>slabě</em> (weakly) NP-těžkých problémů existovat, viz $\mathcal{O}(nW)$ knapsack <a href="../k7/l7-1.html">[L7.1]</a>. A pozor na druhý exponent: $UB^{\mathbf{R}}$ — polynomialita v&nbsp;$UB$ drží jen pro <strong>konstantní</strong> počet strojů.</p>
     </div>
   </details>
 
@@ -168,9 +168,9 @@ Assign tasks T_n, T_{n-1}, ..., T_1 in the reverse direction;
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy kolem Rothkopfa</div>
     <ul>
       <li><strong>$x_i$ není „hodnota“, je to dosažitelnost.</strong> Do buňky nepíšeš nejlepší $C_{max}$, jen 0/1 („umím prvních $i$ úloh složit přesně na zátěže $(t_1, \ldots, t_R)$?“). Optimalizuje se až <em>čtením</em> poslední vrstvy: $C^*_{max} = \min \max_v t_v$.</li>
-      <li><strong>$t_v - p_i &lt; 0$ nebo $t_v &gt; UB$ = mimo tabulku = 0.</strong> Stavy „přeteklé“ přes $UB$ zahodíš — a proto musí být $UB \ge C^*_{max}$, jinak v $x_n$ nezbude žádná jednička a odpověď si uřízneš. Bezpečná volba je vždy $UB = \sum_i p_i$ (vše na jednom stroji); těsnější $UB$ z heuristiky (list scheduling <a href="../k5/l5-12.html">[L5.12]</a>) = menší tabulka.</li>
-      <li><strong>„Pseudopolynomiální“ platí jen pro konstantní $R$</strong> (slide 50): pro $R = poly(n)$ je $P \,||\, C_{max}$ <em>silně</em> NP-hard (redukce z 3-partition) a $UB^R$ exploduje exponenciálně. Žádný pseudopolynomiální algoritmus tam (pokud P≠NP) neexistuje.</li>
-      <li><strong>Rothkopf = nezávislé nepreemptivní úlohy.</strong> S preempcí je to triviální McNaughton <a href="../k5/l5-4.html">[L5.4]</a> ($\mathcal{O}(n)$, žádné DP!); s precedencemi M&amp;C <a href="../k5/l5-10.html">[L5.10]</a> (pmtn) nebo list scheduling <a href="../k5/l5-12.html">[L5.12]</a> (bez pmtn). Klíč k volbě metody = tahák <a href="../k5/l5-14.html">[L5.14]</a>; u zkoušky navíc obvykle stojí v zadání „[Rothkopf]“ přímo v nadpisu.</li>
+      <li><strong>$t_v - p_i &lt; 0$ nebo $t_v &gt; UB$ = mimo tabulku = 0.</strong> Stavy „přeteklé“ přes $UB$ zahodíš — a proto musí být $UB \ge C^*_{max}$, jinak v&nbsp;$x_n$ nezbude žádná jednička a odpověď si uřízneš. Bezpečná volba je vždy $UB = \sum_i p_i$ (vše na jednom stroji); těsnější $UB$ z&nbsp;heuristiky (list scheduling <a href="../k5/l5-12.html">[L5.12]</a>) = menší tabulka.</li>
+      <li><strong>„Pseudopolynomiální“ platí jen pro konstantní $R$</strong> (slide 50): pro $R = poly(n)$ je $P \,||\, C_{max}$ <em>silně</em> NP-hard (redukce z&nbsp;3-partition) a $UB^R$ exploduje exponenciálně. Žádný pseudopolynomiální algoritmus tam (pokud P≠NP) neexistuje.</li>
+      <li><strong>Rothkopf = nezávislé nepreemptivní úlohy.</strong> S&nbsp;preempcí je to triviální McNaughton <a href="../k5/l5-4.html">[L5.4]</a> ($\mathcal{O}(n)$, žádné DP!); s&nbsp;precedencemi M&amp;C <a href="../k5/l5-10.html">[L5.10]</a> (pmtn) nebo list scheduling <a href="../k5/l5-12.html">[L5.12]</a> (bez pmtn). Klíč k&nbsp;volbě metody = tahák <a href="../k5/l5-14.html">[L5.14]</a>; u&nbsp;zkoušky navíc obvykle stojí v&nbsp;zadání „[Rothkopf]“ přímo v nadpisu.</li>
     </ul>
   </div>
 
@@ -178,9 +178,9 @@ Assign tasks T_n, T_{n-1}, ..., T_1 in the reverse direction;
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.11</div>
     <ul>
-      <li><strong>Stav:</strong> $x_i(t_1, \ldots, t_R) = 1$ ⟺ úlohy $T_1, \ldots, T_i$ lze rozmístit tak, že $P_v$ je obsazen přesně $\langle 0, t_v\rangle$. Stačí to, protože u $P\,||\,C_{max}$ se na stroji lepí úlohy beze mezer od 0 a záleží jen na zátěžích.</li>
+      <li><strong>Stav:</strong> $x_i(t_1, \ldots, t_R) = 1$ ⟺ úlohy $T_1, \ldots, T_i$ lze rozmístit tak, že $P_v$ je obsazen přesně $\langle 0, t_v\rangle$. Stačí to, protože u&nbsp;$P\,||\,C_{max}$ se na stroji lepí úlohy beze mezer od 0 a záleží jen na zátěžích.</li>
       <li><strong>Rekurence:</strong> $x_i(t_1,\ldots,t_R) = \bigvee_{v=1}^R x_{i-1}(\ldots, t_v - p_i, \ldots)$; init $x_0(0,\ldots,0) = 1$; záporné indexy a $t_v &gt; UB$ jsou 0. Kontrola pro $R=2$: jedničky vrstvy $i$ leží na antidiagonále $t_1 + t_2 = \sum_{j\le i} p_j$ (oříznuté $UB$) a mřížka je symetrická.</li>
-      <li><strong>Čtení a rekonstrukce:</strong> $C^*_{max} = \min_{x_n = 1} \max_v t_v$ (u $R=2$ buňky diagonály nejblíž $t_1 = t_2$); rozvrh odzadu $T_n, \ldots, T_1$ — najdi $v$ s $x_{i-1}(\ldots, t_v - p_i, \ldots) = 1$, zapiš $s_i = t_v - p_i$, $z_i = v$, sniž $t_v$; skončíš v $(0,\ldots,0)$. Pak nakresli Gantt.</li>
+      <li><strong>Čtení a rekonstrukce:</strong> $C^*_{max} = \min_{x_n = 1} \max_v t_v$ (u&nbsp;$R=2$ buňky diagonály nejblíž $t_1 = t_2$); rozvrh odzadu $T_n, \ldots, T_1$ — najdi $v$ s&nbsp;$x_{i-1}(\ldots, t_v - p_i, \ldots) = 1$, zapiš $s_i = t_v - p_i$, $z_i = v$, sniž $t_v$; skončíš v&nbsp;$(0,\ldots,0)$. Pak nakresli Gantt.</li>
       <li><strong>Složitost $\mathcal{O}(n \cdot UB^R)$:</strong> pseudopolynomiální pro konstantní $R$ (slabá NP-těžkost, 2-Partition <a href="../k1/l1-1.html#t-2partition">[L1.1]</a>); pro $R = poly(n)$ silně NP-hard (3-partition) a DP nepomůže. $UB \ge C^*_{max}$ nutné, $UB = \sum p_i$ vždy bezpečné.</li>
       <li><strong>Volba metody</strong> (tahák <a href="../k5/l5-14.html">[L5.14]</a>): $P\,||\,C_{max}$, malé $R$, jen $p_i$ = Rothkopf DP; pmtn = McNaughton <a href="../k5/l5-4.html#takeaways">[L5.4]</a>; prec = list scheduling <a href="../k5/l5-12.html#takeaways">[L5.12]</a> / M&amp;C <a href="../k5/l5-10.html#takeaways">[L5.10]</a>.</li>
     </ul>
@@ -191,7 +191,7 @@ Assign tasks T_n, T_{n-1}, ..., T_1 in the reverse direction;
     <div class="task-head">
       <span class="task-id">T01</span>
       <strong>Scheduling on Parallel Identical Resources [Rothkopf]</strong>
-      <span class="task-src">zdroj: zkouška KO 21.06.2021 / Master_Zkouska_KO str. 27 (zadání EN 1:1)</span>
+      <span class="task-src">zdroj: zkouška KO 21.&nbsp;6.&nbsp;2021 / Master_Zkouska_KO str. 27 (zadání EN 1:1)</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -205,10 +205,10 @@ Assign tasks T_n, T_{n-1}, ..., T_1 in the reverse direction;
         </ul>
       </div>
 
-      <h4>a) Co je v zadání?</h4>
+      <h4>a) Co je v&nbsp;zadání?</h4>
       <p>Čtyři nepreemptivní nezávislé úlohy, dva identické stroje, minimalizovat makespan — a explicitní pokyn použít Rothkopfovo DP. Odevzdat máš tři věci: <strong>záznam hlavních proměnných po každé iteraci</strong> (= vrstvy $x_i$ — mřížka nebo výčet jedniček), přečtené $C^*_{max}$ a <strong>Gantt</strong> zrekonstruovaného rozvrhu. $UB = 5$ je dané, tabulka je $6 \times 6$.</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — stav, rekurence, čtení optima, zpětná rekonstrukce (<a href="#takeaways">takeaways</a>).</li>
         <li><a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace</a> — čtení $P \,||\, C_{max}$ a kreslení Ganttova diagramu.</li>
@@ -216,7 +216,7 @@ Assign tasks T_n, T_{n-1}, ..., T_1 in the reverse direction;
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Čistě mechanicky, iterace = úloha: vrstvu $x_{i-1}$ posuň o $p_i$ doprava (stroj 1) a o $p_i$ nahoru (stroj 2), sjednoť, ořízni na $t_v \le 5$. Po každé vrstvě zkontroluj antidiagonálu $t_1 + t_2 = P_i$ (zde $P_i = 2, 4, 5, 7$) a symetrii. Optimum hledej v $x_4$ co nejblíž ose $t_1 = t_2$. Při rekonstrukci jdi odzadu $T_4 \to T_1$ a každý krok ověř jedničkou v předchozí vrstvě; skončit musíš v $(0,0)$.</p>
+      <p>Čistě mechanicky, iterace = úloha: vrstvu $x_{i-1}$ posuň o&nbsp;$p_i$ doprava (stroj 1) a o&nbsp;$p_i$ nahoru (stroj 2), sjednoť, ořízni na $t_v \le 5$. Po každé vrstvě zkontroluj antidiagonálu $t_1 + t_2 = P_i$ (zde $P_i = 2, 4, 5, 7$) a symetrii. Optimum hledej v&nbsp;$x_4$ co nejblíž ose $t_1 = t_2$. Při rekonstrukci jdi odzadu $T_4 \to T_1$ a každý krok ověř jedničkou v&nbsp;předchozí vrstvě; skončit musíš v&nbsp;$(0,0)$.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení <em>(provedení DP a Gantt vlastní — vzorové řešení se ve zdrojích nedochovalo, přiznáno)</em></summary>
@@ -232,19 +232,19 @@ Assign tasks T_n, T_{n-1}, ..., T_1 in the reverse direction;
               <tr><td>4</td><td>2</td><td>$(5,2),\ (4,3),\ (3,4),\ (2,5)$</td><td>7</td></tr>
             </tbody>
           </table>
-          <p>Pozor v iteraci 4: kandidáti $(7,0), (6,1), (1,6), (0,7)$ <strong>přetékají $UB = 5$</strong> → mimo tabulku, zahazují se. Totéž v mřížce (proklikej):</p>
+          <p>Pozor v&nbsp;iteraci 4: kandidáti $(7,0), (6,1), (1,6), (0,7)$ <strong>přetékají $UB = 5$</strong> → mimo tabulku, zahazují se. Totéž v&nbsp;mřížce (proklikej):</p>
           <div class="viz" id="viz-t01dp"></div>
-          <p><strong>Čtení optima:</strong> $C^*_{max} = \min\{\max(5,2), \max(4,3), \max(3,4), \max(2,5)\} = \min\{5, 4, 4, 5\} = \mathbf{4}$, v buňkách $(4,3)$ a $(3,4)$. Kontrola dolní mezí: $\lceil\frac{2+2+1+2}{2}\rceil = \lceil 3{,}5\rceil = 4$ ✓ — DP našlo optimum (a líp to nejde, $C_{max}$ je při celočíselných $p_i$ celé číslo).</p>
-          <p><strong>Rekonstrukce odzadu</strong> z $(4,3)$:</p>
+          <p><strong>Čtení optima:</strong> $C^*_{max} = \min\{\max(5,2), \max(4,3), \max(3,4), \max(2,5)\} = \min\{5, 4, 4, 5\} = \mathbf{4}$, v&nbsp;buňkách $(4,3)$ a $(3,4)$. Kontrola dolní mezí: $\lceil\frac{2+2+1+2}{2}\rceil = \lceil 3{,}5\rceil = 4$ ✓ — DP našlo optimum (a líp to nejde, $C_{max}$ je při celočíselných $p_i$ celé číslo).</p>
+          <p><strong>Rekonstrukce odzadu</strong> z&nbsp;$(4,3)$:</p>
           <ul>
             <li>$T_4$ ($p_4 = 2$): $v = 1$? $x_3(2, 3) = 1$ ✓ → $s_4 = 4 - 2 = 2$, $z_4 = 1$, tj. $T_4$ na $P_1\,\langle 2,4\rangle$; nový stav $(2,3)$.</li>
             <li>$T_3$ ($p_3 = 1$): $v = 1$? $x_2(1,3) = 0$ ✗. $v = 2$? $x_2(2, 2) = 1$ ✓ → $s_3 = 3 - 1 = 2$, $z_3 = 2$, tj. $T_3$ na $P_2\,\langle 2,3\rangle$; stav $(2,2)$.</li>
             <li>$T_2$ ($p_2 = 2$): $v = 1$? $x_1(0,2) = 1$ ✓ → $s_2 = 0$, $z_2 = 1$, tj. $T_2$ na $P_1\,\langle 0,2\rangle$; stav $(0,2)$.</li>
             <li>$T_1$ ($p_1 = 2$): $v = 2$? $x_0(0,0) = 1$ ✓ → $s_1 = 0$, $z_1 = 2$, tj. $T_1$ na $P_2\,\langle 0,2\rangle$; stav $(0,0)$ — konec ✓.</li>
           </ul>
-          <p>Výstupní vektory: $s = (0, 0, 2, 2)$, $z = (2, 1, 2, 1)$. (Rozvrh není jednoznačný — symetrická větev z $(3,4)$ jen prohodí stroje, a u $T_4$ šlo i $v = 2$ přes $x_3(4,1)$.)</p>
+          <p>Výstupní vektory: $s = (0, 0, 2, 2)$, $z = (2, 1, 2, 1)$. (Rozvrh není jednoznačný — symetrická větev z&nbsp;$(3,4)$ jen prohodí stroje, a u&nbsp;$T_4$ šlo i $v = 2$ přes $x_3(4,1)$.)</p>
           <div class="viz" id="viz-t01gantt"></div>
-          <p>Stroj $P_2$ zahálí $\langle 3,4\rangle$: $2 \cdot 4 - 7 = 1$ jednotka — nevyhnutelné, protože $\sum p_i = 7$ je liché (přesně ta „nerozměnitelná“ jednotka z 2-Partition pohledu).</p>
+          <p>Stroj $P_2$ zahálí $\langle 3,4\rangle$: $2 \cdot 4 - 7 = 1$ jednotka — nevyhnutelné, protože $\sum p_i = 7$ je liché (přesně ta „nerozměnitelná“ jednotka z&nbsp;2-Partition pohledu).</p>
         </div>
       </details>
     </div>
@@ -266,25 +266,25 @@ Assign tasks T_n, T_{n-1}, ..., T_1 in the reverse direction;
         (iii) Compare the table sizes for $UB = 5$ and $UB = 7$ and give the general rule for choosing $UB$.</p>
       </div>
 
-      <h4>a) Co je v zadání?</h4>
-      <p>Tatáž instance jako T01 (studentský souhrn ji cvičí s $UB = 7$), jiná horní mez. Cíl: pochopit, <strong>co přesně $UB$ v algoritmu dělá</strong> — je to jen ořez tabulky, ne parametr ovlivňující optimum (dokud $UB \ge C^*_{max}$).</p>
+      <h4>a) Co je v&nbsp;zadání?</h4>
+      <p>Tatáž instance jako T01 (studentský souhrn ji cvičí s $UB = 7$), jiná horní mez. Cíl: pochopit, <strong>co přesně $UB$ v&nbsp;algoritmu dělá</strong> — je to jen ořez tabulky, ne parametr ovlivňující optimum (dokud $UB \ge C^*_{max}$).</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
-        <li>Tato lekce — role $UB$ v rekurenci a ve složitosti (<a href="#takeaways">takeaways</a>).</li>
-        <li>Vrstvy $x_0$–$x_4$ z řešení T01 (<a href="#t-rothkopf">výše</a>).</li>
+        <li>Tato lekce — role $UB$ v&nbsp;rekurenci a ve složitosti (<a href="#takeaways">takeaways</a>).</li>
+        <li>Vrstvy $x_0$–$x_4$ z&nbsp;řešení T01 (<a href="#t-rothkopf">výše</a>).</li>
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Nepřepočítávej všechno znovu: vrstvy se liší jen tam, kde T01 něco ořízl o podmínku $t_v \le 5$. Projdi tabulku z T01 a najdi zahozené kandidáty. Pak si rozmysli: může buňka s $\max(t_1,t_2) &gt; 4$ vyhrát čtení minima, když $(4,3)$ zůstává jedničkou?</p>
+      <p>Nepřepočítávej všechno znovu: vrstvy se liší jen tam, kde T01 něco ořízl o&nbsp;podmínku $t_v \le 5$. Projdi tabulku z&nbsp;T01 a najdi zahozené kandidáty. Pak si rozmysli: může buňka s&nbsp;$\max(t_1,t_2) &gt; 4$ vyhrát čtení minima, když $(4,3)$ zůstává jedničkou?</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
         <div class="inner">
-          <p><strong>(i)</strong> Vrstvy $x_0$–$x_3$ jsou <strong>stejné</strong> jako v T01 — žádný jejich stav nepřesáhl 5, takže ořez nic nedělal ($P_3 = 5 \le 5$). Rozdíl je až ve vrstvě $x_4$ (antidiagonála $t_1 + t_2 = 7$), kde s $UB = 7$ přežijí i dříve zahozené stavy:
+          <p><strong>(i)</strong> Vrstvy $x_0$–$x_3$ jsou <strong>stejné</strong> jako v&nbsp;T01 — žádný jejich stav nepřesáhl 5, takže ořez nic nedělal ($P_3 = 5 \le 5$). Rozdíl je až ve vrstvě $x_4$ (antidiagonála $t_1 + t_2 = 7$), kde s&nbsp;$UB = 7$ přežijí i dříve zahozené stavy:
           $$x_4: \ (7,0),\ (6,1),\ \underbrace{(5,2),\ (4,3),\ (3,4),\ (2,5)}_{\text{jako v T01}},\ (1,6),\ (0,7) .$$</p>
-          <p><strong>(ii)</strong> Nic se nemění: nové stavy mají $\max(t_1,t_2) \in \{5, 6, 7\}$, takže čtení $C^*_{max} = \min_{x_4=1}\max_v t_v = 4$ vyhrávají pořád $(4,3)$ a $(3,4)$ a zpětná rekonstrukce z $(4,3)$ proběhne identicky ($s = (0,0,2,2)$, $z = (2,1,2,1)$, Gantt jako v T01). Obecně: stavy nad $C^*_{max}$ nikdy nevyhrají minimum — $UB$ jen určuje, <em>kolik zbytečných stavů taháš s sebou</em>. Každé $UB \ge C^*_{max}$ tedy dá stejný výsledek; menší $UB$ jen víc ořezává. (A $UB &lt; C^*_{max}$ by smazalo všechny jedničky z $x_n$ — algoritmus by nevrátil nic, viz danger box.)</p>
-          <p><strong>(iii)</strong> Vrstva má $(UB+1)^R$ buněk: $6^2 = 36$ pro $UB = 5$ vs. $8^2 = 64$ pro $UB = 7$ — celkem $n \cdot (UB+1)^R$, tj. $144$ vs. $256$ vyhodnocení rekurence. Obecné pravidlo: $UB = \sum_i p_i$ (zde právě $7$ — souhrn volí přesně tuhle bezpečnou mez) funguje <em>vždy</em>; cokoli těsnějšího z heuristiky (např. list scheduling <a href="../k5/l5-12.html">[L5.12]</a>) tabulku zmenší a výsledek nezmění, dokud $UB \ge C^*_{max}$. U zkoušky je $UB$ prostě v zadání — použij ho a nezdržuj se.</p>
+          <p><strong>(ii)</strong> Nic se nemění: nové stavy mají $\max(t_1,t_2) \in \{5, 6, 7\}$, takže čtení $C^*_{max} = \min_{x_4=1}\max_v t_v = 4$ vyhrávají pořád $(4,3)$ a $(3,4)$ a zpětná rekonstrukce z&nbsp;$(4,3)$ proběhne identicky ($s = (0,0,2,2)$, $z = (2,1,2,1)$, Gantt jako v&nbsp;T01). Obecně: stavy nad $C^*_{max}$ nikdy nevyhrají minimum — $UB$ jen určuje, <em>kolik zbytečných stavů taháš s&nbsp;sebou</em>. Každé $UB \ge C^*_{max}$ tedy dá stejný výsledek; menší $UB$ jen víc ořezává. (A $UB &lt; C^*_{max}$ by smazalo všechny jedničky z&nbsp;$x_n$ — algoritmus by nevrátil nic, viz danger box.)</p>
+          <p><strong>(iii)</strong> Vrstva má $(UB+1)^R$ buněk: $6^2 = 36$ pro $UB = 5$ vs. $8^2 = 64$ pro $UB = 7$ — celkem $n \cdot (UB+1)^R$, tj. $144$ vs. $256$ vyhodnocení rekurence. Obecné pravidlo: $UB = \sum_i p_i$ (zde právě $7$ — souhrn volí přesně tuhle bezpečnou mez) funguje <em>vždy</em>; cokoli těsnějšího z&nbsp;heuristiky (např. list scheduling <a href="../k5/l5-12.html">[L5.12]</a>) tabulku zmenší a výsledek nezmění, dokud $UB \ge C^*_{max}$. U&nbsp;zkoušky je $UB$ prostě v&nbsp;zadání — použij ho a nezdržuj se.</p>
         </div>
       </details>
     </div>
