@@ -33,10 +33,10 @@
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
-    Relaxuj <strong>všechny hrany grafu</strong>, a to <strong>$(n-1)$-krát</strong> — žádné uzavírání vrcholů, žádný výběr minima. To zvládne i záporné váhy. A bonus: pokud jde nějaká hrana relaxovat ještě v $n$-tém průchodu, graf obsahuje <strong>záporný cyklus</strong>.
+    Relaxuj <strong>všechny hrany grafu</strong>, a to <strong>$(n-1)$-krát</strong> — žádné uzavírání vrcholů, žádný výběr minima. To zvládne i záporné váhy. A bonus: pokud jde nějaká hrana relaxovat ještě v&nbsp;$n$-tém průchodu, graf obsahuje <strong>záporný cyklus</strong>.
   </div>
 
-  <p>Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> se na záporné hraně spálila: vrchol $a$ uzavřela se značkou $1$, a opravu přes $b$ na $0$ už nikdy nepřipustila. A v <a href="l2-3.html#takeaways">[L2.3]</a> jsme si slíbili algoritmus, který „nic nevymýšlí — relaxuje všechny hrany pořád dokola“. Dnes ten slib splníme: <strong>Bellman-Fordův algoritmus</strong> (Bellman-Ford algorithm, 1958; nezávisle Moore 1959).</p>
+  <p>Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a> se na záporné hraně spálila: vrchol $a$ uzavřela se značkou $1$, a opravu přes $b$ na $0$ už nikdy nepřipustila. A v&nbsp;<a href="l2-3.html#takeaways">[L2.3]</a> jsme si slíbili algoritmus, který „nic nevymýšlí — relaxuje všechny hrany pořád dokola“. Dnes ten slib splníme: <strong>Bellman-Fordův algoritmus</strong> (Bellman-Ford algorithm, 1958; nezávisle Moore 1959).</p>
 
   <!-- ===== SEKCE 1 ===== -->
   <h2>Strategie: žádná strategie</h2>
@@ -44,15 +44,15 @@
   <details class="try">
     <summary>Zkus sám: Dijkstru zradilo <em>předčasné zatrvalnění</em> značky. Jak bys navrhl algoritmus, který se takhle spálit nemůže?</summary>
     <div class="inner">
-      <p>Jednoduše: <strong>nic nezatrvalňuj</strong>. Žádná množina $R$, žádný výběr minima — prostě procházej všechny hrany grafu pořád dokola a každou zkus relaxovat <a href="l2-3.html#takeaways">[L2.3]</a>. Značky smí klesat kdykoliv, takže pozdní oprava (jako $l(a): 1 \to 0$ přes zápornou hranu) projde úplně přirozeně. Relaxaci samotné záporná váha nevadí — to víme z <a href="l2-3.html#takeaways">[L2.3]</a>; problém Dijkstry byla <em>strategie pořadí</em>, ne relaxace.</p>
+      <p>Jednoduše: <strong>nic nezatrvalňuj</strong>. Žádná množina $R$, žádný výběr minima — prostě procházej všechny hrany grafu pořád dokola a každou zkus relaxovat <a href="l2-3.html#takeaways">[L2.3]</a>. Značky smí klesat kdykoliv, takže pozdní oprava (jako $l(a): 1 \to 0$ přes zápornou hranu) projde úplně přirozeně. Relaxaci samotné záporná váha nevadí — to víme z&nbsp;<a href="l2-3.html#takeaways">[L2.3]</a>; problém Dijkstry byla <em>strategie pořadí</em>, ne relaxace.</p>
     </div>
   </details>
 
   <details class="try">
-    <summary>Zkus sám: kolikrát stačí všechny hrany projít? Nápověda: vzpomeň na řetízek z úlohy <a href="l2-3.html#t-order">[L2.3] T01</a> — informace teče od startu po hranách.</summary>
+    <summary>Zkus sám: kolikrát stačí všechny hrany projít? Nápověda: vzpomeň na řetízek z&nbsp;úlohy <a href="l2-3.html#t-order">[L2.3] T01</a> — informace teče od startu po hranách.</summary>
     <div class="inner">
-      <p>V řetízku $1 \to 2 \to 3 \to 4$ s nejhorším pořadím hran posunul každý průchod „frontu poznání“ o jedinou hranu. To je obecný princip: po $k$-tém průchodu jsou určitě správně značky všech vrcholů, do nichž vede nejkratší cesta s <strong>nejvýše $k$ hranami</strong> (každý průchod prodlouží zvládnutý úsek každé nejkratší cesty aspoň o jednu hranu — může i o víc, podle pořadí).</p>
-      <p>A protože cesta v grafu s $n$ vrcholy má nejvýše $n-1$ hran <a href="l2-2.html#takeaways">[L2.2]</a>, stačí <strong>$n-1$ průchodů</strong>. <em>(Tohle je intuice; poctivý indukční důkaz — „věta o $k$-té iteraci“ — patří do <a href="../k3/l3-7.html">[L3.7] Korektnost Bellman-Forda</a>. Je to téma ústní zkoušky, žebříček důkazů #4.)</em></p>
+      <p>V&nbsp;řetízku $1 \to 2 \to 3 \to 4$ s&nbsp;nejhorším pořadím hran posunul každý průchod „frontu poznání“ o&nbsp;jedinou hranu. To je obecný princip: po $k$-tém průchodu jsou určitě správně značky všech vrcholů, do nichž vede nejkratší cesta s&nbsp;<strong>nejvýše $k$ hranami</strong> (každý průchod prodlouží zvládnutý úsek každé nejkratší cesty aspoň o&nbsp;jednu hranu — může i o&nbsp;víc, podle pořadí).</p>
+      <p>A protože cesta v&nbsp;grafu s&nbsp;$n$ vrcholy má nejvýše $n-1$ hran <a href="l2-2.html#takeaways">[L2.2]</a>, stačí <strong>$n-1$ průchodů</strong>. <em>(Tohle je intuice; poctivý indukční důkaz — „věta o&nbsp;$k$-té iteraci“ — patří do <a href="../k3/l3-7.html">[L3.7] Korektnost Bellman-Forda</a>. Je to téma ústní zkoušky, žebříček důkazů #4.)</em></p>
     </div>
   </details>
 
@@ -71,19 +71,19 @@ end</code></pre>
     <p><em>„If an iteration of the main loop terminates without making any changes, the algorithm can be terminated, as subsequent iterations will not make changes any more. The worst case of the algorithm remains unchanged.“</em> — tedy: jakmile celý průchod nic nezmění, jsme ve fixpointu <a href="l2-3.html#t-fixpoint">[L2.3]</a> a lze skončit dřív.</p>
   </div>
 
-  <p>Vnitřní <code>if</code> je znak po znaku stejná relaxace jako u Dijkstry — algoritmy se liší <em>jen pořadím</em>, přesně jak sliboval výhled v <a href="l2-3.html#takeaways">[L2.3]</a>. Všimni si také, že váhy jsou $c : E(G) \to \mathbb{R}$ — <strong>záporné hrany jsou povolené</strong>; zakázaný je jen záporný cyklus <a href="l2-1.html#takeaways">[L2.1]</a> (s ním nejkratší cesta ani neexistuje).</p>
+  <p>Vnitřní <code>if</code> je znak po znaku stejná relaxace jako u&nbsp;Dijkstry — algoritmy se liší <em>jen pořadím</em>, přesně jak sliboval výhled v&nbsp;<a href="l2-3.html#takeaways">[L2.3]</a>. Všimni si také, že váhy jsou $c : E(G) \to \mathbb{R}$ — <strong>záporné hrany jsou povolené</strong>; zakázaný je jen záporný cyklus <a href="l2-1.html#takeaways">[L2.1]</a> (s&nbsp;ním nejkratší cesta ani neexistuje).</p>
 
   <!-- ===== SEKCE 2 ===== -->
   <h2>Běh na příkladu</h2>
-  <p>Vezměme přesně ten graf, na kterém Dijkstra v <a href="l2-4.html#takeaways">[L2.4]</a> selhala ($s \to a$ za $1$, $s \to b$ za $2$, $b \to a$ za $-2$), rozšířený o vrchol $t$ (vlastní příklad). Hrany budeme v každém průchodu zpracovávat v pevném pořadí $(a,t), (s,a), (s,b), (b,a)$ — schválně nešikovném, ať je vidět, jak se značky opravují:</p>
+  <p>Vezměme přesně ten graf, na kterém Dijkstra v&nbsp;<a href="l2-4.html#takeaways">[L2.4]</a> selhala ($s \to a$ za $1$, $s \to b$ za $2$, $b \to a$ za $-2$), rozšířený o&nbsp;vrchol $t$ (vlastní příklad). Hrany budeme v&nbsp;každém průchodu zpracovávat v&nbsp;pevném pořadí $(a,t), (s,a), (s,b), (b,a)$ — schválně nešikovném, ať je vidět, jak se značky opravují:</p>
 
   <div class="viz" id="viz-run"></div>
 
   <details class="try">
     <summary>Zkus sám: Dijkstra na tomhle grafu odevzdala $l(a) = 1$. Kde přesně ji Bellman-Ford „opravil“ — a proč to směl udělat?</summary>
     <div class="inner">
-      <p>Hned v prvním průchodu: hrana $(s,a)$ dala $a$ značku $1$, ale o dva kroky později hrana $(b,a)$ našla $2 + (-2) = 0 &lt; 1$ a značku <strong>přepsala</strong>. Směl to udělat, protože Bellman-Ford žádnou značku neprohlašuje za trvalou — všechny jsou dočasné až do konce běhu. Tomu se říká <strong>label-correcting</strong> přístup (vs. label-setting Dijkstra, <a href="l2-4.html#takeaways">[L2.4]</a>).</p>
-      <p>Všimni si i druhé strany mince: hrana $(a,t)$ přišla v prvním průchodu „moc brzy“ ($l(a) = \infty$) a $t$ si na značku musel počkat na druhý průchod. Pořadí hran nemění výsledek, jen počet průchodů — na řetízku ze slidu 30 to je úloha <a href="l2-3.html#t-order">[L2.3] T01</a>: nejhorší pořadí 3 průchody, nejlepší 1.</p>
+      <p>Hned v&nbsp;prvním průchodu: hrana $(s,a)$ dala $a$ značku $1$, ale o&nbsp;dva kroky později hrana $(b,a)$ našla $2 + (-2) = 0 &lt; 1$ a značku <strong>přepsala</strong>. Směl to udělat, protože Bellman-Ford žádnou značku neprohlašuje za trvalou — všechny jsou dočasné až do konce běhu. Tomu se říká <strong>label-correcting</strong> přístup (vs. label-setting Dijkstra, <a href="l2-4.html#takeaways">[L2.4]</a>).</p>
+      <p>Všimni si i druhé strany mince: hrana $(a,t)$ přišla v&nbsp;prvním průchodu „moc brzy“ ($l(a) = \infty$) a $t$ si na značku musel počkat na druhý průchod. Pořadí hran nemění výsledek, jen počet průchodů — na řetízku ze slidu 30 to je úloha <a href="l2-3.html#t-order">[L2.3] T01</a>: nejhorší pořadí 3 průchody, nejlepší 1.</p>
     </div>
   </details>
 
@@ -91,40 +91,40 @@ end</code></pre>
   <h2>Detekce záporného cyklu</h2>
 
   <details class="try">
-    <summary>Zkus sám: vstupní specifikace říká „graph <em>without a negative cycle</em>“. Co se stane, když to porušíme a v grafu záporný cyklus dosažitelný z $s$ je?</summary>
+    <summary>Zkus sám: vstupní specifikace říká „graph <em>without a negative cycle</em>“. Co se stane, když to porušíme a v&nbsp;grafu záporný cyklus dosažitelný z&nbsp;$s$ je?</summary>
     <div class="inner">
-      <p>Algoritmus se <em>nezacyklí</em> — má pevně daných $n-1$ průchodů, takže skončí vždy. Ale značky na cyklu a za ním <strong>nikdy nedoklesají</strong>: každý oběh záporného cyklu sníží součet, takže fixpoint neexistuje (to je přesně mechanismus „sled levnější než cesta“ z <a href="l2-1.html#takeaways">[L2.1]</a>). I po $n-1$ průchodech tedy zbývají hrany, které by relaxace ještě zlepšila.</p>
-      <p>A to je celý detekční trik: <strong>bez záporného cyklu</strong> jsou po $n-1$ průchodech hotové všechny nejkratší cesty (mají $\le n-1$ hran), takže <em>žádná</em> hrana už relaxovat nejde. <strong>Jde-li nějaká hrana relaxovat i v $n$-tém průchodu, zlepšení nemůže pocházet z žádné cesty — v grafu musí být záporný cyklus.</strong></p>
+      <p>Algoritmus se <em>nezacyklí</em> — má pevně daných $n-1$ průchodů, takže skončí vždy. Ale značky na cyklu a za ním <strong>nikdy nedoklesají</strong>: každý oběh záporného cyklu sníží součet, takže fixpoint neexistuje (to je přesně mechanismus „sled levnější než cesta“ z&nbsp;<a href="l2-1.html#takeaways">[L2.1]</a>). I po $n-1$ průchodech tedy zbývají hrany, které by relaxace ještě zlepšila.</p>
+      <p>A to je celý detekční trik: <strong>bez záporného cyklu</strong> jsou po $n-1$ průchodech hotové všechny nejkratší cesty (mají $\le n-1$ hran), takže <em>žádná</em> hrana už relaxovat nejde. <strong>Jde-li nějaká hrana relaxovat i v&nbsp;$n$-tém průchodu, zlepšení nemůže pocházet z&nbsp;žádné cesty — v&nbsp;grafu musí být záporný cyklus.</strong></p>
     </div>
   </details>
 
   <div class="box">
     <div class="box-title">Detection of negative cycles — slide 34, 1:1</div>
-    <p>The Bellman-Ford algorithm <strong>can detect negative cycle</strong> that is reachable from vertex $s$ while checking triangular inequality for resulting $l$. There may be negative cycles not reachable from $s$, in such case we add node $s'$ and connect it to all nodes $v$ with $c(s', v) = 0$.</p>
+    <p>The Bellman-Ford algorithm <strong>can detect a negative cycle</strong> that is reachable from vertex $s$ while checking triangular inequality for resulting $l$. There may be negative cycles not reachable from $s$, in such case we add node $s'$ and connect it to all nodes $v$ with $c(s', v) = 0$.</p>
     <pre><code>for every edge of graph (v, t) ∈ E(G) do
     if l(t) &gt; l(v) + c(v, t) then
         error "Graph contains a negative-weight cycle"
     end
 end</code></pre>
-    <p>However there are better methods for negative cycle detection [Cherkassky&amp;Goldberg 1999].</p>
+    <p>However, there are better methods for negative cycle detection [Cherkassky&amp;Goldberg 1999].</p>
   </div>
 
   <details class="try">
-    <summary>Zkus sám: proč pomocný vrchol $s'$ s nulovými hranami do všech vrcholů nic nepokazí — nevytvoří sám nový cyklus?</summary>
+    <summary>Zkus sám: proč pomocný vrchol $s'$ s&nbsp;nulovými hranami do všech vrcholů nic nepokazí — nevytvoří sám nový cyklus?</summary>
     <div class="inner">
-      <p>Nevytvoří: do $s'$ <strong>žádná hrana nevede</strong>, takže $s'$ nemůže ležet na žádném cyklu — všechny cykly grafu (i jejich délky) zůstávají beze změny. Zato z $s'$ je nově dosažitelný <em>každý</em> vrchol (za cenu $0$), takže detekční běh z $s'$ uvidí každý záporný cyklus v grafu, ať se schovává kdekoliv.</p>
+      <p>Nevytvoří: do $s'$ <strong>žádná hrana nevede</strong>, takže $s'$ nemůže ležet na žádném cyklu — všechny cykly grafu (i jejich délky) zůstávají beze změny. Zato z&nbsp;$s'$ je nově dosažitelný <em>každý</em> vrchol (za cenu $0$), takže detekční běh z&nbsp;$s'$ uvidí každý záporný cyklus v&nbsp;grafu, ať se schovává kdekoliv.</p>
     </div>
   </details>
 
-  <p>Detekce v akci: do našeho grafu přidáme hranu $a \to b$ s váhou $1$ — vznikne cyklus $a \to b \to a$ s délkou $1 + (-2) = -1$. Pořadí hran $(a,t), (s,a), (s,b), (b,a), (a,b)$:</p>
+  <p>Detekce v&nbsp;akci: do našeho grafu přidáme hranu $a \to b$ s&nbsp;váhou $1$ — vznikne cyklus $a \to b \to a$ s&nbsp;délkou $1 + (-2) = -1$. Pořadí hran $(a,t), (s,a), (s,b), (b,a), (a,b)$:</p>
 
   <div class="viz" id="viz-cycle"></div>
 
-  <p>Detekce záporných cyklů není akademická hračka: vrátí se u min-cost flow v kapitole K4 (cycle canceling hledá záporný cyklus právě Bellman-Fordem) a celá zkoušková úloha na ošetření záporných cyklů čeká v <a href="l2-18.html">[L2.18]</a>.</p>
+  <p>Detekce záporných cyklů není akademická hračka: vrátí se u&nbsp;min-cost flow v&nbsp;kapitole K4 (cycle canceling hledá záporný cyklus právě Bellman-Fordem) a celá zkoušková úloha na ošetření záporných cyklů čeká v&nbsp;<a href="l2-18.html">[L2.18]</a>.</p>
 
   <!-- ===== SEKCE 4 ===== -->
   <h2>Label-correcting a složitost</h2>
-  <p>Slide 34 shrnuje: <em>„Best known algorithm for SPT without negative cycles.“</em> Časová složitost je $\mathcal{O}(nm)$ — vnější smyčka $n-1$ průchodů, každý projde všech $m$ hran. Srovnání s Dijkstrou <a href="l2-4.html#takeaways">[L2.4]</a>:</p>
+  <p>Slide 34 shrnuje: <em>„Best known algorithm for SPT without negative cycles.“</em> Časová složitost je $\mathcal{O}(nm)$ — vnější smyčka $n-1$ průchodů, každý projde všech $m$ hran. Srovnání s&nbsp;Dijkstrou <a href="l2-4.html#takeaways">[L2.4]</a>:</p>
 
   <table>
     <thead>
@@ -139,14 +139,14 @@ end</code></pre>
     </tbody>
   </table>
 
-  <p>Důkaz korektnosti (věta o $k$-té iteraci a její indukce, slidy 31–33) do téhle lekce schválně nepatří — probereme ho v <a href="../k3/l3-7.html">[L3.7] Korektnost Bellman-Forda</a>; u ústní zkoušky je to častý „dokažte“ kandidát (žebříček důkazů #4).</p>
+  <p>Důkaz korektnosti (věta o&nbsp;$k$-té iteraci a její indukce, slidy 31–33) do téhle lekce schválně nepatří — probereme ho v&nbsp;<a href="../k3/l3-7.html">[L3.7] Korektnost Bellman-Forda</a>; u&nbsp;ústní zkoušky je to častý „dokažte“ kandidát (žebříček důkazů #4).</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: čtyři polopravdy kolem Bellman-Forda</div>
     <ul>
-      <li><strong>„Detekce najde každý záporný cyklus.“</strong> Přímo jen cykly <em>dosažitelné z $s$</em>. Pro ostatní je potřeba trik ze slidu 34: pomocný vrchol $s'$ a hrany $c(s',v) = 0$ do všech vrcholů.</li>
-      <li><strong>„Nulový cyklus se taky chytí.“</strong> Nechytí — a je to správně. Test je <em>ostrá</em> nerovnost $l(t) &gt; l(v) + c(v,t)$: cyklus s délkou $0$ dá po doběhnutí jen rovnosti a nahlášen není (nejkratší cesta s ním existuje). Uvidíš to v úloze T01.</li>
-      <li><strong>„Hrana, na které detekce vystřelí, leží na záporném cyklu.“</strong> Nemusí! Porušená trojúhelníková nerovnost dokazuje <em>existenci</em> cyklu kdesi v grafu, nelokalizuje ho (v běhu níže vystřelí $(a,t)$, která na cyklu neleží).</li>
+      <li><strong>„Detekce najde každý záporný cyklus.“</strong> Přímo jen cykly <em>dosažitelné z&nbsp;$s$</em>. Pro ostatní je potřeba trik ze slidu 34: pomocný vrchol $s'$ a hrany $c(s',v) = 0$ do všech vrcholů.</li>
+      <li><strong>„Nulový cyklus se taky chytí.“</strong> Nechytí — a je to správně. Test je <em>ostrá</em> nerovnost $l(t) &gt; l(v) + c(v,t)$: cyklus s&nbsp;délkou $0$ dá po doběhnutí jen rovnosti a nahlášen není (nejkratší cesta s&nbsp;ním existuje). Uvidíš to v&nbsp;úloze T01.</li>
+      <li><strong>„Hrana, na které detekce vystřelí, leží na záporném cyklu.“</strong> Nemusí! Porušená trojúhelníková nerovnost dokazuje <em>existenci</em> cyklu kdesi v&nbsp;grafu, nelokalizuje ho (v&nbsp;běhu na detekci záporného cyklu výše vystřelí $(a,t)$, která na cyklu neleží).</li>
       <li><strong>„Se záporným cyklem se algoritmus zacyklí.“</strong> Ne — doběhne vždy ($n-1$ průchodů je pevných), jen vrátí nesmyslné $l$. Právě proto je detekční průchod navíc <em>nutný</em>, chceš-li výsledku věřit.</li>
     </ul>
   </div>
@@ -155,10 +155,10 @@ end</code></pre>
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L2.12</div>
     <ul>
-      <li><strong>Bellman-Ford = relaxuj <a href="l2-3.html#takeaways">[L2.3]</a> všechny hrany $(n-1)$-krát.</strong> Žádné uzavírání → zvládá záporné hrany (záporný cyklus zůstává zakázán <a href="l2-1.html#takeaways">[L2.1]</a>). Po $k$ průchodech jsou správně nejkratší cesty s $\le k$ hranami; průchod beze změny = fixpoint, lze skončit dřív.</li>
-      <li><strong>Detekce záporného cyklu:</strong> pokud v $n$-tém (kontrolním) průchodu jde ještě nějaká hrana relaxovat, graf obsahuje záporný cyklus dosažitelný z $s$. Cykly nedosažitelné z $s$: přidej $s'$ s hranami $c(s',v) = 0$ do všech vrcholů.</li>
+      <li><strong>Bellman-Ford = relaxuj <a href="l2-3.html#takeaways">[L2.3]</a> všechny hrany $(n-1)$-krát.</strong> Žádné uzavírání → zvládá záporné hrany (záporný cyklus zůstává zakázán <a href="l2-1.html#takeaways">[L2.1]</a>). Po $k$ průchodech jsou správně nejkratší cesty s&nbsp;$\le k$ hranami; průchod beze změny = fixpoint, lze skončit dřív.</li>
+      <li><strong>Detekce záporného cyklu:</strong> pokud v&nbsp;$n$-tém (kontrolním) průchodu jde ještě nějaká hrana relaxovat, graf obsahuje záporný cyklus dosažitelný z&nbsp;$s$. Cykly nedosažitelné z&nbsp;$s$: přidej $s'$ s&nbsp;hranami $c(s',v) = 0$ do všech vrcholů.</li>
       <li><strong>Label-correcting</strong> (všechny značky dočasné až do konce), složitost $\mathcal{O}(nm)$ — nejlepší známý algoritmus pro SPT se zápornými hranami; lepší metody existují jen pro samotnou detekci cyklů [Cherkassky&amp;Goldberg 1999].</li>
-      <li>Důkaz korektnosti (věta o $k$-té iteraci) → <a href="../k3/l3-7.html">[L3.7]</a>. <em>Téma ústní; žebříček důkazů #4.</em></li>
+      <li>Důkaz korektnosti (věta o&nbsp;$k$-té iteraci) → <a href="../k3/l3-7.html">[L3.7]</a>. <em>Téma ústní; žebříček důkazů #4.</em></li>
     </ul>
   </div>
 
@@ -167,11 +167,11 @@ end</code></pre>
     <div class="task-head">
       <span class="task-id">T01</span>
       <strong>Bellman-Ford Algorithm [1958] (Moore [1959]) — run on a given graph</strong>
-      <span class="task-src">zdroj: banka #19 (Unsolved, [P] Potential task from slides = slide 29); „given graph“ = příklad ze slidu 35 vč. pořadí zpracování hran — obrázek se v přepisu slidů nedochoval, instance je rekonstruovaná z textového popisu (orientace hran $D \to B$ a $D \to C$ odvozeny z pořadí hran výslovně uvedeného na slidu); řešení vlastní</span>
+      <span class="task-src">zdroj: banka #19 (Unsolved, [P] Potential task from slides — text zadání = slide 29, algoritmus); konkrétní instance „given graph“ = příklad ze slidu 35 vč. pořadí zpracování hran — obrázek se v přepisu slidů nedochoval, instance je rekonstruovaná z&nbsp;textového popisu (orientace hran $D \to B$ a $D \to C$ odvozeny z pořadí hran výslovně uvedeného na slidu); řešení vlastní</span>
     </div>
     <div class="task-body">
       <div class="assignment">
-        <span class="lbl">Assignment (original, EN — bank #19 / slide 29)</span>
+        <span class="lbl">Assignment (original, EN — text zadání = bank #19 / slide 29; graf = slide 35)</span>
         <p><strong>Input:</strong> directed graph $G$ without a negative cycle, weights $c : E(G) \to \mathbb{R}$ and node $s \in V(G)$.</p>
         <p><strong>Output:</strong> vectors $l$ and $p$. For all $v \in V(G)$, $l(v)$ is the length of the shortest path from $s$ and $p(v)$ is the last but one node. If $v$ is not reachable from $s$, then $l(v) = \infty$ and $p(v)$ is undefined.</p>
 <pre><code>l(s) := 0; l(v) := ∞ for v ≠ s;
@@ -189,24 +189,24 @@ end</code></pre>
 
       <div class="viz" id="viz-t01"></div>
 
-      <h4>a) Co je v zadání?</h4>
-      <p>Studijní úloha ze slidů: odsimulovat Bellman-Fordův běh na grafu o $n = 5$ vrcholech a vypsat všechny relaxace po průchodech (iteracích vnější smyčky). Pořadí zpracování hran je pevně dané — v každém průchodu se projde stejný seznam. Start je $A$.</p>
+      <h4>a) Co je v&nbsp;zadání?</h4>
+      <p>Studijní úloha ze slidů: odsimulovat Bellman-Fordův běh na grafu o&nbsp;$n = 5$ vrcholech a vypsat všechny relaxace po průchodech (iteracích vnější smyčky). Pořadí zpracování hran je pevně dané — v&nbsp;každém průchodu se projde stejný seznam. Start je $A$.</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — vnější smyčka $n-1$ průchodů, předčasné ukončení, detekční průchod.</li>
         <li><a href="l2-3.html#takeaways">[L2.3] Relaxace hrany</a> — relaxační krok, vektory $l$ a $p$, ostrá nerovnost.</li>
-        <li><a href="l2-3.html#t-order">[L2.3] T01</a> — proč pořadí hran rozhoduje o počtu průchodů.</li>
+        <li><a href="l2-3.html#t-order">[L2.3] T01</a> — proč pořadí hran rozhoduje o&nbsp;počtu průchodů.</li>
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Veď si tabulku $l$ a $p$ po průchodech. V každém průchodu projdi hrany <em>přesně v daném pořadí</em> a vždy počítej s <strong>čerstvými</strong> hodnotami — když se $l(v)$ zlepší uprostřed průchodu, další hrany už vidí novou hodnotu (tak může jeden průchod urazit i několik hran nejkratší cesty). Zapisuj jen hrany, které opravdu relaxovaly; hrany s $l(v) = \infty$ nic neudělají ($\infty + c$ nic nepodleze). Jakmile celý průchod nic nezmění, můžeš skončit — a na závěr přidej detekční průchod (tady musí vyjít „bez záporného cyklu“, pozor ale na rovnosti).</p>
+      <p>Veď si tabulku $l$ a $p$ po průchodech. V&nbsp;každém průchodu projdi hrany <em>přesně v&nbsp;daném pořadí</em> a vždy počítej s&nbsp;<strong>čerstvými</strong> hodnotami — když se $l(v)$ zlepší uprostřed průchodu, další hrany už vidí novou hodnotu (tak může jeden průchod urazit i několik hran nejkratší cesty). Zapisuj jen hrany, které opravdu relaxovaly; hrany s&nbsp;$l(v) = \infty$ nic neudělají ($\infty + c$ nic nepodleze). Jakmile celý průchod nic nezmění, můžeš skončit — a na závěr přidej detekční průchod (tady musí vyjít „bez záporného cyklu“, pozor ale na rovnosti).</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní — banka úlohu neřeší)</summary>
         <div class="inner">
-          <p>$n = 5$, hlavní smyčka má tedy nejvýše $4$ průchody. Hrany v pořadí $(B,E)\,2,\ (D,B)\,1,\ (B,D)\,2,\ (A,B)\,{-1},\ (A,C)\,4,\ (D,C)\,5,\ (B,C)\,3,\ (E,D)\,{-3}$.</p>
-          <p><strong>Průchod 1:</strong> $(B,E), (D,B), (B,D)$ nic — $l(B) = l(D) = \infty$. $(A,B)$: $l(B) := 0 + (-1) = -1$, $p(B) := A$. $(A,C)$: $l(C) := 0 + 4 = 4$, $p(C) := A$. $(D,C)$ nic. $(B,C)$: $4 &gt; -1 + 3 = 2$ → $l(C) := 2$, $p(C) := B$ (čerstvá hodnota $l(B)$ z téhož průchodu!). $(E,D)$ nic.</p>
+          <p>$n = 5$, hlavní smyčka má tedy nejvýše $4$ průchody. Hrany v&nbsp;pořadí $(B,E)\,2,\ (D,B)\,1,\ (B,D)\,2,\ (A,B)\,{-1},\ (A,C)\,4,\ (D,C)\,5,\ (B,C)\,3,\ (E,D)\,{-3}$.</p>
+          <p><strong>Průchod 1:</strong> $(B,E), (D,B), (B,D)$ nic — $l(B) = l(D) = \infty$. $(A,B)$: $l(B) := 0 + (-1) = -1$, $p(B) := A$. $(A,C)$: $l(C) := 0 + 4 = 4$, $p(C) := A$. $(D,C)$ nic. $(B,C)$: $4 &gt; -1 + 3 = 2$ → $l(C) := 2$, $p(C) := B$ (čerstvá hodnota $l(B)$ z téhož průchodu!). $(E,D)$ nic.</p>
           <p><strong>Průchod 2:</strong> $(B,E)$: $l(E) := -1 + 2 = 1$, $p(E) := B$. $(D,B)$ nic. $(B,D)$: $l(D) := -1 + 2 = 1$, $p(D) := B$. $(A,B), (A,C)$ nic. $(D,C)$: $1 + 5 = 6 &gt; 2$ nic. $(B,C)$: $2 = 2$ — <em>rovnost nerelaxuje</em> (ostrý test). $(E,D)$: $1 &gt; 1 + (-3) = -2$ → $l(D) := -2$, $p(D) := E$.</p>
           <p><strong>Průchod 3:</strong> žádná hrana nerelaxuje → fixpoint, algoritmus lze ukončit (průchod 4 už není potřeba).</p>
           <table>
@@ -218,9 +218,9 @@ end</code></pre>
               <tr><td>3 (beze změny → stop)</td><td>$0$</td><td>$-1$</td><td>$2$</td><td>$-2$</td><td>$1$</td></tr>
             </tbody>
           </table>
-          <p>Výsledek: $l = (0, -1, 2, -2, 1)$, $p = (-,\ A,\ B,\ E,\ B)$. Strom nejkratších cest (SPT): hrany $A \to B$, $B \to C$, $B \to E$, $E \to D$ — např. do $D$ vede $A \to B \to E \to D$ s délkou $-1 + 2 - 3 = -2$.</p>
-          <p><strong>Detekční průchod:</strong> žádná hrana nerelaxuje → graf neobsahuje záporný cyklus dosažitelný z $A$. Stojí za pohled, jak těsné to je: na hranách $(B,E)$, $(E,D)$ a $(D,B)$ vyjdou <em>rovnosti</em> ($-1+2 = 1 = l(E)$, $1-3 = -2 = l(D)$, $-2+1 = -1 = l(B)$) — cyklus $B \to E \to D \to B$ má totiž délku $2 - 3 + 1 = 0$. Nulový cyklus není záporný a ostrý test ho správně nehlásí.</p>
-          <p><em>Poznámka k počtu průchodů:</em> s tímto pořadím hran stačily 2 „pracovní“ průchody + 1 ověřovací; horní mez $n - 1 = 4$ by si vynutilo až nejhorší pořadí (srov. řetízek v <a href="l2-3.html#t-order">[L2.3] T01</a>).</p>
+          <p>Výsledek: $l = (0, -1, 2, -2, 1)$, $p = (-,\ A,\ B,\ E,\ B)$. Strom nejkratších cest (SPT): hrany $A \to B$, $B \to C$, $B \to E$, $E \to D$ — např. do $D$ vede $A \to B \to E \to D$ s&nbsp;délkou $-1 + 2 - 3 = -2$.</p>
+          <p><strong>Detekční průchod:</strong> žádná hrana nerelaxuje → graf neobsahuje záporný cyklus dosažitelný z&nbsp;$A$. Stojí za pohled, jak těsné to je: na hranách $(B,E)$, $(E,D)$ a $(D,B)$ vyjdou <em>rovnosti</em> ($-1+2 = 1 = l(E)$, $1-3 = -2 = l(D)$, $-2+1 = -1 = l(B)$) — cyklus $B \to E \to D \to B$ má totiž délku $2 - 3 + 1 = 0$. Nulový cyklus není záporný a ostrý test ho správně nehlásí.</p>
+          <p><em>Poznámka k&nbsp;počtu průchodů:</em> s&nbsp;tímto pořadím hran stačily 2 „pracovní“ průchody + 1 ověřovací; horní mez $n - 1 = 4$ by si vynutilo až nejhorší pořadí (srov. řetízek v&nbsp;<a href="l2-3.html#t-order">[L2.3] T01</a>).</p>
         </div>
       </details>
     </div>
@@ -235,7 +235,7 @@ end</code></pre>
 
   <div class="pager">
     <a href="../k2/l2-11.html"><span class="dir">← Předchozí</span> L2.11 · Časově expandovaná síť (constrained SP)</a>
-    <a class="next" href="../k2/l2-13.html"><span class="dir">Další →</span> L2.13 · SP v DAG v O(V+E)</a>
+    <a class="next" href="../k2/l2-13.html"><span class="dir">Další →</span> L2.13 · SP v&nbsp;DAG v&nbsp;O(V+E)</a>
   </div>
 
 </div>
@@ -244,7 +244,7 @@ end</code></pre>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <script src="../assets/js/viz.js"></script>
 <script>
-// ---- Stepper 1: Bellman-Ford na grafu z protipříkladu L2.4 + vrchol t ----
+// ---- Stepper 1: Bellman-Ford na grafu z protipříkladu L2.4 + vrchol t ----
 const G1 = {
   directed: true, w: 640, h: 360, nodeR: 20,
   nodes: [
@@ -266,7 +266,7 @@ KOViz.stepper(document.getElementById('viz-run'), {
     {
       nodes: { s: 'hl' },
       subs: { s: 'l=0', a: 'l=∞', b: 'l=∞', t: 'l=∞' },
-      desc: 'Inicializace <a href="l2-3.html#takeaways">[L2.3]</a>: l(s)=0, ostatní ∞. Žádná množina R, žádné uzavírání — poběžíme nejvýše n−1 = 3 průchody přes všechny hrany v pořadí (a,t), (s,a), (s,b), (b,a).',
+      desc: 'Inicializace <a href="l2-3.html#takeaways">[L2.3]</a>: l(s)=0, ostatní ∞. Žádná množina R, žádné uzavírání — poběžíme nejvýše n−1 = 3 průchody přes všechny hrany v pořadí (a,t), (s,a), (s,b), (b,a).',
     },
     {
       nodes: { s: 'hl', a: 'hl', b: 'hl' },
@@ -278,22 +278,22 @@ KOViz.stepper(document.getElementById('viz-run'), {
       nodes: { s: 'hl', a: 'hl', b: 'hl' },
       edges: { 's->b': 'hl', 'b->a': 'hl', 's->a': 'dim' },
       subs: { s: 'l=0', a: 'l=0', b: 'l=2', t: 'l=∞' },
-      desc: 'Průchod 1, poslední hrana (b,a): 1 &gt; 2 + (−2) = 0 → l(a) ← 0, p(a)=b. Značka a se OPRAVILA — používáme čerstvé l(b) z téhož průchodu a nic není „uzavřené“. Přesně tady Dijkstra [L2.4] odevzdala špatnou jedničku.',
+      desc: 'Průchod 1, poslední hrana (b,a): 1 &gt; 2 + (−2) = 0 → l(a) ← 0, p(a)=b. Značka a se OPRAVILA — používáme čerstvé l(b) z téhož průchodu a nic není „uzavřené“. Přesně tady Dijkstra [L2.4] odevzdala špatnou jedničku.',
     },
     {
       nodes: { s: 'hl', a: 'hl', b: 'hl', t: 'hl' },
       edges: { 'a->t': 'hl' },
       subs: { s: 'l=0', a: 'l=0', b: 'l=2', t: 'l=2' },
-      desc: 'Průchod 2: (a,t): l(t) ← 0+2 = 2, p(t)=a — t si na hranu (a,t) musel počkat, v prvním průchodu přišla „moc brzy“. Zbylé hrany: (s,a) 0+1=1 &gt; 0 nic, (s,b) nic, (b,a) 2−2 = 0 = l(a) — rovnost nerelaxuje (ostrý test).',
+      desc: 'Průchod 2: (a,t): l(t) ← 0+2 = 2, p(t)=a — t si na hranu (a,t) musel počkat, v prvním průchodu přišla „moc brzy“. Zbylé hrany: (s,a) 0+1=1 &gt; 0 nic, (s,b) nic, (b,a) 2−2 = 0 = l(a) — rovnost nerelaxuje (ostrý test).',
     },
     {
       nodes: { s: 'good', a: 'good', b: 'good', t: 'good' },
       edges: { 's->b': 'good', 'b->a': 'good', 'a->t': 'good', 's->a': 'dim' },
       subs: { s: 'l=0', a: 'l=0', b: 'l=2', t: 'l=2' },
-      desc: 'Průchod 3: žádná hrana nerelaxuje → fixpoint, konec (předčasné ukončení dle slidu 29; horní mez n−1 = 3 jsme ani nepotřebovali celou). Výsledek l = (0, 0, 2, 2), p = (−, b, s, a); zeleně strom nejkratších cest: s→b→a→t. Průchod beze změny je zároveň důkaz, že záporný cyklus dosažitelný z s neexistuje — hned se k tomu vrátíme.',
+      desc: 'Průchod 3: žádná hrana nerelaxuje → fixpoint, konec (předčasné ukončení dle slidu 29; horní mez n−1 = 3 jsme ani nepotřebovali celou). Výsledek l = (0, 0, 2, 2), p = (−, b, s, a); zeleně strom nejkratších cest: s→b→a→t. Průchod beze změny je zároveň důkaz, že záporný cyklus dosažitelný z s neexistuje — hned se k tomu vrátíme.',
     },
   ],
-  caption: 'Bellman-Fordův běh na grafu, kde Dijkstra [L2.4] selhala (rozšířeno o vrchol t; vlastní příklad). Pořadí hran (a,t), (s,a), (s,b), (b,a) je schválně nešikovné — ukazuje opravu značky uvnitř průchodu i čekání t na druhý průchod.',
+  caption: 'Bellman-Fordův běh na grafu, kde Dijkstra [L2.4] selhala (rozšířeno o vrchol t; vlastní příklad). Pořadí hran (a,t), (s,a), (s,b), (b,a) je schválně nešikovné — ukazuje opravu značky uvnitř průchodu i čekání t na druhý průchod.',
 });
 
 // ---- Stepper 2: detekce záporného cyklu (přidána hrana a→b, cyklus a→b→a = −1) ----
@@ -320,7 +320,7 @@ KOViz.stepper(document.getElementById('viz-cycle'), {
       nodes: { s: 'hl' },
       edges: { 'b->a': 'bad', 'a->b': 'bad' },
       subs: { s: 'l=0', a: 'l=∞', b: 'l=∞', t: 'l=∞' },
-      desc: 'Tentýž graf + hrana a→b s váhou 1: cyklus a→b→a má délku 1 + (−2) = −1 (červeně). Vstupní podmínku „without a negative cycle“ jsme porušili — pusťme algoritmus naslepo: n−1 = 3 průchody, pořadí (a,t), (s,a), (s,b), (b,a), (a,b).',
+      desc: 'Tentýž graf + hrana a→b s váhou 1: cyklus a→b→a má délku 1 + (−2) = −1 (červeně). Vstupní podmínku „without a negative cycle“ jsme porušili — pusťme algoritmus naslepo: n−1 = 3 průchody, pořadí (a,t), (s,a), (s,b), (b,a), (a,b).',
     },
     {
       nodes: { s: 'hl', a: 'hl', b: 'hl' },
@@ -332,7 +332,7 @@ KOViz.stepper(document.getElementById('viz-cycle'), {
       nodes: { s: 'hl', a: 'hl', b: 'hl', t: 'hl' },
       edges: { 'a->t': 'hl', 'b->a': 'hl', 'a->b': 'hl' },
       subs: { s: 'l=0', a: 'l=−1', b: 'l=0', t: 'l=2' },
-      desc: 'Průchod 2: (a,t) → l(t)=2; (b,a): 1−2=−1 → l(a)=−1; (a,b): −1+1=0 → l(b)=0. Každý oběh cyklu (délka −1) srazí obě značky o 1 — fixpoint neexistuje.',
+      desc: 'Průchod 2: (a,t) → l(t)=2; (b,a): 1−2=−1 → l(a)=−1; (a,b): −1+1=0 → l(b)=0. Každý oběh cyklu (délka −1) srazí obě značky o 1 — fixpoint neexistuje.',
     },
     {
       nodes: { s: 'hl', a: 'bad', b: 'bad', t: 'hl' },
@@ -347,7 +347,7 @@ KOViz.stepper(document.getElementById('viz-cycle'), {
       desc: 'Detekční (n-tý) průchod: hned první hrana (a,t) dává l(t) = 1 &gt; l(a) + 2 = 0 → error „Graph contains a negative-weight cycle“. Všimni si: (a,t) sama na cyklu NELEŽÍ — porušená trojúhelníková nerovnost dokazuje existenci cyklu, nelokalizuje ho.',
     },
   ],
-  caption: 'Detekce záporného cyklu (vlastní příklad: graf z běhu výše + hrana a→b za 1, cyklus a→b→a délky −1). Po n−1 průchodech jde stále relaxovat → graf obsahuje záporný cyklus dosažitelný z s.',
+  caption: 'Detekce záporného cyklu (vlastní příklad: graf z běhu výše + hrana a→b za 1, cyklus a→b→a délky −1). Po n−1 průchodech jde stále relaxovat → graf obsahuje záporný cyklus dosažitelný z s.',
 });
 
 // ---- T01: statický graf zadání (rekonstrukce slidu 35) ----
@@ -372,7 +372,7 @@ const T01G = {
   ],
 };
 KOViz.graph(document.getElementById('viz-t01'), Object.assign({}, T01G, {
-  caption: 'Given graph (rekonstrukce příkladu ze slidu 35; obrázek se v přepisu nedochoval, orientace hran D→B a D→C plynou z pořadí zpracování hran uvedeného na slidu). Start A; pořadí hran (B,E), (D,B), (B,D), (A,B), (A,C), (D,C), (B,C), (E,D).',
+  caption: 'Given graph (rekonstrukce příkladu ze slidu 35; obrázek se v přepisu nedochoval, orientace hran D→B a D→C plynou z pořadí zpracování hran uvedeného na slidu). Start A; pořadí hran (B,E), (D,B), (B,D), (A,B), (A,C), (D,C), (B,C), (E,D).',
 }));
 
 // ---- T01: stepper řešení (za details.solution kvůli getBBox) ----
@@ -382,19 +382,19 @@ KOViz.stepper(document.getElementById('viz-t01run'), {
     {
       nodes: { A: 'hl' },
       subs: { A: 'l=0', B: 'l=∞', C: 'l=∞', D: 'l=∞', E: 'l=∞' },
-      desc: 'Inicializace: l(A)=0, ostatní ∞. n = 5 → nejvýše 4 průchody přes hrany v pořadí (B,E), (D,B), (B,D), (A,B), (A,C), (D,C), (B,C), (E,D).',
+      desc: 'Inicializace: l(A)=0, ostatní ∞. n = 5 → nejvýše 4 průchody přes hrany v pořadí (B,E), (D,B), (B,D), (A,B), (A,C), (D,C), (B,C), (E,D).',
     },
     {
       nodes: { A: 'hl', B: 'hl', C: 'hl' },
       edges: { 'A->B': 'hl', 'A->C': 'dim', 'B->C': 'hl' },
       subs: { A: 'l=0', B: 'l=−1', C: 'l=2', D: 'l=∞', E: 'l=∞' },
-      desc: 'Průchod 1: (B,E), (D,B), (B,D) nic (∞). (A,B): l(B) ← −1, p(B)=A. (A,C): l(C) ← 4, p(C)=A. (D,C) nic. (B,C): 4 &gt; −1+3 = 2 → l(C) ← 2, p(C)=B — čerstvá hodnota l(B) z téhož průchodu, přímá hrana A→C (šedě) právě prohrála. (E,D) nic.',
+      desc: 'Průchod 1: (B,E), (D,B), (B,D) nic (∞). (A,B): l(B) ← −1, p(B)=A. (A,C): l(C) ← 4, p(C)=A. (D,C) nic. (B,C): 4 &gt; −1+3 = 2 → l(C) ← 2, p(C)=B — čerstvá hodnota l(B) z téhož průchodu, přímá hrana A→C (šedě) právě prohrála. (E,D) nic.',
     },
     {
       nodes: { A: 'hl', B: 'hl', C: 'hl', D: 'hl', E: 'hl' },
       edges: { 'A->B': 'hl', 'B->C': 'hl', 'B->E': 'hl', 'B->D': 'dim', 'E->D': 'hl' },
       subs: { A: 'l=0', B: 'l=−1', C: 'l=2', D: 'l=−2', E: 'l=1' },
-      desc: 'Průchod 2: (B,E): l(E) ← −1+2 = 1, p(E)=B. (D,B) nic. (B,D): l(D) ← −1+2 = 1, p(D)=B. (A,B), (A,C), (D,C) nic. (B,C): 2 = 2 — rovnost nerelaxuje. (E,D): 1 &gt; 1−3 = −2 → l(D) ← −2, p(D)=E (přímá hrana B→D šedě prohrála ještě v témže průchodu).',
+      desc: 'Průchod 2: (B,E): l(E) ← −1+2 = 1, p(E)=B. (D,B) nic. (B,D): l(D) ← −1+2 = 1, p(D)=B. (A,B), (A,C), (D,C) nic. (B,C): 2 = 2 — rovnost nerelaxuje. (E,D): 1 &gt; 1−3 = −2 → l(D) ← −2, p(D)=E (přímá hrana B→D šedě prohrála ještě v témže průchodu).',
     },
     {
       nodes: { A: 'good', B: 'good', C: 'good', D: 'good', E: 'good' },
@@ -406,10 +406,10 @@ KOViz.stepper(document.getElementById('viz-t01run'), {
       nodes: { A: 'good', B: 'good', C: 'good', D: 'good', E: 'good' },
       edges: { 'A->B': 'good', 'B->C': 'good', 'B->E': 'good', 'E->D': 'good', 'D->B': 'hl' },
       subs: { A: 'l=0', B: 'l=−1', C: 'l=2', D: 'l=−2', E: 'l=1' },
-      desc: 'Detekční průchod: nic nerelaxuje → bez záporného cyklu dosažitelného z A. Těsné rovnosti na (B,E), (E,D) a (D,B): cyklus B→E→D→B má délku 2−3+1 = 0 — nulový cyklus není záporný a ostrý test ho správně nehlásí.',
+      desc: 'Detekční průchod: nic nerelaxuje → bez záporného cyklu dosažitelného z A. Těsné rovnosti na (B,E), (E,D) a (D,B): cyklus B→E→D→B má délku 2−3+1 = 0 — nulový cyklus není záporný a ostrý test ho správně nehlásí.',
     },
   ],
-  caption: 'Běh řešení T01 (rekonstrukce slidu 35): 2 pracovní průchody, 1 ověřovací, detekce mlčí — v grafu je jen nulový cyklus B→E→D→B.',
+  caption: 'Běh řešení T01 (rekonstrukce slidu 35): 2 pracovní průchody, 1 ověřovací, detekce mlčí — v grafu je jen nulový cyklus B→E→D→B.',
 });
 </script>
 <script src="../assets/js/app.js"></script>
