@@ -51,16 +51,18 @@
   </details>
 
   <div class="box info">
-    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 38 (EN 1:1) — Scheduling on Parallel Identical Resources, Minimizing $C_{max}$ (výběr)</div>
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 38 (EN 1:1) — Scheduling on Parallel Identical Resources, Minimizing $C_{max}$</div>
     <ul>
       <li>“$P2 \,||\, C_{\max}$ — <strong>NP-hard</strong> … the problem is NP-hard because the <strong>2 partition problem</strong> (see ILP lecture) can be reduced to $P2 \,||\, C_{\max}$ while comparing the optimal $C_{\max}$ with the threshold of $0.5 \cdot \sum_{i \in 1..n} p_i$.”</li>
       <li>“$P \,|\, \mathrm{pmtn} \,|\, C_{\max}$ — <strong>easy</strong>: can be solved by the <strong>McNaughton algorithm</strong> in $\mathcal{O}(n)$.”</li>
       <li>“$P \,|\, \mathrm{pmtn}, r_j, \tilde{d}_j \,|\, -$ — <strong>easy</strong>: decision version of <strong>maximum flow problem</strong> (see the lecture on Flows).”</li>
+      <li>“$P \,|\, \mathrm{prec} \,|\, C_{\max}$ — <strong>NP-hard</strong>: <strong>LS</strong> — approximation algorithm with factor $r_{LS} = 2 - \frac{1}{R}$.”</li>
+      <li>“$P \,||\, C_{\max}$ — <strong>NP-hard</strong>: <strong>LPT</strong> — approximation algorithm with factor $r_{LPT} = \frac{4}{3} - \frac{1}{3R}$; <strong>dynamic programming</strong> — Rothkopf's pseudopolynomial algorithm.”</li>
       <li>“$P \,|\, \mathrm{pmtn}, \mathrm{prec} \,|\, C_{\max}$ — <strong>NP-hard</strong>: <strong>Muntz&amp;Coffman's level algorithm</strong> with factor $r_{MC} = 2 - \frac{2}{R}$.”</li>
     </ul>
   </div>
 
-  <p>Mapu si zapamatuj: preempce sama o sobě dělá z $C_{max}$ na identických strojích <em>snadný</em> problém (dnešní lekce); preempce + časová okna $r_j, \tilde{d}_j$ = toky <a href="../k5/l5-0.html">[L5.0]</a>; jakmile ale přibudou precedence, je to zase NP-hard a McNaughton přežívá jen jako podprogram aproximačního Muntze&amp;Coffmana <a href="../k5/l5-10.html">[L5.10]</a>. Nepreemptivní $P\,||\,C_{max}$ řeší DP Rothkopf <a href="../k5/l5-11.html">[L5.11]</a> (pseudopolynomiálně) a aproximačně list scheduling / LPT <a href="../k5/l5-12.html">[L5.12]</a>.</p>
+  <p>Mapu si zapamatuj: preempce sama o sobě dělá z $C_{max}$ na identických strojích <em>snadný</em> problém (dnešní lekce); preempce + časová okna $r_j, \tilde{d}_j$ = toky <a href="../k5/l5-0.html">[L5.0]</a>; jakmile ale přibudou precedence, je to zase NP-hard a McNaughton přežívá jen jako podprogram aproximačního Muntze&amp;Coffmana <a href="../k5/l5-10.html">[L5.10]</a>. Nepreemptivní $P\,||\,C_{max}$ (bez precedencí) řeší DP Rothkopf <a href="../k5/l5-11.html">[L5.11]</a> (pseudopolynomiálně) a aproximačně LPT <a href="../k5/l5-12.html">[L5.12]</a>; list scheduling (LS) je naproti tomu aproximace pro precedenční variantu $P\,|\,\mathrm{prec}\,|\,C_{max}$.</p>
 
   <!-- ===== SEKCE 2: DOLNI MEZ ===== -->
   <h2>Jak rychle to vůbec může být hotovo?</h2>
