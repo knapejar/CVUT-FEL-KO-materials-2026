@@ -36,7 +36,7 @@
     <strong>Pořadové proměnné</strong> $x_{ij} = 1 \iff T_i$ běží před $T_j$: rozvrh na jednom stroji je permutace a tu zakóduješ antisymetrií $x_{ij} + x_{ji} = 1$, zákazem cyklů přes trojice a precedencí $x_{ij} \ge e_{ij}$ — a completion time pak <em>není</em> $p_j$, ale $C_j = \sum_i p_i\,x_{ij}$.
   </div>
 
-  <p>Tohle je doložená zkoušková otázka: na zkoušce 9.&nbsp;7.&nbsp;2021 padla i s b) částí o B&amp;B (přepis ručního řešení se dochoval — včetně chyby, kterou za chvíli uvidíš červeně opravenou) a na zkoušce 29.&nbsp;6.&nbsp;2023 zněla otázka 6 doslova: <em>„SCHED — ILP formulace pro $1|prec|\sum w_j C_j$, rict jak se LP relaxace toho ILP da pouzit pri branch and bound algoritmu.“</em> Dnes postavíme tu ILP formulaci (slidy 24–25); LP relaxace + B&amp;B (slide 26) je příští lekce <a href="../k5/l5-6b.html">[L5.6b] LP relaxace jako dolní mez v B&amp;B</a>, která použije stroj z <a href="../k5/l5-5.html#takeaways">[L5.5] Branch &amp; Bound pro ILP</a>.</p>
+  <p>Tohle je doložená zkoušková otázka: na zkoušce 9.&nbsp;7.&nbsp;2021 padla i s b) částí o B&amp;B; dochoval se přepis ručního řešení části a) včetně chyby ve vyjádření $C_j$, kterou za chvíli uvidíš červeně opravenou. Na zkoušce 29.&nbsp;6.&nbsp;2023 zněla otázka 6 doslova: <em>„SCHED — ILP formulace pro $1|prec|\sum w_j C_j$, rict jak se LP relaxace toho ILP da pouzit pri branch and bound algoritmu.“</em> Dnes postavíme tu ILP formulaci (slidy 24–25); LP relaxace + B&amp;B (slide 26) je příští lekce <a href="../k5/l5-6b.html">[L5.6b] LP relaxace jako dolní mez v B&amp;B</a>, která použije stroj z <a href="../k5/l5-5.html#takeaways">[L5.5] Branch &amp; Bound pro ILP</a>.</p>
 
   <!-- ===== SEKCE 1: PROC VUBEC ILP ===== -->
   <h2>Proč na to potřebujeme ILP?</h2>
@@ -49,7 +49,7 @@
   </details>
 
   <div class="box info">
-    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 23 (EN 1:1) — Scheduling on One Resource — Minimizing $\sum w_j C_j$</div>
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 23 (EN 1:1, výběr relevantních řádků) — Scheduling on One Resource — Minimizing $\sum w_j C_j$</div>
     <ul>
       <li>“$1 \,||\, \sum C_j$ — <strong>easy</strong> — <strong>SPT rule</strong> (Shortest Processing Time first) — schedule the tasks in a non-decreasing order of $p_j$”</li>
       <li>“$1 \,||\, \sum w_j C_j$ — <strong>easy</strong> — <strong>Weighted SPT</strong> — schedule the tasks in a non-decreasing order of $\frac{p_j}{w_j}$”</li>
@@ -193,7 +193,7 @@
     <div class="task-head">
       <span class="task-id">T01</span>
       <strong>Scheduling on One Resource — Minimizing $\sum w_j C_j$ (ILP formulace)</strong>
-      <span class="task-src">zdroj: zkouška 9. 7. 2021 (přepis, zadání EN 1:1); táž otázka zkouška 29. 6. 2023</span>
+      <span class="task-src">zdroj: zkouška 9.&nbsp;7.&nbsp;2021 (přepis, zadání EN 1:1); táž otázka zkouška 29.&nbsp;6.&nbsp;2023</span>
     </div>
     <div class="task-body">
       <div class="assignment">
