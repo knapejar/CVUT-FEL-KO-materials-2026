@@ -36,7 +36,7 @@
     <strong>Lokální vylepšování okruhu výměnou $k$ hran</strong> (slidy 28–31): vyhoď $k$ hran Hamiltonovského okruhu, zkus všechny rekonstrukce, přijmi zlepšení a opakuj — heuristika <em>bez</em> záruky faktoru.
   </div>
 
-  <p>Poslední lekce K3 — a tečka za TSP. Z <a href="l3-1.html#takeaways">[L3.1]</a> víš, že <strong>nearest neighbor</strong> okruh sice vyrobí, ale nic neslibuje (heuristika). Z <a href="l3-9.html#takeaways">[L3.9]</a> a <a href="l3-10.html#takeaways">[L3.10]</a> máš aproximace s faktory 2 a 3/2 pro metrický TSP <a href="l3-8a.html#takeaways">[L3.8a]</a>. Dnešní otázka je jiná: <em>okruh už nějaký mám — jde levně vylepšit?</em> Slide 28 odpovídá principem, kterému se říká <strong>local search</strong> (lokální prohledávání), a jeho TSP instancí je algoritmus <strong>$k$-OPT</strong> — podle slidu „one of the most successful techniques for TSP instances in practice“.</p>
+  <p>Poslední lekce K3 — a tečka za TSP. Z&nbsp;<a href="l3-1.html#takeaways">[L3.1]</a> víš, že <strong>nearest neighbor</strong> okruh sice vyrobí, ale nic neslibuje (heuristika). Z&nbsp;<a href="l3-9.html#takeaways">[L3.9]</a> a <a href="l3-10.html#takeaways">[L3.10]</a> máš aproximace s&nbsp;faktory 2 a 3/2 pro metrický TSP <a href="l3-8a.html#takeaways">[L3.8a]</a>. Dnešní otázka je jiná: <em>okruh už nějaký mám — jde levně vylepšit?</em> Slide 28 odpovídá principem, kterému se říká <strong>local search</strong> (lokální prohledávání), a jeho TSP instancí je algoritmus <strong>$k$-OPT</strong> — podle slidu „one of the most successful techniques for TSP instances in practice“.</p>
 
   <!-- ===== SEKCE 1: PRINCIP ===== -->
   <h2>Local search: dvě rozhodnutí (slide 28)</h2>
@@ -77,7 +77,7 @@
   <p>Vnější smyčka vybírá, <strong>kterých $k$ hran okruhu se zbavit</strong>; vnitřní smyčka zkouší <strong>všechny okruhy $H' \ne H$, které zbylé hrany $E(H)\setminus S$ obsahují</strong> (tj. doplňují je nějakými novými hranami). Jakmile nějaký $H'$ vyjde ostře levněji, stane se novým $H$ a vše začíná znovu od kroku 2 — s novou rodinou $\mathcal{S}$, protože okruh (a tedy jeho hrany) se změnil.</p>
 
   <details class="try">
-    <summary>Zkus sám: vezmi Hamiltonovský okruh a vyhoď z něj 2 hrany, které spolu nesousedí (nesdílí vrchol). Co zbyde? A kolika způsoby to jde spojit zpátky do <em>jiného</em> Hamiltonovského okruhu?</summary>
+    <summary>Zkus sám: vezmi Hamiltonovský okruh a vyhoď z&nbsp;něj 2 hrany, které spolu nesousedí (nesdílí vrchol). Co zbyde? A kolika způsoby to jde spojit zpátky do <em>jiného</em> Hamiltonovského okruhu?</summary>
     <div class="inner">
       <p>Zbydou <strong>dvě cesty</strong> (okruh je kružnice — dva řezy ji rozpadnou na dva oblouky). Každá cesta má dva konce; nový okruh musí konce pospojovat dvěma hranami „křížem“. Možnosti jsou jen dvě: buď vrátíš původní dvě hrany (to je zase $H$ — zakázáno podmínkou $H' \ne H$), nebo je zapojíš <strong>jediným zbývajícím způsobem</strong>. Přesně to říká poznámka slidu 29: pro $k = 2$ proběhne vnitřní smyčka jen jednou.</p>
       <p>(A když vyhodíš dvě hrany, které <em>sousedí</em>? Zbyde osamocený vrchol + jedna cesta — osamocený vrchol jde zapojit jen tak, jak byl, takže jediná rekonstrukce je $H$ samo a vnitřní smyčka neproběhne ani jednou. Vlastní pozorování — slide tenhle případ nerozepisuje.)</p>
@@ -90,11 +90,11 @@
   <h2>2-opt: zisk výměny (slide 30)</h2>
 
   <details class="try">
-    <summary>Zkus sám: při 2-opt výměně se z celého okruhu změní jen 4 hrany — dvě odstraněné $(a,b), (c,d)$ a dvě vložené $(a,d), (b,c)$. Napiš, o kolik se změní cena okruhu.</summary>
+    <summary>Zkus sám: při 2-opt výměně se z&nbsp;celého okruhu změní jen 4 hrany — dvě odstraněné $(a,b), (c,d)$ a dvě vložené $(a,d), (b,c)$. Napiš, o&nbsp;kolik se změní cena okruhu.</summary>
     <div class="inner">
       <p>Všechny ostatní hrany zůstávají, takže rozdíl je jen
       $$c(E(H')) - c(E(H)) = c(a,d) + c(b,c) - c(c,d) - c(a,b).$$
-      Je-li záporný, výměna se vyplatí. Vyhodnocení jedné výměny je tedy $\mathcal{O}(1)$ — proto je 2-opt v praxi tak laciný.</p>
+      Je-li záporný, výměna se vyplatí. Vyhodnocení jedné výměny je tedy $\mathcal{O}(1)$ — proto je 2-opt v&nbsp;praxi tak laciný.</p>
     </div>
   </details>
 
@@ -108,12 +108,12 @@
     </ul>
   </div>
 
-  <p>Drobnost, která u písemky dělá dobrý dojem: po 2-opt výměně se jeden z oblouků projíždí <strong>v opačném směru</strong> („path $(b,\ldots,d)$ has changed orientation“). U symetrického TSP je to jedno ($c$ nezávisí na směru), u asymetrického by se cena oblouku přepočítávala celá — proto se 2-opt v této podobě používá pro symetrické instance.</p>
+  <p>Drobnost, která u písemky dělá dobrý dojem: po 2-opt výměně se jeden z&nbsp;oblouků projíždí <strong>v&nbsp;opačném směru</strong> („path $(b,\ldots,d)$ has changed orientation“). U symetrického TSP je to jedno ($c$ nezávisí na směru), u asymetrického by se cena oblouku přepočítávala celá — proto se 2-opt v&nbsp;této podobě používá pro symetrické instance.</p>
 
   <!-- ===== SEKCE 4: BĚH ===== -->
   <h2>Běh 2-OPT na známé instanci</h2>
 
-  <p>Vezmi metrickou $K_5$ z <a href="l3-8a.html#takeaways">[L3.8a]</a> (tabulka cen tam; $c(A,B){=}2$, $c(B,C){=}1$, $c(C,D){=}2$, $c(D,E){=}5$, $c(E,A){=}2$, $c(A,D){=}3$, $c(B,E){=}3$, …) a jako startovní okruh výstup double-tree algoritmu z <a href="l3-9.html#takeaways">[L3.9]</a>: $H = A,B,C,D,E,A$ s cenou $12$.</p>
+  <p>Vezmi metrickou $K_5$ z&nbsp;<a href="l3-8a.html#takeaways">[L3.8a]</a> (tabulka cen tam; $c(A,B){=}2$, $c(B,C){=}1$, $c(C,D){=}2$, $c(D,E){=}5$, $c(E,A){=}2$, $c(A,D){=}3$, $c(B,E){=}3$, …) a jako startovní okruh výstup double-tree algoritmu z <a href="l3-9.html#takeaways">[L3.9]</a>: $H = A,B,C,D,E,A$ s cenou $12$ (tentýž okruh dostaneš i shortcuttingem v&nbsp;<a href="l3-8a.html#takeaways">[L3.8a]</a>).</p>
 
   <details class="try">
     <summary>Zkus sám: na okruhu $H = A,B,C,D,E,A$ existuje 5 dvojic nesousedních hran. Spočítej zisk všech pěti 2-opt výměn (vzorec výše) a najdi tu, která se vyplatí. Ceny: $c(A,C){=}3$, $c(B,D){=}2$, $c(C,E){=}4$, zbytek viz výše.</summary>
@@ -132,12 +132,12 @@
 
   <div class="viz" id="viz-run"></div>
 
-  <p>Po výměně algoritmus skočí na krok 2 a prověří novou rodinu $\mathcal{S}$ — a žádná z pěti výměn už nepomůže (zisky $+1, +1, +1, +4, +3$, propočet v T02). Algoritmus končí: $H' = A,D,C,B,E,A$ je <strong>2-OPT lokální optimum</strong>. Na téhle malé instanci je to shodou okolností i globální optimum ($\mathrm{OPT} = 11$ enumerací, <a href="l3-8b.html#takeaways">[L3.8b]</a>) — ale to je výjimka malé instance, ne pravidlo.</p>
+  <p>Po výměně algoritmus skočí na krok 2 a prověří novou rodinu $\mathcal{S}$ — a žádná z&nbsp;pěti výměn už nepomůže (zisky $+1, +1, +1, +4, +3$, propočet v T02). Algoritmus končí: $H' = A,D,C,B,E,A$ je <strong>2-OPT lokální optimum</strong>. Na téhle malé instanci je to shodou okolností i globální optimum ($\mathrm{OPT} = 11$ enumerací, <a href="l3-8b.html#takeaways">[L3.8b]</a>) — ale to je výjimka malé instance, ne pravidlo.</p>
 
   <!-- ===== SEKCE 5: 3-OPT, 4-OPT ===== -->
   <h2>3-opt a 4-opt „double bridge“ (slidy 30–31)</h2>
 
-  <p>Pro $k = 3$ už vnitřní smyčka jednou neproběhne: po vyhození tří navzájem nesousedních hran zbydou <em>tři</em> oblouky a slide 30 ukazuje <em>at least two ways</em>, jak je pospojovat do nového okruhu (jeden bez otáčení oblouků, druhý s otočením oblouku $(c,\ldots,b)$).</p>
+  <p>Pro $k = 3$ už vnitřní smyčka jednou neproběhne: po vyhození tří navzájem nesousedních hran zbydou <em>tři</em> oblouky a slide 30 ukazuje <em>at least two ways</em>, jak je pospojovat do nového okruhu (jeden bez otáčení oblouků, druhý s&nbsp;otočením oblouku $(c,\ldots,b)$).</p>
 
   <div class="viz" id="viz-3opt"></div>
 
@@ -149,7 +149,7 @@
   <h2>Heuristika, ne aproximace</h2>
 
   <details class="try">
-    <summary>Zkus sám: $k$-OPT vždy skončí (rozmysli proč!) a vrátí okruh, ze kterého žádná výměna $k$ hran nevede na levnější okruh. Je to aproximační algoritmus podle definice z [L3.1]?</summary>
+    <summary>Zkus sám: $k$-OPT vždy skončí (rozmysli proč!) a vrátí okruh, ze kterého žádná výměna $k$ hran nevede na levnější okruh. Je to aproximační algoritmus podle definice z&nbsp;[L3.1]?</summary>
     <div class="inner">
       <p><strong>Konečnost:</strong> každé přijetí ostře zmenší $c(E(H))$, a Hamiltonovských okruhů je konečně mnoho — žádný se tedy nemůže opakovat a algoritmus skončí (vlastní pozorování; slidy konečnost nerozebírají).</p>
       <p><strong>Aproximace? NE.</strong> Aproximační algoritmus podle <a href="l3-1.html#takeaways">[L3.1]</a> potřebuje <em>dokázanou</em> worst-case záruku $c(E(H)) \le r \cdot \mathrm{OPT}$ pro <em>všechny</em> instance. $k$-OPT vrací jen <strong>lokální optimum</strong> — okruh neporazitelný výměnou $k$ hran — a to může být od globálního optima libovolně daleko. Slidy taky žádný faktor nedokazují a celou techniku nadepisují „Tour Improvement <em>Heuristics</em>“. Pro obecný (nemetrický) TSP by polynomiální algoritmus se zárukou $r$ ani existovat nemohl, pokud $P \ne NP$ <a href="l3-6.html#takeaways">[L3.6]</a>.</p>
@@ -158,7 +158,7 @@
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda</div>
-    <p>„2-OPT našel na naší instanci optimum, takže je to aproximační algoritmus.“ — <strong>NE.</strong> Lokální optimum ($k$ hran nepomůže vyměnit) obecně <strong>není</strong> globální optimum a žádný faktor $r$ pro $k$-OPT dokázán není: je to <strong>heuristika</strong>, stejně jako nearest neighbor <a href="l3-1.html#takeaways">[L3.1]</a>. Záruky mají až aproximace pro <em>metrický</em> TSP: double-tree (faktor 2) <a href="l3-9.html#takeaways">[L3.9]</a> a Christofides (faktor 3/2) <a href="l3-10.html#takeaways">[L3.10]</a>. V praxi se obojí kombinuje: aproximace dodá startovní okruh se zárukou, $k$-OPT ho dál vylepšuje.</p>
+    <p>„2-OPT našel na naší instanci optimum, takže je to aproximační algoritmus.“ — <strong>NE.</strong> Lokální optimum ($k$ hran nepomůže vyměnit) obecně <strong>není</strong> globální optimum a žádný faktor $r$ pro $k$-OPT dokázán není: je to <strong>heuristika</strong>, stejně jako nearest neighbor <a href="l3-1.html#takeaways">[L3.1]</a>. Záruky mají až aproximace pro <em>metrický</em> TSP: double-tree (faktor 2) <a href="l3-9.html#takeaways">[L3.9]</a> a Christofides (faktor 3/2) <a href="l3-10.html#takeaways">[L3.10]</a>. V&nbsp;praxi se obojí kombinuje: aproximace dodá startovní okruh se zárukou, $k$-OPT ho dál vylepšuje.</p>
   </div>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
@@ -183,8 +183,19 @@
     <div class="task-body">
       <div class="assignment">
         <span class="lbl">Assignment (EN 1:1 dle banky #34; pokyny i–iii vlastní doplněk — banka otázku neformuluje)</span>
-        <p><em>One of the most successful techniques for TSP instances in practice is local search. The simple idea is: find any Hamiltonian circuit by some heuristic; improve it by local modifications, for example delete two edges and reconstruct the circuit by some other edges. Local search is an algorithmic principle based on two decisions: which modifications are allowed; when to modify the solution, e.g. allow improvements only. Example of local search is the k-OPT algorithm for TSP.</em></p>
-        <p><em>k-OPT algorithm for TSP. Input: An instance $(K_n, c)$ of TSP, number $k \ge 2$. Output: Hamiltonian circuit $H$. 1. Let $H$ be any Hamiltonian circuit. 2. Let $\mathcal{S}$ be the family of $k$-element subsets $S$ of $E(H)$. For all $S \in \mathcal{S}$ do: for all Hamiltonian circuits $H' \ne H$ such that $E(H') \supseteq E(H) \setminus S$ do: if $c(E(H')) &lt; c(E(H))$, then set $H := H'$ and go to step 2.</em></p>
+        <p><em>One of the most successful techniques for TSP instances in practice is local search. The simple idea is:</em></p>
+        <ul>
+          <li><em>find any Hamiltonian circuit by some heuristic;</em></li>
+          <li><em>improve it by local modifications, for example delete two edges and reconstruct the circuit by some other edges.</em></li>
+        </ul>
+        <p><em>Local search is an algorithmic principle based on two decisions:</em></p>
+        <ul>
+          <li><em>which modifications are allowed;</em></li>
+          <li><em>when to modify the solution, e.g. allow improvements only.</em></li>
+        </ul>
+        <p><em>Example of local search is the k-OPT algorithm for TSP.</em></p>
+        <p><em><strong>k-OPT algorithm for TSP.</strong> Input: An instance $(K_n, c)$ of TSP, number $k \ge 2$. Output: Hamiltonian circuit $H$. 1. Let $H$ be any Hamiltonian circuit. 2. Let $\mathcal{S}$ be the family of $k$-element subsets $S$ of $E(H)$. For all $S \in \mathcal{S}$ do: for all Hamiltonian circuits $H' \ne H$ such that $E(H') \supseteq E(H) \setminus S$ do: if $c(E(H')) &lt; c(E(H))$, then set $H := H'$ and go to step 2.</em></p>
+        <p><em>Note: $H'$ is constructed so that it is a Hamiltonian circuit as well. When $k = 2$, the inner loop creating Hamiltonian circuits $H'$ from the remaining edges of $H$ executes only once, because there is only one way to construct the new Hamiltonian circuit $H'$.</em></p>
         <p>(i) Explain the two decisions that define a local search algorithm and how $k$-OPT answers them. (ii) Explain why for $k = 2$ the inner loop executes only once. (iii) Is $k$-OPT an approximation algorithm? Justify.</p>
       </div>
 
@@ -204,9 +215,9 @@
       <details class="solution">
         <summary>d) Úplné řešení</summary>
         <div class="inner">
-          <p><strong>(i)</strong> Local search je dán dvěma rozhodnutími (slide 28): <em>which modifications are allowed</em> — u $k$-OPT je povolenou modifikací odebrání $k$-prvkové podmnožiny $S$ hran okruhu a doplnění zbytku $E(H)\setminus S$ na jiný Hamiltonovský okruh $H' \ne H$; <em>when to modify the solution</em> — $k$-OPT přijímá pouze ostrá zlepšení, $c(E(H')) &lt; c(E(H))$, a po přijetí se vrací na krok 2 (okolí se počítá z nového okruhu).</p>
-          <p><strong>(ii)</strong> Odeberu-li z kružnice dvě nesousední hrany $(a,b)$ a $(c,d)$, rozpadne se na dvě cesty se čtyřmi konci $a, b, c, d$. Nový okruh musí oba oblouky spojit dvěma hranami; možnosti jsou jen dvě — původní dvojice (dá $H' = H$, vyloučeno podmínkou $H' \ne H$) a jediná zbývající dvojice $(a,d), (b,c)$, při níž jeden oblouk změní orientaci (slide 30). Vnitřní smyčka tedy vygeneruje právě jednoho kandidáta. (Při odebrání dvou sousedních hran zbyde izolovaný vrchol + cesta a jediná rekonstrukce je $H$ samo — kandidát žádný; tento případ slide explicitně nerozepisuje.)</p>
-          <p><strong>(iii)</strong> Ne. Aproximační algoritmus vyžaduje dokázanou worst-case záruku $c(E(H)) \le r \cdot \mathrm{OPT}$ pro všechny instance <a href="l3-1.html#takeaways">[L3.1]</a>. $k$-OPT vrací jen lokální optimum vzhledem k výměnám $k$ hran, které může být od $\mathrm{OPT}$ libovolně daleko; slidy žádný faktor nedokazují a řadí $k$-OPT mezi <em>tour improvement heuristics</em>. Pro obecný TSP navíc žádný polynomiální $r$-aproximační algoritmus neexistuje, pokud $P \ne NP$ <a href="l3-6.html#takeaways">[L3.6]</a>.</p>
+          <p><strong>(i)</strong> Local search je dán dvěma rozhodnutími (slide 28): <em>which modifications are allowed</em> — u&nbsp;$k$-OPT je povolenou modifikací odebrání $k$-prvkové podmnožiny $S$ hran okruhu a doplnění zbytku $E(H)\setminus S$ na jiný Hamiltonovský okruh $H' \ne H$; <em>when to modify the solution</em> — $k$-OPT přijímá pouze ostrá zlepšení, $c(E(H')) &lt; c(E(H))$, a po přijetí se vrací na krok 2 (okolí se počítá z&nbsp;nového okruhu).</p>
+          <p><strong>(ii)</strong> Odeberu-li z&nbsp;kružnice dvě nesousední hrany $(a,b)$ a $(c,d)$, rozpadne se na dvě cesty se čtyřmi konci $a, b, c, d$. Nový okruh musí oba oblouky spojit dvěma hranami; možnosti jsou jen dvě — původní dvojice (dá $H' = H$, vyloučeno podmínkou $H' \ne H$) a jediná zbývající dvojice $(a,d), (b,c)$, při níž jeden oblouk změní orientaci (slide 30). Vnitřní smyčka tedy vygeneruje právě jednoho kandidáta. (Při odebrání dvou sousedních hran zbyde izolovaný vrchol + cesta a jediná rekonstrukce je $H$ samo — kandidát žádný; tento případ slide explicitně nerozepisuje.)</p>
+          <p><strong>(iii)</strong> Ne. Aproximační algoritmus vyžaduje dokázanou worst-case záruku $c(E(H)) \le r \cdot \mathrm{OPT}$ pro všechny instance <a href="l3-1.html#takeaways">[L3.1]</a>. $k$-OPT vrací jen lokální optimum vzhledem k&nbsp;výměnám $k$ hran, které může být od $\mathrm{OPT}$ libovolně daleko; slidy žádný faktor nedokazují a řadí $k$-OPT mezi <em>tour improvement heuristics</em>. Pro obecný TSP navíc žádný polynomiální $r$-aproximační algoritmus neexistuje, pokud $P \ne NP$ <a href="l3-6.html#takeaways">[L3.6]</a>.</p>
         </div>
       </details>
     </div>
@@ -226,7 +237,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Ruční odsimulování 2-OPT: na okruhu za 12 (výstup double-tree z <a href="l3-9.html#takeaways">[L3.9]</a>) spočítat zisky všech výměn, provést tu výhodnou a ověřit zastavení.</p>
+      <p>Ruční odsimulování 2-OPT: na okruhu za 12 (výstup double-tree z&nbsp;<a href="l3-9.html#takeaways">[L3.9]</a>) spočítat zisky všech výměn, provést tu výhodnou a ověřit zastavení.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -256,7 +267,7 @@
           $\{D{,}C\},\{B{,}E\} \to \{D{,}B\},\{C{,}E\}$: $2+4-2-3 = +1$;
           $\{D{,}C\},\{E{,}A\} \to \{D{,}E\},\{C{,}A\}$: $5+3-2-2 = +4$;
           $\{C{,}B\},\{E{,}A\} \to \{C{,}E\},\{B{,}A\}$: $4+2-1-2 = +3$.
-          Žádný zisk není záporný → $H'$ je 2-OPT lokální optimum a algoritmus končí. Z <a href="l3-8b.html#takeaways">[L3.8b]</a> víme, že $\mathrm{OPT} = 11$ — zde se lokální optimum trefilo do globálního (malá instance; obecně to neplatí, viz box „Nebezpečná polopravda“).</p>
+          Žádný zisk není záporný → $H'$ je 2-OPT lokální optimum a algoritmus končí. Z&nbsp;<a href="l3-8b.html#takeaways">[L3.8b]</a> víme, že $\mathrm{OPT} = 11$ — zde se lokální optimum trefilo do globálního (malá instance; obecně to neplatí, viz box „Nebezpečná polopravda“).</p>
         </div>
       </details>
     </div>
