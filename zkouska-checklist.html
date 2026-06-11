@@ -31,7 +31,7 @@
     <div class="box-title"><img src="assets/icons/book-open.svg" class="ico" alt="">Jak číst štítky</div>
     <p>U každé položky je štítek, <strong>co se po tobě reálně chce</strong> — to je důležitější než „umět látku":</p>
     <ul style="margin:4px 0">
-      <li><span class="ci-kind run">🔁 oddrolovat</span> — spustit algoritmus na zadané instanci na papíře (ne psát pseudokód z hlavy).</li>
+      <li><span class="ci-kind run">🔁 odkrokovat</span> — spustit algoritmus na zadané instanci na papíře (ne psát pseudokód z hlavy).</li>
       <li><span class="ci-kind prove">✍️ napsat / dokázat</span> — sestavit model, důkaz nebo argument vlastními slovy.</li>
       <li><span class="ci-kind oral">💬 ústní</span> — typicky jen u dobrovolné ústní (na zlepšení známky), ne v písemce.</li>
     </ul>
@@ -75,14 +75,14 @@
     <li class="check-item">
       <input type="checkbox" data-check="s2-dijkstra">
       <div class="ci-body">
-        <div class="ci-task">Oddrolovat Dijkstru + pořadí expanze / tie-breaking<span class="ci-kind run">🔁 oddrolovat</span></div>
+        <div class="ci-task">Odkrokovat Dijkstru + pořadí expanze / tie-breaking<span class="ci-kind run">🔁 odkrokovat</span></div>
         <div class="ci-links">→ <a href="k2/l2-4.html">[L2.4] Dijkstra (běh)</a> · <a href="k2/l2-8.html">[L2.8] Dangerous adventure</a> · <a href="k2/l2-5.html">[L2.5] Edge costs</a></div>
       </div>
     </li>
     <li class="check-item">
       <input type="checkbox" data-check="s2-bf">
       <div class="ci-body">
-        <div class="ci-task">Bellman-Ford + detekce záporného cyklu<span class="ci-kind run">🔁 oddrolovat</span><span class="ci-kind oral">💬 ústní</span></div>
+        <div class="ci-task">Bellman-Ford + detekce záporného cyklu<span class="ci-kind run">🔁 odkrokovat</span><span class="ci-kind oral">💬 ústní</span></div>
         <div class="ci-links">→ <a href="k2/l2-12.html">[L2.12] Bellman-Ford + záporný cyklus</a> · <a href="k2/l2-18.html">[L2.18] teorie záporných cyklů</a></div>
       </div>
     </li>
@@ -134,7 +134,7 @@
     <li class="check-item">
       <input type="checkbox" data-check="s4-ff">
       <div class="ci-body">
-        <div class="ci-task">Oddrolovat Ford-Fulkerson + najít minimální řez<span class="ci-kind run">🔁 oddrolovat</span></div>
+        <div class="ci-task">Odkrokovat Ford-Fulkerson + najít minimální řez<span class="ci-kind run">🔁 odkrokovat</span></div>
         <div class="ci-links">→ <a href="k4/l4-3.html">[L4.3] Ford-Fulkerson (běh)</a> · <a href="k4/l4-4.html">[L4.4] řez a max-flow/min-cut</a></div>
       </div>
     </li>
@@ -152,6 +152,27 @@
         <div class="ci-links">→ <a href="k4/l4-7.html">[L4.7] počáteční přípustný tok</a> · <a href="k4/l4-6.html">[L4.6] feasible flow s balancy</a></div>
       </div>
     </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s4-schedflow">
+      <div class="ci-body">
+        <div class="ci-task">Rozvrhování / matrix rounding jako max-flow (úkoly → intervaly → stok)<span class="ci-kind prove">✍️ napsat</span><span class="ci-kind run">🔁 odkrokovat</span></div>
+        <div class="ci-links">→ <a href="k5/l5-0.html">[L5.0] rozvrhování přes toky</a> · <a href="k4/l4-8.html">[L4.8] matrix rounding</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s4-mcf">
+      <div class="ci-body">
+        <div class="ci-task">Min-cost flow + reziduální graf s cenami, cycle canceling<span class="ci-kind run">🔁 odkrokovat</span></div>
+        <div class="ci-links">→ <a href="k4/l4-10.html">[L4.10] Min-cost flow</a> · <a href="k4/l4-11.html">[L4.11] cycle canceling</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s4-assign">
+      <div class="ci-body">
+        <div class="ci-task">Assignment problem / min-weight perfect matching přes MCF (Hungarian)<span class="ci-kind prove">✍️ napsat</span></div>
+        <div class="ci-links">→ <a href="k4/l4-12.html">[L4.12] assignment přes MCF</a></div>
+      </div>
+    </li>
   </ul>
 
   <!-- ===== SLOT 5 ===== -->
@@ -167,7 +188,7 @@
     <li class="check-item">
       <input type="checkbox" data-check="s5-muntz">
       <div class="ci-body">
-        <div class="ci-task">Muntz &amp; Coffman: oddrolovat úrovně + Gantt<span class="ci-kind run">🔁 oddrolovat</span></div>
+        <div class="ci-task">Muntz &amp; Coffman: odkrokovat úrovně + Gantt<span class="ci-kind run">🔁 odkrokovat</span></div>
         <div class="ci-links">→ <a href="k5/l5-10.html">[L5.10] Muntz &amp; Coffman</a></div>
       </div>
     </li>
@@ -181,8 +202,22 @@
     <li class="check-item">
       <input type="checkbox" data-check="s5-bb">
       <div class="ci-body">
-        <div class="ci-task">Branch &amp; Bound (grafické řezání) a Bratley<span class="ci-kind run">🔁 oddrolovat</span><span class="ci-kind oral">💬 ústní</span></div>
+        <div class="ci-task">Branch &amp; Bound (grafické řezání) a Bratley<span class="ci-kind run">🔁 odkrokovat</span><span class="ci-kind oral">💬 ústní</span></div>
         <div class="ci-links">→ <a href="k5/l5-5.html">[L5.5] B&amp;B pro ILP</a> · <a href="k5/l5-9.html">[L5.9] Bratley</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s5-mcnaughton">
+      <div class="ci-body">
+        <div class="ci-task">McNaughton (wrap-around) pro $P|pmtn|C_{max}$<span class="ci-kind run">🔁 odkrokovat</span></div>
+        <div class="ci-links">→ <a href="k5/l5-4.html">[L5.4] McNaughton</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s5-edd">
+      <div class="ci-body">
+        <div class="ci-task">EDD a Hornův algoritmus pro $1|pmtn,r_j|L_{max}$<span class="ci-kind run">🔁 odkrokovat</span></div>
+        <div class="ci-links">→ <a href="k5/l5-7.html">[L5.7] EDD a Horn</a> · <a href="k5/l5-8.html">[L5.8] Chetto-Silly-Bouchentouf</a></div>
       </div>
     </li>
   </ul>
@@ -193,7 +228,7 @@
     <li class="check-item">
       <input type="checkbox" data-check="s6-ac3">
       <div class="ci-body">
-        <div class="ci-task">Oddrolovat AC-3: zredukovat domény, zapsat frontu před každou revizí<span class="ci-kind run">🔁 oddrolovat</span></div>
+        <div class="ci-task">Odkrokovat AC-3: zredukovat domény, zapsat frontu před každou revizí<span class="ci-kind run">🔁 odkrokovat</span></div>
         <div class="ci-links">→ <a href="k6/l6-3.html">[L6.3] AC-3 + oditerování</a> · <a href="k6/l6-1.html">[L6.1] CSP a arc consistency</a> · <a href="k6/l6-2.html">[L6.2] REVISE</a></div>
       </div>
     </li>
@@ -212,7 +247,7 @@
     <li class="check-item">
       <input type="checkbox" data-check="x-knap">
       <div class="ci-body">
-        <div class="ci-task">Knapsack DP: tabulka + zpětná rekonstrukce + složitost<span class="ci-kind run">🔁 oddrolovat</span><span class="ci-kind oral">💬 ústní</span></div>
+        <div class="ci-task">Knapsack DP: tabulka + zpětná rekonstrukce + složitost<span class="ci-kind run">🔁 odkrokovat</span><span class="ci-kind oral">💬 ústní</span></div>
         <div class="ci-links">→ <a href="k7/l7-1.html">[L7.1] Knapsack DP</a> · <a href="k7/l7-2.html">[L7.2] cost-indexed</a></div>
       </div>
     </li>
@@ -237,11 +272,18 @@
         <div class="ci-links">→ <a href="k2/l2-13.html">[L2.13] SP v DAG v O(V+E)</a></div>
       </div>
     </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="x-knap2">
+      <div class="ci-body">
+        <div class="ci-task">Knapsack: fractional greedy + důkaz 2-aproximace<span class="ci-kind prove">✍️ dokázat</span></div>
+        <div class="ci-links">→ <a href="k3/l3-11.html">[L3.11] Knapsack 2-aproximace</a></div>
+      </div>
+    </li>
   </ul>
 
   <div class="box foto" style="margin-top:24px">
     <div class="box-title"><img src="assets/icons/camera.svg" class="ico" alt="">Jak s tím pracovat</div>
-    <p>Než půjdeš na zkoušku, měj odškrtaný hlavně blok <strong>🔁 oddrolovat</strong> a <strong>✍️ dokázat</strong> ve Slotech 1–5 — to je jádro 40 bodů. Štítky <strong>💬 ústní</strong> řeš jen, když jdeš na zlepšení známky. Položka není odškrtnutá, dokud ji <em>neumíš bez koukání do řešení</em> — u FOTO úloh si to ověř fotkou ke kontrole.</p>
+    <p>Než půjdeš na zkoušku, měj odškrtaný hlavně blok <strong>🔁 odkrokovat</strong> a <strong>✍️ dokázat</strong> ve Slotech 1–5 — to je jádro 40 bodů. Štítky <strong>💬 ústní</strong> řeš jen, když jdeš na zlepšení známky. Položka není odškrtnutá, dokud ji <em>neumíš bez koukání do řešení</em> — u FOTO úloh si to ověř fotkou ke kontrole.</p>
   </div>
 
   <div class="pager">
