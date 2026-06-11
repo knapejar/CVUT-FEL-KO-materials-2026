@@ -33,26 +33,26 @@
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
-    <strong>Důkaz sporem: r-aproximace by rozhodla HC.</strong> Zostři váhy redukce z <a href="l3-5.html#takeaways">[L3.5]</a> na $1$ / $2 + (r-1)n$ — mezera mezi ANO ($\mathrm{OPT} = n$) a NE (každý okruh $\ge rn+1$) se roztáhne tak, že ji rozliší i „nepřesný“ r-aproximační algoritmus. Ten by tedy v polynomiálním čase rozhodl NP-úplný HC → $P = NP$. Spor.
+    <strong>Důkaz sporem: r-aproximace by rozhodla HC.</strong> Zostři váhy redukce z&nbsp;<a href="l3-5.html#takeaways">[L3.5]</a> na $1$ / $2 + (r-1)n$ — mezera mezi ANO ($\mathrm{OPT} = n$) a NE (každý okruh $\ge rn+1$) se roztáhne tak, že ji rozliší i „nepřesný“ r-aproximační algoritmus. Ten by tedy v&nbsp;polynomiálním čase rozhodl NP-úplný HC → $P = NP$. Spor.
   </div>
 
-  <p>V <a href="l3-5.html#takeaways">[L3.5] TSP je silně NP-těžký</a> jsi prošel(a) „tréninkovou verzi“ dnešního důkazu: redukce HC → TSP s vahami 1/2 a ekvivalence „HC ⟺ $\mathrm{OPT} = n$“. Dnes tutéž šablonu vystřelíme na mnohem silnější cíl — ukážeme, že pro <em>obecný</em> TSP nepomůže ani vzdát se optimality: <strong>žádný polynomiální r-aproximační algoritmus</strong> <a href="l3-1.html#takeaways">[L3.1]</a> <strong>neexistuje</strong> (pokud $P \ne NP$), a to pro žádné $r \ge 1$. Je to <strong>žebříčkový důkaz #3</strong> pro 15. 6. — na zkoušce 25. 5. 2026 padl doslova — a lekce končí FOTO checkpointem.</p>
+  <p>V <a href="l3-5.html#takeaways">[L3.5] TSP je silně NP-těžký</a> jsi prošel(a) „tréninkovou verzi“ dnešního důkazu: redukce HC → TSP s&nbsp;vahami 1/2 a ekvivalence „HC ⟺ $\mathrm{OPT} = n$“. Dnes tutéž šablonu vystřelíme na mnohem silnější cíl — ukážeme, že pro <em>obecný</em> TSP nepomůže ani vzdát se optimality: <strong>žádný polynomiální r-aproximační algoritmus</strong> <a href="l3-1.html#takeaways">[L3.1]</a> <strong>neexistuje</strong> (pokud $P \ne NP$), a to pro žádné $r \ge 1$. Je to <strong>žebříčkový důkaz #3</strong> pro 15.&nbsp;6. — na zkoušce 25.&nbsp;5.&nbsp;2026 padl doslova — a lekce končí FOTO checkpointem.</p>
 
   <!-- ===== SEKCE 1: VĚTA A STRATEGIE ===== -->
   <h2>Co dokazujeme: věta a strategie sporu</h2>
 
   <div class="box">
     <div class="box-title">Theorem (06_TSP, slide 19 — EN 1:1)</div>
-    <p><em>„If we believe $P \ne NP$, than there is no polynomial r-approximation algorithm for <strong>TSP</strong> for $r \ge 1$.“</em></p>
+    <p><em>„If we believe $P \ne NP$, then there is no polynomial r-approximation algorithm for <strong>TSP</strong> for $r \ge 1$.“</em></p>
     <p>A strategie důkazu, slide 19 (EN 1:1): <em>„<strong>Proof by contradiction:</strong> Assume there exists a polynomial r-approximation algorithm $\mathcal{A}$ for <strong>TSP</strong>. We further show that we can solve the <strong>HC</strong> problem while using such an &quot;inaccurate&quot; algorithm $\mathcal{A}$. Since <strong>HC</strong> is NP-complete, $P = NP$.“</em></p>
   </div>
 
-  <p>Plán je tedy stejný jako v <a href="l3-5.html#takeaways">[L3.5]</a> — „kdybys uměl TSP, umíš HC“ — jen s jedním zásadním rozdílem: tentokrát nemáme k dispozici přesný algoritmus, ale jen <strong>„nepřesnou“ černou skříňku</strong> $\mathcal{A}$, která smí vrátit okruh až $r$-krát dražší než optimum <a href="l3-1.html#takeaways">[L3.1]</a>. Celé umění dneška je sestavit instanci tak, aby ani tahle nepřesnost odpověď nerozmazala.</p>
+  <p>Plán je tedy stejný jako v <a href="l3-5.html#takeaways">[L3.5]</a> — „kdybys uměl TSP, umíš HC“ — jen s&nbsp;jedním zásadním rozdílem: tentokrát nemáme k&nbsp;dispozici přesný algoritmus, ale jen <strong>„nepřesnou“ černou skříňku</strong> $\mathcal{A}$, která smí vrátit okruh až $r$-krát dražší než optimum <a href="l3-1.html#takeaways">[L3.1]</a>. Celé umění dneška je sestavit instanci tak, aby ani tahle nepřesnost odpověď nerozmazala.</p>
 
   <details class="try">
-    <summary>Zkus sám (klíčová otázka lekce): proč konstrukce z [L3.5] s vahami 1/2 najednou NESTAČÍ? Vezmi $r = 2$ a rozmysli si, co ti $\mathcal{A}$ na ANO-instanci smí vrátit.</summary>
+    <summary>Zkus sám (klíčová otázka lekce): proč konstrukce z&nbsp;[L3.5] s&nbsp;vahami 1/2 najednou NESTAČÍ? Vezmi $r = 2$ a rozmysli si, co ti $\mathcal{A}$ na ANO-instanci smí vrátit.</summary>
     <div class="inner">
-      <p>Váhy 1/2 dávají mezeru: ANO → $\mathrm{OPT} = n$, NE → $\mathrm{OPT} \ge n+1$. Přesný algoritmus ji rozliší. Jenže 2-aproximace na ANO-instanci garantuje jen $J^{\mathcal{A}} \le 2n$ — klidně vrátí okruh za $1{,}5n$. A na NE-instanci může být optimum třeba $n+1$ a $\mathcal{A}$ vrátí $n+1$. Hodnota $1{,}5n$ (ANO) je <em>větší</em> než $n+1$ (NE) — z odpovědi $\mathcal{A}$ nepoznáš, ve kterém případě jsi. Mezera šířky 1 se v „rozmazání faktorem $r$“ utopí.</p>
+      <p>Váhy 1/2 dávají mezeru: ANO → $\mathrm{OPT} = n$, NE → $\mathrm{OPT} \ge n+1$. Přesný algoritmus ji rozliší. Jenže 2-aproximace na ANO-instanci garantuje jen $J^{\mathcal{A}} \le 2n$ — klidně vrátí okruh za $1{,}5n$. A na NE-instanci může být optimum třeba $n+1$ a $\mathcal{A}$ vrátí $n+1$. Hodnota $1{,}5n$ (ANO) je <em>větší</em> než $n+1$ (NE) — z&nbsp;odpovědi $\mathcal{A}$ nepoznáš, ve kterém případě jsi. Mezera šířky 1 se v&nbsp;„rozmazání faktorem $r$“ utopí.</p>
       <p>Poučení: aby šel výstup r-aproximace číst jako ANO/NE, musí být mezera mezi případy <strong>širší než celé rozmazání</strong> — NE-případ musí začínat až <em>nad</em> $r \cdot (\text{ANO optimum})$.</p>
     </div>
   </details>
@@ -61,11 +61,11 @@
   <h2>Konstrukce: jak drahá musí být chybějící hrana?</h2>
 
   <details class="try">
-    <summary>Zkus sám: levné hrany nech za 1 (ANO-případ pak má $\mathrm{OPT} = n$ jako v [L3.5]). Jak velkou cenu $x$ musí dostat doplněné hrany, aby KAŽDÝ okruh používající aspoň jednu z nich stál ostře víc než $r \cdot n$?</summary>
+    <summary>Zkus sám: levné hrany nech za 1 (ANO-případ pak má $\mathrm{OPT} = n$ jako v&nbsp;[L3.5]). Jak velkou cenu $x$ musí dostat doplněné hrany, aby KAŽDÝ okruh používající aspoň jednu z&nbsp;nich stál ostře víc než $r \cdot n$?</summary>
     <div class="inner">
-      <p>Nejlevnější okruh s aspoň jednou drahou hranou má $n-1$ hran po 1 a jednu za $x$: stojí $(n-1) + x$. Chceme $(n-1) + x &gt; rn$, tedy</p>
+      <p>Nejlevnější okruh s&nbsp;aspoň jednou drahou hranou má $n-1$ hran po 1 a jednu za $x$: stojí $(n-1) + x$. Chceme $(n-1) + x &gt; rn$, tedy</p>
       <p>$$x &gt; rn - n + 1 = (r-1)n + 1.$$</p>
-      <p>Slidy volí nejmenší „hezkou“ hodnotu o jedničku výš: $x = 2 + (r-1)n$. Pak nejlevnější „špinavý“ okruh stojí přesně $(n-1) + 2 + (r-1)n = rn + 1$ — první celé číslo <em>nad</em> pásem $\langle n, rn\rangle$, kam smí padnout odpověď $\mathcal{A}$ na ANO-instanci. Všimni si, že cena drahé hrany <strong>roste s $n$ i s $r$</strong> — mezeru roztahujeme přesně tak agresivně, jak agresivní je faktor, který chceme porazit.</p>
+      <p>Slidy volí nejmenší „hezkou“ hodnotu o&nbsp;jedničku výš: $x = 2 + (r-1)n$. Pak nejlevnější „špinavý“ okruh stojí přesně $(n-1) + 2 + (r-1)n = rn + 1$ — první celé číslo <em>nad</em> pásem $\langle n, rn\rangle$, kam smí padnout odpověď $\mathcal{A}$ na ANO-instanci. Všimni si, že cena drahé hrany <strong>roste s&nbsp;$n$ i s&nbsp;$r$</strong> — mezeru roztahujeme přesně tak agresivně, jak agresivní je faktor, který chceme porazit.</p>
     </div>
   </details>
 
@@ -82,34 +82,34 @@
   <details class="try">
     <summary>Zkus sám: je převod pořád polynomiální? A nepotřebuje znát odpověď HC?</summary>
     <div class="inner">
-      <p>Ano, polynomiální zůstal: stejně jako v <a href="l3-5.html#takeaways">[L3.5]</a> projdeme $\binom{n}{2} = O(n^2)$ dvojic a každé přiřadíme 1, nebo $2+(r-1)n$ podle členství v $E(G)$ — nic se nehledá, odpověď HC převod nezná. Jediná novinka: do vah vstupuje $r$ (konstanta zkoumaného algoritmu) a $n$ — číslo $2+(r-1)n$ má polynomiálně dlouhý zápis, takže i s ním je instance sestavitelná v polynomiálním čase. <em>(Mimochodem proto dnešní instance už nejsou „malá čísla“ — silnou NP-těžkost jsme dokazovali jinou, jemnější konstrukcí v [L3.5].)</em></p>
+      <p>Ano, polynomiální zůstal: stejně jako v&nbsp;<a href="l3-5.html#takeaways">[L3.5]</a> projdeme $\binom{n}{2} = O(n^2)$ dvojic a každé přiřadíme 1, nebo $2+(r-1)n$ podle členství v&nbsp;$E(G)$ — nic se nehledá, odpověď HC převod nezná. Jediná novinka: do vah vstupuje $r$ (konstanta zkoumaného algoritmu) a $n$ — číslo $2+(r-1)n$ má polynomiálně dlouhý zápis, takže i s&nbsp;ním je instance sestavitelná v&nbsp;polynomiálním čase. <em>(Mimochodem proto dnešní instance už nejsou „malá čísla“ — silnou NP-těžkost jsme dokazovali jinou, jemnější konstrukcí v&nbsp;[L3.5].)</em></p>
     </div>
   </details>
 
-  <p>Konstrukci si prohlédni na obou typech instancí. Nejdřív ANO-případ — pětiúhelník z <a href="l3-5.html">[L3.5]</a>, který HC má (konkrétně $n = 5$, $r = 2$, takže drahé hrany stojí $2 + (2-1)\cdot 5 = 7$):</p>
+  <p>Konstrukci si prohlédni na obou typech instancí. Nejdřív ANO-případ — pětiúhelník z&nbsp;<a href="l3-5.html">[L3.5]</a>, který HC má (konkrétně $n = 5$, $r = 2$, takže drahé hrany stojí $2 + (2-1)\cdot 5 = 7$):</p>
 
   <div class="viz" id="viz-yes"></div>
 
   <details class="try">
     <summary>Zkus sám (ANO-případ): $G$ má HC, takže $\mathrm{OPT} = n$ (proč?). Jaké hodnoty teď smí vrátit r-aproximační $\mathcal{A}$?</summary>
     <div class="inner">
-      <p><strong>$\mathrm{OPT} = n$:</strong> stejné dva kroky jako v <a href="l3-5.html#takeaways">[L3.5]</a> — HC v $G$ je okruh ze samých jedniček (cena $n$), a žádný okruh nestojí méně, protože má $n$ hran po aspoň 1.</p>
-      <p><strong>Odpověď $\mathcal{A}$:</strong> definice r-aproximace pro minimalizaci <a href="l3-1.html#takeaways">[L3.1]</a> dává horní mez $J^{\mathcal{A}} \le r \cdot \mathrm{OPT} = rn$; a pod optimum se žádný algoritmus nedostane, takže $J^{\mathcal{A}} \ge n$. Odpověď je uvězněná v pásu
+      <p><strong>$\mathrm{OPT} = n$:</strong> stejné dva kroky jako v&nbsp;<a href="l3-5.html#takeaways">[L3.5]</a> — HC v&nbsp;$G$ je okruh ze samých jedniček (cena $n$), a žádný okruh nestojí méně, protože má $n$ hran po aspoň 1.</p>
+      <p><strong>Odpověď $\mathcal{A}$:</strong> definice r-aproximace pro minimalizaci <a href="l3-1.html#takeaways">[L3.1]</a> dává horní mez $J^{\mathcal{A}} \le r \cdot \mathrm{OPT} = rn$; a pod optimum se žádný algoritmus nedostane, takže $J^{\mathcal{A}} \ge n$. Odpověď je uvězněná v&nbsp;pásu
       $$n \;\le\; J^{\mathcal{A}} \;\le\; rn.$$
       V našem příkladu: mezi 5 a 10.</p>
     </div>
   </details>
 
-  <p>A teď NE-případ — motýlek z <a href="l3-3.html#takeaways">[L3.3]</a>, který HC nemá (vrchol $c$ je artikulace):</p>
+  <p>A teď NE-případ — motýlek z&nbsp;<a href="l3-3.html#takeaways">[L3.3]</a>, který HC nemá (vrchol $c$ je artikulace):</p>
 
   <div class="viz" id="viz-no"></div>
 
   <details class="try">
-    <summary>Zkus sám (NE-případ): $G$ HC nemá. Dokaž, že KAŽDÝ Hamiltonovský okruh v $K_n$ teď stojí aspoň $rn + 1$ — a všimni si, že tady aproximační záruku vůbec nepotřebuješ.</summary>
+    <summary>Zkus sám (NE-případ): $G$ HC nemá. Dokaž, že KAŽDÝ Hamiltonovský okruh v&nbsp;$K_n$ teď stojí aspoň $rn + 1$ — a všimni si, že tady aproximační záruku vůbec nepotřebuješ.</summary>
     <div class="inner">
-      <p>Kdyby nějaký okruh používal jen hrany ceny 1, byly by to samé hrany $E(G)$ — a takový okruh je Hamiltonovská kružnice v $G$, která neexistuje. Každý okruh tedy obsahuje <strong>aspoň jednu drahou hranu</strong> a stojí aspoň</p>
+      <p>Kdyby nějaký okruh používal jen hrany ceny 1, byly by to samé hrany $E(G)$ — a takový okruh je Hamiltonovská kružnice v&nbsp;$G$, která neexistuje. Každý okruh tedy obsahuje <strong>aspoň jednu drahou hranu</strong> a stojí aspoň</p>
       <p>$$(n-1) \cdot 1 + 2 + (r-1)n = rn + 1.$$</p>
-      <p>A teď pointa: $\mathcal{A}$ vrací <em>skutečný přípustný okruh</em> — jeho hodnota je cena nějakého existujícího okruhu, tedy $J^{\mathcal{A}} \ge rn + 1$ <strong>automaticky</strong>, bez jakékoliv záruky. (Záruku $J^{\mathcal{A}} \le r\,\mathrm{OPT}$ jsme potřebovali jen v ANO-případu, aby odpověď nevylétla nad $rn$.)</p>
+      <p>A teď pointa: $\mathcal{A}$ vrací <em>skutečný přípustný okruh</em> — jeho hodnota je cena nějakého existujícího okruhu, tedy $J^{\mathcal{A}} \ge rn + 1$ <strong>automaticky</strong>, bez jakékoliv záruky. (Záruku $J^{\mathcal{A}} \le r\,\mathrm{OPT}$ jsme potřebovali jen v&nbsp;ANO-případu, aby odpověď nevylétla nad $rn$.)</p>
     </div>
   </details>
 
@@ -120,22 +120,22 @@
 
   <div class="viz" id="viz-axis"></div>
 
-  <p>Slide 20 z toho čte rozhodovací pravidlo (EN 1:1): <em>„We use $\mathcal{A}$ to solve the instance: if the result is in interval $\langle n, r \ast n\rangle$, then the Hamiltonian circuit exists, otherwise the result is greater or equal to $(n-1) + 2 + (r-1) \ast n = r \ast n + 1$ and $G$ has no Hamiltonian circuit.“</em></p>
+  <p>Slide 20 z&nbsp;toho čte rozhodovací pravidlo (EN 1:1): <em>„We use $\mathcal{A}$ to solve the instance: if the result is in interval $\langle n, r \ast n\rangle$, then the Hamiltonian circuit exists, otherwise the result is greater or equal to $(n-1) + 2 + (r-1) \ast n = r \ast n + 1$ and $G$ has no Hamiltonian circuit.“</em></p>
 
   <details class="try">
     <summary>Zkus sám: proč se intervaly $\langle n, rn\rangle$ a $\langle rn+1, \infty)$ nemůžou překrýt — a kde přesně by se důkaz rozbil, kdybychom za cenu drahé hrany dali jen $1 + (r-1)n$?</summary>
     <div class="inner">
       <p>Nepřekrývají se, protože $rn &lt; rn + 1$ — mezi pásem ANO-odpovědí a dnem NE-hodnot je ostrá hranice. <em>Každá</em> hodnota, kterou $\mathcal{A}$ může vrátit, padne právě do jednoho intervalu, takže odpověď čteme jednoznačně.</p>
-      <p>S cenou $1 + (r-1)n$ by nejlevnější „špinavý“ okruh stál $(n-1) + 1 + (r-1)n = rn$ — přesně horní okraj ANO-pásu. Odpověď $J^{\mathcal{A}} = rn$ by pak mohla znamenat obojí (ANO s nejhorší povolenou nepřesností, i NE s optimem $rn$) a rozhodnutí by se rozpadlo. Proto ta „+2“: posune NE-případ ostře nad pás.</p>
+      <p>S&nbsp;cenou $1 + (r-1)n$ by nejlevnější „špinavý“ okruh stál $(n-1) + 1 + (r-1)n = rn$ — přesně horní okraj ANO-pásu. Odpověď $J^{\mathcal{A}} = rn$ by pak mohla znamenat obojí (ANO s&nbsp;nejhorší povolenou nepřesností, i NE s&nbsp;optimem $rn$) a rozhodnutí by se rozpadlo. Proto ta „+2“: posune NE-případ ostře nad pás.</p>
     </div>
   </details>
 
   <details class="try">
-    <summary>Zkus sám (závěr sporu): poskládej z kousků celý polynomiální rozhodovač HC a řekni, kde přesně vznikne spor.</summary>
+    <summary>Zkus sám (závěr sporu): poskládej z&nbsp;kousků celý polynomiální rozhodovač HC a řekni, kde přesně vznikne spor.</summary>
     <div class="inner">
-      <p>Pro vstupní graf $G$ s $n$ vrcholy:</p>
+      <p>Pro vstupní graf $G$ s&nbsp;$n$ vrcholy:</p>
       <ol>
-        <li>Sestav TSP instanci $(K_n, c)$ s cenami $1$ / $2+(r-1)n$ — čas $O(n^2)$.</li>
+        <li>Sestav TSP instanci $(K_n, c)$ s&nbsp;cenami $1$ / $2+(r-1)n$ — čas $O(n^2)$.</li>
         <li>Spusť $\mathcal{A}$ → hodnota $J^{\mathcal{A}}$ — polynomiální čas (to je předpoklad sporu).</li>
         <li>Odpověz: $J^{\mathcal{A}} \le rn$ → <strong>ANO</strong>, HC existuje; $J^{\mathcal{A}} \ge rn+1$ → <strong>NE</strong>.</li>
       </ol>
@@ -144,22 +144,22 @@
   </details>
 
   <details class="try">
-    <summary>Zkus sám (kontrola konzistence): v <a href="l3-9.html">[L3.9]</a> a <a href="l3-10.html">[L3.10]</a> přitom dokážeme 2- a 3/2-aproximaci TSP. Jak to jde dohromady s dnešní větou?</summary>
+    <summary>Zkus sám (kontrola konzistence): v&nbsp;<a href="l3-9.html">[L3.9]</a> a <a href="l3-10.html">[L3.10]</a> přitom dokážeme 2- a 3/2-aproximaci TSP. Jak to jde dohromady s&nbsp;dnešní větou?</summary>
     <div class="inner">
-      <p>Ty algoritmy jsou pro <strong>metrický TSP</strong> <a href="l3-8a.html">[L3.8a]</a> — instance splňující trojúhelníkovou nerovnost $c(\{i,j\}) + c(\{j,k\}) \ge c(\{k,i\})$. Naše dnešní instance ji <em>porušují</em>: dvě levné hrany dají $1 + 1 = 2$, zatímco drahá hrana stojí $2 + (r-1)n &gt; 2$ pro každé $r &gt; 1$. Dnešní důkaz tedy o metrických instancích neříká nic — zabíjí jen aproximace slibující záruku pro <em>všechny</em> (i nemetrické) instance. Proto věta zní „for <strong>General</strong> TSP“. (Srovnej s [L3.5]: váhy 1/2 trojúhelníkovou nerovnost splňují, takže i metrický TSP je silně NP-těžký — těžkost zůstává, jen aproximovat už jde.)</p>
+      <p>Ty algoritmy jsou pro <strong>metrický TSP</strong> <a href="l3-8a.html">[L3.8a]</a> — instance splňující trojúhelníkovou nerovnost $c(\{i,j\}) + c(\{j,k\}) \ge c(\{k,i\})$. Naše dnešní instance ji <em>porušují</em>: dvě levné hrany dají $1 + 1 = 2$, zatímco drahá hrana stojí $2 + (r-1)n &gt; 2$ pro každé $r &gt; 1$. Dnešní důkaz tedy o&nbsp;metrických instancích neříká nic — zabíjí jen aproximace slibující záruku pro <em>všechny</em> (i nemetrické) instance. Proto věta zní „for <strong>General</strong> TSP“. (Srovnej s&nbsp;[L3.5]: váhy 1/2 trojúhelníkovou nerovnost splňují, takže i metrický TSP je silně NP-těžký — těžkost zůstává, jen aproximovat už jde.)</p>
     </div>
   </details>
 
   <div class="box info">
-    <div class="box-title">Varianta z banky úloh: ∞ místo $2+(r-1)n$</div>
-    <p>Vzorové řešení v bance úloh (#31) vede tentýž důkaz s cenami $c(i,j) = 1$ / $\infty$ a prahem $J^{\mathcal{A}} \le rn \iff$ HC existuje; formální poznámka banky pak ∞ nahrazuje konečnou konstantou, např. $M = \lceil rn \rceil + 1$ (EN 1:1: <em>„In a strictly formal reduction one usually avoids $\infty$ and replaces it by a sufficiently large finite constant, for example $M = \lceil rn\rceil + 1$. […] The proof idea is the same as with $\infty$.“</em>). Slidová volba $2+(r-1)n$ je přesně takové konečné $M$ — u zkoušky piš slidovou verzi, je nejkonkrétnější.</p>
+    <div class="box-title">Varianta z&nbsp;banky úloh: ∞ místo $2+(r-1)n$</div>
+    <p>Vzorové řešení v&nbsp;bance úloh (#31) vede tentýž důkaz s&nbsp;cenami $c(i,j) = 1$ / $\infty$ a prahem $J^{\mathcal{A}} \le rn \iff$ HC existuje; formální poznámka banky pak ∞ nahrazuje konečnou konstantou, např. $M = \lceil rn \rceil + 1$ (EN 1:1: <em>„In a strictly formal reduction one usually avoids $\infty$ and replaces it by a sufficiently large finite constant, for example $M = \lceil rn\rceil + 1$. […] The proof idea is the same as with $\infty$.“</em>). Slidová volba $2+(r-1)n$ je přesně takové konečné $M$ — u&nbsp;zkoušky piš slidovou verzi, je nejkonkrétnější.</p>
   </div>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy kolem důkazu</div>
     <ul>
-      <li><strong>„Stačí váhy 1/2 jako u silné NP-těžkosti.“</strong> NE — mezera $n$ vs. $n+1$ je užší než rozmazání faktorem $r$; ANO-odpověď až $rn$ se s NE-hodnotami překryje. Drahá hrana musí stát $2+(r-1)n$, aby NE-případ začínal nad $rn$.</li>
-      <li><strong>„V NE-případu použiju záruku $J^{\mathcal{A}} \le r\,\mathrm{OPT}$.“</strong> Nepotřebuješ ji (a argument by byl zbytečně křehký): $\mathcal{A}$ vrací přípustný okruh a <em>každý</em> okruh tam stojí $\ge rn+1$. Záruka pracuje jen v ANO-případu.</li>
+      <li><strong>„Stačí váhy 1/2 jako u&nbsp;silné NP-těžkosti.“</strong> NE — mezera $n$ vs. $n+1$ je užší než rozmazání faktorem $r$; ANO-odpověď až $rn$ se s&nbsp;NE-hodnotami překryje. Drahá hrana musí stát $2+(r-1)n$, aby NE-případ začínal nad $rn$.</li>
+      <li><strong>„V NE-případu použiju záruku $J^{\mathcal{A}} \le r\,\mathrm{OPT}$.“</strong> Nepotřebuješ ji (a argument by byl zbytečně křehký): $\mathcal{A}$ vrací přípustný okruh a <em>každý</em> okruh tam stojí $\ge rn+1$. Záruka pracuje jen v&nbsp;ANO-případu.</li>
       <li><strong>„Věta zakazuje aproximovat každý TSP.“</strong> NE — jen <em>obecný</em> (nemetrický). Konstruované instance porušují trojúhelníkovou nerovnost; metrický TSP má double-tree 2-aproximaci <a href="l3-9.html">[L3.9]</a> i Christofidesovu 3/2 <a href="l3-10.html">[L3.10]</a>.</li>
       <li><strong>Směr redukce:</strong> pořád HC → TSP („kdybys měl r-aproximaci TSP, rozhodneš HC“). Obrácený převod nedokazuje nic <a href="l3-3.html#takeaways">[L3.3]</a>.</li>
       <li><strong>„$r$ je nějaká konkrétní konstanta.“</strong> Důkaz běží pro <em>libovolné</em> $r \ge 1$ — konstrukce si faktor přečte a roztáhne mezeru na míru. Proto padají všechny faktory najednou.</li>
@@ -170,9 +170,9 @@
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.6</div>
     <ul>
-      <li><strong>Konstrukce (slide 20):</strong> z grafu $G$ pro HC vyrob $K_n$ s cenami $c(\{i,j\}) = 1$ pokud $\{i,j\} \in E(G)$, jinak $2 + (r-1) \cdot n$. Převod je $O(n^2)$, polynomiální.</li>
+      <li><strong>Konstrukce (slide 20):</strong> z&nbsp;grafu $G$ pro HC vyrob $K_n$ s&nbsp;cenami $c(\{i,j\}) = 1$ pokud $\{i,j\} \in E(G)$, jinak $2 + (r-1) \cdot n$. Převod je $O(n^2)$, polynomiální.</li>
       <li><strong>Dva disjunktní intervaly:</strong> HC existuje → $\mathrm{OPT} = n$ a r-aproximace vrátí $J^{\mathcal{A}} \in \langle n, rn\rangle$; HC neexistuje → každý okruh (tedy i výstup $\mathcal{A}$, bez záruky) stojí $\ge (n-1) + 2 + (r-1)n = rn + 1 &gt; rn$.</li>
-      <li><strong>Spor:</strong> porovnáním $J^{\mathcal{A}}$ s prahem $rn$ by polynomiální r-aproximace rozhodla NP-úplný HC v polynomiálním čase → $P = NP$. Pokud $P \ne NP$, žádná polynomiální r-aproximace obecného TSP neexistuje, pro žádné $r \ge 1$.</li>
+      <li><strong>Spor:</strong> porovnáním $J^{\mathcal{A}}$ s&nbsp;prahem $rn$ by polynomiální r-aproximace rozhodla NP-úplný HC v&nbsp;polynomiálním čase → $P = NP$. Pokud $P \ne NP$, žádná polynomiální r-aproximace obecného TSP neexistuje, pro žádné $r \ge 1$.</li>
       <li><strong>„Obecný“ je podstatné:</strong> konstruované instance porušují trojúhelníkovou nerovnost ($1+1 &lt; 2+(r-1)n$) — metrickému TSP věta neškodí, tam fungují double-tree <a href="l3-9.html">[L3.9]</a> a Christofides <a href="l3-10.html">[L3.10]</a>.</li>
     </ul>
   </div>
@@ -183,7 +183,7 @@
       <span class="task-id">T01</span>
       <strong>Likely Nonexistence of r-approximation Algorithm for General TSP</strong>
       <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
-      <span class="task-src">zdroj: zkouška KO 25.5.2026, slot 3 (EN 1:1, oba dochované přepisy znění shodné; = banka #31); řešení dle 06_TSP slidů 19–21, banka řeší variantou ∞/$M$ (zmíněna v závěru)</span>
+      <span class="task-src">zdroj: zkouška KO 25.5.2026, slot 3 (EN 1:1, oba dochované přepisy znění shodné; = banka #31); řešení dle 06_TSP slidů 19–21, banka řeší variantou ∞/$M$ (zmíněna v&nbsp;závěru)</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -191,35 +191,35 @@
         <p>Prove the following statement: assuming that $P \neq NP$ there is no polynomial r-approximation algorithm for Traveling Salesman Problem (TSP). Explain polynomial reduction from <strong>Existence of Hamiltonian Circuit</strong> to prove the statement.</p>
       </div>
 
-      <h4>a) Co je v zadání?</h4>
-      <p>Celý dnešní důkaz „na papír“: důkaz sporem, že polynomiální r-aproximace obecného TSP neexistuje (za předpokladu $P \ne NP$), s výslovně vyžádaným vysvětlením polynomiální redukce z HC. Žádná čísla, žádný konkrétní graf — odevzdává se text důkazu. Zadavatel recykluje: tahle úloha padla 25. 5. 2026 doslova v tomto znění.</p>
+      <h4>a) Co je v&nbsp;zadání?</h4>
+      <p>Celý dnešní důkaz „na papír“: důkaz sporem, že polynomiální r-aproximace obecného TSP neexistuje (za předpokladu $P \ne NP$), s&nbsp;výslovně vyžádaným vysvětlením polynomiální redukce z&nbsp;HC. Žádná čísla, žádný konkrétní graf — odevzdává se text důkazu. Zadavatel recykluje: tahle úloha padla 25.&nbsp;5.&nbsp;2026 doslova v&nbsp;tomto znění.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — konstrukce $1$ / $2+(r-1)n$, analýza obou případů, rozhodovací pravidlo, spor.</li>
-        <li><a href="l3-1.html#takeaways">[L3.1] Co je aproximační algoritmus a faktor r</a> — definice $J^{\mathcal{A}}(I) \le r \cdot J^*(I)$ pro minimalizaci (v ANO-případu ji cituješ).</li>
+        <li><a href="l3-1.html#takeaways">[L3.1] Co je aproximační algoritmus a faktor r</a> — definice $J^{\mathcal{A}}(I) \le r \cdot J^*(I)$ pro minimalizaci (v&nbsp;ANO-případu ji cituješ).</li>
         <li><a href="l3-5.html#takeaways">[L3.5] TSP je silně NP-těžký</a> — šablona redukce a argument „okruh má $n$ hran po $\ge 1$“.</li>
         <li><a href="l3-3.html#takeaways">[L3.3] Hamiltonovská kružnice a NP-úplnost</a> — HC je NP-úplný (na tom spor stojí) a směr redukce.</li>
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Piš jako pět očíslovaných bloků a u každého si zkontroluj „povinnou větu“: (1) <em>strategie</em> — sporem, předpokládej polynomiální r-aproximaci $\mathcal{A}$; (2) <em>konstrukce</em> — vzorec pro $c(\{i,j\})$ + věta „převod je polynomiální“; (3) <em>ANO-případ</em> — $\mathrm{OPT} = n$ (obě nerovnosti!) a ze záruky $J^{\mathcal{A}} \le rn$; (4) <em>NE-případ</em> — každý okruh má drahou hranu → $\ge rn+1$ (zdůrazni, že tady záruku nepotřebuješ); (5) <em>závěr</em> — pravidlo „$J^{\mathcal{A}} \le rn$ ⟺ HC“, polynomiální rozhodovač NP-úplného problému → $P = NP$, spor. Nejčastější ztráta bodů: chybějící zdůvodnění, proč je drahá hrana zrovna $2+(r-1)n$ — ukaž výpočet $(n-1)+2+(r-1)n = rn+1$.</p>
+      <p>Piš jako pět očíslovaných bloků a u&nbsp;každého si zkontroluj „povinnou větu“: (1) <em>strategie</em> — sporem, předpokládej polynomiální r-aproximaci $\mathcal{A}$; (2) <em>konstrukce</em> — vzorec pro $c(\{i,j\})$ + věta „převod je polynomiální“; (3) <em>ANO-případ</em> — $\mathrm{OPT} = n$ (obě nerovnosti!) a ze záruky $J^{\mathcal{A}} \le rn$; (4) <em>NE-případ</em> — každý okruh má drahou hranu → $\ge rn+1$ (zdůrazni, že tady záruku nepotřebuješ); (5) <em>závěr</em> — pravidlo „$J^{\mathcal{A}} \le rn$ ⟺ HC“, polynomiální rozhodovač NP-úplného problému → $P = NP$, spor. Nejčastější ztráta bodů: chybějící zdůvodnění, proč je drahá hrana zrovna $2+(r-1)n$ — ukaž výpočet $(n-1)+2+(r-1)n = rn+1$.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (dle slidů 19–21)</summary>
         <div class="inner">
-          <p><strong>(1) Strategie (slide 19).</strong> Důkaz sporem. Předpokládejme, že existuje polynomiální r-aproximační algoritmus $\mathcal{A}$ pro TSP, $r \ge 1$, tj. pro každou instanci vrátí přípustný okruh s cenou $J^{\mathcal{A}} \le r \cdot \mathrm{OPT}$. Ukážeme, že pomocí takto „nepřesného“ $\mathcal{A}$ umíme polynomiálně rozhodnout NP-úplný problém HC, takže $P = NP$ — spor s předpokladem.</p>
-          <p><strong>(2) Konstrukce (slide 20).</strong> Nechť $G$ je neorientovaný graf s $n$ vrcholy, v němž chceme rozhodnout existenci Hamiltonovské kružnice. Sestavíme instanci TSP: každý vrchol $G$ odpovídá jednomu vrcholu (městu) úplného grafu $K_n$ a cena hrany $\{i,j\}$ v $K_n$ je
+          <p><strong>(1) Strategie (slide 19).</strong> Důkaz sporem. Předpokládejme, že existuje polynomiální r-aproximační algoritmus $\mathcal{A}$ pro TSP, $r \ge 1$, tj. pro každou instanci vrátí přípustný okruh s&nbsp;cenou $J^{\mathcal{A}} \le r \cdot \mathrm{OPT}$. Ukážeme, že pomocí takto „nepřesného“ $\mathcal{A}$ umíme polynomiálně rozhodnout NP-úplný problém HC, takže $P = NP$ — spor s&nbsp;předpokladem.</p>
+          <p><strong>(2) Konstrukce (slide 20).</strong> Nechť $G$ je neorientovaný graf s&nbsp;$n$ vrcholy, v němž chceme rozhodnout existenci Hamiltonovské kružnice. Sestavíme instanci TSP: každý vrchol $G$ odpovídá jednomu vrcholu (městu) úplného grafu $K_n$ a cena hrany $\{i,j\}$ v&nbsp;$K_n$ je
           $$c(\{i,j\}) = \begin{cases} 1 & \text{if } \{i,j\} \in E(G); \\ 2 + (r-1) \ast n & \text{if } \{i,j\} \notin E(G). \end{cases}$$
-          Převod jen ohodnotí $\binom{n}{2}$ dvojic — čas $O(n^2)$, polynomiální; odpověď HC k němu nepotřebuje.</p>
-          <p><strong>(3) ANO-případ.</strong> Má-li $G$ Hamiltonovskou kružnici, tentýž okruh v $K_n$ používá jen hrany ceny 1 a stojí $n$; a každý okruh má $n$ hran po aspoň 1, takže $\mathrm{OPT} = n$. Algoritmus $\mathcal{A}$ pak vrátí hodnotu v intervalu
+          Převod jen ohodnotí $\binom{n}{2}$ dvojic — čas $O(n^2)$, polynomiální; odpověď HC k&nbsp;němu nepotřebuje.</p>
+          <p><strong>(3) ANO-případ.</strong> Má-li $G$ Hamiltonovskou kružnici, tentýž okruh v&nbsp;$K_n$ používá jen hrany ceny 1 a stojí $n$; a každý okruh má $n$ hran po aspoň 1, takže $\mathrm{OPT} = n$. Algoritmus $\mathcal{A}$ pak vrátí hodnotu v&nbsp;intervalu
           $$n \;\le\; J^{\mathcal{A}} \;\le\; r \cdot \mathrm{OPT} = r \ast n.$$</p>
-          <p><strong>(4) NE-případ.</strong> Nemá-li $G$ Hamiltonovskou kružnici, žádný okruh v $K_n$ nemůže používat jen hrany ceny 1 (byl by to HC v $G$). Každý okruh tedy obsahuje aspoň jednu hranu ceny $2+(r-1)n$ a stojí aspoň
+          <p><strong>(4) NE-případ.</strong> Nemá-li $G$ Hamiltonovskou kružnici, žádný okruh v&nbsp;$K_n$ nemůže používat jen hrany ceny 1 (byl by to HC v&nbsp;$G$). Každý okruh tedy obsahuje aspoň jednu hranu ceny $2+(r-1)n$ a stojí aspoň
           $$(n-1) + 2 + (r-1) \ast n = r \ast n + 1.$$
           Výstup $\mathcal{A}$ je cena skutečného okruhu, takže $J^{\mathcal{A}} \ge rn + 1 &gt; rn$ — zde aproximační záruka není potřeba.</p>
-          <p><strong>(5) Závěr (slidy 20–21).</strong> Intervaly $\langle n, rn\rangle$ a $\langle rn+1, \infty)$ jsou disjunktní, takže rozhodneme: je-li výsledek $\mathcal{A}$ v intervalu $\langle n, r \ast n\rangle$, Hamiltonovská kružnice existuje; jinak je výsledek $\ge rn+1$ a $G$ Hamiltonovskou kružnici nemá. Sestavení instance i běh $\mathcal{A}$ jsou polynomiální — rozhodli jsme NP-úplný problém HC v polynomiálním čase, tedy $P = NP$. To odporuje předpokladu $P \ne NP$; polynomiální r-aproximační algoritmus pro obecný TSP tedy neexistuje pro žádné $r \ge 1$. $\blacksquare$</p>
+          <p><strong>(5) Závěr (slidy 20–21).</strong> Intervaly $\langle n, rn\rangle$ a $\langle rn+1, \infty)$ jsou disjunktní, takže rozhodneme: je-li výsledek $\mathcal{A}$ v&nbsp;intervalu $\langle n, r \ast n\rangle$, Hamiltonovská kružnice existuje; jinak je výsledek $\ge rn+1$ a $G$ Hamiltonovskou kružnici nemá. Sestavení instance i běh $\mathcal{A}$ jsou polynomiální — rozhodli jsme NP-úplný problém HC v&nbsp;polynomiálním čase, tedy $P = NP$. To odporuje předpokladu $P \ne NP$; polynomiální r-aproximační algoritmus pro obecný TSP tedy neexistuje pro žádné $r \ge 1$. $\blacksquare$</p>
           <p><strong>Poznámka (vzorové řešení banky #31):</strong> ekvivalentně lze chybějícím hranám dát cenu $\infty$, resp. formálně konečné $M = \lceil rn\rceil + 1$; práh zůstává „$J^{\mathcal{A}} \le rn \iff$ HC existuje“ a myšlenka důkazu se nemění.</p>
-          <p><strong>Krátká zkoušková odpověď (kostra, kterou rozepíšeš):</strong> ① sporem: nechť polynomiální r-aproximace $\mathcal{A}$ existuje; ② redukce HC → TSP: $K_n$, $c = 1$ pro hrany $G$, jinak $2+(r-1)n$, převod $O(n^2)$; ③ HC ano → $\mathrm{OPT} = n$ → $J^{\mathcal{A}} \le rn$; ④ HC ne → každý okruh $\ge (n-1)+2+(r-1)n = rn+1$; ⑤ porovnání $J^{\mathcal{A}}$ s $rn$ rozhodne HC polynomiálně → $P = NP$, spor. Výpočet $rn+1$ v kroku ④ <u>výslovně</u> ukaž.</p>
+          <p><strong>Krátká zkoušková odpověď (kostra, kterou rozepíšeš):</strong> ① sporem: nechť polynomiální r-aproximace $\mathcal{A}$ existuje; ② redukce HC → TSP: $K_n$, $c = 1$ pro hrany $G$, jinak $2+(r-1)n$, převod $O(n^2)$; ③ HC ano → $\mathrm{OPT} = n$ → $J^{\mathcal{A}} \le rn$; ④ HC ne → každý okruh $\ge (n-1)+2+(r-1)n = rn+1$; ⑤ porovnání $J^{\mathcal{A}}$ s&nbsp;$rn$ rozhodne HC polynomiálně → $P = NP$, spor. Výpočet $rn+1$ v&nbsp;kroku ④ <u>výslovně</u> ukaž.</p>
         </div>
       </details>
     </div>
@@ -227,7 +227,7 @@
 
   <div class="box foto">
     <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
-    <p>Tenhle důkaz napiš celý NA PAPÍR (bez koukání do řešení i do lekce — u zkoušky ho píšeš zpaměti, 25. 5. 2026 padl doslova) a pošli mi fotku. Zkontroluju strukturu (sporem → konstrukce → ANO/NE případy → práh → $P = NP$), vzorec $2+(r-1)n$ s výpočtem $rn+1$ a to, jestli máš v ANO-případu citovanou aproximační záruku a v NE-případu argument „každý okruh má drahou hranu“.</p>
+    <p>Tenhle důkaz napiš celý NA PAPÍR (bez koukání do řešení i do lekce — u&nbsp;zkoušky ho píšeš zpaměti, 25.&nbsp;5.&nbsp;2026 padl doslova) a pošli mi fotku. Zkontroluju strukturu (sporem → konstrukce → ANO/NE případy → práh → $P = NP$), vzorec $2+(r-1)n$ s&nbsp;výpočtem $rn+1$ a to, jestli máš v&nbsp;ANO-případu citovanou aproximační záruku a v&nbsp;NE-případu argument „každý okruh má drahou hranu“.</p>
   </div>
 
   <label class="done-toggle" data-lesson-id="L3.6">
