@@ -33,10 +33,10 @@
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
-    <strong>Vrcholy s bilancemi $b(v)$ — zdroje a spotřebiče přímo v uzlech — a rozhodnutí, zda přípustný tok existuje.</strong> Síť s mnoha zdroji a mnoha spotřebiči převedeš na obyčejný max flow: přidáš super-zdroj a super-stok s hranami podle $b(v)$ a odpověď ANO/NE přečteš z toho, zda maximální tok <strong>nasytí všechny b-hrany</strong>.
+    <strong>Vrcholy s&nbsp;bilancemi $b(v)$ — zdroje a spotřebiče přímo v&nbsp;uzlech — a rozhodnutí, zda přípustný tok existuje.</strong> Síť s&nbsp;mnoha zdroji a mnoha spotřebiči převedeš na obyčejný max flow: přidáš super-zdroj a super-stok s&nbsp;hranami podle $b(v)$ a odpověď ANO/NE přečteš z&nbsp;toho, zda maximální tok <strong>nasytí všechny b-hrany</strong>.
   </div>
 
-  <p>Zatím měla každá síť jediný zdroj $s$ a jediný stok $t$ a všude jinde platil Kirchhoffův zákon (<a href="l4-1.html#takeaways">[L4.1]</a>). Reálné úlohy ale vypadají jinak: tři rafinerie <em>vyrábějí</em>, čtyři města <em>spotřebovávají</em> a potrubí mezi nimi má omezené kapacity. Žádné $s$, žádné $t$ — jen uzly, které chtějí mít předepsaný přebytek nebo schodek. Dnes se naučíš tuhle úlohu (slidy 21–23) <em>rozhodnout</em>: existuje tok, který všechny bilance splní? Stejný převod budeš za chvíli potřebovat jako vnitřek konstrukce počátečního přípustného toku v <a href="l4-7.html">[L4.7]</a> a u matrix rounding v <a href="l4-8.html">[L4.8]</a> — a bilance $b(v)$ se znovu objeví v definici minimum cost flow <a href="l4-10.html">[L4.10]</a>.</p>
+  <p>Zatím měla každá síť jediný zdroj $s$ a jediný stok $t$ a všude jinde platil Kirchhoffův zákon (<a href="l4-1.html#takeaways">[L4.1]</a>). Reálné úlohy ale vypadají jinak: tři rafinerie <em>vyrábějí</em>, čtyři města <em>spotřebovávají</em> a potrubí mezi nimi má omezené kapacity. Žádné $s$, žádné $t$ — jen uzly, které chtějí mít předepsaný přebytek nebo schodek. Dnes se naučíš tuhle úlohu (slidy 21–23) <em>rozhodnout</em>: existuje tok, který všechny bilance splní? Stejný převod budeš za chvíli potřebovat jako vnitřek konstrukce počátečního přípustného toku v&nbsp;<a href="l4-7.html">[L4.7]</a> a u&nbsp;matrix rounding v&nbsp;<a href="l4-8.html">[L4.8]</a> — a bilance $b(v)$ se znovu objeví v&nbsp;definici minimum cost flow <a href="l4-10.html">[L4.10]</a>.</p>
 
   <!-- ===== SEKCE 1: MOTIVACE ===== -->
   <h2>Víc zdrojů, víc spotřebičů (slide 22)</h2>
@@ -50,11 +50,11 @@
   <details class="try">
     <summary>Zkus sám: čím se taková síť liší od sítě $(G, l, u, s, t)$ z <a href="l4-1.html#takeaways">[L4.1]</a>? Můžeš na ni rovnou pustit Ford-Fulkersona?</summary>
     <div class="inner">
-      <p>Nemůžeš — chybí jediný zdroj a jediný stok. A hlavně: dodavatelské uzly Kirchhoffův zákon <em>porušují schválně</em> — dodavatel $A_i$ má víc odtéct, než přiteče (vyrábí), spotřebiteli $B_j$ má naopak víc přitéct (spotřebovává). Potřebujeme tedy nejdřív nový jazyk, jak „chtěný přebytek“ uzlu zapsat, a pak trik, jak úlohu vrátit do světa max flow, kde už umíme všechno z <a href="l4-3.html#takeaways">[L4.3]</a>–<a href="l4-4.html#takeaways">[L4.4]</a>.</p>
+      <p>Nemůžeš — chybí jediný zdroj a jediný stok. A hlavně: dodavatelské uzly Kirchhoffův zákon <em>porušují schválně</em> — dodavatel $A_i$ má víc odtéct, než přiteče (vyrábí), spotřebiteli $B_j$ má naopak víc přitéct (spotřebovává). Potřebujeme tedy nejdřív nový jazyk, jak „chtěný přebytek“ uzlu zapsat, a pak trik, jak úlohu vrátit do světa max flow, kde už umíme všechno z&nbsp;<a href="l4-3.html#takeaways">[L4.3]</a>–<a href="l4-4.html#takeaways">[L4.4]</a>.</p>
     </div>
   </details>
 
-  <p>Tady je konkrétní mini-instance, na které budeme celou lekci pracovat (vlastní, přiznáno — slide 22 má větší obrázek se třemi dodavateli a čtyřmi spotřebiteli, jeho kapacity se v přepisu nedochovaly):</p>
+  <p>Tady je konkrétní mini-instance, na které budeme celou lekci pracovat (vlastní, přiznáno — slide 22 má větší obrázek se třemi dodavateli a čtyřmi spotřebiteli, jeho kapacity se v&nbsp;přepisu nedochovaly):</p>
 
   <div class="viz" id="viz-instance"></div>
 
@@ -64,7 +64,7 @@
   <details class="try">
     <summary>Zkus sám: jak jedinou rovnicí říct „uzel $v$ vyrobí $b(v)$ jednotek“? (Nápověda: uprav Kirchhoffa z <a href="l4-1.html#takeaways">[L4.1]</a> — co se musí změnit na pravé straně?)</summary>
     <div class="inner">
-      <p>Kirchhoff říká $\sum_{e \in \delta^+(v)} f(e) - \sum_{e \in \delta^-(v)} f(e) = 0$ — co odteče, to přiteklo. Výroba znamená, že odtéct má o $b(v)$ <em>víc</em>: na pravou stranu napíšeš $b(v)$ místo nuly. Spotřeba je totéž se záporným $b(v)$ (víc přiteče, než odteče). Kirchhoffův zákon je tedy speciální případ $b(v) = 0$.</p>
+      <p>Kirchhoff říká $\sum_{e \in \delta^+(v)} f(e) - \sum_{e \in \delta^-(v)} f(e) = 0$ — co odteče, to přiteklo. Výroba znamená, že odtéct má o&nbsp;$b(v)$ <em>víc</em>: na pravou stranu napíšeš $b(v)$ místo nuly. Spotřeba je totéž se záporným $b(v)$ (víc přiteče, než odteče). Kirchhoffův zákon je tedy speciální případ $b(v) = 0$.</p>
     </div>
   </details>
 
@@ -75,12 +75,12 @@
     <p><em><strong>Goal:</strong> Decide if there exists a feasible flow $f$ which satisfies $\sum_{e \in \delta^+(v)} f(e) - \sum_{e \in \delta^-(v)} f(e) = b(v)$ for all $v \in G(V)$.</em></p>
   </div>
 
-  <p>Slovník: $b(v) &gt; 0$ = <strong>supply</strong> (dodavatel, zdroj), $b(v) &lt; 0$ = <strong>consumption</strong> (spotřebič), $b(v) = 0$ = průtokový uzel s obyčejným Kirchhoffem. Všimni si dvou věcí: je to <strong>rozhodovací úloha</strong> (decision problem) — odpověď je ANO/NE, nic se nemaximalizuje — a v instanci není žádné $s$ ani $t$.</p>
+  <p>Slovník: $b(v) &gt; 0$ = <strong>supply</strong> (dodavatel, zdroj), $b(v) &lt; 0$ = <strong>consumption</strong> (spotřebič), $b(v) = 0$ = průtokový uzel s&nbsp;obyčejným Kirchhoffem. Všimni si dvou věcí: je to <strong>rozhodovací úloha</strong> (decision problem) — odpověď je ANO/NE, nic se nemaximalizuje — a v&nbsp;instanci není žádné $s$ ani $t$.</p>
 
   <details class="try">
     <summary>Zkus sám: proč definice vyžaduje $\sum_{v} b(v) = 0$? Co by se stalo bez toho?</summary>
     <div class="inner">
-      <p>Sečti bilanční rovnice přes všechny vrcholy: každá hrana $e = (x, y)$ se v součtu objeví dvakrát — jednou s $+f(e)$ (odchází z $x$), jednou s $-f(e)$ (přichází do $y$) — takže levá strana je vždy $0$. Pravá strana je $\sum_v b(v)$. Kdyby součet bilancí nebyl nulový, rovnice si protiřečí a tok nemůže existovat <em>pro žádné kapacity</em> — celková výroba se musí rovnat celkové spotřebě. V mini-instanci: $2 + 3 - 4 - 1 = 0$ ✓. (Tohle si u zkoušky vždycky zkontroluj jako první.)</p>
+      <p>Sečti bilanční rovnice přes všechny vrcholy: každá hrana $e = (x, y)$ se v součtu objeví dvakrát — jednou s&nbsp;$+f(e)$ (odchází z&nbsp;$x$), jednou s&nbsp;$-f(e)$ (přichází do $y$) — takže levá strana je vždy $0$. Pravá strana je $\sum_v b(v)$. Kdyby součet bilancí nebyl nulový, rovnice si protiřečí a tok nemůže existovat <em>pro žádné kapacity</em> — celková výroba se musí rovnat celkové spotřebě. V&nbsp;mini-instanci: $2 + 3 - 4 - 1 = 0$ ✓. (Tohle si u zkoušky vždycky zkontroluj jako první.)</p>
     </div>
   </details>
 
@@ -88,9 +88,9 @@
   <h2>Redukce na max flow: super-zdroj a super-stok (slide 23)</h2>
 
   <details class="try">
-    <summary>Zkus sám: max flow umí vynutit jen Kirchhoffa ($b \equiv 0$ všude mimo $s, t$). Jak donutit uzel $A_1$, aby měl přebytek $+2$? (Nápověda: přebytek nemusí vznikat „z ničeho“ — může odněkud <em>přitéct</em>.)</summary>
+    <summary>Zkus sám: max flow umí vynutit jen Kirchhoffa ($b \equiv 0$ všude mimo $s, t$). Jak donutit uzel $A_1$, aby měl přebytek $+2$? (Nápověda: přebytek nemusí vznikat „z&nbsp;ničeho“ — může odněkud <em>přitéct</em>.)</summary>
     <div class="inner">
-      <p>Přivedeš mu ty $2$ jednotky zvenku: nový super-zdroj $s'$ a hrana $s' \to A_1$ s kapacitou $u = 2$. Když po ní poteče přesně $2$, Kirchhoff v $A_1$ (v rozšířené síti) říká „co přiteklo, odteče“ — a v <em>původní</em> síti to vypadá, jako by $A_1$ dvě jednotky vyrobil. Symetricky spotřebič $B_1$ dostane odvod $B_1 \to t'$ s kapacitou $-b(B_1) = 4$ do super-stoku. Z bilancí se tak stanou obyčejné hrany — a zbývá jediná otázka: jak zařídit, aby po b-hranách teklo <strong>přesně</strong> $b(v)$, když kapacita umí říct jen „nejvýš“? Stejný tah jako v <a href="l4-5.html#takeaways">[L4.5]</a>: „přesně“ = „nejvýš“ + požadavek nasycení.</p>
+      <p>Přivedeš mu ty $2$ jednotky zvenku: nový super-zdroj $s'$ a hrana $s' \to A_1$ s&nbsp;kapacitou $u = 2$. Když po ní poteče přesně $2$, Kirchhoff v&nbsp;$A_1$ (v&nbsp;rozšířené síti) říká „co přiteklo, odteče“ — a v&nbsp;<em>původní</em> síti to vypadá, jako by $A_1$ dvě jednotky vyrobil. Symetricky spotřebič $B_1$ dostane odvod $B_1 \to t'$ s&nbsp;kapacitou $-b(B_1) = 4$ do super-stoku. Z&nbsp;bilancí se tak stanou obyčejné hrany — a zbývá jediná otázka: jak zařídit, aby po b-hranách teklo <strong>přesně</strong> $b(v)$, když kapacita umí říct jen „nejvýš“? Stejný tah jako v&nbsp;<a href="l4-5.html#takeaways">[L4.5]</a>: „přesně“ = „nejvýš“ + požadavek nasycení.</p>
     </div>
   </details>
 
@@ -105,15 +105,15 @@
     </ol>
   </div>
 
-  <p>(Slide nové uzly pojmenovává $s$ a $t$; my budeme psát $s'$ a $t'$ — jednak je to jméno, které uvidíš na slidu 27 a v <a href="l4-7.html">[L4.7]</a>, jednak se pak neplete s případným původním $s, t$ v grafu.) Takhle dopadne mini-instance po redukci:</p>
+  <p>(Slide nové uzly pojmenovává $s$ a $t$; my budeme psát $s'$ a $t'$ — jednak je to jméno, které uvidíš na slidu 27 a v&nbsp;<a href="l4-7.html">[L4.7]</a>, jednak se pak neplete s&nbsp;případným původním $s, t$ v&nbsp;grafu.) Takhle dopadne mini-instance po redukci:</p>
 
   <div class="viz" id="viz-reduced"></div>
 
   <details class="try">
     <summary>Zkus sám: proč je nasycení všech hran ze $s'$ správné kritérium? Rozmysli si obě strany ekvivalence.</summary>
     <div class="inner">
-      <p><strong>(⇐)</strong> Když max tok nasytí všechny hrany ze $s'$, teče do každého dodavatele $A_i$ přesně $b(A_i)$ zvenku. Kirchhoff v $A_i$ (rozšířená síť) pak dává: odtok do původních hran $-$ přítok z původních hran $= b(A_i)$ — přesně bilanční rovnice. Stejně u spotřebičů (nasycený odvod $-b(B_j)$ do $t'$; díky $\sum_v b(v) = 0$ se nasytí obě strany naráz, viz další otázka) a uzly s $b = 0$ mají čistého Kirchhoffa. Restrikce maximálního toku na původní hrany je tedy hledaný přípustný tok s bilancemi — odpověď ANO.
-      <strong>(⇒)</strong> Naopak z přípustného toku $f$ s bilancemi vyrobíš tok v rozšířené síti: na původních hranách nech $f$, na b-hranách pošli $f(s' \to v) = b(v)$ a $f(v \to t') = -b(v)$ — bilanční rovnice říkají přesně to, že Kirchhoff teď platí všude. Tenhle tok má hodnotu $B := \sum_{v:\,b(v)&gt;0} b(v)$ a víc nejde: řez $A = \{s'\}$ má kapacitu $C(A) = B$, takže $|f| \le B$ pro každý tok (slabá dualita <a href="l4-4.html#takeaways">[L4.4]</a>). Je to tedy maximální tok a b-hrany jsou nasycené. <em>(Rozepsání ekvivalence je vlastní — slide 23 uvádí jen kritérium.)</em></p>
+      <p><strong>(⇐)</strong> Když max tok nasytí všechny hrany ze $s'$, teče do každého dodavatele $A_i$ přesně $b(A_i)$ zvenku. Kirchhoff v&nbsp;$A_i$ (rozšířená síť) pak dává: odtok do původních hran $-$ přítok z&nbsp;původních hran $= b(A_i)$ — přesně bilanční rovnice. Stejně u&nbsp;spotřebičů (nasycený odvod $-b(B_j)$ do $t'$; díky $\sum_v b(v) = 0$ se nasytí obě strany naráz, viz další otázka) a uzly s&nbsp;$b = 0$ mají čistého Kirchhoffa. Restrikce maximálního toku na původní hrany je tedy hledaný přípustný tok s&nbsp;bilancemi — odpověď ANO.
+      <strong>(⇒)</strong> Naopak z&nbsp;přípustného toku $f$ s&nbsp;bilancemi vyrobíš tok v&nbsp;rozšířené síti: na původních hranách nech $f$, na b-hranách pošli $f(s' \to v) = b(v)$ a $f(v \to t') = -b(v)$ — bilanční rovnice říkají přesně to, že Kirchhoff teď platí všude. Tenhle tok má hodnotu $B := \sum_{v:\,b(v)&gt;0} b(v)$ a víc nejde: řez $A = \{s'\}$ má kapacitu $C(A) = B$, takže $|f| \le B$ pro každý tok (slabá dualita <a href="l4-4.html#takeaways">[L4.4]</a>). Je to tedy maximální tok a b-hrany jsou nasycené. <em>(Rozepsání ekvivalence je vlastní — slide 23 uvádí jen kritérium.)</em></p>
     </div>
   </details>
 
@@ -127,19 +127,19 @@
   <!-- ===== SEKCE 4: BĚH ===== -->
   <h2>Naživo: rozhodnutí Ford-Fulkersonem</h2>
 
-  <p>Po redukci je to obyčejná síť s $l \equiv 0$, takže Ford-Fulkerson <a href="l4-3.html#takeaways">[L4.3]</a> může vystartovat z nulového toku. Proklikej si běh na mini-instanci (popisek hrany $= l, f, u$):</p>
+  <p>Po redukci je to obyčejná síť s&nbsp;$l \equiv 0$, takže Ford-Fulkerson <a href="l4-3.html#takeaways">[L4.3]</a> může vystartovat z&nbsp;nulového toku. Proklikej si běh na mini-instanci (popisek hrany $= l, f, u$):</p>
 
   <div class="viz" id="viz-ffrun"></div>
 
   <!-- ===== SEKCE 5: DOLNÍ MEZE ===== -->
   <h2>A co dolní meze $l(e)$?</h2>
 
-  <p>Definice na slidu 21 dolní meze $l : E(G) \to \mathbb{R}^+_0$ připouští — ale všimni si, že <em>nové</em> b-hrany je v redukci dostávají nulové, a celý krok 3 („solve the maximum flow problem“) je pohodlný jen tehdy, když $l \equiv 0$ i na původních hranách: pak je nulový tok přípustný start pro F-F (<a href="l4-1.html#takeaways">[L4.1]</a>). Kdyby původní síť měla $l(e) &gt; 0$, k řešení max flow bys nejdřív potřeboval počáteční přípustný tok — což je přesně úloha, kvůli které se tohle všechno učíme. Vtip příští lekce <a href="l4-7.html">[L4.7]</a>: substituce $f(e) = f'(e) + l(e)$ umí nenulové dolní meze <em>převést na bilance</em> $b(v)$ s nulovými $l$ — a pak zavoláš dnešní redukci. Proto se „feasible flow with balances“ probírá s $l \equiv 0$ a proto je to stavební kámen, ne okrajová kuriozita.</p>
+  <p>Definice na slidu 21 dolní meze $l : E(G) \to \mathbb{R}^+_0$ připouští — ale všimni si, že <em>nové</em> b-hrany je v&nbsp;redukci dostávají nulové, a celý krok 3 („solve the maximum flow problem“) je pohodlný jen tehdy, když $l \equiv 0$ i na původních hranách: pak je nulový tok přípustný start pro F-F (<a href="l4-1.html#takeaways">[L4.1]</a>). Kdyby původní síť měla $l(e) &gt; 0$, k&nbsp;řešení max flow bys nejdřív potřeboval počáteční přípustný tok — což je přesně úloha, kvůli které se tohle všechno učíme. Vtip příští lekce <a href="l4-7.html">[L4.7]</a>: substituce $f(e) = f'(e) + l(e)$ umí nenulové dolní meze <em>převést na bilance</em> $b(v)$ s&nbsp;nulovými $l$ — a pak zavoláš dnešní redukci. Proto se „feasible flow with balances“ probírá s&nbsp;$l \equiv 0$ a proto je to stavební kámen, ne okrajová kuriozita.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
     <p><strong>1) „$b(v)$ je kapacita vrcholu.“</strong> Není — bilance je <em>rovnost</em> (uzel musí mít přebytek <strong>přesně</strong> $b(v)$), zatímco kapacita říká „nejvýš“. Rovnost vynutíš až kombinací „kapacita $b(v)$ na b-hraně“ + „požadavek nasycení“.
-    <strong>2) „Když přípustný tok neexistuje, algoritmus selže.“</strong> Neselže — maximální tok v rozšířené síti existuje <em>vždy</em>. Odpověď NE poznáš jedině porovnáním $|f_{\max}| &lt; B = \sum_{b(v)&gt;0} b(v)$; bez věty „přípustný tok existuje $\iff$ max tok nasytí b-hrany“ je formulace u zkoušky neúplná (stejná past jako v <a href="l4-5.html#takeaways">[L4.5]</a>). A min řez z posledního značkování <a href="l4-4.html#takeaways">[L4.4]</a> je certifikát, kudy vede úzké hrdlo.
+    <strong>2) „Když přípustný tok neexistuje, algoritmus selže.“</strong> Neselže — maximální tok v&nbsp;rozšířené síti existuje <em>vždy</em>. Odpověď NE poznáš jedině porovnáním $|f_{\max}| &lt; B = \sum_{b(v)&gt;0} b(v)$; bez věty „přípustný tok existuje $\iff$ max tok nasytí b-hrany“ je formulace u&nbsp;zkoušky neúplná (stejná past jako v&nbsp;<a href="l4-5.html#takeaways">[L4.5]</a>). A min řez z&nbsp;posledního značkování <a href="l4-4.html#takeaways">[L4.4]</a> je certifikát, kudy vede úzké hrdlo.
     <strong>3) Zapomenutá kontrola $\sum_v b(v) = 0$.</strong> Když součet nevyjde nulový, je odpověď NE okamžitě (rovnice si protiřečí) — žádnou síť stavět nemusíš.</p>
   </div>
 
@@ -148,10 +148,10 @@
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.6</div>
     <ul>
       <li><strong>Instance $(G, l, u, b)$:</strong> bilance $b(v)$ nahrazuje Kirchhoffa — $\sum_{\delta^+} f - \sum_{\delta^-} f = b(v)$; $b &gt; 0$ supply, $b &lt; 0$ consumption, $b = 0$ průtokový uzel. Nutně $\sum_v b(v) = 0$ (sečti rovnice — každá hrana se vyruší).</li>
-      <li><strong>Redukce na max flow (slide 23):</strong> super-zdroj $s'$ s hranami $(s', v)$, $u = b(v)$, pro $b(v) &gt; 0$; super-stok $t'$ s hranami $(v, t')$, $u = -b(v)$, pro $b(v) &lt; 0$; všechny nové $l = 0$.</li>
-      <li><strong>Kritérium:</strong> přípustný tok s bilancemi existuje $\iff$ maximální tok nasytí všechny b-hrany, tj. $|f_{\max}| = B = \sum_{b(v)&gt;0} b(v)$. Hrany ze $s'$ a do $t'$ se díky $\sum_v b(v) = 0$ nasytí naráz („and/or“). Víc než $B$ tok mít nemůže (řez $A = \{s'\}$).</li>
+      <li><strong>Redukce na max flow (slide 23):</strong> super-zdroj $s'$ s&nbsp;hranami $(s', v)$, $u = b(v)$, pro $b(v) &gt; 0$; super-stok $t'$ s&nbsp;hranami $(v, t')$, $u = -b(v)$, pro $b(v) &lt; 0$; všechny nové $l = 0$.</li>
+      <li><strong>Kritérium:</strong> přípustný tok s&nbsp;bilancemi existuje $\iff$ maximální tok nasytí všechny b-hrany, tj. $|f_{\max}| = B = \sum_{b(v)&gt;0} b(v)$. Hrany ze $s'$ a do $t'$ se díky $\sum_v b(v) = 0$ nasytí naráz („and/or“). Víc než $B$ tok mít nemůže (řez $A = \{s'\}$).</li>
       <li><strong>Čtení výsledku:</strong> ANO → restrikce max toku na původní hrany je hledaný tok; NE → $|f_{\max}| &lt; B$ a min řez je certifikát.</li>
-      <li><strong>Role v kapitole:</strong> s $l \equiv 0$ startuje F-F z nuly; nenulové dolní meze se v <a href="l4-7.html">[L4.7]</a> substitucí $f = f' + l$ převedou právě na tuhle úlohu.</li>
+      <li><strong>Role v&nbsp;kapitole:</strong> s&nbsp;$l \equiv 0$ startuje F-F z&nbsp;nuly; nenulové dolní meze se v&nbsp;<a href="l4-7.html">[L4.7]</a> substitucí $f = f' + l$ převedou právě na tuhle úlohu.</li>
     </ul>
   </div>
 
@@ -171,29 +171,29 @@
         <p>Otázky (vlastní, přiznáno): (i) describe the polynomial reduction to the Maximum Flow problem, (ii) state the criterion that decides YES/NO, (iii) justify both directions of the criterion.</p>
       </div>
 
-      <h4>a) Co je v zadání?</h4>
-      <p>Učebnicová „state &amp; explain“ úloha ze slidů 21 a 23: síť bez $s, t$, zato s bilancemi $b(v)$ na vrcholech. Máš předvést převod na max flow (jeden zdroj, jeden stok) a vysvětlit, jak se z hodnoty maximálního toku přečte odpověď rozhodovací úlohy.</p>
+      <h4>a) Co je v&nbsp;zadání?</h4>
+      <p>Učebnicová „state &amp; explain“ úloha ze slidů 21 a 23: síť bez $s, t$, zato s&nbsp;bilancemi $b(v)$ na vrcholech. Máš předvést převod na max flow (jeden zdroj, jeden stok) a vysvětlit, jak se z&nbsp;hodnoty maximálního toku přečte odpověď rozhodovací úlohy.</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — definice, redukce, kritérium nasycení (<a href="#takeaways">takeaways</a>).</li>
         <li><a href="l4-1.html#takeaways">[L4.1]</a> — Kirchhoff, hodnota toku $|f|$ měřená na řezu.</li>
         <li><a href="l4-4.html#takeaways">[L4.4]</a> — slabá dualita $|f| \le C(A)$ pro horní odhad $B$.</li>
-        <li><a href="l4-3.html#takeaways">[L4.3]</a> — čím se max flow v kroku 3 vyřeší.</li>
+        <li><a href="l4-3.html#takeaways">[L4.3]</a> — čím se max flow v&nbsp;kroku 3 vyřeší.</li>
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Drž osnovu z lekce: (i) co udělají bilance s Kirchhoffem? (ii) jak se z „uzel vyrábí“ stane „uzlu se dodává“ — kam vedou nové hrany a jaké mají meze? (iii) proč kapacita $b(v)$ + nasycení = rovnost? U zdůvodnění (⇐) použij Kirchhoffa v rozšířené síti; u (⇒) sestav tok hodnoty $B$ a zastrop ho řezem $\{s'\}$.</p>
+      <p>Drž osnovu z&nbsp;lekce: (i) co udělají bilance s&nbsp;Kirchhoffem? (ii) jak se z&nbsp;„uzel vyrábí“ stane „uzlu se dodává“ — kam vedou nové hrany a jaké mají meze? (iii) proč kapacita $b(v)$ + nasycení = rovnost? U&nbsp;zdůvodnění (⇐) použij Kirchhoffa v&nbsp;rozšířené síti; u&nbsp;(⇒) sestav tok hodnoty $B$ a zastrop ho řezem $\{s'\}$.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení</summary>
         <div class="inner">
-          <p><strong>(i) Redukce (slide 23, 1:1 postup).</strong> 1. Přidej nový uzel $s'$ (source) a hrany $(s', v)$ s $l = 0$, $u = b(v)$ pro každý uzel s $b(v) &gt; 0$. 2. Přidej nový uzel $t'$ (sink) a hrany $(v, t')$ s $l = 0$, $u = -b(v)$ pro každý uzel s $b(v) &lt; 0$. 3. Vyřeš maximum flow problem ze $s'$ do $t'$ (původní hrany si nechají své meze $l, u$; při $l \equiv 0$ stačí F-F z nulového toku, <a href="l4-3.html#takeaways">[L4.3]</a>). Konstrukce je polynomiální: přidá $2$ uzly a nejvýš $|V|$ hran.</p>
-          <p><strong>(ii) Kritérium (slide 23, krok 4).</strong> Přípustný tok s bilancemi existuje $\iff$ maximální tok nasytí všechny hrany vycházející ze $s'$ (ekvivalentně: všechny hrany vstupující do $t'$), tj. $|f_{\max}| = B = \sum_{v:\,b(v)&gt;0} b(v)$.</p>
+          <p><strong>(i) Redukce (slide 23, 1:1 postup).</strong> 1. Přidej nový uzel $s'$ (source) a hrany $(s', v)$ s&nbsp;$l = 0$, $u = b(v)$ pro každý uzel s&nbsp;$b(v) &gt; 0$. 2. Přidej nový uzel $t'$ (sink) a hrany $(v, t')$ s&nbsp;$l = 0$, $u = -b(v)$ pro každý uzel s&nbsp;$b(v) &lt; 0$. 3. Vyřeš maximum flow problem ze $s'$ do $t'$ (původní hrany si nechají své meze $l, u$; při $l \equiv 0$ stačí F-F z&nbsp;nulového toku, <a href="l4-3.html#takeaways">[L4.3]</a>). Konstrukce je polynomiální: přidá $2$ uzly a nejvýš $|V|$ hran.</p>
+          <p><strong>(ii) Kritérium (slide 23, krok 4).</strong> Přípustný tok s&nbsp;bilancemi existuje $\iff$ maximální tok nasytí všechny hrany vycházející ze $s'$ (ekvivalentně: všechny hrany vstupující do $t'$), tj. $|f_{\max}| = B = \sum_{v:\,b(v)&gt;0} b(v)$.</p>
           <p><strong>(iii) Zdůvodnění (vlastní rozepsání — přiznáno).</strong>
           <em>(⇐)</em> Nechť max tok $f^\ast$ nasytí b-hrany. Pro uzel $v$ s $b(v) &gt; 0$ dává Kirchhoff v rozšířené síti $\sum_{\delta^+(v)} f^\ast - \big(\sum_{\delta^-_{orig}(v)} f^\ast + \underbrace{f^\ast(s' \to v)}_{=\,b(v)}\big) = 0$, tedy na původních hranách $\sum_{\delta^+} f^\ast - \sum_{\delta^-} f^\ast = b(v)$; symetricky pro $b(v) &lt; 0$ (nasycený odvod $-b(v)$ do $t'$) a triviálně pro $b(v) = 0$. Restrikce $f^\ast$ na $E(G)$ splňuje i meze $l \le f \le u$, takže je to hledaný přípustný tok — ANO.
-          <em>(⇒)</em> Nechť existuje přípustný tok $f$ s bilancemi. Rozšiř ho předpisem $f(s' \to v) = b(v)$, $f(v \to t') = -b(v)$: bilanční rovnice $= $ Kirchhoff všude, meze nových hran sedí s rovností (nasyceny). Hodnota toku je $B$. Žádný tok nemůže mít víc, protože řez $A = \{s'\}$ má kapacitu $C(A) = \sum_{b(v)&gt;0} b(v) = B$ a platí slabá dualita $|f| \le C(A)$ (<a href="l4-4.html#takeaways">[L4.4]</a>). Sestavený tok je tedy maximální a nasycuje b-hrany. ∎</p>
-          <p><em>Poznámka navíc:</em> obě strany ($s'$ i $t'$) mají stejnou celkovou kapacitu $B$ právě díky podmínce $\sum_v b(v) = 0$ — proto slide smí psát „and/or“. Když $|f_{\max}| &lt; B$, odpověď je NE a min řez z posledního značkování je certifikát.</p>
+          <em>(⇒)</em> Nechť existuje přípustný tok $f$ s&nbsp;bilancemi. Rozšiř ho předpisem $f(s' \to v) = b(v)$, $f(v \to t') = -b(v)$: bilanční rovnice $= $ Kirchhoff všude, meze nových hran sedí s&nbsp;rovností (nasyceny). Hodnota toku je $B$. Žádný tok nemůže mít víc, protože řez $A = \{s'\}$ má kapacitu $C(A) = \sum_{b(v)&gt;0} b(v) = B$ a platí slabá dualita $|f| \le C(A)$ (<a href="l4-4.html#takeaways">[L4.4]</a>). Sestavený tok je tedy maximální a nasycuje b-hrany. ∎</p>
+          <p><em>Poznámka navíc:</em> obě strany ($s'$ i $t'$) mají stejnou celkovou kapacitu $B$ právě díky podmínce $\sum_v b(v) = 0$ — proto slide smí psát „and/or“. Když $|f_{\max}| &lt; B$, odpověď je NE a min řez z&nbsp;posledního značkování je certifikát.</p>
         </div>
       </details>
     </div>
@@ -212,25 +212,25 @@
         <p>Two suppliers $A_1, A_2$ and two consumers $B_1, B_2$ are given with balances $b(A_1) = 3$, $b(A_2) = 2$, $b(B_1) = -3$, $b(B_2) = -2$. The transportation network has edges with upper bounds $u(A_1 \to B_1) = 1$, $u(A_1 \to B_2) = 2$, $u(A_2 \to B_1) = 1$, $u(A_2 \to B_2) = 2$ and zero lower bounds. Decide whether a feasible flow with balances exists. If it does not, give a certificate (a cut) and interpret it.</p>
       </div>
 
-      <h4>a) Co je v zadání?</h4>
-      <p>Malý transportní problém přesně podle dnešní lekce: dva dodavatelé (dohromady vyrobí $5$), dva spotřebitelé (dohromady spotřebují $5$), čtyři silnice s kapacitami. Otázka zní jen ANO/NE — a když NE, máš říct <em>proč</em> (řezem, ne pocitem).</p>
+      <h4>a) Co je v&nbsp;zadání?</h4>
+      <p>Malý transportní problém přesně podle dnešní lekce: dva dodavatelé (dohromady vyrobí $5$), dva spotřebitelé (dohromady spotřebují $5$), čtyři silnice s&nbsp;kapacitami. Otázka zní jen ANO/NE — a když NE, máš říct <em>proč</em> (řezem, ne pocitem).</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — redukce $s', t'$ + kritérium $|f_{\max}| = B$ (<a href="#takeaways">takeaways</a>).</li>
         <li><a href="l4-3.html#takeaways">[L4.3]</a> — běh Ford-Fulkersona po iteracích.</li>
-        <li><a href="l4-4.html#takeaways">[L4.4]</a> — min řez z posledního značkování jako certifikát.</li>
+        <li><a href="l4-4.html#takeaways">[L4.4]</a> — min řez z&nbsp;posledního značkování jako certifikát.</li>
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Nejdřív kontrola $\sum_v b(v) = 0$ a výpočet $B$. Pak postav rozšířenou síť (čtyři b-hrany), pusť F-F a každou iteraci vypiš. Až nenajdeš augmentující cestu, porovnej $|f_{\max}|$ s $B$ — a množinu označených vrcholů z posledního značkování použij jako řez. Zkus si výsledek tipnout dopředu: kolik jednotek se vůbec <em>vejde</em> do $B_1$?</p>
+      <p>Nejdřív kontrola $\sum_v b(v) = 0$ a výpočet $B$. Pak postav rozšířenou síť (čtyři b-hrany), pusť F-F a každou iteraci vypiš. Až nenajdeš augmentující cestu, porovnej $|f_{\max}|$ s&nbsp;$B$ — a množinu označených vrcholů z&nbsp;posledního značkování použij jako řez. Zkus si výsledek tipnout dopředu: kolik jednotek se vůbec <em>vejde</em> do $B_1$?</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
         <div class="inner">
           <p>$\sum_v b(v) = 3 + 2 - 3 - 2 = 0$ ✓, $B = 3 + 2 = 5$. Redukce: $s' \to A_1$ ($u = 3$), $s' \to A_2$ ($u = 2$), $B_1 \to t'$ ($u = 3$), $B_2 \to t'$ ($u = 2$). Běh F-F po iteracích:</p>
           <div class="viz" id="viz-t02"></div>
-          <p><strong>Závěr.</strong> $|f_{\max}| = 4 &lt; 5 = B$ → přípustný tok s bilancemi <strong>neexistuje</strong>. Certifikát: poslední značkování označí $A = \{s', A_2, B_2, A_1\}$ (z $A_2$ dopředně do $B_2$ po nenasycené $A_2 \to B_2$, z $B_2$ zpětně do $A_1$ po $A_1 \to B_2$ s $f = 2 &gt; 0$); $t'$ neoznačen. Kapacita řezu: $C(A) = u(A_1 \to B_1) + u(A_2 \to B_1) + u(B_2 \to t') = 1 + 1 + 2 = 4 = |f_{\max}|$ ✓ (max-flow = min-cut, <a href="l4-4.html#takeaways">[L4.4]</a>). <strong>Interpretace:</strong> do $B_1$ vedou jen hrany o celkové kapacitě $1 + 1 = 2 &lt; 3 = $ jeho spotřeba — tři jednotky pro $B_1$ prostě nemají kudy přitéct, ať dodavatelé dělají cokoli.</p>
+          <p><strong>Závěr.</strong> $|f_{\max}| = 4 &lt; 5 = B$ → přípustný tok s&nbsp;bilancemi <strong>neexistuje</strong>. Certifikát: poslední značkování označí $A = \{s', A_2, B_2, A_1\}$ (z $A_2$ dopředně do $B_2$ po nenasycené $A_2 \to B_2$, z $B_2$ zpětně do $A_1$ po $A_1 \to B_2$ s&nbsp;$f = 2 &gt; 0$); $t'$ neoznačen. Kapacita řezu: $C(A) = u(A_1 \to B_1) + u(A_2 \to B_1) + u(B_2 \to t') = 1 + 1 + 2 = 4 = |f_{\max}|$ ✓ (max-flow = min-cut, <a href="l4-4.html#takeaways">[L4.4]</a>). <strong>Interpretace:</strong> do $B_1$ vedou jen hrany o&nbsp;celkové kapacitě $1 + 1 = 2 &lt; 3 = $ jeho spotřeba — tři jednotky pro $B_1$ prostě nemají kudy přitéct, ať dodavatelé dělají cokoli.</p>
         </div>
       </details>
     </div>
