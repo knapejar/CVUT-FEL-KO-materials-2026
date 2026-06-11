@@ -118,6 +118,7 @@
   <div class="box">
     <div class="box-title">Tentýž důkaz jednou větou (re-worded proof, slide 33, 1:1)</div>
     <p><em>„While assuming $^{IH}$ that we had $l^k(v)$ better than or equal to the shortest $s$-$v$-path with at most $k - 1$ edges in iteration $k - 1$, in iteration $k$ of the algorithm $^{ALG}$ we will create $l^k(w)$ better than or equal to the shortest $s$-$w$-path with at most $k$ edges since the shortest path consists of the shortest paths $^{BPO}$.“</em></p>
+    <p style="color:var(--ink-soft);font-size:14px">[Pozn.: slide má v indexu značky překlep — z indukčního předpokladu po iteraci $k-1$ má být $l^{k-1}(v)$, ne $l^k(v)$, jak jsme značku používali v řetízku výše.]</p>
   </div>
 
   <!-- ===== SEKCE 3: Z VĚTY KE KOREKTNOSTI ===== -->
@@ -173,7 +174,7 @@
       <p>Bez záporného cyklu je po $n-1$ průchodech $l(w) = \mathrm{dist}(w)$ pro všechny vrcholy (právě dokázáno). Skutečné nejkratší vzdálenosti ale splňují <strong>trojúhelníkovou nerovnost</strong>: pro každou hranu $(v,t)$ je</p>
       $$\mathrm{dist}(t) \le \mathrm{dist}(v) + c(v,t),$$
       <p>protože nejkratší cesta do $v$ prodloužená o hranu $(v,t)$ je sled do $t$ — a žádný sled není pod $\mathrm{dist}(t)$ <a href="../k2/l2-1.html#takeaways">[L2.1]</a>. Test $l(t) &gt; l(v) + c(v,t)$ tedy nikde nevystřelí.</p>
-      <p><strong>Kontrapozice:</strong> vystřelí-li test na nějaké hraně, korektnost neplatí — a jediný předpoklad, který jsme mohli porušit, je „graph without a negative cycle“. Graf tedy záporný cyklus obsahuje (dosažitelný z $s$). Slide 34 (1:1): <em>„The Bellman-Ford algorithm can detect negative cycle that is reachable from vertex $s$ while checking triangular inequality for resulting $l$.“</em> Pro cykly nedosažitelné z $s$ přidej $s'$ s hranami $c(s',v) = 0$ — proč to žádný nový cyklus nevytvoří, sis rozmyslel v <a href="../k2/l2-12.html#takeaways">[L2.12]</a>.</p>
+      <p><strong>Kontrapozice:</strong> vystřelí-li test na nějaké hraně, korektnost neplatí — a jediný předpoklad, který jsme mohli porušit, je „graph without a negative cycle“. Graf tedy záporný cyklus obsahuje (dosažitelný z $s$). Slide 34 (1:1): <em>„The Bellman-Ford algorithm can detect a negative cycle that is reachable from vertex $s$ while checking triangular inequality for resulting $l$.“</em> Pro cykly nedosažitelné z $s$ přidej $s'$ s hranami $c(s',v) = 0$ — proč to žádný nový cyklus nevytvoří, sis rozmyslel v <a href="../k2/l2-12.html#takeaways">[L2.12]</a>.</p>
     </div>
   </details>
 
