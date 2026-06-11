@@ -79,7 +79,7 @@
       <li>“It starts by relaxing on the integrality of the variables and <strong>solves the LP problem</strong>.”</li>
       <li>“If all variables $x_i$ are <strong>integers, the computation ends</strong>. Otherwise one variable $x_i \notin \mathbb{Z}$ is chosen and its value is assigned to $k$.”</li>
       <li>“Then the solution space is <strong>divided into two sets</strong> — in the first one we consider $x_i \le \lfloor k \rfloor$ and in the second one $x_i \ge \lfloor k \rfloor + 1$.”</li>
-      <li>“The algorithm <strong>recursively repeats</strong> computation for the both new sets till feasible integer solution is found.”</li>
+      <li>“The algorithm <strong>recursively repeats</strong> computation for both new sets till a feasible integer solution is found.”</li>
     </ul>
   </div>
 
@@ -117,7 +117,7 @@
 
   z^LP, x^LP := solution to LP problem
 
-  if the solution to LP infeasible?
+  is the solution to LP infeasible?
     yes → z,x := -∞, [ ]; return
     no  → continue
 
@@ -162,7 +162,7 @@
   <div class="viz" id="viz-tree"></div>
 
   <div class="box info">
-    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Jak to vypadá u testu (přepis z wiki, test 8. 3. 2011, CZ 1:1)</div>
+    <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Jak to vypadá u testu (přepis z wiki, test 8.&nbsp;3.&nbsp;2011, CZ 1:1)</div>
     <p>„Zadane nerovnice a kriterium a vyresit tento ILP problem pomoci metody vetvi a mezi. Byla tam nakreslena mrizka, kde jsme si to meli kreslit. Takze si zopaknout jak se zakresluji nerovnice do roviny :-)“ — tedy: <strong>dostaneš mřížku a kreslíš</strong>. Stejná úloha („Větve a meze pro ILP“) je doložená i na zkoušce 24.&nbsp;5.&nbsp;2011 (dochovaly se jen fotky zadání).</p>
   </div>
 
@@ -184,7 +184,7 @@
       <span class="task-id">T01</span>
       <strong>Branch and Bound Method for ILP (minimization)</strong>
       <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
-      <span class="task-src">zdroj: zápočtový test 16. 3. 2021, varianta 1 (zadání EN 1:1)</span>
+      <span class="task-src">zdroj: zápočtový test 16.&nbsp;3.&nbsp;2021, varianta 1 (zadání EN 1:1)</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -241,7 +241,7 @@
     <div class="task-head">
       <span class="task-id">T02</span>
       <strong>Branch and Bound Method for ILP (maximization)</strong>
-      <span class="task-src">zdroj: zápočtový test 16. 3. 2021, varianta 2 (zadání EN 1:1)</span>
+      <span class="task-src">zdroj: zápočtový test 16.&nbsp;3.&nbsp;2021, varianta 2 (zadání EN 1:1)</span>
     </div>
     <div class="task-body">
       <div class="assignment">
