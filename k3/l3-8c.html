@@ -33,22 +33,22 @@
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
-    <strong>Eulerovský tah</strong> (uzavřený tah obsahující každou hranu právě jednou) existuje v souvislém (multi)grafu <strong>právě tehdy, když má každý vrchol sudý stupeň</strong> — a <strong>zdvojení všech hran</strong> kostry to zajistí za cenu $c(E(L)) = 2\,c(E(T))$.
+    <strong>Eulerovský tah</strong> (uzavřený tah obsahující každou hranu právě jednou) existuje v&nbsp;souvislém (multi)grafu <strong>právě tehdy, když má každý vrchol sudý stupeň</strong> — a&nbsp;<strong>zdvojení všech hran</strong> kostry to zajistí za cenu $c(E(L)) = 2\,c(E(T))$.
   </div>
 
-  <p>Třetí, poslední stavební kámen aproximací metrického TSP. Z <a href="l3-8a.html#takeaways">[L3.8a] Metrický TSP + trojúhelníková nerovnost + shortcutting</a> umíme z laciného uzavřeného sledu vyrobit Hamiltonovský okruh bez zdražení; z <a href="l3-8b.html#takeaways">[L3.8b] MST jako dolní mez</a> máme měřítko $\mathrm{OPT} \ge c(E(T))$. Chybí jediné: <strong>odkud ten laciný uzavřený sled vzít</strong>. Dnes ho vyrobíme — z kostry, zdvojením hran a Eulerovým slavným kritériem sudých stupňů.</p>
+  <p>Třetí, poslední stavební kámen aproximací metrického TSP. Z&nbsp;<a href="l3-8a.html#takeaways">[L3.8a] Metrický TSP + trojúhelníková nerovnost + shortcutting</a> umíme z&nbsp;laciného uzavřeného sledu vyrobit Hamiltonovský okruh bez zdražení; z&nbsp;<a href="l3-8b.html#takeaways">[L3.8b] MST jako dolní mez</a> máme měřítko $\mathrm{OPT} \ge c(E(T))$. Chybí jediné: <strong>odkud ten laciný uzavřený sled vzít</strong>. Dnes ho vyrobíme — z&nbsp;kostry, zdvojením hran a&nbsp;Eulerovým slavným kritériem sudých stupňů.</p>
 
   <!-- ===== SEKCE 1: CO CHYBÍ ===== -->
   <h2>Poslední chybějící díl skládačky</h2>
 
-  <p>Shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a> chce na vstupu <em>uzavřený sled přes všechny vrcholy</em> a důkaz faktoru bude chtít, aby jeho cena šla svázat s $c(E(T))$ — tedy ideálně sled, který používá <strong>jen hrany kostry</strong> (každou nejvýš párkrát). Nejlevnější představitelný cíl: projít <em>každou hranu právě jednou</em>.</p>
+  <p>Shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a> chce na vstupu <em>uzavřený sled přes všechny vrcholy</em> a&nbsp;důkaz faktoru bude chtít, aby jeho cena šla svázat s&nbsp;$c(E(T))$ — tedy ideálně sled, který používá <strong>jen hrany kostry</strong> (každou nejvýš párkrát). Nejlevnější představitelný cíl: projít <em>každou hranu právě jednou</em>.</p>
 
-  <p>Sled, který žádnou hranu neopakuje, má jméno z <a href="../k0/l0-3.html#takeaways">[L0.3] Cesta, sled, tah, cyklus</a>: <strong>tah</strong> (trail). Slide 24 mu říká <strong>Eulerian walk</strong> (Eulerovský tah) $L$, s vysvětlivkou EN 1:1: <em>„the Eulerian walk L (i.e., a closed walk containing every edge)“</em> — uzavřený sled obsahující <strong>každou hranu</strong> (a protože je to tah, každou <strong>právě jednou</strong>).</p>
+  <p>Sled, který žádnou hranu neopakuje, má jméno z&nbsp;<a href="../k0/l0-3.html#takeaways">[L0.3] Cesta, sled, tah, cyklus</a>: <strong>tah</strong> (trail). Slide 24 mu říká <strong>Eulerian walk</strong> (Eulerovský tah) $L$, s&nbsp;vysvětlivkou EN 1:1: <em>„the Eulerian walk L (i.e., a closed walk containing every edge)“</em> — uzavřený sled obsahující <strong>každou hranu</strong> (a&nbsp;protože je to tah, každou <strong>právě jednou</strong>).</p>
 
   <details class="try">
-    <summary>Zkus sám: vezmi MST z <a href="l3-8b.html#takeaways">[L3.8b]</a> (obrázek níže) a pokus se v něm najít uzavřený tah obsahující všechny 4 hrany. Kde to ztroskotá?</summary>
+    <summary>Zkus sám: vezmi MST z&nbsp;<a href="l3-8b.html#takeaways">[L3.8b]</a> (obrázek níže) a&nbsp;pokus se v&nbsp;něm najít uzavřený tah obsahující všechny 4&nbsp;hrany. Kde to ztroskotá?</summary>
     <div class="inner">
-      <p>Na <strong>listech</strong>. Jakmile vejdeš třeba do $C$ (jedinou hranou $B$–$C$), nemáš kudy ven — jediná hrana $C$ je už použitá a tah hrany opakovat nesmí. A i kdybys v listu začal, na konci se tam nemáš jak <em>vrátit</em>. Strom na $\ge 2$ vrcholech má vždy listy (stupeň 1), takže <strong>kostra sama Eulerovský tah nikdy nemá</strong>. Něco s ní budeme muset udělat — a klíčem je, jak hned uvidíš, právě ten stupeň 1, tedy <em>lichý</em> stupeň.</p>
+      <p>Na <strong>listech</strong>. Jakmile vejdeš třeba do $C$ (jedinou hranou $B$–$C$), nemáš kudy ven — jediná hrana $C$ je už použitá a&nbsp;tah hrany opakovat nesmí. A&nbsp;i&nbsp;kdybys v&nbsp;listu začal, na konci se tam nemáš jak <em>vrátit</em>. Strom na $\ge 2$ vrcholech má vždy listy (stupeň 1), takže <strong>kostra sama Eulerovský tah nikdy nemá</strong>. Něco s&nbsp;ní budeme muset udělat — a&nbsp;klíčem je, jak hned uvidíš, právě ten stupeň 1, tedy <em>lichý</em> stupeň.</p>
     </div>
   </details>
 
@@ -57,35 +57,35 @@
   <!-- ===== SEKCE 2: NUTNÁ PODMÍNKA ===== -->
   <h2>Nutná podmínka: každý vrchol sudého stupně</h2>
 
-  <p>Překážka z listů je speciální případ obecného jevu. Představ si, že uzavřený Eulerovský tah existuje, a sleduj libovolný vrchol $v$.</p>
+  <p>Překážka z&nbsp;listů je speciální případ obecného jevu. Představ si, že uzavřený Eulerovský tah existuje, a&nbsp;sleduj libovolný vrchol $v$.</p>
 
   <details class="try">
-    <summary>Zkus sám: kolik hran u $v$ „spotřebuje“ jedna návštěva (průchod) vrcholu $v$? Co z toho plyne pro stupeň $|\delta(v)|$ z <a href="../k0/l0-2.html#takeaways">[L0.2] Stupeň vrcholu</a>?</summary>
+    <summary>Zkus sám: kolik hran u&nbsp;$v$ „spotřebuje“ jedna návštěva (průchod) vrcholu $v$? Co z&nbsp;toho plyne pro stupeň $|\delta(v)|$ z&nbsp;<a href="../k0/l0-2.html#takeaways">[L0.2] Stupeň vrcholu</a>?</summary>
     <div class="inner">
-      <p>Přesně <strong>dvě</strong>: jednou hranou tah do $v$ <em>vejde</em>, jinou <em>vyjde</em> (hrany se v tahu neopakují, takže jsou různé). Tah tedy hrany u $v$ spáruje do dvojic (příchod, odchod). Protože Eulerovský tah projde <em>každou</em> hranu u $v$, je $|\delta(v)|$ = 2 × (počet návštěv) — <strong>sudé číslo</strong>. U startu = cíle je to stejné: úvodní odchod se spáruje se závěrečným příchodem (tah je uzavřený). Sudý stupeň všech vrcholů je tedy <strong>nutná podmínka</strong>. List se stupněm 1 ji porušuje — proto strom ztroskotal.</p>
+      <p>Přesně <strong>dvě</strong>: jednou hranou tah do $v$ <em>vejde</em>, jinou <em>vyjde</em> (hrany se v&nbsp;tahu neopakují, takže jsou různé). Tah tedy hrany u&nbsp;$v$ spáruje do dvojic (příchod, odchod). Protože Eulerovský tah projde <em>každou</em> hranu u&nbsp;$v$, je $|\delta(v)|$ = 2 × (počet návštěv) — <strong>sudé číslo</strong>. U&nbsp;startu = cíle je to stejné: úvodní odchod se spáruje se závěrečným příchodem (tah je uzavřený). Sudý stupeň všech vrcholů je tedy <strong>nutná podmínka</strong>. List se stupněm 1 ji porušuje — proto strom ztroskotal.</p>
     </div>
   </details>
 
   <div class="viz" id="viz-parity"></div>
 
   <!-- ===== SEKCE 3: POSTAČUJÍCÍ ===== -->
-  <h2>… a sudost i stačí (v souvislém grafu)</h2>
+  <h2>… a&nbsp;sudost i&nbsp;stačí (v&nbsp;souvislém grafu)</h2>
 
   <p>Slide 24 rovnou konstatuje obě implikace najednou (Observation, EN 1:1):</p>
 
   <div class="box">
     <div class="box-title">Slide 24, Observation (1:1)</div>
     <p><em>„the doubling of edges in $T$ ensures even degree of all vertices in the multigraph, which is a sufficient and necessary condition for existence of Eulerian walk.“</em></p>
-    <p>Tedy: sudý stupeň všech vrcholů je <strong>nutná i postačující</strong> podmínka existence Eulerovského tahu. (Mlčky se předpokládá <em>souvislost</em> — zdvojená kostra je souvislá vždy; viz danger box níže.)</p>
+    <p>Tedy: sudý stupeň všech vrcholů je <strong>nutná i&nbsp;postačující</strong> podmínka existence Eulerovského tahu. (Mlčky se předpokládá <em>souvislost</em> — zdvojená kostra je souvislá vždy; viz danger box níže.)</p>
   </div>
 
-  <p>Nutnost jsme si právě dokázali. Proč sudost <em>stačí</em>, slidy nedokazují — náčrt argumentu (vlastní doplněk) si ale zkus sestavit sám, je to hezké a u ústní se hodí:</p>
+  <p>Nutnost jsme si právě dokázali. Proč sudost <em>stačí</em>, slidy nedokazují — náčrt argumentu (vlastní doplněk) si ale zkus sestavit sám, je to hezké a&nbsp;u&nbsp;ústní se hodí:</p>
 
   <details class="try">
-    <summary>Zkus sám: vyraž z libovolného vrcholu $s$ a choď dál vždy nějakou <em>dosud nepoužitou</em> hranou. Proč se nemůžeš zaseknout nikde jinde než zpátky v $s$?</summary>
+    <summary>Zkus sám: vyraž z&nbsp;libovolného vrcholu $s$ a&nbsp;choď dál vždy nějakou <em>dosud nepoužitou</em> hranou. Proč se nemůžeš zaseknout nikde jinde než zpátky v&nbsp;$s$?</summary>
     <div class="inner">
-      <p>Spočítej parity. Stojíš-li ve vrcholu $v \ne s$, pak jsi u něj zatím spotřeboval <strong>lichý</strong> počet hran: každá dřívější návštěva 2 (příchod + odchod) a teď navíc 1 příchod. Jenže $|\delta(v)|$ je sudé — takže aspoň jedna hrana u $v$ je pořád volná a můžeš odejít. <strong>Zaseknout se lze jedině v $s$</strong> (tam je spotřeba sudá a může dojít na nulu volných) — tvá procházka tedy vždy skončí jako <em>uzavřený</em> tah.</p>
-      <p>Pokud po něm zbyly nepoužité hrany: díky souvislosti se některá dotýká vrcholu $w$ na už nalezeném tahu (a zbylé hrany mají u každého vrcholu opět sudé počty — odečetli jsme dvojice). Spusť stejnou procházku z $w$ po zbylých hranách → druhý uzavřený tah, který do prvního v $w$ <strong>vpleteš</strong> (projdeš první tah do $w$, objedeš druhý, dokončíš první). Opakuj, dokud hrany nedojdou — vznikne Eulerovský tah celého grafu. (Tomuhle postupu se říká Hierholzerův algoritmus a běží v polynomiálním čase — Euler je na rozdíl od Hamiltona <a href="l3-3.html#takeaways">[L3.3]</a> <em>snadný</em>.)</p>
+      <p>Spočítej parity. Stojíš-li ve vrcholu $v \ne s$, pak jsi u&nbsp;něj zatím spotřeboval <strong>lichý</strong> počet hran: každá dřívější návštěva 2 (příchod + odchod) a&nbsp;teď navíc 1 příchod. Jenže $|\delta(v)|$ je sudé — takže aspoň jedna hrana u&nbsp;$v$ je pořád volná a&nbsp;můžeš odejít. <strong>Zaseknout se lze jedině v&nbsp;$s$</strong> (tam je spotřeba sudá a&nbsp;může dojít na nulu volných) — tvá procházka tedy vždy skončí jako <em>uzavřený</em> tah.</p>
+      <p>Pokud po něm zbyly nepoužité hrany: díky souvislosti se některá dotýká vrcholu $w$ na už nalezeném tahu (a&nbsp;zbylé hrany mají u&nbsp;každého vrcholu opět sudé počty — odečetli jsme dvojice). Spusť stejnou procházku z&nbsp;$w$ po zbylých hranách → druhý uzavřený tah, který do prvního v&nbsp;$w$ <strong>vpleteš</strong> (projdeš první tah do $w$, objedeš druhý, dokončíš první). Opakuj, dokud hrany nedojdou — vznikne Eulerovský tah celého grafu. (Tomuhle postupu se říká Hierholzerův algoritmus a&nbsp;běží v&nbsp;polynomiálním čase — Euler je na rozdíl od Hamiltona <a href="l3-3.html#takeaways">[L3.3]</a> <em>snadný</em>.)</p>
     </div>
   </details>
 
@@ -95,40 +95,40 @@
   <p>Zpátky ke kostře $T$. Má listy, tedy liché stupně — Eulerovský tah nemá. Potřebujeme ji <em>nejjednodušeji</em> opravit.</p>
 
   <details class="try">
-    <summary>Zkus sám: jak z kostry vyrobit graf, kde má každý vrchol sudý stupeň — bez přidávání vrcholů a tak, aby cena nových hran šla vyjádřit přes $c(E(T))$?</summary>
+    <summary>Zkus sám: jak z&nbsp;kostry vyrobit graf, kde má každý vrchol sudý stupeň — bez přidávání vrcholů a&nbsp;tak, aby cena nových hran šla vyjádřit přes $c(E(T))$?</summary>
     <div class="inner">
-      <p><strong>Zdvoj každou hranu.</strong> Stupeň každého vrcholu se přesně zdvojnásobí: $2 \cdot |\delta(v)|$ je sudé <em>vždy</em>, ať byl původní stupeň jakýkoliv — žádné rozbory případů. Souvislost zůstane (hran jen přibylo) a cena nového grafu je přesně $2\,c(E(T))$. Vznikne ovšem <strong>multigraf</strong> — graf, kde mezi dvěma vrcholy smí vést víc hran; dvě kopie téže hrany jsou <em>dvě různé hrany</em> a tah projde každou kopii právě jednou.</p>
+      <p><strong>Zdvoj každou hranu.</strong> Stupeň každého vrcholu se přesně zdvojnásobí: $2 \cdot |\delta(v)|$ je sudé <em>vždy</em>, ať byl původní stupeň jakýkoliv — žádné rozbory případů. Souvislost zůstane (hran jen přibylo) a&nbsp;cena nového grafu je přesně $2\,c(E(T))$. Vznikne ovšem <strong>multigraf</strong> — graf, kde mezi dvěma vrcholy smí vést víc hran; dvě kopie téže hrany jsou <em>dvě různé hrany</em> a&nbsp;tah projde každou kopii právě jednou.</p>
     </div>
   </details>
 
-  <p>Přesně to je krok 2 double-tree algoritmu (slide 24, EN 1:1): <em>„By doubling every edge in $T$ we get multigraph in which we find the Eulerian walk $L$ (i.e., a closed walk containing every edge);“</em> A cenu zachycuje bod 3 důkazu na slidu 25 (EN 1:1) — třetí a poslední nerovnost (vlastně rovnost) budoucího řetízku:</p>
+  <p>Přesně to je krok 2 double-tree algoritmu (slide 24, EN 1:1): <em>„By doubling every edge in $T$ we get multigraph in which we find the Eulerian walk $L$ (i.e., a closed walk containing every edge);“</em> A&nbsp;cenu zachycuje bod 3 důkazu na slidu 25 (EN 1:1) — třetí a&nbsp;poslední nerovnost (vlastně rovnost) budoucího řetízku:</p>
 
   <div class="box">
     <div class="box-title">Slide 25, bod 3 (1:1) — cena Eulerovského tahu</div>
     <p><em>„$2 c(E(T)) = c(E(L))$ holds due to the creation of $L$ by doubling edges in $T$“</em></p>
-    <p>Žádná magie: $L$ projde každou hranu multigrafu právě jednou a multigraf = každá hrana $T$ dvakrát, takže $c(E(L)) = 2\,c(E(T))$.</p>
+    <p>Žádná magie: $L$ projde každou hranu multigrafu právě jednou a&nbsp;multigraf = každá hrana $T$ dvakrát, takže $c(E(L)) = 2\,c(E(T))$.</p>
   </div>
 
-  <p>Celé si to přehraj na zdvojené MST z <a href="l3-8b.html#takeaways">[L3.8b]</a> (tatáž metrická $K_5$, $c(E(T)) = 7$):</p>
+  <p>Celé si to přehraj na zdvojené MST z&nbsp;<a href="l3-8b.html#takeaways">[L3.8b]</a> (tatáž metrická $K_5$, $c(E(T)) = 7$):</p>
 
   <div class="viz" id="viz-euler"></div>
 
   <!-- ===== SEKCE 5: K ČEMU TO BUDE ===== -->
-  <h2>K čemu to bude: tři kameny jsou pohromadě</h2>
+  <h2>K&nbsp;čemu to bude: tři kameny jsou pohromadě</h2>
 
-  <p>Stepper skončil pointou: Eulerovský tah zdvojené MST je <strong>přesně ten sled $W$</strong>, na kterém v <a href="l3-8a.html#t-shortcut">[L3.8a]</a> běžel shortcutting ($14 \to$ okruh ceny 12). Nic z toho nebyla náhoda — byl to dopředu rozložený double-tree algoritmus. V <a href="l3-9.html">[L3.9]</a> už jen slepíme řetízek (slide 25):</p>
+  <p>Stepper skončil pointou: Eulerovský tah zdvojené MST je <strong>přesně ten sled $W$</strong>, na kterém v&nbsp;<a href="l3-8a.html#t-shortcut">[L3.8a]</a> běžel shortcutting ($14 \to$ okruh ceny 12). Nic z&nbsp;toho nebyla náhoda — byl to dopředu rozložený double-tree algoritmus. V&nbsp;<a href="l3-9.html">[L3.9]</a> už jen slepíme řetízek (slide 25):</p>
 
   $$2\, \mathrm{OPT}(K_n, c) \;\stackrel{2.}{\ge}\; 2\, c(E(T)) \;\stackrel{3.}{=}\; c(E(L)) \;\stackrel{1.}{\ge}\; c(E(H)),$$
 
-  <p>kde bod 1 je shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>, bod 2 dolní mez <a href="l3-8b.html#takeaways">[L3.8b]</a> a bod 3 dnešní zdvojení. Christofides <a href="l3-10.html">[L3.10]</a> pak zahraje stejnou partii chytřeji: nezdvojí <em>všechno</em>, ale opraví jen vrcholy, kde sudost chybí — vrcholů lichého stupně je v každém grafu sudý počet <a href="../k0/l0-2.html#takeaways">[L0.2]</a>, takže se dají <em>spárovat</em> levným perfektním párováním (slide 26: <em>„The merging of $T$ and $M$ ensures even degree of all vertices in the multigraph and thus existence of Eulerian walk.“</em>). A Eulerovský tah potkáš i mimo TSP — u směrovaného čínského pošťáka <a href="../k4/l4-13.html">[L4.13]</a> se hrany doplňují podle bilance $|\delta^+| = |\delta^-|$.</p>
+  <p>kde bod 1 je shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>, bod 2 dolní mez <a href="l3-8b.html#takeaways">[L3.8b]</a> a&nbsp;bod 3 dnešní zdvojení. Christofides <a href="l3-10.html">[L3.10]</a> pak zahraje stejnou partii chytřeji: nezdvojí <em>všechno</em>, ale opraví jen vrcholy, kde sudost chybí — vrcholů lichého stupně je v&nbsp;každém grafu sudý počet <a href="../k0/l0-2.html#takeaways">[L0.2]</a>, takže se dají <em>spárovat</em> levným perfektním párováním (slide 26: <em>„The merging of $T$ and $M$ ensures even degree of all vertices in the multigraph and thus existence of Eulerian walk.“</em>). A&nbsp;Eulerovský tah potkáš i&nbsp;mimo TSP — u&nbsp;směrovaného čínského pošťáka <a href="../k4/l4-13.html">[L4.13]</a> se hrany doplňují podle bilance $|\delta^+| = |\delta^-|$.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
     <ul>
-      <li><strong>„Eulerovský tah ≈ Hamiltonovský okruh.“</strong> NE — Euler projde každou <em>HRANU</em> právě jednou (vrcholy se smí opakovat), Hamilton každý <em>VRCHOL</em> právě jednou <a href="l3-3.html#takeaways">[L3.3]</a>. A složitost je opačný svět: Euler se pozná v polynomiálním čase (zkontroluj sudosti), Hamilton je NP-úplný. Eulerovský tah <em>není</em> přípustné řešení TSP — okruh z něj teprve vyrobí shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>.</li>
-      <li><strong>„Sudé stupně stačí vždy.“</strong> Bez <em>souvislosti</em> ne — dvě disjunktní kružnice mají všechny stupně sudé, ale jeden tah je neprojde. Slide 24 souvislost nezmiňuje, protože zdvojená kostra je souvislá automaticky (vlastní upřesnění, přiznáno). Přesně: ekvivalence platí pro souvislé multigrafy (resp. ty, kde všechny hrany leží v jedné komponentě).</li>
-      <li><strong>Uzavřený vs. otevřený tah:</strong> dnešní věta je o <em>uzavřeném</em> tahu (start = cíl) — ten chce TSP. Otevřený Eulerovský tah existuje ⟺ právě 2 vrcholy mají lichý stupeň (slavné königsberské mosty; vlastní doplněk, slidy ho nepotřebují).</li>
-      <li><strong>„Zdvojení je zadarmo.“</strong> NE — platíš celou kostru podruhé: $c(E(L)) = 2\,c(E(T))$. Právě tahle dvojka je celý faktor 2 double-tree algoritmu; Christofides <a href="l3-10.html">[L3.10]</a> ji srazí na $\tfrac{3}{2}$ tím, že místo druhé kostry přidá jen párování s cenou $\le \mathrm{OPT}/2$.</li>
+      <li><strong>„Eulerovský tah ≈ Hamiltonovský okruh.“</strong> NE — Euler projde každou <em>HRANU</em> právě jednou (vrcholy se smí opakovat), Hamilton každý <em>VRCHOL</em> právě jednou <a href="l3-3.html#takeaways">[L3.3]</a>. A&nbsp;složitost je opačný svět: Euler se pozná v&nbsp;polynomiálním čase (zkontroluj sudosti), Hamilton je NP-úplný. Eulerovský tah <em>není</em> přípustné řešení TSP — okruh z&nbsp;něj teprve vyrobí shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>.</li>
+      <li><strong>„Sudé stupně stačí vždy.“</strong> Bez <em>souvislosti</em> ne — dvě disjunktní kružnice mají všechny stupně sudé, ale jeden tah je neprojde. Slide 24 souvislost nezmiňuje, protože zdvojená kostra je souvislá automaticky (vlastní upřesnění, přiznáno). Přesně: ekvivalence platí pro souvislé multigrafy (resp. ty, kde všechny hrany leží v&nbsp;jedné komponentě).</li>
+      <li><strong>Uzavřený vs. otevřený tah:</strong> dnešní věta je o&nbsp;<em>uzavřeném</em> tahu (start = cíl) — ten chce TSP. Otevřený Eulerovský tah existuje ⟺ právě 2 vrcholy mají lichý stupeň (vlastní doplněk, slidy ho nepotřebují). Slavné königsberské mosty žádný Eulerovský tah nemají právě proto, že tam mají lichý stupeň <em>čtyři</em> vrcholy.</li>
+      <li><strong>„Zdvojení je zadarmo.“</strong> NE — platíš celou kostru podruhé: $c(E(L)) = 2\,c(E(T))$. Právě tahle dvojka je celý faktor 2 double-tree algoritmu; Christofides <a href="l3-10.html">[L3.10]</a> ji srazí na $\tfrac{3}{2}$ tím, že místo druhé kostry přidá jen párování s&nbsp;cenou $\le \mathrm{OPT}/2$.</li>
     </ul>
   </div>
 
@@ -136,9 +136,9 @@
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L3.8c</div>
     <ul>
-      <li><strong>Eulerovský tah</strong> = uzavřený tah <a href="../k0/l0-3.html#takeaways">[L0.3]</a> obsahující každou hranu právě jednou; v souvislém (multi)grafu existuje <strong>⟺ každý vrchol má sudý stupeň</strong> <a href="../k0/l0-2.html#takeaways">[L0.2]</a> (slide 24: „sufficient and necessary condition“). Nutnost: každá návštěva vrcholu spáruje 2 hrany; postačitelnost: procházka se zasekne jen ve startu + vplétání (Hierholzer, polynomiální).</li>
+      <li><strong>Eulerovský tah</strong> = uzavřený tah <a href="../k0/l0-3.html#takeaways">[L0.3]</a> obsahující každou hranu právě jednou; v&nbsp;souvislém (multi)grafu existuje <strong>⟺ každý vrchol má sudý stupeň</strong> <a href="../k0/l0-2.html#takeaways">[L0.2]</a> (slide 24: „sufficient and necessary condition“). Nutnost: každá návštěva vrcholu spáruje 2 hrany; postačitelnost: procházka se zasekne jen ve startu + vplétání (Hierholzer, polynomiální).</li>
       <li><strong>Zdvojení všech hran</strong> kostry zdvojnásobí každý stupeň → všechny sudé → Eulerovský multigraf; cena tahu $c(E(L)) = 2\,c(E(T))$ (slide 25, bod 3).</li>
-      <li>Eulerovský tah pak shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a> převede na Hamiltonovský okruh bez zdražení — s dolní mezí <a href="l3-8b.html#takeaways">[L3.8b]</a> jsou tím pohromadě všechny tři kameny řetízku $2\,\mathrm{OPT} \ge 2\,c(E(T)) = c(E(L)) \ge c(E(H))$ pro <a href="l3-9.html">[L3.9]</a>.</li>
+      <li>Eulerovský tah pak shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a> převede na Hamiltonovský okruh bez zdražení — s&nbsp;dolní mezí <a href="l3-8b.html#takeaways">[L3.8b]</a> jsou tím pohromadě všechny tři kameny řetízku $2\,\mathrm{OPT} \ge 2\,c(E(T)) = c(E(L)) \ge c(E(H))$ pro <a href="l3-9.html">[L3.9]</a>.</li>
       <li>Euler ≠ Hamilton: hrany × vrcholy, polynomiální × NP-úplné <a href="l3-3.html#takeaways">[L3.3]</a>.</li>
       <li>Christofides <a href="l3-10.html">[L3.10]</a> nezdvojuje vše — liché vrcholy (vždy sudý počet <a href="../k0/l0-2.html#takeaways">[L0.2]</a>) opraví perfektním párováním.</li>
     </ul>
@@ -158,10 +158,10 @@
         <p><em>Study questions (own): (i) Prove that even degree of every vertex is a necessary condition for the existence of a closed Eulerian walk. (ii) Sketch why, in a connected multigraph, even degrees are also sufficient. (iii) Explain why doubling every edge of a spanning tree makes all degrees even, and derive the equality $c(E(L)) = 2\,c(E(T))$.</em></p>
       </div>
 
-      <h4>a) Co je v zadání?</h4>
-      <p>Důkazová mini-úloha: obhájit Observation ze slidu 24 — obě implikace ekvivalence „Eulerovský tah ⟺ sudé stupně“ — a zdůvodnit krok zdvojení včetně ceny. U zkoušky je to bod 3 důkazů faktorů 2 i 3/2 (a věta, na kterou se oba algoritmy odvolávají v kroku „find the Eulerian walk“).</p>
+      <h4>a) Co je v&nbsp;zadání?</h4>
+      <p>Důkazová mini-úloha: obhájit Observation ze slidu 24 — obě implikace ekvivalence „Eulerovský tah ⟺ sudé stupně“ — a&nbsp;zdůvodnit krok zdvojení včetně ceny. U&nbsp;zkoušky je to bod 3 důkazů faktorů 2 i&nbsp;3/2 (a&nbsp;věta, na kterou se oba algoritmy odvolávají v&nbsp;kroku „find the Eulerian walk“).</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — párovací argument, náčrt Hierholzera, zdvojení.</li>
         <li><a href="../k0/l0-2.html#takeaways">[L0.2] Stupeň vrcholu</a> — definice $|\delta(v)|$, parita.</li>
@@ -170,14 +170,14 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>(i) Sleduj jeden vrchol a počítej hrany, které tah u něj spotřebuje za jednu návštěvu; nezapomeň na start = cíl. (ii) „Choď po nepoužitých hranách“ — kde jediné se můžeš zaseknout a proč (parita spotřeby)? Co se zbylými hranami? (iii) Co udělá zdvojení se stupněm $|\delta(v)|$? A kolikrát Eulerovský tah multigrafu zaplatí každou hranu původní kostry?</p>
+      <p>(i) Sleduj jeden vrchol a&nbsp;počítej hrany, které tah u&nbsp;něj spotřebuje za jednu návštěvu; nezapomeň na start = cíl. (ii) „Choď po nepoužitých hranách“ — kde jediné se můžeš zaseknout a&nbsp;proč (parita spotřeby)? Co se zbylými hranami? (iii) Co udělá zdvojení se stupněm $|\delta(v)|$? A&nbsp;kolikrát Eulerovský tah multigrafu zaplatí každou hranu původní kostry?</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní rozepsání; postačitelnost = náčrt Hierholzera)</summary>
         <div class="inner">
-          <p><strong>(i) Nutnost.</strong> Nechť uzavřený Eulerovský tah existuje a $v$ je libovolný vrchol. Každý průchod tahu vrcholem $v$ použije právě dvě hrany u $v$: jednu pro příchod, jinou pro odchod (tah hrany neopakuje). U startovního vrcholu se úvodní odchod páruje se závěrečným příchodem (tah je uzavřený). Hrany u $v$ se tedy rozpadnou na disjunktní dvojice — a protože Eulerovský tah obsahuje <em>každou</em> hranu, je $|\delta(v)| = 2 \cdot (\text{počet návštěv } v)$, tedy sudé. $\blacksquare$</p>
-          <p><strong>(ii) Postačitelnost (náčrt).</strong> Vyjdi z libovolného vrcholu $s$ a opakovaně pokračuj libovolnou nepoužitou hranou. Ve vrcholu $v \ne s$ je počet dosud použitých hran u $v$ lichý (dvojice za dřívější návštěvy + aktuální příchod), ale $|\delta(v)|$ je sudé → existuje nepoužitá hrana → lze pokračovat. Procházka se tedy zastaví jedině v $s$, čímž vznikne uzavřený tah $C_1$. Zbývají-li nepoužité hrany, mají u každého vrcholu opět sudé počty (odebrali jsme dvojice) a díky souvislosti se některá dotýká vrcholu $w \in C_1$; stejným postupem z $w$ vznikne uzavřený tah $C_2$, který do $C_1$ v $w$ vpleteme (projdi $C_1$ do $w$, objeď $C_2$, dokonči $C_1$). Konečně mnoha opakováními vznikne uzavřený tah obsahující všechny hrany — Eulerovský. (Hierholzerův algoritmus, polynomiální.) $\blacksquare$</p>
-          <p><strong>(iii) Zdvojení a cena.</strong> Zdvojením má vrchol $v$ v multigrafu stupeň $2\,|\delta_T(v)|$ — sudý bez ohledu na paritu původního stupně (listy kostry přestanou překážet). Multigraf je souvislý (vznikl z kostry přidáváním hran <a href="../k0/l0-4.html#takeaways">[L0.4]</a>), takže podle (ii) Eulerovský tah $L$ existuje. Jeho hrany jsou přesně hrany multigrafu, každá právě jednou — a multigraf obsahuje každou hranu $e \in E(T)$ dvakrát, takže $c(E(L)) = \sum_{e \in E(T)} 2\,c(e) = 2\,c(E(T))$, přesně jak tvrdí slide 25, bod 3. $\blacksquare$</p>
+          <p><strong>(i) Nutnost.</strong> Nechť uzavřený Eulerovský tah existuje a&nbsp;$v$ je libovolný vrchol. Každý průchod tahu vrcholem $v$ použije právě dvě hrany u&nbsp;$v$: jednu pro příchod, jinou pro odchod (tah hrany neopakuje). U&nbsp;startovního vrcholu se úvodní odchod páruje se závěrečným příchodem (tah je uzavřený). Hrany u&nbsp;$v$ se tedy rozpadnou na disjunktní dvojice — a&nbsp;protože Eulerovský tah obsahuje <em>každou</em> hranu, je $|\delta(v)| = 2 \cdot (\text{počet návštěv } v)$, tedy sudé. $\blacksquare$</p>
+          <p><strong>(ii) Postačitelnost (náčrt).</strong> Vyjdi z&nbsp;libovolného vrcholu $s$ a&nbsp;opakovaně pokračuj libovolnou nepoužitou hranou. Ve vrcholu $v \ne s$ je počet dosud použitých hran u&nbsp;$v$ lichý (dvojice za dřívější návštěvy + aktuální příchod), ale $|\delta(v)|$ je sudé → existuje nepoužitá hrana → lze pokračovat. Procházka se tedy zastaví jedině v&nbsp;$s$, čímž vznikne uzavřený tah $C_1$. Zbývají-li nepoužité hrany, mají u&nbsp;každého vrcholu opět sudé počty (odebrali jsme dvojice) a&nbsp;díky souvislosti se některá dotýká vrcholu $w \in C_1$; stejným postupem z&nbsp;$w$ vznikne uzavřený tah $C_2$, který do $C_1$ v&nbsp;$w$ vpleteme (projdi $C_1$ do $w$, objeď $C_2$, dokonči $C_1$). Konečně mnoha opakováními vznikne uzavřený tah obsahující všechny hrany — Eulerovský. (Hierholzerův algoritmus, polynomiální.) $\blacksquare$</p>
+          <p><strong>(iii) Zdvojení a&nbsp;cena.</strong> Zdvojením má vrchol $v$ v&nbsp;multigrafu stupeň $2\,|\delta_T(v)|$ — sudý bez ohledu na paritu původního stupně (listy kostry přestanou překážet). Multigraf je souvislý (vznikl z&nbsp;kostry přidáváním hran <a href="../k0/l0-4.html#takeaways">[L0.4]</a>), takže podle (ii) Eulerovský tah $L$ existuje. Jeho hrany jsou přesně hrany multigrafu, každá právě jednou — a&nbsp;multigraf obsahuje každou hranu $e \in E(T)$ dvakrát, takže $c(E(L)) = \sum_{e \in E(T)} 2\,c(e) = 2\,c(E(T))$, přesně jak tvrdí slide 25, bod 3. $\blacksquare$</p>
         </div>
       </details>
     </div>
@@ -197,25 +197,25 @@
         <p><em>(a) Double every edge of $T$ and list the degrees of all vertices in the resulting multigraph. Why does an Eulerian walk exist? (b) Starting at $A$, find an Eulerian walk $L$ and compute $c(E(L))$; verify $c(E(L)) = 2\,c(E(T))$. (c) Shortcut $L$ into a Hamiltonian circuit $H$ (lesson [L3.8a]) and compare $c(E(H))$ with $c(E(L))$.</em></p>
       </div>
 
-      <h4>a) Co je v zadání?</h4>
-      <p>Početní procvičení celé dnešní konstrukce: zdvojit kostru, ověřit sudosti, najít Eulerovský tah, spočítat jeho cenu a shortcuttingem ho dorazit na okruh. Je to ručně provedený double-tree algoritmus — v <a href="l3-9.html">[L3.9]</a> k němu už jen doplníme důkaz faktoru.</p>
+      <h4>a) Co je v&nbsp;zadání?</h4>
+      <p>Početní procvičení celé dnešní konstrukce: zdvojit kostru, ověřit sudosti, najít Eulerovský tah, spočítat jeho cenu a&nbsp;shortcuttingem ho dorazit na okruh. Je to ručně provedený double-tree algoritmus — v&nbsp;<a href="l3-9.html">[L3.9]</a> k&nbsp;němu už jen doplníme důkaz faktoru.</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — sudé stupně ⟺ Eulerovský tah, zdvojení, $c(E(L)) = 2\,c(E(T))$.</li>
         <li><a href="l3-8a.html#t-shortcut">[L3.8a] T02</a> — shortcutting (posloupnost prvních návštěv).</li>
-        <li><a href="l3-8b.html#t-sandwich">[L3.8b] T02</a> — odkud se vzala MST a její cena 7.</li>
+        <li><a href="l3-8b.html#t-sandwich">[L3.8b] T02</a> — odkud se vzala MST a&nbsp;její cena 7.</li>
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>(a) Stupeň v multigrafu = 2 × stupeň v $T$; spočítej stupně v $T$ ($B$ je střed, $C, D, E$ listy). (b) Drž se pravidla „zaseknout se smíš jen ve startu“: z listů se vracej druhou kopií hrany. (c) Zapisuj posloupnost vrcholů tahu a škrtej opakované — zbytek je okruh.</p>
+      <p>(a) Stupeň v&nbsp;multigrafu = 2 × stupeň v&nbsp;$T$; spočítej stupně v&nbsp;$T$ ($B$ je střed, $C, D, E$ listy). (b) Drž se pravidla „zaseknout se smíš jen ve startu“: z&nbsp;listů se vracej druhou kopií hrany. (c) Zapisuj posloupnost vrcholů tahu a&nbsp;škrtej opakované — zbytek je okruh.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní)</summary>
         <div class="inner">
-          <p><strong>(a)</strong> Stupně v $T$: $|\delta(A)| = 2$ ($B, E$), $|\delta(B)| = 3$ ($A, C, D$), $|\delta(C)| = |\delta(D)| = |\delta(E)| = 1$ (listy). Po zdvojení: $A$: 4, $B$: 6, $C$: 2, $D$: 2, $E$: 2 — <strong>všechny sudé</strong>; multigraf je navíc souvislý (zdvojená kostra). Podle dnešní věty (slide 24 Observation) Eulerovský tah existuje.</p>
-          <p><strong>(b)</strong> Např. $L: A \to B \to C \to B \to D \to B \to A \to E \to A$ (z listů $C$, $D$, $E$ vždy zpět druhou kopií; obě kopie $A$–$B$ použity v opačných směrech). Každá z 8 hran multigrafu právě jednou, start = cíl ✓. Cena: $2 + 1 + 1 + 2 + 2 + 2 + 2 + 2 = \mathbf{14} = 2 \cdot 7 = 2\,c(E(T))$ ✓ (slide 25, bod 3 — tah platí každou hranu kostry přesně dvakrát).</p>
-          <p><strong>(c)</strong> Posloupnost prvních návštěv v $L = A,B,C,B,D,B,A,E,A$: vrcholy $B$ (druhý a třetí výskyt) a $A$ (prostřední výskyt) přeskočíme → $H = A, B, C, D, E, A$. Cena $c(E(H)) = 2 + 1 + 2 + 5 + 2 = \mathbf{12} \le 14 = c(E(L))$ — shortcutting díky trojúhelníkové nerovnosti nezdražil <a href="l3-8a.html#t-shortcut">[L3.8a]</a> (je to přesně tamní běh). Mimochodem se sendvičem z <a href="l3-8b.html#t-sandwich">[L3.8b] T02</a>: $7 \le \mathrm{OPT} \le 12$ a $12 \le 2 \cdot 7 = 14$ — faktor 2, který v <a href="l3-9.html">[L3.9]</a> dokážeme obecně, tu sedí.</p>
+          <p><strong>(a)</strong> Stupně v&nbsp;$T$: $|\delta(A)| = 2$ ($B, E$), $|\delta(B)| = 3$ ($A, C, D$), $|\delta(C)| = |\delta(D)| = |\delta(E)| = 1$ (listy). Po zdvojení: $A$: 4, $B$: 6, $C$: 2, $D$: 2, $E$: 2 — <strong>všechny sudé</strong>; multigraf je navíc souvislý (zdvojená kostra). Podle dnešní věty (slide 24 Observation) Eulerovský tah existuje.</p>
+          <p><strong>(b)</strong> Např. $L: A \to B \to C \to B \to D \to B \to A \to E \to A$ (z&nbsp;listů $C$, $D$, $E$ vždy zpět druhou kopií; obě kopie $A$–$B$ použity v&nbsp;opačných směrech). Každá z&nbsp;8 hran multigrafu právě jednou, start = cíl ✓. Cena: $2 + 1 + 1 + 2 + 2 + 2 + 2 + 2 = \mathbf{14} = 2 \cdot 7 = 2\,c(E(T))$ ✓ (slide 25, bod 3 — tah platí každou hranu kostry přesně dvakrát).</p>
+          <p><strong>(c)</strong> Posloupnost prvních návštěv v&nbsp;$L = A,B,C,B,D,B,A,E,A$: vrcholy $B$ (druhý a&nbsp;třetí výskyt) a&nbsp;$A$ (prostřední výskyt) přeskočíme → $H = A, B, C, D, E, A$. Cena $c(E(H)) = 2 + 1 + 2 + 5 + 2 = \mathbf{12} \le 14 = c(E(L))$ — shortcutting díky trojúhelníkové nerovnosti nezdražil <a href="l3-8a.html#t-shortcut">[L3.8a]</a> (je to přesně tamní běh). Mimochodem se sendvičem z&nbsp;<a href="l3-8b.html#t-sandwich">[L3.8b] T02</a>: $7 \le \mathrm{OPT} \le 12$ a&nbsp;$12 \le 2 \cdot 7 = 14$ — faktor 2, který v&nbsp;<a href="l3-9.html">[L3.9]</a> dokážeme obecně, tu sedí.</p>
         </div>
       </details>
     </div>
@@ -252,7 +252,7 @@ KOViz.graph(document.getElementById('viz-mst'), {
     {from:'B', to:'C', label:'1'},
     {from:'B', to:'D', label:'2'},
   ],
-  caption: 'MST T z [L3.8b] (c(E(T)) = 7) se stupni vrcholů. Čtyři vrcholy lichého stupně (červeně) — sudý počet, přesně jak slibuje [L0.2]. Kvůli listům tu uzavřený tah přes všechny hrany neexistuje.',
+  caption: 'MST T z&nbsp;[L3.8b] (c(E(T)) = 7) se stupni vrcholů. Čtyři vrcholy lichého stupně (červeně) — sudý počet, přesně jak slibuje [L0.2]. Kvůli listům tu uzavřený tah přes všechny hrany neexistuje.',
 });
 
 // Statický gadget: každá návštěva vrcholu spáruje 2 hrany
@@ -271,7 +271,7 @@ KOViz.graph(document.getElementById('viz-parity'), {
     {from:'u₃', to:'v', label:'2. příchod', cls:'good'},
     {from:'v', to:'u₄', label:'2. odchod', cls:'good'},
   ],
-  caption: 'Hrany jsou neorientované, šipky ukazují jen směr průchodu tahu. Každá návštěva vrcholu v spáruje jeden příchod s jedním odchodem — Eulerovský tah tedy spotřebuje hrany u v po dvojicích a stupeň |δ(v)| musí být sudý.',
+  caption: 'Hrany jsou neorientované, šipky ukazují jen směr průchodu tahu. Každá návštěva vrcholu v spáruje jeden příchod s&nbsp;jedním odchodem — Eulerovský tah tedy spotřebuje hrany u&nbsp;v po dvojicích a&nbsp;stupeň |δ(v)| musí být sudý.',
 });
 
 // Stepper: Eulerovský tah na zdvojené MST (multigraf — dvojice rovnoběžných hran zadané opačnými směry, aby měly různé klíče)
@@ -295,33 +295,33 @@ KOViz.stepper(document.getElementById('viz-euler'), {
       {from:'B', to:'D', label:'2', curve:0.22},
       {from:'D', to:'B', label:'2', curve:0.22},
     ],
-    caption: 'Multigraf po zdvojení hran MST z [L3.8b]: každá hrana 2× (8 hran, cena 14 = 2·7). Klikej a sleduj konstrukci Eulerovského tahu L.',
+    caption: 'Multigraf po zdvojení hran MST z&nbsp;[L3.8b]: každá hrana 2× (8 hran, cena 14 = 2·7). Klikej a&nbsp;sleduj konstrukci Eulerovského tahu L.',
   },
   frames: [
-    {desc:'Stupně po zdvojení: A 4, B 6, C 2, D 2, E 2 — všechny sudé (zdvojnásobení je sudé vždy) a multigraf je souvislý (pořád je to kostra, jen dvojmo). Eulerovský tah tedy existuje. Start zvolíme v A.',
+    {desc:'Stupně po zdvojení: A 4, B 6, C 2, D 2, E 2 — všechny sudé (zdvojnásobení je sudé vždy) a&nbsp;multigraf je souvislý (pořád je to kostra, jen dvojmo). Eulerovský tah tedy existuje. Start zvolíme v&nbsp;A.',
      nodes:{A:'hl'},
      subs:{A:'deg 4', B:'deg 6', C:'deg 2', D:'deg 2', E:'deg 2'}},
-    {desc:'První kopií hrany A–B do B (cena 2). Tah zatím: A,B. U vrcholu A je spotřebována 1 hrana (lichý počet) — ale A je start, tam se to na konci spáruje.',
+    {desc:'První kopií hrany A–B do B (cena 2). Tah zatím: A,B. U&nbsp;vrcholu A je spotřebována 1 hrana (lichý počet) — ale A je start, tam se to na konci spáruje.',
      nodes:{A:'good', B:'hl'},
      edges:{'A->B':'hl'},
      subs:{A:'deg 4', B:'deg 6', C:'deg 2', D:'deg 2', E:'deg 2'}},
-    {desc:'Z B do C (1) — a C má jen druhou kopii téže hrany, takže zpět do B (1). Vrchol C je tím vyřízený: obě jeho hrany spárované, navštívit ho podruhé už není čím. Tah: A,B,C,B. (Opakovat VRCHOL tah smí — jen hrany ne.)',
+    {desc:'Z&nbsp;B do C (1) — a&nbsp;C má jen druhou kopii téže hrany, takže zpět do B (1). Vrchol C je tím vyřízený: obě jeho hrany spárované, navštívit ho podruhé už není čím. Tah: A,B,C,B. (Opakovat VRCHOL tah smí — jen hrany ne.)',
      nodes:{A:'good', B:'hl', C:'good'},
      edges:{'A->B':'good', 'B->C':'hl', 'C->B':'hl'},
      subs:{A:'deg 4', B:'deg 6', C:'deg 2', D:'deg 2', E:'deg 2'}},
-    {desc:'Stejně s D: B→D (2) a druhou kopií zpět D→B (2). Tah: A,B,C,B,D,B. U vrcholu B je spotřebováno 5 hran z 6 — lichý počet, takže podle paritního argumentu musí zbývat volná hrana. Zbývá: druhá kopie B–A.',
+    {desc:'Stejně s&nbsp;D: B→D (2) a&nbsp;druhou kopií zpět D→B (2). Tah: A,B,C,B,D,B. U&nbsp;vrcholu B je spotřebováno 5 hran z&nbsp;6 — lichý počet, takže podle paritního argumentu musí zbývat volná hrana. Zbývá: druhá kopie B–A.',
      nodes:{A:'good', B:'hl', C:'good', D:'good'},
      edges:{'A->B':'good', 'B->C':'good', 'C->B':'good', 'B->D':'hl', 'D->B':'hl'},
      subs:{A:'deg 4', B:'deg 6', C:'deg 2', D:'deg 2', E:'deg 2'}},
-    {desc:'Druhou kopií B–A zpět do A (2). Tah: A,B,C,B,D,B,A. Vrchol B je vyřízený (6/6). V A zbývají 2 volné hrany — obě kopie A–E.',
+    {desc:'Druhou kopií B–A zpět do A (2). Tah: A,B,C,B,D,B,A. Vrchol B je vyřízený (6/6). V&nbsp;A zbývají 2 volné hrany — obě kopie A–E.',
      nodes:{A:'hl', B:'good', C:'good', D:'good'},
      edges:{'A->B':'good', 'B->C':'good', 'C->B':'good', 'B->D':'good', 'D->B':'good', 'B->A':'hl'},
      subs:{A:'deg 4', B:'deg 6', C:'deg 2', D:'deg 2', E:'deg 2'}},
-    {desc:'A→E (2) a druhou kopií E→A (2). Všech 8 hran právě jednou, start = cíl: L = A,B,C,B,D,B,A,E,A je Eulerovský tah. Cena c(E(L)) = 2+1+1+2+2+2+2+2 = 14 = 2·c(E(T)) — slide 25, bod 3.',
+    {desc:'A→E (2) a&nbsp;druhou kopií E→A (2). Všech 8 hran právě jednou, start = cíl: L = A,B,C,B,D,B,A,E,A je Eulerovský tah. Cena c(E(L)) = 2+1+1+2+2+2+2+2 = 14 = 2·c(E(T)) — slide 25, bod 3.',
      nodes:{A:'hl', B:'good', C:'good', D:'good', E:'good'},
      edges:{'A->B':'good', 'B->C':'good', 'C->B':'good', 'B->D':'good', 'D->B':'good', 'B->A':'good', 'A->E':'hl', 'E->A':'hl'},
      subs:{A:'deg 4', B:'deg 6', C:'deg 2', D:'deg 2', E:'deg 2'}},
-    {desc:'Pointa: L = A,B,C,B,D,B,A,E,A je PŘESNĚ sled W, na kterém v [L3.8a] běžel shortcutting — vyrobil z něj okruh H = A,B,C,D,E,A ceny 12 ≤ 14. Tři stavební kameny do sebe zapadly; v [L3.9] z nich složíme důkaz faktoru 2.',
+    {desc:'Pointa: L = A,B,C,B,D,B,A,E,A je PŘESNĚ sled W, na kterém v&nbsp;[L3.8a] běžel shortcutting — vyrobil z&nbsp;něj okruh H = A,B,C,D,E,A ceny 12 ≤ 14. Tři stavební kameny do sebe zapadly; v&nbsp;[L3.9] z&nbsp;nich složíme důkaz faktoru 2.',
      nodes:{A:'good', B:'good', C:'good', D:'good', E:'good'},
      edges:{'A->B':'good', 'B->C':'good', 'C->B':'good', 'B->D':'good', 'D->B':'good', 'B->A':'good', 'A->E':'good', 'E->A':'good'},
      subs:{A:'deg 4', B:'deg 6', C:'deg 2', D:'deg 2', E:'deg 2'}},
