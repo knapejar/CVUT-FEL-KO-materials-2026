@@ -41,12 +41,12 @@
   <!-- ===== SEKCE 1: MOTIVACE ===== -->
   <h2>Za kolik? Nová otázka pro starou síť</h2>
 
-  <p>Vezmi síť ze slidu 32 (přednáška ji používá pro celé MCF). Hrany mají kromě mezí $l, u$ a toku $f$ nově i <strong>cenu $c(e)$ za jednotku toku</strong>; uzly nemají $s$ a $t$, ale <strong>bilance $b(v)$</strong> přesně jako v <a href="l4-6.html#takeaways">[L4.6]</a>: uzel $u$ vyrábí 4 jednotky, uzel $x$ je spotřebuje.</p>
+  <p>Vezmi síť ze slidu 32 (přednáška ji používá pro celé MCF). Hrany mají kromě mezí $l, u$ a toku $f$ nově i <strong>cenu $c(e)$ za jednotku toku</strong>; uzly nemají $s$ a $t$, ale <strong>bilance $b(v)$</strong> přesně jako v&nbsp;<a href="l4-6.html#takeaways">[L4.6]</a>: uzel $u$ vyrábí 4 jednotky, uzel $x$ je spotřebuje.</p>
 
   <div class="viz" id="viz-g"></div>
 
   <details class="try">
-    <summary>Zkus sám: nakreslený tok bilance splňuje (ověř Kirchhoffa s bilancemi!) a stojí $3 \cdot 2 + 1 \cdot 2 + 0 \cdot 1 + 3 \cdot 3 + 1 \cdot 1 = 18$. Umíš těch 4 jednotky z $u$ do $x$ dopravit levněji? Kolik nejméně?</summary>
+    <summary>Zkus sám: nakreslený tok bilance splňuje (ověř Kirchhoffa s bilancemi!) a stojí $3 \cdot 2 + 1 \cdot 2 + 0 \cdot 1 + 3 \cdot 3 + 1 \cdot 1 = 18$. Umíš ty 4 jednotky z&nbsp;$u$ do&nbsp;$x$ dopravit levněji? Kolik nejméně?</summary>
     <div class="inner">
       <p>Spočítej cenu tras za jednotku: přímo $u \to x$ stojí 1 (ale kapacita jen 2), přes $w$ stojí $2 + 1 = 3$ (kapacita $\min(2,5) = 2$), přes $v$ stojí $2 + 3 = 5$. Nejlevnější mix: 2 jednotky přímo + 2 jednotky přes $w$ = $2 \cdot 1 + 2 \cdot 3 = \mathbf{8}$. Bilance sedí stejně dobře jako u nakresleného toku za 18 — <strong>přípustnost o ceně nic neříká</strong>. Max flow by mezi oběma toky nerozlišoval; potřebujeme novou úlohu, která mezi přípustnými toky vybírá ten nejlevnější. (Že je 8 opravdu minimum, dnes jen tušíme — certifikát dodá příští lekce <a href="l4-11.html#takeaways">[L4.11]</a>: žádný záporný cyklus v reziduálním grafu.)</p>
     </div>
@@ -98,7 +98,7 @@
   <details class="try">
     <summary>Zkus sám: jak nastavit $(G, l, u, c, b)$, aby MCF spočítal <em>maximum flow</em> ze $s$ do $t$? Nápověda: MCF minimalizuje — tak ať „víc toku“ znamená „menší cena“.</summary>
     <div class="inner">
-      <p>Žádný uzel nesmí nic vyrábět: $b(v) = 0$ všude (tok jen krouží — <em>cirkulace</em>). Aby vůbec kroužil, přidej hranu $t \to s$ s $u = \infty$ — a té dej cenu $-1$, všem ostatním cenu 0. Každá jednotka, která proteče sítí z $s$ do $t$, se musí vrátit hranou $t \to s$ a „vydělá“ $-1$. Minimalizace ceny pak žene tok hranou $t \to s$ co nejvýš — tedy maximalizuje tok sítí. Optimální cena je $-|f_{max}|$.</p>
+      <p>Žádný uzel nesmí nic vyrábět: $b(v) = 0$ všude (tok jen krouží — <em>cirkulace</em>). Aby vůbec kroužil, přidej hranu $t \to s$ s $u = \infty$ — a té dej cenu $-1$, všem ostatním cenu 0. Každá jednotka, která proteče sítí z&nbsp;$s$ do&nbsp;$t$, se musí vrátit hranou $t \to s$ a „vydělá“ $-1$. Minimalizace ceny pak žene tok hranou $t \to s$ co nejvýš — tedy maximalizuje tok sítí. Optimální cena je $-|f_{max}|$.</p>
     </div>
   </details>
 
@@ -132,7 +132,7 @@
   <!-- ===== SEKCE 5: REZIDUÁLNÍ GRAF S CENAMI ===== -->
   <h2>Reziduální graf dostává ceny (slide 32)</h2>
 
-  <p>Jak se MCF řeší kombinatoricky (bez LP solveru)? Stejnou filozofií jako max flow: vezmi nějaký přípustný tok a <em>vylepšuj ho v reziduálním grafu</em>. Kapacitní část $G_f$ znáš z <a href="l4-2.html#takeaways">[L4.2]</a> — dopředná hrana s rezervou $u - f$, zpětná s rezervou $f - l$. Jenže teď nevylepšujeme <em>velikost</em>, ale <em>cenu</em> — takže každá reziduální hrana musí říkat, kolik její použití stojí.</p>
+  <p>Jak se MCF řeší kombinatoricky (bez LP solveru)? Stejnou filozofií jako max flow: vezmi nějaký přípustný tok a <em>vylepšuj ho v&nbsp;reziduálním grafu</em>. Kapacitní část $G_f$ znáš z <a href="l4-2.html#takeaways">[L4.2]</a> — dopředná hrana s rezervou $u - f$, zpětná s rezervou $f - l$. Jenže teď nevylepšujeme <em>velikost</em>, ale <em>cenu</em> — takže každá reziduální hrana musí říkat, kolik její použití stojí.</p>
 
   <details class="try">
     <summary>Zkus sám: dopředná reziduální hrana znamená „pošli po $e$ jednotku navíc“ — ta logicky stojí $c(e)$. Co znamená zpětná hrana a kolik má stát?</summary>
@@ -164,7 +164,7 @@
   <details class="try">
     <summary>Zkus sám: najdi v hotovém $G_f$ <em>cyklus se zápornou součtovou cenou</em>. Co by se stalo, kdybys podél něj poslal tolik jednotek, kolik dovolí nejmenší $u_f$ na cyklu?</summary>
     <div class="inner">
-      <p>Třeba $u \to x \to v \to u$: ceny $1 + (-3) + (-2) = -4 &lt; 0$, kapacity $\min(2, 3, 3) = 2$. Pošli po něm $\gamma = 2$ jednotky: na $u \to x$ tok vzroste o 2, na zpětných úsecích se tok <em>vrátí</em> — $f(v \to x)$ klesne $3 \to 1$ a $f(u \to v)$ klesne $3 \to 1$. Bilance se nezmění (cyklus do žádného uzlu nic nepřidá ani neodebere!), ale cena klesne o $4 \cdot 2 = 8$: z 18 na 10. A v novém $G_f$ je další záporný cyklus ($u \to w \to x \to v \to u$, cena $2 + 1 - 3 - 2 = -2$, $\gamma = 1$) — po něm jsi na ceně $\mathbf{8}$ z prvního try. <strong>Záporný cyklus v $G_f$ = sleva beze změny bilancí.</strong> Opakovat, dokud nějaký existuje — to je celý algoritmus cycle canceling, příští lekce <a href="l4-11.html#takeaways">[L4.11]</a> (záporné cykly najde Bellman-Ford, srov. <a href="../k2/l2-12.html#takeaways">[L2.12]</a>).</p>
+      <p>Třeba $u \to x \to v \to u$: ceny $1 + (-3) + (-2) = -4 &lt; 0$, kapacity $\min(2, 3, 3) = 2$. Pošli po něm $\gamma = 2$ jednotky: na $u \to x$ tok vzroste o 2, na zpětných úsecích se tok <em>vrátí</em> — $f(v \to x)$ klesne $3 \to 1$ a $f(u \to v)$ klesne $3 \to 1$. Bilance se nezmění (cyklus do žádného uzlu nic nepřidá ani neodebere!), ale cena klesne o $4 \cdot 2 = 8$: z 18 na 10. A v&nbsp;novém $G_f$ je další záporný cyklus ($u \to w \to x \to v \to u$, cena $2 + 1 - 3 - 2 = -2$, $\gamma = 1$) — po něm jsi na ceně $\mathbf{8}$ z prvního try. <strong>Záporný cyklus v $G_f$ = sleva beze změny bilancí.</strong> Opakovat, dokud nějaký existuje — to je celý algoritmus cycle canceling, příští lekce <a href="l4-11.html#takeaways">[L4.11]</a> (záporné cykly najde Bellman-Ford, srov. <a href="../k2/l2-12.html#takeaways">[L2.12]</a>).</p>
     </div>
   </details>
 
@@ -194,7 +194,7 @@
     <div class="task-head">
       <span class="task-id">T01</span>
       <strong>Minimum Cost Flow — formulace a redukce</strong>
-      <span class="task-src">zdroj: banka úloh #24 (EN 1:1; v bance „Unsolved“ — studijní otázky i–iii vlastní, řešení dle textu banky/slidů 28–30, přiznáno)</span>
+      <span class="task-src">zdroj: banka úloh #24 (EN 1:1; v bance „Unsolved“ — studijní otázky i–iii vlastní, řešení dle slidů 28–30 — banka #24 redukci Chinese Postman jen nadepisuje, plné znění je na slidu 30 — přiznáno)</span>
     </div>
     <div class="task-body">
       <div class="assignment">
