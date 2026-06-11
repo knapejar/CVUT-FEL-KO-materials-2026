@@ -36,7 +36,7 @@
     <strong>List scheduling (LS):</strong> kdykoliv se uvolní stroj, přiřaď mu první <em>připravenou</em> úlohu ze seznamu $L$. Pro $P\,|\,prec\,|\,C_{max}$ (i $P\,||\,C_{max}$) je to aproximační algoritmus s faktorem $r_{LS} = 2 - \frac{1}{R}$ [Graham 1966]; setřídění $L$ podle nerostoucích $p_i$ (<strong>LPT</strong>) zlepší faktor na $r_{LPT} = \frac{4}{3} - \frac{1}{3R}$ (jen pro $P\,||\,C_{max}$).
   </div>
 
-  <p>Nepreemptivní $P\,||\,C_{max}$ je NP-hard a s precedencemi $P\,|\,prec\,|\,C_{max}$ to lepší není (víc o NP-těžkosti rozvrhování v <a href="../k5/l5-13.html">[L5.13]</a>). Exaktní Rothkopf <a href="../k5/l5-11.html">[L5.11]</a> platí pseudopolynomiální daň a precedence vůbec neumí; Muntz&amp;Coffman <a href="../k5/l5-10.html">[L5.10]</a> potřebuje preempci. Co zbývá, když je úloh hodně, precedence v zadání a preempce zakázaná? <strong>Heuristika se zárukou</strong> — aproximační algoritmus ve smyslu <a href="../k3/l3-1.html">[L3.1]</a>: nevrátí nutně optimum, ale dokazatelně nikdy nepřekročí $r \cdot C^*_{max}$. Dnes ta nejslavnější: <strong>list scheduling</strong> (slidy 41–46). Notaci $P\,|\,prec\,|\,C_{max}$ čteš dle <a href="../k5/l5-1.html">[L5.1]</a>: identické paralelní stroje, nepreemptivní úlohy s precedencemi (DAG), minimalizuj makespan.</p>
+  <p>Nepreemptivní $P\,||\,C_{max}$ je NP-hard a s precedencemi $P\,|\,prec\,|\,C_{max}$ to lepší není (víc o&nbsp;NP-těžkosti rozvrhování v&nbsp;<a href="../k5/l5-13.html">[L5.13]</a>). Exaktní Rothkopf <a href="../k5/l5-11.html">[L5.11]</a> platí pseudopolynomiální daň a precedence vůbec neumí; Muntz&amp;Coffman <a href="../k5/l5-10.html">[L5.10]</a> potřebuje preempci. Co zbývá, když je úloh hodně, precedence v&nbsp;zadání a&nbsp;preempce zakázaná? <strong>Heuristika se zárukou</strong> — aproximační algoritmus ve smyslu <a href="../k3/l3-1.html">[L3.1]</a>: nevrátí nutně optimum, ale dokazatelně nikdy nepřekročí $r \cdot C^*_{max}$. Dnes ta nejslavnější: <strong>list scheduling</strong> (slidy 41–46). Notaci $P\,|\,prec\,|\,C_{max}$ čteš dle <a href="../k5/l5-1.html">[L5.1]</a>: identické paralelní stroje, nepreemptivní úlohy s precedencemi (DAG), minimalizuj makespan.</p>
 
   <!-- ===== SEKCE 1: ALGORITMUS ===== -->
   <h2>Algoritmus: první připravená úloha ze seznamu (slide 41)</h2>
@@ -44,7 +44,7 @@
   <details class="try">
     <summary>Zkus sám: navrhni nejjednodušší možný rozvrhovač pro $P\,|\,prec\,|\,C_{max}$. Co budeš dělat ve chvíli, kdy se uvolní stroj?</summary>
     <div class="inner">
-      <p>Přesně to, co by tě napadlo: drž si <strong>seznam</strong> (list) úloh a uvolněnému stroji dej první úlohu ze seznamu, která <strong>je připravená</strong> — tj. všichni její predchůdci v DAGu už doběhli. Žádné přerozvrhování, žádný backtracking, jeden průchod. Jediné, co je potřeba hlídat, je <em>kdy</em> se úloha stává připravenou — k tomu slouží <strong>availability time</strong> $a_i$.</p>
+      <p>Přesně to, co by tě napadlo: drž si <strong>seznam</strong> (list) úloh a uvolněnému stroji dej první úlohu ze seznamu, která <strong>je připravená</strong> — tj. všichni její predchůdci v&nbsp;DAGu už doběhli. Žádné přerozvrhování, žádný backtracking, jeden průchod. Jediné, co je potřeba hlídat, je <em>kdy</em> se úloha stává připravenou — k&nbsp;tomu slouží <strong>availability time</strong> $a_i$.</p>
     </div>
   </details>
 
@@ -67,7 +67,7 @@ end
     <p>“$a_i$, <strong>availability time of $T_i$</strong>, is equal to $t_k$ if it has no predecessors, it is equal to $\infty$ if at least one of its predecessors is in $L$, and it is equal to $\max_{j \in \mathrm{Pred}(T_i)}\{s_j + p_j\}$ if all of its predecessors have been removed from $L$.”</p>
   </div>
 
-  <p>Čtení pseudokódu: v každé iteraci vyber <strong>nejdřív uvolněný stroj</strong> $P_k$ (nejmenší $t_v$), pak mezi úlohami zbylými v $L$ najdi ty s <strong>nejmenším</strong> $a_i$ a z nich vezmi tu, která je v $L$ <strong>první</strong>. Tři případy $a_i$: úloha bez predchůdců je k dispozici hned ($a_i = t_k$); úloha, jejíž predchůdce ještě čeká v $L$, nepřipadá v úvahu ($a_i = \infty$); jinak je k dispozici od dokončení posledního predchůdce ($\max_j \{s_j + p_j\}$). Start je $s_i = \max\{t_k, a_i\}$ — stroj může na připravovanou úlohu i chvíli <em>čekat</em>.</p>
+  <p>Čtení pseudokódu: v každé iteraci vyber <strong>nejdřív uvolněný stroj</strong> $P_k$ (nejmenší $t_v$), pak mezi úlohami zbylými v $L$ najdi ty s&nbsp;<strong>nejmenším</strong> $a_i$ a&nbsp;z nich vezmi tu, která je v $L$ <strong>první</strong>. Tři případy $a_i$: úloha bez predchůdců je k&nbsp;dispozici hned ($a_i = t_k$); úloha, jejíž predchůdce ještě čeká v $L$, nepřipadá v úvahu ($a_i = \infty$); jinak je k&nbsp;dispozici od dokončení posledního predchůdce ($\max_j \{s_j + p_j\}$). Start je $s_i = \max\{t_k, a_i\}$ — stroj může na připravovanou úlohu i chvíli <em>čekat</em>.</p>
 
   <div class="box info">
     <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 42 (EN 1:1) — co LS vlastně je</div>
@@ -81,7 +81,7 @@ end
   <!-- ===== SEKCE 2: FAKTOR ===== -->
   <h2>Jak špatné to může být? Faktor $2 - \frac{1}{R}$ (slide 42)</h2>
 
-  <p>Kvalita výsledku závisí na <strong>pořadí úloh v $L$</strong>. Slide 42 to ukazuje na instanci, kde se nejhorší případ opravdu stane: $R = 4$, $n = (R-1)\cdot R + 1 = 13$, $p = (1, 1, \ldots, 1, 4)$ (dvanáct jednotkových úloh + jedna délky $R = 4$), $\prec$ prázdné. Proklikej běh LS s „hloupým“ seznamem $L' = (T_1, T_2, \ldots, T_{13})$:</p>
+  <p>Kvalita výsledku závisí na <strong>pořadí úloh v&nbsp;$L$</strong>. Slide 42 to ukazuje na instanci, kde se nejhorší případ opravdu stane: $R = 4$, $n = (R-1)\cdot R + 1 = 13$, $p = (1, 1, \ldots, 1, 4)$ (dvanáct jednotkových úloh + jedna délky $R = 4$), $\prec$ prázdné. Proklikej běh LS s „hloupým“ seznamem $L' = (T_1, T_2, \ldots, T_{13})$:</p>
 
   <div class="viz" id="viz-ls42"></div>
 
@@ -92,7 +92,7 @@ end
   <details class="try">
     <summary>Zkus sám: spočítej poměr $C_{max}^{LS} / C^*_{max}$ z obou obrázků. Vidíš v něm $2 - \frac{1}{R}$?</summary>
     <div class="inner">
-      <p>$\frac{7}{4} = 1{,}75 = 2 - \frac{1}{4}$ — přesně faktor pro $R = 4$. A obecně: $C^*_{max} = R$ (dlouhá úloha běží paralelně s jednotkovými), kdežto špatný list nejdřív rovnoměrně rozlije $(R-1)\cdot R$ jednotek na $R$ strojů (do času $R - 1$) a dlouhou úlohu délky $R$ nechá až nakonec: $C_{max} = (R-1) + R = 2R - 1 = (2 - \frac{1}{R}) \cdot R$. Hůř to dopadnout nemůže — to je obsah Grahamovy věty.</p>
+      <p>$\frac{7}{4} = 1{,}75 = 2 - \frac{1}{4}$ — přesně faktor pro $R = 4$. A obecně: $C^*_{max} = R$ (dlouhá úloha běží paralelně s jednotkovými), kdežto špatný list nejdřív rovnoměrně rozlije $(R-1)\cdot R$ jednotek na $R$ strojů (do času $R - 1$) a&nbsp;dlouhou úlohu délky $R$ nechá až nakonec: $C_{max} = (R-1) + R = 2R - 1 = (2 - \frac{1}{R}) \cdot R$. Hůř to dopadnout nemůže — to je obsah Grahamovy věty.</p>
     </div>
   </details>
 
@@ -107,14 +107,14 @@ end
     <div class="inner">
       <p>Bez precedencí je každá úloha připravená od začátku — kdyby nějaký stroj před $s_l$ zahálel, LS by mu $T_l$ (nebo jinou čekající úlohu) přidělil dřív. Do času $s_l$ tedy všech $R$ strojů nepřetržitě pracuje: $R \cdot s_l \le \sum_i p_i - p_l$, tj. $s_l \le \frac{1}{R}\sum_i p_i - \frac{p_l}{R}$. Dosaď dolní meze $C^*_{max} \ge \frac{1}{R}\sum_i p_i$ a $C^*_{max} \ge p_l$:
       $$C_{max} = s_l + p_l \le \frac{1}{R}\textstyle\sum_i p_i + \left(1 - \frac{1}{R}\right) p_l \le C^*_{max} + \left(1 - \frac{1}{R}\right) C^*_{max} = \left(2 - \frac{1}{R}\right) C^*_{max}.$$
-      S precedencemi je argument jemnější (místo jedné úlohy se sleduje řetěz predchůdců, jehož délka je dolní mez $C^*_{max}$), ale mez $2 - \frac{1}{R}$ platí beze změny [Graham 1966].</p>
+      S&nbsp;precedencemi je argument jemnější (místo jedné úlohy se sleduje řetěz predchůdců, jehož délka je dolní mez $C^*_{max}$), ale mez $2 - \frac{1}{R}$ platí beze změny [Graham 1966].</p>
     </div>
   </details>
 
   <!-- ===== SEKCE 3: ANOMALIE ===== -->
   <h2>Anomálie: „pomohl jsem si“ — a rozvrh se prodloužil (slidy 43–44)</h2>
 
-  <p>Faktor je záruka <em>na nejhorší případ</em> — neříká nic o tom, že se LS chová „rozumně“ při změnách vstupu. Slide 43 dává instanci pro $R = 2$: $n = 8$, $p = (3, 4, 2, 4, 4, 2, 13, 2)$ s precedencemi (DAG rekonstruován z popisu obrázku slidu — přiznáno):</p>
+  <p>Faktor je záruka <em>na nejhorší případ</em> — neříká nic o&nbsp;tom, že se LS chová „rozumně“ při změnách vstupu. Slide 43 dává instanci pro $R = 2$: $n = 8$, $p = (3, 4, 2, 4, 4, 2, 13, 2)$ s&nbsp;precedencemi (DAG rekonstruován z&nbsp;popisu obrázku slidu — přiznáno):</p>
 
   <div class="viz" id="viz-prec43"></div>
 
@@ -125,7 +125,7 @@ end
   <details class="try">
     <summary>Zkus sám: výsledných $C_{max} = 17$ vypadá obyčejně. Srovnej se $\sum_i p_i / R$. Co zjistíš?</summary>
     <div class="inner">
-      <p>$\sum_i p_i = 34$, takže $\frac{34}{2} = 17$ — ani jeden stroj ani chvíli nezahálí, LS tady našel <strong>optimum</strong>. To je důležitá kalibrace: heuristika často trefí optimum a faktor $2 - \frac{1}{R}$ je jen pojistka. Pointa slidů 43–44 je ale jinde: stačí drobnost a výsledek se <em>zhorší</em>.</p>
+      <p>$\sum_i p_i = 34$, takže $\frac{34}{2} = 17$ — ani jeden stroj ani chvíli nezahálí, LS tady našel <strong>optimum</strong>. To je důležitá kalibrace: heuristika často trefí optimum a&nbsp;faktor $2 - \frac{1}{R}$ je jen pojistka. Pointa slidů 43–44 je ale jinde: stačí drobnost a&nbsp;výsledek se <em>zhorší</em>.</p>
     </div>
   </details>
 
@@ -143,20 +143,20 @@ end
   <details class="try">
     <summary>Zkus sám: prohoď v seznamu $T_7$ a $T_8$ (tj. $L = (T_1, \ldots, T_6, T_8, T_7)$) a odsimuluj LS. Proč se rozvrh prodlouží?</summary>
     <div class="inner">
-      <p>V okamžiku, kdy jsou $T_7$ i $T_8$ připravené (obě $a = 3$), bere LS tu, která je v $L$ <em>dřív</em> — teď tedy krátkou $T_8$ na uvolněnou $P_2$. Obří $T_7$ ($p_7 = 13$) pak startuje až v čase 5 na $P_1$ a táhne rozvrh do $C_{max} = 18 &gt; 17$ (běh níže; simulace dle pseudokódu vlastní — přiznáno, Gantt slidu 44 je jen na obrázku):</p>
+      <p>V okamžiku, kdy jsou $T_7$ i $T_8$ připravené (obě $a = 3$), bere LS tu, která je v&nbsp;$L$ <em>dřív</em> — teď tedy krátkou $T_8$ na uvolněnou $P_2$. Obří $T_7$ ($p_7 = 13$) pak startuje až v&nbsp;čase 5 na $P_1$ a&nbsp;táhne rozvrh do $C_{max} = 18 &gt; 17$ (běh níže; simulace dle pseudokódu vlastní — přiznáno, Gantt slidu 44 je jen na obrázku):</p>
       <div class="viz" id="viz-swap44"></div>
     </div>
   </details>
 
-  <p>A nejprotivnější anomálie (3): <strong>přidej stroj</strong> a bude hůř. S $R = 3$ a původním seznamem dá LS $C_{max} = 19$ (simulace dle pseudokódu vlastní — přiznáno): třetí stroj „ukradne“ $T_3$ dřív, takže se dřív připraví $T_4, T_5, T_6$, ty předběhnou ve frontě dlouhou $T_7$ — a ta startuje až v čase 6:</p>
+  <p>A&nbsp;nejprotivnější anomálie (3): <strong>přidej stroj</strong> a&nbsp;bude hůř. S&nbsp;$R = 3$ a&nbsp;původním seznamem dá LS $C_{max} = 19$ (simulace dle pseudokódu vlastní — přiznáno): třetí stroj „ukradne“ $T_3$ dřív, takže se dřív připraví $T_4, T_5, T_6$, ty předběhnou ve frontě dlouhou $T_7$ — a&nbsp;ta startuje až v&nbsp;čase 6:</p>
 
   <div class="viz" id="viz-r3"></div>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Anomálie nejsou folklór — u ústní se na ně ptají</div>
     <ul>
-      <li><strong>LS není monotónní.</strong> Zkrácení úloh, odebrání precedencí i přidání stroje — všechno „zlepšení“ vstupu — může $C_{max}$ <em>prodloužit</em> (slide 43, případy 1–3). Záruka je jen jedna: $C_{max} \le (2 - \frac{1}{R}) \, C^*_{max}$.</li>
-      <li><strong>Mechanismus je vždy stejný:</strong> změna uvolní/posune nějakou úlohu ve frontě dřív, tím se přehází přiřazení strojům a dlouhá úloha (tady $T_7$) skončí pozdě. Faktor se tím neporuší — jen se v rámci něj posuneš k horšímu.</li>
+      <li><strong>LS není monotónní.</strong> Zkrácení úloh, odebrání precedencí i&nbsp;přidání stroje — všechno „zlepšení“ vstupu — může $C_{max}$ <em>prodloužit</em> (příčiny slide 43, prodloužení demonstruje slide 44, případy 1–3). Záruka je jen jedna: $C_{max} \le (2 - \frac{1}{R}) \, C^*_{max}$.</li>
+      <li><strong>Mechanismus je vždy stejný:</strong> změna uvolní/posune nějakou úlohu ve frontě dřív, tím se přehází přiřazení strojům a&nbsp;dlouhá úloha (tady $T_7$) skončí pozdě. Faktor se tím neporuší — jen se v&nbsp;rámci něj posuneš k&nbsp;horšímu.</li>
       <li><strong>Proto v praxi:</strong> výsledek LS po změně vstupu vždy přepočítej; neargumentuj „ubral jsem práci, hůř být nemůže“.</li>
     </ul>
   </div>
@@ -167,7 +167,7 @@ end
   <details class="try">
     <summary>Zkus sám: v příkladu na faktor (R = 4 výše) prohrál seznam, který nechal dlouhou úlohu nakonec. Jak bys list seřadil, aby se to nestalo?</summary>
     <div class="inner">
-      <p><strong>Od nejdelší úlohy</strong> — dlouhé úlohy odbavit první, krátkými se mezery dorovnají. Přesně to je <strong>LPT (Longest Processing Time first)</strong>: při inicializaci LS setřiď $L$ podle <em>nerostoucích</em> $p_i$. Na příkladu výše dá LPT rovnou optimum ($T_{13}$ první). Obecně faktor klesne z $2 - \frac{1}{R}$ na $\frac{4}{3} - \frac{1}{3R}$ — ale pozor, věta platí pro $P\,||\,C_{max}$, tedy <em>bez precedencí</em>.</p>
+      <p><strong>Od nejdelší úlohy</strong> — dlouhé úlohy odbavit první, krátkými se mezery dorovnají. Přesně to je <strong>LPT (Longest Processing Time first)</strong>: při inicializaci LS setřiď $L$ podle <em>nerostoucích</em> $p_i$. Na příkladu výše dá LPT rovnou optimum ($T_{13}$ první). Obecně faktor klesne z&nbsp;$2 - \frac{1}{R}$ na $\frac{4}{3} - \frac{1}{3R}$ — ale pozor, věta platí pro $P\,||\,C_{max}$, tedy <em>bez precedencí</em>.</p>
     </div>
   </details>
 
@@ -181,14 +181,14 @@ end
     <p>Time complexity of LPT algorithm is $\mathcal{O}(n \cdot \log(n))$ due to the sorting.”</p>
   </div>
 
-  <p>I LPT má svou těsnou instanci (slide 46): $p = (2R-1, 2R-1, 2R-2, 2R-2, \ldots, R+1, R+1, R, R, R)$, $n = 2R + 1$, $\prec$ prázdné. Pro $R = 3$: $p = (5, 5, 4, 4, 3, 3, 3)$, $r_{LPT} = \frac{4}{3} - \frac{1}{9} = \frac{11}{9}$. Proklikej běh LPT (list už je setříděný):</p>
+  <p>I&nbsp;LPT má svou těsnou instanci (slide 46): $p = (2R-1, 2R-1, 2R-2, 2R-2, \ldots, R+1, R+1, R, R, R)$, $n = 2R + 1$, $\prec$ prázdné. Pro $R = 3$: $p = (5, 5, 4, 4, 3, 3, 3)$, $r_{LPT} = \frac{4}{3} - \frac{1}{9} = \frac{11}{9}$. Proklikej běh LPT (list už je setříděný):</p>
 
   <div class="viz" id="viz-lpt46"></div>
 
   <details class="try">
     <summary>Zkus sám: najdi pro $p = (5, 5, 4, 4, 3, 3, 3)$, $R = 3$ optimum. Nápověda: zkus dát dvě trojky k sobě.</summary>
     <div class="inner">
-      <p>$\sum p_i = 27 = 3 \cdot 9$, takže dolní mez je 9 — a jde trefit: $P_1$: $T_1 + T_3$ ($5 + 4$), $P_2$: $T_2 + T_4$ ($5 + 4$), $P_3$: $T_5 + T_6 + T_7$ ($3 + 3 + 3$). $C^*_{max} = 9$, poměr $\frac{11}{9} = \frac{4}{3} - \frac{1}{3 \cdot 3}$ — faktor je <strong>těsný</strong>. LPT prohrává, protože páruje hladově „dlouhá + dlouhá“ podle uvolnění strojů a tři trojky mu nakonec nevyjdou na jeden stroj.</p>
+      <p>$\sum p_i = 27 = 3 \cdot 9$, takže dolní mez je 9 — a jde trefit: $P_1$: $T_1 + T_3$ ($5 + 4$), $P_2$: $T_2 + T_4$ ($5 + 4$), $P_3$: $T_5 + T_6 + T_7$ ($3 + 3 + 3$). $C^*_{max} = 9$, poměr $\frac{11}{9} = \frac{4}{3} - \frac{1}{3 \cdot 3}$ — faktor je <strong>těsný</strong>. LPT prohrává, protože páruje hladově „dlouhá + dlouhá“ podle uvolnění strojů a&nbsp;tři trojky mu nakonec nevyjdou na jeden stroj.</p>
       <div class="viz" id="viz-opt46"></div>
     </div>
   </details>
@@ -202,9 +202,9 @@ end
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy kolem LS/LPT</div>
     <ul>
       <li><strong>Faktor $2 - \frac{1}{R}$ je worst-case záruka, ne typický výsledek.</strong> LS klidně najde optimum (instance slidu 43: $C_{max} = 17 = \sum p_i / R$). Ale taky se na faktor přesně dosáhne (instance slidu 42) — „heuristika“ tu neznamená „bez záruky“, znamená to r-aproximaci dle <a href="../k3/l3-1.html#takeaways">[L3.1]</a>.</li>
-      <li><strong>LPT faktor $\frac{4}{3} - \frac{1}{3R}$ platí jen pro $P\,||\,C_{max}$.</strong> S precedencemi smíš tvrdit jen obecných $2 - \frac{1}{R}$ (věta o LS platí pro libovolný, i setříděný list). Neprohazuj.</li>
-      <li><strong>Nezaměň role: LS je aproximační, ne exaktní.</strong> Exaktně řeší $P\,||\,C_{max}$ Rothkopf DP <a href="../k5/l5-11.html">[L5.11]</a> (pseudopolynomiálně, bez prec); s preempcí je $P\,|\,pmtn\,|\,C_{max}$ snadný McNaughton <a href="../k5/l5-4.html">[L5.4]</a> a $P\,|\,pmtn,prec\,|\,C_{max}$ řeší Muntz&amp;Coffman <a href="../k5/l5-10.html">[L5.10]</a> (sám je pro obecné DAGy aproximační s faktorem $2 - \frac{2}{R}$). Volba metody: tahák <a href="../k5/l5-14.html">[L5.14]</a>.</li>
-      <li><strong>„První v listu“ ≠ „první podle indexu“.</strong> Výběr jde přes nejmenší availability time $a_i$ a teprve mezi nimi rozhoduje pořadí v $L$ — proto LS někdy nechá stroj čekat krátce na připravovanou úlohu a proto vznikají anomálie při prohození položek.</li>
+      <li><strong>LPT faktor $\frac{4}{3} - \frac{1}{3R}$ platí jen pro $P\,||\,C_{max}$.</strong> S&nbsp;precedencemi smíš tvrdit jen obecných $2 - \frac{1}{R}$ (věta o&nbsp;LS platí pro libovolný, i&nbsp;setříděný list). Neprohazuj.</li>
+      <li><strong>Nezaměň role: LS je aproximační, ne exaktní.</strong> Exaktně řeší $P\,||\,C_{max}$ Rothkopf DP <a href="../k5/l5-11.html">[L5.11]</a> (pseudopolynomiálně, bez prec); s&nbsp;preempcí je $P\,|\,pmtn\,|\,C_{max}$ snadný McNaughton <a href="../k5/l5-4.html">[L5.4]</a> a&nbsp;$P\,|\,pmtn,prec\,|\,C_{max}$ řeší Muntz&amp;Coffman <a href="../k5/l5-10.html">[L5.10]</a> (sám je pro obecné DAGy aproximační s faktorem $2 - \frac{2}{R}$). Volba metody: tahák <a href="../k5/l5-14.html">[L5.14]</a>.</li>
+      <li><strong>„První v listu“ ≠ „první podle indexu“.</strong> Výběr jde přes nejmenší availability time $a_i$ a&nbsp;teprve mezi nimi rozhoduje pořadí v&nbsp;$L$ — proto LS někdy nechá stroj čekat krátce na připravovanou úlohu a&nbsp;proto vznikají anomálie při prohození položek.</li>
     </ul>
   </div>
 
@@ -212,10 +212,10 @@ end
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L5.12</div>
     <ul>
-      <li><strong>Algoritmus:</strong> drž list $L$; v každé iteraci vyber stroj s nejmenším $t_v$, mezi úlohami s nejmenším availability time $a_i$ vezmi první v $L$; $s_i = \max\{t_k, a_i\}$, $t_k \mathrel{+}= p_i$. $a_i$: $t_k$ bez predchůdců / $\infty$ dokud je predchůdce v $L$ / $\max_j\{s_j + p_j\}$ jinak.</li>
-      <li><strong>Faktor [Graham 1966]:</strong> pro $P\,|\,prec\,|\,C_{max}$ i $P\,||\,C_{max}$ a <em>libovolný</em> list je $r_{LS} = 2 - \frac{1}{R}$; těsné na $n = (R-1)R + 1$, $p = (1, \ldots, 1, R)$ se špatným pořadím (dlouhá úloha nakonec).</li>
+      <li><strong>Algoritmus:</strong> drž list $L$; v každé iteraci vyber stroj s&nbsp;nejmenším $t_v$, mezi úlohami s&nbsp;nejmenším availability time $a_i$ vezmi první v&nbsp;$L$; $s_i = \max\{t_k, a_i\}$, $t_k \mathrel{+}= p_i$. $a_i$: $t_k$ bez predchůdců / $\infty$ dokud je predchůdce v $L$ / $\max_j\{s_j + p_j\}$ jinak.</li>
+      <li><strong>Faktor [Graham 1966]:</strong> pro $P\,|\,prec\,|\,C_{max}$ i $P\,||\,C_{max}$ a&nbsp;<em>libovolný</em> list je $r_{LS} = 2 - \frac{1}{R}$; těsné na $n = (R-1)R + 1$, $p = (1, \ldots, 1, R)$ se špatným pořadím (dlouhá úloha nakonec).</li>
       <li><strong>LPT:</strong> setřiď $L$ nerostoucně podle $p_i$ → pro $P\,||\,C_{max}$ faktor $r_{LPT} = \frac{4}{3} - \frac{1}{3R}$, složitost $\mathcal{O}(n \log n)$; zpřesnění $r_{LPT} = 1 + \frac{1}{k} - \frac{1}{kR}$ ($k$ = počet úloh na stroji, který končí poslední).</li>
-      <li><strong>Anomálie:</strong> $C_{max}$ může vzrůst po zkrácení $p_i$, odebrání precedencí i přidání stroje (a po přeskupení listu) — LS není monotónní, platí jen worst-case faktor.</li>
+      <li><strong>Anomálie:</strong> $C_{max}$ může vzrůst po zkrácení $p_i$, odebrání precedencí i&nbsp;přidání stroje (a po přeskupení listu) — LS není monotónní, platí jen worst-case faktor.</li>
       <li><strong>Volba metody</strong> (tahák <a href="../k5/l5-14.html">[L5.14]</a>): $P\,|\,prec\,|\,C_{max}$ bez pmtn = list scheduling; s pmtn = M&amp;C <a href="../k5/l5-10.html#takeaways">[L5.10]</a>; bez prec exaktně Rothkopf <a href="../k5/l5-11.html#takeaways">[L5.11]</a>, s pmtn McNaughton <a href="../k5/l5-4.html#takeaways">[L5.4]</a>.</li>
     </ul>
   </div>
@@ -235,7 +235,7 @@ end
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Čistě reprodukční otázka za plný počet bodů: (i) pseudokód LS pro $P\,|\,prec\,|\,C_{max}$ včetně definice availability time, (ii) Grahamův faktor LS, (iii) faktor LPT — u obou říct, <em>pro který problém</em> platí.</p>
+      <p>Čistě reprodukční otázka za plný počet bodů: (i) pseudokód LS pro $P\,|\,prec\,|\,C_{max}$ včetně definice availability time, (ii) Grahamův faktor LS, (iii) faktor LPT — u&nbsp;obou říct, <em>pro který problém</em> platí.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -245,7 +245,7 @@ end
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Pseudokód piš kolem tří rozhodnutí: <em>který stroj</em> ($\arg\min t_v$), <em>které úlohy připadají v úvahu</em> (nejmenší $a_i$), <em>která z nich</em> (první v $L$) — a nezapomeň na $s_i = \max\{t_k, a_i\}$. K faktorům přidej jednu větu kontextu (pro jaký problém, kdo, čím je těsný) — to bývá rozdíl mezi „zná vzorec“ a „rozumí“.</p>
+      <p>Pseudokód piš kolem tří rozhodnutí: <em>který stroj</em> ($\arg\min t_v$), <em>které úlohy připadají v úvahu</em> (nejmenší $a_i$), <em>která z&nbsp;nich</em> (první v&nbsp;$L$) — a&nbsp;nezapomeň na $s_i = \max\{t_k, a_i\}$. K&nbsp;faktorům přidej jednu větu kontextu (pro jaký problém, kdo, čím je těsný) — to bývá rozdíl mezi „zná vzorec“ a&nbsp;„rozumí“.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení</summary>
@@ -263,13 +263,13 @@ for i := 1 to n do
     t_k = s_i + p_i;
 end
 </code></pre>
-          <p>kde $a_i = t_k$, nemá-li $T_i$ predchůdce; $a_i = \infty$, je-li aspoň jeden predchůdce ještě v $L$; jinak $a_i = \max_{j \in \mathrm{Pred}(T_i)}\{s_j + p_j\}$.</p>
+          <p>kde $a_i = t_k$, nemá-li $T_i$ predchůdce; $a_i = \infty$, je-li aspoň jeden predchůdce ještě v&nbsp;$L$; jinak $a_i = \max_{j \in \mathrm{Pred}(T_i)}\{s_j + p_j\}$.</p>
           <p><strong>(ii) Faktor LS:</strong> pro $P\,|\,prec\,|\,C_{max}$ (a také $P\,||\,C_{max}$) a libovolný (nesetříděný) list
           $$r_{LS} = 2 - \frac{1}{R} \qquad \text{[Graham 1966]},$$
           těsné na instanci $n = (R-1)R + 1$, $p = (1, \ldots, 1, R)$, $\prec$ prázdné, s listem končícím dlouhou úlohou (pro $R = 4$: $\frac{7}{4}$).</p>
           <p><strong>(iii) Faktor LPT</strong> (list setříděný nerostoucně podle $p_i$, $\mathcal{O}(n \log n)$): pro $P\,||\,C_{max}$
           $$r_{LPT} = \frac{4}{3} - \frac{1}{3R} \qquad \text{[Graham 1966]},$$
-          těsné na $p = (2R-1, 2R-1, \ldots, R+1, R+1, R, R, R)$, $n = 2R+1$ (pro $R = 3$: $\frac{11}{9}$). Bonus k ústní: pro velký počet úloh platí jemnější $r_{LPT} = 1 + \frac{1}{k} - \frac{1}{kR}$, kde $k$ je počet úloh na stroji, který končí poslední. S precedencemi pro LPT žádná lepší záruka než $2 - \frac{1}{R}$ z (ii) není.</p>
+          těsné na $p = (2R-1, 2R-1, \ldots, R+1, R+1, R, R, R)$, $n = 2R+1$ (pro $R = 3$: $\frac{11}{9}$). Bonus k&nbsp;ústní: pro velký počet úloh platí jemnější $r_{LPT} = 1 + \frac{1}{k} - \frac{1}{kR}$, kde $k$ je počet úloh na stroji, který končí poslední. S&nbsp;precedencemi pro LPT žádná lepší záruka než $2 - \frac{1}{R}$ z&nbsp;(ii) není.</p>
         </div>
       </details>
     </div>
@@ -292,7 +292,7 @@ end
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Malá instance bez precedencí — ručně odsimulovat LPT (= LS se setříděným listem), najít optimum a ověřit, že poměr sedí na vzorec faktoru. Je to přesně rodina těsných instancí ze slidu 46, dosazená pro $R = 2$: $(2R-1, 2R-1, R, R, R) = (3, 3, 2, 2, 2)$, $n = 2R+1 = 5$.</p>
+      <p>Malá instance bez precedencí — ručně odsimulovat LPT (= LS se setříděným listem), najít optimum a&nbsp;ověřit, že poměr sedí na vzorec faktoru. Je to přesně rodina těsných instancí ze slidu 46, dosazená pro $R = 2$: $(2R-1, 2R-1, R, R, R) = (3, 3, 2, 2, 2)$, $n = 2R+1 = 5$.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -301,7 +301,7 @@ end
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>List je už setříděný ($3, 3, 2, 2, 2$). Iteruj pseudokód: vždy stroj s menším $t_v$ (při shodě $P_1$), úlohy jsou bez precedencí, takže vyhrává prostě první zbylá v $L$. U optima zkus dolní mez $\frac{1}{2}\sum p_i$ a hledej rozdělení, které ji trefí. U (iii) si vzpomeň, čím přesně LPT na téhle rodině prohrává.</p>
+      <p>List je už setříděný ($3, 3, 2, 2, 2$). Iteruj pseudokód: vždy stroj s&nbsp;menším $t_v$ (při shodě $P_1$), úlohy jsou bez precedencí, takže vyhrává prostě první zbylá v&nbsp;$L$. U&nbsp;optima zkus dolní mez $\frac{1}{2}\sum p_i$ a&nbsp;hledej rozdělení, které ji trefí. U&nbsp;(iii) si vzpomeň, čím přesně LPT na téhle rodině prohrává.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
@@ -319,10 +319,10 @@ end
           </table>
           <p>$C_{max}^{LPT} = 7$, $s = (0, 0, 3, 3, 5)$, $z = (1, 2, 1, 2, 1)$:</p>
           <div class="viz" id="viz-t02lpt"></div>
-          <p><strong>(ii) Optimum:</strong> $\sum p_i = 12$, dolní mez $\frac{12}{2} = 6$ — a trefí se: $P_1$: $T_1 + T_2$ ($3+3$), $P_2$: $T_3 + T_4 + T_5$ ($2+2+2$), $C^*_{max} = 6$.</p>
+          <p><strong>(ii) Optimum:</strong> $\sum p_i = 12$, dolní mez $\frac{12}{2} = 6$ — a&nbsp;trefí se: $P_1$: $T_1 + T_2$ ($3+3$), $P_2$: $T_3 + T_4 + T_5$ ($2+2+2$), $C^*_{max} = 6$.</p>
           <div class="viz" id="viz-t02opt"></div>
           <p>Poměr $\frac{C_{max}^{LPT}}{C^*_{max}} = \frac{7}{6} = \frac{4}{3} - \frac{1}{3 \cdot 2} = r_{LPT}$ — faktor je na této instanci <strong>dosažen</strong> (těsný). Sedí i zpřesnění: poslední končí stroj se $k = 3$ úlohami ($T_1, T_3, T_5$), $1 + \frac{1}{3} - \frac{1}{3 \cdot 2} = \frac{7}{6}$ ✓.</p>
-          <p><strong>(iii)</strong> Rodina ze slidu 46 (EN 1:1): “$p = (2R - 1, 2R - 1, 2R - 2, 2R - 2, \ldots, R + 1, R + 1, R, R, R)$, $n = 2 \cdot R + 1$, $\prec$ empty”. LPT na ní hladově spáruje dlouhé úlohy podle uvolňování strojů a tři úlohy délky $R$ mu nevyjdou na jeden stroj — optimum přitom dává všem strojům přesně $3R$ jednotek… pro $R = 2$: $3R = 6$ ✓. Obecně $C^*_{max} = 3R$, $C_{max}^{LPT} = 4R - 1$, poměr $\frac{4R-1}{3R} = \frac{4}{3} - \frac{1}{3R}$.</p>
+          <p><strong>(iii)</strong> Rodina ze slidu 46 (EN 1:1): “$p = (2R - 1, 2R - 1, 2R - 2, 2R - 2, \ldots, R + 1, R + 1, R, R, R)$, $n = 2 \cdot R + 1$, $\prec$ empty”. LPT na ní hladově spáruje dlouhé úlohy podle uvolňování strojů a&nbsp;tři úlohy délky $R$ mu nevyjdou na jeden stroj — optimum přitom dává všem strojům přesně $3R$ jednotek… pro $R = 2$: $3R = 6$ ✓. Obecně $C^*_{max} = 3R$, $C_{max}^{LPT} = 4R - 1$, poměr $\frac{4R-1}{3R} = \frac{4}{3} - \frac{1}{3R}$.</p>
         </div>
       </details>
     </div>
@@ -433,7 +433,7 @@ KOViz.graph(document.getElementById('viz-prec43'), {
       { desc: 'Init: t = (0,0), L = (T₁, …, T₈). Připravené (a = 0): T₁, T₂, T₃; úlohy T₄–T₈ mají predchůdce v L → a = ∞.', blocks: [], marks: [] },
       { desc: 'Iterace 1+2: T₁ → P¹ ⟨0,3⟩, T₂ → P² ⟨0,4⟩ (první v listu mezi připravenými).', blocks: st(['t1', 't2'], ['t1', 't2']), marks: [] },
       { desc: 'Iterace 3: k = P¹ (t₁ = 3). a(T₃) = 3, a(T₇) = a(T₈) = 3 (T₁ doběhla ve 3), a(T₄..T₆) = ∞ → S = {T₃, T₇, T₈}, první v L je T₃ → P¹ ⟨3,5⟩.', blocks: st(['t1', 't2', 't3'], ['t3']), marks: [] },
-      { desc: 'Iterace 4: k = P² (t₂ = 4). a(T₇) = a(T₈) = 3 < a(T₄..T₆) = 5 → S = {T₇, T₈}, první je T₇ → P² ⟨4,17⟩. Obr dorazil včas.', blocks: st(['t1', 't2', 't3', 't7'], ['t7']), marks: [] },
+      { desc: 'Iterace 4: k = P² (t₂ = 4). a(T₇) = a(T₈) = 3 < a(T₄..T₆) = 5 → S = {T₇, T₈}, první je T₇ → P² ⟨4,17⟩. Dlouhá T₇ (p = 13) startuje v čase 4 na P².', blocks: st(['t1', 't2', 't3', 't7'], ['t7']), marks: [] },
       { desc: 'Iterace 5: k = P¹ (t₁ = 5). S = {T₈} (a = 3) → T₈ → P¹ ⟨5,7⟩.', blocks: st(['t1', 't2', 't3', 't7', 't8'], ['t8']), marks: [] },
       { desc: 'Iterace 6–8: T₄ ⟨7,11⟩, T₅ ⟨11,15⟩, T₆ ⟨15,17⟩ na P¹. Cmax = 17 = Σp/R = 34/2 → žádné zahálení, OPTIMUM.', blocks: st(['t1', 't2', 't3', 't7', 't8', 't4', 't5', 't6'], ['t4', 't5', 't6']), marks: [{ t: 17, label: 'Cmax = 17 = Σp/R' }] },
     ],
