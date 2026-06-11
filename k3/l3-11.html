@@ -36,7 +36,7 @@
     <strong>Greedy podle poměru $c_j/w_j$</strong> řeší <em>frakční</em> batoh optimálně — a součet cen $\sum_{i=1}^{h} c_i$ až po první nevejdoucí položku $h$ je <strong>horní mez celočíselného optima</strong>, ze které lepší z $\{1,\dots,h-1\}$ a $\{h\}$ vytěží faktor 2.
   </div>
 
-  <p>Po čtyřech TSP lekcích střih: dnešní důkaz je <strong>maximalizační</strong> — jediný v kapitole. V <a href="l3-1.html#takeaways">[L3.1]</a> jsme definici r-aproximace pro maximalizaci citovali přesně z dnešního slidu 6 a slíbili, že vzor „<em>horní mez $B \ge J^*$ a $J^A \ge B/2$</em>“ uvidíš v akci. Je to krátký důkaz za jisté body: u zkoušky doložen 24. 5. 2011 („2-aproximační algoritmus pro Knapsack“) a v testech z přednášky 2014/2015 chodil v jedné sadě s Bratleym a Christofidesem <a href="l3-10.html#takeaways">[L3.10]</a>.</p>
+  <p>Po čtyřech TSP lekcích střih: dnešní důkaz je <strong>maximalizační</strong> — jediný v kapitole. V <a href="l3-1.html#takeaways">[L3.1]</a> jsme definici r-aproximace pro maximalizaci citovali přesně z dnešního slidu 6 a slíbili, že vzor „<em>horní mez $B \ge J^*$ a $J^A \ge B/2$</em>“ uvidíš v akci. Je to krátký důkaz za jisté body: u zkoušky doložen 24.&nbsp;5.&nbsp;2011 („2-aproximační algoritmus pro Knapsack“) a v testech z přednášky 2014/2015 chodil v jedné sadě s Bratleym a Christofidesem <a href="l3-10.html#takeaways">[L3.10]</a>.</p>
 
   <!-- ===== SEKCE 1: BATOH A RELAXACE ===== -->
   <h2>Batoh a jeho frakční relaxace</h2>
@@ -192,7 +192,7 @@
   <!-- ===== SEKCE 5: CO DÁL ===== -->
   <h2>Kam to vede</h2>
 
-  <p>2-aproximace není u batohu konec, ale začátek: slide 12 ji používá jako <strong>krok 1 aproximačního schématu</strong> (FPTAS) — její výstup $c(S_1)$ kalibruje zaokrouhlení cen a horní mez DP tabulky, výsledkem je $(1+\epsilon)$-aproximace v $\mathcal{O}(n^2 \cdot \frac{1}{\epsilon})$ pro libovolně malé $\epsilon$. Detaily ve volitelné <a href="../k7/l7-2.html">[L7.2]</a>; samotnou DP tabulku (přesné řešení, pseudopolynomiálně) propočítáš v <a href="../k7/l7-1.html">[L7.1]</a>. Pro 15. 6. je jádro dnešek: mez + dva kandidáti + $\max$.</p>
+  <p>2-aproximace není u batohu konec, ale začátek: slide 12 ji používá jako <strong>krok 1 aproximačního schématu</strong> (FPTAS) — její výstup $c(S_1)$ kalibruje zaokrouhlení cen a horní mez DP tabulky, výsledkem je $(1+\epsilon)$-aproximace v $\mathcal{O}(n^2 \cdot \frac{1}{\epsilon})$ pro libovolně malé $\epsilon$. Detaily ve volitelné <a href="../k7/l7-2.html">[L7.2]</a>; samotnou DP tabulku (přesné řešení, pseudopolynomiálně) propočítáš v <a href="../k7/l7-1.html">[L7.1]</a>. Pro 15.&nbsp;6. je jádro dnešek: mez + dva kandidáti + $\max$.</p>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
@@ -259,7 +259,7 @@
     <div class="task-head">
       <span class="task-id">T02</span>
       <strong>2-Approximation Algorithm for Knapsack — prove the theorem</strong>
-      <span class="task-src">zdroj: banka #30 EN 1:1 (věta = slide 6, úkol = study task); u zkoušky doloženo 24. 5. 2011 (dochovány jen fotky zadání); řešení dle slidu 7, krok s horní mezí rozepsán vlastně (přiznáno)</span>
+      <span class="task-src">zdroj: banka #30 EN 1:1 (věta = slide 6, úkol = study task); u zkoušky doloženo 24.&nbsp;5.&nbsp;2011 (dochovány jen fotky zadání); řešení dle slidu 7, krok s horní mezí rozepsán vlastně (přiznáno)</span>
     </div>
     <div class="task-body">
       <div class="assignment">
