@@ -73,7 +73,7 @@
   <!-- ===== SEKCE 2: TABULKA ===== -->
   <h2 id="tab">Referenční tabulka (souhrnné slidy 13, 23, 27, 38 + PS)</h2>
 
-  <p>Tučně je vždy metoda, kterou po tobě zkouška typicky chce <em>odsimulovat</em>. „Easy“ a „NP-hard“ jsou doslovné verdikty slidů.</p>
+  <p>Tučně je vždy metoda, kterou po tobě zkouška typicky chce <em>odsimulovat</em>. Sloupec těžkosti drží terminologii slidů (slidy 13, 23 a 38 píší „easy“/„NP-hard“; slide 27 pro $L_{max}$ rozlišuje „polynomiální“/„NP-hard“).</p>
 
   <table>
     <thead>
@@ -117,7 +117,7 @@
         <td>$1\,|\,prec\,|\,\sum w_j C_j$</td><td><strong>NP-hard</strong></td>
         <td><strong>relative-order ILP</strong> + B&amp;B s LP relaxací</td>
         <td><a href="../k5/l5-6a.html">[L5.6a]</a>, <a href="../k5/l5-6b.html">[L5.6b]</a></td>
-        <td>$x_{ij}$ = „$T_i$ před $T_j$“; pozor na $C_j = \sum_i p_i x_{ij} + p_j$</td>
+        <td>$x_{ij}$ = „$T_i$ před $T_j$“; pozor na $C_j = \sum_i p_i x_{ij}$</td>
       </tr>
 
       <tr><th colspan="5">Jeden stroj — $L_{max}$ (slide 27)</th></tr>
@@ -211,7 +211,7 @@
   <p>Zápisy níže jsou skutečné zkouškové problémy z lekcí této kapitoly. Odpověz dřív, než rozklikneš.</p>
 
   <details class="try">
-    <summary>Zkus sám: (a) $P\,|\,pmtn, prec\,|\,C_{max}$ (zkouška 02.06.2021, doloženo i 1.6.2026) — (b) $PS1\,|\,temp\,|\,C_{max}$, “give the ILP formulation” (zkouška 25.5.2026)?</summary>
+    <summary>Zkus sám: (a) $P\,|\,pmtn, prec\,|\,C_{max}$ (zkouška 02.06.2021, doloženo i 1.&nbsp;6.&nbsp;2026) — (b) $PS1\,|\,temp\,|\,C_{max}$, “Formulate $PS1\,|temp|\,C_{max}$ problem as a time-indexed ILP.” (zkouška 25.&nbsp;5.&nbsp;2026)?</summary>
     <div class="inner">
       <p><strong>(a) Muntz&amp;Coffman</strong> <a href="../k5/l5-10.html">[L5.10]</a>: levely odzadu, sdílení kapacity $\beta$, kroky $\delta$, McNaughton jako podprogram. <strong>(b) Time-indexed ILP</strong> <a href="../k5/l5-3.html">[L5.3]</a>: binární $x_{it}$ „$T_i$ startuje v $t$“, čtyři skupiny omezení, dekódování $s_i = \sum_t t \cdot x_{it}$.</p>
     </div>
