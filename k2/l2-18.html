@@ -33,31 +33,31 @@
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
-    <strong>Složení mikro-výsledků</strong> z lekcí <a href="l2-12.html#takeaways">[L2.12]</a>, <a href="l2-15.html#takeaways">[L2.15]</a>, <a href="l2-16.html#takeaways">[L2.16]</a> a <a href="l2-17.html#takeaways">[L2.17]</a> do souhrnné argumentační úlohy: každý výrok / každou podotázku rozhodni <strong>důkazem</strong>, nebo <strong>protipříkladem</strong>.
+    <strong>Složení mikro-výsledků</strong> z&nbsp;lekcí <a href="l2-12.html#takeaways">[L2.12]</a>, <a href="l2-15.html#takeaways">[L2.15]</a>, <a href="l2-16.html#takeaways">[L2.16]</a> a <a href="l2-17.html#takeaways">[L2.17]</a> do souhrnné argumentační úlohy: každý výrok / každou podotázku rozhodni <strong>důkazem</strong>, nebo <strong>protipříkladem</strong>.
   </div>
 
-  <p>Slot 2 nemusí být vždy počítací — místo modelovací úlohy se objevuje i čistá <strong>teorie nejkratších cest</strong>. Dochovaly se dva formáty: čtyřdílná úloha <em>Handling negative cycles in the graph</em> (zkouška KO 21. 06. 2021, úloha T01 níže — třetí a poslední FOTO checkpoint kapitoly) a úloha <em>„5 výroků“</em> (dokaž, nebo vyvrať protipříkladem; úloha T02). Dobrá zpráva: <strong>žádný nový obsah dnes nepotřebuješ</strong> — všechny odpovědi už máš z minulých lekcí. Nová je jen disciplína skládání: poznat, na kterou „páku“ výrok tlačí, a vytáhnout správný argument.</p>
+  <p>Slot 2 nemusí být vždy počítací — místo modelovací úlohy se objevuje i čistá <strong>teorie nejkratších cest</strong>. Dochovaly se dva formáty: čtyřdílná úloha <em>Handling negative cycles in the graph</em> (zkouška KO 21.&nbsp;06.&nbsp;2021, úloha T01 níže — třetí a poslední FOTO checkpoint kapitoly) a úloha <em>„5 výroků“</em> (dokaž, nebo vyvrať protipříkladem; úloha T02). Dobrá zpráva: <strong>žádný nový obsah dnes nepotřebuješ</strong> — všechny odpovědi už máš z minulých lekcí. Nová je jen disciplína skládání: poznat, na kterou „páku“ výrok tlačí, a vytáhnout správný argument.</p>
 
   <!-- ===== SEKCE 1: DŮKAZ, NEBO PROTIPŘÍKLAD ===== -->
   <h2>Důkaz, nebo protipříklad?</h2>
 
   <details class="try">
-    <summary>Zkus sám: výrok tvrdí, že něco platí <em>vždy</em> („always“, „any two vertices“). Co stačí k jeho vyvrácení — a co je potřeba k jeho potvrzení?</summary>
+    <summary>Zkus sám: výrok tvrdí, že něco platí <em>vždy</em> („always“, „any two vertices“). Co stačí k&nbsp;jeho vyvrácení — a co je potřeba k&nbsp;jeho potvrzení?</summary>
     <div class="inner">
       <p>Asymetrie je tvůj přítel: k <strong>vyvrácení</strong> stačí <em>jediný</em> protipříklad, a klidně miniaturní — 3–4 vrcholy bohatě stačí. K <strong>potvrzení</strong> naopak nestačí žádné množství příkladů: potřebuješ obecný argument pokrývající všechny instance (typicky rozpis ceny cesty, např. $c'(P) = c(P) + h\,|P|$ z <a href="l2-15.html#takeaways">[L2.15]</a>, nebo odvolání na korektní algoritmus se splněnými vstupními podmínkami). Proto se vyplatí <em>nejdřív chvíli hledat protipříklad</em> — když se ani po systematickém pokusu nenajde, bývá to nápověda, že výrok platí a má krátký důkaz.</p>
     </div>
   </details>
 
   <details class="try">
-    <summary>Zkus sám: sestav si checklist — jaké „páky“ zkouškové výroky o nejkratších cestách nejčastěji lámou? (Projdi v hlavě lekce K2.)</summary>
+    <summary>Zkus sám: sestav si checklist — jaké „páky“ zkouškové výroky o nejkratších cestách nejčastěji lámou? (Projdi v&nbsp;hlavě lekce K2.)</summary>
     <div class="inner">
-      <p>Pět otázek, které si polož u každého výroku:</p>
+      <p>Pět otázek, které si polož u&nbsp;každého výroku:</p>
       <ol>
         <li><strong>Je nejkratší cesta vůbec definovaná?</strong> Záporný cyklus → sled ≠ cesta, úloha NP-těžká <a href="l2-1.html#takeaways">[L2.1]</a>.</li>
         <li><strong>Splňuje algoritmus vstupní podmínky?</strong> Dijkstra chce nezáporné váhy <a href="l2-4.html#takeaways">[L2.4]</a>, Bellman-Ford „jen“ žádný záporný cyklus <a href="l2-12.html#takeaways">[L2.12]</a>.</li>
         <li><strong>Mění transformace vah pořadí cest?</strong> Posun $+h$ ano ($c'(P) = c(P) + h\,|P|$), násobení $k &gt; 0$ ne <a href="l2-15.html#takeaways">[L2.15]</a>.</li>
         <li><strong>Nesměšuje výrok cenu a počet hran?</strong> To jsou dvě různá kritéria <a href="l2-16.html#takeaways">[L2.16]</a>.</li>
-        <li><strong>Jde o nejdelší cestu?</strong> Pak je jedinou hranicí <em>kladný cyklus</em>: bez něj snadná (×(−1)), s ním NP-těžká <a href="l2-17.html#takeaways">[L2.17]</a>.</li>
+        <li><strong>Jde o nejdelší cestu?</strong> Pak je jedinou hranicí <em>kladný cyklus</em>: bez něj snadná (×(−1)), s&nbsp;ním NP-těžká <a href="l2-17.html#takeaways">[L2.17]</a>.</li>
       </ol>
     </div>
   </details>
@@ -65,9 +65,9 @@
   <div class="box">
     <div class="box-title">Recept na protipříklad (na papír za minutu)</div>
     <ul>
-      <li><strong>Malý graf:</strong> 3–4 vrcholy, dvě konkurenční $s \to t$ cesty — jedna přímá hrana, jedna o více hranách s těsně lepší cenou.</li>
-      <li><strong>Silná souvislost</strong> (když ji zadání chce): přidej zpáteční hranu $t \to s$ s velkou kladnou váhou — souvislost zajistí a nic nepokazí.</li>
-      <li><strong>Kontrola definovanosti:</strong> v protipříkladu nesmí omylem vzniknout záporný cyklus (pokud ho tam nechceš), jinak vyvracíš výrok rozbitou instancí <a href="l2-1.html#takeaways">[L2.1]</a>.</li>
+      <li><strong>Malý graf:</strong> 3–4 vrcholy, dvě konkurenční $s \to t$ cesty — jedna přímá hrana, jedna o&nbsp;více hranách s&nbsp;těsně lepší cenou.</li>
+      <li><strong>Silná souvislost</strong> (když ji zadání chce): přidej zpáteční hranu $t \to s$ s&nbsp;velkou kladnou váhou — souvislost zajistí a nic nepokazí.</li>
+      <li><strong>Kontrola definovanosti:</strong> v&nbsp;protipříkladu nesmí omylem vzniknout záporný cyklus (pokud ho tam nechceš), jinak vyvracíš výrok rozbitou instancí <a href="l2-1.html#takeaways">[L2.1]</a>.</li>
       <li><strong>Dopočítej obě strany:</strong> napiš ceny obou cest před úpravou i po ní — protipříklad bez čísel není protipříklad.</li>
     </ul>
   </div>
@@ -76,30 +76,30 @@
   <h2>Detekce ≠ řešení</h2>
 
   <details class="try">
-    <summary>Zkus sám: Bellman-Ford umí záporný cyklus <em>detekovat</em> <a href="l2-12.html#takeaways">[L2.12]</a>. Plyne z toho, že umí najít nejkratší cestu v grafu, který záporný cyklus obsahuje?</summary>
+    <summary>Zkus sám: Bellman-Ford umí záporný cyklus <em>detekovat</em> <a href="l2-12.html#takeaways">[L2.12]</a>. Plyne z&nbsp;toho, že umí najít nejkratší cestu v&nbsp;grafu, který záporný cyklus obsahuje?</summary>
     <div class="inner">
       <p><strong>Ne</strong> — a přesně tahle záměna je nejčastější chyba celé úlohy. Jsou to dva různé problémy:</p>
       <ul>
-        <li><strong>Detekce</strong> („je v grafu záporný cyklus?“) je <strong>polynomiální</strong>: $n-1$ relaxačních průchodů Bellman-Forda a pak jeden kontrolní průchod přes všechny hrany — pokud kdekoliv ještě platí $l(t) &gt; l(v) + c(v,t)$, graf záporný cyklus má (slide 34). Celkem $\mathcal{O}(nm)$.</li>
-        <li><strong>Řešení</strong> („najdi nejkratší <em>cestu</em> v grafu se záporným cyklem“) je <strong>NP-těžké</strong> <a href="l2-1.html#takeaways">[L2.1]</a>: algoritmy K2 nerozlišují cestu od sledu a nejkratší sled tu neexistuje. Bellman-Ford problém ohlásí — ale nevyřeší.</li>
+        <li><strong>Detekce</strong> („je v&nbsp;grafu záporný cyklus?“) je <strong>polynomiální</strong>: $n-1$ relaxačních průchodů Bellman-Forda a pak jeden kontrolní průchod přes všechny hrany — pokud kdekoliv ještě platí $l(t) &gt; l(v) + c(v,t)$, graf záporný cyklus má (slide 34). Celkem $\mathcal{O}(nm)$.</li>
+        <li><strong>Řešení</strong> („najdi nejkratší <em>cestu</em> v&nbsp;grafu se záporným cyklem“) je <strong>NP-těžké</strong> <a href="l2-1.html#takeaways">[L2.1]</a>: algoritmy K2 nerozlišují cestu od sledu a nejkratší sled tu neexistuje. Bellman-Ford problém ohlásí — ale nevyřeší.</li>
       </ul>
     </div>
   </details>
 
-  <p>Ukažme si obojí na jednom silně souvislém grafu $G^\star$ (instance vlastní) se záporným cyklem $a \rightleftarrows b$ o váze $-2 + 1 = -1$:</p>
+  <p>Ukažme si obojí na jednom silně souvislém grafu $G^\star$ (instance vlastní) se záporným cyklem $a \rightleftarrows b$ o&nbsp;váze $-2 + 1 = -1$:</p>
 
   <div class="viz" id="viz-gstar"></div>
 
-  <p>Detekce v akci — rychlá repríza běhu z <a href="l2-12.html#takeaways">[L2.12]</a>, tentokrát na $G^\star$ (pořadí hran $(s,a), (a,b), (b,a), (b,t), (t,s)$):</p>
+  <p>Detekce v akci — rychlá repríza běhu z&nbsp;<a href="l2-12.html#takeaways">[L2.12]</a>, tentokrát na $G^\star$ (pořadí hran $(s,a), (a,b), (b,a), (b,t), (t,s)$):</p>
 
   <div class="viz" id="viz-detect"></div>
 
-  <p>Všimni si bonusu silné souvislosti: z libovolného startu $s$ je dosažitelné všechno, takže trik s pomocným vrcholem $s'$ a nulovými hranami <a href="l2-12.html#takeaways">[L2.12]</a> tady není potřeba — to se hodí do odpovědi na první podotázku T01.</p>
+  <p>Všimni si bonusu silné souvislosti: z&nbsp;libovolného startu $s$ je dosažitelné všechno, takže trik s&nbsp;pomocným vrcholem $s'$ a nulovými hranami <a href="l2-12.html#takeaways">[L2.12]</a> tady není potřeba — to se hodí do odpovědi na první podotázku T01.</p>
 
   <!-- ===== SEKCE 3: ARZENÁL ===== -->
   <h2>Arzenál K2 na jedné stránce</h2>
 
-  <p>Mapa „téma výroku → hotový argument“. U zkoušky ji budeš mít v hlavě; teď slouží jako rozcestník k úlohám, kde je každý argument vypracovaný:</p>
+  <p>Mapa „téma výroku → hotový argument“. U zkoušky ji budeš mít v&nbsp;hlavě; teď slouží jako rozcestník k&nbsp;úlohám, kde je každý argument vypracovaný:</p>
 
   <table>
     <thead>
@@ -120,8 +120,8 @@
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
     <ul>
-      <li><strong>„Bellman-Ford si se záporným cyklem poradí.“</strong> Poradí si s <em>detekcí</em> — najít nejkratší cestu v grafu se záporným cyklem neumí nikdo polynomiálně (za $P \ne NP$): úloha je NP-těžká <a href="l2-1.html#takeaways">[L2.1]</a>.</li>
-      <li><strong>„Rozdíly vah dvojic hran se posunem $+h$ nezmění, takže se SP zachová.“</strong> Chybný argument z dochované zkouškové odpovědi — o vítězi rozhodují <em>součty podél celých cest</em> a ty rostou o $h \cdot |P|$, tedy podle počtu hran <a href="l2-15.html#takeaways">[L2.15]</a>.</li>
+      <li><strong>„Bellman-Ford si se záporným cyklem poradí.“</strong> Poradí si s&nbsp;<em>detekcí</em> — najít nejkratší cestu v&nbsp;grafu se záporným cyklem neumí nikdo polynomiálně (za $P \ne NP$): úloha je NP-těžká <a href="l2-1.html#takeaways">[L2.1]</a>.</li>
+      <li><strong>„Rozdíly vah dvojic hran se posunem $+h$ nezmění, takže se SP zachová.“</strong> Chybný argument z&nbsp;dochované zkouškové odpovědi — o&nbsp;vítězi rozhodují <em>součty podél celých cest</em> a ty rostou o&nbsp;$h \cdot |P|$, tedy podle počtu hran <a href="l2-15.html#takeaways">[L2.15]</a>.</li>
       <li><strong>Protipříklad mimo zadání.</strong> Když zadání říká „strongly connected“, tvůj protipříklad musí být silně souvislý (zpáteční hrana); když vyvracíš zachování SP, musí mít obě instance SP definované. Protipříklad porušující zadání hodnotitel škrtne.</li>
     </ul>
   </div>
@@ -132,8 +132,8 @@
     <ul>
       <li><strong>Každý výrok rozhodni důkazem, nebo protipříkladem:</strong> vyvrácení = jeden malý graf (3–4 vrcholy, dvě konkurenční cesty, dopočítaná čísla); potvrzení = obecný argument (rozpis ceny cesty, korektní algoritmus se splněnými vstupy).</li>
       <li><strong>Checklist pák:</strong> ① definovanost (záporný cyklus? <a href="l2-1.html#takeaways">[L2.1]</a>), ② vstupní podmínky algoritmu (Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a>), ③ transformace vah ($+h$ vs. $\times k$ <a href="l2-15.html#takeaways">[L2.15]</a>), ④ cena ≠ počet hran <a href="l2-16.html#takeaways">[L2.16]</a>, ⑤ nejdelší cesta = otázka na kladný cyklus <a href="l2-17.html#takeaways">[L2.17]</a>.</li>
-      <li><strong>Detekce ≠ řešení:</strong> záporný cyklus se detekuje polynomiálně (Bellman-Ford + kontrolní průchod, $\mathcal{O}(nm)$ <a href="l2-12.html#takeaways">[L2.12]</a>), ale nejkratší cesta v grafu se záporným cyklem je NP-těžká.</li>
-      <li>Silná souvislost v zadání = bonus (vše dosažitelné, $s'$-trik netřeba) i povinnost (protipříklad ji musí splnit — zpáteční hrana).</li>
+      <li><strong>Detekce ≠ řešení:</strong> záporný cyklus se detekuje polynomiálně (Bellman-Ford + kontrolní průchod, $\mathcal{O}(nm)$ <a href="l2-12.html#takeaways">[L2.12]</a>), ale nejkratší cesta v&nbsp;grafu se záporným cyklem je NP-těžká.</li>
+      <li>Silná souvislost v&nbsp;zadání = bonus (vše dosažitelné, $s'$-trik netřeba) i povinnost (protipříklad ji musí splnit — zpáteční hrana).</li>
       <li>Tohle je FOTO checkpoint: celou čtyřdílnou úlohu T01 napiš <strong>na papír</strong> a pošli ke kontrole.</li>
     </ul>
   </div>
@@ -144,7 +144,7 @@
       <span class="task-id">T01</span>
       <strong>Handling negative cycles in the graph</strong>
       <span class="foto-badge"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</span>
-      <span class="task-src">zdroj: zkouška KO_21_06_2021 (historicke_zadani_testu.md ř. 1305–1312, shodně testu_2 ř. 914–921), EN 1:1; dochovaná studentská odpověď je u podotázek 1+4 v zásadě správná, u 2+3 chybná — řešení vlastní s vyznačením rozdílů</span>
+      <span class="task-src">zdroj: zkouška KO_21_06_2021 (historicke_zadani_testu.md ř. 1305–1312, shodně testu_2 ř. 914–921), EN 1:1; dochovaná studentská odpověď je u podotázek 1+4 v&nbsp;zásadě správná, u 2+3 chybná — řešení vlastní s vyznačením rozdílů</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -160,35 +160,35 @@
 
       <div class="box foto">
         <div class="box-title"><img src="../assets/icons/camera.svg" class="ico" alt="">FOTO checkpoint</div>
-        <p>Tuhle úlohu vyřeš celou <strong>NA PAPÍR</strong> — všechny čtyři podotázky, od prázdného listu, bez koukání do lekce, orientačně do 15–20 minut (přesný limit zkoušky doložený není, ale při 6 úlohách na test víc mít nebudeš). U podotázky 3 nakresli konkrétní dvojici grafů $G$, $G'$ s čísly a dopočítej obě cesty v obou grafech. Pak mi pošli fotku — zkontroluju ti ji a vytknu chyby přesně jako hodnotitel.</p>
+        <p>Tuhle úlohu vyřeš celou <strong>NA PAPÍR</strong> — všechny čtyři podotázky, od prázdného listu, bez koukání do lekce, orientačně do 15–20&nbsp;minut (přesný limit zkoušky doložený není, ale při 6&nbsp;úlohách na test víc mít nebudeš). U podotázky 3 nakresli konkrétní dvojici grafů $G$, $G'$ s&nbsp;čísly a dopočítej obě cesty v&nbsp;obou grafech. Pak mi pošli fotku — zkontroluju ti ji a vytknu chyby přesně jako hodnotitel.</p>
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Silně souvislý orientovaný graf s libovolnými celočíselnými vahami (i zápornými) a čtyři podotázky: ① jak polynomiálně <em>detekovat</em> záporný cyklus, ② zda je nejkratší cesta <em>vždy</em> polynomiálně řešitelná, ③ zda posun všech vah o $+h$ (zvolené tak, aby váhy vyšly nezáporné) zachová nejkratší cesty, ④ zda při <em>všech záporných</em> vahách umíme polynomiálně nejdelší cestu. Závorka „consider $P \ne NP$“ prozrazuje, že aspoň jedna odpověď bude „ne, je to NP-těžké“.</p>
+      <p>Silně souvislý orientovaný graf s&nbsp;libovolnými celočíselnými vahami (i zápornými) a čtyři podotázky: ① jak polynomiálně <em>detekovat</em> záporný cyklus, ② zda je nejkratší cesta <em>vždy</em> polynomiálně řešitelná, ③ zda posun všech vah o&nbsp;$+h$ (zvolené tak, aby váhy vyšly nezáporné) zachová nejkratší cesty, ④ zda při <em>všech záporných</em> vahách umíme polynomiálně nejdelší cestu. Závorka „consider $P \ne NP$“ prozrazuje, že aspoň jedna odpověď bude „ne, je to NP-těžké“.</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
         <li><a href="l2-12.html#takeaways">[L2.12] Bellman-Ford + detekce záporného cyklu</a> — podotázka 1.</li>
         <li><a href="l2-1.html#takeaways">[L2.1] Záporné váhy ano, záporné cykly ne</a> — podotázka 2 (NP-těžkost se záporným cyklem).</li>
-        <li><a href="l2-15.html#t-shift">[L2.15] T01</a> — podotázka 3 je s ní doslova totožná (hotový protipříklad).</li>
+        <li><a href="l2-15.html#t-shift">[L2.15] T01</a> — podotázka 3 je s&nbsp;ní doslova totožná (hotový protipříklad).</li>
         <li><a href="l2-17.html#takeaways">[L2.17] Nejdelší cesta</a> — podotázka 4 (×(−1) a hranice kladného cyklu); Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a>.</li>
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Každá podotázka je jedna lekce — poznej kterou. ① je čistá reprodukce detekce; využij silnou souvislost (vše je dosažitelné → $s'$-trik netřeba). ② pozor na slovo <em>always</em>: váhy jsou libovolné ze $\mathbb{Z}$, takže graf <em>může</em> obsahovat záporný cyklus — a co pak? ③ neptej se „změní se délky?“, ale „změní se <em>vítěz</em>?“ — rozepiš $c'(P)$ a postav mini protipříklad (nezapomeň: silně souvislý, bez záporného cyklu). ④ aplikuj checklist nejdelší cesty: má graf po ×(−1) záporný cyklus? Dochovaná studentská odpověď je dobrý trenažér: u ② a ③ napsala „yes“ a hodnotitel ji červeně opravoval („What about negative cycles?“) — zkus říct přesně, kde se spletla.</p>
+      <p>Každá podotázka je jedna lekce — poznej kterou. ① je čistá reprodukce detekce; využij silnou souvislost (vše je dosažitelné → $s'$-trik netřeba). ② pozor na slovo <em>always</em>: váhy jsou libovolné ze $\mathbb{Z}$, takže graf <em>může</em> obsahovat záporný cyklus — a co pak? ③ neptej se „změní se délky?“, ale „změní se <em>vítěz</em>?“ — rozepiš $c'(P)$ a postav mini protipříklad (nezapomeň: silně souvislý, bez záporného cyklu). ④ aplikuj checklist nejdelší cesty: má graf po ×(−1) záporný cyklus? Dochovaná studentská odpověď je dobrý trenažér: u&nbsp;② a ③ napsala „yes“ a hodnotitel ji červeně opravoval („What about negative cycles?“) — zkus říct přesně, kde se spletla.</p>
 
       <details class="solution">
-        <summary>d) Úplné řešení (vlastní; srovnání s dochovanou odpovědí vyznačeno)</summary>
+        <summary>d) Úplné řešení (vlastní; srovnání s&nbsp;dochovanou odpovědí vyznačeno)</summary>
         <div class="inner">
-          <p><strong>① Detekce záporného cyklu — Bellman-Ford + kontrolní průchod, $\mathcal{O}(nm)$.</strong> Zvol libovolný startovní vrchol $s$; díky silné souvislosti je z něj dosažitelný celý graf (pomocný vrchol $s'$ s nulovými hranami <a href="l2-12.html#takeaways">[L2.12]</a> není potřeba). Proveď $n-1$ průchodů relaxací všech hran. Pak proveď jeden <em>kontrolní</em> průchod: existuje-li hrana $(v,t)$ s $l(t) &gt; l(v) + c(v,t)$, graf obsahuje záporný cyklus; jinak neobsahuje (slide 34). Celkem $\mathcal{O}(nm)$ — polynomiální. <em>(Dochovaná odpověď „run Bellman-Ford $|V|-1$ times, then relax once more; if any distance changes, there is a negative cycle“ je ekvivalentní — hodnotitel ji označil „not incorrect“.)</em></p>
-          <p><strong>② NE — ne vždy.</strong> Váhy jsou libovolné ze $\mathbb{Z}$, takže $G$ může obsahovat <strong>záporný cyklus</strong> (silně souvislý graf cykly má; stačí jeden se záporným součtem, např. $a \rightleftarrows b$ v grafu $G^\star$ z lekce). Pak nejkratší <em>sled</em> neexistuje a hledání nejkratší <em>cesty</em> je <strong>NP-těžké</strong> <a href="l2-1.html#takeaways">[L2.1]</a> (redukce z Hamiltonovské kružnice, slide 12) — za předpokladu $P \ne NP$ tedy žádný polynomiální algoritmus neexistuje. Polynomiálně řešitelné to je jen v případě, že $G$ záporný cyklus <em>nemá</em> (Bellman-Ford, $\mathcal{O}(nm)$) — což díky ① umíme poznat. <em>(Dochovaná odpověď „yes, since we are working with finite number of $V$ and $E$“ je chybná — konečnost instance neznamená polynomialitu; hodnotitel ji označil „very confusing“.)</em></p>
-          <p><strong>③ NE — protipříklad</strong> (tentýž jako v <a href="l2-15.html#t-shift">[L2.15] T01</a>). Pro každou cestu platí $c'(P) = c(P) + h \cdot |P|$: příplatek roste s <em>počtem hran</em>, takže se pořadí cest s různým počtem hran může přehodit. Konkrétně $G$: vrcholy $\{s, a, t\}$, hrany $c(s,a) = -2$, $c(a,t) = -2$, $c(s,t) = -3$ a zpáteční hrana $c(t,s) = 10$ (silná souvislost; všechny cykly kladné → nejkratší cesty definované). Minimum vah je $-3$, zvol $h = 3 \ge |{-3}|$.</p>
+          <p><strong>① Detekce záporného cyklu — Bellman-Ford + kontrolní průchod, $\mathcal{O}(nm)$.</strong> Zvol libovolný startovní vrchol $s$; díky silné souvislosti je z&nbsp;něj dosažitelný celý graf (pomocný vrchol $s'$ s&nbsp;nulovými hranami <a href="l2-12.html#takeaways">[L2.12]</a> není potřeba). Proveď $n-1$ průchodů relaxací všech hran. Pak proveď jeden <em>kontrolní</em> průchod: existuje-li hrana $(v,t)$ s&nbsp;$l(t) &gt; l(v) + c(v,t)$, graf obsahuje záporný cyklus; jinak neobsahuje (slide 34). Celkem $\mathcal{O}(nm)$ — polynomiální. <em>(Dochovaná odpověď „run Bellman-Ford $|V|-1$ times, then relax once more; if any distance changes, there is a negative cycle“ je ekvivalentní — hodnotitel ji označil „not incorrect“.)</em></p>
+          <p><strong>② NE — ne vždy.</strong> Váhy jsou libovolné ze $\mathbb{Z}$, takže $G$ může obsahovat <strong>záporný cyklus</strong> (silně souvislý graf cykly má; stačí jeden se záporným součtem, např. $a \rightleftarrows b$ v&nbsp;grafu $G^\star$ z&nbsp;lekce). Pak nejkratší <em>sled</em> neexistuje a hledání nejkratší <em>cesty</em> je <strong>NP-těžké</strong> <a href="l2-1.html#takeaways">[L2.1]</a> (redukce z&nbsp;Hamiltonovské kružnice, slide 12) — za předpokladu $P \ne NP$ tedy žádný polynomiální algoritmus neexistuje. Polynomiálně řešitelné to je jen v&nbsp;případě, že $G$ záporný cyklus <em>nemá</em> (Bellman-Ford, $\mathcal{O}(nm)$) — což díky ① umíme poznat. <em>(Dochovaná odpověď „yes, since we are working with finite number of $V$ and $E$“ je chybná — konečnost instance neznamená polynomialitu; hodnotitel ji označil „very confusing“.)</em></p>
+          <p><strong>③ NE — protipříklad</strong> (tentýž jako v&nbsp;<a href="l2-15.html#t-shift">[L2.15] T01</a>). Pro každou cestu platí $c'(P) = c(P) + h \cdot |P|$: příplatek roste s&nbsp;<em>počtem hran</em>, takže se pořadí cest s&nbsp;různým počtem hran může přehodit. Konkrétně $G$: vrcholy $\{s, a, t\}$, hrany $c(s,a) = -2$, $c(a,t) = -2$, $c(s,t) = -3$ a zpáteční hrana $c(t,s) = 10$ (silná souvislost; všechny cykly kladné → nejkratší cesty definované). Minimum vah je $-3$, zvol $h = 3 \ge |{-3}|$.</p>
           <ul>
-            <li>V $G$: $c(s{\to}a{\to}t) = -4 \;&lt;\; c(s{\to}t) = -3$ → nejkratší je $s \to a \to t$.</li>
-            <li>V $G'$: $c'(s{\to}a{\to}t) = 1 + 1 = 2 \;&gt;\; c'(s{\to}t) = 0$ → nejkratší je přímá hrana $s \to t$.</li>
+            <li>V&nbsp;$G$: $c(s{\to}a{\to}t) = -4 \;&lt;\; c(s{\to}t) = -3$ → nejkratší je $s \to a \to t$.</li>
+            <li>V&nbsp;$G'$: $c'(s{\to}a{\to}t) = 1 + 1 = 2 \;&gt;\; c'(s{\to}t) = 0$ → nejkratší je přímá hrana $s \to t$.</li>
           </ul>
-          <p>Nejkratší cesta v $G'$ tedy neodpovídá nejkratší cestě v $G$ (grafy nakreslené pod řešením). $\blacksquare$ <em>(Dochovaná odpověď „yes — rozdíly dvojic hran se nezmění“ je chybná: o vítězi rozhodují součty podél celých cest, viz danger box lekce; hodnotitel připsal „What about negative cycles?“ a skicu trojúhelníkového protipříkladu.)</em></p>
-          <p><strong>④ ANO.</strong> Vytvoř $G'$ shodný s $G$, ale každou váhu vynásob $(-1)$: z $c(e) &lt; 0$ plyne, že v $G'$ jsou <strong>všechny váhy kladné</strong> — žádný záporný cyklus, dokonce splněné vstupní podmínky Dijkstry <a href="l2-4.html#takeaways">[L2.4]</a>. Nejkratší cesta v $G'$ je nejdelší cestou v $G$ a její délka je $(-1)\times$ délka nalezená v $G'$ <a href="l2-17.html#takeaways">[L2.17]</a>. Složitost $\mathcal{O}(n^2)$ (resp. $\mathcal{O}(m + n \log n)$) — polynomiální. <em>(Dochovaná odpověď je správně — hodnotitel ✓.)</em> Pikantní detail k ústní: $G$ sám je samými zápornými vahami prošpikovaný zápornými cykly (silně souvislý graf cykly má a každý je tu záporný), takže <em>nejkratší</em> cesta v $G$ by byla NP-těžká — ale na <em>nejdelší</em> se ptáme „ze správné strany“.</p>
+          <p>Nejkratší cesta v&nbsp;$G'$ tedy neodpovídá nejkratší cestě v&nbsp;$G$ (grafy nakreslené pod řešením). $\blacksquare$ <em>(Dochovaná odpověď „yes — rozdíly dvojic hran se nezmění“ je chybná: o&nbsp;vítězi rozhodují součty podél celých cest, viz danger box lekce; hodnotitel připsal „What about negative cycles?“ a skicu trojúhelníkového protipříkladu.)</em></p>
+          <p><strong>④ ANO.</strong> Vytvoř $G'$ shodný s&nbsp;$G$, ale každou váhu vynásob $(-1)$: z&nbsp;$c(e) &lt; 0$ plyne, že v&nbsp;$G'$ jsou <strong>všechny váhy kladné</strong> — žádný záporný cyklus, dokonce splněné vstupní podmínky Dijkstry <a href="l2-4.html#takeaways">[L2.4]</a>. Nejkratší cesta v&nbsp;$G'$ je nejdelší cestou v&nbsp;$G$ a její délka je $(-1)\times$ délka nalezená v&nbsp;$G'$ <a href="l2-17.html#takeaways">[L2.17]</a>. Složitost $\mathcal{O}(n^2)$ (resp. $\mathcal{O}(m + n \log n)$) — polynomiální. <em>(Dochovaná odpověď je správně — hodnotitel ✓.)</em> Pikantní detail k&nbsp;ústní: $G$ sám je samými zápornými vahami prošpikovaný zápornými cykly (silně souvislý graf cykly má a každý je tu záporný), takže <em>nejkratší</em> cesta v&nbsp;$G$ by byla NP-těžká — ale na <em>nejdelší</em> se ptáme „ze správné strany“.</p>
         </div>
       </details>
 
@@ -203,7 +203,7 @@
     <div class="task-head">
       <span class="task-id">T02</span>
       <strong>5 výroků o nejkratších cestách</strong>
-      <span class="task-src">zdroj: studentský souhrn (testy/ko_souhrn.md ř. 488) — dochován jen CZ přepis zadání se dvěma ukázkovými výroky (EN originál se nedochoval); pětice níže je VLASTNÍ rekonstrukce v duchu zadání (výroky 1–2 dle přepisu, 3–5 doplněny z témat K2); řešení vlastní</span>
+      <span class="task-src">zdroj: studentský souhrn (testy/ko_souhrn.md ř. 488) — dochován jen CZ přepis zadání se dvěma ukázkovými výroky (EN originál se nedochoval); pětice níže je VLASTNÍ rekonstrukce v&nbsp;duchu zadání (výroky 1–2 dle přepisu, 3–5 doplněny z&nbsp;témat K2); řešení vlastní</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -224,9 +224,9 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Formát „dokaž, nebo vyvrať“: u každého výroku verdikt PLATÍ/NEPLATÍ + důkaz, resp. protipříklad. Dochovaly se jen dva ukázkové výroky (1 a 2) — zbylé tři jsou doplněné tak, aby pokryly páky, na které se K2 výroky ptají nejčastěji.</p>
+      <p>Formát „dokaž, nebo vyvrať“: u&nbsp;každého výroku verdikt PLATÍ/NEPLATÍ + důkaz, resp. protipříklad. Dochovaly se jen dva ukázkové výroky (1 a 2) — zbylé tři jsou doplněné tak, aby pokryly páky, na které se K2 výroky ptají nejčastěji.</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
         <li><a href="l2-15.html#t-scale">[L2.15] T02</a> (násobení $\times k$, vč. druhého čtení „jen jedna hrana“) a <a href="l2-15.html#t-shift">[L2.15] T01</a> (posun $+h$).</li>
         <li><a href="l2-16.html#t-edgecount">[L2.16] T01</a> (Dijkstra a počet hran).</li>
@@ -234,19 +234,19 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Na každý výrok pusť checklist z lekce: definovanost → vstupní podmínky → transformace vah → cena vs. počet hran → kladný cyklus. Výroky 2, 3 a 5 padají na protipříklad/protiargument, výroky 1 a 4 mají krátký důkaz. Nepřepisuj argumenty z minulých lekcí — tady si jen ověř, že je umíš <em>vybrat a stručně podat</em> (na písemce stačí pár řádků + obrázek na výrok).</p>
+      <p>Na každý výrok pusť checklist z&nbsp;lekce: definovanost → vstupní podmínky → transformace vah → cena vs. počet hran → kladný cyklus. Výroky 2, 3 a 5 padají na protipříklad/protiargument, výroky 1 a 4 mají krátký důkaz. Nepřepisuj argumenty z&nbsp;minulých lekcí — tady si jen ověř, že je umíš <em>vybrat a stručně podat</em> (na písemce stačí pár řádků + obrázek na výrok).</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní — stručné verdikty s odkazy na vypracované argumenty)</summary>
         <div class="inner">
           <ol>
-            <li><strong>PLATÍ</strong> (pro čtení „všechny hrany“, $k &gt; 0$): množina cest se nemění a $c'(P) = k \cdot c(P)$, kladná konstanta projde přes minimum → $\min_P c'(P) = k \min_P c(P)$, argmin se zachová. Vypracováno vč. mezí platnosti ($k \le 0$) a druhého čtení „jen jedna hrana“ (to NEPLATÍ) v <a href="l2-15.html#t-scale">[L2.15] T02</a>.</li>
-            <li><strong>NEPLATÍ:</strong> Dijkstra minimalizuje součet vah, počet hran do algoritmu nevstupuje. Protipříklad: $s{\to}a{\to}b{\to}t$ za $1+1+1 = 3$ (3 hrany) porazí přímou hranu $s{\to}t$ za $10$ (1 hrana). Vypracováno v <a href="l2-16.html#t-edgecount">[L2.16] T01</a>.</li>
-            <li><strong>NEPLATÍ:</strong> $c'(P) = c(P) + h \cdot |P|$ — příplatek závisí na počtu hran. Protipříklad = grafy $G$, $G'$ z řešení T01③ výše (s $h = 3$ se vítěz přehodí z $s{\to}a{\to}t$ na $s{\to}t$). Vypracováno v <a href="l2-15.html#t-shift">[L2.15] T01</a>.</li>
-            <li><strong>PLATÍ:</strong> ×(−1) dá všechny váhy kladné → žádný záporný cyklus → Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a>; výsledek převeď zpět $\times(-1)$. To je přesně T01④ výše a takeaway <a href="l2-17.html#takeaways">[L2.17]</a>. (Pozor na obecnější výrok bez „all weights negative“ — nejdelší cesta s kladným cyklem je NP-těžká, <a href="l2-17.html#t-poscycle">[L2.17] T01</a>.)</li>
-            <li><strong>NEPLATÍ:</strong> Bellman-Ford záporný cyklus <em>detekuje</em> (kontrolní průchod, $\mathcal{O}(nm)$ <a href="l2-12.html#takeaways">[L2.12]</a>), ale nejkratší cestu v takovém grafu nenajde — úloha je NP-těžká <a href="l2-1.html#takeaways">[L2.1]</a>, takže za $P \ne NP$ to polynomiálně neumí žádný algoritmus. „Umí detekovat“ ≠ „umí vyřešit“.</li>
+            <li><strong>PLATÍ</strong> (pro čtení „všechny hrany“, $k &gt; 0$): množina cest se nemění a $c'(P) = k \cdot c(P)$, kladná konstanta projde přes minimum → $\min_P c'(P) = k \min_P c(P)$, argmin se zachová. Vypracováno vč. mezí platnosti ($k \le 0$) a druhého čtení „jen jedna hrana“ (to NEPLATÍ) v&nbsp;<a href="l2-15.html#t-scale">[L2.15] T02</a>.</li>
+            <li><strong>NEPLATÍ:</strong> Dijkstra minimalizuje součet vah, počet hran do algoritmu nevstupuje. Protipříklad: $s{\to}a{\to}b{\to}t$ za $1+1+1 = 3$ (3 hrany) porazí přímou hranu $s{\to}t$ za $10$ (1 hrana). Vypracováno v&nbsp;<a href="l2-16.html#t-edgecount">[L2.16] T01</a>.</li>
+            <li><strong>NEPLATÍ:</strong> $c'(P) = c(P) + h \cdot |P|$ — příplatek závisí na počtu hran. Protipříklad = grafy $G$, $G'$ z&nbsp;řešení T01③ výše (s&nbsp;$h = 3$ se vítěz přehodí z&nbsp;$s{\to}a{\to}t$ na $s{\to}t$). Vypracováno v&nbsp;<a href="l2-15.html#t-shift">[L2.15] T01</a>.</li>
+            <li><strong>PLATÍ:</strong> ×(−1) dá všechny váhy kladné → žádný záporný cyklus → Dijkstra <a href="l2-4.html#takeaways">[L2.4]</a>; výsledek převeď zpět $\times(-1)$. To je přesně T01④ výše a takeaway <a href="l2-17.html#takeaways">[L2.17]</a>. (Pozor na obecnější výrok bez „all weights negative“ — nejdelší cesta s&nbsp;kladným cyklem je NP-těžká, <a href="l2-17.html#t-poscycle">[L2.17] T01</a>.)</li>
+            <li><strong>NEPLATÍ:</strong> Bellman-Ford záporný cyklus <em>detekuje</em> (kontrolní průchod, $\mathcal{O}(nm)$ <a href="l2-12.html#takeaways">[L2.12]</a>), ale nejkratší cestu v&nbsp;takovém grafu nenajde — úloha je NP-těžká <a href="l2-1.html#takeaways">[L2.1]</a>, takže za $P \ne NP$ to polynomiálně neumí žádný algoritmus. „Umí detekovat“ ≠ „umí vyřešit“.</li>
           </ol>
-          <p><strong>Poznámka k písemce:</strong> přesné EN znění pětice se každý termín liší — formát i páky ale zůstávají. Když výrok nepoznáš, projdi checklist z této lekce; téměř jistě tlačí na jednu z pěti pák.</p>
+          <p><strong>Poznámka k&nbsp;písemce:</strong> přesné EN znění pětice se každý termín liší — formát i páky ale zůstávají. Když výrok nepoznáš, projdi checklist z&nbsp;této lekce; téměř jistě tlačí na jednu z&nbsp;pěti pák.</p>
         </div>
       </details>
     </div>
