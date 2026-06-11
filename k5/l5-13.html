@@ -33,18 +33,18 @@
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
-    <strong>Řetěz polynomiálních redukcí</strong>, kterým se NP-těžkost šíří rozvrhováním: 3-PARTITION $\to$ $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ (slide 14–15 — proto je Bratleyho problém <em>silně</em> NP-těžký) a $1\,|\,r_j, \tilde{d}_j\,|\,C_{max} \to PS1\,|\,temp\,|\,C_{max}$ (slide 75 — dummy $T_0$ s $p_0 = 0$, hrany $r_i$ tam a $-(\tilde{d}_i - p_i)$ zpět).
+    <strong>Řetěz polynomiálních redukcí</strong>, kterým se NP-těžkost šíří rozvrhováním: 3-PARTITION $\to$ $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ (slide 14–15 — proto je Bratleyho problém <em>silně</em> NP-těžký) a $1\,|\,r_j, \tilde{d}_j\,|\,C_{max} \to PS1\,|\,temp\,|\,C_{max}$ (slide 75 — dummy $T_0$ s&nbsp;$p_0 = 0$, hrany $r_i$ tam a $-(\tilde{d}_i - p_i)$ zpět).
   </div>
 
-  <p>Celou kapitolou K5 se táhne jedna nevyslovená otázka: <em>proč</em> jsme na $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ vytáhli branch &amp; bound <a href="../k5/l5-9.html">[L5.9]</a> a na $PS1\,|\,temp\,|\,C_{max}$ rovnou ILP se solverem <a href="../k5/l5-3.html">[L5.3]</a>, místo nějakého chytrého polynomiálního algoritmu jako u Horna <a href="../k5/l5-7.html">[L5.7]</a> nebo McNaughtona <a href="../k5/l5-4.html">[L5.4]</a>? Tahle lekce dodává důkazy, že nic chytřejšího (pokud $P \ne NP$) neexistuje. Je to <strong>ústní téma</strong> („proč je $1\,|\,r_j, d_j\,|\,C_{max}$ NP-těžký?“) — počítat tu skoro nebudeš, zato dvakrát stavět redukci.</p>
+  <p>Celou kapitolou K5 se táhne jedna nevyslovená otázka: <em>proč</em> jsme na&nbsp;$1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ vytáhli branch &amp; bound <a href="../k5/l5-9.html">[L5.9]</a> a na&nbsp;$PS1\,|\,temp\,|\,C_{max}$ rovnou ILP se solverem <a href="../k5/l5-3.html">[L5.3]</a>, místo nějakého chytrého polynomiálního algoritmu jako u&nbsp;Horna <a href="../k5/l5-7.html">[L5.7]</a> nebo McNaughtona <a href="../k5/l5-4.html">[L5.4]</a>? Tahle lekce dodává důkazy, že nic chytřejšího (pokud $P \ne NP$) neexistuje. Je to <strong>ústní téma</strong> („proč je $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ NP-těžký?“) — počítat tu skoro nebudeš, zato dvakrát stavět redukci.</p>
 
   <!-- ===== SEKCE 1: SMĚR REDUKCE ===== -->
   <h2>Těžkost teče po šipce redukce</h2>
 
   <details class="try">
-    <summary>Zkus sám: z <a href="../k3/l3-5.html">[L3.5]</a> znáš důkaz NP-těžkosti TSP redukcí z hamiltonovské kružnice. Který problém se tam převáděl na který — a proč zrovna tímhle směrem?</summary>
+    <summary>Zkus sám: z&nbsp;<a href="../k3/l3-5.html">[L3.5]</a> znáš důkaz NP-těžkosti TSP redukcí z hamiltonovské kružnice. Který problém se tam převáděl na který — a proč zrovna tímhle směrem?</summary>
     <div class="inner">
-      <p>Převáděl se <strong>známý těžký problém</strong> (HC) <strong>na náš problém</strong> (TSP): z každé instance HC se polynomiálně vyrobila instance TSP tak, že odpověď na TSP dává odpověď na HC. Kdyby TSP uměl polynomiální algoritmus, uměl by ho i HC — spor. Šipka redukce tedy vede <em>od těžkého k mému</em>: „můj problém je aspoň tak těžký jako…“. Opačný směr (můj problém převedu na ILP) nedokazuje vůbec nic — ILP umí zakódovat i triviálně lehké problémy.</p>
+      <p>Převáděl se <strong>známý těžký problém</strong> (HC) <strong>na náš problém</strong> (TSP): z každé instance HC se polynomiálně vyrobila instance TSP tak, že odpověď na TSP dává odpověď na HC. Kdyby TSP uměl polynomiální algoritmus, uměl by ho i HC — spor. Šipka redukce tedy vede <em>od těžkého k&nbsp;mému</em>: „můj problém je aspoň tak těžký jako…“. Opačný směr (můj problém převedu na ILP) nedokazuje vůbec nic — ILP umí zakódovat i triviálně lehké problémy.</p>
     </div>
   </details>
 
@@ -85,7 +85,7 @@
     </div>
   </details>
 
-  <p>Důležité je slovo <em>strongly</em>: 3-PARTITION zůstává NP-úplný, i když jsou všechna čísla malá (polynomiálně omezená velikostí instance). Příbuzný 4-PARTITION ses už potkal v úloze s bankovkami <a href="../k1/l1-8.html#t-4partition">[L1.8]</a>.</p>
+  <p>Důležité je slovo <em>strongly</em>: 3-PARTITION zůstává NP-úplný, i když jsou všechna čísla malá (polynomiálně omezená velikostí instance). Příbuzný 4-PARTITION ses už potkal v&nbsp;úloze s&nbsp;bankovkami <a href="../k1/l1-8.html#t-4partition">[L1.8]</a>.</p>
 
   <!-- ===== SEKCE 3: REDUKCE NA BRATLEYHO PROBLEM ===== -->
   <h2>Redukce 3-PARTITION → 1 | r<sub>j</sub>, d̃<sub>j</sub> | C<sub>max</sub> (slide 15)</h2>
@@ -93,7 +93,7 @@
   <details class="try">
     <summary>Zkus sám: máš jediný stroj a chceš ho přinutit, aby se choval jako $m$ oddělených košů kapacity přesně $B$. Jaké úlohy (s jakými $p_j, r_j, \tilde{d}_j$) na to potřebuješ přidat?</summary>
     <div class="inner">
-      <p><strong>Ploty.</strong> Úloha s oknem $\langle r_j, \tilde{d}_j \rangle$ dlouhým přesně $p_j$ nemá žádnou vůli — je „přibitá“ na své místo. Když takových jednotkových plotů rozestavíš $m$ s rozestupem $B + 1$, rozsekají časovou osu na $m$ mezer délky přesně $B$ — a to jsou tvoje koše. Zbylé úlohy (jedna za každý prvek $a_i$, bez release a deadlinu) se do mezer musí naskládat.</p>
+      <p><strong>Ploty.</strong> Úloha s&nbsp;oknem $\langle r_j, \tilde{d}_j \rangle$ dlouhým přesně $p_j$ nemá žádnou vůli — je „přibitá“ na své místo. Když takových jednotkových plotů rozestavíš $m$ s&nbsp;rozestupem $B + 1$, rozsekají časovou osu na $m$ mezer délky přesně $B$ — a to jsou tvoje koše. Zbylé úlohy (jedna za každý prvek $a_i$, bez release a deadlinu) se do mezer musí naskládat.</p>
     </div>
   </details>
 
@@ -122,22 +122,22 @@
     </div>
   </details>
 
-  <p>A teď pointa, kterou chce zkoušející slyšet u ústní celou: konstrukce $I_{SCH}$ je polynomiální (vyrobí $4m$ úloh, čísla jen sčítá a násobí) a zachovává odpověď ANO/NE. Kdyby $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ uměl polynomiální (nebo i jen pseudopolynomiální) algoritmus, vyřešil by přes tuhle redukci i 3-PARTITION — který je ale <em>silně</em> NP-úplný. Slide 13 to shrnuje (EN 1:1): “$1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ - <strong>NP-hard</strong> — NP-hardness proved by the pol. reduction from 3-Partition problem — for $p_j = 1$ there exists a polynomial algorithm.” Plné znění slidu 13 (které varianty $1\,|\,\cdot\,|\,C_{max}$ jsou easy) máš v <a href="../k5/l5-9.html">[L5.9]</a>.</p>
+  <p>A teď pointa, kterou chce zkoušející slyšet u&nbsp;ústní celou: konstrukce $I_{SCH}$ je polynomiální (vyrobí $4m$ úloh, čísla jen sčítá a násobí) a zachovává odpověď ANO/NE. Kdyby $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ uměl polynomiální (nebo i jen pseudopolynomiální) algoritmus, vyřešil by přes tuhle redukci i 3-PARTITION — který je ale <em>silně</em> NP-úplný. Slide 13 to shrnuje (EN 1:1): “$1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ - <strong>NP-hard</strong> — NP-hardness proved by the pol. reduction from 3-Partition problem — for $p_j = 1$ there exists a polynomial algorithm.” Plné znění slidu 13 (které varianty $1\,|\,\cdot\,|\,C_{max}$ jsou easy) máš v <a href="../k5/l5-9.html">[L5.9]</a>.</p>
 
   <!-- ===== SEKCE 4: REDUKCE NA PS1|temp|Cmax ===== -->
   <h2>Redukce 1 | r<sub>j</sub>, d̃<sub>j</sub> | C<sub>max</sub> → PS1 | temp | C<sub>max</sub> (slide 75)</h2>
 
-  <p>Druhý krok řetězu posílá těžkost dál: do project schedulingu s temporálními omezeními, jehož graf TC a sémantiku $s_i + l_{ij} \le s_j$ znáš z <a href="../k5/l5-2.html#takeaways">[L5.2]</a>. Slide 74 (EN 1:1): “Using $PS1\,|\,temp\,|\,C_{max}$ we will model: $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$, scheduling on <strong>dedicated resources</strong> $PSm,1\,|\,temp\,|\,C_{max}$.”</p>
+  <p>Druhý krok řetězu posílá těžkost dál: do project schedulingu s&nbsp;temporálními omezeními, jehož graf TC a sémantiku $s_i + l_{ij} \le s_j$ znáš z&nbsp;<a href="../k5/l5-2.html#takeaways">[L5.2]</a>. Slide 74 (EN 1:1): “Using $PS1\,|\,temp\,|\,C_{max}$ we will model: $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$, scheduling on <strong>dedicated resources</strong> $PSm,1\,|\,temp\,|\,C_{max}$.”</p>
 
   <details class="try">
-    <summary>Zkus sám: temporální omezení umí jen nerovnosti tvaru $s_i + l_{ij} \le s_j$ mezi <em>dvojicemi</em> úloh. Jak jimi zapíšeš $s_i \ge r_i$ a $s_i + p_i \le \tilde{d}_i$, které mluví o jediné úloze a absolutním čase?</summary>
+    <summary>Zkus sám: temporální omezení umí jen nerovnosti tvaru $s_i + l_{ij} \le s_j$ mezi <em>dvojicemi</em> úloh. Jak jimi zapíšeš $s_i \ge r_i$ a $s_i + p_i \le \tilde{d}_i$, které mluví o&nbsp;jediné úloze a absolutním čase?</summary>
     <div class="inner">
       <p>Potřebuješ <strong>pevný bod na časové ose</strong> — dummy úlohu $T_0$ s $p_0 = 0$ a $s_0 = 0$. Pak:</p>
       <ul>
         <li>hrana $T_0 \xrightarrow{\,l_{0i} = r_i\,} T_i$: $\quad s_0 + r_i \le s_i \;\Leftrightarrow\; s_i \ge r_i$ (release),</li>
         <li>hrana $T_i \xrightarrow{\,l_{i0} = -(\tilde{d}_i - p_i)\,} T_0$: $\quad s_i - (\tilde{d}_i - p_i) \le s_0 \;\Leftrightarrow\; s_i + p_i \le \tilde{d}_i$ (deadline).</li>
       </ul>
-      <p>Záporná hrana „v protisměru“ jako horní mez — přesně trik z katalogu <a href="../k5/l5-2.html#takeaways">[L5.2]</a>. A proč si můžeme dovolit předpokládat $s_0 = 0$? Všechny hrany $r_i \ge 0$ vynucují $s_i \ge s_0$, takže posunutím celého rozvrhu o $-s_0$ doleva zůstanou všechna (rozdílová) omezení v platnosti a $C_{max}$ se nezvětší — minimalizace kritéria tedy $T_0$ sama přitlačí na nulu.</p>
+      <p>Záporná hrana „v&nbsp;protisměru“ jako horní mez — přesně trik z&nbsp;katalogu <a href="../k5/l5-2.html#takeaways">[L5.2]</a>. A proč si můžeme dovolit předpokládat $s_0 = 0$? Všechny hrany $r_i \ge 0$ vynucují $s_i \ge s_0$, takže posunutím celého rozvrhu o $-s_0$ doleva zůstanou všechna (rozdílová) omezení v platnosti a $C_{max}$ se nezvětší — minimalizace kritéria tedy $T_0$ sama přitlačí na nulu.</p>
     </div>
   </details>
 
@@ -149,11 +149,11 @@
 
   <div class="viz" id="viz-ps1"></div>
 
-  <p>Zbytek instance $PS1\,|\,temp\,|\,C_{max}$ je beze změny: úlohy $T_1, \ldots, T_n$ se svými $p_i$ sdílejí jednu unární kapacitu (= jeden stroj, nesmí se překrývat — jako v $1\,|\,\ldots\,|$), kritérium zůstává $C_{max}$. Rozvrhy si odpovídají 1:1, takže optimum se zachová — a tím je NP-těžkost $PS1\,|\,temp\,|\,C_{max}$ dokázána. Proto v <a href="../k5/l5-3.html">[L5.3]</a> nebylo nic lepšího než time-indexed ILP: pro NP-těžký problém se solver + dobrý model čekat <em>má</em>.</p>
+  <p>Zbytek instance $PS1\,|\,temp\,|\,C_{max}$ je beze změny: úlohy $T_1, \ldots, T_n$ se svými $p_i$ sdílejí jednu unární kapacitu (= jeden stroj, nesmí se překrývat — jako v $1\,|\,\ldots\,|$), kritérium zůstává $C_{max}$. Rozvrhy si odpovídají 1:1, takže optimum se zachová — a tím je NP-těžkost $PS1\,|\,temp\,|\,C_{max}$ dokázána. Proto v&nbsp;<a href="../k5/l5-3.html">[L5.3]</a> nebylo nic lepšího než time-indexed ILP: pro NP-těžký problém se solver + dobrý model čekat <em>má</em>.</p>
 
   <div class="box info">
     <div class="box-title"><img src="../assets/icons/flag.svg" class="ico" alt="">Jen zmínka: $PSm,1\,|\,temp\,|\,C_{max} \to PS1\,|\,temp\,|\,C_{max}$ (slidy 76–78) — <strong>VYLOUČENO ze zkoušky 2026</strong></div>
-    <p>Stejná hra se hraje i o patro výš: rozvrhování na $m$ dedikovaných zdrojích se převede na jediný zdroj tak, že se rozvrh každého zdroje $P^j$ promítne do vlastního časového okna $\langle (j-1) \cdot UB,\ j \cdot UB \rangle$; původní temporální omezení se přepočtou na $l'_{ij} = l_{ij} + (a_j - a_i) \cdot UB$ a přidají se dummy $T_0$ (pevný počátek) a $T_{n+1}$ (sběr kritéria). Na zkoušce se objevila 31.05.2011 („Převod PSm1|temp|Cmax -&gt; PS1|temp|Cmax, najdete splnitelny rozvrh“ — CZ přepis 1:1), ale <strong>pro termín 2026 je oficiálně mimo rozsah</strong> — víc než tento odstavec nepotřebuješ.</p>
+    <p>Stejná hra se hraje i o&nbsp;patro výš: rozvrhování na $m$ dedikovaných zdrojích se převede na jediný zdroj tak, že se rozvrh každého zdroje $P^j$ promítne do vlastního časového okna $\langle (j-1) \cdot UB,\ j \cdot UB \rangle$; původní temporální omezení se přepočtou na $l'_{ij} = l_{ij} + (a_j - a_i) \cdot UB$ a přidají se dummy $T_0$ (pevný počátek) a $T_{n+1}$ (sběr kritéria). Na zkoušce se objevila 31.05.2011 („Převod PSm1|temp|Cmax -&gt; PS1|temp|Cmax, najdete splnitelny rozvrh“ — CZ přepis 1:1), ale <strong>pro termín 2026 je oficiálně mimo rozsah</strong> — víc než tento odstavec nepotřebuješ.</p>
   </div>
 
   <div class="box danger">
@@ -172,7 +172,7 @@
     <ul>
       <li><strong>Řetěz redukcí:</strong> 3-PARTITION (silně NP-úplný) → $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ (silně NP-těžký) → $PS1\,|\,temp\,|\,C_{max}$ (NP-těžký). Směr: známý těžký problém → můj problém.</li>
       <li><strong>3-PARTITION → Bratley (slide 15):</strong> $m$ jednotkových „plotů“ $T_j = (1, (B+1)(j-1), (B+1)(j-1)+1)$ rozseká osu na koše délky $B$; prvky $a_i$ jako úlohy $(a_i, 0, \infty)$. 3-partition existuje ⟺ $C^*_{max} = m(B+1)$ (⇐: $\sum p_j = m(B+1)$ → žádná díra → koše přesně po $B$ → z $\frac{B}{4} &lt; a_i &lt; \frac{B}{2}$ tři prvky na koš).</li>
-      <li><strong>Bratley → $PS1\,|\,temp\,|$ (slide 75):</strong> přidej dummy $T_0$ ($p_0 = 0$, WLOG $s_0 = 0$); hrana $T_0 \to T_i$ s váhou $r_i$ dává $s_i \ge r_i$, hrana $T_i \to T_0$ s váhou $-(\tilde{d}_i - p_i)$ dává $s_i + p_i \le \tilde{d}_i$ — release/deadline jako temporální omezení <a href="../k5/l5-2.html#takeaways">[L5.2]</a>.</li>
+      <li><strong>Bratley → $PS1\,|\,temp\,|$ (slide 75):</strong> přidej dummy $T_0$ ($p_0 = 0$, WLOG $s_0 = 0$); hrana $T_0 \to T_i$ s&nbsp;váhou $r_i$ dává $s_i \ge r_i$, hrana $T_i \to T_0$ s&nbsp;váhou $-(\tilde{d}_i - p_i)$ dává $s_i + p_i \le \tilde{d}_i$ — release/deadline jako temporální omezení <a href="../k5/l5-2.html#takeaways">[L5.2]</a>.</li>
       <li><strong>Důsledky:</strong> žádný pseudopolynomiální algoritmus pro $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ (silná NP-těžkost); pro $PS1\,|\,temp\,|\,C_{max}$ je time-indexed ILP <a href="../k5/l5-3.html#takeaways">[L5.3]</a> legitimní zbraň. Speciální případ $p_j = 1$ je polynomiální.</li>
       <li><strong>$PSm,1\,|\,temp\,| \to PS1\,|\,temp\,|$</strong> (projekce zdrojů do oken $\langle (j-1)UB, jUB \rangle$, $l'_{ij} = l_{ij} + (a_j - a_i) UB$) je pro zkoušku 2026 <strong>vyloučena</strong> — stačí vědět, že existuje.</li>
     </ul>
@@ -197,7 +197,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Reprodukce redukce ze slidu 75 na malých číslech: postavit graf TC s dummy $T_0$, zkontrolovat sémantiku hran, rozvrhnout a říct teoretickou pointu. Typická ústní/teoretická otázka s malým výpočtem.</p>
+      <p>Reprodukce redukce ze slidu 75 na malých číslech: postavit graf TC s&nbsp;dummy $T_0$, zkontrolovat sémantiku hran, rozvrhnout a říct teoretickou pointu. Typická ústní/teoretická otázka s malým výpočtem.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -207,12 +207,12 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Za každou úlohu $T_i$ jdou do grafu přesně dvě hrany od/k $T_0$ — dopředná s váhou $r_i$, zpětná s váhou $-(\tilde{d}_i - p_i)$. Dosaď a u každé hrany si nahlas přelož nerovnost $s_i + l_{ij} \le s_j$. U rozvrhu si spočti okna startů $[r_i, \tilde{d}_i - p_i]$ a všimni si, která úloha skoro nemá vůli. U (iv) si vybav směr šipky redukce.</p>
+      <p>Za každou úlohu $T_i$ jdou do grafu přesně dvě hrany od/k $T_0$ — dopředná s&nbsp;váhou $r_i$, zpětná s&nbsp;váhou $-(\tilde{d}_i - p_i)$. Dosaď a u&nbsp;každé hrany si nahlas přelož nerovnost $s_i + l_{ij} \le s_j$. U&nbsp;rozvrhu si spočti okna startů $[r_i, \tilde{d}_i - p_i]$ a všimni si, která úloha skoro nemá vůli. U&nbsp;(iv) si vybav směr šipky redukce.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
         <div class="inner">
-          <p><strong>(i)</strong> Přidáme $T_0$ s $p_0 = 0$ ($s_0 = 0$). Hrany: $T_0 \xrightarrow{r_i} T_i$ a $T_i \xrightarrow{-(\tilde{d}_i - p_i)} T_0$, tedy zpětné váhy $-(8-2) = -6$, $-(5-4) = -1$, $-(10-1) = -9$:</p>
+          <p><strong>(i)</strong> Přidáme $T_0$ s&nbsp;$p_0 = 0$ ($s_0 = 0$). Hrany: $T_0 \xrightarrow{r_i} T_i$ a $T_i \xrightarrow{-(\tilde{d}_i - p_i)} T_0$, tedy zpětné váhy $-(8-2) = -6$, $-(5-4) = -1$, $-(10-1) = -9$:</p>
           <div class="viz" id="viz-t01graph"></div>
           <p><strong>(ii)</strong> Překlad přes $s_i + l_{ij} \le s_j$ (a $s_0 = 0$):</p>
           <table>
@@ -254,7 +254,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Kompletní důkazová otázka — přesně to, co OSNOVA eviduje jako ústní téma „proč je $1\,|\,r_j, d_j\,|\,C_{max}$ NP-těžký“. Části (i)–(iii) jsou reprodukce slidů 14–15, část (iv) je kontrola, že redukci umíš i <em>spustit</em> na instanci bez řešení.</p>
+      <p>Kompletní důkazová otázka — přesně to, co OSNOVA eviduje jako ústní téma „proč je $1\,|\,r_j, \tilde{d}_j\,|\,C_{max}$ NP-těžký“. Části (i)–(iii) jsou reprodukce slidů 14–15, část (iv) je kontrola, že redukci umíš i <em>spustit</em> na instanci bez řešení.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -264,15 +264,15 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Struktura důkazu redukcí má vždy čtyři věty: <em>odkud</em> redukuju (silně NP-úplný 3-PARTITION), <em>jak</em> stavím instanci (ploty + prvkové úlohy), <em>proč</em> se odpověď zachová (oba směry ekvivalence!) a <em>proč</em> je převod polynomiální. U (iv) napřed rozhodni 3-partition otázku (try v lekci) a pak přemýšlej, co nejlepšího se do košů naskládat dá, když se trefit nejde.</p>
+      <p>Struktura důkazu redukcí má vždy čtyři věty: <em>odkud</em> redukuju (silně NP-úplný 3-PARTITION), <em>jak</em> stavím instanci (ploty + prvkové úlohy), <em>proč</em> se odpověď zachová (oba směry ekvivalence!) a <em>proč</em> je převod polynomiální. U&nbsp;(iv) napřed rozhodni 3-partition otázku (try v&nbsp;lekci) a pak přemýšlej, co nejlepšího se do košů naskládat dá, když se trefit nejde.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (rozepsání ⇐ a část (iv) vlastní — přiznáno)</summary>
         <div class="inner">
-          <p><strong>(i)</strong> Slide 14 (EN 1:1): instance $I_{3P} = (A, B)$ je multiset $A$ o $3m$ celých číslech $a_1, \ldots, a_{3m}$ a kladné celé $B$ s $\frac{B}{4} &lt; a_i &lt; \frac{B}{2}$ a $\sum a_i = mB$; otázka zní, zda lze $A$ rozdělit do $m$ disjunktních podmnožin $A_1, \ldots, A_m$ se součtem každé přesně $B$. Problém je <strong>silně NP-úplný</strong>; z $\frac{B}{4} &lt; a_i &lt; \frac{B}{2}$ plyne, že každá $A_j$ má přesně 3 prvky.</p>
-          <p><strong>(ii)</strong> Konstrukce $I_{SCH}$ o $4m$ úlohách (slide 15): ploty $T_j = (1, (B+1)(j-1), (B+1)(j-1)+1)$ pro $j \le m$, prvkové úlohy $T_j = (a_i, 0, \infty)$, $i = j - m$, pro $j &gt; m$. Převod je zjevně polynomiální (i v unárním kódování — čísla se nezvětšují víc než násobením $m(B+1) \le$ velikost vstupu v unárce), proto přenáší <em>silnou</em> NP-těžkost.</p>
-          <p><strong>(iii) ⇒:</strong> z 3-partition $A_1, \ldots, A_m$ poskládám rozvrh: plot $T_j$ do jeho okna, trojici $A_j$ do mezery $\langle (B+1)(j-1)+1,\ (B+1)j \rangle$ — vše bez díry, $C_{max} = m(B+1)$. (Ganttův diagram pro Example 1 je v lekci.) <strong>⇐:</strong> práce celkem $\sum p_j = m + mB = m(B+1)$, takže rozvrh s $C_{max} = m(B+1)$ nemá nečinnost; ploty jsou okny přibité na svá místa; nepreemptivní prvková úloha nemůže plot překrýt, leží tedy celá v jedné mezeře; mezery mají délku $B$ a bez děr se plní přesně na $B$; podle (i) po třech prvcích → rozklad $A_1, \ldots, A_m$ existuje. ∎</p>
-          <p><strong>(iv)</strong> $I_{SCH}$: ploty $T_1 = (1, 0, 1)$, $T_2 = (1, 16, 17)$; prvkové úlohy $T_3, \ldots, T_8$ s $p = (4, 4, 4, 6, 6, 6)$, $r = 0$, $\tilde{d} = \infty$. Trojice mají součty jen $12, 14, 16, 18$ — 3-partition <strong>neexistuje</strong>, takže podle (iii) je $C^*_{max} &gt; m(B+1) = 32$, tj. $C^*_{max} \ge 33$ (celá čísla). A 33 se dosáhne: do první mezery $4 + 4 + 6 = 14$ (jedna jednotka díry před plotem $T_2$), zbytek $4 + 6 + 6 = 16$ za druhý plot:</p>
+          <p><strong>(i)</strong> Slide 14 (EN 1:1): instance $I_{3P} = (A, B)$ je multiset $A$ o&nbsp;$3m$ celých číslech $a_1, \ldots, a_{3m}$ a kladné celé $B$ s&nbsp;$\frac{B}{4} &lt; a_i &lt; \frac{B}{2}$ a $\sum a_i = mB$; otázka zní, zda lze $A$ rozdělit do $m$ disjunktních podmnožin $A_1, \ldots, A_m$ se součtem každé přesně $B$. Problém je <strong>silně NP-úplný</strong>; z&nbsp;$\frac{B}{4} &lt; a_i &lt; \frac{B}{2}$ plyne, že každá $A_j$ má přesně 3 prvky.</p>
+          <p><strong>(ii)</strong> Konstrukce $I_{SCH}$ o&nbsp;$4m$ úlohách (slide 15): ploty $T_j = (1, (B+1)(j-1), (B+1)(j-1)+1)$ pro $j \le m$, prvkové úlohy $T_j = (a_i, 0, \infty)$, $i = j - m$, pro $j &gt; m$. Převod je zjevně polynomiální (i v&nbsp;unárním kódování — čísla se nezvětšují víc než násobením $m(B+1) \le$ velikost vstupu v unárce), proto přenáší <em>silnou</em> NP-těžkost.</p>
+          <p><strong>(iii) ⇒:</strong> z&nbsp;3-partition $A_1, \ldots, A_m$ poskládám rozvrh: plot $T_j$ do jeho okna, trojici $A_j$ do mezery $\langle (B+1)(j-1)+1,\ (B+1)j \rangle$ — vše bez díry, $C_{max} = m(B+1)$. (Ganttův diagram pro Example 1 je v lekci.) <strong>⇐:</strong> práce celkem $\sum p_j = m + mB = m(B+1)$, takže rozvrh s $C_{max} = m(B+1)$ nemá nečinnost; ploty jsou okny přibité na svá místa; nepreemptivní prvková úloha nemůže plot překrýt, leží tedy celá v jedné mezeře; mezery mají délku $B$ a bez děr se plní přesně na $B$; podle (i) po třech prvcích → rozklad $A_1, \ldots, A_m$ existuje. ∎</p>
+          <p><strong>(iv)</strong> $I_{SCH}$: ploty $T_1 = (1, 0, 1)$, $T_2 = (1, 16, 17)$; prvkové úlohy $T_3, \ldots, T_8$ s $p = (4, 4, 4, 6, 6, 6)$, $r = 0$, $\tilde{d} = \infty$. Trojice mají součty jen $12, 14, 16, 18$ — 3-partition <strong>neexistuje</strong>, takže podle (iii) je $C^*_{max} &gt; m(B+1) = 32$, tj. $C^*_{max} \ge 33$ (celá čísla). A 33 se dosáhne: do první mezery $4 + 4 + 6 = 14$ (jedna jednotka díry před plotem $T_2$), zbytek $4 + 6 + 6 = 16$ za&nbsp;druhý plot:</p>
           <div class="viz" id="viz-t02gantt"></div>
           <p>$C^*_{max} = 33$. Přesně takhle redukce „počítá“: optimum $= m(B+1)$ ⟺ ANO, optimum $&gt; m(B+1)$ ⟺ NE.</p>
         </div>
