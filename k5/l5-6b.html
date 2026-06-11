@@ -75,12 +75,13 @@
 
   <div class="box info">
     <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 26 (EN 1:1) — pravidlo ořezu</div>
-    <p>“The Branch and Bound algorithm creates a similar tree as Bradley’s algorithm <em>[sic — myšlen Bratleyho algoritmus, <a href="../k5/l5-9.html">[L5.9]</a>]</em>.</p>
+    <p>“The Branch and Bound algorithm creates a similar tree as Bratley’s algorithm.</p>
     <ul>
       <li>Let $J_1$ be the value of the best solution known up to now</li>
       <li>We discard the partial solution of value $J_2$ not only when $J_2 \ge J_1$, but also when $J_2 + J^{LP}\text{(remaining tasks)} \ge J_1$.<br>
       Since the solution space of ILP is a subspace of LP we know: $J\text{(remaining tasks)} \ge J^{LP}\text{(remaining tasks)}$.”</li>
     </ul>
+    <p style="margin-bottom:0">Bratleyho algoritmus rozebíráme v <a href="../k5/l5-9.html">[L5.9]</a>.</p>
   </div>
 
   <p>Test je neostrý ($\ge$, ne $&gt;$): při rovnosti už pod uzlem nemůže být nic <em>ostře</em> lepšího než $J_1$, takže ho taky zavíráme — stejná logika jako u <a href="../k5/l5-5.html#takeaways">[L5.5]</a>. A druhá volba designu: na zlomkovém $x_{ij}$ se tu <strong>nevětví</strong>. Obecné schéma z L5.5 by větvilo $x_{ij} \le 0 / x_{ij} \ge 1$ (u binárky jsou to přesně větve „$T_j$ před $T_i$“ / „$T_i$ před $T_j$“ — i to je legální odpověď); strom nad prefixy dělá totéž po balících a každý podproblém zůstává rozvrhovací úlohou.</p>
@@ -132,7 +133,7 @@
     <div class="task-head">
       <span class="task-id">T01</span>
       <strong>Branch and Bound with relaxed LP for $1|prec|\sum w_j C_j$ (část b)</strong>
-      <span class="task-src">zdroj: zkouška 9. 7. 2021 (přepis, zadání EN 1:1); táž otázka zkouška 29. 6. 2023</span>
+      <span class="task-src">zdroj: zkouška 9.&nbsp;7.&nbsp;2021 (přepis, zadání EN 1:1); táž otázka zkouška 29.&nbsp;6.&nbsp;2023</span>
     </div>
     <div class="task-body">
       <div class="assignment">
