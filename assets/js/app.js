@@ -72,6 +72,39 @@
     refresh();
   }
 
+  /* ---------- obecný checklist (klíč ko-exam-check) ---------- */
+  function checkSet() {
+    try { return new Set(JSON.parse(localStorage.getItem("ko-exam-check") || "[]")); }
+    catch (_) { return new Set(); }
+  }
+  function saveCheck(s) { localStorage.setItem("ko-exam-check", JSON.stringify([...s])); }
+
+  function setupChecklist() {
+    const boxes = document.querySelectorAll("input[type=checkbox][data-check]");
+    if (!boxes.length) return;
+    const progress = document.querySelector("[data-check-progress]");
+    const bar = document.querySelector("[data-check-bar] > i");
+    const refresh = () => {
+      const s = checkSet();
+      let done = 0;
+      boxes.forEach(cb => {
+        const on = s.has(cb.getAttribute("data-check"));
+        cb.checked = on;
+        const item = cb.closest(".check-item");
+        if (item) item.classList.toggle("is-done", on);
+        if (on) done++;
+      });
+      if (progress) progress.textContent = done + " / " + boxes.length + " hotovo";
+      if (bar) bar.style.width = (boxes.length ? Math.round(100 * done / boxes.length) : 0) + "%";
+    };
+    boxes.forEach(cb => cb.addEventListener("change", () => {
+      const s = checkSet();
+      if (cb.checked) s.add(cb.getAttribute("data-check")); else s.delete(cb.getAttribute("data-check"));
+      saveCheck(s); refresh();
+    }));
+    refresh();
+  }
+
   function markIndexDone() {
     const s = doneSet();
     document.querySelectorAll("[data-done-mark]").forEach(el => {
@@ -102,6 +135,7 @@
     setupThemeToggle();
     setupBackButton();
     setupDoneToggle();
+    setupChecklist();
     markIndexDone();
     renderMath();
   });

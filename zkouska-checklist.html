@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Co chtějí u zkoušky — checklist — KO</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<nav class="topbar">
+  <div class="topbar-inner">
+    <button class="btn-back" data-back="index.html" title="Zpět odkud jsem přišel">
+      <img src="assets/icons/arrow-left.svg" class="ico" alt="">Zpět
+    </button>
+    <a href="index.html">Domů</a>
+    <span class="crumb-sep">/</span>
+    <span style="font-size:14px;color:var(--ink)">Checklist zkoušky</span>
+    <span class="spacer"></span>
+    <button class="btn-icon" data-theme-toggle></button>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <h1>Co po nás chtějí u zkoušky</h1>
+  <p class="lesson-meta">Odškrtávací seznam dovedností · stav se ukládá v prohlížeči · u každé položky odkaz, kde je vyložená</p>
+
+  <div class="box info">
+    <div class="box-title"><img src="assets/icons/book-open.svg" class="ico" alt="">Jak číst štítky</div>
+    <p>U každé položky je štítek, <strong>co se po tobě reálně chce</strong> — to je důležitější než „umět látku":</p>
+    <ul style="margin:4px 0">
+      <li><span class="ci-kind run">🔁 oddrolovat</span> — spustit algoritmus na zadané instanci na papíře (ne psát pseudokód z hlavy).</li>
+      <li><span class="ci-kind prove">✍️ napsat / dokázat</span> — sestavit model, důkaz nebo argument vlastními slovy.</li>
+      <li><span class="ci-kind oral">💬 ústní</span> — typicky jen u dobrovolné ústní (na zlepšení známky), ne v písemce.</li>
+    </ul>
+    <p style="margin-bottom:0">Zdroj priorit: <code>analyza_predikce_KO_15-6-2026</code> + historická zadání. Písemka = 6 slotů / 40 bodů, pevná kostra <strong>ILP · SP · Důkaz · Toky · Sched · (CSP / 2. úloha)</strong>.</p>
+  </div>
+
+  <div class="check-progress-wrap">
+    <span class="count" data-check-progress>0 / 0 hotovo</span>
+    <span class="check-bar" data-check-bar><i></i></span>
+  </div>
+
+  <!-- ===== SLOT 1 ===== -->
+  <h2>Slot 1 — ILP modelování <span class="tag-foto">~100 %</span></h2>
+  <ul class="checklist">
+    <li class="check-item">
+      <input type="checkbox" data-check="s1-model">
+      <div class="ci-body">
+        <div class="ci-task">Ze slovní úlohy sestavit kompletní ILP: proměnné, účelová funkce, omezení<span class="ci-kind prove">✍️ napsat</span></div>
+        <div class="ci-links">→ <a href="k1/l1-1.html">[L1.1] Cílová funkce a omezení</a> · <a href="k1/l1-9.html">[L1.9] Wedding</a> · <a href="k1/l1-14.html">[L1.14] Toys</a> · <a href="k1/l1-12.html">[L1.12] Loot</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s1-bigm">
+      <div class="ci-body">
+        <div class="ci-task">big-M: disjunkce omezení, „buď–anebo"<span class="ci-kind prove">✍️ napsat</span></div>
+        <div class="ci-links">→ <a href="k1/l1-4.html">[L1.4] big-M</a> · <a href="k1/l1-3.html">[L1.3] logika přes 0/1</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s1-abs">
+      <div class="ci-body">
+        <div class="ci-task">Linearizace absolutní hodnoty a „max z více"<span class="ci-kind prove">✍️ napsat</span></div>
+        <div class="ci-links">→ <a href="k1/l1-10.html">[L1.10] abs. hodnota</a> · <a href="k1/l1-11.html">[L1.11] poměr a max</a> · <a href="k1/l1-8.html">[L1.8] rozptyl max−min</a></div>
+      </div>
+    </li>
+  </ul>
+
+  <!-- ===== SLOT 2 ===== -->
+  <h2>Slot 2 — Nejkratší cesty <span class="tag-foto">~90 %</span></h2>
+  <ul class="checklist">
+    <li class="check-item">
+      <input type="checkbox" data-check="s2-dijkstra">
+      <div class="ci-body">
+        <div class="ci-task">Oddrolovat Dijkstru + pořadí expanze / tie-breaking<span class="ci-kind run">🔁 oddrolovat</span></div>
+        <div class="ci-links">→ <a href="k2/l2-4.html">[L2.4] Dijkstra (běh)</a> · <a href="k2/l2-8.html">[L2.8] Dangerous adventure</a> · <a href="k2/l2-5.html">[L2.5] Edge costs</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s2-bf">
+      <div class="ci-body">
+        <div class="ci-task">Bellman-Ford + detekce záporného cyklu<span class="ci-kind run">🔁 oddrolovat</span><span class="ci-kind oral">💬 ústní</span></div>
+        <div class="ci-links">→ <a href="k2/l2-12.html">[L2.12] Bellman-Ford + záporný cyklus</a> · <a href="k2/l2-18.html">[L2.18] teorie záporných cyklů</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s2-model">
+      <div class="ci-body">
+        <div class="ci-task">Převést úlohu na SP: −log součinu, časová expanze, DAG<span class="ci-kind prove">✍️ napsat</span></div>
+        <div class="ci-links">→ <a href="k2/l2-7.html">[L2.7] −log: součin → součet</a> · <a href="k2/l2-11.html">[L2.11] časově expandovaná síť</a> · <a href="k2/l2-9.html">[L2.9] reálná úloha jako SP</a></div>
+      </div>
+    </li>
+  </ul>
+
+  <!-- ===== SLOT 3 ===== -->
+  <h2>Slot 3 — Důkaz / teorie <span class="tag-foto">~95 %</span></h2>
+  <ul class="checklist">
+    <li class="check-item">
+      <input type="checkbox" data-check="s3-dij">
+      <div class="ci-body">
+        <div class="ci-task">Důkaz korektnosti Dijkstry<span class="ci-kind prove">✍️ dokázat</span></div>
+        <div class="ci-links">→ <a href="k3/l3-2.html">[L3.2] Důkaz Dijkstry</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s3-tsp">
+      <div class="ci-body">
+        <div class="ci-task">Neexistence r-aproximace pro obecný TSP<span class="ci-kind prove">✍️ dokázat</span></div>
+        <div class="ci-links">→ <a href="k3/l3-6.html">[L3.6] r-aprox TSP</a> · <a href="k3/l3-5.html">[L3.5] TSP silně NP-těžký</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s3-christ">
+      <div class="ci-body">
+        <div class="ci-task">Christofides 3/2: dokázat faktor (pseudokód bývá zadaný)<span class="ci-kind prove">✍️ dokázat</span></div>
+        <div class="ci-links">→ <a href="k3/l3-10.html">[L3.10] Christofides 3/2</a> · <a href="k3/l3-8a.html">[L3.8a] metrický TSP + Δ-nerovnost</a> · <a href="k3/l3-9.html">[L3.9] double-tree 2-aprox</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s3-bf">
+      <div class="ci-body">
+        <div class="ci-task">Korektnost Bellman-Forda<span class="ci-kind prove">✍️ dokázat</span></div>
+        <div class="ci-links">→ <a href="k3/l3-7.html">[L3.7] Korektnost Bellman-Forda</a></div>
+      </div>
+    </li>
+  </ul>
+
+  <!-- ===== SLOT 4 ===== -->
+  <h2>Slot 4 — Toky a řezy <span class="tag-foto">~100 %</span></h2>
+  <ul class="checklist">
+    <li class="check-item">
+      <input type="checkbox" data-check="s4-ff">
+      <div class="ci-body">
+        <div class="ci-task">Oddrolovat Ford-Fulkerson + najít minimální řez<span class="ci-kind run">🔁 oddrolovat</span></div>
+        <div class="ci-links">→ <a href="k4/l4-3.html">[L4.3] Ford-Fulkerson (běh)</a> · <a href="k4/l4-4.html">[L4.4] řez a max-flow/min-cut</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s4-model">
+      <div class="ci-body">
+        <div class="ci-task">Modelovat přiřazení / párování jako tok (vrstvená síť)<span class="ci-kind prove">✍️ napsat</span></div>
+        <div class="ci-links">→ <a href="k4/l4-5.html">[L4.5] přiřazení jako tok</a> · <a href="k4/l4-9.html">[L4.9] bipartitní matching</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s4-initial">
+      <div class="ci-body">
+        <div class="ci-task">Initial feasible flow při nenulových dolních mezích / balancech<span class="ci-kind prove">✍️ napsat</span><span class="ci-kind oral">💬 ústní</span></div>
+        <div class="ci-links">→ <a href="k4/l4-7.html">[L4.7] počáteční přípustný tok</a> · <a href="k4/l4-6.html">[L4.6] feasible flow s balancy</a></div>
+      </div>
+    </li>
+  </ul>
+
+  <!-- ===== SLOT 5 ===== -->
+  <h2>Slot 5 — Rozvrhování <span class="tag-foto">~100 %</span></h2>
+  <ul class="checklist">
+    <li class="check-item">
+      <input type="checkbox" data-check="s5-graham">
+      <div class="ci-body">
+        <div class="ci-task">Číst a zapsat Grahamovu notaci $\alpha|\beta|\gamma$<span class="ci-kind prove">✍️ napsat</span></div>
+        <div class="ci-links">→ <a href="k5/l5-1.html">[L5.1] notace α|β|γ</a> · <a href="k5/l5-14.html">[L5.14] tahák problém → algoritmus</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s5-muntz">
+      <div class="ci-body">
+        <div class="ci-task">Muntz &amp; Coffman: oddrolovat úrovně + Gantt<span class="ci-kind run">🔁 oddrolovat</span></div>
+        <div class="ci-links">→ <a href="k5/l5-10.html">[L5.10] Muntz &amp; Coffman</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s5-ti">
+      <div class="ci-body">
+        <div class="ci-task">Time-indexed ILP pro $PS1|temp|C_{max}$<span class="ci-kind prove">✍️ napsat</span></div>
+        <div class="ci-links">→ <a href="k5/l5-3.html">[L5.3] time-indexed ILP</a> · <a href="k5/l5-2.html">[L5.2] precedence a graf TC</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s5-bb">
+      <div class="ci-body">
+        <div class="ci-task">Branch &amp; Bound (grafické řezání) a Bratley<span class="ci-kind run">🔁 oddrolovat</span><span class="ci-kind oral">💬 ústní</span></div>
+        <div class="ci-links">→ <a href="k5/l5-5.html">[L5.5] B&amp;B pro ILP</a> · <a href="k5/l5-9.html">[L5.9] Bratley</a></div>
+      </div>
+    </li>
+  </ul>
+
+  <!-- ===== SLOT 6 ===== -->
+  <h2>Slot 6 — CSP / AC-3 <span class="tag-nice">~55 % (rotuje)</span></h2>
+  <ul class="checklist">
+    <li class="check-item">
+      <input type="checkbox" data-check="s6-ac3">
+      <div class="ci-body">
+        <div class="ci-task">Oddrolovat AC-3: zredukovat domény, zapsat frontu před každou revizí<span class="ci-kind run">🔁 oddrolovat</span></div>
+        <div class="ci-links">→ <a href="k6/l6-3.html">[L6.3] AC-3 + oditerování</a> · <a href="k6/l6-1.html">[L6.1] CSP a arc consistency</a> · <a href="k6/l6-2.html">[L6.2] REVISE</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="s6-ac3-oral">
+      <div class="ci-body">
+        <div class="ci-task">Slovně popsat, jak AC-3 funguje (fronta, REVISE, neúplnost)<span class="ci-kind oral">💬 ústní</span></div>
+        <div class="ci-links">→ <a href="k6/l6-3.html#takeaways">[L6.3] Key takeaways</a></div>
+      </div>
+    </li>
+  </ul>
+
+  <!-- ===== DOPLŇKOVÉ / ROTUJÍCÍ ===== -->
+  <h2>Doplňkové &amp; rotující sloty</h2>
+  <ul class="checklist">
+    <li class="check-item">
+      <input type="checkbox" data-check="x-knap">
+      <div class="ci-body">
+        <div class="ci-task">Knapsack DP: tabulka + zpětná rekonstrukce + složitost<span class="ci-kind run">🔁 oddrolovat</span><span class="ci-kind oral">💬 ústní</span></div>
+        <div class="ci-links">→ <a href="k7/l7-1.html">[L7.1] Knapsack DP</a> · <a href="k7/l7-2.html">[L7.2] cost-indexed</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="x-tum">
+      <div class="ci-body">
+        <div class="ci-task">TUM → celočíselnost (jak z LP zaručit integer řešení)<span class="ci-kind oral">💬 ústní</span></div>
+        <div class="ci-links">→ <a href="k3/l3-12.html">[L3.12] Teorie ILP / TUM</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="x-list">
+      <div class="ci-body">
+        <div class="ci-task">List scheduling: pseudokód + faktor aproximace (i pro LPT)<span class="ci-kind prove">✍️ napsat</span></div>
+        <div class="ci-links">→ <a href="k5/l5-12.html">[L5.12] List scheduling (faktor)</a></div>
+      </div>
+    </li>
+    <li class="check-item">
+      <input type="checkbox" data-check="x-dag">
+      <div class="ci-body">
+        <div class="ci-task">SP v DAG v $O(V+E)$ (výroba topologického pořadí)<span class="ci-kind oral">💬 ústní</span></div>
+        <div class="ci-links">→ <a href="k2/l2-13.html">[L2.13] SP v DAG v O(V+E)</a></div>
+      </div>
+    </li>
+  </ul>
+
+  <div class="box foto" style="margin-top:24px">
+    <div class="box-title"><img src="assets/icons/camera.svg" class="ico" alt="">Jak s tím pracovat</div>
+    <p>Než půjdeš na zkoušku, měj odškrtaný hlavně blok <strong>🔁 oddrolovat</strong> a <strong>✍️ dokázat</strong> ve Slotech 1–5 — to je jádro 40 bodů. Štítky <strong>💬 ústní</strong> řeš jen, když jdeš na zlepšení známky. Položka není odškrtnutá, dokud ji <em>neumíš bez koukání do řešení</em> — u FOTO úloh si to ověř fotkou ke kontrole.</p>
+  </div>
+
+  <div class="pager">
+    <a href="index.html"><span class="dir">←</span> Zpět na domovskou stránku</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script src="assets/js/viz.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
