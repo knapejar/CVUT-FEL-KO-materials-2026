@@ -36,7 +36,7 @@
     <strong>Sedm ekvivalentních charakterizací stromu</strong> (slide 61) a jejich důkaz <strong>kruhem implikací</strong> (slide 62) — motorem celého důkazu je počítadlo $n = m + p$ pro lesy.
   </div>
 
-  <p>Z <a href="../k0/l0-4.html#takeaways">[L0.4] Strom, kostra, les, DAG</a> znáš definici: <strong>tree</strong> (strom) = souvislý graf bez kružnice, a jako fakty jsme tam přijali „strom má $n-1$ hran“ a „mezi každou dvojicí vrcholů vede právě jedna cesta“. Dnes všechny tyhle tváře stromu <em>dokážeme</em> — je to méně častá, ale férová otázka k ústní (na slidech 61–62 je plný důkaz). Bonus: dva fakty z důkazu („hrana na kružnici jde smazat bez ztráty souvislosti“, „hrana uvnitř komponenty uzavře kružnici“) jsi už mlčky používal u MST i u <a href="l3-9.html#takeaways">[L3.9] double-tree</a>.</p>
+  <p>Z <a href="../k0/l0-4.html#takeaways">[L0.4] Strom, kostra, les, DAG</a> znáš definici: <strong>tree</strong> (strom) = souvislý graf bez kružnice, a jako fakty jsme tam přijali „strom má $n-1$ hran“ a „mezi každou dvojicí vrcholů vede právě jedna cesta“. Dnes všechny tyhle tváře stromu <em>dokážeme</em> — je to méně častá, ale férová otázka k&nbsp;ústní (na slidech 61–62 je plný důkaz). Bonus: dva fakty z důkazu („hrana na kružnici jde smazat bez ztráty souvislosti“, „hrana uvnitř komponenty uzavře kružnici“) jsi už mlčky používal u MST i u <a href="l3-9.html#takeaways">[L3.9] double-tree</a>.</p>
 
   <!-- ===== SEKCE 1: SLIDE 61 ===== -->
   <h2>Sedm tváří stromu (slide 61)</h2>
@@ -57,7 +57,7 @@
 
   <p>Většinu tvrzení přečteš rovnou: (d) říká „<strong>minimálně souvislý</strong>“ (každá hrana je nepostradatelná), (f) říká „<strong>maximálně acyklický</strong>“ (žádná hrana se už nevejde). Jediný nový zápis je $\delta(X)$ v (e): zobecnění okolí vrcholu $\delta(v)$ z <a href="../k0/l0-2.html#takeaways">[L0.2]</a> na množinu vrcholů — <strong>řez</strong> (cut)
   $$\delta(X) = \{\,\{u,v\} \in E(G) : u \in X,\ v \notin X\,\}$$
-  = hrany s právě jedním koncem v $X$.</p>
+  = hrany s právě jedním koncem v&nbsp;$X$.</p>
 
   <details class="try">
     <summary>Zkus sám: přečti (e) „lidsky“. Co znamená „$\delta(X) \ne \emptyset$ pro každou neprázdnou vlastní $X \subset V(G)$“ — a co k tomu přidává slovo „minimal“?</summary>
@@ -86,7 +86,7 @@
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečná polopravda</div>
-    <p>„Graf s $n-1$ hranami je strom“ — <strong>NE</strong>. Počet hran $n-1$ dělá strom až ve dvojici s <em>jednou</em> další vlastností: + bez kružnice = (b), nebo + souvislost = (c). Samotné $n-1$ hran připouští „kružnice tady, díra jinde“ (viz obrázek). U ústní na tohle zdůvodnění dojde.</p>
+    <p>„Graf s $n-1$ hranami je strom“ — <strong>NE</strong>. Počet hran $n-1$ dělá strom až ve dvojici s <em>jednou</em> další vlastností: + bez kružnice = (b), nebo + souvislost = (c). Samotné $n-1$ hran připouští „kružnice tady, díra jinde“ (viz obrázek). U&nbsp;ústní na tohle zdůvodnění dojde.</p>
   </div>
 
   <!-- ===== SEKCE 3: STRATEGIE ===== -->
@@ -145,12 +145,12 @@
 
   <p>Slide 62 tu důkaz <em>nerozepisuje</em>: <em>„(g) $\Rightarrow$ (e) $\Rightarrow$ (d): see [1] page 17 Proposition 2.3.“</em> (odkaz na učebnici Korte–Vygen). Náčrt níže je <strong>vlastní doplněk</strong> (přiznáno) — pro ústní bohatě stačí.</p>
 
-  <p><strong>$(g) \Rightarrow (e)$:</strong> Jednoznačné cesty ⟹ souvislost ⟹ každý řez neprázdný (cesta z $u \in X$ do $v \notin X$ musí někde řez překročit) — to je vlastnost z (e). Zbývá <em>minimalita</em>:</p>
+  <p><strong>$(g) \Rightarrow (e)$:</strong> Jednoznačné cesty ⟹ souvislost ⟹ každý řez neprázdný (cesta z&nbsp;$u \in X$ do $v \notin X$ musí někde řez překročit) — to je vlastnost z&nbsp;(e). Zbývá <em>minimalita</em>:</p>
 
   <details class="try">
     <summary>Zkus sám: smažu libovolnou hranu $e = \{u,v\}$. Najdi množinu $X$, jejíž řez se tím vyprázdní. (Nápověda: hrana $e$ je sama o sobě cesta z $u$ do $v$…)</summary>
     <div class="inner">
-      <p>Hrana $e$ je cesta $u$–$v$; podle (g) je to <em>jediná</em> cesta mezi $u$ a $v$. V $G - e$ už tedy žádná $u$–$v$ cesta není. Vezmi $X$ = {vrcholy dosažitelné z $u$ v $G - e$}: platí $u \in X$, $v \notin X$ a žádná hrana $G - e$ z $X$ nevede ven (jinak by se dalo dosáhnout dál), takže $\delta_{G-e}(X) = \emptyset$. Žádná hrana se nedá postrádat → $G$ je minimální: (e).</p>
+      <p>Hrana $e$ je cesta $u$–$v$; podle (g) je to <em>jediná</em> cesta mezi $u$ a $v$. V $G - e$ už tedy žádná $u$–$v$ cesta není. Vezmi $X$ = {vrcholy dosažitelné z&nbsp;$u$ v&nbsp;$G - e$}: platí $u \in X$, $v \notin X$ a žádná hrana $G - e$ z&nbsp;$X$ nevede ven (jinak by se dalo dosáhnout dál), takže $\delta_{G-e}(X) = \emptyset$. Žádná hrana se nedá postrádat → $G$ je minimální: (e).</p>
     </div>
   </details>
 
@@ -175,7 +175,7 @@
     </div>
   </details>
 
-  <p>Všimni si: <strong>objížďkový argument</strong> („hrana na kružnici jde smazat bez ztráty souvislosti“) za chvíli pohání i mašinu v $(c) \Rightarrow (a)$ — a znáš ho z důkazu, že MST je strom (<a href="../k0/l0-5.html#takeaways">[L0.5]</a>, <a href="l3-8b.html#takeaways">[L3.8b]</a>).</p>
+  <p>Všimni si: <strong>objížďkový argument</strong> („hrana na kružnici jde smazat bez ztráty souvislosti“) za chvíli pohání i mašinu v&nbsp;$(c) \Rightarrow (a)$ — a znáš ho z důkazu, že MST je strom (<a href="../k0/l0-5.html#takeaways">[L0.5]</a>, <a href="l3-8b.html#takeaways">[L3.8b]</a>).</p>
 
   <!-- ===== SEKCE 8: f => b => c ===== -->
   <h2>$(f) \Rightarrow (b) \Rightarrow (c)$: počítadlo poprvé</h2>
@@ -228,7 +228,7 @@
   <div class="task" id="t-treeequiv">
     <div class="task-head">
       <span class="task-id">T01</span>
-      <strong>Tree — equivalent statements (důkaz k ústní)</strong>
+      <strong>Tree — equivalent statements (důkaz k&nbsp;ústní)</strong>
       <span class="task-src">zdroj: 01_Basic_KO slidy 61–62 (tvrzení a důkaz 1:1; pokyn „prove“ vlastní formulace — přiznáno)</span>
     </div>
     <div class="task-body">
@@ -260,7 +260,7 @@
 
           <p><strong>$(a) \Rightarrow (g)$</strong> (slide 62: <em>„follows from the fact that the union of two distinct paths with the same endpoints contains a circuit“</em>): Souvislost dává aspoň jednu cestu mezi každou dvojicí. Kdyby $P_1 \ne P_2$ vedly obě z $u$ do $v$, úsek mezi prvním rozvětvením $r$ a prvním opětovným setkáním $s$ tvoří kružnici — spor s acykličností stromu. Cesta je právě jedna.</p>
 
-          <p><strong>$(g) \Rightarrow (e) \Rightarrow (d)$</strong> (slide 62 odkazuje na <em>[1] page 17 Proposition 2.3</em>; náčrt vlastní — přiznáno): Z (g) plyne souvislost, a souvislost ⟺ $\delta(X) \ne \emptyset$ pro každou $\emptyset \ne X \subset V$ (cesta z $X$ ven musí řez překročit; obráceně prázdný řez = odříznutá množina). Minimalita: hrana $e=\{u,v\}$ je podle (g) jedinou $u$–$v$ cestou, takže v $G-e$ má množina vrcholů dosažitelných z $u$ prázdný řez → žádnou hranu nelze postrádat: (e). A (e) přeloženo z jazyka řezů: $G$ souvislý a $G - e$ nesouvislý pro každé $e$ — doslova (d).</p>
+          <p><strong>$(g) \Rightarrow (e) \Rightarrow (d)$</strong> (slide 62 odkazuje na <em>[1] page 17 Proposition 2.3</em>; náčrt vlastní — přiznáno): Z (g) plyne souvislost, a souvislost ⟺ $\delta(X) \ne \emptyset$ pro každou $\emptyset \ne X \subset V$ (cesta z $X$ ven musí řez překročit; obráceně prázdný řez = odříznutá množina). Minimalita: hrana $e=\{u,v\}$ je podle (g) jedinou $u$–$v$ cestou, takže v&nbsp;$G-e$ má množina vrcholů dosažitelných z&nbsp;$u$ prázdný řez → žádnou hranu nelze postrádat: (e). A (e) přeloženo z jazyka řezů: $G$ souvislý a $G - e$ nesouvislý pro každé $e$ — doslova (d).</p>
 
           <p><strong>$(d) \Rightarrow (f)$</strong> (slide 62: <em>„trivial“</em>): Kružnice by dovolila smazat svou hranu bez ztráty souvislosti (objížďka po zbytku kružnice) — spor s (d); a přidání $\{u,v\}$ k existující $u$–$v$ cestě (souvislost) kružnici uzavře.</p>
 
@@ -448,7 +448,7 @@ KOViz.stepper(document.getElementById('viz-twopaths'), {
   },
   frames: [
     {desc:'Sporem: nechť mezi u a v existují DVĚ různé cesty — P₁ = u,x,y,v (nahoře) a P₂ = u,p,q,v (dole).',
-     edges:{'u->x':'hl', 'x->y':'hl', 'y->v':'hl', 'u->p':'good', 'p->q':'good', 'q->v':'good'},
+     edges:{'u->x':'hl', 'x->y':'hl', 'y->v':'hl', 'u->p':'hl', 'p->q':'hl', 'q->v':'hl'},
      nodes:{u:'hl', v:'hl'}},
     {desc:'Sjednocení P₁ ∪ P₂ obsahuje kružnici u–x–y–v–q–p–u (slide 62: „the union of two distinct paths with the same endpoints contains a circuit“). Obecně cesty mohou kus sdílet — kružnici pak uzavře úsek mezi prvním rozvětvením a prvním opětovným setkáním.',
      edges:{'u->x':'hl', 'x->y':'hl', 'y->v':'hl', 'u->p':'hl', 'p->q':'hl', 'q->v':'hl'},
