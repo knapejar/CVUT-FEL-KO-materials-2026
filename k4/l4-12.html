@@ -190,7 +190,7 @@
     <div class="task-head">
       <span class="task-id">T02</span>
       <strong>Toys Assignment — část b): min-weight perfect matching</strong>
-      <span class="task-src">zdroj: zkouška KO_09_07_2021 (EN 1:1; doloženo i pro termín 1. 6. 2026)</span>
+      <span class="task-src">zdroj: zkouška KO_09_07_2021 (EN 1:1; doloženo i pro termín 1.&nbsp;6.&nbsp;2026)</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -231,7 +231,7 @@
     <div class="task-head">
       <span class="task-id">T03</span>
       <strong>School Bus Driver Assignment — matching + třídicí párování</strong>
-      <span class="task-src">zdroj: Master_Zkouska_KO, termín 02.06.2011 (= banka #7), EN 1:1</span>
+      <span class="task-src">zdroj: zkouška KO_02_06_2021 (= banka #7; bankovní přepis má překlep „$m$ morning runs“), EN 1:1</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -356,7 +356,7 @@ KOViz.stepper(document.getElementById('viz-run'), {
   frames: [
     {desc:'Krok 1: přípustný tok = libovolné přiřazení, vezmeme diagonálu f⁽¹⁾: 1→A, 2→B, 3→C za 6 + 1 + 4 = 11. Nakreslena bipartitní část G_f⁽¹⁾ (s a t na žádném cyklu ležet nemohou, viz try výše): párovací hrany jsou nasycené (u_f = 0, zešedlé), místo nich jsou v E_f zpětné hrany se zápornou cenou (čárkovaně).',
      nodes:{}, edges:{'1->A':'dim', 'B->1':'dim', 'A->2':'dim', '2->B':'dim', '3->C':'dim'}},
-    {desc:'Krok 2: Bellman-Ford (z pomocného uzlu, [L4.11]) najde záporný cyklus, např. C₁ = 1 → B → 2 → A → 1: c_f(C₁) = 2 + (−1) + 3 + (−6) = −2 < 0; γ = min(1, 1, 1, 1) = 1. (Záporný je i 1→C→3→A→1: 4 − 4 + 5 − 6 = −1 a oba šesticykly za −1 — vzít lze kterýkoli.)',
+    {desc:'Krok 2: Bellman-Ford (z pomocného uzlu, [L4.11]) najde záporný cyklus, např. C₁ = 1 → B → 2 → A → 1: c_f(C₁) = 2 + (−1) + 3 + (−6) = −2 < 0; γ = min(1, 1, 1, 1) = 1. (Záporný je i 4-cyklus 1→C→3→A→1: 4 − 4 + 5 − 6 = −1; existují i dva šesticykly s cenou −1, např. 1→B→2→C→3→A→1 — vzít lze kterýkoli záporný.)',
      nodes:{}, edges:{'1->A':'dim', 'B->1':'dim', 'A->2':'dim', '2->B':'dim', '3->C':'dim', '1->B':'bad', 'B->2':'bad', '2->A':'bad', 'A->1':'bad'}},
     {desc:'Krok 3: augmentace o γ = 1 podél C₁ = výměna párovacích hran po M-alternating cyklu: f(1→B): 0→1, f(2→B): 1→0, f(2→A): 0→1, f(1→A): 1→0. Nový tok f⁽²⁾: 1→B, 2→A, 3→C za 11 − 2·1 = 9. V G_f⁽²⁾ se zpětné hrany přestěhovaly na nové párovací dvojice.',
      nodes:{}, edges:{'1->B':'dim', 'A->1':'dim', '2->A':'dim', 'B->2':'dim', '3->C':'dim'},
