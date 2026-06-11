@@ -36,18 +36,18 @@
     <strong>Multicommodity flow</strong> (multikomoditní tok): sítí teče <em>víc komodit najednou</em> — každá komodita $m$ má vlastní proměnné $f^m(e)$ a vlastní Kirchhoffův zákon, ale všechny komodity <strong>sdílejí kapacity hran</strong>: $l(e) \le \sum_m f^m(e) \le u(e)$. Cena za sdílení: matice modelu už <em>není</em> totálně unimodulární <a href="../k3/l3-12.html#takeaways">[L3.12]</a>, takže LP může vrátit zlomky — pro celočíselný tok je potřeba ILP.
   </div>
 
-  <p>Tohle je poslední lekce K4 a uzavírá rodinu toků: max flow <a href="l4-1.html#takeaways">[L4.1]</a> → toky s bilancemi <a href="l4-6.html#takeaways">[L4.6]</a> → minimum cost flow <a href="l4-10.html#takeaways">[L4.10]</a> → a teď víc komodit naráz. U zkoušky se objevuje jako <em>formulační</em> úloha:</p>
+  <p>Tohle je poslední lekce K4 a uzavírá rodinu toků: max flow <a href="l4-1.html#takeaways">[L4.1]</a> → toky s&nbsp;bilancemi <a href="l4-6.html#takeaways">[L4.6]</a> → minimum cost flow <a href="l4-10.html#takeaways">[L4.10]</a> → a teď víc komodit naráz. U&nbsp;zkoušky se objevuje jako <em>formulační</em> úloha:</p>
 
   <div class="box">
-    <div class="box-title">Doloženo u zkoušek (přepisy studentů, 1:1)</div>
-    <p><em>„3. Formulace distribuce komodit ze zdrojů do spotřebičů pomocí multicommodity network flow (byla to složitá úloha, kterou nakonec zjednodušovali).“</em> — Termín A, zkoušky 2023.</p>
-    <p><em>„3) takovy hodne nepovedeny kockopes – formulace distribuce komodit ze zdroju do spotrebicu pomoci multicommodity network flow; problem byl, ze Hanzalek behem testu zjistil, ze to ani sam nedokaze spravne vyresit, tak to zjednodusil…“</em> — týž termín, druhý přepis. A „Multikomoditní toky“ padly i u zkoušky 24. 5. 2011 (dochovaly se jen fotky zadání).</p>
+    <div class="box-title">Doloženo u&nbsp;zkoušek (přepisy studentů, 1:1)</div>
+    <p><em>„3. Formulace distribuce komodit ze zdrojů do spotřebičů pomocí multicommodity network flow (byla to složitá úloha, kterou nakonec zjednodušovali).“</em> — Termín A, přepis studentů.</p>
+    <p><em>„3) takovy hodne nepovedeny kockopes – formulace distribuce komodit ze zdroju do spotrebicu pomoci multicommodity network flow; problem byl, ze Hanzalek behem testu zjistil, ze to ani sam nedokaze spravne vyresit, tak to zjednodusil…“</em> — týž termín, druhý přepis. A „Multikomoditní toky“ padly i&nbsp;u&nbsp;zkoušky 24.&nbsp;5.&nbsp;2011 (dochovaly se jen fotky zadání).</p>
   </div>
 
-  <p>Poučení z té anekdoty: <strong>nikdo po tobě nechce multikomoditní instanci vyřešit ručně</strong> (nejde to ani autorovi zkoušky 🙂). Chce se <em>formulace</em> — proměnné, účelová funkce, omezení — a věta o tom, co se stalo s celočíselností. Přesně to je obsah téhle lekce.</p>
+  <p>Poučení z&nbsp;té anekdoty: <strong>nikdo po tobě nechce multikomoditní instanci vyřešit ručně</strong> (nejde to ani autorovi zkoušky 🙂). Chce se <em>formulace</em> — proměnné, účelová funkce, omezení — a věta o&nbsp;tom, co se stalo s&nbsp;celočíselností. Přesně to je obsah téhle lekce.</p>
 
   <!-- ===== SEKCE 1 ===== -->
-  <h2>Víc komodit v jedné síti</h2>
+  <h2>Víc komodit v&nbsp;jedné síti</h2>
 
   <p>Dosud každá síť přepravovala jedinou „látku“. Slide 35 motivuje změnu senzorovou sítí (citace EN 1:1):</p>
 
@@ -57,12 +57,12 @@
     <p><em>„<strong>Example:</strong> sensor network with two commodities and one sink for every commodity: source nodes are measuring <strong>temperature (green)</strong> and/or <strong>humidity (blue)</strong> and sending the data to one concentrator (sink) for temperature and one for humidity; flow = amount of data per time unit. Communication links: capacity (amount of data per time unit).“</em></p>
   </div>
 
-  <p>Klíčové slovo je <strong>commodity</strong> (komodita): data o teplotě a data o vlhkosti jsou dvě různé „látky“ — nesmí se cestou smíchat (každá musí dorazit do <em>svého</em> koncentrátoru), ale tečou <em>stejnými dráty</em>.</p>
+  <p>Klíčové slovo je <strong>commodity</strong> (komodita): data o&nbsp;teplotě a data o&nbsp;vlhkosti jsou dvě různé „látky“ — nesmí se cestou smíchat (každá musí dorazit do <em>svého</em> koncentrátoru), ale tečou <em>stejnými dráty</em>.</p>
 
   <details class="try">
     <summary>Zkus sám: síť má hrany $E(G)$ a komodity $M$. Kolik tokových proměnných bude mít model? A proč nestačí jedna proměnná $f(e)$ na hranu jako dosud?</summary>
     <div class="inner">
-      <p>$|M| \cdot |E(G)|$ — proměnná $f^m(e)$ pro <em>každou dvojici</em> (komodita, hrana). Jedna proměnná na hranu nestačí, protože by model nevěděl, <em>čí</em> jednotky hranou tečou: tok 3 na hraně může být „3 teploty“, „3 vlhkosti“ nebo „2+1“ — a jen některé z těchto kombinací správně doručí každou komoditu do jejího spotřebiče. Komodity se nesmí cestou „přebarvit“.</p>
+      <p>$|M| \cdot |E(G)|$ — proměnná $f^m(e)$ pro <em>každou dvojici</em> (komodita, hrana). Jedna proměnná na hranu nestačí, protože by model nevěděl, <em>čí</em> jednotky hranou tečou: tok 3 na hraně může být „3 teploty“, „3 vlhkosti“ nebo „2+1“ — a jen některé z&nbsp;těchto kombinací správně doručí každou komoditu do jejího spotřebiče. Komodity se nesmí cestou „přebarvit“.</p>
     </div>
   </details>
 
@@ -73,7 +73,7 @@
   <details class="try">
     <summary>Zkus sám: komodita ① potřebuje dopravit 2 jednotky $s_1 \to t_1$, komodita ② dvě jednotky $s_2 \to t_2$. Každou komoditu zvlášť umíš vyřešit jako minimum cost flow <a href="l4-10.html#takeaways">[L4.10]</a> — obě projdou ($2 \le 3$). Proč ti dvě oddělená řešení nedají řešení celé úlohy?</summary>
     <div class="inner">
-      <p>Obě oddělená optima si naplánují hranu $x \to y$ pro sebe: dohromady by jí teklo $2 + 2 = 4 > 3 = u(x{\to}y)$. Kapacita hrany je <strong>sdílená</strong> — omezuje <em>součet</em> přes komodity, ne každou komoditu zvlášť. Komodity se tedy o hrany <em>přetahují</em> a model je musí koordinovat: tahle instance jako celek přípustná není (každá jednotka obou komodit musí přes $x \to y$), i když každá komodita sama o sobě projde. Přesně tahle vazba dělá z multikomoditního toku novou úlohu, ne $|M|$ kopií staré.</p>
+      <p>Obě oddělená optima si naplánují hranu $x \to y$ pro sebe: dohromady by jí teklo $2 + 2 = 4 > 3 = u(x{\to}y)$. Kapacita hrany je <strong>sdílená</strong> — omezuje <em>součet</em> přes komodity, ne každou komoditu zvlášť. Komodity se tedy o&nbsp;hrany <em>přetahují</em> a model je musí koordinovat: tahle instance jako celek přípustná není (každá jednotka obou komodit musí přes $x \to y$), i když každá komodita sama o&nbsp;sobě projde. Přesně tahle vazba dělá z&nbsp;multikomoditního toku novou úlohu, ne $|M|$ kopií staré.</p>
     </div>
   </details>
 
@@ -86,12 +86,12 @@
     <p><em>„<strong>Goal:</strong> Find the feasible flow $f$ whose cost $\sum_{e \in E(G)} \sum_{m \in M} f^m(e) \cdot c(e)$ is minimal (we want to transport the flow as cheap as possible) or decide that such a flow does not exist. Feasible flow satisfies $\sum_{e \in \delta^+(v)} f^m(e) - \sum_{e \in \delta^-(v)} f^m(e) = b^m(v)$ for all $v \in V(G)$ and all $m \in M$.“</em></p>
   </div>
 
-  <p>Porovnej s pěticí $(G, l, u, c, b)$ z <a href="l4-10.html#takeaways">[L4.10]</a>: jediná změna je, že místo jednoho bilančního vektoru $b$ je jich <strong>$|M|$ kusů</strong> — každá komodita má vlastní zdroje ($b^m(v) &gt; 0$), vlastní spotřebiče ($b^m(v) &lt; 0$) a vlastních „kolik kam“. Žádné jediné $s$ a $t$: vícero zdrojů i spotřebičů na komoditu je v definici od začátku (stejný princip bilancí jako v <a href="l4-6.html#takeaways">[L4.6]</a>).</p>
+  <p>Porovnej s&nbsp;pěticí $(G, l, u, c, b)$ z&nbsp;<a href="l4-10.html#takeaways">[L4.10]</a>: jediná změna je, že místo jednoho bilančního vektoru $b$ je jich <strong>$|M|$ kusů</strong> — každá komodita má vlastní zdroje ($b^m(v) &gt; 0$), vlastní spotřebiče ($b^m(v) &lt; 0$) a vlastních „kolik kam“. Žádné jediné $s$ a $t$: vícero zdrojů i spotřebičů na komoditu je v&nbsp;definici od začátku (stejný princip bilancí jako v&nbsp;<a href="l4-6.html#takeaways">[L4.6]</a>).</p>
 
   <details class="try">
-    <summary>Zkus sám: proč definice chce $\sum_v b^m(v) = 0$ <em>pro každou komoditu zvlášť</em>, a ne jen v součtu přes všechny komodity dohromady?</summary>
+    <summary>Zkus sám: proč definice chce $\sum_v b^m(v) = 0$ <em>pro každou komoditu zvlášť</em>, a ne jen v&nbsp;součtu přes všechny komodity dohromady?</summary>
     <div class="inner">
-      <p>Protože komodity se nepřeměňují jedna v druhou. Kirchhoffova bilance platí per komodita: co komodita $m$ kde vyrobí, musí <em>táž komodita</em> jinde spotřebovat — přebytek teploty nezaplní poptávku po vlhkosti. Kdyby se nulovala jen suma přes komodity, „vyrobených +5 komodity 1 a spotřebovaných −5 komodity 2“ by prošlo kontrolou, ale fyzikálně je to nesmysl. (Sečti bilanční rovnice komodity $m$ přes všechna $v$: každá hrana se objeví jednou s $+$, jednou s $-$, takže nutně $\sum_v b^m(v) = 0$ — pro každé $m$.)</p>
+      <p>Protože komodity se nepřeměňují jedna v&nbsp;druhou. Kirchhoffova bilance platí per komodita: co komodita $m$ kde vyrobí, musí <em>táž komodita</em> jinde spotřebovat — přebytek teploty nezaplní poptávku po vlhkosti. Kdyby se nulovala jen suma přes komodity, „vyrobených +5 komodity 1 a spotřebovaných −5 komodity 2“ by prošlo kontrolou, ale fyzikálně je to nesmysl. (Sečti bilanční rovnice komodity $m$ přes všechna $v$: každá hrana se objeví jednou s&nbsp;$+$, jednou s&nbsp;$-$, takže nutně $\sum_v b^m(v) = 0$ — pro každé $m$.)</p>
     </div>
   </details>
 
@@ -111,13 +111,13 @@
   </div>
 
   <details class="try">
-    <summary>Zkus sám: které omezení v té formulaci komodity <em>spojuje</em>? A co by se stalo, kdybys ho vypustil?</summary>
+    <summary>Zkus sám: které omezení v&nbsp;té formulaci komodity <em>spojuje</em>? A co by se stalo, kdybys ho vypustil?</summary>
     <div class="inner">
-      <p>Jen to poslední: $l(e) \le \sum_{m} f^m(e) \le u(e)$ — kapacita omezuje <strong>součet toků všech komodit</strong> na hraně. Všechno ostatní (bilanční rovnice i cena) se rozpadá po komoditách: rovnice komodity $m$ obsahují jen proměnné $f^m(\cdot)$ a účelová funkce je prostý součet. Bez sdílených kapacit by úloha byla $|M|$ <em>nezávislých</em> minimum cost flow <a href="l4-10.html#takeaways">[L4.10]</a> — vyřešíš každou zvlášť a hotovo. Matice modelu je bloková diagonála (jeden blok = jedna komodita, každý blok sám o sobě TUM) a teprve kapacitní řádky bloky „svážou“. A přesně ty řádky, jak hned uvidíš, rozbijí totální unimodularitu.</p>
+      <p>Jen to poslední: $l(e) \le \sum_{m} f^m(e) \le u(e)$ — kapacita omezuje <strong>součet toků všech komodit</strong> na hraně. Všechno ostatní (bilanční rovnice i cena) se rozpadá po komoditách: rovnice komodity $m$ obsahují jen proměnné $f^m(\cdot)$ a účelová funkce je prostý součet. Bez sdílených kapacit by úloha byla $|M|$ <em>nezávislých</em> minimum cost flow <a href="l4-10.html#takeaways">[L4.10]</a> — vyřešíš každou zvlášť a hotovo. Matice modelu je bloková diagonála (jeden blok = jedna komodita, každý blok sám o&nbsp;sobě TUM) a teprve kapacitní řádky bloky „svážou“. A přesně ty řádky, jak hned uvidíš, rozbijí totální unimodularitu.</p>
     </div>
   </details>
 
-  <p>U zkoušky („distribuce komodit ze zdrojů do spotřebičů“) tedy odevzdáváš: <strong>(1)</strong> proměnné $f^m(e) \ge 0$ pro každou komoditu a hranu, <strong>(2)</strong> Kirchhoffovu bilanci s $b^m(v)$ pro každý vrchol <em>a každou komoditu</em>, <strong>(3)</strong> sdílené kapacity $l(e) \le \sum_m f^m(e) \le u(e)$, <strong>(4)</strong> cenu $\min \sum_e \sum_m f^m(e)\, c(e)$ — a <strong>(5)</strong> větu o celočíselnosti. Tu teď odvodíme.</p>
+  <p>U&nbsp;zkoušky („distribuce komodit ze zdrojů do spotřebičů“) tedy odevzdáváš: <strong>(1)</strong> proměnné $f^m(e) \ge 0$ pro každou komoditu a hranu, <strong>(2)</strong> Kirchhoffovu bilanci s&nbsp;$b^m(v)$ pro každý vrchol <em>a každou komoditu</em>, <strong>(3)</strong> sdílené kapacity $l(e) \le \sum_m f^m(e) \le u(e)$, <strong>(4)</strong> cenu $\min \sum_e \sum_m f^m(e)\, c(e)$ — a <strong>(5)</strong> větu o&nbsp;celočíselnosti. Tu teď odvodíme.</p>
 
   <!-- ===== SEKCE 4 ===== -->
   <h2>Co se rozbilo: celočíselnost</h2>
@@ -131,22 +131,22 @@
     </ul>
   </div>
 
-  <p>U jednokomoditních toků jsme celočíselnost dostávali zadarmo — incidenční matice je TUM <a href="../k3/l3-12.html#takeaways">[L3.12]</a>, takže vrcholy LP polytopu jsou celé a stačilo LP (nebo rovnou Ford-Fulkerson). Sdílené kapacitní řádky tuhle strukturu zničí. Že to není jen teoretická obava, ukazuje následující instance — <em>orientovaná adaptace klasického protipříkladu se dvěma komoditami (vlastní překreslení, přiznáno; všechny kombinace ověřeny strojově hrubou silou)</em>:</p>
+  <p>U&nbsp;jednokomoditních toků jsme celočíselnost dostávali zadarmo — incidenční matice je TUM <a href="../k3/l3-12.html#takeaways">[L3.12]</a>, takže vrcholy LP polytopu jsou celé a stačilo LP (nebo rovnou Ford-Fulkerson). Sdílené kapacitní řádky tuhle strukturu zničí. Že to není jen teoretická obava, ukazuje následující instance — <em>orientovaná adaptace klasického protipříkladu se dvěma komoditami (vlastní překreslení, přiznáno; všechny kombinace ověřeny strojově hrubou silou)</em>:</p>
 
   <div class="viz" id="viz-frac"></div>
 
   <details class="try">
-    <summary>Zkus sám (po projití stepperu): každá komodita <em>sama o sobě</em> projde celočíselně. Proč spolu celočíselně neprojdou, ale „na půlky“ ano?</summary>
+    <summary>Zkus sám (po projití stepperu): každá komodita <em>sama o&nbsp;sobě</em> projde celočíselně. Proč spolu celočíselně neprojdou, ale „na půlky“ ano?</summary>
     <div class="inner">
-      <p>Spočítej, kolik sdílených hran (A, B, C, D, každá $u = 1$) musí každá komodita použít: ① se dostane z $s_1$ do $t_1$ jen přes $\{A, B\}$ nebo $\{D, C\}$, ② z $s_2$ do $t_2$ jen přes $\{B, C\}$ nebo $\{A, D\}$ (delší trasy používají sdílených hran ještě víc). Celočíselně si každá komodita musí <em>vybrat jednu</em> dvojici — a každá volba ① se s každou volbou ② srazí přesně na jedné hraně s kapacitou 1 (zkontroluj všechny 4 kombinace: srážka na B, A, C, resp. D). Zlomkově se ale komodita vybírat nemusí: pošle <strong>půl jednotky oběma svými trasami</strong>. Pak každou sdílenou hranou teče $\frac12 + \frac12 = 1 \le u$ — LP je přípustné, ILP ne. Zlomky tu nejsou kosmetická vada, kterou „zaokrouhlíš“: žádné celočíselné řešení <em>neexistuje</em>.</p>
+      <p>Spočítej, kolik sdílených hran (A, B, C, D, každá $u = 1$) musí každá komodita použít: ① se dostane z&nbsp;$s_1$ do $t_1$ jen přes $\{A, B\}$ nebo $\{D, C\}$, ② z&nbsp;$s_2$ do $t_2$ jen přes $\{B, C\}$ nebo $\{A, D\}$ (delší trasy používají sdílených hran ještě víc). Celočíselně si každá komodita musí <em>vybrat jednu</em> dvojici — a každá volba ① se s&nbsp;každou volbou ② srazí přesně na jedné hraně s&nbsp;kapacitou 1 (zkontroluj všechny 4 kombinace: srážka na B, A, C, resp. D). Zlomkově se ale komodita vybírat nemusí: pošle <strong>půl jednotky oběma svými trasami</strong>. Pak každou sdílenou hranou teče $\frac12 + \frac12 = 1 \le u$ — LP je přípustné, ILP ne. Zlomky tu nejsou kosmetická vada, kterou „zaokrouhlíš“: žádné celočíselné řešení <em>neexistuje</em>.</p>
     </div>
   </details>
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
-    <p><strong>1) „Toky vyjdou celočíselně zadarmo“ platí jen pro JEDNU komoditu.</strong> Integral Flow Theorem a TUM argument <a href="../k3/l3-12.html#takeaways">[L3.12]</a> se opírají o čistou incidenční matici; kapacitní řádky $\sum_m f^m(e) \le u(e)$ sčítají přes bloky komodit a TUM zničí. LP relaxace multikomoditního toku může mít <em>jediné</em> optimum/přípustné řešení ve zlomcích (viz instance výše — half-integral, samé poloviny).
-    <strong>2) Zlomkové LP řešení nelze obecně „zaokrouhlit“.</strong> V instanci výše celočíselné řešení vůbec neexistuje, přestože LP přípustné je — zaokrouhlování nemá co najít.
-    <strong>3) Ford-Fulkerson ani cycle canceling tady nepoužiješ</strong> — to jsou algoritmy pro jednu komoditu. Multikomoditní tok řešíš jako LP (zlomky OK, polynomiálně), a chceš-li celočíselný tok, deklaruješ $f^m(e) \in \mathbb{Z}^+_0$ a řešíš <strong>ILP</strong> (solver; dle slidu v praxi zvládnutelné i pro velké instance).</p>
+    <p><strong>1) „Toky vyjdou celočíselně zadarmo“ platí jen pro JEDNU komoditu.</strong> Integral Flow Theorem a TUM argument <a href="../k3/l3-12.html#takeaways">[L3.12]</a> se opírají o&nbsp;čistou incidenční matici; kapacitní řádky $\sum_m f^m(e) \le u(e)$ sčítají přes bloky komodit a TUM zničí. LP relaxace multikomoditního toku může mít <em>jediné</em> optimum/přípustné řešení ve zlomcích (viz instance výše — half-integral, samé poloviny).
+    <strong>2) Zlomkové LP řešení nelze obecně „zaokrouhlit“.</strong> V&nbsp;instanci výše celočíselné řešení vůbec neexistuje, přestože LP přípustné je — zaokrouhlování nemá co najít.
+    <strong>3) Ford-Fulkerson ani cycle canceling tady nepoužiješ</strong> — to jsou algoritmy pro jednu komoditu. Multikomoditní tok řešíš jako LP (zlomky OK, polynomiálně), a chceš-li celočíselný tok, deklaruješ $f^m(e) \in \mathbb{Z}^+_0$ a řešíš <strong>ILP</strong> (solver; dle slidu v&nbsp;praxi zvládnutelné i pro velké instance).</p>
   </div>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
@@ -157,7 +157,7 @@
       <li><strong>Komodity spojuje jediné omezení — sdílené kapacity:</strong> $l(e) \le \sum_{m \in M} f^m(e) \le u(e)$. Bez něj by úloha byla $|M|$ nezávislých MCF <a href="l4-10.html#takeaways">[L4.10]</a>.</li>
       <li><strong>Cena:</strong> $\min \sum_e \sum_m f^m(e)\,c(e)$; jako LP řešitelné <strong>polynomiálně</strong> (ve zlomcích).</li>
       <li><strong>Matice NENÍ TUM</strong> <a href="../k3/l3-12.html#takeaways">[L3.12]</a> (kvůli kapacitním řádkům se součtem přes komodity) → LP může vracet zlomky a celočíselné řešení nemusí vůbec existovat, i když zlomkové ano (klasický protipříklad: 2 komodity, 2 trasy na komoditu, vše půlkové). Pro celočíselný tok deklaruj $f^m(e) \in \mathbb{Z}^+_0$ a řeš ILP.</li>
-      <li>U zkoušky je to <strong>formulační úloha</strong>: proměnné → bilance per komodita → sdílené kapacity → cena → věta o celočíselnosti. Nikdo nechce ruční výpočet.</li>
+      <li>U&nbsp;zkoušky je to <strong>formulační úloha</strong>: proměnné → bilance per komodita → sdílené kapacity → cena → věta o&nbsp;celočíselnosti. Nikdo nechce ruční výpočet.</li>
     </ul>
   </div>
 
@@ -166,7 +166,7 @@
     <div class="task-head">
       <span class="task-id">T01</span>
       <strong>Minimum Cost Multicommodity Flow — formulace</strong>
-      <span class="task-src">zdroj: banka #26 (zkouška 24.5.2011 / Termín A 2023), EN 1:1</span>
+      <span class="task-src">zdroj: banka #26 (zkouška 24.5.2011 / Termín A), EN 1:1</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -177,10 +177,10 @@
         <p><em>Give the LP formulation. Is an integer-valued optimal flow assured? Why?</em></p>
       </div>
 
-      <h4>a) Co je v zadání?</h4>
-      <p>Formulační úloha: zapsat minimum cost multicommodity flow jako LP a vysvětlit, co je s celočíselností. Pozn. ke zdroji: banka přiznává, že přesné originální znění zkoušky se nedochovalo („distribuce komodit ze zdrojů do spotřebičů“, Termín A 2023 / fotky 24.5.2011) — tohle je její kanonická rekonstrukce ze slidů 35–37, vedená jako <em>Unsolved</em>; poslední věta zadání (pokyn „Give the LP formulation…“) je naše dopsání, přiznáno. Formulace v řešení je dle banky/slidů 1:1.</p>
+      <h4>a) Co je v&nbsp;zadání?</h4>
+      <p>Formulační úloha: zapsat minimum cost multicommodity flow jako LP a vysvětlit, co je s&nbsp;celočíselností. Pozn. ke zdroji: banka přiznává, že přesné originální znění zkoušky se nedochovalo („distribuce komodit ze zdrojů do spotřebičů“, Termín A / fotky 24.5.2011) — tohle je její kanonická rekonstrukce ze slidů 35–37, vedená jako <em>Unsolved</em>; poslední věta zadání (pokyn „Give the LP formulation…“) je naše dopsání, přiznáno. Formulace v&nbsp;řešení je dle banky/slidů 1:1.</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — definice, LP formulace, celočíselnost (<a href="#takeaways">takeaways</a>).</li>
         <li><a href="l4-10.html#takeaways">[L4.10] Minimum Cost Flow</a> — jednokomoditní pětice $(G,l,u,c,b)$, na kterou se odkazuješ.</li>
@@ -188,7 +188,7 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Postupuj po pěti odevzdávkách z lekce: proměnné (kolik a jaké?), bilance (per komodita!), kapacity (kde je součet přes $m$?), účelová funkce, věta o celočíselnosti. Nejčastější chyba: napsat kapacitu $f^m(e) \le u(e)$ pro každou komoditu zvlášť — tím by sis vyrobil $|M|$ nezávislých úloh a model by dovolil hranu přetížit součtem. U celočíselnosti neříkej jen „není zaručena“ — řekni <em>proč</em> (která část matice rozbíjí TUM) a co s tím (ILP).</p>
+      <p>Postupuj po pěti odevzdávkách z&nbsp;lekce: proměnné (kolik a jaké?), bilance (per komodita!), kapacity (kde je součet přes $m$?), účelová funkce, věta o&nbsp;celočíselnosti. Nejčastější chyba: napsat kapacitu $f^m(e) \le u(e)$ pro každou komoditu zvlášť — tím by sis vyrobil $|M|$ nezávislých úloh a model by dovolil hranu přetížit součtem. U&nbsp;celočíselnosti neříkej jen „není zaručena“ — řekni <em>proč</em> (která část matice rozbíjí TUM) a co s&nbsp;tím (ILP).</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (formulace dle banky #26 / slidů 36–37)</summary>
@@ -202,8 +202,8 @@
           & f^m(e) \ge 0 & e \in E(G),\ m \in M
           \end{aligned}
           $$</p>
-          <p><strong>Komentář k omezením:</strong> 1. Kirchhoffův zákon platí v každém vrcholu <em>pro každou komoditu</em> (komodity se nesmí přeměňovat jedna v druhou); kapacita hrany je sdílená — omezuje <em>součet</em> toků všech komodit.</p>
-          <p><strong>Celočíselnost:</strong> NENÍ zaručena. Matice $A$ tohoto LP není totálně unimodulární — bilanční bloky jednotlivých komodit samy o sobě TUM jsou (incidenční matice), ale kapacitní řádky $l(e) \le \sum_m f^m(e) \le u(e)$ sčítají proměnné napříč bloky a TUM rozbijí. LP je řešitelné polynomiálně, ale optimum může vyjít ve zlomcích — a dokonce může existovat zlomkové přípustné řešení, i když žádné celočíselné neexistuje (protipříklad viz T02). Chceme-li zaručeně celočíselný tok, přidáme $f^m(e) \in \mathbb{Z}^+_0$ a řešíme ILP — dle slidu 37 v praxi zvládnutelné i pro velké instance v přijatelném čase.</p>
+          <p><strong>Komentář k&nbsp;omezením:</strong> 1. Kirchhoffův zákon platí v&nbsp;každém vrcholu <em>pro každou komoditu</em> (komodity se nesmí přeměňovat jedna v&nbsp;druhou); kapacita hrany je sdílená — omezuje <em>součet</em> toků všech komodit.</p>
+          <p><strong>Celočíselnost:</strong> NENÍ zaručena. Matice $A$ tohoto LP není totálně unimodulární — bilanční bloky jednotlivých komodit samy o&nbsp;sobě TUM jsou (incidenční matice), ale kapacitní řádky $l(e) \le \sum_m f^m(e) \le u(e)$ sčítají proměnné napříč bloky a TUM rozbijí. LP je řešitelné polynomiálně, ale optimum může vyjít ve zlomcích — a dokonce může existovat zlomkové přípustné řešení, i když žádné celočíselné neexistuje (protipříklad viz T02). Chceme-li zaručeně celočíselný tok, přidáme $f^m(e) \in \mathbb{Z}^+_0$ a řešíme ILP — dle slidu 37 v&nbsp;praxi zvládnutelné i pro velké instance v&nbsp;přijatelném čase.</p>
         </div>
       </details>
     </div>
@@ -223,25 +223,25 @@
         <p><em>(i) List all routes of each commodity and the shared arcs (A, B, C, D) they use. (ii) Show that no integer-valued feasible multicommodity flow exists. (iii) Find a feasible fractional flow. (iv) What does (ii)+(iii) prove about the constraint matrix of the multicommodity-flow LP?</em></p>
       </div>
 
-      <h4>a) Co je v zadání?</h4>
-      <p>Konkrétní dvanáctivrcholová instance ze stepperu lekce: dvě komodity po jedné jednotce, všechny kapacity 1. Úkol: rozborem tras dokázat, že celočíselně to nejde, zlomkově ano — a vyvodit z toho důsledek pro TUM.</p>
+      <h4>a) Co je v&nbsp;zadání?</h4>
+      <p>Konkrétní dvanáctivrcholová instance ze stepperu lekce: dvě komodity po jedné jednotce, všechny kapacity 1. Úkol: rozborem tras dokázat, že celočíselně to nejde, zlomkově ano — a vyvodit z&nbsp;toho důsledek pro TUM.</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
-        <li>Tato lekce — sdílené kapacity a sekce o celočíselnosti (<a href="#takeaways">takeaways</a>).</li>
+        <li>Tato lekce — sdílené kapacity a sekce o&nbsp;celočíselnosti (<a href="#takeaways">takeaways</a>).</li>
         <li><a href="../k3/l3-12.html#takeaways">[L3.12]</a> — TUM + celočíselná pravá strana $\Rightarrow$ celé vrcholy polytopu.</li>
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>(i) Jdi od konce: kterými hranami se dá vstoupit do $t_1$? Do $t_2$? Zpětným trasováním vyjdou trasy. (ii) Spočítej minimum sdílených hran na trasu a projdi všechny kombinace voleb — hledej srážku na hraně s $u = 1$. (iii) Komodita nemusí poslat celou jednotku jednou trasou. (iv) Vzpomeň, co přesně garantuje lemma o TUM z [L3.12] — a co tedy plyne z toho, že tady polytop celočíselný vrchol nemá.</p>
+      <p>(i) Jdi od konce: kterými hranami se dá vstoupit do $t_1$? Do $t_2$? Zpětným trasováním vyjdou trasy. (ii) Spočítej minimum sdílených hran na trasu a projdi všechny kombinace voleb — hledej srážku na hraně s&nbsp;$u = 1$. (iii) Komodita nemusí poslat celou jednotku jednou trasou. (iv) Vzpomeň, co přesně garantuje lemma o&nbsp;TUM z&nbsp;[L3.12] — a co tedy plyne z&nbsp;toho, že tady polytop celočíselný vrchol nemá.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní — přiznáno; ověřeno strojově hrubou silou)</summary>
         <div class="inner">
           <p><strong>(i) Trasy.</strong> Do $t_1$ vedou jen hrany $b' \to t_1$ a $c' \to t_1$, tedy poslední sdílená hrana komodity ① je B, nebo C. Zpětným trasováním: ① má dvě minimální trasy — $s_1 \to a \xrightarrow{A} a' \to b \xrightarrow{B} b' \to t_1$ (sdílené $\{A, B\}$) a $s_1 \to d \xrightarrow{D} d' \to c \xrightarrow{C} c' \to t_1$ (sdílené $\{D, C\}$); delší varianty ($\{A,B,C\}$, $\{A,D,C\}$) používají sdílené hrany tři. Symetricky ② : $s_2 \to b \xrightarrow{B} b' \to c \xrightarrow{C} c' \to t_2$ ($\{B, C\}$) a $s_2 \to a \xrightarrow{A} a' \to d \xrightarrow{D} d' \to t_2$ ($\{A, D\}$). Každá trasa každé komodity používá <strong>aspoň 2</strong> ze čtyř sdílených hran A, B, C, D.</p>
           <p><strong>(ii) Celočíselně to nejde.</strong> Celočíselný tok komodity = volba jedné trasy (kapacity jsou 1). Projdi všechny kombinace minimálních tras: $\{A,B\} \cap \{B,C\} = \{B\}$, $\{A,B\} \cap \{A,D\} = \{A\}$, $\{D,C\} \cap \{B,C\} = \{C\}$, $\{D,C\} \cap \{A,D\} = \{D\}$ — každá kombinace se srazí na jedné sdílené hraně, kde by muselo téct $1 + 1 = 2 > u = 1$. Delší trasy mají sdílených hran víc, takže srážce také neuniknou (formálně: obě komodity dohromady potřebují $\ge 4$ průchodů sdílenými hranami a kapacita všech čtyř dohromady je přesně 4, takže každá komodita musí použít právě 2 — tedy jen minimální trasy, a ty se vždy protnou). Celočíselné přípustné řešení neexistuje. <em>(Ověřeno i hrubou silou přes všechny 0/1 toky obou komodit.)</em></p>
-          <p><strong>(iii) Zlomkově to jde.</strong> Každá komodita pošle $\frac12$ jednotky oběma svými trasami: ① půl přes $\{A,B\}$, půl přes $\{D,C\}$; ② půl přes $\{B,C\}$, půl přes $\{A,D\}$. Bilance sedí (z $s_1$ odteče $\frac12 + \frac12 = 1$, do $t_1$ přiteče 1; stejně ②) a každou sdílenou hranou teče $\frac12 + \frac12 = 1 = u(e)$, spojkami $\frac12 \le 1$. Přípustné.</p>
-          <p><strong>(iv) Důsledek pro matici.</strong> Vstupní data jsou celá ($u \equiv 1$, $b^m \in \{0, \pm 1\}$), polytop je neprázdný, ale neobsahuje žádný celočíselný bod. Podle lemmatu z <a href="../k3/l3-12.html#takeaways">[L3.12]</a> má polyedr $\{x : Ax \le b\}$ s TUM maticí $A$ a celočíselným $b$ všechny vrcholy celočíselné — tady vrchol celočíselný není (jediná přípustná struktura je půlková), takže matice multikomoditního LP <strong>totálně unimodulární není</strong>. Viníkem jsou kapacitní řádky $\sum_m f^m(e) \le u(e)$, které sčítají přes komoditní bloky.</p>
+          <p><strong>(iii) Zlomkově to jde.</strong> Každá komodita pošle $\frac12$ jednotky oběma svými trasami: ① půl přes $\{A,B\}$, půl přes $\{D,C\}$; ② půl přes $\{B,C\}$, půl přes $\{A,D\}$. Bilance sedí (z&nbsp;$s_1$ odteče $\frac12 + \frac12 = 1$, do $t_1$ přiteče 1; stejně ②) a každou sdílenou hranou teče $\frac12 + \frac12 = 1 = u(e)$, spojkami $\frac12 \le 1$. Přípustné.</p>
+          <p><strong>(iv) Důsledek pro matici.</strong> Vstupní data jsou celá ($u \equiv 1$, $b^m \in \{0, \pm 1\}$), polytop je neprázdný, ale neobsahuje žádný celočíselný bod. Podle lemmatu z&nbsp;<a href="../k3/l3-12.html#takeaways">[L3.12]</a> má polyedr $\{x : Ax \le b\}$ s&nbsp;TUM maticí $A$ a celočíselným $b$ všechny vrcholy celočíselné — tady vrchol celočíselný není (jediná přípustná struktura je půlková), takže matice multikomoditního LP <strong>totálně unimodulární není</strong>. Viníkem jsou kapacitní řádky $\sum_m f^m(e) \le u(e)$, které sčítají přes komoditní bloky.</p>
         </div>
       </details>
     </div>
