@@ -36,7 +36,7 @@
     <strong>V každém okamžiku spusť ready úlohu s nejbližším due date.</strong> Bez release times je to prosté seřazení EDD (optimální pro $1\,||\,L_{\max}$); s release times a povolenou preempcí je to Hornův algoritmus — preempce nastane, když přijde naléhavější úloha.
   </div>
 
-  <p>Dosud jsme v K5 minimalizovali $C_{max}$ a $\sum w_j C_j$. Dnes poprvé kritérium s <strong>due daty</strong>: maximum lateness $L_{\max} = \max_j (C_j - d_j)$ — značení $L_j$, $d_j$ vs. $\tilde{d}_j$ znáš z <a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace α|β|γ</a>. A vzpomeň si: $L_{max}$ v kritériu <em>implikuje</em> existenci due dat, i když v $\beta$ nestojí.</p>
+  <p>Dosud jsme v K5 minimalizovali $C_{\max}$ a $\sum w_j C_j$. Dnes poprvé kritérium s <strong>due daty</strong>: maximum lateness $L_{\max} = \max_j (C_j - d_j)$ — značení $L_j$, $d_j$ vs. $\tilde{d}_j$ znáš z <a href="../k5/l5-1.html#takeaways">[L5.1] Grahamova notace α|β|γ</a>. A vzpomeň si: $L_{\max}$ v kritériu <em>implikuje</em> existenci due dat, i když v $\beta$ nestojí.</p>
 
   <!-- ===== SEKCE 1: EDD ===== -->
   <h2>$1\,||\,L_{\max}$: stačí seřadit — EDD</h2>
@@ -153,7 +153,7 @@ end</code></pre>
   <div class="box info">
     <div class="box-title"><img src="../assets/icons/lightbulb.svg" class="ico" alt="">Slide 32 (EN 1:1) — Optimality of Horn's Algorithm</div>
     <p>“<strong>Theorem — Optimality of Horn's Algorithm.</strong> Given a set of $n$ independent preemptive tasks with arbitrary release times, any algorithm that at any instant executes the task with earliest due date among all the ready tasks is optimal with respect to $L_{\max}$ minimization.</p>
-    <p>When we assume $1\,|\,\mathrm{pmtn}, r_j, d_j = \tilde{d}_j\,|\,L_{\max}$ then the algorithm is often called <strong>EDF (Earliest Deadline First)</strong> and we will speak about deadlines rather than due dates since now. Such algorithm:</p>
+    <p>When we assume $1\,|\,\mathrm{pmtn}, r_j, d_j = \tilde{d}_j\,|\,L_{\max}$ then the algorithm is often called <strong>EDF (Earliest Deadline First)</strong> and we will speak about deadlines rather than due dates from now on. Such algorithm:</p>
     <ul>
       <li><strong>minimizes</strong> $L_{\max}$ (i.e. its non positive value)</li>
       <li><strong>decides schedulability</strong> — if there exists a feasible schedule ($L_{\max} \le 0$) for the given instance, then the EDF is able to find it”</li>
@@ -199,7 +199,7 @@ end</code></pre>
     <div class="task-head">
       <span class="task-id">T01</span>
       <strong>Problem $1 \mid pmtn, r_j \mid L_{\max}$ — Horn's Algorithm</strong>
-      <span class="task-src">zdroj: task bank #38 = příklad slidu 31 (EN 1:1); Horn doložen i na zkoušce 29. 6. 2023</span>
+      <span class="task-src">zdroj: task bank #38 = příklad slidu 31 (EN 1:1); Horn doložen i na zkoušce 29.&nbsp;6.&nbsp;2023</span>
     </div>
     <div class="task-body">
       <div class="assignment">
@@ -341,7 +341,7 @@ end</code></pre>
       { desc: 'Vyhodnocení: L₁ = 6 − 9 = −3, L₂ = 3 − 4 = −1, L₃ = 8 − 12 = −4 → <strong>Lmax = −1</strong> (určuje T₂). Vše záporné = všechno stíháme s rezervou (earliness).',
         blocks: [{ row: 't1', from: 0, to: 1, label: 'T₁', cls: 'good' }, { row: 't2', from: 1, to: 3, label: 'T₂', cls: 'good' }, { row: 't1', from: 3, to: 6, label: 'T₁', cls: 'good' }, { row: 't3', from: 6, to: 8, label: 'T₃', cls: 'good' }] },
     ],
-    caption: 'Hornův algoritmus na vlastní mini-instanci (přiznáno): r = (0, 1, 2), p = (4, 2, 2), d = (9, 4, 12). Řádek = úloha (stroj je jeden — bloky se v čase nepřekrývají); čárkované značky = release times (šedě) a due daty. Preempce T₁ v čase 1 = příchod naléhavější T₂.',
+    caption: 'Hornův algoritmus na vlastní mini-instanci (přiznáno): r = (0, 1, 2), p = (4, 2, 2), d = (9, 4, 12). Řádek = úloha (stroj je jeden — bloky se v čase nepřekrývají); čárkované značky = release times (šedě) a due data. Preempce T₁ v čase 1 = příchod naléhavější T₂.',
   });
 })();
 
