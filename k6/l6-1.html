@@ -36,7 +36,14 @@
     Trojice $(X, D, C)$ definující <strong>constraint satisfaction problem</strong> (problém splňování omezení) a pojem <strong>arc consistency</strong> (hranová konzistence): kdy je orientovaná hrana $(x_i, x_j)$ grafu omezení konzistentní.
   </div>
 
-  <p>Poslední slotová kapitola. Slot 6 padá zhruba v polovině zkoušek a když padne, vypadá takhle (zkouška 02.06.2021; AC-3 jako typ úlohy znovu padl 1.&nbsp;6.&nbsp;2026):</p>
+  <div class="box info">
+    <div class="box-title"><img src="../assets/icons/book-open.svg" class="ico" alt="">Než začneme: o co tady vlastně jde (polopatě)</div>
+    <p>Znáš <strong>sudoku</strong>? Máš mřížku, do každého políčka smí přijít nějaká číslice, a platí pravidla (v řádku/sloupci/bloku se čísla neopakují). Sudoku <em>nevyřešíš</em> tak, že bys slepě zkoušel všechny kombinace — to by trvalo věčnost. Vyřešíš ho tak, že se koukneš na pravidla a postupně <strong>vyškrtáváš</strong> možnosti, které prostě nejdou („sem nemůže přijít 5, protože už je v řádku"), až ti často vyjde jediná možnost.</p>
+    <p>Tahle kapitola je přesně o tomhle, jen obecně. Úloze typu „proměnné + množiny povolených hodnot + pravidla mezi nimi" se říká <strong>constraint satisfaction problem (CSP)</strong> — problém splňování omezení. A způsob, jak chytře vyškrtávat nemožné hodnoty (místo hrubého zkoušení všeho), se jmenuje <strong>propagace omezení</strong>. <strong>Arc consistency</strong> (hranová konzistence) je přesné pravidlo, <em>kdy</em> hodnotu smíš vyškrtnout; algoritmus <strong>AC-3</strong> (příští lekce) to vyškrtávání zorganizuje, aby na nic nezapomněl.</p>
+    <p><strong>Pozor na jednu věc, ať tě to nemate:</strong> tahle metoda ti řešení <em>sama nenajde</em>. Jen pročistí možnosti — zmenší pytlíky hodnot. To je užitečné jako příprava (a u zkoušky se to po tobě chce ručně spočítat), ale „dořešení" je pak už jiná práce. K čemu to celé je a kde to v praxi potkáš, ber takhle: kdykoli popisuješ úlohu pravidly a chceš, aby ji počítač dohledal (rozvrhy, rozsazování, hádanky), tohle je ten základní úklid, který to celé zrychlí.</p>
+  </div>
+
+  <p>A teď proč to řešíme my: Slot 6 padá zhruba v polovině zkoušek a když padne, vypadá takhle (zkouška 02.06.2021; AC-3 jako typ úlohy znovu padl 1.&nbsp;6.&nbsp;2026):</p>
 
   <div class="box info">
     <div class="box-title"><img src="../assets/icons/flag.svg" class="ico" alt="">Ukázka zkouškového zadání (EN, 1:1)</div>
