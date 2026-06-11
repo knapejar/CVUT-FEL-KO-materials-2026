@@ -36,7 +36,7 @@
     Optimální TSP okruh je vždy aspoň tak drahý jako minimální kostra: $\mathrm{OPT}(K_n, c) \ge c(E(T))$ — vypočitatelná <strong>dolní mez</strong> na neznámé optimum, na které stojí důkazy faktorů 2 i 3/2.
   </div>
 
-  <p>Druhý ze tří stavebních kamenů aproximací metrického TSP. V <a href="l3-8a.html#takeaways">[L3.8a] Metrický TSP + trojúhelníková nerovnost + shortcutting</a> jsme se naučili z laciného uzavřeného sledu vyrobit Hamiltonovský okruh, aniž bychom zhoršili cenu. Jenže „nezhoršit cenu sledu“ samo o sobě nic neříká o tom, jak daleko jsme od <em>optima</em>. Dnes si pořídíme měřítko: číslo, které umíme <strong>spočítat v polynomiálním čase</strong> a které je <strong>zaručeně pod $\mathrm{OPT}$</strong>.</p>
+  <p>Druhý ze tří stavebních kamenů aproximací metrického TSP. V <a href="l3-8a.html#takeaways">[L3.8a] Metrický TSP + trojúhelníková nerovnost + shortcutting</a> jsme se naučili z&nbsp;laciného uzavřeného sledu vyrobit Hamiltonovský okruh, aniž bychom zhoršili cenu. Jenže „nezhoršit cenu sledu“ samo o sobě nic neříká o tom, jak daleko jsme od <em>optima</em>. Dnes si pořídíme měřítko: číslo, které umíme <strong>spočítat v polynomiálním čase</strong> a které je <strong>zaručeně pod $\mathrm{OPT}$</strong>.</p>
 
   <!-- ===== SEKCE 1: PROČ DOLNÍ MEZ ===== -->
   <h2>Problém: jak dokázat faktor vůči číslu, které nikdo nezná?</h2>
@@ -44,9 +44,9 @@
   <p>Cíl příštích lekcí je dokázat záruky typu $c(H) \le 2 \cdot \mathrm{OPT}$ (double-tree <a href="l3-9.html">[L3.9]</a>) a $c(H) \le \tfrac{3}{2} \cdot \mathrm{OPT}$ (Christofides <a href="l3-10.html">[L3.10]</a>). Háček: $\mathrm{OPT}$ je řešení silně NP-těžké úlohy <a href="l3-8a.html#takeaways">[L3.8a]</a> — nikdo ho nezná a důkaz se na jeho hodnotu nesmí odvolávat.</p>
 
   <details class="try">
-    <summary>Zkus sám: recept na tenhle problém už máš z <a href="l3-1.html#takeaways">[L3.1] Co je aproximační algoritmus a faktor r</a>. Jak se dokazuje $J^A \le r \cdot J^*$ u minimalizace, když $J^*$ neznáme?</summary>
+    <summary>Zkus sám: recept na tenhle problém už máš z <a href="l3-1.html#takeaways">[L3.1] Co je aproximační algoritmus a faktor r</a>. Jak se dokazuje $J^A \le r \cdot J^*$ u&nbsp;minimalizace, když $J^*$ neznáme?</summary>
     <div class="inner">
-      <p>Přes <strong>vypočitatelnou mez</strong>: najdi veličinu $B$, kterou spočítat umíš a o které dokážeš obecně (pro každou instanci) dvě věci — $B \le J^*$ (dolní mez na optimum) a $J^A \le r \cdot B$ (výstup algoritmu je nejvýš $r$-násobek meze). Složením $J^A \le r \cdot B \le r \cdot J^*$, a $J^*$ se v důkazu vůbec nemuselo vyčíslit.</p>
+      <p>Přes <strong>vypočitatelnou mez</strong>: najdi veličinu $B$, kterou spočítat umíš a o&nbsp;které dokážeš obecně (pro každou instanci) dvě věci — $B \le J^*$ (dolní mez na&nbsp;optimum) a $J^A \le r \cdot B$ (výstup algoritmu je nejvýš $r$-násobek meze). Složením $J^A \le r \cdot B \le r \cdot J^*$, a $J^*$ se v důkazu vůbec nemuselo vyčíslit.</p>
       <p>Otázka dneška tedy zní: <strong>jaké $B$ vzít pro TSP?</strong> Potřebujeme polynomiálně spočitatelný objekt, který je „příbuzný“ Hamiltonovskému okruhu a zaručeně levnější.</p>
     </div>
   </details>
@@ -55,7 +55,7 @@
   <h2>Kandidát: minimální kostra</h2>
 
   <details class="try">
-    <summary>Zkus sám: Hamiltonovský okruh <a href="l3-3.html#takeaways">[L3.3]</a> prochází všemi vrcholy. Který levný, polynomiálně spočitatelný objekt z K0 taky „drží všechny vrcholy pohromadě“ — a co s okruhem udělat, aby ses k němu dostal? (Nápověda: okruh má $n$ hran, ten objekt $n-1$.)</summary>
+    <summary>Zkus sám: Hamiltonovský okruh <a href="l3-3.html#takeaways">[L3.3]</a> prochází všemi vrcholy. Který levný, polynomiálně spočitatelný objekt z&nbsp;K0 taky „drží všechny vrcholy pohromadě“ — a co s okruhem udělat, aby ses k němu dostal? (Nápověda: okruh má $n$ hran, ten objekt $n-1$.)</summary>
     <div class="inner">
       <p><strong>Kostra</strong>, konkrétně ta nejlevnější — <strong>MST</strong> <a href="../k0/l0-5.html#takeaways">[L0.5] Minimální kostra (MST)</a>: spojuje všechny vrcholy, má $n-1$ hran a Kruskal/Prim ji najdou hladově v polynomiálním čase. Od okruhu ($n$ hran) ji dělí jediná hrana: <strong>odeber z okruhu libovolnou hranu</strong> a zbyde souvislý graf na všech $n$ vrcholech s $n-1$ hranami — kostra (dokonce Hamiltonovská <em>cesta</em>). Přesně tohle pozorování jsme si v <a href="../k0/l0-5.html#takeaways">[L0.5]</a> předplatili „na později“ — a později je teď.</p>
     </div>
@@ -72,7 +72,7 @@
   <!-- ===== SEKCE 3: DŮKAZ PO KROCÍCH ===== -->
   <h2>Důkaz krok po kroku</h2>
 
-  <p>Slide má jednu větu — my si ji rozepíšeme tak, abys ji u zkoušky uměl obhájit do detailu. Vezmi <em>optimální</em> okruh $H^*$ s cenou $c(E(H^*)) = \mathrm{OPT}(K_n,c)$ a odeber z něj libovolnou hranu $e$.</p>
+  <p>Slide má jednu větu — my si ji rozepíšeme tak, abys ji u&nbsp;zkoušky uměl obhájit do detailu. Vezmi <em>optimální</em> okruh $H^*$ s&nbsp;cenou $c(E(H^*)) = \mathrm{OPT}(K_n,c)$ a odeber z&nbsp;něj libovolnou hranu $e$.</p>
 
   <details class="try">
     <summary>Zkus sám (krok 1): co přesně je $H^* - e$ za objekt? Zdůvodni přes ekvivalence stromu z <a href="../k0/l0-4.html#takeaways">[L0.4]</a>: počet hran, souvislost, všechny vrcholy.</summary>
@@ -84,11 +84,11 @@
   <details class="try">
     <summary>Zkus sám (krok 2): teď máš v ruce kostru $H^* - e$. Napiš řetízek nerovností, který z ní vymáčkne $c(E(T)) \le \mathrm{OPT}$. Které dvě nerovnosti potřebuješ a co každou z nich zdůvodňuje?</summary>
     <div class="inner">
-      <p>Dvě nerovnosti, každá s vlastní adresou:</p>
+      <p>Dvě nerovnosti, každá s&nbsp;vlastní adresou:</p>
       $$c(E(T)) \;\le\; c(E(H^* - e)) \;=\; \mathrm{OPT}(K_n,c) - c(e) \;\le\; \mathrm{OPT}(K_n,c).$$
       <ul>
         <li><strong>První:</strong> $T$ je <em>minimální</em> kostra a $H^* - e$ je <em>nějaká</em> kostra — minimum nepřebije žádný jiný exemplář <a href="../k0/l0-5.html#takeaways">[L0.5]</a>.</li>
-        <li><strong>Druhá:</strong> $c(e) \ge 0$ — ceny jsou nezáporné (v metrickém TSP dokonce $c : E(K_n) \to \mathbb{R}^+$ z definice <a href="l3-8a.html#takeaways">[L3.8a]</a>).</li>
+        <li><strong>Druhá:</strong> $c(e) \ge 0$ — ceny jsou nezáporné (v metrickém TSP dokonce $c : E(K_n) \to \mathbb{R}^+$ z&nbsp;definice <a href="l3-8a.html#takeaways">[L3.8a]</a>).</li>
       </ul>
       <p>Hotovo: $\mathrm{OPT}(K_n, c) \ge c(E(T))$. $\blacksquare$</p>
     </div>
@@ -104,13 +104,13 @@
   <details class="try">
     <summary>Zkus sám: projdi důkaz znovu a hledej, kde se použila trojúhelníková nerovnost. Najdeš ji?</summary>
     <div class="inner">
-      <p><strong>Nikde.</strong> Důkaz použil jen: okruh minus hrana = kostra (čistá teorie grafů), minimalitu MST a nezápornost cen. Nerovnost $\mathrm{OPT} \ge c(\mathrm{MST})$ tedy platí pro <strong>každý TSP s nezápornými cenami</strong>, i nemetrický. Metrika (a úplnost $K_n$) je potřeba až v <em>jiném</em> kroku důkazů — shortcuttingu <a href="l3-8a.html#takeaways">[L3.8a]</a>, který z laciného sledu vyrábí okruh. Dolní mez sama je „zadarmo navíc“.</p>
+      <p><strong>Nikde.</strong> Důkaz použil jen: okruh minus hrana = kostra (čistá teorie grafů), minimalitu MST a nezápornost cen. Nerovnost $\mathrm{OPT} \ge c(\mathrm{MST})$ tedy platí pro <strong>každý TSP s nezápornými cenami</strong>, i nemetrický. Metrika (a úplnost $K_n$) je potřeba až v&nbsp;<em>jiném</em> kroku důkazů — shortcuttingu <a href="l3-8a.html#takeaways">[L3.8a]</a>, který z&nbsp;laciného sledu vyrábí okruh. Dolní mez sama je „zadarmo navíc“.</p>
       <p>Pozor na jemnost: nezápornost vypustit nejde — se zápornou hranou $e$ by $c(E(H^*)) - c(e) &gt; \mathrm{OPT}$ a druhá nerovnost řetízku padá.</p>
     </div>
   </details>
 
   <details class="try">
-    <summary>Zkus sám: mez funguje i „z druhé strany“. Vezmi okruh $H = A,B,C,D,E,A$ s cenou 12, který v <a href="l3-8a.html#t-shortcut">[L3.8a]</a> vypadl ze shortcuttingu. Co o $\mathrm{OPT}$ téhle instance víš, když $c(\mathrm{MST}) = 7$?</summary>
+    <summary>Zkus sám: mez funguje i „z druhé strany“. Vezmi okruh $H = A,B,C,D,E,A$ s&nbsp;cenou 12, který v&nbsp;<a href="l3-8a.html#t-shortcut">[L3.8a]</a> vypadl ze shortcuttingu. Co o&nbsp;$\mathrm{OPT}$ téhle instance víš, když $c(\mathrm{MST}) = 7$?</summary>
     <div class="inner">
       <p>Sendvič: každý <em>přípustný</em> okruh dává horní mez ($\mathrm{OPT}$ je minimum, takže $\mathrm{OPT} \le 12$), MST dává dolní mez ($\mathrm{OPT} \ge 7$). Tedy $7 \le \mathrm{OPT} \le 12$ — aniž bychom optimum počítali. (Skutečné $\mathrm{OPT} = 11$, viz stepper; obě meze sedí.) Přesně takhle se dolní mez používá i prakticky: certifikuje, jak daleko nejvýš od optima tvé řešení může být.</p>
     </div>
@@ -128,7 +128,7 @@
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Pozor: nebezpečné polopravdy</div>
     <ul>
-      <li><strong>„MST je (skoro) řešení TSP.“</strong> NE — kostra není okruh, není to přípustné řešení TSP. $c(\mathrm{MST})$ je jen <em>číslo-měřítko</em>; okruh z kostry teprve musíš vyrobit (zdvojení <a href="l3-8c.html#takeaways">[L3.8c]</a> + shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>) a při tom se cena až zdvojnásobí.</li>
+      <li><strong>„MST je (skoro) řešení TSP.“</strong> NE — kostra není okruh, není to přípustné řešení TSP. $c(\mathrm{MST})$ je jen <em>číslo-měřítko</em>; okruh z&nbsp;kostry teprve musíš vyrobit (zdvojení <a href="l3-8c.html#takeaways">[L3.8c]</a> + shortcutting <a href="l3-8a.html#takeaways">[L3.8a]</a>) a při tom se cena až zdvojnásobí.</li>
       <li><strong>Směr nerovnosti:</strong> $\mathrm{OPT} \ge c(\mathrm{MST})$, nikdy naopak. Mnemotechnika: okruh = kostra + jedna hrana navíc, takže okruh je „víc než“ kostra; a optimální okruh je pořád aspoň MST, protože MST je úplně nejlevnější způsob, jak vrcholy spojit.</li>
       <li><strong>„Tahle mez potřebuje trojúhelníkovou nerovnost.“</strong> NE — stačí nezáporné ceny; platí i pro nemetrický TSP. Metrika je potřeba v <em>jiných</em> krocích (shortcutting). Naopak <strong>nezápornost vypustit nejde</strong> ($c(e) \ge 0$ drží druhou nerovnost řetízku).</li>
       <li><strong>„Dolní mez = hotová aproximace.“</strong> NE — mez sama žádný okruh nevyrábí. Faktor vznikne až spárováním s konstrukcí: okruh s cenou $\le 2\,c(\mathrm{MST})$ <a href="l3-9.html">[L3.9]</a>, resp. $\le \tfrac{3}{2}$-násobkem <a href="l3-10.html">[L3.10]</a>.</li>
@@ -162,7 +162,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Důkazová mini-úloha: rozepsat jednu větu slidu 25 do plného argumentu a vyjasnit si, které předpoklady krok skutečně spotřebuje. U zkoušky je to bod 2 důkazů faktorů 2 i 3/2 — nestačí ho odcitovat, chtějí slyšet <em>proč</em>.</p>
+      <p>Důkazová mini-úloha: rozepsat jednu větu slidu 25 do plného argumentu a vyjasnit si, které předpoklady krok skutečně spotřebuje. U&nbsp;zkoušky je to bod 2 důkazů faktorů 2 i&nbsp;3/2 — nestačí ho odcitovat, chtějí slyšet <em>proč</em>.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -173,15 +173,15 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>(i) Začni u optimálního okruhu $H^*$ — jediného objektu, o kterém něco víš (má $n$ hran, je souvislý, jeho cena JE $\mathrm{OPT}$). Odeber hranu, pojmenuj, co zbylo, a srovnej to s MST. (ii) Projdi řetízek nerovností a u každé se ptej „co ji drží?“. (iii) Udělej inventuru použitých předpokladů — je mezi nimi trojúhelníková nerovnost?</p>
+      <p>(i) Začni u optimálního okruhu $H^*$ — jediného objektu, o kterém něco víš (má $n$ hran, je souvislý, jeho cena JE $\mathrm{OPT}$). Odeber hranu, pojmenuj, co zbylo, a srovnej to s&nbsp;MST. (ii) Projdi řetízek nerovností a u každé se ptej „co ji drží?“. (iii) Udělej inventuru použitých předpokladů — je mezi nimi trojúhelníková nerovnost?</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní rozepsání jednořádkového argumentu slidu 25)</summary>
         <div class="inner">
-          <p><strong>(i)</strong> Nechť $H^*$ je optimální Hamiltonovský okruh, $c(E(H^*)) = \mathrm{OPT}(K_n, c)$, a $e \in E(H^*)$ libovolná jeho hrana. Podgraf $H^* - e$: obsahuje všech $n$ vrcholů, je souvislý (oba konce $e$ spojuje zbytek okruhu) a má $n - 1$ hran — podle ekvivalencí z <a href="../k0/l0-4.html#takeaways">[L0.4]</a> je to strom na všech vrcholech, tedy <strong>kostra</strong> (konkrétně Hamiltonovská cesta). Protože $T$ je <em>minimální</em> kostra a $H^* - e$ je <em>nějaká</em> kostra:</p>
+          <p><strong>(i)</strong> Nechť $H^*$ je optimální Hamiltonovský okruh, $c(E(H^*)) = \mathrm{OPT}(K_n, c)$, a $e \in E(H^*)$ libovolná jeho hrana. Podgraf $H^* - e$: obsahuje všech $n$ vrcholů, je souvislý (oba konce $e$ spojuje zbytek okruhu) a má $n - 1$ hran — podle ekvivalencí z <a href="../k0/l0-4.html#takeaways">[L0.4]</a> je to strom na&nbsp;všech vrcholech, tedy <strong>kostra</strong> (konkrétně Hamiltonovská cesta). Protože $T$ je <em>minimální</em> kostra a $H^* - e$ je <em>nějaká</em> kostra:</p>
           $$c(E(T)) \;\le\; c(E(H^* - e)) \;=\; \mathrm{OPT}(K_n, c) - c(e) \;\le\; \mathrm{OPT}(K_n, c). \qquad \blacksquare$$
           <p><strong>(ii)</strong> Nezápornost drží <em>poslední</em> nerovnost: $\mathrm{OPT} - c(e) \le \mathrm{OPT}$ platí právě díky $c(e) \ge 0$. V metrickém TSP ji garantuje definice $c : E(K_n) \to \mathbb{R}^+$ <a href="l3-8a.html#takeaways">[L3.8a]</a>. (První nerovnost je čistá minimalita MST, žádné předpoklady o cenách nepotřebuje.)</p>
-          <p><strong>(iii)</strong> Ne — trojúhelníková nerovnost se v důkazu nikde nepoužila. Mez $\mathrm{OPT} \ge c(\mathrm{MST})$ proto platí pro <strong>každou</strong> TSP instanci s nezápornými cenami, i nemetrickou. Metrika je v důkazech faktorů potřeba jinde: v bodu 1 (shortcutting, <a href="l3-8a.html#takeaways">[L3.8a]</a>), který z Eulerovského tahu vyrábí okruh bez zdražení. To je také důvod, proč samotná dolní mez nestačí k aproximaci nemetrického TSP — mez platí, ale levný okruh z kostry už bez metriky vyrobit neumíme (a podle <a href="l3-6.html#takeaways">[L3.6]</a> ani žádná jiná cesta nevede, pokud $P \ne NP$).</p>
+          <p><strong>(iii)</strong> Ne — trojúhelníková nerovnost se v důkazu nikde nepoužila. Mez $\mathrm{OPT} \ge c(\mathrm{MST})$ proto platí pro <strong>každou</strong> TSP instanci s nezápornými cenami, i nemetrickou. Metrika je v důkazech faktorů potřeba jinde: v bodu 1 (shortcutting, <a href="l3-8a.html#takeaways">[L3.8a]</a>), který z Eulerovského tahu vyrábí okruh bez zdražení. To je také důvod, proč samotná dolní mez nestačí k aproximaci nemetrického TSP — mez platí, ale levný okruh z&nbsp;kostry už bez metriky vyrobit neumíme (a podle <a href="l3-6.html#takeaways">[L3.6]</a> ani žádná jiná cesta nevede, pokud $P \ne NP$).</p>
         </div>
       </details>
     </div>
@@ -202,7 +202,7 @@
       </div>
 
       <h4>a) Co je v zadání?</h4>
-      <p>Početní procvičení dnešní meze: spočítat MST Kruskalem, sevřít neznámé $\mathrm{OPT}$ do sendviče mezi dolní mez (MST) a horní mez (libovolný přípustný okruh) a zkontrolovat konzistenci s budoucím faktorem 2.</p>
+      <p>Početní procvičení dnešní meze: spočítat MST Kruskalem, sevřít neznámé $\mathrm{OPT}$ do sendviče mezi dolní mez (MST) a horní mez (libovolný přípustný okruh) a zkontrolovat konzistenci s&nbsp;budoucím faktorem 2.</p>
 
       <h4>b) Co k tomu budeme potřebovat?</h4>
       <ul>
@@ -217,7 +217,7 @@
       <details class="solution">
         <summary>d) Úplné řešení (vlastní)</summary>
         <div class="inner">
-          <p><strong>(a) Kruskal.</strong> Pořadí hran: $BC(1)$; pak čtyři hrany ceny 2 — $AB, AE, BD, CD$ (pořadí remíz libovolné); pak $AC, AD, BE$ (3); $CE$ (4); $DE$ (5). Běh: $BC$ ✓; $AB$ ✓ (spojí $A$ s $B,C$); $AE$ ✓ (připojí $E$); $BD$ ✓ (připojí $D$) — máme 4 hrany, hotovo. $T = \{BC, AB, AE, BD\}$, $c(E(T)) = 1 + 2 + 2 + 2 = \mathbf{7}$. (Při jiném pořadí remíz může vyjít $CD$ místo $BD$ — jiná MST, ale cena je vždy 7 <a href="../k0/l0-5.html#takeaways">[L0.5]</a>.)</p>
+          <p><strong>(a) Kruskal.</strong> Pořadí hran: $BC(1)$; pak čtyři hrany ceny 2 — $AB, AE, BD, CD$ (pořadí remíz libovolné); pak $AC, AD, BE$ (3); $CE$ (4); $DE$ (5). Běh: $BC$ ✓; $AB$ ✓ (spojí $A$ s&nbsp;$B,C$); $AE$ ✓ (připojí $E$); $BD$ ✓ (připojí $D$) — máme 4 hrany, hotovo. $T = \{BC, AB, AE, BD\}$, $c(E(T)) = 1 + 2 + 2 + 2 = \mathbf{7}$. (Při jiném pořadí remíz může vyjít $CD$ místo $BD$ — jiná MST, ale cena je vždy 7 <a href="../k0/l0-5.html#takeaways">[L0.5]</a>.)</p>
           <p><strong>(b) Sendvič.</strong> Dolní mez (dnešní věta): $\mathrm{OPT} \ge c(E(T)) = 7$. Horní mez: $H$ je přípustný Hamiltonovský okruh a $\mathrm{OPT}$ je minimum přes všechny okruhy, takže $\mathrm{OPT} \le c(H) = 12$. Celkem</p>
           $$7 \;\le\; \mathrm{OPT}(K_5, c) \;\le\; 12.$$
           <p><em>(Pro kontrolu — enumerace všech 12 okruhů, kterou úloha nechtěla, dává $\mathrm{OPT} = 11$ pro okruh $A,D,C,B,E,A$; obě meze sedí.)</em></p>
