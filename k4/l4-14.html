@@ -33,23 +33,23 @@
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
-    Maximální tok umíš zapsat jako LP <a href="l4-1.html#takeaways">[L4.1]</a>. Dnes z něj uděláš <strong>ILP</strong> a přidáš do něj <em>logiku</em>: indikátor použití hrany, prahy „když, tak aspoň…“, povinné hrany, liché hodnoty toku a OR/implikace — vším, co už znáš z K1 (binární přepínače <a href="../k1/l1-5.html#takeaways">[L1.5]</a>, big-M <a href="../k1/l1-4.html#takeaways">[L1.4]</a>, logické formule <a href="../k1/l1-3.html#takeaways">[L1.3]</a>). Tedy omezení, která čistá síť (a Ford-Fulkerson) z principu neumí.
+    Maximální tok umíš zapsat jako LP <a href="l4-1.html#takeaways">[L4.1]</a>. Dnes z&nbsp;něj uděláš <strong>ILP</strong> a přidáš do něj <em>logiku</em>: indikátor použití hrany, prahy „když, tak aspoň…“, povinné hrany, liché hodnoty toku a OR/implikace — vším, co už znáš z&nbsp;K1 (binární přepínače <a href="../k1/l1-5.html#takeaways">[L1.5]</a>, big-M <a href="../k1/l1-4.html#takeaways">[L1.4]</a>, logické formule <a href="../k1/l1-3.html#takeaways">[L1.3]</a>). Tedy omezení, která čistá síť (a Ford-Fulkerson) z&nbsp;principu neumí.
   </div>
 
-  <p>Tohle je doložená zkoušková kombinace dvou slotů: vezmi tok z K4 a modeluj nad ním jako v K1. Studentské přepisy zkoušek 2023 ji popisují takhle (obojí CZ zápisky, 1:1):</p>
+  <p>Tohle je doložená zkoušková kombinace dvou slotů: vezmi tok z&nbsp;K4 a modeluj nad ním jako v&nbsp;K1. Studentské přepisy zkoušek 2023 ji popisují takhle (obojí CZ zápisky, 1:1):</p>
 
   <div class="box">
-    <div class="box-title">Doloženo u zkoušek 2023 (přepisy studentů, 1:1)</div>
-    <p><em>„5. ILP pro max flow plus extra podminky (formulace logickych podminek typu OR, implikace, atd. podobne jako u toho ILP s investicema do baraku)“</em> — termín 12.6.2023.</p>
+    <div class="box-title">Doloženo u&nbsp;zkoušek 2023 (přepisy studentů, 1:1)</div>
+    <p><em>„5. ILP pro max flow plus extra podminky (formulace logickych podminek typu OR, implikace, atd. podobne jako u toho ILP s investicema do baraku)“</em> — termín 12.&nbsp;6.&nbsp;2023.</p>
     <p><em>„1. ILP formulace max flow s extra podmínkami (např. přes množinu M, liché hodnoty, $y$ větší než 1 pokud je $x$ nenulové,...)“</em> — Termín A.</p>
   </div>
 
   <p>„ILP s investicema do baráků“ je Real Estate Investment ze slidů 02_ILP — přesně ten, na kterém stojí <a href="../k1/l1-3.html#takeaways">[L1.3]</a>. Nic nového se tedy učit nebudeš: nová je jen <em>kombinace</em> — proměnné nejsou binární volby domů, ale toky $f(e)$ na hranách.</p>
 
   <!-- ===== SEKCE 1: KOSTRA ===== -->
-  <h2>Kostra: max-flow LP z [L4.1]</h2>
+  <h2>Kostra: max-flow LP z&nbsp;[L4.1]</h2>
 
-  <p>Základ modelu je pořád stejný — LP ze slidu 8, které jsme odvodili v <a href="l4-1.html#takeaways">[L4.1]</a> (tady jen připomenutí, ne nový výklad): proměnná $f(e)$ pro každou hranu, Kirchhoff <a href="l4-1.html#takeaways">[L4.1]</a> v každém vnitřním vrcholu, meze na hranách:</p>
+  <p>Základ modelu je pořád stejný — LP ze slidu 8, které jsme odvodili v&nbsp;<a href="l4-1.html#takeaways">[L4.1]</a> (tady jen připomenutí, ne nový výklad): proměnná $f(e)$ pro každou hranu, Kirchhoff <a href="l4-1.html#takeaways">[L4.1]</a> v&nbsp;každém vnitřním vrcholu, meze na hranách:</p>
 
   <p>$$
   \begin{aligned}
@@ -60,16 +60,16 @@
   $$</p>
 
   <details class="try">
-    <summary>Zkus sám: tohle LP vyřeší Ford-Fulkerson <a href="l4-3.html#takeaways">[L4.3]</a>. Které z následujících čtyř požadavků zvládne síť „sama o sobě“ (jen volbou $l, u$) — a které už ne? ① hranou $e$ musí téct aspoň jedna jednotka; ② tok na $e$ musí být <em>lichý</em>; ③ když se $e$ použije, musí nést aspoň 2 jednotky; ④ použije se hrana $e_1$, nebo $e_2$, ale ne obě.</summary>
+    <summary>Zkus sám: tohle LP vyřeší Ford-Fulkerson <a href="l4-3.html#takeaways">[L4.3]</a>. Které z&nbsp;následujících čtyř požadavků zvládne síť „sama o&nbsp;sobě“ (jen volbou $l, u$) — a které už ne? ① hranou $e$ musí téct aspoň jedna jednotka; ② tok na $e$ musí být <em>lichý</em>; ③ když se $e$ použije, musí nést aspoň 2 jednotky; ④ použije se hrana $e_1$, nebo $e_2$, ale ne obě.</summary>
     <div class="inner">
-      <p>Jen ①: „aspoň jedna jednotka“ je obyčejná dolní mez $l(e) = 1$ — tu má síť v definici od začátku (<a href="l4-1.html#takeaways">[L4.1]</a>, a jak s ní FF startuje, řeší <a href="l4-7.html#takeaways">[L4.7]</a>). Zbylé tři jsou <em>logika</em>: ② lichost není interval, ③ je podmíněný požadavek „když…, tak…“ (množina přípustných hodnot $\{0\} \cup [2, u]$ — díra uprostřed!), ④ je XOR mezi hranami. Množiny přípustných řešení přestávají být „krabice“ $l \le f \le u$ — a přesně tam končí FF a začíná ILP.</p>
+      <p>Jen ①: „aspoň jedna jednotka“ je obyčejná dolní mez $l(e) = 1$ — tu má síť v&nbsp;definici od začátku (<a href="l4-1.html#takeaways">[L4.1]</a>, a jak s&nbsp;ní FF startuje, řeší <a href="l4-7.html#takeaways">[L4.7]</a>). Zbylé tři jsou <em>logika</em>: ② lichost není interval, ③ je podmíněný požadavek „když…, tak…“ (množina přípustných hodnot $\{0\} \cup [2, u]$ — díra uprostřed!), ④ je XOR mezi hranami. Množiny přípustných řešení přestávají být „krabice“ $l \le f \le u$ — a přesně tam končí FF a začíná ILP.</p>
     </div>
   </details>
 
   <!-- ===== SEKCE 2: Z LP NA ILP ===== -->
   <h2>Krok 1: prohlásit tok za ILP</h2>
 
-  <p>První věta každého řešení: <strong>proměnné prohlásíme za celočíselné</strong>, $f(e) \in \mathbb{Z}^+_0$. U čistého max flow to nic nezmění — celočíselné optimum existuje zadarmo (Integral Flow Theorem, citovali jsme v <a href="l4-5.html#takeaways">[L4.5]</a>; plyne z totální unimodularity incidenční matice <a href="../k3/l3-12.html#takeaways">[L3.12]</a>). Jakmile ale přidáš binární přepínače a big-M, tahle pěkná struktura se rozbije a celočíselnost už <em>není</em> automatická — musí být v modelu napsaná a úlohu řeší ILP solver, ne Ford-Fulkerson.</p>
+  <p>První věta každého řešení: <strong>proměnné prohlásíme za celočíselné</strong>, $f(e) \in \mathbb{Z}^+_0$. U&nbsp;čistého max flow to nic nezmění — celočíselné optimum existuje zadarmo (Integral Flow Theorem, citovali jsme v&nbsp;<a href="l4-5.html#takeaways">[L4.5]</a>; plyne z&nbsp;totální unimodularity incidenční matice <a href="../k3/l3-12.html#takeaways">[L3.12]</a>). Jakmile ale přidáš binární přepínače a big-M, tahle pěkná struktura se rozbije a celočíselnost už <em>není</em> automatická — musí být v&nbsp;modelu napsaná a úlohu řeší ILP solver, ne Ford-Fulkerson.</p>
 
   <!-- ===== SEKCE 3: KATALOG ===== -->
   <h2>Katalog: logika nad tokem</h2>
@@ -79,9 +79,9 @@
   <h3>① Indikátor: $y_e = 1 \iff$ hranou něco teče</h3>
 
   <details class="try">
-    <summary>Zkus sám: zaveď binární $y_e \in \{0,1\}$, která má hlásit „hrana $e$ je použitá“ ($f(e) &gt; 0$). Jak ji svážeš s $f(e)$ — a jaké big-M je tady to přirozené? (Vzpomeň na aktivaci z <a href="../k1/l1-5.html#takeaways">[L1.5]</a>: stroj se pronajme, právě když se produkt vyrábí.)</summary>
+    <summary>Zkus sám: zaveď binární $y_e \in \{0,1\}$, která má hlásit „hrana $e$ je použitá“ ($f(e) &gt; 0$). Jak ji svážeš s&nbsp;$f(e)$ — a jaké big-M je tady to přirozené? (Vzpomeň na aktivaci z&nbsp;<a href="../k1/l1-5.html#takeaways">[L1.5]</a>: stroj se pronajme, právě když se produkt vyrábí.)</summary>
     <div class="inner">
-      <p>Stejná dvojice nerovností jako u stroje ze slidu 35 ($x_i \le 100 y_i$, $x_i \ge y_i$):</p>
+      <p>Stejná dvojice nerovností jako u&nbsp;stroje ze slidu 35 ($x_i \le 100 y_i$, $x_i \ge y_i$) — pozor, na rozdíl od slidu 35 druhou nerovnost $f(e) \ge y_e$ <em>nelze</em> vypustit: indikátor $y_e$ tu na rozdíl od onoho slidu není penalizován v&nbsp;účelové funkci, takže ho do jedničky musíme vynutit explicitně:</p>
       <p>$$f(e) \le u(e) \cdot y_e, \qquad f(e) \ge y_e.$$</p>
       <p>První říká „$y_e = 0 \Rightarrow f(e) = 0$“, tedy obměnou „$f(e) &gt; 0 \Rightarrow y_e = 1$“ (to je přesně to zkouškové <em>„$y$ větší než $1$ pokud je $x$ nenulové“</em> — přesněji $y_e \ge 1$, tj. $y_e = 1$). Druhá vynucuje opačný směr „$y_e = 1 \Rightarrow f(e) \ge 1$“; funguje, protože tok je celočíselný. A přirozené big-M je <strong>kapacita hrany $u(e)$</strong> — víc než $u(e)$ stejně téct nemůže, takže $f(e) \le u(e) y_e$ pro $y_e = 1$ nic nepřidává a pro $y_e = 0$ vypne hranu.</p>
     </div>
@@ -89,56 +89,56 @@
 
   <h3>② Práh: „když se hrana použije, ať nese aspoň $L$“</h3>
 
-  <p>Stačí v indikátorové dvojici zesílit druhou nerovnost:</p>
+  <p>Stačí v&nbsp;indikátorové dvojici zesílit druhou nerovnost:</p>
 
   <p>$$f(e) \le u(e) \cdot y_e, \qquad f(e) \ge L \cdot y_e.$$</p>
 
-  <p>Pro $y_e = 0$ je $f(e) = 0$, pro $y_e = 1$ je $L \le f(e) \le u(e)$. Přípustné hodnoty: $\{0\} \cup [L, u(e)]$ — nekonvexní množina s dírou, kterou LP samo popsat neumí (stejný jev jako u fixed-charge <a href="../k1/l1-6.html#takeaways">[L1.6]</a>).</p>
+  <p>Pro $y_e = 0$ je $f(e) = 0$, pro $y_e = 1$ je $L \le f(e) \le u(e)$. Přípustné hodnoty: $\{0\} \cup [L, u(e)]$ — nekonvexní množina s&nbsp;dírou, kterou LP samo popsat neumí (stejný jev jako u&nbsp;fixed-charge <a href="../k1/l1-6.html#takeaways">[L1.6]</a>).</p>
 
   <h3>③ Tok musí projít množinou $M$</h3>
 
   <details class="try">
-    <summary>Zkus sám: „tok musí projít hranou $e_0$“ — potřebuješ na to vůbec ILP? A co „tok musí projít vrcholem $v_0$“ nebo „aspoň jednou hranou z množiny $M$“?</summary>
+    <summary>Zkus sám: „tok musí projít hranou $e_0$“ — potřebuješ na to vůbec ILP? A co „tok musí projít vrcholem $v_0$“ nebo „aspoň jednou hranou z&nbsp;množiny $M$“?</summary>
     <div class="inner">
-      <p>Povinná <em>jedna konkrétní hrana</em> je nejlehčí případ z celé lekce: $f(e_0) \ge 1$ — to je obyčejná dolní mez $l(e_0) = 1$, čistá síť (viz try výše). Povinný <em>vrchol</em> $v_0$: aspoň jednotka musí do $v_0$ vtéct, $\sum_{e \in \delta^-(v_0)} f(e) \ge 1$ (díky Kirchhoffovi pak i vytéct). Ale „aspoň jedna hrana <strong>z množiny</strong> $M$“ už je OR — přes indikátory z bodu ①:</p>
+      <p>Povinná <em>jedna konkrétní hrana</em> je nejlehčí případ z&nbsp;celé lekce: $f(e_0) \ge 1$ — to je obyčejná dolní mez $l(e_0) = 1$, čistá síť (viz try výše). Povinný <em>vrchol</em> $v_0$: aspoň jednotka musí do $v_0$ vtéct, $\sum_{e \in \delta^-(v_0)} f(e) \ge 1$ (díky Kirchhoffovi pak i vytéct). Ale „aspoň jedna hrana <strong>z&nbsp;množiny</strong> $M$“ už je OR — přes indikátory z&nbsp;bodu ①:</p>
       <p>$$\sum_{e \in M} y_e \ge 1.$$</p>
-      <p>Pozor na rozdíl: $\sum_{e \in M} f(e) \ge 1$ by povolilo „rozdrobit“ jednotku na poloviny mezi víc hran, kdyby tok nebyl celočíselný — s indikátory a celočíselností je sémantika čistá. (A „každou hranou z $M$“ = $f(e) \ge 1$ pro všechna $e \in M$, zase jen dolní meze.)</p>
+      <p>Pozor na rozdíl: $\sum_{e \in M} f(e) \ge 1$ by povolilo „rozdrobit“ jednotku na poloviny mezi víc hran, kdyby tok nebyl celočíselný — s&nbsp;indikátory a celočíselností je sémantika čistá. (A „každou hranou z&nbsp;$M$“ = $f(e) \ge 1$ pro všechna $e \in M$, zase jen dolní meze.)</p>
     </div>
   </details>
 
   <h3>④ Liché hodnoty toku</h3>
 
   <details class="try">
-    <summary>Zkus sám: jak zapíšeš lineárně „$f(e)$ je liché“? Nápověda: lichá čísla jsou $1, 3, 5, \ldots$ — umíš je všechna vyrobit z jedné celočíselné proměnné?</summary>
+    <summary>Zkus sám: jak zapíšeš lineárně „$f(e)$ je liché“? Nápověda: lichá čísla jsou $1, 3, 5, \ldots$ — umíš je všechna vyrobit z&nbsp;jedné celočíselné proměnné?</summary>
     <div class="inner">
       <p>Zavedeš novou <strong>celočíselnou</strong> pomocnou proměnnou $k_e$ a napíšeš lichost jako rovnost:</p>
       <p>$$f(e) = 2k_e + 1, \qquad k_e \in \mathbb{Z}^+_0.$$</p>
-      <p>Žádná nerovnost s big-M — parita se kóduje <em>substitucí</em>. Klíčové je $k_e \in \mathbb{Z}$: bez celočíselnosti $k_e$ rovnost nic neříká ($k_e = 0{,}75$ by „povolilo“ $f(e) = 2{,}5$). Sudost by analogicky byla $f(e) = 2k_e$. Tohle je ukázkový příklad omezení, které síťový algoritmus nemůže umět nikdy — FF augmentuje po cestách a o paritě jednotlivé hrany nemá ponětí.</p>
+      <p>Žádná nerovnost s&nbsp;big-M — parita se kóduje <em>substitucí</em>. Klíčové je $k_e \in \mathbb{Z}$: bez celočíselnosti $k_e$ rovnost nic neříká ($k_e = 0{,}75$ by „povolilo“ $f(e) = 2{,}5$). Sudost by analogicky byla $f(e) = 2k_e$. Tohle je ukázkový příklad omezení, které síťový algoritmus nemůže umět nikdy — FF augmentuje po cestách a o&nbsp;paritě jednotlivé hrany nemá ponětí.</p>
     </div>
   </details>
 
   <h3>⑤ Logika mezi hranami: implikace, XOR, OR</h3>
 
-  <p>Jakmile máš indikátory $y_e$, je zbytek doslova <a href="../k1/l1-3.html#takeaways">[L1.3]</a> (tam s domy, tady s hranami):</p>
+  <p>Jakmile máš indikátory $y_e$, je zbytek doslova <a href="../k1/l1-3.html#takeaways">[L1.3]</a> (tam s&nbsp;domy, tady s&nbsp;hranami):</p>
 
   <ul>
     <li><strong>Implikace</strong> „použiješ-li $e_1$, použij i $e_2$“: $y_{e_1} \le y_{e_2}$.</li>
     <li><strong>Zákaz kombinace</strong> „$e_1$ a $e_2$ ne současně“: $y_{e_1} + y_{e_2} \le 1$.</li>
-    <li><strong>XOR</strong> „právě jedna z $e_1, e_2$“: $y_{e_1} + y_{e_2} = 1$.</li>
+    <li><strong>XOR</strong> „právě jedna z&nbsp;$e_1, e_2$“: $y_{e_1} + y_{e_2} = 1$.</li>
     <li><strong>OR mezi celými nerovnostmi</strong> (např. „$f(e_1) + f(e_2) \le 3$ <em>nebo</em> $f(e_3) \ge 2$“): big-M přepínač přesně podle slidu 37 a <a href="../k1/l1-4.html#takeaways">[L1.4]</a> — ke každé nerovnosti $+M y$ resp. $+M(1-y)$.</li>
   </ul>
 
   <!-- ===== SEKCE 4: PŘÍKLAD ===== -->
-  <h2>Příklad: co logika udělá s optimem</h2>
+  <h2>Příklad: co logika udělá s&nbsp;optimem</h2>
 
-  <p>Zkouškové znění se nedochovalo s konkrétním grafem (viz T01) — následující čtyřvrcholová síť je naše vlastní, abychom efekt logických omezení viděli na číslech:</p>
+  <p>Zkouškové znění se nedochovalo s&nbsp;konkrétním grafem (viz T01) — následující čtyřvrcholová síť je naše vlastní, abychom efekt logických omezení viděli na číslech:</p>
 
   <div class="viz" id="viz-logic"></div>
 
   <details class="try">
     <summary>Zkus sám: než kliknutím projdeš stepper — čistý max flow je 5. Oč klesne optimum, když přidáš ③-styl podmínku „když se $a \to b$ použije, ať nese aspoň 2“? Rozeber obě hodnoty přepínače $y_{ab}$.</summary>
     <div class="inner">
-      <p>Na 4. <strong>Větev $y_{ab} = 0$</strong> ($f(a{\to}b) = 0$): přes $a$ proteče nejvýš $u(a{\to}t) = 2$, přes $b$ nejvýš $u(s{\to}b) = 2$, celkem 4. <strong>Větev $y_{ab} = 1$</strong> ($f(a{\to}b) \ge 2$): do $a$ vteče nejvýš 3, z toho aspoň 2 odbočí do $b$, takže $f(a{\to}t) \le 1$; do $b$ vteče $f(s{\to}b) + f(a{\to}b) \le 2 + 2$, ale ven smí jen $u(b{\to}t) = 3$ — celkem $1 + 3 = 4$. Maximum z obou větví: $\mathbf{4}$. Jediná hodnota, kterou logika zakázala, je přitom $f(a{\to}b) = 1$ — a přesně na ní stálo optimum 5.</p>
+      <p>Na 4. <strong>Větev $y_{ab} = 0$</strong> ($f(a{\to}b) = 0$): přes $a$ proteče nejvýš $u(a{\to}t) = 2$, přes $b$ nejvýš $u(s{\to}b) = 2$, celkem 4. <strong>Větev $y_{ab} = 1$</strong> ($f(a{\to}b) \ge 2$): do $a$ vteče nejvýš 3, z&nbsp;toho aspoň 2 odbočí do $b$, takže $f(a{\to}t) \le 1$; do $b$ vteče $f(s{\to}b) + f(a{\to}b) \le 2 + 2$, ale ven smí jen $u(b{\to}t) = 3$ — celkem $1 + 3 = 4$. Maximum z&nbsp;obou větví: $\mathbf{4}$. Jediná hodnota, kterou logika zakázala, je přitom $f(a{\to}b) = 1$ — a přesně na ní stálo optimum 5.</p>
     </div>
   </details>
 
@@ -146,20 +146,20 @@
 
   <div class="box danger">
     <div class="box-title"><img src="../assets/icons/alert-triangle.svg" class="ico" alt="">Nebezpečné polopravdy</div>
-    <p><strong>1) Ostrá nerovnost „$f(e) &gt; 0$“ v (I)LP neexistuje.</strong> Piš $f(e) \ge 1$ (celočíselný tok), resp. $f(e) \ge \varepsilon$ u spojitého — viz <a href="../k1/l1-5.html#takeaways">[L1.5]</a>.
-    <strong>2) Big-M u toků není „libovolně velké číslo“:</strong> přirozená a nejtěsnější volba je $M = u(e)$. Když je $u(e) = \infty$, musíš $M$ stejně konečně omezit (např. $\sum_{e \in \delta^+(s)} u(e)$ — víc než celý tok hranou nepoteče).
-    <strong>3) „Tok vyjde celočíselně zadarmo“ po přidání logiky UŽ NEPLATÍ.</strong> Integralita z TUM <a href="../k3/l3-12.html#takeaways">[L3.12]</a> se týká čisté tokové matice; big-M řádky a pomocné proměnné ji rozbijí — celočíselnost $f$, $y$, $k$ <em>deklaruj</em> a počítej s tím, že LP relaxace může vyjít zlomkově.
-    <strong>4) Tohle už neřeší Ford-Fulkerson.</strong> FF je správný pro čistý max flow; s logikou je úloha obecné ILP (a obecné ILP je NP-těžké) — u zkoušky se chce <em>formulace</em>, ne běh algoritmu.</p>
+    <p><strong>1) Ostrá nerovnost „$f(e) &gt; 0$“ v&nbsp;(I)LP neexistuje.</strong> Piš $f(e) \ge 1$ (celočíselný tok), resp. $f(e) \ge \varepsilon$ u&nbsp;spojitého — viz <a href="../k1/l1-5.html#takeaways">[L1.5]</a>.
+    <strong>2) Big-M u&nbsp;toků není „libovolně velké číslo“:</strong> přirozená a nejtěsnější volba je $M = u(e)$. Když je $u(e) = \infty$, musíš $M$ stejně konečně omezit (např. $\sum_{e \in \delta^+(s)} u(e)$ — víc než celý tok hranou nepoteče).
+    <strong>3) „Tok vyjde celočíselně zadarmo“ po přidání logiky UŽ NEPLATÍ.</strong> Integralita z&nbsp;TUM <a href="../k3/l3-12.html#takeaways">[L3.12]</a> se týká čisté tokové matice; big-M řádky a pomocné proměnné ji rozbijí — celočíselnost $f$, $y$, $k$ <em>deklaruj</em> a počítej s&nbsp;tím, že LP relaxace může vyjít zlomkově.
+    <strong>4) Tohle už neřeší Ford-Fulkerson.</strong> FF je správný pro čistý max flow; s&nbsp;logikou je úloha obecné ILP (a obecné ILP je NP-těžké) — u&nbsp;zkoušky se chce <em>formulace</em>, ne běh algoritmu.</p>
   </div>
 
   <!-- ===== KEY TAKEAWAYS ===== -->
   <div class="box takeaways" id="takeaways">
     <div class="box-title"><img src="../assets/icons/key-round.svg" class="ico" alt="">Key takeaways — L4.14</div>
     <ul>
-      <li><strong>Tok jako ILP:</strong> kostra = max-flow LP <a href="l4-1.html#takeaways">[L4.1]</a> (Kirchhoff + meze) + deklarace $f(e) \in \mathbb{Z}^+_0$. Bez logiky se nic nemění (integralita zadarmo <a href="../k3/l3-12.html#takeaways">[L3.12]</a>), s logikou je celočíselnost povinná a řeší se solverem, ne FF.</li>
+      <li><strong>Tok jako ILP:</strong> kostra = max-flow LP <a href="l4-1.html#takeaways">[L4.1]</a> (Kirchhoff + meze) + deklarace $f(e) \in \mathbb{Z}^+_0$. Bez logiky se nic nemění (integralita zadarmo <a href="../k3/l3-12.html#takeaways">[L3.12]</a>), s&nbsp;logikou je celočíselnost povinná a řeší se solverem, ne FF.</li>
       <li><strong>Indikátor použití hrany:</strong> $f(e) \le u(e)\,y_e$ a $f(e) \ge y_e$, $y_e \in \{0,1\}$ — kapacita $u(e)$ je přirozené big-M. Práh „když, tak aspoň $L$“: $f(e) \ge L\,y_e$.</li>
-      <li><strong>Průchod množinou $M$:</strong> povinná hrana = dolní mez $f(e) \ge 1$ (to umí i čistá síť!); povinný vrchol = $\sum_{\delta^-(v)} f \ge 1$; „aspoň jedna z $M$“ = $\sum_{e \in M} y_e \ge 1$.</li>
-      <li><strong>Lichý tok:</strong> $f(e) = 2k_e + 1$, $k_e \in \mathbb{Z}^+_0$ — parita se kóduje substitucí s novou celočíselnou proměnnou, ne big-M.</li>
+      <li><strong>Průchod množinou $M$:</strong> povinná hrana = dolní mez $f(e) \ge 1$ (to umí i čistá síť!); povinný vrchol = $\sum_{\delta^-(v)} f \ge 1$; „aspoň jedna z&nbsp;$M$“ = $\sum_{e \in M} y_e \ge 1$.</li>
+      <li><strong>Lichý tok:</strong> $f(e) = 2k_e + 1$, $k_e \in \mathbb{Z}^+_0$ — parita se kóduje substitucí s&nbsp;novou celočíselnou proměnnou, ne big-M.</li>
       <li><strong>Logika mezi hranami</strong> = <a href="../k1/l1-3.html#takeaways">[L1.3]</a> nad indikátory ($y_{e_1} \le y_{e_2}$, XOR $y_{e_1}+y_{e_2}=1$, …); OR mezi nerovnostmi = big-M <a href="../k1/l1-4.html#takeaways">[L1.4]</a>.</li>
     </ul>
   </div>
@@ -184,10 +184,10 @@
         <p><em>State all additional variables and big-$M$ constants needed.</em></p>
       </div>
 
-      <h4>a) Co je v zadání?</h4>
+      <h4>a) Co je v&nbsp;zadání?</h4>
       <p>Formulační úloha bez konkrétního grafu: napsat max-flow ILP a pak po jednom přeložit čtyři logické požadavky. Pozn. ke zdroji: banka přiznává, že přesné originální znění zkoušky se nedochovalo — tohle je její kanonická rekonstrukce podle přepisů termínů 2023 („přes množinu M, liché hodnoty, $y$ … pokud je $x$ nenulové“); řešení níže je naše vlastní (banka úlohu vede jako <em>Unsolved</em>).</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — celý katalog ①–⑤ (<a href="#takeaways">takeaways</a>).</li>
         <li><a href="l4-1.html#takeaways">[L4.1] Síť, tok, Kirchhoffův zákon</a> — max-flow LP.</li>
@@ -196,7 +196,7 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>Drž pevné pořadí: ① kostra (proměnné, účelová funkce, Kirchhoff, meze) + věta o celočíselnosti; ② ke každému požadavku <em>nejdřív</em> řekni, jaké nové proměnné zavádíš a co znamenají, <em>pak</em> napiš nerovnosti a u každé jednou větou ověř oba směry (co dělá pro $y = 0$, co pro $y = 1$). Big-M nikdy nenech „nějaké velké“ — pojmenuj ho: $M = u(e)$. A nezapomeň na poslední větu zadání — výčet všech pomocných proměnných a konstant je explicitní odevzdávka.</p>
+      <p>Drž pevné pořadí: ① kostra (proměnné, účelová funkce, Kirchhoff, meze) + věta o&nbsp;celočíselnosti; ② ke každému požadavku <em>nejdřív</em> řekni, jaké nové proměnné zavádíš a co znamenají, <em>pak</em> napiš nerovnosti a u&nbsp;každé jednou větou ověř oba směry (co dělá pro $y = 0$, co pro $y = 1$). Big-M nikdy nenech „nějaké velké“ — pojmenuj ho: $M = u(e)$. A nezapomeň na poslední větu zadání — výčet všech pomocných proměnných a konstant je explicitní odevzdávka.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní — přiznáno; banka řešení neuvádí)</summary>
@@ -209,22 +209,22 @@
           & l(e) \le f(e) \le u(e), \quad f(e) \in \mathbb{Z}^+_0 & e \in E(G)
           \end{aligned}
           $$</p>
-          <p>Bez dalších omezení by stačilo LP (celočíselné optimum existuje díky totální unimodularitě <a href="../k3/l3-12.html#takeaways">[L3.12]</a>); s logickými omezeními níže je celočíselnost nutné deklarovat.</p>
+          <p>Bez dalších omezení by stačilo LP (celočíselné optimum existuje díky totální unimodularitě <a href="../k3/l3-12.html#takeaways">[L3.12]</a>); s&nbsp;logickými omezeními níže je celočíselnost nutné deklarovat.</p>
           <p><strong>② Indikátor $y_e \iff f(e) &gt; 0$.</strong> Nová proměnná $y_e \in \{0,1\}$ pro každou sledovanou hranu:</p>
           <p>$$f(e) \le u(e) \cdot y_e, \qquad f(e) \ge y_e.$$</p>
           <p>První nerovnost: $f(e) &gt; 0 \Rightarrow y_e = 1$ (big-M je tu kapacita, $M = u(e)$; pro $u(e) = \infty$ vezmi $M = \sum_{e' \in \delta^+(s)} u(e')$). Druhá: $y_e = 1 \Rightarrow f(e) \ge 1$ (platí díky celočíselnosti $f$). Dohromady $y_e = 1 \iff f(e) \ge 1$.</p>
-          <p><strong>③ Práh při použití hrany.</strong> Pro hranu $e$ s prahem $L_e &gt; 0$ (tatáž $y_e$):</p>
+          <p><strong>③ Práh při použití hrany.</strong> Pro hranu $e$ s&nbsp;prahem $L_e &gt; 0$ (tatáž $y_e$):</p>
           <p>$$f(e) \le u(e) \cdot y_e, \qquad f(e) \ge L_e \cdot y_e.$$</p>
           <p>Přípustné hodnoty $f(e) \in \{0\} \cup [L_e, u(e)]$: buď hrana neteče vůbec, nebo aspoň $L_e$.</p>
           <p><strong>④ Průchod množinou $M$.</strong> Tři varianty podle čtení zadání:</p>
           <ul>
             <li>každou hranou $e \in M$: $f(e) \ge 1$ pro všechna $e \in M$ (jen dolní meze, $l(e) := 1$);</li>
-            <li>aspoň jednou hranou z $M$: $\sum_{e \in M} y_e \ge 1$ s indikátory z bodu ②;</li>
+            <li>aspoň jednou hranou z $M$: $\sum_{e \in M} y_e \ge 1$ s&nbsp;indikátory z&nbsp;bodu ②;</li>
             <li>vrcholem $v \in M$: $\sum_{e \in \delta^-(v)} f(e) \ge 1$ (Kirchhoff pak zaručí i výtok).</li>
           </ul>
           <p><strong>⑤ Liché hodnoty toku.</strong> Pro každou vybranou hranu $e$ nová celočíselná proměnná $k_e$:</p>
           <p>$$f(e) = 2k_e + 1, \qquad k_e \in \mathbb{Z}^+_0.$$</p>
-          <p><strong>Výčet (poslední věta zadání):</strong> pomocné proměnné $y_e \in \{0,1\}$ (indikátory použití, body ②③④) a $k_e \in \mathbb{Z}^+_0$ (parita, bod ⑤); konstanty $M = u(e)$ u každé indikátorové nerovnosti (u nekonečné kapacity $M = \sum_{e' \in \delta^+(s)} u(e')$), prahy $L_e$ ze zadání. Úloha se po přidání těchto omezení řeší jako obecné ILP — Ford-Fulkerson na ni nestačí.</p>
+          <p><strong>Výčet (poslední věta zadání):</strong> pomocné proměnné $y_e \in \{0,1\}$ (indikátory použití, body ②③④) a $k_e \in \mathbb{Z}^+_0$ (parita, bod ⑤); konstanty $M = u(e)$ u&nbsp;každé indikátorové nerovnosti (u&nbsp;nekonečné kapacity $M = \sum_{e' \in \delta^+(s)} u(e')$), prahy $L_e$ ze zadání. Úloha se po přidání těchto omezení řeší jako obecné ILP — Ford-Fulkerson na ni nestačí.</p>
         </div>
       </details>
     </div>
@@ -244,10 +244,10 @@
         <p><em>(i) Formulate the maximum flow problem as an ILP and find the maximum flow value. (ii) Add the constraint „if arc $(a,b)$ carries any flow, it must carry at least 2 units“ — write the constraints and find the new optimum. (iii) Instead, add the constraint „the flow on arc $(s,b)$ must be an odd integer“ — write the constraints and find the new optimum. (iv) For both cases explain why Ford-Fulkerson cannot be used directly.</em></p>
       </div>
 
-      <h4>a) Co je v zadání?</h4>
-      <p>Konkrétní pětihranná síť z lekce. Postupně: čistý max flow (i), prahová logika na $a \to b$ (ii), parita na $s \to b$ (iii) a zdůvodnění, proč je to po přidání logiky jiná třída úloh (iv).</p>
+      <h4>a) Co je v&nbsp;zadání?</h4>
+      <p>Konkrétní pětihranná síť z&nbsp;lekce. Postupně: čistý max flow (i), prahová logika na $a \to b$ (ii), parita na $s \to b$ (iii) a zdůvodnění, proč je to po přidání logiky jiná třída úloh (iv).</p>
 
-      <h4>b) Co k tomu budeme potřebovat?</h4>
+      <h4>b) Co k&nbsp;tomu budeme potřebovat?</h4>
       <ul>
         <li>Tato lekce — katalog ②④ a příklad (<a href="#takeaways">takeaways</a>).</li>
         <li><a href="l4-1.html#takeaways">[L4.1]</a> — LP kostra a hodnota toku $|f|$.</li>
@@ -255,7 +255,7 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>(i) najdi tok i řez stejné hodnoty. (ii) rozeber obě hodnoty přepínače $y_{ab}$ zvlášť — v každé větvi je to zase obyčejný max flow s upravenými mezemi, vyhraje lepší větev. (iii) jaké hodnoty vůbec smí $f(s{\to}b)$ mít při $u = 2$? Zbude jediná. (iv) vzpomeň, co přesně FF garantuje a nad jakou množinou přípustných toků pracuje.</p>
+      <p>(i) najdi tok i řez stejné hodnoty. (ii) rozeber obě hodnoty přepínače $y_{ab}$ zvlášť — v&nbsp;každé větvi je to zase obyčejný max flow s&nbsp;upravenými mezemi, vyhraje lepší větev. (iii) jaké hodnoty vůbec smí $f(s{\to}b)$ mít při $u = 2$? Zbude jediná. (iv) vzpomeň, co přesně FF garantuje a nad jakou množinou přípustných toků pracuje.</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní — přiznáno)</summary>
@@ -263,7 +263,7 @@
           <p><strong>(i)</strong> Kostra: $\max f(s{\to}a) + f(s{\to}b)$ za Kirchhoffů $f(s{\to}a) = f(a{\to}t) + f(a{\to}b)$ (vrchol $a$), $f(s{\to}b) + f(a{\to}b) = f(b{\to}t)$ (vrchol $b$), mezí $0 \le f(e) \le u(e)$ a $f(e) \in \mathbb{Z}^+_0$. Optimum $|f| = \mathbf{5}$: $f(s{\to}a) = 3$, $f(a{\to}t) = 2$, $f(a{\to}b) = 1$, $f(s{\to}b) = 2$, $f(b{\to}t) = 3$. Certifikát: řez $A = \{s\}$ má kapacitu $u(s{\to}a) + u(s{\to}b) = 3 + 2 = 5 = |f|$ <a href="l4-4.html#takeaways">[L4.4]</a>.</p>
           <p><strong>(ii)</strong> Nové: $y_{ab} \in \{0,1\}$, $f(a{\to}b) \le 2 y_{ab}$, $f(a{\to}b) \ge 2 y_{ab}$ (zde práh $L = 2 = u(a{\to}b)$, takže se obě slijí do $f(a{\to}b) = 2y_{ab}$, tj. $f(a{\to}b) \in \{0, 2\}$). Větev $y_{ab} = 0$: přes $a$ nejvýš $u(a{\to}t) = 2$, přes $b$ nejvýš $u(s{\to}b) = 2$, celkem 4 (dosažitelné: $2{+}2$). Větev $y_{ab} = 1$: $f(a{\to}t) \le 3 - 2 = 1$ a $f(b{\to}t) \le 3$, celkem $\le 4$ (dosažitelné: $f(s{\to}a)=3$, $f(a{\to}b)=2$, $f(a{\to}t)=1$, $f(s{\to}b)=1$, $f(b{\to}t)=3$). Nové optimum $\mathbf{4}$ — logika stojí jednotku toku, protože zakázala přesně hodnotu $f(a{\to}b) = 1$, na které stálo optimum 5.</p>
           <p><strong>(iii)</strong> Nové: $f(s{\to}b) = 2k + 1$, $k \in \mathbb{Z}^+_0$. Protože $u(s{\to}b) = 2$, jediná lichá přípustná hodnota je $f(s{\to}b) = 1$ (tj. $k = 0$). Pak $|f| = f(s{\to}a) + f(s{\to}b) \le 3 + 1 = 4$, a 4 se dosáhne: $f(s{\to}a) = 3$, $f(a{\to}t) = 2$, $f(a{\to}b) = 1$, $f(s{\to}b) = 1$, $f(b{\to}t) = 2$. Nové optimum $\mathbf{4}$.</p>
-          <p><strong>(iv)</strong> FF je korektní pro přípustné toky tvaru $l \le f \le u$ s Kirchhoffem — augmentace po cestě zachovává přípustnost a věta o maximalitě stojí na reziduálním grafu <a href="l4-2.html#takeaways">[L4.2]</a>. V (ii) je množina přípustných hodnot $f(a{\to}b)$ nekonvexní ($\{0, 2\}$ — augmentace o $\gamma = 1$ by z přípustného toku udělala nepřípustný), v (iii) totéž s paritou ($\{1\}$ z intervalu $[0,2]$). Takové množiny síťový model nepopíše; úloha se řeší jako obecné ILP (a obě naše optima jsme našli rozborem větví binárního přepínače — přesně to dělá branch &amp; bound).</p>
+          <p><strong>(iv)</strong> FF je korektní pro přípustné toky tvaru $l \le f \le u$ s&nbsp;Kirchhoffem — augmentace po cestě zachovává přípustnost a věta o&nbsp;maximalitě stojí na reziduálním grafu <a href="l4-2.html#takeaways">[L4.2]</a>. V (ii) je množina přípustných hodnot $f(a{\to}b)$ nekonvexní ($\{0, 2\}$ — augmentace o&nbsp;$\gamma = 1$ by z&nbsp;přípustného toku udělala nepřípustný), v (iii) totéž s&nbsp;paritou ($\{1\}$ z&nbsp;intervalu $[0,2]$). Takové množiny síťový model nepopíše; úloha se řeší jako obecné ILP (a obě naše optima jsme našli rozborem větví binárního přepínače — přesně to dělá branch &amp; bound).</p>
         </div>
       </details>
     </div>
