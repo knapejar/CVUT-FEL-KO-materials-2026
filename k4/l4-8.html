@@ -33,16 +33,16 @@
 
   <div class="one-new-thing">
     <span class="lbl">Jedna nová věc</span>
-    <strong>Konzistentní zaokrouhlení matice = celočíselný tok v síti $s \to$ řádky $\to$ sloupce $\to t$, kde každá zaokrouhlovaná hodnota $a$ je hrana s mezemi $[\lfloor a \rfloor, \lceil a \rceil]$.</strong> Celočíselnost toku (Dantzig-Fulkerson / TUM) pak zaručí, že tok <em>je</em> zaokrouhlení — a protože matice sama je přípustný frakční tok, řešení existuje pro libovolný vstup.
+    <strong>Konzistentní zaokrouhlení matice = celočíselný tok v&nbsp;síti $s \to$ řádky $\to$ sloupce $\to t$, kde každá zaokrouhlovaná hodnota $a$ je hrana s&nbsp;mezemi $[\lfloor a \rfloor, \lceil a \rceil]$.</strong> Celočíselnost toku (Dantzig-Fulkerson / TUM) pak zaručí, že tok <em>je</em> zaokrouhlení — a protože matice sama je přípustný frakční tok, řešení existuje pro libovolný vstup.
   </div>
 
-  <p>V <a href="l4-5.html#takeaways">[L4.5]</a> jsi viděl, že vrstvená síť umí kódovat přiřazení („kdo koho nominuje“). Dnes stejný trik použijeme na úlohu, která na první pohled s toky nemá nic společného: <strong>zaokrouhlování matice</strong>. Je to druhý příklad ze série „Integrality and Existence of Lower Bound“ (slide 20, [AMO93]) — a zkoušková klasika: chodila v testu 2 (2013/14) i v teoretickém testu, kde po tobě chtějí formulaci, zdůvodnění celočíselnosti <em>a</em> feasibility (úloha T01 dole). Hodí se ti přitom skoro celá kapitola: dolní meze a přípustnost <a href="l4-1.html#takeaways">[L4.1]</a>, běh Ford-Fulkersona <a href="l4-3.html#takeaways">[L4.3]</a>, řez jako certifikát <a href="l4-4.html#takeaways">[L4.4]</a> a počáteční tok při $l &gt; 0$ <a href="l4-7.html#takeaways">[L4.7]</a>.</p>
+  <p>V <a href="l4-5.html#takeaways">[L4.5]</a> jsi viděl, že vrstvená síť umí kódovat přiřazení („kdo koho nominuje“). Dnes stejný trik použijeme na úlohu, která na první pohled s toky nemá nic společného: <strong>zaokrouhlování matice</strong>. Je to druhý příklad ze série „Integrality and Existence of Lower Bound“ (slide&nbsp;20, [AMO93]) — a zkoušková klasika: chodila v testu 2 (2013/14) i v teoretickém testu, kde po tobě chtějí formulaci, zdůvodnění celočíselnosti <em>a</em>&nbsp;feasibility (úloha T01 dole). Hodí se ti přitom skoro celá kapitola: dolní meze a přípustnost <a href="l4-1.html#takeaways">[L4.1]</a>, běh Ford-Fulkersona <a href="l4-3.html#takeaways">[L4.3]</a>, řez jako certifikát <a href="l4-4.html#takeaways">[L4.4]</a> a počáteční tok při $l &gt; 0$ <a href="l4-7.html#takeaways">[L4.7]</a>.</p>
 
   <!-- ===== SEKCE 1: ÚLOHA ===== -->
   <h2>Úloha: konzistentní zaokrouhlení (slide 20)</h2>
 
   <div class="box">
-    <div class="box-title">Slide 20 — Example Flow.lower.rounding: Matrix Rounding Problem [AMO93], 1:1</div>
+    <div class="box-title">Slide 20 — Example Flow.lower.rounding: Matrix Rounding Problem - Integrality and Existence of Lower Bound [AMO93] (text níže 1:1)</div>
     <p><em>This application is concerned with <strong>consistent rounding of the elements, row sums, and column sums</strong> of a matrix. We are given a $3 \times 3$ matrix of real numbers $x_{ij}$ with row sums vector $r$ and column sums vector $c$. We can round any real number $a \in \{x_{11} \ldots x_{33}, r_1 \ldots r_3, c_1 \ldots c_3\}$ to the next smaller integer $\lfloor a \rfloor$ or to the next larger integer $\lceil a \rceil$, and the decision is completely up to us. The problem requires that we round all matrix elements and the following constraints hold:</em></p>
     <ul>
       <li><em>the sum of the rounded elements in each row is equal to the rounded row sum $r_i$</em></li>
@@ -51,7 +51,7 @@
     <p><em>We refer to such rounding as a <strong>consistent rounding</strong>. The objective is to maximize the sum of matrix entries (due to the constraint it is equal to the sum of the row sums and at the same time to the sum of the column sums).</em></p>
   </div>
 
-  <p>Celou lekci odpracujeme na konkrétní matici z [AMO93] (Figure 6.2; tatáž čísla má i studentský souhrn, str. 8–9):</p>
+  <p>Celou lekci odpracujeme na konkrétní matici z&nbsp;[AMO93] (Figure 6.2; tatáž čísla má i&nbsp;studentský souhrn, str.&nbsp;8–9):</p>
 
   $$\begin{array}{ccc|c}
   x_{ij} & & & r_i \\ \hline
@@ -64,9 +64,9 @@
   <p>Každé z 15 čísel (9 prvků + 3 řádkové součty + 3 sloupcové součty) smíš nahradit dolní nebo horní celou částí — ale tak, aby zaokrouhlené řádky a sloupce pořád „seděly“ se zaokrouhlenými součty.</p>
 
   <details class="try">
-    <summary>Zkus sám: kolik je kandidátních zaokrouhlení? A proč nepomůže „zaokrouhli každé číslo k nejbližšímu celému“?</summary>
+    <summary>Zkus sám: kolik je kandidátních zaokrouhlení? A proč nepomůže „zaokrouhli každé číslo k&nbsp;nejbližšímu celému“?</summary>
     <div class="inner">
-      <p>Každé z 15 čísel má 2 možnosti → $2^{15} = 32\,768$ kandidátů (a pro matici $m \times n$ obecně $2^{mn + m + n}$ — exponenciálně). A běžné „k nejbližšímu“ konzistenci snadno rozbije: první řádek by dal $3 + 7 + 7 = 17$, ale $r_1 = 17.2$ se zaokrouhlí na $17$ — náhodou OK; jenže třetí sloupec: $7 + 1 + 7 = 15$, zatímco $c_3 = 14.5 \to 14$ nebo $15$… a druhý řádek $10 + 2 + 1 = 13$ vs. třetí prvek $0.7 \to 1$ — podmínky se navzájem svazují přes <em>celou</em> matici. Potřebujeme nástroj, který umí všechna lokální rozhodnutí provázat globální podmínkou „součty sedí“. V téhle kapitole takový nástroj máme: Kirchhoffův zákon.</p>
+      <p>Každé z 15 čísel má 2 možnosti → $2^{15} = 32\,768$ kandidátů (a pro matici $m \times n$ obecně $2^{mn + m + n}$ — exponenciálně). A běžné „k&nbsp;nejbližšímu“ konzistenci snadno rozbije: první řádek by dal $3 + 7 + 7 = 17$, ale $r_1 = 17.2$ se zaokrouhlí na $17$ — náhodou OK; jenže třetí sloupec: $7 + 1 + 7 = 15$, zatímco $c_3 = 14.5 \to 14$ nebo $15$… a druhý řádek $10 + 2 + 1 = 13$ vs. třetí prvek $0.7 \to 1$ — podmínky se navzájem svazují přes <em>celou</em> matici. Potřebujeme nástroj, který umí všechna lokální rozhodnutí provázat globální podmínkou „součty sedí“. V téhle kapitole takový nástroj máme: Kirchhoffův zákon.</p>
     </div>
   </details>
 
@@ -87,12 +87,12 @@
     </div>
   </details>
 
-  <p>Konstrukce pro matici $m \times n$ (u nás $3 \times 3$):</p>
+  <p>Konstrukce pro matici $m \times n$ (u&nbsp;nás $3 \times 3$):</p>
   <ul>
     <li>uzly: zdroj $s$, řádkové uzly $R_1, \ldots, R_m$, sloupcové uzly $C_1, \ldots, C_n$, stok $t$;</li>
-    <li>hrany $s \to R_i$ s mezemi $[\lfloor r_i \rfloor, \lceil r_i \rceil]$ — zaokrouhlený <strong>řádkový součet</strong>;</li>
-    <li>hrany $R_i \to C_j$ s mezemi $[\lfloor x_{ij} \rfloor, \lceil x_{ij} \rceil]$ — zaokrouhlený <strong>prvek</strong>;</li>
-    <li>hrany $C_j \to t$ s mezemi $[\lfloor c_j \rfloor, \lceil c_j \rceil]$ — zaokrouhlený <strong>sloupcový součet</strong>.</li>
+    <li>hrany $s \to R_i$ s&nbsp;mezemi $[\lfloor r_i \rfloor, \lceil r_i \rceil]$ — zaokrouhlený <strong>řádkový součet</strong>;</li>
+    <li>hrany $R_i \to C_j$ s&nbsp;mezemi $[\lfloor x_{ij} \rfloor, \lceil x_{ij} \rceil]$ — zaokrouhlený <strong>prvek</strong>;</li>
+    <li>hrany $C_j \to t$ s&nbsp;mezemi $[\lfloor c_j \rfloor, \lceil c_j \rceil]$ — zaokrouhlený <strong>sloupcový součet</strong>.</li>
   </ul>
 
   <div class="box">
@@ -129,7 +129,7 @@
   <!-- ===== SEKCE 4: FEASIBILITA ===== -->
   <h2>Feasibilita pro libovolný vstup: certifikát zadarmo</h2>
 
-  <p>Věta nahoře má předpoklad: <em>„and there exists a feasible flow“</em>. U sítí s $l &gt; 0$ přípustný tok existovat nemusí (drill <a href="l4-1.html#t-nofeasible">[L4.1] T02</a>) — tady ale ano, a to vždy:</p>
+  <p>Věta nahoře má předpoklad: <em>„and there exists a feasible flow“</em>. U&nbsp;sítí s&nbsp;$l &gt; 0$ přípustný tok existovat nemusí (drill <a href="l4-1.html#t-nofeasible">[L4.1] T02</a>) — tady ale ano, a to vždy:</p>
 
   <details class="try">
     <summary>Zkus sám: najdi přípustný (klidně neceločíselný) tok v naší síti — bez jediného výpočtu. Nápověda: máš ho celou dobu před očima.</summary>
@@ -212,7 +212,7 @@
       </ul>
 
       <h4>c) Jak nad úlohou uvažovat?</h4>
-      <p>U a) odevzdej čtyři věci jako vždy u tokových formulací: uzly, hrany, meze, čtení výsledku — a navíc větu „Kirchhoff v $R_i$/$C_j$ = podmínky konzistence, $|f|$ = celkový součet, tedy max flow“. U b) nestačí „ano“: musíš říct <em>proč</em> (celočíselné meze + věta / TUM / celočíselné $\gamma$ ve F-F). U c) hledej přípustný tok, který nemusíš počítat — a nezapomeň, že frakční certifikát sám o sobě nestačí (polopravda 2).</p>
+      <p>U&nbsp;a) odevzdej čtyři věci jako vždy u&nbsp;tokových formulací: uzly, hrany, meze, čtení výsledku — a navíc větu „Kirchhoff v&nbsp;$R_i$/$C_j$ = podmínky konzistence, $|f|$ = celkový součet, tedy max flow“. U&nbsp;b) nestačí „ano“: musíš říct <em>proč</em> (celočíselné meze + věta / TUM / celočíselné $\gamma$ ve F-F). U&nbsp;c) hledej přípustný tok, který nemusíš počítat — a nezapomeň, že frakční certifikát sám o sobě nestačí (polopravda 2).</p>
 
       <details class="solution">
         <summary>d) Úplné řešení (vlastní dle slidů 17 + 20 — přiznáno)</summary>
@@ -368,7 +368,7 @@ KOViz.stepper(document.getElementById('viz-ffrun'), {
     ]),
   },
   frames: [
-    {desc:'Start: počáteční přípustný celočíselný tok (z transformace [L4.7]; dopočet vlastní — přiznáno). Všude l ≤ f ≤ u, Kirchhoff platí (R₁: 17 = 3 + 6 + 8, C₁: 3 + 10 + 3 = 16, …). |f| = 17 + 12 + 12 = 41.',
+    {desc:'Start: počáteční přípustný celočíselný tok (z transformace [L4.7]; dopočet vlastní — přiznáno). Všude l ≤ f ≤ u, Kirchhoff platí ve všech uzlech (R₁: 17 = 3 + 6 + 8, C₁: 3 + 10 + 3 = 16, …). |f| = 17 + 12 + 12 = 41.',
      nodes:{}, edges:{}},
     {desc:'Iterace ①: augmentující cesta s→R₁→C₁→t (samé dopředné hrany, f < u), γ = min(18−17, 4−3, 17−16) = 1. Nově x̂₁₁ = 4, r̂₁ = 18, ĉ₁ = 17. |f| = 42.',
      nodes:{},
