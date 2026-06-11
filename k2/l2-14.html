@@ -62,7 +62,7 @@
     <ul>
       <li>initialize matrix $l^0$ by the weights of the edges</li>
       <li>computes the sequence of matrices $l^0, l^1, l^2, \cdots, l^k, \cdots, l^n$ where:
-        <ul><li>$l^k_{ij}$ is the length of the shortest path from $i$ to $j$ such that with the exception of $i, j$ it goes only through nodes from the set $\{1, 2, \cdots k\}$</li></ul></li>
+        <ul><li>$l^k_{ij}$ is the length of the shortest path from $i$ to $j$ such that with the exception of $i, j$ it goes only through nodes from the set $\{1, 2, \cdots, k\}$</li></ul></li>
       <li>one can easily compute matrix $l^k$ from matrix $l^{k-1}$:
         $$l^k_{ij} = \min\{l^{k-1}_{ij},\ l^{k-1}_{ik} + l^{k-1}_{kj}\}$$</li>
     </ul>
@@ -103,7 +103,7 @@ end</code></pre>
   <details class="try">
     <summary>Zkus sám: proč se při zlepšení nastavuje $p_{ij} := p_{kj}$, a ne třeba $p_{ij} := k$?</summary>
     <div class="inner">
-      <p>$p_{ij}$ má být <em>předposlední vrchol</em> cesty $i \to j$ (výstupní specifikace). Nová cesta je $i \rightsquigarrow k \rightsquigarrow j$ — končí stejně jako úsek $k \rightsquigarrow j$, a jeho předposlední vrchol známe: $p_{kj}$. Vrchol $k$ je jen <em>někde uvnitř</em>, předposlední být nemusí. (Inicializace $p_{ij} := i$ sedí: přímá hrana $(i,j)$ má předposlední vrchol $i$.) Cestu pak rekonstruuješ couváním po řádku… pozor, po <strong>sloupcích</strong>: $j$, $p_{ij}$, $p_{i,p_{ij}}$, … až dojdeš do $i$ — stejné couvání jako u vektoru $p(\cdot)$ <a href="l2-3.html#takeaways">[L2.3]</a>, jen v řádku $i$ matice.</p>
+      <p>$p_{ij}$ má být <em>předposlední vrchol</em> cesty $i \to j$ (výstupní specifikace). Nová cesta je $i \rightsquigarrow k \rightsquigarrow j$ — končí stejně jako úsek $k \rightsquigarrow j$, a jeho předposlední vrchol známe: $p_{kj}$. Vrchol $k$ je jen <em>někde uvnitř</em>, předposlední být nemusí. (Inicializace $p_{ij} := i$ sedí: přímá hrana $(i,j)$ má předposlední vrchol $i$.) Cestu pak rekonstruuješ couváním v řádku $i$ matice: čteš $p_{ij}$, pak $p_{i,p_{ij}}$, … (mění se jen druhý index/sloupec), až dojdeš do $i$ — stejné couvání jako u vektoru $p(\cdot)$ <a href="l2-3.html#takeaways">[L2.3]</a>.</p>
     </div>
   </details>
 
@@ -179,7 +179,7 @@ end</code></pre>
     <summary>Zkus sám: přečti z diagonály $l$ nejkratší cyklus v grafu. Přes který vrchol vede a kudy?</summary>
     <div class="inner">
       <p>Diagonála je $(10, 0, 1, 1, 0)$ — minimum $0$ u vrcholů 2 a 5: nejkratší cyklus má délku $0$ a je to $2 \to 5 \to 2$ ($2 + (-2) = 0$). Rekonstrukce přes $p$: $p_{22} = 5$ → cyklus končí hranou $(5,2)$; $p_{25} = 2$ → úsek $2 \to 5$ je přímá hrana. Hodnoty $1$ u vrcholů 3 a 4 patří cyklu $4 \to 3 \to 2 \to 4$ ($4 - 5 + 2 = 1$), hodnota $10$ u vrcholu 1 cyklu $1 \to 5 \to 1$. A protipóly: kdyby na diagonále vyšlo záporné číslo, máš v grafu záporný cyklus.</p>
-      <p><em>(Studentská poznámka z testu 2014: „Hlavní je dát v tý úvodní matici pro Floyda na diagonálu nekonečna místo nul, pak člověk rovnou vyřeší i otázku b.“ — přesně tenhle trik.)</em></p>
+      <p><em>(Volně dle studentské poznámky z testu 2014: hlavní je dát v té úvodní matici pro Floyda na diagonálu nekonečna místo nul, pak člověk rovnou vyřeší i otázku b — přesně tenhle trik.)</em></p>
     </div>
   </details>
 
@@ -192,7 +192,7 @@ end</code></pre>
     <summary>Zkus sám: písemka chce <em>nejdelší</em> cesty mezi všemi dvojicemi. Jak na to s Floydem — a kdy to smíš udělat?</summary>
     <div class="inner">
       <p>Stejný trik jako u DAGu <a href="l2-13.html#takeaways">[L2.13]</a>: <strong>vynásob všechny váhy $-1$</strong>, pusť Floyda beze změny a výsledek vynásob $-1$ zpátky ($q_{ij} = -l_{ij}$). Maximum v $c$ je minimum v $-c$.</p>
-      <p>Smíš to, jen když negovaný graf splní vstupní podmínku Floyda („free of negative cycles“) — tedy když původní graf <strong>nemá kladný cyklus</strong>. Kolem kladného cyklu by se dala délka „nabalovat“ donekonečna a nejdelší <em>cesta</em> (bez opakování vrcholů) se stává NP-těžkým problémem (podrobně v lekci <a href="l2-17.html">[L2.17]</a>). Záporné cykly v původním grafu naopak nevadí — po negaci jsou kladné.</p>
+      <p>Smíš to, jen když negovaný graf splní vstupní podmínku Floyda („free of negative cycles“) — tedy když původní graf <strong>nemá kladný cyklus</strong>. Kolem kladného cyklu by se dala délka „nabalovat“ donekonečna a nejdelší <em>cesta</em> (bez opakování vrcholů) se stává NP-těžkým problémem (NP-těžké = výpočetně těžké, podrobně v lekci <a href="l2-17.html">[L2.17]</a>). Záporné cykly v původním grafu naopak nevadí — po negaci jsou kladné.</p>
       <p>Ze studentského souhrnu (přepis): <em>„Varianta pre najdlhšiu cestu = ceny hrán vynásobíš $-1$ a klasicky pokračuješ.“</em></p>
     </div>
   </details>
@@ -286,7 +286,7 @@ end</code></pre>
     <div class="task-head">
       <span class="task-id">T02</span>
       <strong>Floyd — minimální cyklus z diagonály</strong>
-      <span class="task-src">zdroj: zkouška 31.5.2011 („Floyd, nalézt nenulový minimální cyklus“ — dochován jen CZ titulek, obrázek ne) + přepisy testů 2011/12, 2013/14 („z toho jsme měli vyčíst minimální kružnici“); EN znění rekonstrukce vlastní, instance = příklad ze slidu 46 (matice 1:1 ze slidu), řešení vlastní</span>
+      <span class="task-src">zdroj: zkouška 31.&nbsp;5.&nbsp;2011 („Floyd, nalézt nenulový minimální cyklus“ — dochován jen CZ titulek, obrázek ne) + přepisy testů 2011/12, 2013/14 („z toho jsme měli vyčíst minimální kružnici“); EN znění rekonstrukce vlastní, instance = příklad ze slidu 46 (matice 1:1 ze slidu), řešení vlastní</span>
     </div>
     <div class="task-body">
       <div class="assignment">
