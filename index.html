@@ -40,6 +40,7 @@
   <div class="chapter-card" id="k0">
     <h3>K0 — Základní jazyk grafů a ILP</h3>
     <div class="meta">prerekvizitní minikapitola · 8 lekcí · bez FOTO — projeď rychle, vracej se podle odkazů</div>
+    <p class="chapter-intro">Než se pustíš do zkouškových témat: tahle minikapitola tě naučí <strong>slovník</strong>, kterým je psaný celý zbytek webu — co je graf, strom, kostra, párování a co znamená „celočíselné lineární programování" (ILP). Sama se u zkoušky neptá, ale bez ní nebudeš rozumět zadáním ostatních slotů. Když na něco narazíš jinde, vracej se sem podle odkazů.</p>
     <ul class="lesson-list">
       <li data-done-mark="L0.1"><span class="lid">L0.1</span><a href="k0/l0-1.html">Co je graf</a></li>
       <li data-done-mark="L0.2"><span class="lid">L0.2</span><a href="k0/l0-2.html">Stupeň vrcholu</a></li>
@@ -56,6 +57,7 @@
   <div class="chapter-card" id="k1">
     <h3>K1 — ILP modelování (Slot 1)</h3>
     <div class="meta">100 % výskyt × 7 bodů · 15 lekcí · FOTO: L1.9 Wedding, L1.12 Loot, L1.14 Toys</div>
+    <p class="chapter-intro">Dostaneš <strong>slovní úlohu</strong> („rozsaď svatební hosty tak, aby…") a tvým úkolem je přepsat ji do matematiky: zavést <strong>proměnné</strong>, napsat <strong>účelovou funkci</strong> (co minimalizovat/maximalizovat) a <strong>omezení</strong> (nerovnice). Nic se nepočítá do čísla — odevzdáváš jen <em>model</em>. Kapitola tě naučí typické „překladatelské triky": jak do nerovnic dostat logiku (když–pak, nebo, a), fixní náklady nebo volbu z více možností pomocí 0/1 proměnných a tzv. big-M.</p>
     <ul class="lesson-list">
       <li data-done-mark="L1.1"><span class="lid">L1.1</span><a href="k1/l1-1.html">Cílová funkce a základní omezení</a></li>
       <li data-done-mark="L1.2"><span class="lid">L1.2</span><a href="k1/l1-2.html">Přiřazovací (assignment) struktura</a></li>
@@ -79,6 +81,7 @@
   <div class="chapter-card" id="k2">
     <h3>K2 — Nejkratší cesty (Slot 2)</h3>
     <div class="meta">90 % × 7 bodů · 18 lekcí · FOTO: L2.5 Edge costs, L2.8 Dangerous adventure, L2.18 Negative cycles</div>
+    <p class="chapter-intro">Máš mapu (graf) s ohodnocenými spoji a hledáš <strong>nejlevnější trasu</strong> z bodu A do bodu B. Kapitola učí klasické algoritmy (<strong>Dijkstra</strong>, <strong>Bellman-Ford</strong>) — jak je ručně „oddrolovat" na papíře krok po kroku — a hlavně jak na nejkratší cestu chytře <strong>převést</strong> i úlohu, která tak na první pohled nevypadá (násobení pravděpodobností, plánování v čase apod.). Pozor je na záporné hrany a záporné cykly.</p>
     <ul class="lesson-list">
       <li data-done-mark="L2.1"><span class="lid">L2.1</span><a href="k2/l2-1.html">Záporné váhy ano, záporné cykly ne</a></li>
       <li data-done-mark="L2.2"><span class="lid">L2.2</span><a href="k2/l2-2.html">Bellmanův princip optimality</a></li>
@@ -103,6 +106,7 @@
   <div class="chapter-card" id="k3">
     <h3>K3 — Důkaz / teorie (Slot 3)</h3>
     <div class="meta">95 % × 7 bodů · 16 lekcí · FOTO: L3.2 Dijkstra proof, L3.6 TSP r-aprox, L3.10 Christofides</div>
+    <p class="chapter-intro">Tady se nepočítá, ale <strong>dokazuje a argumentuje</strong>: proč nějaký algoritmus dává správný výsledek, proč je problém „těžký" (NP), nebo co přesně zaručuje <strong>aproximační algoritmus</strong> (řešení nanejvýš r-krát horší než optimum). Slot 3 chce souvislý důkaz nebo úvahu sepsanou vlastními slovy — kapitola tě provede těmi, co padají nejčastěji (korektnost Dijkstry/Bellman-Forda, těžkost TSP, Christofides 3/2).</p>
     <ul class="lesson-list">
       <li data-done-mark="L3.1"><span class="lid">L3.1</span><a href="k3/l3-1.html">Co je aproximační algoritmus a faktor r</a></li>
       <li data-done-mark="L3.2"><span class="lid">L3.2</span><a href="k3/l3-2.html">Důkaz korektnosti Dijkstry</a><span class="tag-foto">FOTO</span></li>
@@ -125,6 +129,7 @@
   <div class="chapter-card" id="k4">
     <h3>K4 — Toky a řezy (Slot 4)</h3>
     <div class="meta">~100 % × 7 bodů · 15 lekcí · FOTO: L4.4 Ford-Fulkerson, L4.5 Residents &amp; council</div>
+    <p class="chapter-intro">Představ si <strong>potrubní síť</strong>: kolik vody protlačíš ze zdroje do spotřebiče, když má každá trubka omezenou kapacitu? To je <strong>maximální tok</strong>. Kapitola učí algoritmus <strong>Ford-Fulkerson</strong> (jak ho oddrolovat hledáním „augmentujících cest"), klíčovou dualitu <strong>max-tok = min-řez</strong> a hlavně jak na tok převést úlohy, které s vodou nesouvisí (přiřazování lidí k úkolům, párování, zaokrouhlování tabulek).</p>
     <ul class="lesson-list">
       <li data-done-mark="L4.1"><span class="lid">L4.1</span><a href="k4/l4-1.html">Síť, tok, Kirchhoffův zákon</a></li>
       <li data-done-mark="L4.2"><span class="lid">L4.2</span><a href="k4/l4-2.html">Reziduální graf a augmentující cesta</a></li>
@@ -146,6 +151,7 @@
   <div class="chapter-card" id="k5">
     <h3>K5 — Rozvrhování (Slot 5)</h3>
     <div class="meta">100 % × 6 bodů · 16 lekcí · FOTO: L5.0 toky-rozvrh, L5.3 time-indexed ILP, L5.5 B&amp;B, L5.10 Muntz&amp;Coffman</div>
+    <p class="chapter-intro">Máš <strong>úkoly (tasks)</strong> a <strong>stroje (procesory)</strong> a chceš je naplánovat v čase tak, aby něco vyšlo co nejlépe — typicky aby bylo vše hotové co nejdřív ($C_{max}$). Kapitola nejdřív naučí <strong>značení $\alpha|\beta|\gamma$</strong>, kterým se rozvrhovací problémy stručně pojmenovávají (stroje | podmínky | kritérium), a pak sadu konkrétních algoritmů — ke každému typu úlohy ten správný. Tahák „problém → algoritmus" je v poslední lekci.</p>
     <ul class="lesson-list">
       <li data-done-mark="L5.1"><span class="lid">L5.1</span><a href="k5/l5-1.html">Grahamova notace α|β|γ</a></li>
       <li data-done-mark="L5.0"><span class="lid">L5.0</span><a href="k5/l5-0.html">Rozvrhování přes toky (P|pmtn,rj,dj|)</a><span class="tag-foto">FOTO</span></li>
@@ -168,6 +174,7 @@
   <div class="chapter-card" id="k6">
     <h3>K6 — CSP / AC-3 (Slot 6)</h3>
     <div class="meta">55 % × 6 bodů · 3 lekce · FOTO: L6.3 AC-3</div>
+    <p class="chapter-intro">Hlavolam typu <strong>sudoku</strong>: máš proměnné, každá s množinou možných hodnot („<strong>doménou</strong>"), a <strong>omezení</strong> mezi nimi (např. „tyhle dvě se musí lišit"). Než začneš zkoušet kombinace, vyplatí se domény <strong>pročistit</strong> — vyhodit hodnoty, které evidentně nemůžou vyjít, protože pro ně u souseda neexistuje žádný partner. Přesně to dělá algoritmus <strong>AC-3</strong> (řetězová reakce škrtů řízená frontou hran) a Slot 6 chce jeho ruční oddrolování. AC-3 řešení nehledá — jen zmenší domény; to je celé.</p>
     <ul class="lesson-list">
       <li data-done-mark="L6.1"><span class="lid">L6.1</span><a href="k6/l6-1.html">CSP a arc consistency</a></li>
       <li data-done-mark="L6.2"><span class="lid">L6.2</span><a href="k6/l6-2.html">REVISE a redukce domén</a></li>
@@ -177,6 +184,7 @@
   <div class="chapter-card" id="k7">
     <h3>K7 — Knapsack (doplňková)</h3>
     <div class="meta">doplňková · 2 lekce · foto volitelně</div>
+    <p class="chapter-intro"><strong>Batoh</strong> s omezenou nosností a věci, každá s nějakou cenou a vahou — co vzít, aby měl náklad <strong>největší hodnotu</strong> a nepřetížil se? Klasická úloha řešená <strong>dynamickým programováním</strong> (postupné vyplňování tabulky a zpětné dohledání, co se vzalo). Doplňková kapitola — ve zkoušce se objevuje spíš okrajově, ale technika tabulkového DP se hodí i jinde.</p>
     <ul class="lesson-list">
       <li data-done-mark="L7.1"><span class="lid">L7.1</span><a href="k7/l7-1.html">Knapsack DP (tabulka + backtracking)</a></li>
       <li data-done-mark="L7.2"><span class="lid">L7.2</span><a href="k7/l7-2.html">Knapsack DP indexovaný cenou (cost-indexed)</a><span class="tag-nice">NICE</span></li>

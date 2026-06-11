@@ -230,6 +230,10 @@ summary::-webkit-details-marker { display: none; }
 }
 .chapter-card h3 { margin: 0 0 4px; }
 .chapter-card .meta { color: var(--ink-soft); font-size: 14px; }
+.chapter-card .chapter-intro {
+  margin: 10px 0 2px; font-size: 14.5px; line-height: 1.55; color: var(--ink);
+  border-left: 3px solid var(--accent); padding: 2px 0 2px 12px;
+}
 .lesson-list { list-style: none; padding: 0; margin: 10px 0 0; }
 .lesson-list li {
   display: flex; align-items: center; gap: 10px; padding: 7px 4px;
